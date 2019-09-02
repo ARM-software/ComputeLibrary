@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(DATA_TYPE) && defined(SELECT_DATA_TYPE) && defined(ACT) && defined(NUM_CLASSES) && defined(VEC_SIZE)
+#if defined(DATA_TYPE) && defined(SELECT_DATA_TYPE) && defined(ACTIVATION_TYPE) && defined(NUM_CLASSES) && defined(VEC_SIZE)
+
+#include "activation_float_helpers.h"
 
 #if VEC_SIZE != 1
 #define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define SELECT_TYPE VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
-
-#include "activation_helpers.h"
 
 /** This performs a YOLO partial activation function for NCHW data layout
  *
@@ -35,7 +35,7 @@
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
- * @note Activation function should be given as a preprocessor argument using -DACT=name. e.g. -DACT=TANH
+ * @note Activation function should be given as a preprocessor argument using -DACTIVATION_TYPE=name. e.g. -DACTIVATION_TYPE=TANH
  * @note The number of classes should be given as a preprocessor argument using -DNUM_CLASSES=num. e.g. -DNUM_CLASSES=80
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively.
  *
@@ -79,7 +79,7 @@ __kernel void yolo_layer_nchw(
     {
         // Load data
         TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
-        data      = ACTIVATION_OP(ACT, data); // select(1.0f, ACTIVATION_OP(ACT, data), (SELECT_TYPE)activate);
+        data      = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, data, A_VAL, B_VAL); // select(1.0f, ACTIVATION_OP(ACTIVATION_TYPE, data), (SELECT_TYPE)activate);
 
         // Store result
         VSTORE(VEC_SIZE)
@@ -100,18 +100,14 @@ __kernel void yolo_layer_nchw(
 
 #else // VEC_SIZE != 1
 
-#define TYPE DATA_TYPE
 #define SELECT_TYPE SELECT_DATA_TYPE
-
-#include "activation_helpers.h"
-
 /** This performs a YOLO partial activation function for NCHW data layout
  *
  * @note In order to perform the activation function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=1
- * @note Activation function should be given as a preprocessor argument using -DACT=name. e.g. -DACT=TANH
+ * @note Activation function should be given as a preprocessor argument using -DACTIVATION_TYPE=name. e.g. -DACTIVATION_TYPE=TANH
  * @note The number of classes should be given as a preprocessor argument using -DNUM_CLASSES=num. e.g. -DNUM_CLASSES=80
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively.
  *
@@ -155,7 +151,7 @@ __kernel void yolo_layer_nhwc(
     {
         // Load data
         DATA_TYPE data = *((__global DATA_TYPE *)input.ptr);
-        data           = select(data, ACTIVATION_OP(ACT, data), (SELECT_TYPE)activate);
+        data           = select(data, ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, data, A_VAL, B_VAL), (SELECT_TYPE)activate);
 
         // Store result
         *((__global DATA_TYPE *)output.ptr) = data;
@@ -173,4 +169,4 @@ __kernel void yolo_layer_nhwc(
 }
 
 #endif // VEC_SIZE != 1
-#endif // defined(DATA_TYPE) && defined(SELECT_DATA_TYPE) && defined(ACT) && defined(NUM_CLASSES) && defined(VEC_SIZE)
+#endif // defined(DATA_TYPE) && defined(SELECT_DATA_TYPE) && defined(ACTIVATION_TYPE) && defined(NUM_CLASSES) && defined(VEC_SIZE)

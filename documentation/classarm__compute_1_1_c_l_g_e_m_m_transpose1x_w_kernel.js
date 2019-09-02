@@ -1,5 +1,0 @@
-var classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel =
-[
-    [ "configure", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml#a9718c86f3b9141ca3f05ede073e17d12", null ],
-    [ "run", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e", null ]
-];

@@ -86,7 +86,7 @@ public:
         TensorShape dst_shape = misc::shape_calculator::calculate_concatenate_shape(src_ptrs, Window::DimZ);
         _dst                  = create_tensor<TensorType>(dst_shape, data_type, 1);
 
-        _depth_concat.configure(src_ptrs, &_dst);
+        _depth_concat.configure(src_ptrs, &_dst, 2);
 
         for(auto &src : _srcs)
         {

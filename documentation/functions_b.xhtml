@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -104,15 +104,19 @@ $(document).ready(function(){initNavTree('functions_b.xhtml','');});
 </li>
 <li>B_is_pretransposed()
 : <a class="el" href="classarm__gemm_1_1_gemm_hybrid.xhtml#ac5dec5063a75604fdc60555f15577b94">GemmHybrid&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#ac5dec5063a75604fdc60555f15577b94">GemmHybridQuantized&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#ac5dec5063a75604fdc60555f15577b94">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_batched.xhtml#ac5dec5063a75604fdc60555f15577b94">GemvBatched&lt; To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_pretransposed.xhtml#ac5dec5063a75604fdc60555f15577b94">GemvPretransposed&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_quantize_wrapper.xhtml#ac5dec5063a75604fdc60555f15577b94">QuantizeWrapper&lt; To, Tr, Tgemm &gt;</a>
 </li>
 <li>B_pretranspose_required()
 : <a class="el" href="classarm__gemm_1_1_gemm_hybrid.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c">GemmHybrid&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c">GemmHybridQuantized&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_batched.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c">GemvBatched&lt; To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_pretransposed.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c">GemvPretransposed&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_quantize_wrapper.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c">QuantizeWrapper&lt; To, Tr, Tgemm &gt;</a>
 </li>
 <li>backend_allocator()
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend.xhtml#ae6b65acad7e828cac1385f7efd5e1ac3">CLDeviceBackend</a>
@@ -128,6 +132,9 @@ $(document).ready(function(){initNavTree('functions_b.xhtml','');});
 </li>
 <li>background_label_id()
 : <a class="el" href="classarm__compute_1_1_detection_output_layer_info.xhtml#a158d49c7c1df3c6c6589b47d3de56cf0">DetectionOutputLayerInfo</a>
+</li>
+<li>barrier()
+: <a class="el" href="classarm__gemm_1_1barrier.xhtml#a90c5729c7709dc787ce1d6abbff830e4">barrier</a>
 </li>
 <li>BatchNormalizationLayer()
 : <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_batch_normalization_layer.xhtml#a5a6d29d97205186313cf48823a2dce8a">BatchNormalizationLayer</a>
@@ -225,6 +232,7 @@ $(document).ready(function(){initNavTree('functions_b.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEConvolutionKernel&lt; matrix_size &gt;</a>
 , <a class="el" href="classarm__compute_1_1_n_e_convolution_rectangle_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEConvolutionRectangleKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEDepthwiseConvolutionLayer3x3Kernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer_native_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEDepthwiseConvolutionLayerNativeKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_derivative_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEDerivativeKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_dilate_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEDilateKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEDirectConvolutionLayerKernel</a>
@@ -285,6 +293,11 @@ $(document).ready(function(){initNavTree('functions_b.xhtml','');});
 <li>brelu()
 : <a class="el" href="structarm__compute_1_1detail_1_1brelu.xhtml#aa616370cb7c15ee81a8baecd6f9b8545">brelu&lt; T, S &gt;</a>
 </li>
+<li>broadcast_bias()
+: <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml#a757197ffaf53ef6b284c6ceb24fdb688">GEMMInfo</a>
+, <a class="el" href="structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#aab96468aedb59e7a2a19c6eea2f4b055">GEMMKernelInfo</a>
+, <a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a757197ffaf53ef6b284c6ceb24fdb688">GEMMReshapeInfo</a>
+</li>
 <li>broadcast_if_dimension_le_one()
 : <a class="el" href="classarm__compute_1_1_window.xhtml#a8a8a12cc3cc3d07d9914cfa5f94b3ee5">Window</a>
 </li>
@@ -305,13 +318,13 @@ $(document).ready(function(){initNavTree('functions_b.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#acdbd1d0a6ab2898e3b75231386c43f40">ICLMemoryRegion</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#a24954cca5108a24706441fd99a7fb04c">ICLTensor</a>
 , <a class="el" href="classarm__compute_1_1_i_distribution.xhtml#a0eb5856c63562cb144938ed77d6823a0">IDistribution</a>
-, <a class="el" href="classarm__compute_1_1_i_g_c_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">IGCMemoryRegion</a>
+, <a class="el" href="classarm__compute_1_1_i_g_c_memory_region.xhtml#acdbd1d0a6ab2898e3b75231386c43f40">IGCMemoryRegion</a>
 , <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml#a24954cca5108a24706441fd99a7fb04c">IGCTensor</a>
 , <a class="el" href="classarm__compute_1_1_i_lut.xhtml#ab988210662dbd3bf32fd563c7dd1bdbf">ILut</a>
-, <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#aeb4cf01e5d74997a1994272225baeb05">IMemoryRegion</a>
+, <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#af4cf95f81e1b269a31d2d9a7e0429a24">IMemoryRegion</a>
 , <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#ab988210662dbd3bf32fd563c7dd1bdbf">ITensor</a>
 , <a class="el" href="classarm__compute_1_1_lut.xhtml#a24954cca5108a24706441fd99a7fb04c">Lut</a>
-, <a class="el" href="classarm__compute_1_1_memory_region.xhtml#ab9ec7ea42f2074a78cc2bf89e4663a24">MemoryRegion</a>
+, <a class="el" href="classarm__compute_1_1_memory_region.xhtml#a80776c0cd484c25f25e4e7d8198c4678">MemoryRegion</a>
 , <a class="el" href="classarm__compute_1_1_sub_tensor.xhtml#a24954cca5108a24706441fd99a7fb04c">SubTensor</a>
 , <a class="el" href="classarm__compute_1_1_tensor.xhtml#a24954cca5108a24706441fd99a7fb04c">Tensor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_array_accessor.xhtml#a32e914dbe65c0591501e44790957bb0f">ArrayAccessor&lt; T &gt;</a>
@@ -320,7 +333,7 @@ $(document).ready(function(){initNavTree('functions_b.xhtml','');});
 </li>
 <li>Buffer
 : <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#acf18a24d1f21176e811e88cee2a70f1f">SimpleTensor&lt; T &gt;</a>
-, <a class="el" href="classarm__gemm_1_1_buffer.xhtml#a8bf60bd0f8a216c716ef58fea0606aee">Buffer</a>
+, <a class="el" href="classarm__gemm_1_1_buffer.xhtml#a53dae4cefe42f5ba80b09f65257b4fcb">Buffer</a>
 </li>
 <li>BufferManager()
 : <a class="el" href="classarm__gemm_1_1_buffer_manager.xhtml#a49b4e2b0c8c4da02a55bf479f0666b9e">BufferManager</a>
@@ -334,7 +347,7 @@ $(document).ready(function(){initNavTree('functions_b.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

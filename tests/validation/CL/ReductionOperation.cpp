@@ -51,7 +51,10 @@ RelativeTolerance<float> rel_tolerance_f16(0.2f);
 const auto ReductionOperations = framework::dataset::make("ReductionOperation",
 {
     ReductionOperation::SUM,
-    ReductionOperation::PROD
+    ReductionOperation::PROD,
+    ReductionOperation::MIN,
+    ReductionOperation::MAX,
+
 });
 
 } // namespace

@@ -9,7 +9,7 @@ var classarm__compute_1_1_tensor_allocator =
     [ "free", "classarm__compute_1_1_tensor_allocator.xhtml#a1468b0adb6ec3f9d38aa7d60b8a91974", null ],
     [ "import_memory", "classarm__compute_1_1_tensor_allocator.xhtml#a84052cebf66a6126051a166a078253a4", null ],
     [ "init", "classarm__compute_1_1_tensor_allocator.xhtml#af36143939a43fa124312e395975091ed", null ],
-    [ "init", "classarm__compute_1_1_tensor_allocator.xhtml#a3014ce2f4215e8a44331aa5daf3ba0d4", null ],
+    [ "init", "classarm__compute_1_1_tensor_allocator.xhtml#a3fc6adad84b23f10d54d5a7b6928f872", null ],
     [ "operator=", "classarm__compute_1_1_tensor_allocator.xhtml#a943854ce6f3aafac2714340e0915de75", null ],
     [ "operator=", "classarm__compute_1_1_tensor_allocator.xhtml#ace0f71b15cbb5b468070f5a2fd4110ad", null ],
     [ "set_associated_memory_group", "classarm__compute_1_1_tensor_allocator.xhtml#a89ee265e94df4e8aaf4f465649d4e065", null ]

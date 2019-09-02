@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -162,6 +162,10 @@ Functions</h2></td></tr>
 <tr class="memitem:acc5dddee1cbe93a4eaf0a9f74ee96bb7"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">to_string</a> (T &amp;&amp;value)</td></tr>
 <tr class="memdesc:acc5dddee1cbe93a4eaf0a9f74ee96bb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert integer and float values to string.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">More...</a><br /></td></tr>
 <tr class="separator:acc5dddee1cbe93a4eaf0a9f74ee96bb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac26a2b6f5d8e0c60e67684eea7e71e7c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ac26a2b6f5d8e0c60e67684eea7e71e7c"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#ac26a2b6f5d8e0c60e67684eea7e71e7c">nearbyint</a> (T value)</td></tr>
+<tr class="memdesc:ac26a2b6f5d8e0c60e67684eea7e71e7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rounds the floating-point argument arg to an integer value in floating-point format, using the current rounding mode.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#ac26a2b6f5d8e0c60e67684eea7e71e7c">More...</a><br /></td></tr>
+<tr class="separator:ac26a2b6f5d8e0c60e67684eea7e71e7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1df10cffb9f2dea9f3b007ce411e105f"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
 <tr class="memitem:a1df10cffb9f2dea9f3b007ce411e105f"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a1df10cffb9f2dea9f3b007ce411e105f">stof</a> (Ts &amp;&amp;... args)</td></tr>
 <tr class="memdesc:a1df10cffb9f2dea9f3b007ce411e105f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert string values to float.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a1df10cffb9f2dea9f3b007ce411e105f">More...</a><br /></td></tr>
@@ -178,6 +182,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a28096f8372c0ad762864c790917375e2"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a28096f8372c0ad762864c790917375e2">copysign</a> (T x, T y)</td></tr>
 <tr class="memdesc:a28096f8372c0ad762864c790917375e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Composes a floating point value with the magnitude of <code>x</code> and the sign of <code>y</code>.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a28096f8372c0ad762864c790917375e2">More...</a><br /></td></tr>
 <tr class="separator:a28096f8372c0ad762864c790917375e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af399bedeaeb8dc177d3a301a12c3a5d0"><td class="memTemplParams" colspan="2">template&lt;typename T , typename  = typename std::enable_if&lt;std::is_floating_point&lt;T&gt;::value&gt;::type&gt; </td></tr>
+<tr class="memitem:af399bedeaeb8dc177d3a301a12c3a5d0"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a> (T x, T y, T z)</td></tr>
+<tr class="memdesc:af399bedeaeb8dc177d3a301a12c3a5d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes (x*y) + z as if to infinite precision and rounded only once to fit the result type.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">More...</a><br /></td></tr>
+<tr class="separator:af399bedeaeb8dc177d3a301a12c3a5d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9429515817425d10f4b662eaa069cc5c"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
 <tr class="memitem:a9429515817425d10f4b662eaa069cc5c"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a9429515817425d10f4b662eaa069cc5c">snprintf</a> (char *s, std::size_t n, const char *fmt, Ts &amp;&amp;... args)</td></tr>
 <tr class="memdesc:a9429515817425d10f4b662eaa069cc5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the data from the given location, converts them to character string equivalents and writes the result to a character string buffer.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a9429515817425d10f4b662eaa069cc5c">More...</a><br /></td></tr>
@@ -213,7 +221,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml">support</a></li><li class="navelem"><a class="el" href="_toolchain_support_8h.xhtml">ToolchainSupport.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

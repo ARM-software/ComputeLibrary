@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -135,7 +135,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Resize Layer. </p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00909">909</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00962">962</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6de958db405f92c48214eedd8c5a2a7b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6de958db405f92c48214eedd8c5a2a7b">&#9670;&nbsp;</a></span>ResizeLayer()</h2>
@@ -177,8 +177,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00912">912</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00913"></a><span class="lineno">  913</span>&#160;        : _policy(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">policy</a>), _width_scale(width_scale), _height_scale(height_scale)</div><div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;    {</div><div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ad986b73e9d5f47a623a9b6d773c25e34"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">arm_compute::test::validation::policy</a></div><div class="ttdeci">policy</div><div class="ttdef"><b>Definition:</b> <a href="_cast_8cpp_source.xhtml#l00169">Cast.cpp:169</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00965">965</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00966"></a><span class="lineno">  966</span>&#160;        : _policy(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">policy</a>), _width_scale(width_scale), _height_scale(height_scale)</div><div class="line"><a name="l00967"></a><span class="lineno">  967</span>&#160;    {</div><div class="line"><a name="l00968"></a><span class="lineno">  968</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ad986b73e9d5f47a623a9b6d773c25e34"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">arm_compute::test::validation::policy</a></div><div class="ttdeci">policy</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00136">ArithmeticAddition.cpp:136</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -218,11 +218,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00917">917</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160;    {</div><div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4e6a956431d508ac913a77cf1f9eaa69">GraphBuilder::add_resize_node</a>(s.graph(), common_params, input, _policy, _width_scale, _height_scale);</div><div class="line"><a name="l00922"></a><span class="lineno">  922</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a4e6a956431d508ac913a77cf1f9eaa69"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4e6a956431d508ac913a77cf1f9eaa69">arm_compute::graph::GraphBuilder::add_resize_node</a></div><div class="ttdeci">static NodeID add_resize_node(Graph &amp;g, NodeParams params, NodeIdxPair input, InterpolationPolicy policy, float width_scale, float height_scale)</div><div class="ttdoc">Adds a resize layer node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00579">GraphBuilder.cpp:579</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00970">970</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00971"></a><span class="lineno">  971</span>&#160;    {</div><div class="line"><a name="l00972"></a><span class="lineno">  972</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00973"></a><span class="lineno">  973</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00974"></a><span class="lineno">  974</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4e6a956431d508ac913a77cf1f9eaa69">GraphBuilder::add_resize_node</a>(s.graph(), common_params, input, _policy, _width_scale, _height_scale);</div><div class="line"><a name="l00975"></a><span class="lineno">  975</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a4e6a956431d508ac913a77cf1f9eaa69"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4e6a956431d508ac913a77cf1f9eaa69">arm_compute::graph::GraphBuilder::add_resize_node</a></div><div class="ttdeci">static NodeID add_resize_node(Graph &amp;g, NodeParams params, NodeIdxPair input, InterpolationPolicy policy, float width_scale, float height_scale)</div><div class="ttdoc">Adds a resize layer node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00614">GraphBuilder.cpp:614</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_ad8227ba86a01f26e4f173cd5e219d5d1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const</div><div class="ttdoc">Layer name accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00579">GraphBuilder::add_resize_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
+<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00614">GraphBuilder::add_resize_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
 
 </div>
 </div>
@@ -235,7 +235,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_resize_layer.xhtml">ResizeLayer</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

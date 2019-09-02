@@ -51,7 +51,9 @@ RelativeTolerance<float> tolerance_qasymm8(1);
 const auto ReductionOperations = framework::dataset::make("ReductionOperation",
 {
     ReductionOperation::SUM,
-    ReductionOperation::PROD
+    ReductionOperation::PROD,
+    ReductionOperation::MIN,
+    ReductionOperation::MAX,
 });
 
 const auto QuantizationInfos = framework::dataset::make("QuantizationInfo",

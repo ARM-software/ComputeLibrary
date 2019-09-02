@@ -7,6 +7,6 @@ var _c_l_2_channel_combine_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#ae5fe43cec1fb6be35fb3843967dc00b7", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a93ea11644b7100b02b97f2d7ee3cfc49", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a8b5dcd386c7d06894b0e1fbc7a361834", null ],
-    [ "TEST_SUITE_END", "_c_l_2_channel_combine_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_c_l_2_channel_combine_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLChannelCombineFixture< uint8_t >", "_c_l_2_channel_combine_8cpp.xhtml#ad7db0f8bd43bbf6c64713eb300b88147", null ]
 ];

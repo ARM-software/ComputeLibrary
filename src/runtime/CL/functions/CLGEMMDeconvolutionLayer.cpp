@@ -277,11 +277,15 @@ void CLGEMMDeconvolutionLayer::configure(const ICLTensor *input, const ICLTensor
 
     if(_is_quantized)
     {
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / _gemmlowp_final.info()->quantization_info().scale;
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = _gemmlowp_final.info()->quantization_info().uniform();
+
+        float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
         int   output_multiplier(0);
         int   output_shift(0);
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _gemmlowp_output_stage.configure(&_gemmlowp_final, nullptr, output_stage_output, output_multiplier, output_shift, _gemmlowp_final.info()->quantization_info().offset);
+        _gemmlowp_output_stage.configure(&_gemmlowp_final, nullptr, output_stage_output, output_multiplier, output_shift, oq_info.offset);
         _gemmlowp_final.allocator()->allocate();
     }
 

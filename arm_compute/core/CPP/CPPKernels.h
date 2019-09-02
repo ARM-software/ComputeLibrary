@@ -29,6 +29,7 @@
 #include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPFlipWeightsKernel.h"
+#include "arm_compute/core/CPP/kernels/CPPNonMaximumSuppressionKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPTopKVKernel.h"

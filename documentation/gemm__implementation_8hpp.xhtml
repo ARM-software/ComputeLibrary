@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -111,7 +111,9 @@ $(document).ready(function(){initNavTree('gemm__implementation_8hpp.xhtml','');}
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml">GemmImplementation&lt; Top, Tret &gt;</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml">GemmImplementation&lt; Top, Tret, OutputStage &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation_3_01_top_00_01_tret_00_01_nothing_01_4.xhtml">GemmImplementation&lt; Top, Tret, Nothing &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
@@ -121,24 +123,21 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:acddaad8ff32456a845746feeb2865bde"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret &gt; </td></tr>
-<tr class="memitem:acddaad8ff32456a845746feeb2865bde"><td class="memTemplItemLeft" align="right" valign="top">const GemmImplementation&lt; Top, Tret &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#acddaad8ff32456a845746feeb2865bde">gemm_implementation_list</a> ()</td></tr>
-<tr class="separator:acddaad8ff32456a845746feeb2865bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ec8bb2afab6de2518ca5649cdf9182a"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret &gt; </td></tr>
-<tr class="memitem:a6ec8bb2afab6de2518ca5649cdf9182a"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a6ec8bb2afab6de2518ca5649cdf9182a">find_implementation</a> (const GemmArgs&lt; Tret &gt; &amp;args, const GemmImplementation&lt; Top, Tret &gt; *&amp;impl)</td></tr>
-<tr class="separator:a6ec8bb2afab6de2518ca5649cdf9182a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf0f6b1c87578208f653c7ac60fad1f8"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret &gt; </td></tr>
-<tr class="memitem:acf0f6b1c87578208f653c7ac60fad1f8"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; KernelDescription &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#acf0f6b1c87578208f653c7ac60fad1f8">get_compatible_kernels</a> (const GemmArgs&lt; Tret &gt; &amp;args)</td></tr>
-<tr class="separator:acf0f6b1c87578208f653c7ac60fad1f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d35c3fce4e08e461199c4cdc6e5f613"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret &gt; </td></tr>
-<tr class="memitem:a2d35c3fce4e08e461199c4cdc6e5f613"><td class="memTemplItemLeft" align="right" valign="top">UniqueGemmCommon&lt; Top, Tret &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a2d35c3fce4e08e461199c4cdc6e5f613">gemm</a> (const GemmArgs&lt; Tret &gt; &amp;args)</td></tr>
-<tr class="separator:a2d35c3fce4e08e461199c4cdc6e5f613"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19d838df735190843718a2cb4449204b"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret &gt; </td></tr>
-<tr class="memitem:a19d838df735190843718a2cb4449204b"><td class="memTemplItemLeft" align="right" valign="top">KernelDescription&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a19d838df735190843718a2cb4449204b">get_gemm_method</a> (const GemmArgs&lt; Tret &gt; &amp;args)</td></tr>
-<tr class="separator:a19d838df735190843718a2cb4449204b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d2763e21b221cb737e41bd90443c3de"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret &gt; </td></tr>
-<tr class="memitem:a4d2763e21b221cb737e41bd90443c3de"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a4d2763e21b221cb737e41bd90443c3de">method_is_compatible</a> (GemmMethod method, const GemmArgs&lt; Tret &gt; &amp;args)</td></tr>
-<tr class="separator:a4d2763e21b221cb737e41bd90443c3de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafbf874fc03cb6d5e6d79e93f5dc1d76"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret , class OutputStage  = Nothing&gt; </td></tr>
+<tr class="memitem:aafbf874fc03cb6d5e6d79e93f5dc1d76"><td class="memTemplItemLeft" align="right" valign="top">const GemmImplementation&lt; Top, Tret, OutputStage &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#aafbf874fc03cb6d5e6d79e93f5dc1d76">gemm_implementation_list</a> ()</td></tr>
+<tr class="separator:aafbf874fc03cb6d5e6d79e93f5dc1d76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7af0b0e9e111e3ec37682c89ee803d82"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret , class OutputStage &gt; </td></tr>
+<tr class="memitem:a7af0b0e9e111e3ec37682c89ee803d82"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a7af0b0e9e111e3ec37682c89ee803d82">find_implementation</a> (const GemmArgs&lt; Tret &gt; &amp;args, const OutputStage &amp;os, const GemmImplementation&lt; Top, Tret, OutputStage &gt; *&amp;impl)</td></tr>
+<tr class="separator:a7af0b0e9e111e3ec37682c89ee803d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8eb5d997d45efbbdaa4374f45e541d86"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret , class OutputStage &gt; </td></tr>
+<tr class="memitem:a8eb5d997d45efbbdaa4374f45e541d86"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; KernelDescription &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a8eb5d997d45efbbdaa4374f45e541d86">get_compatible_kernels</a> (const GemmArgs&lt; Tret &gt; &amp;args, const OutputStage &amp;os)</td></tr>
+<tr class="separator:a8eb5d997d45efbbdaa4374f45e541d86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cf8a3a8f4c31d116db5013daa6d83d9"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret , class OutputStage &gt; </td></tr>
+<tr class="memitem:a3cf8a3a8f4c31d116db5013daa6d83d9"><td class="memTemplItemLeft" align="right" valign="top">UniqueGemmCommon&lt; Top, Tret &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a3cf8a3a8f4c31d116db5013daa6d83d9">gemm</a> (const GemmArgs&lt; Tret &gt; &amp;args, const OutputStage &amp;os)</td></tr>
+<tr class="separator:a3cf8a3a8f4c31d116db5013daa6d83d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a777476ec2693309861bef88dbef2d23f"><td class="memTemplParams" colspan="2">template&lt;typename Top , typename Tret , class OutputStage &gt; </td></tr>
+<tr class="memitem:a777476ec2693309861bef88dbef2d23f"><td class="memTemplItemLeft" align="right" valign="top">KernelDescription&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a777476ec2693309861bef88dbef2d23f">get_gemm_method</a> (const GemmArgs&lt; Tret &gt; &amp;args, const OutputStage &amp;os)</td></tr>
+<tr class="separator:a777476ec2693309861bef88dbef2d23f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -146,7 +145,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_1ce938f580a6f304b99685e2c1dd19db.xhtml">kernels</a></li><li class="navelem"><a class="el" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="gemm__implementation_8hpp.xhtml">gemm_implementation.hpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

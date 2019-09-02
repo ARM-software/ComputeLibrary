@@ -187,47 +187,51 @@ private:
         }
 
         // Quantization info taken from the AndroidNN QASYMM8 MobileNet example
-        const QuantizationInfo in_quant_info  = QuantizationInfo(0.0078125f, 128);
-        const QuantizationInfo mid_quant_info = QuantizationInfo(0.0784313753247f, 128);
+        const QuantizationInfo in_quant_info = QuantizationInfo(0.0078125f, 128);
 
         const std::vector<QuantizationInfo> conv_weights_quant_info =
         {
-            QuantizationInfo(0.031778190285f, 156), // conv0
-            QuantizationInfo(0.00604454148561f, 66) // conv14
+            QuantizationInfo(0.02182667888700962f, 151), // conv0
+            QuantizationInfo(0.004986600950360298f, 74)  // conv14
+        };
+        const std::vector<QuantizationInfo> conv_out_quant_info =
+        {
+            QuantizationInfo(0.023528477177023888f, 0), // conv0
+            QuantizationInfo(0.16609922051429749f, 66)  // conv14
         };
 
         const std::vector<QuantizationInfo> depth_weights_quant_info =
         {
-            QuantizationInfo(0.254282623529f, 129),  // dwsc1
-            QuantizationInfo(0.12828284502f, 172),   // dwsc2
-            QuantizationInfo(0.265911251307f, 83),   // dwsc3
-            QuantizationInfo(0.0985597148538f, 30),  // dwsc4
-            QuantizationInfo(0.0631204470992f, 54),  // dwsc5
-            QuantizationInfo(0.0137207424268f, 141), // dwsc6
-            QuantizationInfo(0.0817828401923f, 125), // dwsc7
-            QuantizationInfo(0.0393880493939f, 164), // dwsc8
-            QuantizationInfo(0.211694166064f, 129),  // dwsc9
-            QuantizationInfo(0.158015936613f, 103),  // dwsc10
-            QuantizationInfo(0.0182712618262f, 137), // dwsc11
-            QuantizationInfo(0.0127998134121f, 134), // dwsc12
-            QuantizationInfo(0.299285322428f, 161)   // dwsc13
+            QuantizationInfo(0.29219913482666016f, 110),  // dwsc1
+            QuantizationInfo(0.40277284383773804f, 130),  // dwsc2
+            QuantizationInfo(0.06053730100393295f, 160),  // dwsc3
+            QuantizationInfo(0.01675807684659958f, 123),  // dwsc4
+            QuantizationInfo(0.04105526953935623f, 129),  // dwsc5
+            QuantizationInfo(0.013460792601108551f, 122), // dwsc6
+            QuantizationInfo(0.036934755742549896f, 132), // dwsc7
+            QuantizationInfo(0.042609862983226776f, 94),  // dwsc8
+            QuantizationInfo(0.028358859941363335f, 127), // dwsc9
+            QuantizationInfo(0.024329448118805885f, 134), // dwsc10
+            QuantizationInfo(0.019366811960935593f, 106), // dwsc11
+            QuantizationInfo(0.007835594937205315f, 126), // dwsc12
+            QuantizationInfo(0.12616927921772003f, 211)   // dwsc13
         };
 
         const std::vector<QuantizationInfo> point_weights_quant_info =
         {
-            QuantizationInfo(0.0425766184926f, 129),  // dwsc1
-            QuantizationInfo(0.0250773020089f, 94),   // dwsc2
-            QuantizationInfo(0.015851572156f, 93),    // dwsc3
-            QuantizationInfo(0.0167811904103f, 98),   // dwsc4
-            QuantizationInfo(0.00951790809631f, 135), // dwsc5
-            QuantizationInfo(0.00999817531556f, 128), // dwsc6
-            QuantizationInfo(0.00590536883101f, 126), // dwsc7
-            QuantizationInfo(0.00576109671965f, 133), // dwsc8
-            QuantizationInfo(0.00830461271107f, 142), // dwsc9
-            QuantizationInfo(0.0152327232063f, 72),   // dwsc10
-            QuantizationInfo(0.00741417845711f, 125), // dwsc11
-            QuantizationInfo(0.0135628981516f, 142),  // dwsc12
-            QuantizationInfo(0.0338749065995f, 140)   // dwsc13
+            QuantizationInfo(0.030420949682593346f, 121), // dwsc1
+            QuantizationInfo(0.015148180536925793f, 104), // dwsc2
+            QuantizationInfo(0.013755458407104015f, 94),  // dwsc3
+            QuantizationInfo(0.007601846940815449f, 151), // dwsc4
+            QuantizationInfo(0.006431614048779011f, 122), // dwsc5
+            QuantizationInfo(0.00917122047394514f, 109),  // dwsc6
+            QuantizationInfo(0.005300046876072884f, 140), // dwsc7
+            QuantizationInfo(0.0049632852897048f, 127),   // dwsc8
+            QuantizationInfo(0.007770895957946777f, 89),  // dwsc9
+            QuantizationInfo(0.009658650495111942f, 99),  // dwsc10
+            QuantizationInfo(0.005446993745863438f, 153), // dwsc11
+            QuantizationInfo(0.00817922968417406f, 130),  // dwsc12
+            QuantizationInfo(0.018048152327537537f, 95)   // dwsc13
         };
 
         graph << InputLayer(input_descriptor.set_quantization_info(in_quant_info),
@@ -237,7 +241,7 @@ private:
                   get_weights_accessor(data_path, "Conv2d_0_weights.npy"),
                   get_weights_accessor(data_path, "Conv2d_0_bias.npy"),
                   PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR),
-                  1, conv_weights_quant_info.at(0), mid_quant_info)
+                  1, conv_weights_quant_info.at(0), conv_out_quant_info.at(0))
               .set_name("Conv2d_0")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name("Conv2d_0/Relu6");
         graph << get_dwsc_node_qasymm(data_path, "Conv2d_1", 64U, PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(0), point_weights_quant_info.at(0));
@@ -270,7 +274,7 @@ private:
                   1U, 1U, 1001U,
                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy"),
                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_bias.npy"),
-                  PadStrideInfo(1U, 1U, 0U, 0U), 1, conv_weights_quant_info.at(1))
+                  PadStrideInfo(1U, 1U, 0U, 0U), 1, conv_weights_quant_info.at(1), conv_out_quant_info.at(1))
               .set_name("Logits/Conv2d_1c_1x1");
     }
 
@@ -324,14 +328,14 @@ private:
                3U, 3U,
                get_weights_accessor(data_path, total_path + "depthwise_weights.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_bias.npy"),
-               dwc_pad_stride_info, 1, depth_weights_quant_info)
+               dwc_pad_stride_info, 1, std::move(depth_weights_quant_info))
            .set_name(total_path + "depthwise/depthwise")
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "depthwise/Relu6")
            << ConvolutionLayer(
                1U, 1U, conv_filt,
                get_weights_accessor(data_path, total_path + "pointwise_weights.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_bias.npy"),
-               conv_pad_stride_info, 1, point_weights_quant_info)
+               conv_pad_stride_info, 1, std::move(point_weights_quant_info))
            .set_name(total_path + "pointwise/Conv2D")
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "pointwise/Relu6");
 

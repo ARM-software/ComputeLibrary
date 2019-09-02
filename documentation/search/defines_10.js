@@ -4,6 +4,7 @@ var searchData=
   ['register_5ffixture_5fdata_5ftest_5fcase_5fimpl',['REGISTER_FIXTURE_DATA_TEST_CASE_IMPL',['../tests_2framework_2_macros_8h.xhtml#a0e9639d43f395accacbefdbf368f7ca0',1,'Macros.h']]],
   ['register_5ffixture_5ftest_5fcase',['REGISTER_FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#ac39772d06a4784bffc30fbe8a66ae1be',1,'Macros.h']]],
   ['register_5ffixture_5ftest_5fcase_5fimpl',['REGISTER_FIXTURE_TEST_CASE_IMPL',['../tests_2framework_2_macros_8h.xhtml#aea955b85cfaf872bc064b0e34a7cb7db',1,'Macros.h']]],
+  ['relu_5fop',['relu_op',['../activation__float__helpers_8h.xhtml#a5885769bd59707cdfdfaa82677ea4483',1,'activation_float_helpers.h']]],
   ['repeat_5f3_5f1',['REPEAT_3_1',['../repeat_8h.xhtml#a1dd0718c2bf5d454acd7a02b64577591',1,'repeat.h']]],
   ['repeat_5f3_5f10',['REPEAT_3_10',['../repeat_8h.xhtml#a25dcf84375f5bef322aba053e054986d',1,'repeat.h']]],
   ['repeat_5f3_5f11',['REPEAT_3_11',['../repeat_8h.xhtml#aab44d0a9187edad7e53d5e29f4fd65ee',1,'repeat.h']]],

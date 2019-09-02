@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,7 +73,8 @@ void CLHOGOrientationBinningKernel::configure(const ICLTensor *input_magnitude, 
     build_opts.insert(args_str.str());
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("hog_orientation_binning", build_opts));
+    const std::string kernel_name = std::string("hog_orientation_binning");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
     constexpr unsigned int num_elems_read_per_iteration      = 1;
@@ -92,6 +93,19 @@ void CLHOGOrientationBinningKernel::configure(const ICLTensor *input_magnitude, 
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input_magnitude->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input_magnitude->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input_magnitude->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLHOGOrientationBinningKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -112,7 +126,7 @@ void CLHOGOrientationBinningKernel::run(const Window &window, cl::CommandQueue &
         add_2D_tensor_argument(idx, _input_phase, slice_mag_phase);
         add_2D_tensor_argument(idx, _output, slice);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }
@@ -156,7 +170,8 @@ void CLHOGBlockNormalizationKernel::configure(const ICLTensor *input, ICLTensor 
     std::set<std::string> build_opts = {};
     build_opts.insert(args_str.str());
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("hog_block_normalization", build_opts));
+    const std::string kernel_name = std::string("hog_block_normalization");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
     constexpr unsigned int num_elems_read_per_iteration      = 1;
@@ -175,6 +190,19 @@ void CLHOGBlockNormalizationKernel::configure(const ICLTensor *input, ICLTensor 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLHOGBlockNormalizationKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -194,7 +222,7 @@ void CLHOGBlockNormalizationKernel::run(const Window &window, cl::CommandQueue &
         add_2D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

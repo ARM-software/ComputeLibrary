@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -150,12 +150,14 @@ Functions</h2></td></tr>
 <tr class="separator:a3bf71df22cf01e4368b66a37c47cc1bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae317839458e2acbc4f7887d0d494c19a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae317839458e2acbc4f7887d0d494c19a">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLElementwiseSquaredDiffFixture&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseSquaredDiffU8Dataset))</td></tr>
 <tr class="separator:ae317839458e2acbc4f7887d0d494c19a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22533e516588caec3c4c543e45020f2d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a22533e516588caec3c4c543e45020f2d">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLElementwiseSquaredDiffQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffQASYMM8Dataset), framework::dataset::make(&quot;QuantizationInfo&quot;, { QuantizationInfo(5.f/255.f, 20) })), framework::dataset::make(&quot;QuantizationInfo&quot;, { QuantizationInfo(2.f/255.f, 10) })), framework::dataset::make(&quot;QuantizationInfo&quot;, { QuantizationInfo(1.f/255.f, 5) })))</td></tr>
-<tr class="separator:a22533e516588caec3c4c543e45020f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0661dab56621eb39f7ed24eef46dd71"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab0661dab56621eb39f7ed24eef46dd71">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, { DataType::U8, DataType::S16 })), shape, data_type)</td></tr>
 <tr class="separator:ab0661dab56621eb39f7ed24eef46dd71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af233e99feaed3b2b855d7326c8cfa46a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af233e99feaed3b2b855d7326c8cfa46a">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLElementwiseSquaredDiffFixture&lt; int16_t &gt;, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffS16Dataset))</td></tr>
 <tr class="separator:af233e99feaed3b2b855d7326c8cfa46a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c15e30554f5a511458bd0109aa70faa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9c15e30554f5a511458bd0109aa70faa">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLElementwiseSquaredDiffQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffQASYMM8Dataset), framework::dataset::make(&quot;Src0QInfo&quot;, { QuantizationInfo(5.f/255.f, 20) })), framework::dataset::make(&quot;Src1QInfo&quot;, { QuantizationInfo(2.f/255.f, 10) })), framework::dataset::make(&quot;OutQInfo&quot;, { QuantizationInfo(1.f/255.f, 5) })))</td></tr>
+<tr class="separator:a9c15e30554f5a511458bd0109aa70faa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f43b8d8224e315314696ddf66634114"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2f43b8d8224e315314696ddf66634114">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLElementwiseSquaredDiffQuantizedFixture&lt; int16_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffQSYMM16Dataset), framework::dataset::make(&quot;Src0QInfo&quot;, { QuantizationInfo(1.f/32768.f, 0), QuantizationInfo(5.f/32768.f, 0) })), framework::dataset::make(&quot;Src1QInfo&quot;, { QuantizationInfo(2.f/32768.f, 0), QuantizationInfo(5.f/32768.f, 0) })), framework::dataset::make(&quot;OutQInfo&quot;, { QuantizationInfo(5.f/32768.f, 0) })))</td></tr>
+<tr class="separator:a2f43b8d8224e315314696ddf66634114"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a556d5d37e1f877c5897d8b02a9dcb5d3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a556d5d37e1f877c5897d8b02a9dcb5d3">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLElementwiseSquaredDiffFixture&lt; half &gt;, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP16Dataset))</td></tr>
 <tr class="separator:a556d5d37e1f877c5897d8b02a9dcb5d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae6a65b6e477371b9f1e9494c61e663b8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae6a65b6e477371b9f1e9494c61e663b8">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLElementwiseSquaredDiffFixture&lt; float &gt;, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset))</td></tr>
@@ -169,7 +171,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="_elementwise_squared_diff_8cpp.xhtml">ElementwiseSquaredDiff.cpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:27 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -169,6 +169,14 @@ Functions</h2></td></tr>
 <tr class="memitem:a291a16e64b05bdf4d08e1240d5bb286a"><td class="memItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a291a16e64b05bdf4d08e1240d5bb286a">convert_to_asymmetric</a> (const SimpleTensor&lt; float &gt; &amp;src, const QuantizationInfo &amp;quantization_info)</td></tr>
 <tr class="memdesc:a291a16e64b05bdf4d08e1240d5bb286a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert float simple tensor into quantized using specified quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a291a16e64b05bdf4d08e1240d5bb286a">More...</a><br /></td></tr>
 <tr class="separator:a291a16e64b05bdf4d08e1240d5bb286a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32db8010537a9ed07718d91b16366097"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a32db8010537a9ed07718d91b16366097"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; float &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a32db8010537a9ed07718d91b16366097">convert_from_symmetric</a> (const SimpleTensor&lt; T &gt; &amp;src)</td></tr>
+<tr class="memdesc:a32db8010537a9ed07718d91b16366097"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert quantized simple tensor into float using tensor quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a32db8010537a9ed07718d91b16366097">More...</a><br /></td></tr>
+<tr class="separator:a32db8010537a9ed07718d91b16366097"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8f9926d24cb38c66c611ff7d157d9d2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ad8f9926d24cb38c66c611ff7d157d9d2"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad8f9926d24cb38c66c611ff7d157d9d2">convert_to_symmetric</a> (const SimpleTensor&lt; float &gt; &amp;src, const QuantizationInfo &amp;quantization_info)</td></tr>
+<tr class="memdesc:ad8f9926d24cb38c66c611ff7d157d9d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert float simple tensor into quantized using specified quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad8f9926d24cb38c66c611ff7d157d9d2">More...</a><br /></td></tr>
+<tr class="separator:ad8f9926d24cb38c66c611ff7d157d9d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a683cf9b1a237f2d8326735a1c5e881ed"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a683cf9b1a237f2d8326735a1c5e881ed"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a683cf9b1a237f2d8326735a1c5e881ed">matrix_multiply</a> (const SimpleTensor&lt; T &gt; &amp;a, const SimpleTensor&lt; T &gt; &amp;b, SimpleTensor&lt; T &gt; &amp;out)</td></tr>
 <tr class="memdesc:a683cf9b1a237f2d8326735a1c5e881ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Matrix multiply between 2 float simple tensors.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a683cf9b1a237f2d8326735a1c5e881ed">More...</a><br /></td></tr>
@@ -195,7 +203,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="tests_2validation_2_helpers_8h.xhtml">Helpers.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

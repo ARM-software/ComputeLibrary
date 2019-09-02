@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -164,7 +164,7 @@ void MultiImage::allocate()
 void MultiImage::create_subimage(MultiImage *image, const Coordinates &coords, unsigned int width, unsigned int height)
 {
     arm_compute::Format format = image->info()->format();
-    const TensorInfo    info(width, height, Format::U8);
+    TensorInfo          info(width, height, Format::U8);
 
     switch(format)
     {
@@ -180,21 +180,21 @@ void MultiImage::create_subimage(MultiImage *image, const Coordinates &coords, u
         case Format::YUYV422:
         case Format::UYVY422:
         {
-            const TensorInfo info_full(width, height, format);
+            TensorInfo info_full(width, height, format);
             std::get<0>(_plane).allocator()->init(*dynamic_cast<Image *>(image->plane(0))->allocator(), coords, info_full);
             break;
         }
         case Format::NV12:
         case Format::NV21:
         {
-            const TensorInfo info_uv88(width / 2, height / 2, Format::UV88);
+            TensorInfo info_uv88(width / 2, height / 2, Format::UV88);
             std::get<0>(_plane).allocator()->init(*dynamic_cast<Image *>(image->plane(0))->allocator(), coords, info);
             std::get<1>(_plane).allocator()->init(*dynamic_cast<Image *>(image->plane(1))->allocator(), coords, info_uv88);
             break;
         }
         case Format::IYUV:
         {
-            const TensorInfo info_sub2(width / 2, height / 2, Format::U8);
+            TensorInfo info_sub2(width / 2, height / 2, Format::U8);
             std::get<0>(_plane).allocator()->init(*dynamic_cast<Image *>(image->plane(0))->allocator(), coords, info);
             std::get<1>(_plane).allocator()->init(*dynamic_cast<Image *>(image->plane(1))->allocator(), coords, info_sub2);
             std::get<2>(_plane).allocator()->init(*dynamic_cast<Image *>(image->plane(2))->allocator(), coords, info_sub2);

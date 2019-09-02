@@ -86,17 +86,17 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                     _memory_group;
-    std::vector<std::unique_ptr<NEScharr3x3>>       _func_scharr;
-    std::vector<std::unique_ptr<NELKTrackerKernel>> _kernel_tracker;
-    std::vector<std::unique_ptr<Tensor>>            _scharr_gx;
-    std::vector<std::unique_ptr<Tensor>>            _scharr_gy;
-    IKeyPointArray                                 *_new_points;
-    const IKeyPointArray                           *_new_points_estimates;
-    const IKeyPointArray                           *_old_points;
-    LKInternalKeypointArray                         _new_points_internal;
-    LKInternalKeypointArray                         _old_points_internal;
-    unsigned int                                    _num_levels;
+    MemoryGroup                    _memory_group;
+    std::vector<NEScharr3x3>       _func_scharr;
+    std::vector<NELKTrackerKernel> _kernel_tracker;
+    std::vector<Tensor>            _scharr_gx;
+    std::vector<Tensor>            _scharr_gy;
+    IKeyPointArray                *_new_points;
+    const IKeyPointArray          *_new_points_estimates;
+    const IKeyPointArray          *_old_points;
+    LKInternalKeypointArray        _new_points_internal;
+    LKInternalKeypointArray        _old_points_internal;
+    unsigned int                   _num_levels;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEOPTICALFLOW_H__ */

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -183,7 +183,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. In case of <code>output</code> tensor = nullptr, this tensor will store the result of the activation function. Data types supported: QASYMM8/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. In case of <code>output</code> tensor = nullptr, this tensor will store the result of the activation function. Data types supported: QASYMM8/QSYMM16/F16/F32. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>Activation layer parameters. </td></tr>
   </table>
@@ -195,7 +195,7 @@ Static Public Member Functions</h2></td></tr>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00175">arm_compute::test::validation::act_info</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_direct_convolution_layer_8cpp_source.xhtml#l00040">CLDirectConvolutionLayer::configure()</a>, <a class="el" href="_c_l_f_f_t_convolution_layer_8cpp_source.xhtml#l00098">CLFFTConvolutionLayer::configure()</a>, <a class="el" href="_c_l_g_e_m_m_convolution_layer_8cpp_source.xhtml#l00169">CLGEMMConvolutionLayer::configure()</a>, <a class="el" href="_c_l_depthwise_convolution_layer_8cpp_source.xhtml#l00240">CLDepthwiseConvolutionLayer::configure()</a>, and <a class="el" href="tests_2validation_2_c_l_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml#l00108">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_direct_convolution_layer_8cpp_source.xhtml#l00040">CLDirectConvolutionLayer::configure()</a>, <a class="el" href="_c_l_f_f_t_convolution_layer_8cpp_source.xhtml#l00098">CLFFTConvolutionLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00058">CLLSTMLayerQuantized::configure()</a>, <a class="el" href="_c_l_g_e_m_m_convolution_layer_8cpp_source.xhtml#l00177">CLGEMMConvolutionLayer::configure()</a>, <a class="el" href="_c_l_depthwise_convolution_layer_8cpp_source.xhtml#l00256">CLDepthwiseConvolutionLayer::configure()</a>, and <a class="el" href="tests_2validation_2_c_l_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml#l00111">arm_compute::test::validation::TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -242,7 +242,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. In case of <code>output</code> tensor info = nullptr, this tensor will store the result of the activation function. Data types supported: QASYMM8/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. In case of <code>output</code> tensor info = nullptr, this tensor will store the result of the activation function. Data types supported: QASYMM8/QSYMM16/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>Activation layer information.</td></tr>
   </table>
@@ -252,11 +252,11 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_activation_layer_8cpp_source.xhtml#l00039">39</a> of file <a class="el" href="_c_l_activation_layer_8cpp_source.xhtml">CLActivationLayer.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_activation_layer_kernel.xhtml#aa37e2d0b4cd4f835bfa2a2df4a0bdd2c">CLActivationLayerKernel::validate</a>(input, output, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f8aca235c095df227e7444f6b237eb1">act_info</a>);</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a1f8aca235c095df227e7444f6b237eb1"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f8aca235c095df227e7444f6b237eb1">arm_compute::test::validation::act_info</a></div><div class="ttdeci">act_info</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00175">ConvolutionLayer.cpp:175</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_c_l_activation_layer_kernel_xhtml_aa37e2d0b4cd4f835bfa2a2df4a0bdd2c"><div class="ttname"><a href="classarm__compute_1_1_c_l_activation_layer_kernel.xhtml#aa37e2d0b4cd4f835bfa2a2df4a0bdd2c">arm_compute::CLActivationLayerKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &amp;act_info)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLActivationLayerKernel.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_activation_layer_kernel_8cpp_source.xhtml#l00199">CLActivationLayerKernel.cpp:199</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_activation_layer_kernel_xhtml_aa37e2d0b4cd4f835bfa2a2df4a0bdd2c"><div class="ttname"><a href="classarm__compute_1_1_c_l_activation_layer_kernel.xhtml#aa37e2d0b4cd4f835bfa2a2df4a0bdd2c">arm_compute::CLActivationLayerKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &amp;act_info)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLActivationLayerKernel.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_activation_layer_kernel_8cpp_source.xhtml#l00228">CLActivationLayerKernel.cpp:228</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00175">arm_compute::test::validation::act_info</a>, and <a class="el" href="_c_l_activation_layer_kernel_8cpp_source.xhtml#l00199">CLActivationLayerKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00175">arm_compute::test::validation::act_info</a>, and <a class="el" href="_c_l_activation_layer_kernel_8cpp_source.xhtml#l00228">CLActivationLayerKernel::validate()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_direct_convolution_layer_8cpp_source.xhtml#l00068">CLDirectConvolutionLayer::validate()</a>, <a class="el" href="_c_l_winograd_convolution_layer_8cpp_source.xhtml#l00149">CLWinogradConvolutionLayer::validate()</a>, <a class="el" href="_c_l_f_f_t_convolution_layer_8cpp_source.xhtml#l00253">CLFFTConvolutionLayer::validate()</a>, <a class="el" href="_c_l_g_e_m_m_convolution_layer_8cpp_source.xhtml#l00353">CLGEMMConvolutionLayer::validate()</a>, and <a class="el" href="_c_l_depthwise_convolution_layer_8cpp_source.xhtml#l00360">CLDepthwiseConvolutionLayer::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_direct_convolution_layer_8cpp_source.xhtml#l00068">CLDirectConvolutionLayer::validate()</a>, <a class="el" href="_c_l_f_f_t_convolution_layer_8cpp_source.xhtml#l00253">CLFFTConvolutionLayer::validate()</a>, <a class="el" href="_c_l_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00257">CLLSTMLayerQuantized::validate()</a>, <a class="el" href="_c_l_g_e_m_m_convolution_layer_8cpp_source.xhtml#l00373">CLGEMMConvolutionLayer::validate()</a>, and <a class="el" href="_c_l_depthwise_convolution_layer_8cpp_source.xhtml#l00380">CLDepthwiseConvolutionLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -270,7 +270,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:28 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:31 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -133,6 +133,9 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a76e04f20ff5bdc3170425e63025bba9d"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a76e04f20ff5bdc3170425e63025bba9d"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a76e04f20ff5bdc3170425e63025bba9d">NEUpsampleLayerFixture</a> = UpsampleLayerFixture&lt; Tensor, Accessor, NEUpsampleLayer, T &gt;</td></tr>
 <tr class="separator:a76e04f20ff5bdc3170425e63025bba9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e6d67129807615747fa31f9189b8fbb"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a5e6d67129807615747fa31f9189b8fbb"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5e6d67129807615747fa31f9189b8fbb">NEUpsampleLayerQuantizedFixture</a> = UpsampleLayerQuantizedFixture&lt; Tensor, Accessor, NEUpsampleLayer, T &gt;</td></tr>
+<tr class="separator:a5e6d67129807615747fa31f9189b8fbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -142,15 +145,16 @@ Functions</h2></td></tr>
 <tr class="separator:ab3a9be28851ffe70ea37f1da42c13ac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae5beab6e512dd2f8205096e875109492"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae5beab6e512dd2f8205096e875109492">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEUpsampleLayerFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })), framework::dataset::make(&quot;PadInfo&quot;, { Size2D(2, 2) })), framework::dataset::make(&quot;UpsamplingPolicy&quot;, { InterpolationPolicy::NEAREST_NEIGHBOR })))</td></tr>
 <tr class="separator:ae5beab6e512dd2f8205096e875109492"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae">TEST_SUITE_END</a> () <a class="el" href="_window_iterator_8cpp.xhtml#a73168adf798e300ad06a0341c1c9bd59">DATA_TEST_CASE</a>(Configuration = ActivationValidationQuantizedFixture&lt;CLTensor, CLAccessor, CLActivationLayer, T&gt;</td></tr>
-<tr class="separator:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3ede0ad086ada8a19a26f3dcb19332f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad3ede0ad086ada8a19a26f3dcb19332f">combine</a> (combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })), framework::dataset::make(&quot;PadInfo&quot;, { Size2D(2, 2) })), framework::dataset::make(&quot;UpsamplingPolicy&quot;, { InterpolationPolicy::NEAREST_NEIGHBOR })))</td></tr>
-<tr class="separator:ad3ede0ad086ada8a19a26f3dcb19332f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2ed31007ae463a3cec24a581f3651f6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ed31007ae463a3cec24a581f3651f6">TEST_SUITE_END</a> () const auto Int16QuantizedActivationFunctionsDataset = ActivationValidationQuantizedFixture&lt;CLTensor, CLAccessor, CLActivationLayer, T&gt;</td></tr>
+<tr class="memdesc:ac2ed31007ae463a3cec24a581f3651f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input data sets.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ed31007ae463a3cec24a581f3651f6">More...</a><br /></td></tr>
+<tr class="separator:ac2ed31007ae463a3cec24a581f3651f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e5e125d3fc2de2ee33ff9632f794366"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3e5e125d3fc2de2ee33ff9632f794366">combine</a> (combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })), framework::dataset::make(&quot;PadInfo&quot;, { Size2D(2, 2) })), framework::dataset::make(&quot;UpsamplingPolicy&quot;, { InterpolationPolicy::NEAREST_NEIGHBOR })), framework::dataset::make(&quot;QuantizationInfo&quot;, QuantizationInfo(2.f/255.f, 10))))</td></tr>
+<tr class="separator:a3e5e125d3fc2de2ee33ff9632f794366"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:aa7581d5d020ff63835e56c303bbebf88"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa7581d5d020ff63835e56c303bbebf88">NEUpsampleLayerFixture&lt; uint8_t &gt;</a></td></tr>
-<tr class="separator:aa7581d5d020ff63835e56c303bbebf88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3ce43dc6b5eef342ed8d81a51af16c2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab3ce43dc6b5eef342ed8d81a51af16c2">NEUpsampleLayerQuantizedFixture&lt; uint8_t &gt;</a></td></tr>
+<tr class="separator:ab3ce43dc6b5eef342ed8d81a51af16c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -158,7 +162,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="_upsample_8cpp.xhtml">Upsample.cpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:27 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

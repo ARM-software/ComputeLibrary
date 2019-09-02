@@ -36,7 +36,7 @@ void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, in
     uint8_t *outptr = (uint8_t *)out;
     const uint8_t *inptr = (uint8_t *)in;
 
-    uint8_t zerobuff[16];
+    uint8_t zerobuff[16] = { 0 };
 
     for (int y=y0; y<ymax; y+=4) {
         const uint8_t *inptr0 = inptr + y * ldin + k0;
@@ -57,8 +57,10 @@ void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, in
                     /* Everything falls through in here */
                     case 2:
                         inptr1 = zerobuff;
+                        // fall through
                     case 1:
                         inptr2 = zerobuff;
+                        // fall through
                     case 0:
                         inptr3 = zerobuff;
                         break;
@@ -93,8 +95,10 @@ void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, in
                     /* Everything falls through in here */
                     case 2:
                         inptr1 = zerobuff;
+                        // fall through
                     case 1:
                         inptr2 = zerobuff;
+                        // fall through
                     case 0:
                         inptr3 = zerobuff;
                         break;

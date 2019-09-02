@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
 
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
@@ -100,7 +101,8 @@ public:
 
 private:
     CLMemoryGroup                                 _memory_group;
-    CLGEMMLowpMatrixMultiplyKernel                _mm_kernel;
+    CLGEMMLowpMatrixMultiplyKernel                _mm_midgard_kernel;
+    CLGEMMLowpMatrixMultiplyNativeKernel          _mm_native_kernel;
     CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel _mm_reshaped_only_rhs_kernel;
     CLGEMMReshapeRHSMatrixKernel                  _mtx_b_reshape_kernel;
     CLGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
@@ -115,6 +117,7 @@ private:
     int32_t                                       _a_offset;
     int32_t                                       _b_offset;
     bool                                          _is_gemm_reshaped;
+    bool                                          _is_midgard;
     bool                                          _reshape_b_only_on_first_run;
     bool                                          _is_prepared;
     bool                                          _fuse_output_stage;

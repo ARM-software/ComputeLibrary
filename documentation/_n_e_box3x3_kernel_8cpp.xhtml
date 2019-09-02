@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -96,6 +96,8 @@ $(document).ready(function(){initNavTree('_n_e_box3x3_kernel_8cpp.xhtml','');});
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">NEBox3x3Kernel.cpp File Reference</div>  </div>
 </div><!--header-->
@@ -110,13 +112,56 @@ $(document).ready(function(){initNavTree('_n_e_box3x3_kernel_8cpp.xhtml','');});
 <code>#include &lt;arm_neon.h&gt;</code><br />
 </div>
 <p><a href="_n_e_box3x3_kernel_8cpp_source.xhtml">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a14965254bf3c21bcb537c3ab0c3ef128"><td class="memItemLeft" align="right" valign="top">int16x8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_n_e_box3x3_kernel_8cpp.xhtml#a14965254bf3c21bcb537c3ab0c3ef128">calculate_kernel</a> (const uint8x16_t &amp;top_data, const uint8x16_t &amp;mid_data, const uint8x16_t &amp;bot_data)</td></tr>
+<tr class="separator:a14965254bf3c21bcb537c3ab0c3ef128"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="a14965254bf3c21bcb537c3ab0c3ef128"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14965254bf3c21bcb537c3ab0c3ef128">&#9670;&nbsp;</a></span>calculate_kernel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int16x8_t calculate_kernel </td>
+          <td>(</td>
+          <td class="paramtype">const uint8x16_t &amp;&#160;</td>
+          <td class="paramname"><em>top_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8x16_t &amp;&#160;</td>
+          <td class="paramname"><em>mid_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8x16_t &amp;&#160;</td>
+          <td class="paramname"><em>bot_data</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_n_e_box3x3_kernel_8cpp_source.xhtml#l00036">36</a> of file <a class="el" href="_n_e_box3x3_kernel_8cpp_source.xhtml">NEBox3x3Kernel.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keyword">const</span> int16x8x2_t top_s16 =</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    {</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        {</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;            vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(top_data))),</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;            vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(top_data)))</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        }</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    };</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="keyword">const</span> int16x8x2_t mid_s16 =</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    {</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        {</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(mid_data))),</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(mid_data)))</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        }</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    };</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keyword">const</span> int16x8x2_t bot_s16 =</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    {</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        {</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(bot_data))),</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(bot_data)))</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        }</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    };</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="comment">//top left</span></div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    int16x8_t out = top_s16.val[0];</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="comment">//top mid</span></div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    out = vaddq_s16(out, vextq_s16(top_s16.val[0], top_s16.val[1], 1));</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="comment">//top right</span></div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    out = vaddq_s16(out, vextq_s16(top_s16.val[0], top_s16.val[1], 2));</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="comment">//mid left</span></div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    out = vaddq_s16(out, mid_s16.val[0]);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="comment">//mid mid</span></div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    out = vaddq_s16(out, vextq_s16(mid_s16.val[0], mid_s16.val[1], 1));</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="comment">//mid right</span></div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    out = vaddq_s16(out, vextq_s16(mid_s16.val[0], mid_s16.val[1], 2));</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <span class="comment">//bot left</span></div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    out = vaddq_s16(out, bot_s16.val[0]);</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <span class="comment">//bot mid</span></div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    out = vaddq_s16(out, vextq_s16(bot_s16.val[0], bot_s16.val[1], 1));</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="comment">//bot right</span></div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    out = vaddq_s16(out, vextq_s16(bot_s16.val[0], bot_s16.val[1], 2));</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="keywordflow">return</span> out;</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;}</div></div><!-- fragment -->
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_1ce938f580a6f304b99685e2c1dd19db.xhtml">kernels</a></li><li class="navelem"><a class="el" href="_n_e_box3x3_kernel_8cpp.xhtml">NEBox3x3Kernel.cpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

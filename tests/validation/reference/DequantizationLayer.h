@@ -35,8 +35,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<T> dequantization_layer(const SimpleTensor<uint8_t> &src);
+template <typename TOut, typename TIn>
+SimpleTensor<TOut> dequantization_layer(const SimpleTensor<TIn> &src);
 } // namespace reference
 } // namespace validation
 } // namespace test

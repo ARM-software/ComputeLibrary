@@ -11,6 +11,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLActivationLayerKernel.h", "_c_l_activation_layer_kernel_8h.xhtml", [
       [ "CLActivationLayerKernel", "classarm__compute_1_1_c_l_activation_layer_kernel.xhtml", "classarm__compute_1_1_c_l_activation_layer_kernel" ]
     ] ],
+    [ "CLBatchConcatenateLayerKernel.h", "_c_l_batch_concatenate_layer_kernel_8h.xhtml", [
+      [ "CLBatchConcatenateLayerKernel", "classarm__compute_1_1_c_l_batch_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_c_l_batch_concatenate_layer_kernel" ]
+    ] ],
     [ "CLBatchNormalizationLayerKernel.h", "_c_l_batch_normalization_layer_kernel_8h.xhtml", [
       [ "CLBatchNormalizationLayerKernel", "classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml", "classarm__compute_1_1_c_l_batch_normalization_layer_kernel" ]
     ] ],
@@ -79,6 +82,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLDepthConvertLayerKernel.h", "_c_l_depth_convert_layer_kernel_8h.xhtml", [
       [ "CLDepthConvertLayerKernel", "classarm__compute_1_1_c_l_depth_convert_layer_kernel.xhtml", "classarm__compute_1_1_c_l_depth_convert_layer_kernel" ]
+    ] ],
+    [ "CLDepthToSpaceLayerKernel.h", "_c_l_depth_to_space_layer_kernel_8h.xhtml", [
+      [ "CLDepthToSpaceLayerKernel", "classarm__compute_1_1_c_l_depth_to_space_layer_kernel.xhtml", "classarm__compute_1_1_c_l_depth_to_space_layer_kernel" ]
     ] ],
     [ "CLDepthwiseConvolutionLayer3x3NCHWKernel.h", "_c_l_depthwise_convolution_layer3x3_n_c_h_w_kernel_8h.xhtml", [
       [ "CLDepthwiseConvolutionLayer3x3NCHWKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_c_h_w_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_c_h_w_kernel" ]
@@ -163,11 +169,11 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
       [ "CLGaussianPyramidHorKernel", "classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml", "classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel" ],
       [ "CLGaussianPyramidVertKernel", "classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml", "classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel" ]
     ] ],
-    [ "CLGEMMInterleave4x4Kernel.h", "_c_l_g_e_m_m_interleave4x4_kernel_8h.xhtml", [
-      [ "CLGEMMInterleave4x4Kernel", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel" ]
-    ] ],
     [ "CLGEMMLowpMatrixMultiplyKernel.h", "_c_l_g_e_m_m_lowp_matrix_multiply_kernel_8h.xhtml", [
       [ "CLGEMMLowpMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel" ]
+    ] ],
+    [ "CLGEMMLowpMatrixMultiplyNativeKernel.h", "_c_l_g_e_m_m_lowp_matrix_multiply_native_kernel_8h.xhtml", [
+      [ "CLGEMMLowpMatrixMultiplyNativeKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_native_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_native_kernel" ]
     ] ],
     [ "CLGEMMLowpMatrixMultiplyReshapedKernel.h", "_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel_8h.xhtml", [
       [ "CLGEMMLowpMatrixMultiplyReshapedKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel" ]
@@ -180,6 +186,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLGEMMLowpOffsetContributionOutputStageKernel.h", "_c_l_g_e_m_m_lowp_offset_contribution_output_stage_kernel_8h.xhtml", [
       [ "CLGEMMLowpOffsetContributionOutputStageKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_output_stage_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_output_stage_kernel" ]
+    ] ],
+    [ "CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h", "_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel_8h.xhtml", [
+      [ "CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel" ]
     ] ],
     [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h", "_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel_8h.xhtml", [
       [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel" ]
@@ -204,6 +213,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLGEMMMatrixMultiplyKernel.h", "_c_l_g_e_m_m_matrix_multiply_kernel_8h.xhtml", [
       [ "CLGEMMMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel" ]
     ] ],
+    [ "CLGEMMMatrixMultiplyNativeKernel.h", "_c_l_g_e_m_m_matrix_multiply_native_kernel_8h.xhtml", [
+      [ "CLGEMMMatrixMultiplyNativeKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_native_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_native_kernel" ]
+    ] ],
     [ "CLGEMMMatrixMultiplyReshapedKernel.h", "_c_l_g_e_m_m_matrix_multiply_reshaped_kernel_8h.xhtml", [
       [ "CLGEMMMatrixMultiplyReshapedKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel" ]
     ] ],
@@ -218,9 +230,6 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLGEMMReshapeRHSMatrixKernel.h", "_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel_8h.xhtml", [
       [ "CLGEMMReshapeRHSMatrixKernel", "classarm__compute_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel" ]
-    ] ],
-    [ "CLGEMMTranspose1xWKernel.h", "_c_l_g_e_m_m_transpose1x_w_kernel_8h.xhtml", [
-      [ "CLGEMMTranspose1xWKernel", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel" ]
     ] ],
     [ "CLGenerateProposalsLayerKernel.h", "_c_l_generate_proposals_layer_kernel_8h.xhtml", [
       [ "CLComputeAllAnchorsKernel", "classarm__compute_1_1_c_l_compute_all_anchors_kernel.xhtml", "classarm__compute_1_1_c_l_compute_all_anchors_kernel" ]
@@ -261,6 +270,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLMeanStdDevKernel.h", "_c_l_mean_std_dev_kernel_8h.xhtml", [
       [ "CLMeanStdDevKernel", "classarm__compute_1_1_c_l_mean_std_dev_kernel.xhtml", "classarm__compute_1_1_c_l_mean_std_dev_kernel" ]
+    ] ],
+    [ "CLMeanStdDevNormalizationKernel.h", "_c_l_mean_std_dev_normalization_kernel_8h.xhtml", [
+      [ "CLMeanStdDevNormalizationKernel", "classarm__compute_1_1_c_l_mean_std_dev_normalization_kernel.xhtml", "classarm__compute_1_1_c_l_mean_std_dev_normalization_kernel" ]
     ] ],
     [ "CLMedian3x3Kernel.h", "_c_l_median3x3_kernel_8h.xhtml", [
       [ "CLMedian3x3Kernel", "classarm__compute_1_1_c_l_median3x3_kernel.xhtml", "classarm__compute_1_1_c_l_median3x3_kernel" ]
@@ -355,6 +367,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLSpaceToBatchLayerKernel.h", "_c_l_space_to_batch_layer_kernel_8h.xhtml", [
       [ "CLSpaceToBatchLayerKernel", "classarm__compute_1_1_c_l_space_to_batch_layer_kernel.xhtml", "classarm__compute_1_1_c_l_space_to_batch_layer_kernel" ]
+    ] ],
+    [ "CLSpaceToDepthLayerKernel.h", "_c_l_space_to_depth_layer_kernel_8h.xhtml", [
+      [ "CLSpaceToDepthLayerKernel", "classarm__compute_1_1_c_l_space_to_depth_layer_kernel.xhtml", "classarm__compute_1_1_c_l_space_to_depth_layer_kernel" ]
     ] ],
     [ "CLStackLayerKernel.h", "_c_l_stack_layer_kernel_8h.xhtml", [
       [ "CLStackLayerKernel", "classarm__compute_1_1_c_l_stack_layer_kernel.xhtml", "classarm__compute_1_1_c_l_stack_layer_kernel" ]

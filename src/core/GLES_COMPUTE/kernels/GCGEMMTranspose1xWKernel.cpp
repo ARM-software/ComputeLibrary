@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,7 +90,7 @@ void GCGEMMTranspose1xWKernel::configure(const IGCTensor *input, IGCTensor *outp
 
     update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), input->info()->tensor_shape()));
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     IGCKernel::configure(win);
 }

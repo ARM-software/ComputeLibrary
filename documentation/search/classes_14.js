@@ -23,7 +23,6 @@ var searchData=
   ['threadinfo',['ThreadInfo',['../structarm__compute_1_1_thread_info.xhtml',1,'arm_compute']]],
   ['toggleoption',['ToggleOption',['../classarm__compute_1_1utils_1_1_toggle_option.xhtml',1,'arm_compute::utils']]],
   ['topnpredictionsaccessor',['TopNPredictionsAccessor',['../classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml',1,'arm_compute::graph_utils']]],
-  ['transformimpl',['TransformImpl',['../struct_transform_impl.xhtml',1,'']]],
   ['transposeinterleavecommon',['TransposeInterleaveCommon',['../struct_transpose_interleave_common.xhtml',1,'']]],
   ['tunerfactory',['TunerFactory',['../classarm__compute_1_1tuners_1_1_tuner_factory.xhtml',1,'arm_compute::tuners']]]
 ];

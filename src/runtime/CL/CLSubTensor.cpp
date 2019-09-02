@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,11 @@ const cl::Buffer &CLSubTensor::cl_buffer() const
 {
     ARM_COMPUTE_ERROR_ON(_parent == nullptr);
     return _parent->cl_buffer();
+}
+
+CLQuantization CLSubTensor::quantization() const
+{
+    return _parent->quantization();
 }
 
 ICLTensor *CLSubTensor::parent()

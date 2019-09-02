@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -104,13 +104,12 @@ $(document).ready(function(){initNavTree('depthwise__convolution_8cl.xhtml','');
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>&quot;</code><br />
 </div>
 <p><a href="depthwise__convolution_8cl_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a150fbfa48767f3bf602b812f8ecb3ad9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9">ACTIVATION_FUNC</a>(x)&#160;&#160;&#160;(x)</td></tr>
-<tr class="separator:a150fbfa48767f3bf602b812f8ecb3ad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae40b0f25b3985d4853b944151ffddb44"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#ae40b0f25b3985d4853b944151ffddb44">CONVOLUTION1x3_BIFROST2X1_STRIDE1</a>(acc,  src0_left,  src0_mid,  src0_right,  weights_row0)</td></tr>
 <tr class="separator:ae40b0f25b3985d4853b944151ffddb44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2da35283a28c35fd9f8b0d534e5a5a44"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#a2da35283a28c35fd9f8b0d534e5a5a44">CONVOLUTION1x3_BIFROST2X1_STRIDE2</a>(acc,  src0_left,  src0_mid,  src0_right,  weights_row0)</td></tr>
@@ -139,26 +138,6 @@ Functions</h2></td></tr>
 <tr class="separator:a4201b7aeda129409f16dd5a5cfe56450"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
-<a id="a150fbfa48767f3bf602b812f8ecb3ad9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a150fbfa48767f3bf602b812f8ecb3ad9">&#9670;&nbsp;</a></span>ACTIVATION_FUNC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ACTIVATION_FUNC</td>
-          <td>(</td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname">x</td><td>)</td>
-          <td>&#160;&#160;&#160;(x)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00033">33</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
-
-</div>
-</div>
 <a id="ae40b0f25b3985d4853b944151ffddb44"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae40b0f25b3985d4853b944151ffddb44">&#9670;&nbsp;</a></span>CONVOLUTION1x3_BIFROST2X1_STRIDE1</h2>
 
@@ -202,8 +181,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \</div><div class="line">    })</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00107">107</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s1, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s1, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s1, weights_row0.s2, acc.s1);                                 \</div><div class="line">    })</div><div class="ttc" id="namespacearm__compute_1_1support_1_1cpp11_xhtml_af399bedeaeb8dc177d3a301a12c3a5d0"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">arm_compute::support::cpp11::fma</a></div><div class="ttdeci">T fma(T x, T y, T z)</div><div class="ttdoc">Computes (x*y) + z as if to infinite precision and rounded only once to fit the result type.</div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00336">ToolchainSupport.h:336</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00100">100</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -250,8 +230,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \</div><div class="line">    })</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00117">117</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s2, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s2, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s2, weights_row0.s2, acc.s1);                                 \</div><div class="line">    })</div><div class="ttc" id="namespacearm__compute_1_1support_1_1cpp11_xhtml_af399bedeaeb8dc177d3a301a12c3a5d0"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">arm_compute::support::cpp11::fma</a></div><div class="ttdeci">T fma(T x, T y, T z)</div><div class="ttdoc">Computes (x*y) + z as if to infinite precision and rounded only once to fit the result type.</div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00336">ToolchainSupport.h:336</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00110">110</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -298,8 +279,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \</div><div class="line">        acc.s2 = fma(src0_left.s2, weights_row0.s0, acc.s2);                                  \</div><div class="line">        acc.s2 = fma(src0_mid.s2, weights_row0.s1, acc.s2);                                   \</div><div class="line">        acc.s2 = fma(src0_right.s2, weights_row0.s2, acc.s2);                                 \</div><div class="line">        acc.s3 = fma(src0_left.s3, weights_row0.s0, acc.s3);                                  \</div><div class="line">        acc.s3 = fma(src0_mid.s3, weights_row0.s1, acc.s3);                                   \</div><div class="line">        acc.s3 = fma(src0_right.s3, weights_row0.s2, acc.s3);                                 \</div><div class="line">    })</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00127">127</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s1, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s1, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s1, weights_row0.s2, acc.s1);                                 \</div><div class="line">        acc.s2 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s2, weights_row0.s0, acc.s2);                                  \</div><div class="line">        acc.s2 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s2, weights_row0.s1, acc.s2);                                   \</div><div class="line">        acc.s2 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s2, weights_row0.s2, acc.s2);                                 \</div><div class="line">        acc.s3 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s3, weights_row0.s0, acc.s3);                                  \</div><div class="line">        acc.s3 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s3, weights_row0.s1, acc.s3);                                   \</div><div class="line">        acc.s3 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s3, weights_row0.s2, acc.s3);                                 \</div><div class="line">    })</div><div class="ttc" id="namespacearm__compute_1_1support_1_1cpp11_xhtml_af399bedeaeb8dc177d3a301a12c3a5d0"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">arm_compute::support::cpp11::fma</a></div><div class="ttdeci">T fma(T x, T y, T z)</div><div class="ttdoc">Computes (x*y) + z as if to infinite precision and rounded only once to fit the result type.</div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00336">ToolchainSupport.h:336</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00120">120</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -346,8 +328,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \</div><div class="line">        acc.s2 = fma(src0_left.s4, weights_row0.s0, acc.s2);                                  \</div><div class="line">        acc.s2 = fma(src0_mid.s4, weights_row0.s1, acc.s2);                                   \</div><div class="line">        acc.s2 = fma(src0_right.s4, weights_row0.s2, acc.s2);                                 \</div><div class="line">        acc.s3 = fma(src0_left.s6, weights_row0.s0, acc.s3);                                  \</div><div class="line">        acc.s3 = fma(src0_mid.s6, weights_row0.s1, acc.s3);                                   \</div><div class="line">        acc.s3 = fma(src0_right.s6, weights_row0.s2, acc.s3);                                 \</div><div class="line">    })</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00143">143</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s2, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s2, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s2, weights_row0.s2, acc.s1);                                 \</div><div class="line">        acc.s2 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s4, weights_row0.s0, acc.s2);                                  \</div><div class="line">        acc.s2 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s4, weights_row0.s1, acc.s2);                                   \</div><div class="line">        acc.s2 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s4, weights_row0.s2, acc.s2);                                 \</div><div class="line">        acc.s3 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_left.s6, weights_row0.s0, acc.s3);                                  \</div><div class="line">        acc.s3 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_mid.s6, weights_row0.s1, acc.s3);                                   \</div><div class="line">        acc.s3 = <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">fma</a>(src0_right.s6, weights_row0.s2, acc.s3);                                 \</div><div class="line">    })</div><div class="ttc" id="namespacearm__compute_1_1support_1_1cpp11_xhtml_af399bedeaeb8dc177d3a301a12c3a5d0"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#af399bedeaeb8dc177d3a301a12c3a5d0">arm_compute::support::cpp11::fma</a></div><div class="ttdeci">T fma(T x, T y, T z)</div><div class="ttdoc">Computes (x*y) + z as if to infinite precision and rounded only once to fit the result type.</div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00336">ToolchainSupport.h:336</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00136">136</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -363,7 +346,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00793">793</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00794">794</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -379,7 +362,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00794">794</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00795">795</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -395,7 +378,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00795">795</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00796">796</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -411,7 +394,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00796">796</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00797">797</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -427,7 +410,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00797">797</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00798">798</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -443,7 +426,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00798">798</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00799">799</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -513,8 +496,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a uchar </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00046">46</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
-<div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordflow">return</span> ptr + x * stride_x + y * stride_y;</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00039">39</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<div class="fragment"><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordflow">return</span> ptr + x * stride_x + y * stride_y;</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 </div><!-- contents -->
@@ -523,7 +506,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="depthwise__convolution_8cl.xhtml">depthwise_convolution.cl</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

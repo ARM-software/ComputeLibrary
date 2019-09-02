@@ -205,15 +205,16 @@ inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
                                   int                  dilation_x,
                                   int                  dilation_y)
 {
-    const int end_x     = start_x + kernel_width * dilation_x;
-    const int end_y     = start_y + kernel_height * dilation_y;
-    const int pad_quant = kernel_width * input_c;
-    if((start_y >= 0) && (end_y < input_h) && (start_x >= 0) && (end_x < input_w) && (dilation_x == 1))
+    const int end_x        = start_x + kernel_width * dilation_x;
+    const int end_y        = start_y + kernel_height * dilation_y;
+    const int pad_quant    = kernel_width * input_c;
+    const int element_size = static_cast<int>(sizeof(T));
+    if((start_y >= 0) && (end_y < input_h) && (start_x >= 0) && (end_x < input_w) && (dilation_x == 1) && (input_stride_y == input_c * element_size))
     {
         for(int y = start_y; y < end_y; y += dilation_y)
         {
             //optimized for no dilation and no boundary pixels
-            memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + start_x * input_stride_y)), input_c * kernel_width * sizeof(T));
+            memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + start_x * input_stride_y)), input_c * kernel_width * element_size);
             out_ptr += input_c * kernel_width;
         }
     }
@@ -223,21 +224,21 @@ inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
         {
             if(y < 0 || y >= input_h)
             {
-                memset(out_ptr, pad_value, pad_quant * sizeof(T));
+                memset(out_ptr, pad_value, pad_quant * element_size);
                 out_ptr += pad_quant;
             }
-            else if(dilation_x > 1 || start_x < 0 || end_x >= input_w)
+            else if(dilation_x > 1 || start_x < 0 || end_x >= input_w || input_stride_y != input_c * element_size)
             {
                 for(int x = start_x; x < end_x; x += dilation_x)
                 {
                     if(x < 0 || x >= input_w)
                     {
-                        memset(out_ptr, pad_value, input_c * sizeof(T));
+                        memset(out_ptr, pad_value, input_c * element_size);
                         out_ptr += input_c;
                     }
                     else
                     {
-                        memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + x * input_stride_y)), input_c * sizeof(T));
+                        memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + x * input_stride_y)), input_c * element_size);
                         out_ptr += input_c;
                     }
                 }
@@ -245,7 +246,7 @@ inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
             else
             {
                 //optimized for no dilation and no boundary pixels
-                memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + start_x * input_stride_y)), input_c * kernel_width * sizeof(T));
+                memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + start_x * input_stride_y)), input_c * kernel_width * element_size);
                 out_ptr += input_c * kernel_width;
             }
         }
@@ -279,7 +280,7 @@ void NEIm2ColKernel::run_im2col(const Window &window)
     const int pad_top        = _conv_info.pad_top();
     const int stride_x       = _conv_info.stride().first;
     const int stride_y       = _conv_info.stride().second;
-    const int pad_value      = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().offset : 0;
+    const int pad_value      = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().uniform().offset : 0;
 
     Window window_in_out(window);
     // The first three dimensions of the input and output are increased by the inner loops

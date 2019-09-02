@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -186,9 +186,9 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml#l00064">64</a> of file <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml">CLFullyConnectedLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;{</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;CLTransposeKernel&gt;();</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    k-&gt;configure(input, output);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml#l00137">CLFullyConnectedLayer::configure()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml#l00067">67</a> of file <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml">CLFullyConnectedLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;{</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;CLTransposeKernel&gt;();</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    k-&gt;configure(input, output);</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml#l00140">CLFullyConnectedLayer::configure()</a>.</p>
 
 </div>
 </div>
@@ -236,12 +236,12 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml#l00071">71</a> of file <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml">CLFullyConnectedLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;{</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_transpose_kernel.xhtml#a968b23a6ef327fcfb5b99d58e3fbe883">CLTransposeKernel::validate</a>(input, output);</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_transpose_kernel_xhtml_a968b23a6ef327fcfb5b99d58e3fbe883"><div class="ttname"><a href="classarm__compute_1_1_c_l_transpose_kernel.xhtml#a968b23a6ef327fcfb5b99d58e3fbe883">arm_compute::CLTransposeKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLTransposeKernel.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_transpose_kernel_8cpp_source.xhtml#l00103">CLTransposeKernel.cpp:103</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml#l00074">74</a> of file <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml">CLFullyConnectedLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;{</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_transpose_kernel.xhtml#a968b23a6ef327fcfb5b99d58e3fbe883">CLTransposeKernel::validate</a>(input, output);</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_transpose_kernel_xhtml_a968b23a6ef327fcfb5b99d58e3fbe883"><div class="ttname"><a href="classarm__compute_1_1_c_l_transpose_kernel.xhtml#a968b23a6ef327fcfb5b99d58e3fbe883">arm_compute::CLTransposeKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLTransposeKernel.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_transpose_kernel_8cpp_source.xhtml#l00103">CLTransposeKernel.cpp:103</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_c_l_transpose_kernel_8cpp_source.xhtml#l00103">CLTransposeKernel::validate()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml#l00242">CLFullyConnectedLayer::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_fully_connected_layer_8cpp_source.xhtml#l00249">CLFullyConnectedLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -255,7 +255,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer_reshape_weights.xhtml">CLFullyConnectedLayerReshapeWeights</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:29 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,7 +67,8 @@ void CLFastCornersKernel::configure(const ICLImage *input, ICLImage *output, flo
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("fast_corners", build_opts));
+    const std::string kernel_name = std::string("fast_corners");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); // Skip the input and output parameters
@@ -88,6 +89,23 @@ void CLFastCornersKernel::configure(const ICLImage *input, ICLImage *output, flo
     output_access.set_valid_region(win, input->info()->valid_region(), border_mode == BorderMode::UNDEFINED, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(non_max_suppression);
+    _config_id += "_";
+    _config_id += lower_string(string_from_border_mode(border_mode));
 }
 
 void CLFastCornersKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -102,7 +120,7 @@ void CLFastCornersKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
         add_2D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }
@@ -131,7 +149,8 @@ void CLCopyToArrayKernel::configure(const ICLImage *input, bool update_number, I
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("copy_to_keypoint", build_opts));
+    const std::string kernel_name = std::string("copy_to_keypoint");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     //Get how many pixels skipped in the x dimension in the previous stages
     unsigned int offset = _input->info()->valid_region().anchor.x();
@@ -149,6 +168,15 @@ void CLCopyToArrayKernel::configure(const ICLImage *input, bool update_number, I
     update_window_and_padding(win,
                               AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
 void CLCopyToArrayKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -166,7 +194,7 @@ void CLCopyToArrayKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

@@ -1,9 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml" title="Graph mutator interface." alt="" coords="5,132,120,159"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml" title="Mutation pass to optimize depth concatenation operations by using sub&#45;tensors." alt="" coords="168,5,391,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml" title="Mutation pass to implement/optimize grouped convolutions." alt="" coords="178,56,381,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml" title="Mutation pass to optimize operations that can be performed in&#45;place." alt="" coords="189,107,369,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml" title="Mutation pass to fall&#45;back to default execution method." alt="" coords="171,157,387,184"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml" title="Mutation pass to fuss nodes." alt="" coords="206,208,353,235"/>
-<area shape="rect" id="node7" href="$classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml" title="Mutation pass to optimize split operations by using sub&#45;tensors." alt="" coords="179,259,380,285"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title=" " alt="" coords="5,5,231,32"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml" title="Tensor metadata class." alt="" coords="279,5,408,32"/>
 </map>

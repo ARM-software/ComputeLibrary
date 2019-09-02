@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 #define __ARM_COMPUTE_ICLTENSOR_H__
 
 #include "arm_compute/core/ITensor.h"
+
+#include "arm_compute/core/CL/CLTypes.h"
 
 #include <cstdint>
 
@@ -53,6 +55,11 @@ public:
     /** Default virtual destructor. */
     virtual ~ICLTensor() = default;
 
+    /** Interface to be implemented by the child class to return the wrapped quantization info data
+     *
+     * @return A wrapped quantization info object.
+     */
+    virtual CLQuantization quantization() const = 0;
     /** Interface to be implemented by the child class to return a reference to the OpenCL buffer containing the image's data.
      *
      * @return A reference to an OpenCL buffer containing the image's data.

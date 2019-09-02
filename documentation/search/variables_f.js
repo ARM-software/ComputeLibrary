@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['offset',['offset',['../structarm__compute_1_1_quantization_info.xhtml#aed7ea92f45bd273dde380a45ddced592',1,'arm_compute::QuantizationInfo']]],
+  ['offset',['offset',['../structarm__compute_1_1_c_l_quantization.xhtml#adaa6aafa40524cb5b286e22b87a8da4f',1,'arm_compute::CLQuantization::offset()'],['../structarm__compute_1_1_uniform_quantization_info.xhtml#a97bd6c077f3c7769f575b82988b9b668',1,'arm_compute::UniformQuantizationInfo::offset()']]],
   ['offset_5ffirst_5felement_5fin_5fbytes',['offset_first_element_in_bytes',['../struct_vector.xhtml#a35e5a91338398273f3b4a6010004bddd',1,'Vector::offset_first_element_in_bytes()'],['../struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd',1,'Image::offset_first_element_in_bytes()'],['../struct_tensor3_d.xhtml#a35e5a91338398273f3b4a6010004bddd',1,'Tensor3D::offset_first_element_in_bytes()'],['../struct_tensor4_d.xhtml#a35e5a91338398273f3b4a6010004bddd',1,'Tensor4D::offset_first_element_in_bytes()']]],
   ['offsets_5fs',['offsets_s',['../fast__corners_8cl.xhtml#a8d09117e1c8a726efc8d9ec9d9d8ed8a',1,'fast_corners.cl']]],
   ['one_5fgb_5fin_5fkb',['ONE_GB_IN_KB',['../classarm__compute_1_1_m_e_m_info.xhtml#a2ac5f0a5b7dccb10d5bf9bffd33879fa',1,'arm_compute::MEMInfo']]],

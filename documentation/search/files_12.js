@@ -41,7 +41,9 @@ var searchData=
   ['roialignlayernode_2ecpp',['ROIAlignLayerNode.cpp',['../_r_o_i_align_layer_node_8cpp.xhtml',1,'']]],
   ['roialignlayernode_2eh',['ROIAlignLayerNode.h',['../_r_o_i_align_layer_node_8h.xhtml',1,'']]],
   ['roipoolinglayer_2ecpp',['ROIPoolingLayer.cpp',['../_c_l_2_r_o_i_pooling_layer_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_r_o_i_pooling_layer_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['round_2eh',['round.h',['../round_8h.xhtml',1,'']]],
   ['rounding_2ecpp',['Rounding.cpp',['../_rounding_8cpp.xhtml',1,'']]],
   ['rounding_2eh',['Rounding.h',['../_rounding_8h.xhtml',1,'(Global Namespace)'],['../utils_2misc_2_rounding_8h.xhtml',1,'(Global Namespace)']]],
+  ['roundlayer_2ecpp',['RoundLayer.cpp',['../_round_layer_8cpp.xhtml',1,'']]],
   ['rsqrtlayer_2ecpp',['RsqrtLayer.cpp',['../_rsqrt_layer_8cpp.xhtml',1,'']]]
 ];

@@ -35,11 +35,11 @@
 using namespace arm_compute;
 
 CLDeconvolutionLayerUpsampleKernel::CLDeconvolutionLayerUpsampleKernel()
-    : _input(nullptr), _output(nullptr), _inner_border(), _info()
+    : _input(nullptr), _output(nullptr), _info()
 {
 }
 
-Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const BorderSize &inner_border,
+Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, const ITensorInfo *output,
                                                     const PadStrideInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
@@ -64,24 +64,20 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(i) != output->dimension(i));
     }
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(inner_border.right > info.stride().first - 1, "inner_border_right must be smaller that stride_x");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(inner_border.top > info.stride().second - 1, "inner_border_top must be smaller that stride_y");
-
     return Status{};
 }
 
-void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTensor *output, const BorderSize &inner_border,
+void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTensor *output,
                                                    const PadStrideInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    _input        = input;
-    _output       = output;
-    _inner_border = inner_border;
-    _info         = info;
+    _input  = input;
+    _output = output;
+    _info   = info;
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayerUpsampleKernel::validate(input->info(), output->info(), inner_border, info));
+    ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayerUpsampleKernel::validate(input->info(), output->info(), info));
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -109,10 +105,10 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
     const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     const int out_start_x = _info.pad().first;
-    const int out_end_x   = _output->info()->dimension(idx_w) - _inner_border.right - _info.pad().first + _info.stride().first - 1;
+    const int out_end_x   = _output->info()->dimension(idx_w) - _info.pad().first + _info.stride().first - 1;
     const int out_step_x  = _info.stride().first;
 
-    const int out_start_y = _inner_border.top + _info.pad().second;
+    const int out_start_y = _info.pad().second;
     const int out_end_y   = _output->info()->dimension(idx_h) - _info.pad().second + _info.stride().second - 1;
     const int out_step_y  = _info.stride().second;
 

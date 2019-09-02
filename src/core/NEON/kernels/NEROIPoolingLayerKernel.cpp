@@ -89,7 +89,7 @@ void NEROIPoolingLayerKernel::configure(const ITensor *input, const ITensor *roi
                                     input->info()->valid_region().end(1));
     AccessWindowStatic output_access(output->info(), 0, 0, pool_info.pooled_width(), pool_info.pooled_height());
 
-    update_window_and_padding(window, input_access, output_access);
+    ARM_COMPUTE_UNUSED(update_window_and_padding(window, input_access, output_access));
     output_access.set_valid_region(window, ValidRegion(Coordinates(), output->info()->tensor_shape()));
     INEKernel::configure(window);
 }

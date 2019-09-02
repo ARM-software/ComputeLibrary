@@ -65,16 +65,22 @@ inline void MergeResults<24, 8>(__fp16 *out, const __fp16 *in, const int ldout, 
                 switch ((y + 7) - ymax) {
                     case 6:
                         outptr1 = dummyres;
+                        // fall through
                     case 5:
                         outptr2 = dummyres;
+                        // fall through
                     case 4:
                         outptr3 = dummyres;
+                        // fall through
                     case 3:
                         outptr4 = dummyres;
+                        // fall through
                     case 2:
                         outptr5 = dummyres;
+                        // fall through
                     case 1:
                         outptr6 = dummyres;
+                        // fall through
                     case 0:
                         outptr7 = dummyres;
                         break;

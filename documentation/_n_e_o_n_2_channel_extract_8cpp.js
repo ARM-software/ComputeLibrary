@@ -10,6 +10,6 @@ var _n_e_o_n_2_channel_extract_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_extract_8cpp.xhtml#ab073651f3eef1d0d35ea97b4cbbb1a2b", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_extract_8cpp.xhtml#a4335d3732c2c34d71779398a47598d9e", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_extract_8cpp.xhtml#a681b3c15ac7a1d58a729c4e06bd37f1f", null ],
-    [ "TEST_SUITE_END", "_n_e_o_n_2_channel_extract_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_channel_extract_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "NEChannelExtractFixture< uint8_t >", "_n_e_o_n_2_channel_extract_8cpp.xhtml#a06b24618e576e67f62a86460f5621888", null ]
 ];

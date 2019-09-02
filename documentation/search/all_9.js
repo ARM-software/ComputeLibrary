@@ -24,6 +24,7 @@ var searchData=
   ['harriscornerdetector_2eh',['HarrisCornerDetector.h',['../_harris_corner_detector_8h.xhtml',1,'']]],
   ['harriscorners_2ecpp',['HarrisCorners.cpp',['../benchmark_2_c_l_2_harris_corners_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_harris_corners_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_harris_corners_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_harris_corners_8cpp.xhtml',1,'(Global Namespace)']]],
   ['harriscornersparameters',['HarrisCornersParameters',['../structarm__compute_1_1test_1_1validation_1_1_harris_corners_parameters.xhtml',1,'arm_compute::test::validation']]],
+  ['has_5fbias',['has_bias',['../namespacearm__compute_1_1test_1_1validation.xhtml#a9aeced5a5128f60a31ea3e327a45ee21',1,'arm_compute::test::validation']]],
   ['has_5fcifg_5fopt',['has_cifg_opt',['../classarm__compute_1_1_l_s_t_m_params.xhtml#aae040c52316d86a4df2c7cdf179049bf',1,'arm_compute::LSTMParams']]],
   ['has_5fdotprod',['has_dotprod',['../classarm__compute_1_1_c_p_u_info.xhtml#a8d31247d25bfe0a0b669d367aa801c2d',1,'arm_compute::CPUInfo']]],
   ['has_5ferror',['has_error',['../namespacearm__compute_1_1test_1_1validation.xhtml#ab0cfaa9757f9120c3c8a406df86d86ee',1,'arm_compute::test::validation']]],

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -99,6 +99,12 @@ $(document).ready(function(){initNavTree('functions_func_q.xhtml','');});
 &#160;
 
 <h3><a id="index_q"></a>- q -</h3><ul>
+<li>quantization()
+: <a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a6d614dfaa0606b7fef13f3e26d745b48">CLSubTensor</a>
+, <a class="el" href="classarm__compute_1_1_c_l_tensor.xhtml#a6d614dfaa0606b7fef13f3e26d745b48">CLTensor</a>
+, <a class="el" href="classarm__compute_1_1_c_l_tensor_allocator.xhtml#a5c27e81a1ad958e4de947c1da77f4cf1">CLTensorAllocator</a>
+, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#aff9433a5bb38873d6af3d45e6f638281">ICLTensor</a>
+</li>
 <li>quantization_info()
 : <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">ITensorInfo</a>
 , <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#ac74736e3863207232a23b7181c1d0f44">SubTensorInfo</a>
@@ -111,10 +117,16 @@ $(document).ready(function(){initNavTree('functions_func_q.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensorAccessor&lt; T &gt;</a>
 </li>
 <li>QuantizationInfo()
-: <a class="el" href="structarm__compute_1_1_quantization_info.xhtml#a842ac5aa8863f371e40dbe93936c115c">QuantizationInfo</a>
+: <a class="el" href="classarm__compute_1_1_quantization_info.xhtml#af565d3fc3f7d82e9ed5e36dda5377eab">QuantizationInfo</a>
 </li>
-<li>quantize()
-: <a class="el" href="structarm__compute_1_1_quantization_info.xhtml#a3c1509e95650a266278fea2feb59a0b0">QuantizationInfo</a>
+<li>QuantizationLayer()
+: <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_quantization_layer.xhtml#a2a7f0e0b904a95289b8f0af3911abda0">QuantizationLayer</a>
+</li>
+<li>QuantizationLayerNode()
+: <a class="el" href="classarm__compute_1_1graph_1_1_quantization_layer_node.xhtml#a3376905986dc802c9c1133bb9cc313b4">QuantizationLayerNode</a>
+</li>
+<li>QuantizeWrapper()
+: <a class="el" href="classarm__gemm_1_1_quantize_wrapper.xhtml#a774f265ae526558dcb394da1f600dd1d">QuantizeWrapper&lt; To, Tr, Tgemm &gt;</a>
 </li>
 <li>queue()
 : <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml#ad381d1aed28b4b1e1f5a710633934580">CLScheduler</a>
@@ -125,7 +137,7 @@ $(document).ready(function(){initNavTree('functions_func_q.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

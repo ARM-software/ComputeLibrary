@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -143,7 +143,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to run <a class="el" href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml">CLArithmeticOperationKernel</a> for max. </p>
-<dl class="section note"><dt>Note</dt><dd>The tensor data type for the inputs must be U8/QASYMM8/S16/S32/U32/F16/F32. </dd>
+<dl class="section note"><dt>Note</dt><dd>The tensor data type for the inputs must be U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32. </dd>
 <dd>
 The function performs a max operation between two tensors. </dd></dl>
 
@@ -184,15 +184,15 @@ The function performs a max operation between two tensors. </dd></dl>
 <p>Initialise the kernel's inputs, output and conversion policy. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input1</td><td>First tensor input. Data types supported: U8/QASYMM8/S16/S32/U32/F16/F32. The input tensor is [in, out] because its <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata.">TensorInfo</a> might be modified inside the kernel in case of broadcasting of dimension 0. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input2</td><td>Second tensor input. Data types supported: U8, QASYMM8 (only if <code>input1</code> is QASYMM8), S16/F16/F32. The input tensor is [in, out] because its <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata.">TensorInfo</a> might be modified inside the kernel in case of broadcasting of dimension 0. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input1</td><td>First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32. The input tensor is [in, out] because its <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata.">TensorInfo</a> might be modified inside the kernel in case of broadcasting of dimension 0. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input2</td><td>Second tensor input. Data types supported: U8, QASYMM8 (only if <code>input1</code> is QASYMM8), S16, QSYMM16 (only if <code>input1</code> is QSYMM16), F16/F32. The input tensor is [in, out] because its <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata.">TensorInfo</a> might be modified inside the kernel in case of broadcasting of dimension 0. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_elementwise_operations_8cpp_source.xhtml#l00089">89</a> of file <a class="el" href="_c_l_elementwise_operations_8cpp_source.xhtml">CLElementwiseOperations.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;{</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;CLArithmeticOperationKernel&gt;();</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    k-&gt;configure(<a class="code" href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">ArithmeticOperation::MAX</a>, input1, input2, output);</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    configure_border_handler(_border_handler, _kernel-&gt;border_size(), input1, input2, output);</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5"><div class="ttname"><a href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">arm_compute::NonLinearFilterFunction::MAX</a></div><div class="ttdoc">Non linear dilate.</div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_elementwise_operations_8cpp_source.xhtml#l00090">90</a> of file <a class="el" href="_c_l_elementwise_operations_8cpp_source.xhtml">CLElementwiseOperations.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;{</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;CLArithmeticOperationKernel&gt;();</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    k-&gt;configure(<a class="code" href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">ArithmeticOperation::MAX</a>, input1, input2, output);</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    configure_border_handler(_border_handler, _kernel-&gt;border_size(), input1, input2, output);</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5"><div class="ttname"><a href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">arm_compute::NonLinearFilterFunction::MAX</a></div><div class="ttdoc">Non linear dilate.</div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">arm_compute::MAX</a>.</p>
 
@@ -241,19 +241,19 @@ The function performs a max operation between two tensors. </dd></dl>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml">CLArithmeticOperationKernel</a> for max. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>First tensor input info. Data types supported: U8/QASYMM8/S16/S32/U32/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>Second tensor input info. Data types supported: U8, QASYMM8 (only if <code>input1</code> is QASYMM8), S16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 ( only if both inputs are QASYMM8), S16/F16/F32.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>First tensor input info. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>Second tensor input info. Data types supported: U8, QASYMM8 (only if <code>input1</code> is QASYMM8), S16, QSYMM16 (only if <code>input1</code> is QSYMM16), F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 ( only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_elementwise_operations_8cpp_source.xhtml#l00097">97</a> of file <a class="el" href="_c_l_elementwise_operations_8cpp_source.xhtml">CLElementwiseOperations.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;{</div><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a52095bfe8f4fc368d3ec84a8dac4d616">CLArithmeticOperationKernel::validate</a>(<a class="code" href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">ArithmeticOperation::MAX</a>, input1, input2, output);</div><div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_arithmetic_operation_kernel_xhtml_a52095bfe8f4fc368d3ec84a8dac4d616"><div class="ttname"><a href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a52095bfe8f4fc368d3ec84a8dac4d616">arm_compute::CLArithmeticOperationKernel::validate</a></div><div class="ttdeci">static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLArithmeticOperationKer...</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_elementwise_operation_kernel_8cpp_source.xhtml#l00344">CLElementwiseOperationKernel.cpp:344</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_elementwise_operations_8cpp_source.xhtml#l00098">98</a> of file <a class="el" href="_c_l_elementwise_operations_8cpp_source.xhtml">CLElementwiseOperations.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;{</div><div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a52095bfe8f4fc368d3ec84a8dac4d616">CLArithmeticOperationKernel::validate</a>(<a class="code" href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">ArithmeticOperation::MAX</a>, input1, input2, output);</div><div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_arithmetic_operation_kernel_xhtml_a52095bfe8f4fc368d3ec84a8dac4d616"><div class="ttname"><a href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a52095bfe8f4fc368d3ec84a8dac4d616">arm_compute::CLArithmeticOperationKernel::validate</a></div><div class="ttdeci">static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLArithmeticOperationKer...</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_elementwise_operation_kernel_8cpp_source.xhtml#l00373">CLElementwiseOperationKernel.cpp:373</a></div></div>
 <div class="ttc" id="namespacearm__compute_xhtml_adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5"><div class="ttname"><a href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">arm_compute::NonLinearFilterFunction::MAX</a></div><div class="ttdoc">Non linear dilate.</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">arm_compute::MAX</a>, and <a class="el" href="_c_l_elementwise_operation_kernel_8cpp_source.xhtml#l00344">CLArithmeticOperationKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a26a4b44a837bf97b972628509912b4a5">arm_compute::MAX</a>, and <a class="el" href="_c_l_elementwise_operation_kernel_8cpp_source.xhtml#l00373">CLArithmeticOperationKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -267,7 +267,7 @@ The function performs a max operation between two tensors. </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_elementwise_max.xhtml">CLElementwiseMax</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:29 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

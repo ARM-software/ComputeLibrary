@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,8 +49,8 @@
 
 #define CONCAT(ARG0, ARG1) ARG0##ARG1
 
-#define VARIADIC_SIZE_IMPL(e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, size, ...) size
-#define VARIADIC_SIZE(...) VARIADIC_SIZE_IMPL(__VA_ARGS__, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+#define VARIADIC_SIZE_IMPL(e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, size, ...) size
+#define VARIADIC_SIZE(...) VARIADIC_SIZE_IMPL(__VA_ARGS__, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 
 #define JOIN_PARAM1(OP, param) OP(0, param)
 #define JOIN_PARAM2(OP, param, ...) \
@@ -83,6 +83,12 @@
 #define JOIN_PARAM11(OP, param, ...) \
     OP(10, param)                    \
     , JOIN_PARAM10(OP, __VA_ARGS__)
+#define JOIN_PARAM12(OP, param, ...) \
+    OP(11, param)                    \
+    , JOIN_PARAM11(OP, __VA_ARGS__)
+#define JOIN_PARAM13(OP, param, ...) \
+    OP(12, param)                    \
+    , JOIN_PARAM12(OP, __VA_ARGS__)
 #define JOIN_PARAM(OP, NUM, ...) \
     CONCAT(JOIN_PARAM, NUM)      \
     (OP, __VA_ARGS__)

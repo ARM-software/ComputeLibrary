@@ -7,7 +7,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.15"/>
 <meta name="robots" content="NOINDEX, NOFOLLOW" /> <!-- Prevent indexing by search engines -->
-<title>Compute Library: GemmImplementation&lt; Top, Tret &gt; Struct Template Reference</title>
+<title>Compute Library: GemmImplementation&lt; Top, Tret, OutputStage &gt; Struct Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -97,81 +97,221 @@ $(document).ready(function(){initNavTree('structarm__gemm_1_1_gemm_implementatio
 
 <div class="header">
   <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">GemmImplementation&lt; Top, Tret &gt; Struct Template Reference</div>  </div>
+<div class="title">GemmImplementation&lt; Top, Tret, OutputStage &gt; Struct Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a436afad58214e0759d4640e642c4774c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a436afad58214e0759d4640e642c4774c">do_is_supported</a> (const GemmArgs&lt; Tret &gt; &amp;args, const OutputStage &amp;os) const</td></tr>
+<tr class="separator:a436afad58214e0759d4640e642c4774c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8a9a99f3b770cac1affba2d13c7b48c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#ad8a9a99f3b770cac1affba2d13c7b48c">do_is_recommended</a> (const GemmArgs&lt; Tret &gt; &amp;args, const OutputStage &amp;os) const</td></tr>
+<tr class="separator:ad8a9a99f3b770cac1affba2d13c7b48c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d314fbcf3811eaa3cfb1bf25865f4a1"><td class="memItemLeft" align="right" valign="top">GemmCommon&lt; Top, Tret &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a0d314fbcf3811eaa3cfb1bf25865f4a1">do_instantiate</a> (const GemmArgs&lt; Tret &gt; &amp;args, const OutputStage &amp;os) const</td></tr>
+<tr class="separator:a0d314fbcf3811eaa3cfb1bf25865f4a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr class="memitem:a211779127e0aa2bd8edde522d7edf572"><td class="memItemLeft" align="right" valign="top">const GemmMethod&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a211779127e0aa2bd8edde522d7edf572">method</a></td></tr>
 <tr class="separator:a211779127e0aa2bd8edde522d7edf572"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f8f80d37794cde9472343e4487ba3eb"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a8f8f80d37794cde9472343e4487ba3eb">name</a></td></tr>
 <tr class="separator:a8f8f80d37794cde9472343e4487ba3eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4feb7e27f716098b2ed543390f475cde"><td class="memItemLeft" align="right" valign="top">std::function&lt; bool(const GemmArgs&lt; Tret &gt; &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a4feb7e27f716098b2ed543390f475cde">is_supported</a></td></tr>
-<tr class="separator:a4feb7e27f716098b2ed543390f475cde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74a9e12f5dec70507771f4e1c8041258"><td class="memItemLeft" align="right" valign="top">std::function&lt; bool(const GemmArgs&lt; Tret &gt; &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a74a9e12f5dec70507771f4e1c8041258">is_recommended</a></td></tr>
-<tr class="separator:a74a9e12f5dec70507771f4e1c8041258"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a917f2fdbd576154338a51181250a1d3e"><td class="memItemLeft" align="right" valign="top">std::function&lt; GemmCommon&lt; Top, Tret &gt; *(const GemmArgs&lt; Tret &gt; &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a917f2fdbd576154338a51181250a1d3e">instantiate</a></td></tr>
-<tr class="separator:a917f2fdbd576154338a51181250a1d3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82a6416d4fc0fdbeb469b7201fba0bf7"><td class="memItemLeft" align="right" valign="top">std::function&lt; bool(const GemmArgs&lt; Tret &gt; &amp;, const OutputStage &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a82a6416d4fc0fdbeb469b7201fba0bf7">is_supported</a></td></tr>
+<tr class="separator:a82a6416d4fc0fdbeb469b7201fba0bf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74a547c2d85417ab27ad2a5f9d66a72c"><td class="memItemLeft" align="right" valign="top">std::function&lt; bool(const GemmArgs&lt; Tret &gt; &amp;, const OutputStage &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a74a547c2d85417ab27ad2a5f9d66a72c">is_recommended</a></td></tr>
+<tr class="separator:a74a547c2d85417ab27ad2a5f9d66a72c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08d68698221a1a535a0b4849855a6a40"><td class="memItemLeft" align="right" valign="top">std::function&lt; GemmCommon&lt; Top, Tret &gt; *(const GemmArgs&lt; Tret &gt; &amp;, const OutputStage &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a08d68698221a1a535a0b4849855a6a40">instantiate</a></td></tr>
+<tr class="separator:a08d68698221a1a535a0b4849855a6a40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename Top, typename Tret&gt;<br />
-struct arm_gemm::GemmImplementation&lt; Top, Tret &gt;</h3>
+<div class="textblock"><h3>template&lt;typename Top, typename Tret, class OutputStage = Nothing&gt;<br />
+struct arm_gemm::GemmImplementation&lt; Top, Tret, OutputStage &gt;</h3>
 
-
-<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00032">32</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
-</div><h2 class="groupheader">Field Documentation</h2>
-<a id="a917f2fdbd576154338a51181250a1d3e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a917f2fdbd576154338a51181250a1d3e">&#9670;&nbsp;</a></span>instantiate</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::function&lt;GemmCommon&lt;Top, Tret&gt; *(const GemmArgs&lt;Tret&gt; &amp;)&gt; instantiate</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00037">37</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00137">arm_gemm::gemm()</a>.</p>
-
-</div>
-</div>
-<a id="a74a9e12f5dec70507771f4e1c8041258"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a74a9e12f5dec70507771f4e1c8041258">&#9670;&nbsp;</a></span>is_recommended</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::function&lt;bool(const GemmArgs&lt;Tret&gt; &amp;)&gt; is_recommended</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00036">36</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a0d314fbcf3811eaa3cfb1bf25865f4a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d314fbcf3811eaa3cfb1bf25865f4a1">&#9670;&nbsp;</a></span>do_instantiate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">GemmCommon&lt;Top, Tret&gt;* do_instantiate </td>
+          <td>(</td>
+          <td class="paramtype">const GemmArgs&lt; Tret &gt; &amp;&#160;</td>
+          <td class="paramname"><em>args</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const OutputStage &amp;&#160;</td>
+          <td class="paramname"><em>os</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00059">59</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                                                                                                   {</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="structarm__gemm_1_1_gemm_implementation.xhtml#a08d68698221a1a535a0b4849855a6a40">instantiate</a>(args, os);</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    }</div><div class="ttc" id="structarm__gemm_1_1_gemm_implementation_xhtml_a08d68698221a1a535a0b4849855a6a40"><div class="ttname"><a href="structarm__gemm_1_1_gemm_implementation.xhtml#a08d68698221a1a535a0b4849855a6a40">arm_gemm::GemmImplementation::instantiate</a></div><div class="ttdeci">std::function&lt; GemmCommon&lt; Top, Tret &gt; *(const GemmArgs&lt; Tret &gt; &amp;, const OutputStage &amp;)&gt; instantiate</div><div class="ttdef"><b>Definition:</b> <a href="gemm__implementation_8hpp_source.xhtml#l00041">gemm_implementation.hpp:41</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00041">GemmImplementation&lt; Top, Tret, OutputStage &gt;::instantiate</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00193">arm_gemm::gemm()</a>.</p>
 
 </div>
 </div>
-<a id="a4feb7e27f716098b2ed543390f475cde"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4feb7e27f716098b2ed543390f475cde">&#9670;&nbsp;</a></span>is_supported</h2>
+<a id="ad8a9a99f3b770cac1affba2d13c7b48c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8a9a99f3b770cac1affba2d13c7b48c">&#9670;&nbsp;</a></span>do_is_recommended()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool do_is_recommended </td>
+          <td>(</td>
+          <td class="paramtype">const GemmArgs&lt; Tret &gt; &amp;&#160;</td>
+          <td class="paramname"><em>args</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const OutputStage &amp;&#160;</td>
+          <td class="paramname"><em>os</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00051">51</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                                                                                    {</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="structarm__gemm_1_1_gemm_implementation.xhtml#a74a547c2d85417ab27ad2a5f9d66a72c">is_recommended</a> != <span class="keyword">nullptr</span>) {</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            <span class="keywordflow">return</span> <a class="code" href="structarm__gemm_1_1_gemm_implementation.xhtml#a74a547c2d85417ab27ad2a5f9d66a72c">is_recommended</a>(args, os);</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        } <span class="keywordflow">else</span> {</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        }</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    }</div><div class="ttc" id="structarm__gemm_1_1_gemm_implementation_xhtml_a74a547c2d85417ab27ad2a5f9d66a72c"><div class="ttname"><a href="structarm__gemm_1_1_gemm_implementation.xhtml#a74a547c2d85417ab27ad2a5f9d66a72c">arm_gemm::GemmImplementation::is_recommended</a></div><div class="ttdeci">std::function&lt; bool(const GemmArgs&lt; Tret &gt; &amp;, const OutputStage &amp;)&gt; is_recommended</div><div class="ttdef"><b>Definition:</b> <a href="gemm__implementation_8hpp_source.xhtml#l00040">gemm_implementation.hpp:40</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00040">GemmImplementation&lt; Top, Tret, OutputStage &gt;::is_recommended</a>.</p>
+
+</div>
+</div>
+<a id="a436afad58214e0759d4640e642c4774c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a436afad58214e0759d4640e642c4774c">&#9670;&nbsp;</a></span>do_is_supported()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool do_is_supported </td>
+          <td>(</td>
+          <td class="paramtype">const GemmArgs&lt; Tret &gt; &amp;&#160;</td>
+          <td class="paramname"><em>args</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const OutputStage &amp;&#160;</td>
+          <td class="paramname"><em>os</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00043">43</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                                                                                  {</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="structarm__gemm_1_1_gemm_implementation.xhtml#a82a6416d4fc0fdbeb469b7201fba0bf7">is_supported</a> != <span class="keyword">nullptr</span>) {</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            <span class="keywordflow">return</span> <a class="code" href="structarm__gemm_1_1_gemm_implementation.xhtml#a82a6416d4fc0fdbeb469b7201fba0bf7">is_supported</a>(args, os);</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        } <span class="keywordflow">else</span> {</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        }</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div><div class="ttc" id="structarm__gemm_1_1_gemm_implementation_xhtml_a82a6416d4fc0fdbeb469b7201fba0bf7"><div class="ttname"><a href="structarm__gemm_1_1_gemm_implementation.xhtml#a82a6416d4fc0fdbeb469b7201fba0bf7">arm_gemm::GemmImplementation::is_supported</a></div><div class="ttdeci">std::function&lt; bool(const GemmArgs&lt; Tret &gt; &amp;, const OutputStage &amp;)&gt; is_supported</div><div class="ttdef"><b>Definition:</b> <a href="gemm__implementation_8hpp_source.xhtml#l00039">gemm_implementation.hpp:39</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00039">GemmImplementation&lt; Top, Tret, OutputStage &gt;::is_supported</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Field Documentation</h2>
+<a id="a08d68698221a1a535a0b4849855a6a40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08d68698221a1a535a0b4849855a6a40">&#9670;&nbsp;</a></span>instantiate</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::function&lt;bool(const GemmArgs&lt;Tret&gt; &amp;)&gt; is_supported</td>
+          <td class="memname">std::function&lt;GemmCommon&lt;Top, Tret&gt; *(const GemmArgs&lt;Tret&gt; &amp;, const OutputStage &amp;)&gt; instantiate</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00035">35</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00041">41</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00059">GemmImplementation&lt; Top, Tret, OutputStage &gt;::do_instantiate()</a>, and <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00091">GemmImplementation&lt; Top, Tret, Nothing &gt;::do_instantiate()</a>.</p>
+
+</div>
+</div>
+<a id="a74a547c2d85417ab27ad2a5f9d66a72c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74a547c2d85417ab27ad2a5f9d66a72c">&#9670;&nbsp;</a></span>is_recommended</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;bool(const GemmArgs&lt;Tret&gt; &amp;, const OutputStage &amp;)&gt; is_recommended</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00040">40</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00051">GemmImplementation&lt; Top, Tret, OutputStage &gt;::do_is_recommended()</a>, and <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00083">GemmImplementation&lt; Top, Tret, Nothing &gt;::do_is_recommended()</a>.</p>
+
+</div>
+</div>
+<a id="a82a6416d4fc0fdbeb469b7201fba0bf7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82a6416d4fc0fdbeb469b7201fba0bf7">&#9670;&nbsp;</a></span>is_supported</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;bool(const GemmArgs&lt;Tret&gt; &amp;, const OutputStage &amp;)&gt; is_supported</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00039">39</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00043">GemmImplementation&lt; Top, Tret, OutputStage &gt;::do_is_supported()</a>, and <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00075">GemmImplementation&lt; Top, Tret, Nothing &gt;::do_is_supported()</a>.</p>
 
 </div>
 </div>
@@ -187,9 +327,9 @@ struct arm_gemm::GemmImplementation&lt; Top, Tret &gt;</h3>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00033">33</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00037">37</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00148">arm_gemm::get_gemm_method()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00119">arm_gemm::find_implementation()</a>, <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00171">arm_gemm::get_compatible_kernels()</a>, and <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00204">arm_gemm::get_gemm_method()</a>.</p>
 
 </div>
 </div>
@@ -205,9 +345,9 @@ struct arm_gemm::GemmImplementation&lt; Top, Tret &gt;</h3>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00034">34</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00038">38</a> of file <a class="el" href="gemm__implementation_8hpp_source.xhtml">gemm_implementation.hpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00148">arm_gemm::get_gemm_method()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gemm__implementation_8hpp_source.xhtml#l00204">arm_gemm::get_gemm_method()</a>.</p>
 
 </div>
 </div>
@@ -220,7 +360,7 @@ struct arm_gemm::GemmImplementation&lt; Top, Tret &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__gemm.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml">GemmImplementation</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

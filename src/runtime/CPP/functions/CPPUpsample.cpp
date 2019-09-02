@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,9 @@
 
 using namespace arm_compute;
 
-void CPPUpsample::configure(const ITensor *input, ITensor *output, const PadStrideInfo &info, unsigned int inner_border_right, unsigned int inner_border_top)
+void CPPUpsample::configure(const ITensor *input, ITensor *output, const PadStrideInfo &info)
 {
     auto k = arm_compute::support::cpp14::make_unique<CPPUpsampleKernel>();
-    k->configure(input, output, info, inner_border_right, inner_border_top);
+    k->configure(input, output, info);
     _kernel = std::move(k);
 }

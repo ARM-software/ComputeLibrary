@@ -9,6 +9,6 @@ var _c_l_2_reduce_mean_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_reduce_mean_8cpp.xhtml#ac9afd6b6b6136857091609425c1056ca", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_reduce_mean_8cpp.xhtml#a92d30b2dcef4b22f72d99ab8c4381bee", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_reduce_mean_8cpp.xhtml#abc073bfd3c9503cf9ab6c06706b1cbd1", null ],
-    [ "TEST_SUITE_END", "_c_l_2_reduce_mean_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_c_l_2_reduce_mean_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLReduceMeanFixture< float >", "_c_l_2_reduce_mean_8cpp.xhtml#aa1ecfd76f3846c9c90dc97f6f8f382b9", null ]
 ];

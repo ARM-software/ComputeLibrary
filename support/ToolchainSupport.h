@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,6 +117,21 @@ inline std::string to_string(T && value)
     return stream.str();
 }
 
+/** Rounds the floating-point argument arg to an integer value in floating-point format, using the current rounding mode.
+ *
+ * @note This function acts as a convenience wrapper around std::nearbyint. The
+ *       latter is missing in some Android toolchains.
+ *
+ * @param[in] value Value to be rounded.
+ *
+ * @return The rounded value.
+ */
+template <typename T>
+inline T nearbyint(T value)
+{
+    return ::nearbyint(value);
+}
+
 /** Convert string values to float.
  *
  * @note This function implements the same behaviour as std::stof. The latter
@@ -180,6 +195,23 @@ inline T copysign(T x, T y)
     return ::copysign(x, y);
 }
 
+/** Computes (x*y) + z as if to infinite precision and rounded only once to fit the result type.
+ *
+ * @note This function implements the same behaviour as std::fma except that it doesn't
+ *       support Integral type. The latter is not in the namespace std in some Android toolchains.
+ *
+ * @param[in] x floating-point value
+ * @param[in] y floating-point value
+ * @param[in] z floating-point value
+ *
+ * @return Result floating point value equal to (x*y) + z.c
+ */
+template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+inline T fma(T x, T y, T z)
+{
+    return ::fma(x, y, z);
+}
+
 /** Loads the data from the given location, converts them to character string equivalents
  *  and writes the result to a character string buffer.
  *
@@ -210,6 +242,21 @@ template <typename T>
 inline std::string to_string(T &&value)
 {
     return ::std::to_string(std::forward<T>(value));
+}
+
+/** Rounds the floating-point argument arg to an integer value in floating-point format, using the current rounding mode.
+ *
+ * @note This function acts as a convenience wrapper around std::nearbyint. The
+ *       latter is missing in some Android toolchains.
+ *
+ * @param[in] value Value to be rounded.
+ *
+ * @return The rounded value.
+ */
+template <typename T>
+inline T nearbyint(T value)
+{
+    return std::nearbyint(value);
 }
 
 /** Convert string values to float.
@@ -272,6 +319,23 @@ template <typename T, typename = typename std::enable_if<std::is_floating_point<
 inline T copysign(T x, T y)
 {
     return std::copysign(x, y);
+}
+
+/** Computes (x*y) + z as if to infinite precision and rounded only once to fit the result type.
+ *
+ * @note This function implements the same behaviour as std::fma except that it doesn't
+ *       support Integral type. The latter is not in the namespace std in some Android toolchains.
+ *
+ * @param[in] x floating-point value
+ * @param[in] y floating-point value
+ * @param[in] z floating-point value
+ *
+ * @return Result floating point value equal to (x*y) + z.
+ */
+template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+inline T fma(T x, T y, T z)
+{
+    return std::fma(x, y, z);
 }
 
 /** Loads the data from the given location, converts them to character string equivalents

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -145,9 +145,6 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 <li>GCConvolutionLayerReshapeWeights()
 : <a class="el" href="classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml#ab2cb1decf7fb2217d6f7b85c1c6b60a0">GCConvolutionLayerReshapeWeights</a>
 </li>
-<li>GCDepthConcatenateLayer()
-: <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer.xhtml#a96b1abfc5ee6d10be7e8a525d6846f24">GCDepthConcatenateLayer</a>
-</li>
 <li>GCDepthConcatenateLayerKernel()
 : <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml#a7fc9a4cd38bc7e934e279ed52163fc0e">GCDepthConcatenateLayerKernel</a>
 </li>
@@ -188,7 +185,7 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_accumulate_biases_kernel.xhtml#a99ca62606534f58262f790a7979966d8">GCGEMMMatrixAccumulateBiasesKernel</a>
 </li>
 <li>GCGEMMMatrixAdditionKernel()
-: <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_addition_kernel.xhtml#a89039aa338bf8ec2b224dee5013d7fd9">GCGEMMMatrixAdditionKernel</a>
+: <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_addition_kernel.xhtml#a437fda1284692898a7f76a00834f0e2c">GCGEMMMatrixAdditionKernel</a>
 </li>
 <li>GCGEMMMatrixMultiplyKernel()
 : <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#ad8d2a97f9d5033932caaddcde107e9ce">GCGEMMMatrixMultiplyKernel</a>
@@ -256,11 +253,14 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 <li>GemmHybrid()
 : <a class="el" href="classarm__gemm_1_1_gemm_hybrid.xhtml#a67f91182afb2b1092518637116562440">GemmHybrid&lt; strategy, To, Tr &gt;</a>
 </li>
+<li>GemmHybridQuantized()
+: <a class="el" href="classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#a098303a83577a09de148cfa3baaa763d">GemmHybridQuantized&lt; strategy, To, Tr &gt;</a>
+</li>
 <li>GEMMInfo()
-: <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml#ae70403792b9c2d7bdb0c57b5258b2efd">GEMMInfo</a>
+: <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml#ae0c4636f1099428785df0463f7151889">GEMMInfo</a>
 </li>
 <li>GemmInterleaved()
-: <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#aec95ac91ca276b1ad8baf91520c0306f">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
+: <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#add13963d432a1937370721fa61755b9c">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
 </li>
 <li>gemmlowp_max_bound
 : <a class="el" href="structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a1d5d20b31d410f43a2156fa41daba50a">GEMMLowpOutputStageInfo</a>
@@ -293,7 +293,7 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 : <a class="el" href="classarm__gemm_1_1_gemv_native_transposed.xhtml#a59c738596a028d0ec26a9eaabf4d4d75">GemvNativeTransposed&lt; strategy, To, Tr &gt;</a>
 </li>
 <li>GemvPretransposed()
-: <a class="el" href="classarm__gemm_1_1_gemv_pretransposed.xhtml#a8dca5a76de1711aa0d39bf892b7ca2c9">GemvPretransposed&lt; strategy, To, Tr &gt;</a>
+: <a class="el" href="classarm__gemm_1_1_gemv_pretransposed.xhtml#a1721e8ac2ad69c15d7c13a063d4c00c4">GemvPretransposed&lt; strategy, To, Tr &gt;</a>
 </li>
 <li>GenerateProposalsInfo()
 : <a class="el" href="classarm__compute_1_1_generate_proposals_info.xhtml#a00edeeb4822422b6b7095d5aeb68fc39">GenerateProposalsInfo</a>
@@ -316,7 +316,7 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_task_executor.xhtml#a8814816f2d2940dbbc2817277eff42db">TaskExecutor</a>
 , <a class="el" href="classarm__compute_1_1logging_1_1_logger_registry.xhtml#a438bb9166f6212a2343174d324449802">LoggerRegistry</a>
 , <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#ae2c66b86cdc38931af9c49a58e03d692">OMPScheduler</a>
-, <a class="el" href="classarm__compute_1_1_pixel_value.xhtml#a66c4c1f8b1962d71162d7ac0b3ef65bc">PixelValue</a>
+, <a class="el" href="classarm__compute_1_1_pixel_value.xhtml#a2fc59f298e3c9452086f525479458400">PixelValue</a>
 , <a class="el" href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">Scheduler</a>
 , <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml#adde335aa5c5b2fc7e07c1d2dc940bf8f">SingleThreadScheduler</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_assets_library.xhtml#aa6db5c08c0540fb3c0b8292861342a73">AssetsLibrary</a>
@@ -329,9 +329,11 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 </li>
 <li>get_B_pretransposed_array_size()
 : <a class="el" href="classarm__gemm_1_1_gemm_hybrid.xhtml#ae9fc7380e533c43a1d91e48a7578e412">GemmHybrid&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#ae9fc7380e533c43a1d91e48a7578e412">GemmHybridQuantized&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#ae9fc7380e533c43a1d91e48a7578e412">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_batched.xhtml#ae9fc7380e533c43a1d91e48a7578e412">GemvBatched&lt; To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_pretransposed.xhtml#ae9fc7380e533c43a1d91e48a7578e412">GemvPretransposed&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_quantize_wrapper.xhtml#ae9fc7380e533c43a1d91e48a7578e412">QuantizeWrapper&lt; To, Tr, Tgemm &gt;</a>
 </li>
 <li>get_backend()
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#a0e2e9eb7cf2545949ea4130d768bea93">BackendRegistry</a>
@@ -390,6 +392,9 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 </li>
 <li>get_max_workgroup_size()
 : <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#abca336f832d730e8494049bd714df60a">ICLKernel</a>
+</li>
+<li>get_num_compute_units()
+: <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a70696e3d56dcbcdc1f493dec744bc581">CLKernelLibrary</a>
 </li>
 <li>get_output_shape()
 : <a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#a10f4ee28637f13bfbfa0ec1f13972ac1">INEWinogradLayerTransformOutputKernel&lt; T &gt;</a>
@@ -453,15 +458,19 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 </li>
 <li>get_window_size()
 : <a class="el" href="classarm__gemm_1_1_gemm_hybrid.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2">GemmHybrid&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2">GemmHybridQuantized&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_native.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2">GemmNative&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_batched.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2">GemvBatched&lt; To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_native_transposed.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2">GemvNativeTransposed&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_pretransposed.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2">GemvPretransposed&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_quantize_wrapper.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2">QuantizeWrapper&lt; To, Tr, Tgemm &gt;</a>
 </li>
 <li>get_working_size()
-: <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#abf5a58f6feffeae31f48b750cba9303d">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
+: <a class="el" href="classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#abf5a58f6feffeae31f48b750cba9303d">GemmHybridQuantized&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#abf5a58f6feffeae31f48b750cba9303d">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_batched.xhtml#abf5a58f6feffeae31f48b750cba9303d">GemvBatched&lt; To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_quantize_wrapper.xhtml#abf5a58f6feffeae31f48b750cba9303d">QuantizeWrapper&lt; To, Tr, Tgemm &gt;</a>
 </li>
 <li>get_working_space_size()
 : <a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#adf88b409a140a439b6e5479da2f4cb1f">INEWinogradLayerTransformInputKernel&lt; T &gt;</a>
@@ -479,22 +488,22 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 : <a class="el" href="structarm__compute_1_1graph_1_1_execution_workload.xhtml#a2360aba01fa93c8493ba96683c4fb89c">ExecutionWorkload</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#ab9d564f9d6113ecafc98200face036b8">IStream</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_stream.xhtml#ab79f893c9414bcaa96a66b614a400b05">Stream</a>
-, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_sub_stream.xhtml#a7e4fdf6dbe73cb6da5cc36976cff9fa7">SubStream</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_sub_stream.xhtml#ab79f893c9414bcaa96a66b614a400b05">SubStream</a>
 </li>
 <li>Graph()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a9ec832327fd0a641f93af7cea4df3018">Graph</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a274f7443d93573083a86839782b5093c">Graph</a>
 </li>
 <li>graph()
-: <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a88421a0f6fd8896906a4a4b86f41ca4f">INode</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#aa508c46863ea4bb2d54407e43bd062c1">INode</a>
 </li>
 <li>Graph
 : <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#afab89afd724f1b07b1aaad6bdc61c47a">INode</a>
 </li>
 <li>GraphContext()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml#aaaa0e858a95cbd8faa9faf0119911e63">GraphContext</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml#a0e6d7bb7b4759f27f898b566aa254550">GraphContext</a>
 </li>
 <li>GraphManager()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph_manager.xhtml#a7cc3d6b903533416f56a1a30660c112e">GraphManager</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_manager.xhtml#a4e7362b1e7b02f52aa94e150993fc3f8">GraphManager</a>
 </li>
 <li>gws_from_window()
 : <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a6c01790e4e3f22f70f69002f0cb1b913">ICLKernel</a>
@@ -505,7 +514,7 @@ $(document).ready(function(){initNavTree('functions_g.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

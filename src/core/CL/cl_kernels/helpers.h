@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,11 @@
 #pragma OPENCL EXTENSION cl_arm_printf : enable
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED) && defined(cl_arm_printf)
 
+#define GPU_ARCH_MIDGARD 0x100
+#define GPU_ARCH_BIFROST 0x200
+
+#define CONCAT(a, b) a##b
+
 #define EXPAND(x) x
 
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)
@@ -52,6 +57,17 @@
 
 #define float1 float
 #define half1 half
+#define char1 char
+#define uchar1 uchar
+#define short1 short
+#define ushort1 ushort
+#define int1 int
+#define uint1 uint
+#define long1 long
+#define ulong1 ulong
+#define double1 double
+
+#define vload1(OFFSET, PTR) *(OFFSET + PTR)
 
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)

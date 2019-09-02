@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -103,7 +103,8 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_pixel_value.xhtml#a4222b84bae684380152759cada8601c5">PixelValue</a>
 </li>
 <li>f32
-: <a class="el" href="classarm__compute_1_1_pixel_value.xhtml#a7d886905c667c4e8e91251b6a3a98f39">PixelValue</a>
+: <a class="el" href="unionarm__compute_1_1helpers_1_1float__ops_1_1_raw_float.xhtml#a7d886905c667c4e8e91251b6a3a98f39">RawFloat</a>
+, <a class="el" href="classarm__compute_1_1_pixel_value.xhtml#a7d886905c667c4e8e91251b6a3a98f39">PixelValue</a>
 </li>
 <li>f64
 : <a class="el" href="classarm__compute_1_1_pixel_value.xhtml#a4a511caf994d6ffbbd9180293c53fd38">PixelValue</a>
@@ -120,6 +121,9 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 </li>
 <li>feat_width()
 : <a class="el" href="classarm__compute_1_1_compute_anchors_info.xhtml#a5b8b00c38aee11870396f12e764fa3ce">ComputeAnchorsInfo</a>
+</li>
+<li>file_size()
+: <a class="el" href="classarm__compute_1_1utils_1_1mmap__io_1_1_m_mapped_file.xhtml#a93276b635c9162e0716a14133af8cd2f">MMappedFile</a>
 </li>
 <li>FileHandler()
 : <a class="el" href="classarm__compute_1_1io_1_1_file_handler.xhtml#a7a105e8757c6bbbe0e6be820ce84f1ed">FileHandler</a>
@@ -215,6 +219,9 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 <li>floating_point
 : <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b">Measurement::Value</a>
 </li>
+<li>forget_layer_norm_weights()
+: <a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a213908108c07594027bc2b829fe7ee4a">LSTMParams&lt; T &gt;</a>
+</li>
 <li>format()
 : <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">ITensorInfo</a>
 , <a class="el" href="classarm__compute_1_1_multi_image_info.xhtml#a7047a267776924cf166c301310f03a2c">MultiImageInfo</a>
@@ -239,11 +246,13 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_deconvolution_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">DeconvolutionLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">DepthwiseConvolutionLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">DetectionOutputLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_detection_post_process_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">DetectionPostProcessLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_dummy_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">DummyNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_eltwise_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">EltwiseLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_flatten_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">FlattenLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">FullyConnectedLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">FusedConvolutionBatchNormalizationNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">FusedDepthwiseConvolutionBatchNormalizationNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_generate_proposals_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">GenerateProposalsLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a5edbd8a4a1b75060bb3b49bc0ba2c6b0">INode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_input_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">InputNode</a>
@@ -254,6 +263,7 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_permute_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PermuteLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PoolingLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PriorBoxLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_quantization_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">QuantizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_reorg_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">ReorgLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_reshape_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">ReshapeLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_resize_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">ResizeLayerNode</a>
@@ -303,12 +313,19 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a32186582e0a6e02ed7ac3944f60b9c62">ConvolutionLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml#a32186582e0a6e02ed7ac3944f60b9c62">DepthwiseConvolutionLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a32186582e0a6e02ed7ac3944f60b9c62">FusedConvolutionBatchNormalizationNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml#a32186582e0a6e02ed7ac3944f60b9c62">FusedDepthwiseConvolutionBatchNormalizationNode</a>
 </li>
 <li>FusedConvolutionBatchNormalizationFunction()
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#abdf06b73a929804599a347cbc8c8eb17">FusedConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;</a>
 </li>
 <li>FusedConvolutionBatchNormalizationNode()
-: <a class="el" href="classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a6be43ddbddb0082e893ad225cbc28a10">FusedConvolutionBatchNormalizationNode</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a25b36616fe5fb2e3eaa7f2483594c441">FusedConvolutionBatchNormalizationNode</a>
+</li>
+<li>FusedDepthwiseConvolutionBatchNormalizationFunction()
+: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_depthwise_convolution_batch_normalization_function.xhtml#a491fa8f7b245bcaa216d0487ed50f466">FusedDepthwiseConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;</a>
+</li>
+<li>FusedDepthwiseConvolutionBatchNormalizationNode()
+: <a class="el" href="classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml#ae8c23977d5b6d1b17e18166d726d8721">FusedDepthwiseConvolutionBatchNormalizationNode</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -316,7 +333,7 @@ $(document).ready(function(){initNavTree('functions_f.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

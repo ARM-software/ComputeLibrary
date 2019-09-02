@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,16 +44,16 @@ class ElementWiseUnaryValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, ElementWiseUnary op)
+    void setup(TensorShape input_shape, DataType input_data_type, ElementWiseUnary op)
     {
         _op        = op;
-        _target    = compute_target(shape, data_type);
-        _reference = compute_reference(shape, data_type);
+        _target    = compute_target(input_shape, input_data_type);
+        _reference = compute_reference(input_shape, input_data_type);
     }
 
 protected:
     template <typename U>
-    void fill(U &&tensor, int i)
+    void fill(U &&tensor, int i, DataType data_type)
     {
         switch(_op)
         {
@@ -66,6 +66,47 @@ protected:
             case ElementWiseUnary::RSQRT:
             {
                 std::uniform_real_distribution<> distribution(1.0f, 2.0f);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            case ElementWiseUnary::ABS:
+            case ElementWiseUnary::NEG:
+            {
+                switch(data_type)
+                {
+                    case DataType::F32:
+                    case DataType::F16:
+                    {
+                        std::uniform_real_distribution<> distribution(-2.0f, 2.0f);
+                        library->fill(tensor, distribution, i);
+                        break;
+                    }
+                    case DataType::S32:
+                    {
+                        std::uniform_int_distribution<int32_t> distribution(-100, 100);
+                        library->fill(tensor, distribution, i);
+                        break;
+                    }
+                    default:
+                        ARM_COMPUTE_ERROR("DataType for Elementwise Negation Not implemented");
+                }
+                break;
+            }
+            case ElementWiseUnary::LOG:
+            {
+                std::uniform_real_distribution<> distribution(0.0000001f, 100.0f);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            case ElementWiseUnary::SIN:
+            {
+                std::uniform_real_distribution<> distribution(-100.00f, 100.00f);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            case ElementWiseUnary::ROUND:
+            {
+                std::uniform_real_distribution<> distribution(100.0f, -100.0f);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -95,7 +136,7 @@ protected:
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(AccessorType(src), 0);
+        fill(AccessorType(src), 0, data_type);
 
         // Compute function
         elwiseunary_layer.run();
@@ -109,7 +150,7 @@ protected:
         SimpleTensor<T> src{ shape, data_type };
 
         // Fill reference
-        fill(src, 0);
+        fill(src, 0, data_type);
 
         return reference::elementwise_unary<T>(src, _op);
     }
@@ -138,6 +179,61 @@ public:
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::EXP);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class NegValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::NEG);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class LogValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::LOG);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class AbsValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::ABS);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class SinValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::SIN);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class RoundValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::ROUND);
     }
 };
 } // namespace validation

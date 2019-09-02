@@ -13,6 +13,6 @@ var _elementwise_square_diff_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_elementwise_square_diff_8cpp.xhtml#a6c0efec1f9ab32b14febc1f8fdd69bb3", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_elementwise_square_diff_8cpp.xhtml#ac3930b4c56faa3a82c13f80173628046", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_elementwise_square_diff_8cpp.xhtml#a49881776abd59fa083e1b66d03074b2c", null ],
-    [ "TEST_SUITE_END", "_elementwise_square_diff_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_elementwise_square_diff_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "validate", "_elementwise_square_diff_8cpp.xhtml#ae02c6fc90d9c60c634bfa258049eb46b", null ]
 ];

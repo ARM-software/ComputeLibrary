@@ -55,6 +55,7 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
     {
         return tensor.quantization_info() != dst.quantization_info();
     };
+
     if(srcs[0].data_type() == DataType::QASYMM8 && std::any_of(srcs.cbegin(), srcs.cend(), have_different_quantization_info))
     {
         for(int b = 0; b < batches; ++b)
@@ -64,11 +65,14 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
             int slice = 0;
             for(const auto &src : srcs)
             {
-                auto       ptr_slice = static_cast<T *>(dst(Coordinates(0, 0, slice, b)));
-                const auto num_elems_in_slice((dst.num_elements() / depth_out) * src.shape().z());
-                std::transform(ptr_slice, ptr_slice + num_elems_in_slice, ptr_slice, [src, dst](T)
+                auto                          ptr_slice = static_cast<T *>(dst(Coordinates(0, 0, slice, b)));
+                const auto                    num_elems_in_slice((dst.num_elements() / depth_out) * src.shape().z());
+                const UniformQuantizationInfo iq_info = src.quantization_info().uniform();
+                const UniformQuantizationInfo oq_info = dst.quantization_info().uniform();
+
+                std::transform(ptr_slice, ptr_slice + num_elems_in_slice, ptr_slice, [&](T)
                 {
-                    return dst.quantization_info().quantize(src.quantization_info().dequantize(0), RoundingPolicy::TO_NEAREST_UP);
+                    return quantize_qasymm8(dequantize_qasymm8(0, iq_info), oq_info);
                 });
                 slice += src.shape().z();
             }
@@ -102,10 +106,12 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
                 {
                     if(src.data_type() == DataType::QASYMM8 && src.quantization_info() != dst.quantization_info())
                     {
-                        std::transform(src_ptr, src_ptr + width, dst.data() + offset_to_first_element + d * out_stride_z + r * width_out, [src, dst](T t)
+                        const UniformQuantizationInfo iq_info = src.quantization_info().uniform();
+                        const UniformQuantizationInfo oq_info = dst.quantization_info().uniform();
+                        std::transform(src_ptr, src_ptr + width, dst.data() + offset_to_first_element + d * out_stride_z + r * width_out, [&](T t)
                         {
-                            const float dequantized_input = src.quantization_info().dequantize(t);
-                            return dst.quantization_info().quantize(dequantized_input, RoundingPolicy::TO_NEAREST_UP);
+                            const float dequantized_input = dequantize_qasymm8(t, iq_info);
+                            return quantize_qasymm8(dequantized_input, oq_info);
                         });
                         src_ptr += width;
                     }

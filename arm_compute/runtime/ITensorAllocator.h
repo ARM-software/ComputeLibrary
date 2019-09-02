@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,5 +96,5 @@ private:
     TensorInfo _info;      /**< Tensor's metadata. */
     size_t     _alignment; /**< Tensor's alignment in bytes */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_ITENSORALLOCATOR_H__ */

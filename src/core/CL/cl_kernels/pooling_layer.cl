@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@
 #define DIV_OP(x, y) (x * (1.f / y))
 #define SQRT_OP(x) sqrt((x))
 
-#define DIV_OP_NHWC(x, y) (x * (VEC_DATA_TYPE(DATA_TYPE, 8))(1.f / y))
+#define DIV_OP_NHWC(x, y) (x * (VEC_DATA_TYPE(float, 8))(1.f / y))
 
 #if STRIDE_X == 1
 #define POOLING3x3(res, input, output) POOLING3x3_STRIDE1(res, input, output)
@@ -485,14 +485,14 @@ __kernel void pooling_layer_MxN_nchw(
 }
 #endif // defined(POOL_SIZE_X) && defined(POOL_SIZE_Y)
 
-DATA_TYPE calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int upper_bound_w, int upper_bound_h,
-                                   const int pad_x, const int pad_y, const int stride_x, const int stride_y)
+float calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int upper_bound_w, int upper_bound_h,
+                               const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
     int start_x = get_global_id(1) * stride_x - pad_x;
 #if defined(DST_DEPTH)
     int start_y = (get_global_id(2) % DST_DEPTH) * stride_y - pad_y;
 #else  /* defined(DST_DEPTH) */
-    int start_y = get_global_id(2) * stride_y - pad_y;
+    int       start_y    = get_global_id(2) * stride_y - pad_y;
 #endif /* defined(DST_DEPTH) */
 
 #if !defined(EXCLUDE_PADDING)
@@ -553,9 +553,8 @@ __kernel void pooling_layer_MxN_nhwc(
     Tensor3D  output     = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* defined(DST_DEPTH) */
 
-    VEC_DATA_TYPE(DATA_TYPE, 8)
-    vdata           = INITIAL_VALUE;
-    DATA_TYPE sdata = INITIAL_VALUE;
+    VEC_DATA_TYPE(float, 8)
+    vdata = INITIAL_VALUE;
 
     const int idx_width = get_global_id(1) * STRIDE_X;
 #if defined(DST_DEPTH)
@@ -584,7 +583,7 @@ __kernel void pooling_layer_MxN_nhwc(
             // Raise to power of 2 for L2 Pooling
             data0 *= data0;
 #endif /* defined(POOL_L2) */
-            vdata = POOL_OP(vdata, data0);
+            vdata = POOL_OP(vdata, CONVERT(data0, float8));
         }
     }
 
@@ -599,5 +598,5 @@ __kernel void pooling_layer_MxN_nhwc(
 #endif /* defined(POOL_L2) */
 
     // Store result
-    vstore8(vdata, 0, (__global DATA_TYPE *)output.ptr);
+    vstore8(CONVERT(vdata, VEC_DATA_TYPE(DATA_TYPE, 8)), 0, (__global DATA_TYPE *)output.ptr);
 }

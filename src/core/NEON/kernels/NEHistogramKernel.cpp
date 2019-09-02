@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,12 +35,9 @@
 #include <arm_neon.h>
 #include <array>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
 class Coordinates;
-} // namespace arm_compute
 
 inline void NEHistogramKernel::merge_histogram(uint32_t *global_hist, const uint32_t *local_hist, size_t bins)
 {
@@ -217,9 +214,7 @@ void NEHistogramKernel::configure(const IImage *input, IDistribution1D *output, 
     // Set appropriate function
     _func = &NEHistogramKernel::histogram_U8;
 
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
-
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input->info(), Steps());
 
     INEKernel::configure(win);
 }
@@ -236,9 +231,7 @@ void NEHistogramKernel::configure(const IImage *input, IDistribution1D *output)
     // Set appropriate function
     _func = &NEHistogramKernel::histogram_fixed_U8;
 
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
-
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input->info(), Steps());
 
     INEKernel::configure(win);
 }
@@ -251,3 +244,4 @@ void NEHistogramKernel::run(const Window &window, const ThreadInfo &info)
 
     (this->*_func)(window, info);
 }
+} // namespace arm_compute

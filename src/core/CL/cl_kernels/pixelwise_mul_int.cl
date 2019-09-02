@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,9 @@
 #define CONVERT_OP_INT(x, type, size) CONVERT_OP_INT_STR(x, type, size)
 
 #define MUL_OP(x, y, scale, type, size) CONVERT_OP_INT((x) * (y) >> scale, type, size)
+
+#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
+#define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
 
 #if defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_RES) && defined(DATA_TYPE_OUT)
 /** Performs a pixelwise multiplication with integer scale of integer inputs.
@@ -88,18 +91,25 @@ __kernel void pixelwise_mul_int(
 }
 #endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_RES) && defined(DATA_TYPE_OUT) */
 
-#if defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT)
+#if defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE)
+
+#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
+#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
+#define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
+
 /** Performs a pixelwise multiplication with float scale of quantized inputs.
  *
- * @note The quantization offset of the first operand must be passed at compile time using -DOFFSET_IN1, e.g. -DOFFSET_IN1=10
- * @note The quantization offset of the second operand must be passed at compile time using -DOFFSET_IN2, e.g. -DOFFSET_IN2=10
- * @note The quantization offset of the output must be passed at compile time using -DOFFSET_OUT, e.g. -DOFFSET_OUT=10
+ * @note The quantization offset of the first operand must be passed at compile time only if asymmetric using -DOFFSET_IN1, e.g. -DOFFSET_IN1=10
+ * @note The quantization offset of the second operand must be passed at compile time only if asymmetric using -DOFFSET_IN2, e.g. -DOFFSET_IN2=10
+ * @note The quantization offset of the output must be passed at compile time only if asymmetric using -DOFFSET_OUT, e.g. -DOFFSET_OUT=10
  * @note The quantization scale of the first operand must be passed at compile time using -DSCALE_IN1, e.g. -DSCALE_IN1=10
  * @note The quantization scale of the second operand must be passed at compile time using -DSCALE_IN2, e.g. -DSCALE_IN2=10
  * @note The quantization scale of the output must be passed at compile time using -DSCALE_OUT, e.g. -DSCALE_OUT=10
  * @note To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
+ * @attention The data type must be passed at compile time using -DDATA_TYPE_OUT, i.e. -DDATA_TYPE_OUT=uchar
+ * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
- * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: U8, S16, F16, F32
+ * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: QASYMM8/QSYMM16
  * @param[in]  in1_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -137,19 +147,28 @@ __kernel void pixelwise_mul_quantized(
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load data
-    int16 in_a = CONVERT(vload16(0, (__global uchar *)in1.ptr), int16);
-    int16 in_b = CONVERT(vload16(0, (__global uchar *)in2.ptr), int16);
+    VEC_INT in_a = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_OUT *)in1.ptr), VEC_INT);
+    VEC_INT in_b = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_OUT *)in2.ptr), VEC_INT);
 
     // Dequantize
-    in_a -= (int16)(int)OFFSET_IN1;
-    in_b -= (int16)(int)OFFSET_IN2;
-    const float16 in1f32 = convert_float16(in_a) * (float16)(float)SCALE_IN1;
-    const float16 in2f32 = convert_float16(in_b) * (float16)(float)SCALE_IN2;
+#if defined(OFFSET_IN1)
+    in_a -= (VEC_INT)((int)OFFSET_IN1);
+#endif // defined(OFFSET_IN1)
+#if defined(OFFSET_IN2)
+    in_b -= (VEC_INT)((int)OFFSET_IN2);
+#endif // defined(OFFSET_IN2)
+    const VEC_FLOAT in1f32 = CONVERT(in_a, VEC_FLOAT) * (VEC_FLOAT)((float)SCALE_IN1);
+    const VEC_FLOAT in2f32 = CONVERT(in_b, VEC_FLOAT) * (VEC_FLOAT)((float)SCALE_IN2);
 
-    const float16 qresf32 = (in1f32 * in2f32 * scale) / ((float16)(float)SCALE_OUT) + ((float16)((float16)OFFSET_OUT));
-    const uchar16 res     = convert_uchar16_sat(convert_int16_rte(qresf32));
+#if defined(OFFSET_OUT)
+    const VEC_FLOAT qresf32 = (in1f32 * in2f32 * scale) / ((VEC_FLOAT)(float)SCALE_OUT) + ((VEC_FLOAT)((float)OFFSET_OUT));
+#else  // defined(OFFSET_OUT)
+    const VEC_FLOAT qresf32 = (in1f32 * in2f32 * scale) / ((VEC_FLOAT)(float)SCALE_OUT);
+#endif // defined(OFFSET_OUT)
+    const VEC_TYPE res = CONVERT_SAT(CONVERT_DOWN(qresf32, VEC_INT), VEC_TYPE);
 
     // Store result
-    vstore16(res, 0, (__global uchar *)out.ptr);
+    VSTORE(VEC_SIZE)
+    (res, 0, (__global DATA_TYPE_OUT *)out.ptr);
 }
-#endif /* defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) */
+#endif /* defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE) */

@@ -4,6 +4,7 @@ var _n_e_elementwise_operations_8h =
     [ "NEElementwiseMin", "classarm__compute_1_1_n_e_elementwise_min.xhtml", "classarm__compute_1_1_n_e_elementwise_min" ],
     [ "NEElementwiseSquaredDiff", "classarm__compute_1_1_n_e_elementwise_squared_diff.xhtml", "classarm__compute_1_1_n_e_elementwise_squared_diff" ],
     [ "NEElementwiseDivision", "classarm__compute_1_1_n_e_elementwise_division.xhtml", "classarm__compute_1_1_n_e_elementwise_division" ],
+    [ "NEElementwisePower", "classarm__compute_1_1_n_e_elementwise_power.xhtml", "classarm__compute_1_1_n_e_elementwise_power" ],
     [ "NEElementwiseComparison", "classarm__compute_1_1_n_e_elementwise_comparison.xhtml", "classarm__compute_1_1_n_e_elementwise_comparison" ],
     [ "NEElementwiseComparisonStatic", "classarm__compute_1_1_n_e_elementwise_comparison_static.xhtml", "classarm__compute_1_1_n_e_elementwise_comparison_static" ],
     [ "NEEqual", "_n_e_elementwise_operations_8h.xhtml#a8fdefd8ed8639758d0aa6c68087d55e6", null ],

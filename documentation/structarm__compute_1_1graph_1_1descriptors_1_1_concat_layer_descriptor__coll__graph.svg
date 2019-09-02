@@ -19,7 +19,7 @@
 </g>
 <!-- Node1 -->
 <g id="node2" class="node"><title>Node1</title>
-<g id="a_node2"><a xlink:href="structarm__compute_1_1_quantization_info.xhtml" target="_top" xlink:title="Quantization settings (used for QASYMM8 data type)">
+<g id="a_node2"><a xlink:href="classarm__compute_1_1_quantization_info.xhtml" target="_top" xlink:title="Quantization information.">
 <polygon fill="white" stroke="black" points="0,-67.5 0,-86.5 95,-86.5 95,-67.5 0,-67.5"/>
 <text text-anchor="middle" x="47.5" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">QuantizationInfo</text>
 </a>

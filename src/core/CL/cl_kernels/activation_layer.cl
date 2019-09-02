@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#if defined(ACT) && defined(DATA_TYPE) && defined(VEC_SIZE)
+
 #define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-#define SELECT_TYPE VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
 
-#include "activation_helpers.h"
-
-#if defined(ACT)
+#include "activation_float_helpers.h"
 
 /** This performs an activation function floating point inputs.
  *
@@ -74,7 +73,7 @@ __kernel void activation_layer(
     TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
 
     // Perform activation
-    data = ACTIVATION_OP(ACT, data);
+    data = ACTIVATION(ACT, DATA_TYPE, data, A_VAL, B_VAL);
 
     // Store result
     VSTORE(VEC_SIZE)

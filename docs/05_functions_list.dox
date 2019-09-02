@@ -112,7 +112,6 @@ namespace arm_compute
     - @ref NEConvolutionSquare &lt;matrix_size&gt;
     - @ref NECropResize
     - @ref NEDeconvolutionLayer
-    - @ref NEDepthConcatenateLayer
     - @ref NEDepthwiseConvolutionAssemblyDispatch
     - @ref NEDepthwiseConvolutionLayer
     - @ref NEDepthwiseConvolutionLayer3x3
@@ -171,7 +170,6 @@ namespace arm_compute
     - @ref NEStackLayer
     - @ref NEUnstack
     - @ref NEUpsampleLayer
-    - @ref NEWidthConcatenateLayer
     - @ref NEWinogradConvolutionLayer
 
 @section S5_2 OpenCL functions
@@ -188,7 +186,6 @@ namespace arm_compute
     - @ref CLCropResize
     - @ref CLDeconvolutionLayer
     - @ref CLDeconvolutionLayerUpsample
-    - @ref CLDepthConcatenateLayer
     - @ref CLDepthwiseConvolutionLayer
     - @ref CLDepthwiseConvolutionLayer3x3
     - @ref CLDepthwiseSeparableConvolutionLayer
@@ -241,7 +238,6 @@ namespace arm_compute
     - @ref CLStackLayer
     - @ref CLUnstack
     - @ref CLUpsampleLayer
-    - @ref CLWidthConcatenateLayer
     - @ref CLWinogradConvolutionLayer
     - @ref ICLSimpleFunction
         - @ref CLAbsoluteDifference
@@ -285,11 +281,9 @@ namespace arm_compute
         - @ref CLFullyConnectedLayerReshapeWeights
         - @ref CLGather
         - @ref CLGaussian3x3
-        - @ref CLGEMMInterleave4x4
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
-        - @ref CLGEMMTranspose1xW
         - @ref CLMagnitude
         - @ref CLMedian3x3
         - @ref CLNonLinearFilter
@@ -329,7 +323,6 @@ namespace arm_compute
     - @ref GCConcatenateLayer
     - @ref GCConvolutionLayer
     - @ref GCConvolutionLayerReshapeWeights
-    - @ref GCDepthConcatenateLayer
     - @ref GCDepthwiseConvolutionLayer3x3
     - @ref GCDirectConvolutionLayer
     - @ref GCDropoutLayer

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -182,7 +182,7 @@ class arm_gemm::GemvNativeTransposed&lt; strategy, To, Tr &gt;</h3>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="gemv__native__transposed_8hpp_source.xhtml#l00067">67</a> of file <a class="el" href="gemv__native__transposed_8hpp_source.xhtml">gemv_native_transposed.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;            : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _beta(args._beta), _ci(args._ci) {</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="comment">/* For now don&#39;t do any blocking. TODO: figure out if we should. */</span></div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        m_block = _Ksize;</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        n_block = _Nsize;</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    }</div></div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                         : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _beta(args._beta), _ci(args._ci) {</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="comment">/* For now don&#39;t do any blocking. TODO: figure out if we should. */</span></div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        m_block = _Ksize;</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        n_block = _Nsize;</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -299,7 +299,7 @@ class arm_gemm::GemvNativeTransposed&lt; strategy, To, Tr &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__gemm.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="classarm__gemm_1_1_gemv_native_transposed.xhtml">GemvNativeTransposed</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -72,10 +72,13 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
                     const int offset = u * height * depth + d * height + r;
                     if(src.data_type() == DataType::QASYMM8 && src.quantization_info() != dst.quantization_info())
                     {
-                        std::transform(src_ptr, src_ptr + width, dst_ptr + width_offset + offset * width_out, [src, dst](T t)
+                        const UniformQuantizationInfo iq_info = src.quantization_info().uniform();
+                        const UniformQuantizationInfo oq_info = dst.quantization_info().uniform();
+
+                        std::transform(src_ptr, src_ptr + width, dst_ptr + width_offset + offset * width_out, [&](T t)
                         {
-                            const float dequantized_input = src.quantization_info().dequantize(t);
-                            return dst.quantization_info().quantize(dequantized_input, RoundingPolicy::TO_NEAREST_UP);
+                            const float dequantized_input = dequantize_qasymm8(t, iq_info);
+                            return quantize_qasymm8(dequantized_input, oq_info);
                         });
                         src_ptr += width;
                     }
@@ -123,6 +126,16 @@ SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTens
             }
             dst = reference::permute<T>(dst, PermutationVector(2U, 1U, 0U));
             return reference::permute<T>(widthconcatenate_layer(srcs, dst), PermutationVector(2U, 1U, 0U));
+        }
+        case 3:
+        {
+            for(auto &t : srcs)
+            {
+                t = reference::permute<T>(t, PermutationVector(3U, 2U, 1U, 0U));
+            }
+            dst      = reference::permute<T>(dst, PermutationVector(3U, 2U, 1U, 0U));
+            auto ret = reference::permute<T>(widthconcatenate_layer(srcs, dst), PermutationVector(3U, 2U, 1U, 0U));
+            return ret;
         }
         default:
         {

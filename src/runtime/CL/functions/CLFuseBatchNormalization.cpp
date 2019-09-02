@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,20 +36,20 @@ CLFuseBatchNormalization::CLFuseBatchNormalization()
 {
 }
 
-void CLFuseBatchNormalization::configure(const ICLTensor *conv_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var,
+void CLFuseBatchNormalization::configure(const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var,
                                          ICLTensor *fused_weights, ICLTensor *fused_bias,
-                                         const ICLTensor *conv_bias, const ICLTensor *bn_beta, const ICLTensor *bn_gamma,
-                                         float epsilon)
+                                         const ICLTensor *input_bias, const ICLTensor *bn_beta, const ICLTensor *bn_gamma,
+                                         float epsilon, FuseBatchNormalizationType fbn_type)
 {
-    _fuse_bn_kernel.configure(conv_weights, bn_mean, bn_var, fused_weights, fused_bias, conv_bias, bn_beta, bn_gamma, epsilon);
+    _fuse_bn_kernel.configure(input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma, epsilon, fbn_type);
 }
 
-Status CLFuseBatchNormalization::validate(const ITensorInfo *conv_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var,
+Status CLFuseBatchNormalization::validate(const ITensorInfo *input_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var,
                                           const ITensorInfo *fused_weights, const ITensorInfo *fused_bias,
-                                          const ITensorInfo *conv_bias, const ITensorInfo *bn_beta, const ITensorInfo *bn_gamma,
-                                          float epsilon)
+                                          const ITensorInfo *input_bias, const ITensorInfo *bn_beta, const ITensorInfo *bn_gamma,
+                                          float epsilon, FuseBatchNormalizationType fbn_type)
 {
-    return CLFuseBatchNormalizationKernel::validate(conv_weights, bn_mean, bn_var, fused_weights, fused_bias, conv_bias, bn_beta, bn_gamma, epsilon);
+    return CLFuseBatchNormalizationKernel::validate(input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma, epsilon, fbn_type);
 }
 
 void CLFuseBatchNormalization::run()

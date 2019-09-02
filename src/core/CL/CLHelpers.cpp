@@ -37,14 +37,15 @@ std::string get_cl_type_from_data_type(const DataType &dt)
     switch(dt)
     {
         case DataType::U8:
-            return "uchar";
-        case DataType::S8:
-            return "char";
         case DataType::QASYMM8:
             return "uchar";
+        case DataType::S8:
+        case DataType::QSYMM8:
+            return "char";
         case DataType::U16:
             return "ushort";
         case DataType::S16:
+        case DataType::QSYMM16:
             return "short";
         case DataType::U32:
             return "uint";
@@ -69,15 +70,16 @@ std::string get_cl_select_type_from_data_type(const DataType &dt)
     switch(dt)
     {
         case DataType::U8:
-            return "uchar";
-        case DataType::S8:
-            return "char";
         case DataType::QASYMM8:
             return "uchar";
+        case DataType::S8:
+        case DataType::QSYMM8:
+            return "char";
         case DataType::U16:
             return "ushort";
         case DataType::F16:
         case DataType::S16:
+        case DataType::QSYMM16:
             return "short";
         case DataType::U32:
             return "uint";
@@ -100,10 +102,12 @@ std::string get_data_size_from_data_type(const DataType &dt)
     {
         case DataType::U8:
         case DataType::S8:
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
             return "8";
         case DataType::U16:
         case DataType::S16:
+        case DataType::QSYMM16:
         case DataType::F16:
             return "16";
         case DataType::U32:
@@ -241,9 +245,11 @@ size_t preferred_vector_width(const cl::Device &device, const DataType dt)
         case DataType::U8:
         case DataType::S8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8:
             return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR>();
         case DataType::U16:
         case DataType::S16:
+        case DataType::QSYMM16:
             return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT>();
         case DataType::U32:
         case DataType::S32:

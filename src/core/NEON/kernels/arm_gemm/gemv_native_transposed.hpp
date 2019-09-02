@@ -65,7 +65,7 @@ public:
     GemvNativeTransposed & operator= (GemvNativeTransposed &) = delete;
 
     GemvNativeTransposed(const GemmArgs<Tr> &args)
-            : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _beta(args._beta), _ci(args._ci) {
+                         : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _beta(args._beta), _ci(args._ci) {
         /* For now don't do any blocking. TODO: figure out if we should. */
         m_block = _Ksize;
         n_block = _Nsize;

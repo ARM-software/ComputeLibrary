@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -99,6 +99,9 @@ $(document).ready(function(){initNavTree('globals_a.xhtml','');});
 <div class="textblock">Here is a list of all functions, variables, defines, enums, and typedefs with links to the files they belong to:</div>
 
 <h3><a id="index_a"></a>- a -</h3><ul>
+<li>abs_op
+: <a class="el" href="activation__float__helpers_8h.xhtml#ad241c192445437657f18094735135acf">activation_float_helpers.h</a>
+</li>
 <li>absdiff()
 : <a class="el" href="absdiff_8cl.xhtml#abd1c22f3b8c5d2d0a1de36f45c38b88f">absdiff.cl</a>
 </li>
@@ -114,30 +117,188 @@ $(document).ready(function(){initNavTree('globals_a.xhtml','');});
 <li>accumulate_weighted()
 : <a class="el" href="accumulate_8cl.xhtml#ab64020e40663a4356d6037079d7292fb">accumulate.cl</a>
 </li>
-<li>ACTIVATION_FUNC
-: <a class="el" href="depthwise__convolution_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9">depthwise_convolution.cl</a>
-, <a class="el" href="winograd__output__transform_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9">winograd_output_transform.cl</a>
+<li>ACTIVATION
+: <a class="el" href="activation__float__helpers_8h.xhtml#abbc420da5dec17216bb014c05ad65304">activation_float_helpers.h</a>
 </li>
-<li>activation_layer_logistic_qa8()
-: <a class="el" href="activation__layer__qa8_8cl.xhtml#a50bf6cff7ebeaf08c0ec368a07e147df">activation_layer_qa8.cl</a>
+<li>ACTIVATION_BLOCK
+: <a class="el" href="gemm_8cl.xhtml#a2da39e3a865d4f0da99e21e37c2cef85">gemm.cl</a>
+</li>
+<li>ACTIVATION_BLOCK_STR
+: <a class="el" href="gemm__helpers_8h.xhtml#a7bbe15f149f5f2a31c613daa1afa860c">gemm_helpers.h</a>
 </li>
 <li>ACTIVATION_OP
-: <a class="el" href="activation__layer__qa8_8cl.xhtml#a5a310089a4e6b6de57a075a9bd4ced82">activation_layer_qa8.cl</a>
+: <a class="el" href="activation__quant__helpers_8h.xhtml#a5a310089a4e6b6de57a075a9bd4ced82">activation_quant_helpers.h</a>
 </li>
 <li>ACTIVATION_OP2
-: <a class="el" href="activation__layer__qa8_8cl.xhtml#ab13ec269b92f52bb2f1f6dcf12956704">activation_layer_qa8.cl</a>
+: <a class="el" href="activation__quant__helpers_8h.xhtml#ab13ec269b92f52bb2f1f6dcf12956704">activation_quant_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_1
+: <a class="el" href="gemm__helpers_8h.xhtml#a9a5d333671a60527da1acb0b4ab108ef">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_10
+: <a class="el" href="gemm__helpers_8h.xhtml#ae59e674e9d27783d6a30db18caaa15df">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_11
+: <a class="el" href="gemm__helpers_8h.xhtml#a07074bdfb43219ddfe300148db0efd52">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_12
+: <a class="el" href="gemm__helpers_8h.xhtml#a63a4bffa7fdb0e11692d4e5dbb0990d1">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_13
+: <a class="el" href="gemm__helpers_8h.xhtml#a7f664dbeac0ab85fe6ff32dd0defe195">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_14
+: <a class="el" href="gemm__helpers_8h.xhtml#ab3ff3db26f85fb5d8498be439020911b">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_15
+: <a class="el" href="gemm__helpers_8h.xhtml#ac2defc172614c2508737af398b7cfb6b">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_16
+: <a class="el" href="gemm__helpers_8h.xhtml#a2644f3758fec09f4b5639cf51a8617f9">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_2
+: <a class="el" href="gemm__helpers_8h.xhtml#a2528c467ff7f9de034412eb58ab634b1">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_3
+: <a class="el" href="gemm__helpers_8h.xhtml#a985131db76a28d171da0810a8b0f70ee">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_4
+: <a class="el" href="gemm__helpers_8h.xhtml#ad7ea2cca2af876b0bae9945c22f526d9">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_5
+: <a class="el" href="gemm__helpers_8h.xhtml#abea5a4ee08e4599e563652e58a3b747e">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_6
+: <a class="el" href="gemm__helpers_8h.xhtml#ab9f2197890842e0157532502f4553741">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_7
+: <a class="el" href="gemm__helpers_8h.xhtml#a5639eaa43eaf94060f8a43877bc7f293">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_8
+: <a class="el" href="gemm__helpers_8h.xhtml#acf7acbf0e44c8cbf3ed05960d8b370a2">gemm_helpers.h</a>
+</li>
+<li>ACTIVATION_ROW_9
+: <a class="el" href="gemm__helpers_8h.xhtml#addb9f251eaafaad1250ef7d9ebb3b030">gemm_helpers.h</a>
 </li>
 <li>ADD
 : <a class="el" href="elementwise__operation_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8">elementwise_operation.cl</a>
 , <a class="el" href="elementwise__operation__quantized_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8">elementwise_operation_quantized.cl</a>
 </li>
+<li>ADD_BLOCK
+: <a class="el" href="gemm__helpers_8h.xhtml#a47f4d3ee6a1f83a0c3d1744f42da118f">gemm_helpers.h</a>
+</li>
+<li>ADD_BLOCK_BROADCAST
+: <a class="el" href="gemm__helpers_8h.xhtml#a055f3dc1bfec3462a3c48de0203a2c80">gemm_helpers.h</a>
+</li>
+<li>ADD_BLOCK_BROADCAST_STR
+: <a class="el" href="gemm__helpers_8h.xhtml#af28dee0f6cd6020d91d66f4ced01569b">gemm_helpers.h</a>
+</li>
+<li>ADD_BLOCK_STR
+: <a class="el" href="gemm__helpers_8h.xhtml#ae94a788934b8703fedfb364a980a11a6">gemm_helpers.h</a>
+</li>
 <li>ADD_OP
-: <a class="el" href="normalization__layer_8cl.xhtml#a334426d638df3b4108c366e240cf5504">normalization_layer.cl</a>
-, <a class="el" href="softmax__layer_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer.cl</a>
-, <a class="el" href="softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer_quantized.cl</a>
-, <a class="el" href="batchnormalization__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">batchnormalization_layer.cl</a>
+: <a class="el" href="batchnormalization__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">batchnormalization_layer.cl</a>
 , <a class="el" href="direct__convolution1x1_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">direct_convolution1x1.cl</a>
 , <a class="el" href="direct__convolution3x3_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">direct_convolution3x3.cl</a>
+, <a class="el" href="normalization__layer_8cl.xhtml#a334426d638df3b4108c366e240cf5504">normalization_layer.cl</a>
+, <a class="el" href="softmax__layer_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer.cl</a>
+, <a class="el" href="softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer_quantized.cl</a>
+</li>
+<li>ADD_ROW_1
+: <a class="el" href="gemm__helpers_8h.xhtml#a262fd1aa348d6db9829ac2fb3091e0e2">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_10
+: <a class="el" href="gemm__helpers_8h.xhtml#af55a544ff0aed8b1ff5ac706e6f2def7">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_11
+: <a class="el" href="gemm__helpers_8h.xhtml#a3abb49ddd5d9de949c126e8fd475dc9e">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_12
+: <a class="el" href="gemm__helpers_8h.xhtml#a5f8784fa8f828ba4e9a1ac4fe69d73dc">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_13
+: <a class="el" href="gemm__helpers_8h.xhtml#a02cb70709fbb9650a1a639c7abe638fa">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_14
+: <a class="el" href="gemm__helpers_8h.xhtml#a1afb4914b37ea04002f7c34ff9fb5451">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_15
+: <a class="el" href="gemm__helpers_8h.xhtml#acea6e6e38e775db72e55d57ad432df5d">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_16
+: <a class="el" href="gemm__helpers_8h.xhtml#a7dd37c6a57e390e0215c212894789684">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_2
+: <a class="el" href="gemm__helpers_8h.xhtml#a9a4a3e258c8a76d2b2366d5c6f18e938">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_3
+: <a class="el" href="gemm__helpers_8h.xhtml#a95da845fbd8793b29a1e09d148949fa4">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_4
+: <a class="el" href="gemm__helpers_8h.xhtml#a2db13a86675d95a88daa7dfcf0e56ef3">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_5
+: <a class="el" href="gemm__helpers_8h.xhtml#a78b36791b8d53134b5d7be171d1dd576">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_6
+: <a class="el" href="gemm__helpers_8h.xhtml#a90b573562baa916273977081d78cd70b">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_7
+: <a class="el" href="gemm__helpers_8h.xhtml#a24b6c5fc15575153454f10d7cdb8ec75">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_8
+: <a class="el" href="gemm__helpers_8h.xhtml#a0350e3e2a111852d79390a72144b394e">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_9
+: <a class="el" href="gemm__helpers_8h.xhtml#afb2477bec0e97c3a02b090ca5e241b7e">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_1
+: <a class="el" href="gemm__helpers_8h.xhtml#acd0d3c9521fcc52fbb080ab46087331b">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_10
+: <a class="el" href="gemm__helpers_8h.xhtml#a6b9dac7d7ab5608e53526d0e8fc9ed8d">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_11
+: <a class="el" href="gemm__helpers_8h.xhtml#a76ad22b19006a15ec22db1eb71b5104e">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_12
+: <a class="el" href="gemm__helpers_8h.xhtml#a7f5b36e0f9d501a5ca56f41ed3127614">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_13
+: <a class="el" href="gemm__helpers_8h.xhtml#aeea8bd7b430d8041e5c34b06789d430a">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_14
+: <a class="el" href="gemm__helpers_8h.xhtml#a41e89066eca08deffac7a472957e877b">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_15
+: <a class="el" href="gemm__helpers_8h.xhtml#a70edb397fda9cc735f746dff18ef0c1b">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_16
+: <a class="el" href="gemm__helpers_8h.xhtml#a728b576315645636d81d072eaee516bc">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_2
+: <a class="el" href="gemm__helpers_8h.xhtml#a176d32d659f84960e8d4e1551adc4f09">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_3
+: <a class="el" href="gemm__helpers_8h.xhtml#aebeb14fcc0e8958b937599a5b4fe7a93">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_4
+: <a class="el" href="gemm__helpers_8h.xhtml#ad4de3d1ef130212aa0e14a92288f5195">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_5
+: <a class="el" href="gemm__helpers_8h.xhtml#abaf436cf5e2e9062faa2523d9f568ccb">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_6
+: <a class="el" href="gemm__helpers_8h.xhtml#aab82226c20d3ee2f80364d93e492f91a">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_7
+: <a class="el" href="gemm__helpers_8h.xhtml#a4440d1a0661087bef69962003e8e0c6f">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_8
+: <a class="el" href="gemm__helpers_8h.xhtml#a024dfebd7a680c25c9decf3abe24b6ee">gemm_helpers.h</a>
+</li>
+<li>ADD_ROW_BROADCAST_9
+: <a class="el" href="gemm__helpers_8h.xhtml#aef63fcf06b81942e2c1cdedb3b697d0c">gemm_helpers.h</a>
 </li>
 <li>ALLOC_ROUND
 : <a class="el" href="gemm__interleaved_8hpp.xhtml#abd1ded15e3688096ead983e87f83fbd1">gemm_interleaved.hpp</a>
@@ -174,6 +335,15 @@ $(document).ready(function(){initNavTree('globals_a.xhtml','');});
 </li>
 <li>ARM_COMPUTE_CREATE_ERROR_LOC
 : <a class="el" href="_error_8h.xhtml#ac00c754f27b1201dd72c74b73239ff47">Error.h</a>
+</li>
+<li>ARM_COMPUTE_DEPRECATED
+: <a class="el" href="arm__compute_2core_2utils_2misc_2_macros_8h.xhtml#a950190be9de82bc74aef3a59d9733dc1">Macros.h</a>
+</li>
+<li>ARM_COMPUTE_DEPRECATED_REL
+: <a class="el" href="arm__compute_2core_2utils_2misc_2_macros_8h.xhtml#ac518f7eaea4e59db3199086d954b5492">Macros.h</a>
+</li>
+<li>ARM_COMPUTE_DEPRECATED_REL_REPLACE
+: <a class="el" href="arm__compute_2core_2utils_2misc_2_macros_8h.xhtml#a751a15de75311d62d12f9fc9998368e1">Macros.h</a>
 </li>
 <li>ARM_COMPUTE_ERROR
 : <a class="el" href="_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">Error.h</a>
@@ -448,6 +618,72 @@ $(document).ready(function(){initNavTree('globals_a.xhtml','');});
 <li>ARM_COMPUTE_UNUSED
 : <a class="el" href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">Error.h</a>
 </li>
+<li>ARM_DOT1
+: <a class="el" href="gemmlowp_8cl.xhtml#af6f3e915f4b9b0e76dad9ea458a17ba6">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT16
+: <a class="el" href="gemmlowp_8cl.xhtml#a82a34a6b94dcdb93e446287e1a3e630d">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT2
+: <a class="el" href="gemmlowp_8cl.xhtml#ae34a7418dab77ded3f299ad8e01dc545">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT3
+: <a class="el" href="gemmlowp_8cl.xhtml#aa1fc470aae7d425cb48b4eddd923c1f1">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT4
+: <a class="el" href="gemmlowp_8cl.xhtml#a691532f1c550b718a64219c0bf8d1aea">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT8
+: <a class="el" href="gemmlowp_8cl.xhtml#aa6675b3d030e11613b7af2f591a3215f">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT_K0
+: <a class="el" href="gemmlowp_8cl.xhtml#a66f8007bc273c19637859c71e89b7ef3">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT_K0X16
+: <a class="el" href="gemmlowp_8cl.xhtml#a9a4dd8e50aea16bfbdd001ae160c52f1">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT_K0X2
+: <a class="el" href="gemmlowp_8cl.xhtml#ae1635754535ac499cdad8b067e90c435">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT_K0X3
+: <a class="el" href="gemmlowp_8cl.xhtml#a204079a2adf17e607e9cfcad60b89602">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT_K0X4
+: <a class="el" href="gemmlowp_8cl.xhtml#a95f17ea569b0d658d161981c656ce028">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT_K0X8
+: <a class="el" href="gemmlowp_8cl.xhtml#a9fe47ceb84fabdb9ecc8b96c3104e8c7">gemmlowp.cl</a>
+</li>
+<li>ARM_DOT_K0XN0
+: <a class="el" href="gemmlowp_8cl.xhtml#ae991dacacb5b9b0b176538400a7e8269">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0X1
+: <a class="el" href="gemmlowp_8cl.xhtml#a6a30e0c9210948b09a983dff1b3db289">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0X2
+: <a class="el" href="gemmlowp_8cl.xhtml#ad2c6dbc81440272f6ef8f19c7a5e7843">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0X3
+: <a class="el" href="gemmlowp_8cl.xhtml#a82ee8878109026b86a3296e786248d15">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0X4
+: <a class="el" href="gemmlowp_8cl.xhtml#a7422ff84359302ff418d39bfa212a4cc">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0X5
+: <a class="el" href="gemmlowp_8cl.xhtml#a9ab09032778390f87d7050d58a0645e9">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0X6
+: <a class="el" href="gemmlowp_8cl.xhtml#a74a18e1f44fcfd47b8ec54dca07435e7">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0X7
+: <a class="el" href="gemmlowp_8cl.xhtml#a9233e80ae6cba402274f8921ffb22078">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0X8
+: <a class="el" href="gemmlowp_8cl.xhtml#a5cc688208a6d222018ca05eeabb461a2">gemmlowp.cl</a>
+</li>
+<li>ARM_MM_K0XN0XM0
+: <a class="el" href="gemmlowp_8cl.xhtml#af110f6648cbcc21216a66fb3342632b0">gemmlowp.cl</a>
+</li>
 <li>ASM_PREFETCH
 : <a class="el" href="asmlib_8hpp.xhtml#aaca0205a239e6ef80e4e2788837579e8">asmlib.hpp</a>
 </li>
@@ -529,11 +765,11 @@ $(document).ready(function(){initNavTree('globals_a.xhtml','');});
 <li>ASYMM_MASK_IF_ZERO_IMPL
 : <a class="el" href="helpers__asymm_8h.xhtml#a8c47a92ec76a1e367b45305c17d9ea88">helpers_asymm.h</a>
 </li>
-<li>ASYMM_MULT
-: <a class="el" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">helpers_asymm.h</a>
-</li>
 <li>asymm_mult
 : <a class="el" href="softmax__layer__quantized_8cl.xhtml#a525a42d38133b1051b8924b456add4a1">softmax_layer_quantized.cl</a>
+</li>
+<li>ASYMM_MULT
+: <a class="el" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">helpers_asymm.h</a>
 </li>
 <li>asymm_mult16()
 : <a class="el" href="helpers__asymm_8h.xhtml#aef32e3a9c804f145deb6b88f0a444919">helpers_asymm.h</a>
@@ -670,7 +906,7 @@ $(document).ready(function(){initNavTree('globals_a.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:39 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

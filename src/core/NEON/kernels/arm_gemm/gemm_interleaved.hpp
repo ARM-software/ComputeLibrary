@@ -318,10 +318,10 @@ public:
 
     /* Constructor */
     GemmInterleaved(const GemmArgs<Tr> &args)
-            : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
-              _nbatches(args._nbatches), _nmulti(args._nmulti), _trA(args._trA), _trB(args._trB),
-              _alpha(args._alpha), _beta(args._beta), _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
-              _pretransposed(args._pretransposed_hint) {
+                    : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
+                      _nbatches(args._nbatches), _nmulti(args._nmulti), _trA(args._trA), _trB(args._trB),
+                      _alpha(args._alpha), _beta(args._beta), _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
+                      _pretransposed(args._pretransposed_hint) {
         const unsigned int L1_size = _ci->get_L1_cache_size();
         const unsigned int L2_size = _ci->get_L2_cache_size();
 
@@ -356,7 +356,7 @@ public:
             // x_block: Work out how many rows (of length k_block) will fit in the L2
             // Don't allocate more than 90% of the L2 to allow for overheads, and subtract off the L1 contents.
             _x_block = (((L2_size * 9) / 10) - (_k_block * sizeof(Toi) * (strategy::out_width() + strategy::out_height()))) /
-                       (sizeof(Toi) * _k_block);
+                      (sizeof(Toi) * _k_block);
 
             // Needs to be (at least a single) multiple of the kernel output width.
             _x_block /= strategy::out_width();

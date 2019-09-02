@@ -4,6 +4,7 @@ var validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp =
     [ "NEGEMMAssemblyFixture_U8", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a81a5e6a019eb49bf186adbae0baa7325", null ],
     [ "NEGEMMLowpMatrixMultiplyCoreFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#ad6880410d254bb87a46a663bcdd944bf", null ],
     [ "NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#aacc518ecfae05fa0b46c5d4564230deb", null ],
+    [ "NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#ab02d25eb6552ea4de2ee31ce6d7210c8", null ],
     [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a0bc691ca26723ad9d84ad9aafb928438", null ],
     [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a174a5f51b17ff15bdf18ece0907ce1b0", null ],
     [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#aa2492479cb961e36976a096e29d2b9d4", null ],
@@ -11,6 +12,8 @@ var validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp =
     [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#ad0d31acbe1344cd7c3a52388a20dd06e", null ],
     [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a39e8116f6234a2d52f9c819fe6ca1c90", null ],
     [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#add0fceafa27f807388430edba8dc6ca3", null ],
+    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a45dfda69a9789e4e69365236d1dfcc35", null ],
+    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a608d56d2d842ec96c43a583327f6dd35", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#acacfa792d9ac8cc563f34f192c9fdf7e", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#aff14b2b9d2c0f1013bcbecc88d620a8d", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a93026a891d0bb12665dbb384891d33d6", null ],
@@ -21,5 +24,7 @@ var validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a45bb19481b889579e877cfafd3709819", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a0bdd9302efbad44ab382fa8a43ffb73b", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a02e090b82e1cce1d96b3aa4744f80a7b", null ],
-    [ "TEST_SUITE_END", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ]
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a5d3ebd36af2a29ccdc4c79fb3fbbff50", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a2b5e4ea67855b720116cedea5ea10761", null ],
+    [ "TEST_SUITE_END", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ]
 ];

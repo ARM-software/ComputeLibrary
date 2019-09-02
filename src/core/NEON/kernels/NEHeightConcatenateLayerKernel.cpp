@@ -93,6 +93,9 @@ void NEHeightConcatenateLayerKernel::configure(const ITensor *input, unsigned in
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     INEKernel::configure(std::get<1>(win_config));
+
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 }
 
 Status NEHeightConcatenateLayerKernel::validate(const ITensorInfo *input, unsigned int height_offset, const ITensorInfo *output)
@@ -112,11 +115,11 @@ void NEHeightConcatenateLayerKernel::run(const Window &window, const ThreadInfo 
     uint8_t *output_ptr = _output->buffer() + _output->info()->offset_first_element_in_bytes() + _height_offset * _output->info()->strides_in_bytes()[Window::DimY];
 
     // Create iterators
-    Iterator                input(_input, window);
-    Iterator                output(_output, window);
-    const DataType          dt           = _input->info()->data_type();
-    const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
-    const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
+    Iterator                       input(_input, window);
+    Iterator                       output(_output, window);
+    const DataType                 dt           = _input->info()->data_type();
+    const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
     if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
         execute_window_loop(window, [&](const Coordinates &)

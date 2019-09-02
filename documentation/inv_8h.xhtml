@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -121,13 +121,19 @@ Namespaces</h2></td></tr>
 Macros</h2></td></tr>
 <tr class="memitem:a40d7d98ec5221df8fb9baa6285e0eac8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inv_8h.xhtml#a40d7d98ec5221df8fb9baa6285e0eac8">VINV_IMPL</a>(vtype,  prefix,  postfix)</td></tr>
 <tr class="separator:a40d7d98ec5221df8fb9baa6285e0eac8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65517496eb9d17762411fb97381b4a1a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="inv_8h.xhtml#a65517496eb9d17762411fb97381b4a1a">VINV_IMPL_INT</a>(vtype,  prefix,  postfix)</td></tr>
+<tr class="separator:a65517496eb9d17762411fb97381b4a1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a5ac8135a2c0a60f10448be0057543ed7"><td class="memItemLeft" align="right" valign="top">float32x2_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#a5ac8135a2c0a60f10448be0057543ed7">vinv</a> (const float32x2_t &amp;a)</td></tr>
 <tr class="separator:a5ac8135a2c0a60f10448be0057543ed7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9774774ca4af2449263acd0d9bcab43c"><td class="memItemLeft" align="right" valign="top">int32x2_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#a9774774ca4af2449263acd0d9bcab43c">vinv</a> (const int32x2_t &amp;a)</td></tr>
+<tr class="separator:a9774774ca4af2449263acd0d9bcab43c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9fab00cf10194f860fbe0facb245df77"><td class="memItemLeft" align="right" valign="top">float32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#a9fab00cf10194f860fbe0facb245df77">vinv</a> (const float32x4_t &amp;a)</td></tr>
 <tr class="separator:a9fab00cf10194f860fbe0facb245df77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3520eb056004bb255ef24cbd43e8d60a"><td class="memItemLeft" align="right" valign="top">int32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#a3520eb056004bb255ef24cbd43e8d60a">vinv</a> (const int32x4_t &amp;a)</td></tr>
+<tr class="separator:a3520eb056004bb255ef24cbd43e8d60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a40d7d98ec5221df8fb9baa6285e0eac8"></a>
@@ -161,9 +167,46 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> vtype <a class="code" href="namespacearm__compute_1_1wrapper.xhtml#a9fab00cf10194f860fbe0facb245df77">vinv</a>(<span class="keyword">const</span> vtype &amp;a)     \</div><div class="line">    {                                     \</div><div class="line">        return prefix##_##postfix(a);     \</div><div class="line">    }</div><div class="ttc" id="namespacearm__compute_1_1wrapper_xhtml_a9fab00cf10194f860fbe0facb245df77"><div class="ttname"><a href="namespacearm__compute_1_1wrapper.xhtml#a9fab00cf10194f860fbe0facb245df77">arm_compute::wrapper::vinv</a></div><div class="ttdeci">float32x4_t vinv(const float32x4_t &amp;a)</div><div class="ttdef"><b>Definition:</b> <a href="inv_8h_source.xhtml#l00045">inv.h:45</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> vtype <a class="code" href="namespacearm__compute_1_1wrapper.xhtml#a3520eb056004bb255ef24cbd43e8d60a">vinv</a>(<span class="keyword">const</span> vtype &amp;a)     \</div><div class="line">    {                                     \</div><div class="line">        return prefix##_##postfix(a);     \</div><div class="line">    }</div><div class="ttc" id="namespacearm__compute_1_1wrapper_xhtml_a3520eb056004bb255ef24cbd43e8d60a"><div class="ttname"><a href="namespacearm__compute_1_1wrapper.xhtml#a3520eb056004bb255ef24cbd43e8d60a">arm_compute::wrapper::vinv</a></div><div class="ttdeci">int32x4_t vinv(const int32x4_t &amp;a)</div><div class="ttdef"><b>Definition:</b> <a href="inv_8h_source.xhtml#l00053">inv.h:53</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="inv_8h_source.xhtml#l00034">34</a> of file <a class="el" href="inv_8h_source.xhtml">inv.h</a>.</p>
+
+</div>
+</div>
+<a id="a65517496eb9d17762411fb97381b4a1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65517496eb9d17762411fb97381b4a1a">&#9670;&nbsp;</a></span>VINV_IMPL_INT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VINV_IMPL_INT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">vtype, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">prefix, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">postfix&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> vtype <a class="code" href="namespacearm__compute_1_1wrapper.xhtml#a3520eb056004bb255ef24cbd43e8d60a">vinv</a>(<span class="keyword">const</span> vtype &amp;a)         \</div><div class="line">    {                                         \</div><div class="line">        ARM_COMPUTE_ERROR(<span class="stringliteral">&quot;Not supported&quot;</span>);   \</div><div class="line">    }</div><div class="ttc" id="namespacearm__compute_1_1wrapper_xhtml_a3520eb056004bb255ef24cbd43e8d60a"><div class="ttname"><a href="namespacearm__compute_1_1wrapper.xhtml#a3520eb056004bb255ef24cbd43e8d60a">arm_compute::wrapper::vinv</a></div><div class="ttdeci">int32x4_t vinv(const int32x4_t &amp;a)</div><div class="ttdef"><b>Definition:</b> <a href="inv_8h_source.xhtml#l00053">inv.h:53</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="inv_8h_source.xhtml#l00040">40</a> of file <a class="el" href="inv_8h_source.xhtml">inv.h</a>.</p>
 
 </div>
 </div>
@@ -173,7 +216,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_9eca3c725728e372597fcd0d17c1ea0f.xhtml">wrapper</a></li><li class="navelem"><a class="el" href="dir_36bd1941057d7130e210a25993eacc69.xhtml">intrinsics</a></li><li class="navelem"><a class="el" href="inv_8h.xhtml">inv.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -72,9 +72,10 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     _input  = input;
     _output = output;
 
-    const DataLayout data_layout = input->info()->data_layout();
-    const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const DataLayout              data_layout = input->info()->data_layout();
+    const size_t                  idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t                  idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const UniformQuantizationInfo qinfo       = input->info()->quantization_info().uniform();
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -96,7 +97,7 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     build_opts.add_option("-D" + string_from_data_layout(input->info()->data_layout()));
     build_opts.add_option_if(has_bias, "-DHAS_BIAS");
     build_opts.add_option_if_else(is_data_type_quantized_asymmetric(input->info()->data_type()),
-                                  "-DPAD_VALUE=" + support::cpp11::to_string(input->info()->quantization_info().offset),
+                                  "-DPAD_VALUE=" + support::cpp11::to_string(qinfo.offset),
                                   "-DPAD_VALUE=0");
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_im2col", build_opts.options()));

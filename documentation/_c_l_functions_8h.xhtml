@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -128,8 +128,8 @@ $(document).ready(function(){initNavTree('_c_l_functions_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_c_l_crop_resize_8h_source.xhtml">arm_compute/runtime/CL/functions/CLCropResize.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_deconvolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDeconvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_deconvolution_layer_upsample_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDeconvolutionLayerUpsample.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_c_l_depth_concatenate_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_depth_convert_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDepthConvertLayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_depth_to_space_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDepthToSpaceLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_depthwise_convolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDepthwiseConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_depthwise_separable_convolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDepthwiseSeparableConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_dequantization_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDequantizationLayer.h</a>&quot;</code><br />
@@ -153,10 +153,8 @@ $(document).ready(function(){initNavTree('_c_l_functions_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_c_l_g_e_m_m_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMM.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_g_e_m_m_convolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_g_e_m_m_deconvolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMMDeconvolutionLayer.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_c_l_g_e_m_m_interleave4x4_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMMInterleave4x4.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_g_e_m_m_lowp_matrix_multiply_core_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_g_e_m_m_lowp_output_stage_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_c_l_g_e_m_m_transpose1x_w_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMMTranspose1xW.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_gather_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGather.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_gaussian3x3_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGaussian3x3.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_gaussian5x5_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGaussian5x5.h</a>&quot;</code><br />
@@ -171,11 +169,13 @@ $(document).ready(function(){initNavTree('_c_l_functions_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_c_l_integral_image_8h_source.xhtml">arm_compute/runtime/CL/functions/CLIntegralImage.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_l2_normalize_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLL2NormalizeLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_l_s_t_m_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLLSTMLayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_l_s_t_m_layer_quantized_8h_source.xhtml">arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_laplacian_pyramid_8h_source.xhtml">arm_compute/runtime/CL/functions/CLLaplacianPyramid.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_laplacian_reconstruct_8h_source.xhtml">arm_compute/runtime/CL/functions/CLLaplacianReconstruct.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_locally_connected_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLLocallyConnectedLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_magnitude_8h_source.xhtml">arm_compute/runtime/CL/functions/CLMagnitude.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_mean_std_dev_8h_source.xhtml">arm_compute/runtime/CL/functions/CLMeanStdDev.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_mean_std_dev_normalization_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLMeanStdDevNormalizationLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_median3x3_8h_source.xhtml">arm_compute/runtime/CL/functions/CLMedian3x3.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_min_max_location_8h_source.xhtml">arm_compute/runtime/CL/functions/CLMinMaxLocation.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_non_linear_filter_8h_source.xhtml">arm_compute/runtime/CL/functions/CLNonLinearFilter.h</a>&quot;</code><br />
@@ -183,6 +183,7 @@ $(document).ready(function(){initNavTree('_c_l_functions_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_c_l_normalization_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLNormalizationLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_normalize_planar_y_u_v_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLNormalizePlanarYUVLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_optical_flow_8h_source.xhtml">arm_compute/runtime/CL/functions/CLOpticalFlow.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_p_relu_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLPReluLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_pad_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLPadLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_permute_8h_source.xhtml">arm_compute/runtime/CL/functions/CLPermute.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_phase_8h_source.xhtml">arm_compute/runtime/CL/functions/CLPhase.h</a>&quot;</code><br />
@@ -209,6 +210,7 @@ $(document).ready(function(){initNavTree('_c_l_functions_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_c_l_sobel7x7_8h_source.xhtml">arm_compute/runtime/CL/functions/CLSobel7x7.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_softmax_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLSoftmaxLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_space_to_batch_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLSpaceToBatchLayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_space_to_depth_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLSpaceToDepthLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_split_8h_source.xhtml">arm_compute/runtime/CL/functions/CLSplit.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_stack_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLStackLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_strided_slice_8h_source.xhtml">arm_compute/runtime/CL/functions/CLStridedSlice.h</a>&quot;</code><br />
@@ -220,7 +222,6 @@ $(document).ready(function(){initNavTree('_c_l_functions_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_c_l_upsample_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLUpsampleLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_warp_affine_8h_source.xhtml">arm_compute/runtime/CL/functions/CLWarpAffine.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_warp_perspective_8h_source.xhtml">arm_compute/runtime/CL/functions/CLWarpPerspective.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_c_l_width_concatenate_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_winograd_convolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_winograd_input_transform_8h_source.xhtml">arm_compute/runtime/CL/functions/CLWinogradInputTransform.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_y_o_l_o_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLYOLOLayer.h</a>&quot;</code><br />
@@ -232,7 +233,7 @@ $(document).ready(function(){initNavTree('_c_l_functions_8h.xhtml','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_8bc26130589aa16388b5a02f17abf2c2.xhtml">runtime</a></li><li class="navelem"><a class="el" href="dir_b986aa98f9b6490bb4fc7918500346fb.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_functions_8h.xhtml">CLFunctions.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

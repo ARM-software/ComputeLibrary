@@ -3,7 +3,7 @@ var classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel =
     [ "CLGEMMLowpMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#a759d01d5376a17c7b81131212588810a", null ],
     [ "CLGEMMLowpMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#a5f55c40f31bba46fa72429c820ff8139", null ],
     [ "CLGEMMLowpMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#afdcbb16be23445f565801d54201c9b1d", null ],
-    [ "configure", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#a4ed20a874d049cc5042bfbe7f81733a3", null ],
+    [ "configure", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#a8aa57bd9c0703378b82393e8f440e9c8", null ],
     [ "operator=", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#af520778a23d6716080043321d07e9999", null ],
     [ "operator=", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#af7290399a051e470ba52daadd8d7f968", null ],
     [ "run", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e", null ]

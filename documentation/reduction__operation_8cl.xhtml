@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -97,6 +97,7 @@ $(document).ready(function(){initNavTree('reduction__operation_8cl.xhtml','');})
 
 <div class="header">
   <div class="summary">
+<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">reduction_operation.cl File Reference</div>  </div>
@@ -106,6 +107,13 @@ $(document).ready(function(){initNavTree('reduction__operation_8cl.xhtml','');})
 </div>
 <p><a href="reduction__operation_8cl_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a40336a6b889813a08d55e615a26b511a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="reduction__operation_8cl.xhtml#a40336a6b889813a08d55e615a26b511a">ISGREATER</a>(x,  y)&#160;&#160;&#160;select((int16)0, (int16)-1, x &gt; y)</td></tr>
+<tr class="separator:a40336a6b889813a08d55e615a26b511a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afef444918bb4f103371e703041081971"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="reduction__operation_8cl.xhtml#afef444918bb4f103371e703041081971">ISLESS</a>(x,  y)&#160;&#160;&#160;select((int16)0, (int16)-1, x &lt; y)</td></tr>
+<tr class="separator:afef444918bb4f103371e703041081971"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a48cc0583beba45dfba6d94fb6dc3c59a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="reduction__operation_8cl.xhtml#a48cc0583beba45dfba6d94fb6dc3c59a">square_sum</a> (__global const <a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a> *input)</td></tr>
@@ -118,6 +126,67 @@ Functions</h2></td></tr>
 <tr class="memdesc:ab71c1065b18391b45255b1f251b861e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate product of a vector.  <a href="#ab71c1065b18391b45255b1f251b861e7">More...</a><br /></td></tr>
 <tr class="separator:ab71c1065b18391b45255b1f251b861e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="a40336a6b889813a08d55e615a26b511a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40336a6b889813a08d55e615a26b511a">&#9670;&nbsp;</a></span>ISGREATER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ISGREATER</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">y&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;select((int16)0, (int16)-1, x &gt; y)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="reduction__operation_8cl_source.xhtml#l00034">34</a> of file <a class="el" href="reduction__operation_8cl_source.xhtml">reduction_operation.cl</a>.</p>
+
+</div>
+</div>
+<a id="afef444918bb4f103371e703041081971"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afef444918bb4f103371e703041081971">&#9670;&nbsp;</a></span>ISLESS</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ISLESS</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">y&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;select((int16)0, (int16)-1, x &lt; y)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="reduction__operation_8cl_source.xhtml#l00035">35</a> of file <a class="el" href="reduction__operation_8cl_source.xhtml">reduction_operation.cl</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ab71c1065b18391b45255b1f251b861e7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab71c1065b18391b45255b1f251b861e7">&#9670;&nbsp;</a></span>product()</h2>
@@ -152,11 +221,11 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>product of vector. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="reduction__operation_8cl_source.xhtml#l00070">70</a> of file <a class="el" href="reduction__operation_8cl_source.xhtml">reduction_operation.cl</a>.</p>
-<div class="fragment"><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;{</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, 16)</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    in = vload16(0, input);</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    in.s01234567 *= in.s89ABCDEF;</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    in.s0123 *= in.s4567;</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    in.s01 *= in.s23;</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    return (in.s0 * in.s1);</div><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;}</div><div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">helpers.h:57</a></div></div>
+<p class="definition">Definition at line <a class="el" href="reduction__operation_8cl_source.xhtml#l00083">83</a> of file <a class="el" href="reduction__operation_8cl_source.xhtml">reduction_operation.cl</a>.</p>
+<div class="fragment"><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;{</div><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, 16)</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    in = vload16(0, input);</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    in.s01234567 *= in.s89ABCDEF;</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    in.s0123 *= in.s4567;</div><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    in.s01 *= in.s23;</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    return (in.s0 * in.s1);</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;}</div><div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
+<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00073">helpers.h:73</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">VEC_DATA_TYPE</a>.</p>
+<p class="reference">References <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00073">VEC_DATA_TYPE</a>.</p>
 
 </div>
 </div>
@@ -193,11 +262,11 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>square sum of vector. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="reduction__operation_8cl_source.xhtml#l00032">32</a> of file <a class="el" href="reduction__operation_8cl_source.xhtml">reduction_operation.cl</a>.</p>
-<div class="fragment"><div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;{</div><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, 16)</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    in = vload16(0, input);</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    in *= in;</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    in.s01234567 += in.s89ABCDEF;</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    in.s0123 += in.s4567;</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    in.s01 += in.s23;</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    return (in.s0 + in.s1);</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}</div><div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">helpers.h:57</a></div></div>
+<p class="definition">Definition at line <a class="el" href="reduction__operation_8cl_source.xhtml#l00045">45</a> of file <a class="el" href="reduction__operation_8cl_source.xhtml">reduction_operation.cl</a>.</p>
+<div class="fragment"><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;{</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, 16)</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    in = vload16(0, input);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    in *= in;</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    in.s01234567 += in.s89ABCDEF;</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    in.s0123 += in.s4567;</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    in.s01 += in.s23;</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    return (in.s0 + in.s1);</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}</div><div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
+<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00073">helpers.h:73</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">VEC_DATA_TYPE</a>.</p>
+<p class="reference">References <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00073">VEC_DATA_TYPE</a>.</p>
 
 </div>
 </div>
@@ -234,13 +303,13 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>sum of vector. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="reduction__operation_8cl_source.xhtml#l00052">52</a> of file <a class="el" href="reduction__operation_8cl_source.xhtml">reduction_operation.cl</a>.</p>
-<div class="fragment"><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;{</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, 16)</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    in = vload16(0, input);</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    in.s01234567 += in.s89ABCDEF;</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    in.s0123 += in.s4567;</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    in.s01 += in.s23;</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    return (in.s0 + in.s1);</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}</div><div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">helpers.h:57</a></div></div>
+<p class="definition">Definition at line <a class="el" href="reduction__operation_8cl_source.xhtml#l00065">65</a> of file <a class="el" href="reduction__operation_8cl_source.xhtml">reduction_operation.cl</a>.</p>
+<div class="fragment"><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;{</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, 16)</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    in = vload16(0, input);</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    in.s01234567 += in.s89ABCDEF;</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    in.s0123 += in.s4567;</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    in.s01 += in.s23;</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    return (in.s0 + in.s1);</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;}</div><div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
+<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00073">helpers.h:73</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">VEC_DATA_TYPE</a>.</p>
+<p class="reference">References <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00073">VEC_DATA_TYPE</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_l2_normalize_layer_kernel_8cpp_source.xhtml#l00095">CLL2NormalizeLayerKernel::configure()</a>, <a class="el" href="_g_c_softmax_layer_kernel_8cpp_source.xhtml#l00107">GCLogits1DShiftExpSumKernel::configure()</a>, <a class="el" href="_g_c_softmax_layer_kernel_8cpp_source.xhtml#l00201">GCLogits1DNormKernel::configure()</a>, <a class="el" href="_c_l_softmax_layer_kernel_8cpp_source.xhtml#l00220">CLLogits1DMaxShiftExpSumKernel::configure()</a>, <a class="el" href="_c_l_softmax_layer_kernel_8cpp_source.xhtml#l00336">CLLogits1DNormKernel::configure()</a>, <a class="el" href="validation_2reference_2_convolution_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::convolution()</a>, <a class="el" href="validation_2reference_2_l2_normalize_layer_8cpp_source.xhtml#l00051">arm_compute::test::validation::reference::l2_normalize()</a>, <a class="el" href="l2__normalize_8cl_source.xhtml#l00051">l2_normalize_x()</a>, <a class="el" href="l2__normalize_8cl_source.xhtml#l00094">l2_normalize_y()</a>, <a class="el" href="l2__normalize_8cl_source.xhtml#l00145">l2_normalize_z()</a>, <a class="el" href="validation_2reference_2_magnitude_8cpp_source.xhtml#l00035">arm_compute::test::validation::reference::magnitude()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00032">arm_compute::pixel_area_c1u8_clamp()</a>, <a class="el" href="validation_2reference_2_scale_8cpp_source.xhtml#l00040">arm_compute::test::validation::reference::scale_core()</a>, <a class="el" href="validation_2reference_2_softmax_layer_8cpp_source.xhtml#l00037">arm_compute::test::validation::reference::softmax_layer()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00307">softmax_layer_max_shift_exp_sum_parallel()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00158">softmax_layer_max_shift_exp_sum_serial()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00101">softmax_layer_norm()</a>, <a class="el" href="_c_l_l2_normalize_layer_kernel_8cpp_source.xhtml#l00152">CLL2NormalizeLayerKernel::validate()</a>, <a class="el" href="_c_l_softmax_layer_kernel_8cpp_source.xhtml#l00284">CLLogits1DMaxShiftExpSumKernel::validate()</a>, and <a class="el" href="_c_l_softmax_layer_kernel_8cpp_source.xhtml#l00372">CLLogits1DNormKernel::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_l2_normalize_layer_kernel_8cpp_source.xhtml#l00098">CLL2NormalizeLayerKernel::configure()</a>, <a class="el" href="_g_c_softmax_layer_kernel_8cpp_source.xhtml#l00107">GCLogits1DShiftExpSumKernel::configure()</a>, <a class="el" href="_g_c_softmax_layer_kernel_8cpp_source.xhtml#l00201">GCLogits1DNormKernel::configure()</a>, <a class="el" href="_c_l_softmax_layer_kernel_8cpp_source.xhtml#l00220">CLLogits1DMaxShiftExpSumKernel::configure()</a>, <a class="el" href="_c_l_softmax_layer_kernel_8cpp_source.xhtml#l00337">CLLogits1DNormKernel::configure()</a>, <a class="el" href="validation_2reference_2_convolution_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::convolution()</a>, <a class="el" href="validation_2reference_2_l2_normalize_layer_8cpp_source.xhtml#l00051">arm_compute::test::validation::reference::l2_normalize()</a>, <a class="el" href="l2__normalize_8cl_source.xhtml#l00051">l2_normalize_x()</a>, <a class="el" href="l2__normalize_8cl_source.xhtml#l00094">l2_normalize_y()</a>, <a class="el" href="l2__normalize_8cl_source.xhtml#l00145">l2_normalize_z()</a>, <a class="el" href="validation_2reference_2_magnitude_8cpp_source.xhtml#l00035">arm_compute::test::validation::reference::magnitude()</a>, <a class="el" href="reference_2_mean_std_dev_normalization_layer_8cpp_source.xhtml#l00037">arm_compute::test::validation::reference::mean_std_normalization_layer()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00032">arm_compute::pixel_area_c1u8_clamp()</a>, <a class="el" href="validation_2reference_2_scale_8cpp_source.xhtml#l00040">arm_compute::test::validation::reference::scale_core()</a>, <a class="el" href="validation_2reference_2_softmax_layer_8cpp_source.xhtml#l00037">arm_compute::test::validation::reference::softmax_layer()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00307">softmax_layer_max_shift_exp_sum_parallel()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00158">softmax_layer_max_shift_exp_sum_serial()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00101">softmax_layer_norm()</a>, <a class="el" href="_c_l_l2_normalize_layer_kernel_8cpp_source.xhtml#l00153">CLL2NormalizeLayerKernel::validate()</a>, <a class="el" href="_c_l_softmax_layer_kernel_8cpp_source.xhtml#l00285">CLLogits1DMaxShiftExpSumKernel::validate()</a>, and <a class="el" href="_c_l_softmax_layer_kernel_8cpp_source.xhtml#l00374">CLLogits1DNormKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -250,7 +319,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="reduction__operation_8cl.xhtml">reduction_operation.cl</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

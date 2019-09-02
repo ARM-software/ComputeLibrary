@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,4 +116,10 @@ float sqrt_op(float x)
 float linear_op(float x)
 {
     return MLA_OP(float(B_VAL), float(A_VAL), x);
+}
+
+// Linear Activation
+float identity_op(float x)
+{
+    return x;
 }

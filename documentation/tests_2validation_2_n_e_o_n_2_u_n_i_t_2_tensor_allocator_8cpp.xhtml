@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -104,6 +104,7 @@ $(document).ready(function(){initNavTree('tests_2validation_2_n_e_o_n_2_u_n_i_t_
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_tensor_allocator_8h_source.xhtml">arm_compute/runtime/TensorAllocator.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_m_mapped_file_8h_source.xhtml">arm_compute/core/utils/misc/MMappedFile.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_utility_8h_source.xhtml">arm_compute/core/utils/misc/Utility.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_memory_group_8h_source.xhtml">arm_compute/runtime/MemoryGroup.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_memory_region_8h_source.xhtml">arm_compute/runtime/MemoryRegion.h</a>&quot;</code><br />
@@ -135,7 +136,13 @@ Functions</h2></td></tr>
 <tr class="memitem:a01fc4fffa59e809a19e061a70d32a86e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a01fc4fffa59e809a19e061a70d32a86e">TEST_CASE</a> (ImportMemory, framework::DatasetMode::ALL)</td></tr>
 <tr class="separator:a01fc4fffa59e809a19e061a70d32a86e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb7303d43439b4407f4ca94606c60ba2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aeb7303d43439b4407f4ca94606c60ba2">TEST_CASE</a> (ImportMemoryMalloc, framework::DatasetMode::ALL)</td></tr>
+<tr class="memdesc:aeb7303d43439b4407f4ca94606c60ba2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates import memory interface when importing malloced memory.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#aeb7303d43439b4407f4ca94606c60ba2">More...</a><br /></td></tr>
 <tr class="separator:aeb7303d43439b4407f4ca94606c60ba2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc75471bf603be7dc560614d6c94016f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adc75471bf603be7dc560614d6c94016f">TEST_CASE</a> (ImportMemoryMallocPadded, framework::DatasetMode::ALL)</td></tr>
+<tr class="separator:adc75471bf603be7dc560614d6c94016f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5384463e97a1e1b8011c43095edb8b4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae5384463e97a1e1b8011c43095edb8b4">TEST_CASE</a> (ImportMemoryMappedFile, framework::DatasetMode::ALL)</td></tr>
+<tr class="memdesc:ae5384463e97a1e1b8011c43095edb8b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates import memory interface when importing memory mapped objects.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ae5384463e97a1e1b8011c43095edb8b4">More...</a><br /></td></tr>
+<tr class="separator:ae5384463e97a1e1b8011c43095edb8b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa33b5b965fca34d01c787ebb04f04c11"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa33b5b965fca34d01c787ebb04f04c11">TEST_CASE</a> (AlignedAlloc, framework::DatasetMode::ALL)</td></tr>
 <tr class="separator:aa33b5b965fca34d01c787ebb04f04c11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -145,7 +152,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_6fc87decd8cffc07e5f49c197ca3de10.xhtml">UNIT</a></li><li class="navelem"><a class="el" href="tests_2validation_2_n_e_o_n_2_u_n_i_t_2_tensor_allocator_8cpp.xhtml">TensorAllocator.cpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

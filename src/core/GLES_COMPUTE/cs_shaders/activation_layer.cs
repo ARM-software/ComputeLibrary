@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,8 @@ void main(void)
     data_out = sqrt_op(data);
 #elif defined(LINEAR)   /*LINEAR*/
     data_out = linear_op(data);
+#elif defined(IDENTITY) /*IDENTITY*/
+    data_out = identity_op(data);
 #else                   /*LOGISTIC*/
 #error Activation function not provided
 #endif /*LOGISTIC*/
@@ -131,6 +133,9 @@ void main(void)
 #elif defined(LINEAR)   /*LINEAR*/
     data_out.x = linear_op(a);
     data_out.y = linear_op(b);
+#elif defined(IDENTITY)   /*IDENTITY*/
+    data_out.x = identity_op(a);
+    data_out.y = identity_op(b);
 #else                   /*LOGISTIC*/
 #error Activation function not provided
 #endif /*LOGISTIC*/

@@ -15,6 +15,7 @@ var searchData=
   ['memoryregion',['MemoryRegion',['../classarm__compute_1_1_memory_region.xhtml',1,'arm_compute']]],
   ['midgardtuner',['MidgardTuner',['../classarm__compute_1_1tuners_1_1_midgard_tuner.xhtml',1,'arm_compute::tuners']]],
   ['minmaxlocationvalues',['MinMaxLocationValues',['../structarm__compute_1_1_min_max_location_values.xhtml',1,'arm_compute']]],
+  ['mmappedfile',['MMappedFile',['../classarm__compute_1_1utils_1_1mmap__io_1_1_m_mapped_file.xhtml',1,'arm_compute::utils::mmap_io']]],
   ['multihog',['MultiHOG',['../classarm__compute_1_1_multi_h_o_g.xhtml',1,'arm_compute']]],
   ['multiimage',['MultiImage',['../classarm__compute_1_1_multi_image.xhtml',1,'arm_compute']]],
   ['multiimageinfo',['MultiImageInfo',['../classarm__compute_1_1_multi_image_info.xhtml',1,'arm_compute']]]

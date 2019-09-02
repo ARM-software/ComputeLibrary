@@ -26,7 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
+#include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
 
 #include <memory>
@@ -41,9 +41,10 @@ class Status;
 
 /** Basic function to execute concatenate tensors along a given axis. This function calls the following kernels:
  *
- * -# @ref CLWidthConcatenateLayer (if underlying concatenation axis is 0).
+ * -# @ref CLWidthConcatenateLayerKernel (if underlying concatenation axis is 0).
  * -# @ref CLHeightConcatenateLayerKernel (if underlying concatenation axis is 1).
- * -# @ref CLDepthConcatenateLayer (if underlying concatenation axis is 2).
+ * -# @ref CLDepthConcatenateLayerKernel (if underlying concatenation axis is 2).
+ * -# @ref CLBatchConcatenateLayerKernel (if underlying concatenation axis is 3).
  */
 class CLConcatenateLayer : public IFunction
 {
@@ -53,30 +54,38 @@ public:
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayer, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayer.
+     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayerKernel, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayerKernel.
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
-     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1 and 2.
+     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
-    void configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis);
+    void configure(std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis);
+    void configure(std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayer, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayer.
+     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayerKernel, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayerKernel.
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
-     * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1 and 2.
+     * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      *
      * @return a status
      */
     static Status validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
+    static Status validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
+    template <typename TensorType>
+    void configure_internal(std::vector<TensorType *> &&inputs_vector, ICLTensor *output, size_t axis);
+
+    template <typename TensorInfoType>
+    static Status validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output, size_t axis);
+
     std::vector<std::unique_ptr<ICLKernel>> _concat_kernels;
     unsigned int                            _num_inputs;
     unsigned int                            _axis;

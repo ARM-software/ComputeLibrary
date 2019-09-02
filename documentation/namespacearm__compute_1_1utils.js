@@ -1,6 +1,7 @@
 var namespacearm__compute_1_1utils =
 [
     [ "iterable", "namespacearm__compute_1_1utils_1_1iterable.xhtml", "namespacearm__compute_1_1utils_1_1iterable" ],
+    [ "mmap_io", "namespacearm__compute_1_1utils_1_1mmap__io.xhtml", "namespacearm__compute_1_1utils_1_1mmap__io" ],
     [ "random", "namespacearm__compute_1_1utils_1_1random.xhtml", "namespacearm__compute_1_1utils_1_1random" ],
     [ "requires", "namespacearm__compute_1_1utils_1_1requires.xhtml", null ],
     [ "traits", "namespacearm__compute_1_1utils_1_1traits.xhtml", "namespacearm__compute_1_1utils_1_1traits" ],

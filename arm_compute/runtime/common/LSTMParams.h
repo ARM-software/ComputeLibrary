@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,8 @@ public:
     /** Constructor */
     LSTMParams()
         : _input_to_input_weights(nullptr), _recurrent_to_input_weights(nullptr), _cell_to_input_weights(nullptr), _input_gate_bias(nullptr), _cell_to_forget_weights(nullptr),
-          _cell_to_output_weights(nullptr), _projection_weights(nullptr), _projection_bias(nullptr), _has_peephole_opt(false), _has_projection(false), _has_cifg_opt(true)
+          _cell_to_output_weights(nullptr), _projection_weights(nullptr), _projection_bias(nullptr), _input_layer_norm_weights(nullptr), _forget_layer_norm_weights(nullptr), _cell_layer_norm_weights(nullptr),
+          _output_layer_norm_weights(nullptr), _has_peephole_opt(false), _has_projection(false), _has_cifg_opt(true), _use_layer_norm(false)
     {
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -96,6 +97,25 @@ public:
         _has_peephole_opt       = true;
         return *this;
     }
+    /** Set layer normalization tensor parameters.
+     *
+     * @param[in] input_layer_norm_weights  1D weights tensor with dimensions [num_units]. Data type supported: Data types supported: F16/F32.
+     * @param[in] forget_layer_norm_weights 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input_layer_norm_weights.
+     * @param[in] cell_layer_norm_weights   1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input_layer_norm_weights.
+     * @param[in] output_layer_norm_weights 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input_layer_norm_weights.
+     *
+     * @return Reference to this LSTMParams object
+     */
+    LSTMParams &set_layer_normalization_params(const T *input_layer_norm_weights, const T *forget_layer_norm_weights,
+                                               const T *cell_layer_norm_weights, const T *output_layer_norm_weights)
+    {
+        _input_layer_norm_weights  = input_layer_norm_weights;
+        _forget_layer_norm_weights = forget_layer_norm_weights;
+        _cell_layer_norm_weights   = cell_layer_norm_weights;
+        _output_layer_norm_weights = output_layer_norm_weights;
+        _use_layer_norm            = true;
+        return *this;
+    }
 
     const T *input_to_input_weights() const
     {
@@ -137,6 +157,26 @@ public:
         return _projection_bias;
     }
 
+    const T *input_layer_norm_weights() const
+    {
+        return _input_layer_norm_weights;
+    }
+
+    const T *forget_layer_norm_weights() const
+    {
+        return _forget_layer_norm_weights;
+    }
+
+    const T *cell_layer_norm_weights() const
+    {
+        return _cell_layer_norm_weights;
+    }
+
+    const T *output_layer_norm_weights() const
+    {
+        return _output_layer_norm_weights;
+    }
+
     bool has_peephole_opt() const
     {
         return _has_peephole_opt;
@@ -152,6 +192,11 @@ public:
         return _has_cifg_opt;
     }
 
+    bool use_layer_norm() const
+    {
+        return _use_layer_norm;
+    }
+
 private:
     const T *_input_to_input_weights;
     const T *_recurrent_to_input_weights;
@@ -161,9 +206,14 @@ private:
     const T *_cell_to_output_weights;
     const T *_projection_weights;
     const T *_projection_bias;
+    const T *_input_layer_norm_weights;
+    const T *_forget_layer_norm_weights;
+    const T *_cell_layer_norm_weights;
+    const T *_output_layer_norm_weights;
     bool     _has_peephole_opt;
     bool     _has_projection;
     bool     _has_cifg_opt;
+    bool     _use_layer_norm;
 };
 }
 #endif /*__ARM_COMPUTE_LSTMPARAMS_H__ */

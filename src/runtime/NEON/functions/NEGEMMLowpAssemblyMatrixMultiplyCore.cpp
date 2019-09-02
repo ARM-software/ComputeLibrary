@@ -43,7 +43,7 @@ NEGEMMLowpAssemblyMatrixMultiplyCore::NEGEMMLowpAssemblyMatrixMultiplyCore(std::
 {
 }
 
-void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, ITensor *output)
+void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::U8, DataType::S8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32, DataType::S32);
@@ -59,7 +59,7 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            _asm_glue.configure(a, b, output, 1.f, 0.f, true);
+            _asm_glue.configure(a, b, c, output, 1.f, 0.f, GEMMInfo(false, false, true));
             run_optimised = _asm_glue.is_configured();
             break;
         }

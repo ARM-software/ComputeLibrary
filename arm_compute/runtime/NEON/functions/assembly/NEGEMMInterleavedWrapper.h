@@ -104,14 +104,14 @@ public:
      *
      * @note The input and output tensor must have the same dimensions
      *
-     * @param[in]  a              Input tensor (Matrix A)
-     * @param[in]  b              Input tensor (Matrix B)
-     * @param[out] c              Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
-     * @param[in]  alpha          Scalar multiplier to apply to AB matrix product.
-     * @param[in]  beta           Scalar multiplier to apply to input C matrix before adding product.
-     * @param[in]  pretranspose_b If true, pretranspose B once during the prepare() stage instead of on the fly every time.
+     * @param[in]  a         Input tensor (Matrix A)
+     * @param[in]  b         Input tensor (Matrix B)
+     * @param[out] c         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in]  alpha     Scalar multiplier to apply to AB matrix product.
+     * @param[in]  beta      Scalar multiplier to apply to input C matrix before adding product.
+     * @param[in]  gemm_info GEMM meta-data
      */
-    void configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, bool pretranspose_b);
+    void configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, const GEMMInfo &gemm_info);
 
     // Inherited methods overridden:
     void run() override;

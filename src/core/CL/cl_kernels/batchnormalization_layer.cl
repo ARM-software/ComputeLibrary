@@ -29,16 +29,13 @@
 #define INVSQRT_OP(a) rsqrt((a))
 #define SQCVT_SAT(a) (a)
 
-#if defined(VEC_SIZE) && defined(DATA_TYPE)
-
-#if defined(FUSED_ACTIVATION)
-#include "activation_layer.cl"
-#define ACTIVATION_FUNC(x) ACTIVATION_OP(FUSED_ACTIVATION, x)
-#else /* defined(FUSED_ACTIVATION) */
-#define ACTIVATION_FUNC(x) (x)
-#endif /* defined(FUSED_ACTIVATION) */
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(ACTIVATION_TYPE)
+#include "activation_float_helpers.h"
 
 /** Apply batch normalization.
+ *
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
  * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
@@ -142,13 +139,16 @@ __kernel void batchnormalization_layer_nchw(TENSOR3D_DECLARATION(input),
     res = ADD_OP(res, beta_vec);
 #endif /* USE_DEFAULT_BETA */
 
-    res = ACTIVATION_FUNC(res);
+    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, res, A_VAL, B_VAL);
 
     VSTORE(VEC_SIZE)
     (res, 0, (__global DATA_TYPE *)out.ptr);
 }
 
 /** Apply batch normalization on tensors with NHWC format.
+ *
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
  * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
@@ -252,168 +252,168 @@ __kernel void batchnormalization_layer_nhwc(TENSOR3D_DECLARATION(input),
     res = ADD_OP(res, beta_vec);
 #endif /* USE_DEFAULT_BETA */
 
-    res = ACTIVATION_FUNC(res);
+    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, res, A_VAL, B_VAL);
 
     VSTORE(VEC_SIZE)
     (res, 0, (__global DATA_TYPE *)out.ptr);
 }
-#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) */
+#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE)*/
 
-#if defined(NUM_CHANNELS) && defined(DATA_TYPE) && defined(EPSILON)
-/** Fuse batchnorm parameters to convolution layer parameters
+#if defined(DATA_TYPE) && defined(EPSILON)
+/** OpenCL kernel to fuse the weights of convolution or depthwise convolution layer with batch normalization when the data layout is either NCHW or NHWC
  *
- * @attention Data type should be passed using the -DDATA_TYPE compile flag, e.g. -DDATA_TYPE=float
- * @attention Input tensor depth should be given as a preprocessor argument using -DNUM_CHANNELS=size. e.g. -DNUM_CHANNELS=16
- * @attention Batch normalization epsilon parameter should be given as a preprocessor argument with -DEPSILON=value. e.g. -DEPSILON=0.001f
+ * @note The input weights tensor is assumed 4D with the OFMs in the fourth dimension
+ * @note Data type should be passed at compile time using the -DDATA_TYPE, e.g. -DDATA_TYPE=float
+ * @note The third dimension of the input tensor should be passed at compile time when weights belong to a convolution layer using -DDIM2=size. e.g. -DDIM2=16.
+ *       For depthwise convolution weight do not pass DIM2
+ * @note Data layout NHWC should be passed at compile time with -DNHWC. For data layout NCHW it is not required to pass any parameter
+ * @note Batch normalization epsilon parameter should be passed at compile time using -DEPSILON=value. e.g. -DEPSILON=0.001f
  *
- * @param[in]  conv_w_ptr                             Pointer to the source tensor. Supported data types: F16/F32
- * @param[in]  conv_w_stride_x                        Stride of the source tensor in X dimension (in bytes)
- * @param[in]  conv_w_step_x                          input_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  conv_w_stride_y                        Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  conv_w_step_y                          input_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  conv_w_stride_z                        Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  conv_w_step_z                          input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  conv_w_stride_w                        Stride of the source tensor in W dimension (in bytes)
- * @param[in]  conv_w_step_w                          input_stride_w * number of elements along W processed per workitem(in bytes)
- * @param[in]  conv_w_offset_first_element_in_bytes   The offset of the first element in the source tensor
- * @param[in]  bn_mean_ptr                            Pointer to the mean source tensor. Supported data types: same as @p input_ptr
- * @param[in]  bn_mean_stride_x                       Stride of the mean source tensor in X dimension (in bytes)
- * @param[in]  bn_mean_step_x                         bn_mean_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  bn_mean_offset_first_element_in_bytes  The offset of the first element in the mean source tensor
- * @param[in]  bn_var_ptr                             Pointer to the var tensor. Supported data types: same as @p input_ptr
- * @param[in]  bn_var_stride_x                        Stride of the var tensor in X dimension (in bytes)
- * @param[in]  bn_var_step_x                          bn_var_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  bn_var_offset_first_element_in_bytes   The offset of the first element in the var source tensor
- * @param[out] fused_w_ptr                            Pointer to the destination weights tensors. Supported data types: same as @p input_ptr
- * @param[in]  fused_w_stride_x                       Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  fused_w_step_x                         fused_w_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  fused_w_stride_y                       Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  fused_w_step_y                         fused_w_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  fused_w_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  fused_w_step_z                         fused_w_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  fused_w_stride_w                       Stride of the destination tensor in W dimension (in bytes)
- * @param[in]  fused_w_step_w                         fused_w_stride_w * number of elements along W processed per workitem(in bytes)
- * @param[in]  fused_w_offset_first_element_in_bytes  The offset of the first element in the destination tensor
- * @param[in]  fused_b_ptr                            Pointer to the destination bias tensor. Supported data types: same as @p input_ptr
- * @param[in]  fused_b_stride_x                       Stride of the bias source tensor in X dimension (in bytes)
- * @param[in]  fused_b_step_x                         fused_b_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  fused_b_offset_first_element_in_bytes  The offset of the first element in the destination tensor
- * @param[in]  conv_b_ptr                             Pointer to the source bias tensor. Supported data types: same as @p input_ptr
- * @param[in]  conv_b_stride_x                        Stride of the beta source tensor in X dimension (in bytes)
- * @param[in]  conv_b_step_x                          conv_b_beta_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  conv_b_offset_first_element_in_bytes   The offset of the first element in the source bias tensor
- * @param[in]  bn_beta_ptr                            Pointer to the beta source tensor. Supported data types: same as @p input_ptr
- * @param[in]  bn_beta_stride_x                       Stride of the beta source tensor in X dimension (in bytes)
- * @param[in]  bn_beta_step_x                         bn_beta_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  bn_beta_offset_first_element_in_bytes  The offset of the first element in the beta source tensor
- * @param[in]  bn_gamma_ptr                           Pointer to the gamma source tensor. Supported data types: same as @p input_ptr
- * @param[in]  bn_gamma_stride_x                      Stride of the gamma source tensor in X dimension (in bytes)
- * @param[in]  bn_gamma_step_x                        bn_gamma_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  bn_gamma_offset_first_element_in_bytes The offset of the first element in the gamma source tensor
- * @param[in]  epsilon                                Epsilon parameter in the batch normalization equation
+ * @param[in]  w_ptr                                 Pointer to the weights tensor. Supported data types: F16/F32
+ * @param[in]  w_stride_x                            Stride of the weights tensor in X dimension (in bytes)
+ * @param[in]  w_step_x                              w_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  w_stride_y                            Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in]  w_step_y                              w_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  w_stride_z                            Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in]  w_step_z                              w_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  w_offset_first_element_in_bytes       The offset of the first element in the weights tensor
+ * @param[in]  b_ptr                                 (Optional) Pointer to the bias tensor. Supported data types: same as @p w_ptr
+ * @param[in]  b_stride_x                            (Optional) Stride of the bias tensor in X dimension (in bytes)
+ * @param[in]  b_step_x                              (Optional) b_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  b_stride_y                            (Optional) Stride of the bias tensor in Y dimension (in bytes)
+ * @param[in]  b_step_y                              (Optional) b_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  b_stride_z                            (Optional) Stride of the bias tensor in Z dimension (in bytes)
+ * @param[in]  b_step_z                              (Optional) b_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  b_offset_first_element_in_bytes       (Optional) The offset of the first element in the bias tensor
+ * @param[in]  mean_ptr                              Pointer to the mean source tensor. Supported data types: same as @p w_ptr
+ * @param[in]  mean_stride_x                         Stride of the mean source tensor in X dimension (in bytes)
+ * @param[in]  mean_step_x                           mean_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  mean_offset_first_element_in_bytes    The offset of the first element in the mean source tensor
+ * @param[in]  var_ptr                               Pointer to the var tensor. Supported data types: same as @p w_ptr
+ * @param[in]  var_stride_x                          Stride of the var tensor in X dimension (in bytes)
+ * @param[in]  var_step_x                            var_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  var_offset_first_element_in_bytes     The offset of the first element in the var source tensor
+ * @param[out] w_fused_ptr                           (Optional) Pointer to the destination weights tensors. Supported data types: same as @p w_ptr
+ * @param[in]  w_fused_stride_x                      (Optional) Stride of the destination weights tensor in X dimension (in bytes)
+ * @param[in]  w_fused_step_x                        (Optional) w_fused_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  w_fused_stride_y                      (Optional) Stride of the destination weights tensor in Y dimension (in bytes)
+ * @param[in]  w_fused_step_y                        (Optional) w_fused_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  w_fused_stride_z                      (Optional) Stride of the destination weights tensor in Z dimension (in bytes)
+ * @param[in]  w_fused_step_z                        (Optional) w_fused_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  w_fused_offset_first_element_in_bytes (Optional) The offset of the first element in the destination weights tensor
+ * @param[in]  b_fused_ptr                           (Optional) Pointer to the destination bias tensor. Supported data types: same as @p w_ptr
+ * @param[in]  b_fused_stride_x                      (Optional) Stride of the destination bias tensor in X dimension (in bytes)
+ * @param[in]  b_fused_step_x                        (Optional) b_fused_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  b_fused_offset_first_element_in_bytes (Optional) The offset of the first element in the destination bias tensor
+ * @param[in]  beta_ptr                              (Optional) Pointer to the beta source tensor. Supported data types: same as @p w_ptr
+ * @param[in]  beta_stride_x                         (Optional) Stride of the beta source tensor in X dimension (in bytes)
+ * @param[in]  beta_step_x                           (Optional) beta_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  beta_offset_first_element_in_bytes    (Optional) The offset of the first element in the beta source tensor
+ * @param[in]  gamma_ptr                             (Optional) Pointer to the gamma source tensor. Supported data types: same as @p w_ptr
+ * @param[in]  gamma_stride_x                        (Optional) Stride of the gamma source tensor in X dimension (in bytes)
+ * @param[in]  gamma_step_x                          (Optional) gamma_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  gamma_offset_first_element_in_bytes   (Optional) The offset of the first element in the gamma source tensor
  */
-__kernel void fuse_batchnormalization_layer(TENSOR4D_DECLARATION(conv_w),
-                                            VECTOR_DECLARATION(bn_mean),
-                                            VECTOR_DECLARATION(bn_var)
+__kernel void fuse_batchnormalization_layer(TENSOR3D_DECLARATION(w),
+#if defined(BIAS)
+                                            VECTOR_DECLARATION(b),
+#endif // defined(BIAS)
+                                            VECTOR_DECLARATION(mean),
+                                            VECTOR_DECLARATION(var)
 #ifndef IN_PLACE_W
                                             ,
-                                            TENSOR4D_DECLARATION(fused_w)
-#endif /* not IN_PLACE_W */
+                                            TENSOR3D_DECLARATION(w_fused)
+#endif // ifndef IN_PLACE_W
 #ifndef IN_PLACE_B
                                             ,
-                                            VECTOR_DECLARATION(fused_b)
-#endif /* not IN_PLACE_B */
-#ifdef HAS_BIAS
+                                            VECTOR_DECLARATION(b_fused)
+#endif // ifndef IN_PLACE_B
+#if defined(BETA)
                                             ,
-                                            VECTOR_DECLARATION(conv_b)
-#endif /* HAS_BIAS */
-#ifndef USE_DEFAULT_BETA
+                                            VECTOR_DECLARATION(beta)
+#endif // defined(BETA)
+#if defined(GAMMA)
                                             ,
-                                            VECTOR_DECLARATION(bn_beta)
-#endif /* USE_DEFAULT_BETA */
-#ifndef USE_DEFAULT_GAMMA
-                                            ,
-                                            VECTOR_DECLARATION(bn_gamma)
-#endif /* USE_DEFAULT_GAMMA */
+                                            VECTOR_DECLARATION(gamma)
+#endif // defined(GAMMA)
                                            )
 {
-    Tensor4D conv_w  = CONVERT_TO_TENSOR4D_STRUCT(conv_w, NUM_CHANNELS);
-    Vector   bn_mean = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bn_mean);
-    Vector   bn_var  = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bn_var);
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+    int z = get_global_id(2);
 
-    // Conditional ops
-#ifdef HAS_BIAS
-    Vector conv_b = CONVERT_TO_VECTOR_STRUCT_NO_STEP(conv_b);
-#endif /* HAS_BIAS */
-#ifndef USE_DEFAULT_BETA
-    Vector bn_beta = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bn_beta);
-#endif /* USE_DEFAULT_BETA */
-#ifndef USE_DEFAULT_GAMMA
-    Vector bn_gamma = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bn_gamma);
-#endif /* USE_DEFAULT_GAMMA */
+#if defined(DIM2)
+    int c0 = z % DIM2;
+    int c1 = z / DIM2;
+#else // ! defined(DIM2)
+    int c0 = 0;
+#if defined(NHWC)
+    int c1 = x;
+#else  // defined(NHWC)
+    int c1 = z;
+#endif // defined(NHWC)
+#endif // defined(DIM2)
 
-    // In-place ops
-#ifdef IN_PLACE_W
-    Tensor4D fused_w          = conv_w;
-    uint     fused_w_stride_x = conv_w_stride_x;
-#else  /* IN_PLACE_W */
-    Tensor4D  fused_w                      = CONVERT_TO_TENSOR4D_STRUCT(fused_w, NUM_CHANNELS);
-#endif /* IN_PLACE_W */
-#ifdef IN_PLACE_B
-    Vector fused_b = conv_b;
-#else  /* IN_PLACE_B */
-    Vector    fused_b                      = CONVERT_TO_VECTOR_STRUCT_NO_STEP(fused_b);
-#endif /* IN_PLACE_B */
+    int w_offset = x * sizeof(DATA_TYPE) + y * w_stride_y + z * w_stride_z;
+    int v_offset = c1 * sizeof(DATA_TYPE);
 
-    const int current_slice = get_global_id(2) / NUM_CHANNELS;
+    DATA_TYPE w_old = 0.0f;
+    DATA_TYPE b_old = 0.0f;
+    DATA_TYPE w_new = 0.0f;
+    DATA_TYPE b_new = 0.0f;
+    DATA_TYPE gamma = 1.0f;
+    DATA_TYPE mean  = 0.0f;
+    DATA_TYPE var   = 1.0f;
+    DATA_TYPE beta  = 0.0f;
 
-#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
-    // Check if access on width gets out of bounds
-    // If it does shift access vector to access elements within bounds
-    const int xi = (int)(get_global_id(0) * VEC_SIZE);
-    conv_w.ptr -= max(xi - (int)LAST_ACCESSED_X, 0) * conv_w_stride_x;
-    fused_w.ptr -= max(xi - (int)LAST_ACCESSED_X, 0) * fused_w_stride_x;
+    w_old = *((__global DATA_TYPE *)(w_ptr + w_offset + w_offset_first_element_in_bytes));
+    var   = *((__global DATA_TYPE *)(var_ptr + v_offset + var_offset_first_element_in_bytes));
+    mean  = *((__global DATA_TYPE *)(mean_ptr + v_offset + mean_offset_first_element_in_bytes));
 
-    // Load W
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    wn = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)conv_w.ptr);
-#else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
-    DATA_TYPE wn                           = *((__global DATA_TYPE *)(conv_w.ptr));
-#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+#if defined(GAMMA)
+    gamma = *((__global DATA_TYPE *)(gamma_ptr + v_offset + gamma_offset_first_element_in_bytes));
+#endif // defined(GAMMA)
 
-    // rvar = 1 / sqrt(var + epsilon)
-    const DATA_TYPE var  = *((__global DATA_TYPE *)(bn_var.ptr + current_slice * bn_var.stride_x));
-    const DATA_TYPE rvar = INVSQRT_OP(ADD_OP(var, SQCVT_SAT((float)EPSILON)));
-    wn *= rvar;
+    // Compute new weight
+    w_new = (gamma * w_old) / (sqrt(var + EPSILON));
 
-    // Load b
-    const DATA_TYPE mean = *((__global DATA_TYPE *)(bn_mean.ptr + current_slice * bn_mean.stride_x));
-    DATA_TYPE bn         = 0;
-#ifdef HAS_BIAS
-    bn = *((__global DATA_TYPE *)(conv_b.ptr + current_slice * conv_b.stride_x));
-#endif /* HAS_BIAS */
-    bn = (bn - mean) * rvar;
+#if defined(IN_PLACE_W)
+    *((__global DATA_TYPE *)(w_ptr + w_offset + w_offset_first_element_in_bytes)) = w_new;
+#else  // defined(IN_PLACE_W)
+    *((__global DATA_TYPE *)(w_fused_ptr + w_offset + w_fused_offset_first_element_in_bytes)) = w_new;
+#endif // defined(IN_PLACE_W)
 
-#ifndef USE_DEFAULT_GAMMA
-    const DATA_TYPE gamma_scalar = *((__global DATA_TYPE *)(bn_gamma.ptr + current_slice * bn_gamma.stride_x));
-    wn *= gamma_scalar;
-    bn *= gamma_scalar;
-#endif /* USE_DEFAULT_GAMMA */
+    // Compute bias
+#if !defined(DIM2) && defined(NHWC)
+    if(z == 0 && y == 0)
+#else !defined(DIM2) && defined(NHWC)
+    if(x == 0 && y == 0 && c0 == 0)
+#endif // !defined(DIM2) && defined(NHWC)
+    {
+#if defined(BIAS)
+        b_old = *((__global DATA_TYPE *)(b_ptr + v_offset + b_offset_first_element_in_bytes));
+#endif // defined(BIAS)
+#if defined(BETA)
+        beta = *((__global DATA_TYPE *)(beta_ptr + v_offset + beta_offset_first_element_in_bytes));
+#endif // defined(BETA)
 
-#ifndef USE_DEFAULT_BETA
-    const DATA_TYPE beta_scalar = *((__global DATA_TYPE *)(bn_beta.ptr + current_slice * bn_beta.stride_x));
-    bn += beta_scalar;
-#endif /* USE_DEFAULT_BETA */
+        b_new = ((gamma * (b_old - mean)) / (sqrt(var + EPSILON))) + beta;
 
-#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
-    // Store updated weights
-    VSTORE(VEC_SIZE)
-    (wn, 0, (__global DATA_TYPE *)fused_w.ptr);
-#else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
-    *((__global DATA_TYPE *)(fused_w.ptr)) = wn;
-#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+#if defined(BIAS)
 
-    // Store updated bias
-    *((__global DATA_TYPE *)(fused_b.ptr + current_slice * fused_b.stride_x)) = bn;
+#if defined(IN_PLACE_B)
+        *((__global DATA_TYPE *)(b_ptr + v_offset + b_offset_first_element_in_bytes)) = b_new;
+#else  // defined(IN_PLACE_B)
+        *((__global DATA_TYPE *)(b_fused_ptr + v_offset + b_fused_offset_first_element_in_bytes)) = b_new;
+#endif // defined(IN_PLACE_B)
+
+#else // defined(BIAS)
+
+#ifndef IN_PLACE_B
+        *((__global DATA_TYPE *)(b_fused_ptr + v_offset + b_fused_offset_first_element_in_bytes)) = b_new;
+#endif // ifndef IN_PLACE_B
+
+#endif // defined(BIAS)
+    }
 }
-#endif /* defined(NUM_CHANNELS) && defined(DATA_TYPE) && defined(EPSILON) */
+#endif // defined(DATA_TYPE) && defined(EPSILON)

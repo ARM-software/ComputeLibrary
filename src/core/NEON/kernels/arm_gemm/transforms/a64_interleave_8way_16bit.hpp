@@ -35,7 +35,7 @@ void TransformImpl<8, 1, false, 2, 2, false>::Transform(T *out, const T *in, int
     uint16_t *outptr = (uint16_t *)out;
     const uint16_t *inptr = (const uint16_t *)in;
 
-    uint16_t zerobuff[16]; // 8 for asm loop plus up to 7 for overflow loop
+    uint16_t zerobuff[16] = { 0 }; // 8 for asm loop plus up to 7 for overflow loop
 
     for (int y=y0; y<ymax; y+=8) {
         const uint16_t *inptr0 = inptr + y * ldin + k0;
@@ -64,16 +64,22 @@ void TransformImpl<8, 1, false, 2, 2, false>::Transform(T *out, const T *in, int
                     /* Everything falls through in here */
                     case 6:
                         inptr1 = zerobuff;
+                        // fall through
                     case 5:
                         inptr2 = zerobuff;
+                        // fall through
                     case 4:
                         inptr3 = zerobuff;
+                        // fall through
                     case 3:
                         inptr4 = zerobuff;
+                        // fall through
                     case 2:
                         inptr5 = zerobuff;
+                        // fall through
                     case 1:
                         inptr6 = zerobuff;
+                        // fall through
                     case 0:
                         inptr7 = zerobuff;
                         break;

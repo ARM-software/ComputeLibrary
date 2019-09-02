@@ -153,10 +153,11 @@ template <typename T>
 using CLLSTMLayerFixture = LSTMLayerValidationFixture<CLTensor, CLAccessor, CLLSTMLayer, LSTMParams<ICLTensor>, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallLSTMLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallLSTMLayerDataset(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)),
-                                                                                                         framework::dataset::make("ProjectionOpt", { true, false })),
-                                                                                                 framework::dataset::make("PeepholeOpt", { true, false })))
+                                                                                                                 framework::dataset::make("ProjectionOpt", { true, false })),
+                                                                                                         framework::dataset::make("PeepholeOpt", { true, false })),
+                                                                                                 framework::dataset::make("UseLayerNorm", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -165,9 +166,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<float>, framework::DatasetMo
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallLSTMLayerDataset(), framework::dataset::make("DataType", DataType::F16)),
-                                                                                                        framework::dataset::make("ProjectionOpt", { true, false })),
-                                                                                                framework::dataset::make("PeepholeOpt", { true, false })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallLSTMLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                        DataType::F16)),
+                                                                                                                framework::dataset::make("ProjectionOpt", { true, false })),
+                                                                                                        framework::dataset::make("PeepholeOpt", { true, false })),
+                                                                                                framework::dataset::make("UseLayerNorm", { true, false })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

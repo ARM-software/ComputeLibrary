@@ -28,7 +28,6 @@
 
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
 #include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
@@ -120,7 +119,7 @@ public:
      *                          Data types supported: Same as @p input.
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
-     *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *                          tensor has also been transposed with CLGEMMReshapeRHSMatrixKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      * @param[in]  num_groups   (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
@@ -139,7 +138,7 @@ public:
      *                          Data types supported: Same as @p input.
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
-     *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *                          tensor has also been transposed with CLGEMMReshapeRHSMatrixKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      * @param[in]  num_groups   (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
@@ -164,8 +163,10 @@ private:
      *                                       except for input of QASYMM8 type where output should be of S32 type.
      * @param[in]      gemmlowp_output_stage GEMMLowp output stage info
      * @param[in]      gemm_3d_depth         Depth of GEMM 3D
+     * @param[in]      act_info              Activation to apply after the matrix multiplication
      */
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth = 1);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth,
+                      const ActivationLayerInfo &act_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
      *
      * @param[in] input                 Input tensor. Data types supported: QASYMM8/F16/F32.
@@ -177,22 +178,21 @@ private:
      * @param[in] gemmlowp_output_stage GEMMLowp output stage info
      * @param[in] gemm_3d_depth         Depth of GEMM 3D
      * @param[in] skip_im2col           Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout.
-     * @param[in] run_addition          Flag which specifies if @ref CLGEMMMatrixMatrixMultiplyAddition to be run.
+     * @param[in] act_info              Activation to apply after the matrix multiplication
      *
      * @return a status
      */
     static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
-                              int gemm_3d_depth, bool skip_im2col, bool run_addition);
+                              int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info);
 
 private:
-    CLMemoryGroup                        _memory_group;
-    CLConvolutionLayerReshapeWeights     _reshape_weights;
-    CLIm2ColKernel                       _im2col_kernel;
-    CLGEMM                               _mm_gemm;
-    CLGEMMLowpMatrixMultiplyCore         _mm_gemmlowp;
-    CLCol2ImKernel                       _col2im_kernel;
-    CLActivationLayer                    _activationlayer_function;
-    CLSaturatedArithmeticOperationKernel _add_bias_kernel;
+    CLMemoryGroup                    _memory_group;
+    CLConvolutionLayerReshapeWeights _reshape_weights;
+    CLIm2ColKernel                   _im2col_kernel;
+    CLGEMM                           _mm_gemm;
+    CLGEMMLowpMatrixMultiplyCore     _mm_gemmlowp;
+    CLCol2ImKernel                   _col2im_kernel;
+    CLActivationLayer                _activationlayer_function;
 
     const ICLTensor *_original_weights;
 
@@ -200,15 +200,11 @@ private:
     CLTensor _weights_reshaped;
     CLTensor _gemm_output;
 
-    DataLayout _data_layout;
-
-    bool _append_bias;
     bool _skip_im2col;
     bool _skip_col2im;
     bool _is_quantized;
-    bool _is_activationlayer_enabled;
+    bool _fuse_activation;
     bool _is_prepared;
-    bool _run_addition;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

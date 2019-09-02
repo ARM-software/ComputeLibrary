@@ -94,9 +94,12 @@ TEST_CASE(Configuration, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    CLConcatenateLayer concat_layer;
-
-    concat_layer.configure({ &src1, &src2, &src3 }, &dst, 2);
+    CLConcatenateLayer       concat_layer;
+    std::vector<ICLTensor *> inputs;
+    inputs.emplace_back(&src1);
+    inputs.emplace_back(&src2);
+    inputs.emplace_back(&src3);
+    concat_layer.configure(inputs, &dst, 2);
 }
 template <typename T>
 using CLDepthConcatenateLayerFixture = ConcatenateLayerValidationFixture<CLTensor, ICLTensor, CLAccessor, CLConcatenateLayer, T>;

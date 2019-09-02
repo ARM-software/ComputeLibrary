@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
+
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "support/ToolchainSupport.h"
-#include <arm_compute/runtime/CL/functions/CLElementwiseOperations.h>
 
 #include <utility>
 
@@ -124,4 +125,18 @@ Status CLElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITens
 {
     return CLArithmeticOperationKernel::validate(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
 }
+
+void CLElementwisePower::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
+    k->configure(ArithmeticOperation::POWER, input1, input2, output);
+    _kernel = std::move(k);
+    configure_border_handler(_border_handler, _kernel->border_size(), input1, input2, output);
+}
+
+Status CLElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+{
+    return CLArithmeticOperationKernel::validate(ArithmeticOperation::POWER, input1, input2, output);
+}
+
 } // namespace arm_compute

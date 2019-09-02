@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -136,7 +136,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Upsample Layer. </p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01128">1128</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01181">1181</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a831a44fe14e8472e6421467599661dd2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a831a44fe14e8472e6421467599661dd2">&#9670;&nbsp;</a></span>UpsampleLayer()</h2>
@@ -181,8 +181,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01136">1136</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01137"></a><span class="lineno"> 1137</span>&#160;        : _info(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">info</a>), _upsampling_policy(upsampling_policy)</div><div class="line"><a name="l01138"></a><span class="lineno"> 1138</span>&#160;    {</div><div class="line"><a name="l01139"></a><span class="lineno"> 1139</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a4f4125dba5283887b34f889b1c615c0c"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">arm_compute::test::validation::info</a></div><div class="ttdeci">info</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">ConvolutionLayer.cpp:174</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01189">1189</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01190"></a><span class="lineno"> 1190</span>&#160;        : _info(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">info</a>), _upsampling_policy(upsampling_policy)</div><div class="line"><a name="l01191"></a><span class="lineno"> 1191</span>&#160;    {</div><div class="line"><a name="l01192"></a><span class="lineno"> 1192</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a4f4125dba5283887b34f889b1c615c0c"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">arm_compute::test::validation::info</a></div><div class="ttdeci">info</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">ConvolutionLayer.cpp:174</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -222,11 +222,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01141">1141</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01142"></a><span class="lineno"> 1142</span>&#160;    {</div><div class="line"><a name="l01143"></a><span class="lineno"> 1143</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l01144"></a><span class="lineno"> 1144</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l01145"></a><span class="lineno"> 1145</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#abfc484c5e7a1a8cdd8a545857a8dc425">GraphBuilder::add_upsample_node</a>(s.graph(), common_params, input, _info, _upsampling_policy);</div><div class="line"><a name="l01146"></a><span class="lineno"> 1146</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_abfc484c5e7a1a8cdd8a545857a8dc425"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#abfc484c5e7a1a8cdd8a545857a8dc425">arm_compute::graph::GraphBuilder::add_upsample_node</a></div><div class="ttdeci">static NodeID add_upsample_node(Graph &amp;g, NodeParams params, NodeIdxPair input, Size2D info, InterpolationPolicy upsampling_policy)</div><div class="ttdoc">Adds an upsample layer to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00649">GraphBuilder.cpp:649</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01194">1194</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01195"></a><span class="lineno"> 1195</span>&#160;    {</div><div class="line"><a name="l01196"></a><span class="lineno"> 1196</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l01197"></a><span class="lineno"> 1197</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l01198"></a><span class="lineno"> 1198</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#abfc484c5e7a1a8cdd8a545857a8dc425">GraphBuilder::add_upsample_node</a>(s.graph(), common_params, input, _info, _upsampling_policy);</div><div class="line"><a name="l01199"></a><span class="lineno"> 1199</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_abfc484c5e7a1a8cdd8a545857a8dc425"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#abfc484c5e7a1a8cdd8a545857a8dc425">arm_compute::graph::GraphBuilder::add_upsample_node</a></div><div class="ttdeci">static NodeID add_upsample_node(Graph &amp;g, NodeParams params, NodeIdxPair input, Size2D info, InterpolationPolicy upsampling_policy)</div><div class="ttdoc">Adds an upsample layer to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00684">GraphBuilder.cpp:684</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_ad8227ba86a01f26e4f173cd5e219d5d1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const</div><div class="ttdoc">Layer name accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00649">GraphBuilder::add_upsample_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
+<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00684">GraphBuilder::add_upsample_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
 
 </div>
 </div>
@@ -239,7 +239,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_upsample_layer.xhtml">UpsampleLayer</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

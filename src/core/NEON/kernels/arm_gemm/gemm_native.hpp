@@ -80,11 +80,11 @@ public:
     GemmNative & operator= (GemmNative &) = delete;
 
     GemmNative(const GemmArgs<Tr> &args)
-            : _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
-              _nbatches(args._nbatches), _nmultis(args._nmulti),
-              _beta(args._beta), _ci(args._ci),
-              _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
-              _window_range(iceildiv(_Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmultis) { }
+               : _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
+                 _nbatches(args._nbatches), _nmultis(args._nmulti),
+                 _beta(args._beta), _ci(args._ci),
+                 _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
+                 _window_range(iceildiv(_Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmultis) { }
 
     // Window is amount per multi multiplied by total number of multis.
     unsigned int get_window_size() const override {

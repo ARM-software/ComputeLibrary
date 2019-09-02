@@ -30,6 +30,9 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     [ "DetectionOutputLayerNode.h", "_detection_output_layer_node_8h.xhtml", [
       [ "DetectionOutputLayerNode", "classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml", "classarm__compute_1_1graph_1_1_detection_output_layer_node" ]
     ] ],
+    [ "DetectionPostProcessLayerNode.h", "_detection_post_process_layer_node_8h.xhtml", [
+      [ "DetectionPostProcessLayerNode", "classarm__compute_1_1graph_1_1_detection_post_process_layer_node.xhtml", "classarm__compute_1_1graph_1_1_detection_post_process_layer_node" ]
+    ] ],
     [ "DummyNode.h", "_dummy_node_8h.xhtml", [
       [ "DummyNode", "classarm__compute_1_1graph_1_1_dummy_node.xhtml", "classarm__compute_1_1graph_1_1_dummy_node" ]
     ] ],
@@ -44,6 +47,9 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     ] ],
     [ "FusedConvolutionBatchNormalizationNode.h", "_fused_convolution_batch_normalization_node_8h.xhtml", [
       [ "FusedConvolutionBatchNormalizationNode", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node" ]
+    ] ],
+    [ "FusedDepthwiseConvolutionBatchNormalizationNode.h", "_fused_depthwise_convolution_batch_normalization_node_8h.xhtml", [
+      [ "FusedDepthwiseConvolutionBatchNormalizationNode", "classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml", "classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node" ]
     ] ],
     [ "GenerateProposalsLayerNode.h", "_generate_proposals_layer_node_8h.xhtml", [
       [ "GenerateProposalsLayerNode", "classarm__compute_1_1graph_1_1_generate_proposals_layer_node.xhtml", "classarm__compute_1_1graph_1_1_generate_proposals_layer_node" ]
@@ -73,6 +79,9 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     ] ],
     [ "PriorBoxLayerNode.h", "_prior_box_layer_node_8h.xhtml", [
       [ "PriorBoxLayerNode", "classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml", "classarm__compute_1_1graph_1_1_prior_box_layer_node" ]
+    ] ],
+    [ "QuantizationLayerNode.h", "_quantization_layer_node_8h.xhtml", [
+      [ "QuantizationLayerNode", "classarm__compute_1_1graph_1_1_quantization_layer_node.xhtml", "classarm__compute_1_1graph_1_1_quantization_layer_node" ]
     ] ],
     [ "ReorgLayerNode.h", "_reorg_layer_node_8h.xhtml", [
       [ "ReorgLayerNode", "classarm__compute_1_1graph_1_1_reorg_layer_node.xhtml", "classarm__compute_1_1graph_1_1_reorg_layer_node" ]

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -121,6 +121,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1bb4c9ebe62c1b18326b3aed78b1e484"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml#a1bb4c9ebe62c1b18326b3aed78b1e484">configure</a> (Args &amp;&amp;... args)</td></tr>
 <tr class="memdesc:a1bb4c9ebe62c1b18326b3aed78b1e484"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the kernel.  <a href="#a1bb4c9ebe62c1b18326b3aed78b1e484">More...</a><br /></td></tr>
 <tr class="separator:a1bb4c9ebe62c1b18326b3aed78b1e484"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05c0100e33f5dfe143c7a70d2644a93b"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a05c0100e33f5dfe143c7a70d2644a93b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml#a05c0100e33f5dfe143c7a70d2644a93b">configure</a> (<a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> gpu_target, Args &amp;&amp;... args)</td></tr>
+<tr class="memdesc:a05c0100e33f5dfe143c7a70d2644a93b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the kernel setting the GPU target as well.  <a href="#a05c0100e33f5dfe143c7a70d2644a93b">More...</a><br /></td></tr>
+<tr class="separator:a05c0100e33f5dfe143c7a70d2644a93b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_c_l_simple_function"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_c_l_simple_function')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_simple_function.xhtml">ICLSimpleFunction</a></td></tr>
 <tr class="memitem:aa8149af857c4bface8ad712e418a63f1 inherit pub_methods_classarm__compute_1_1_i_c_l_simple_function"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_simple_function.xhtml#aa8149af857c4bface8ad712e418a63f1">ICLSimpleFunction</a> ()</td></tr>
 <tr class="memdesc:aa8149af857c4bface8ad712e418a63f1 inherit pub_methods_classarm__compute_1_1_i_c_l_simple_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="classarm__compute_1_1_i_c_l_simple_function.xhtml#aa8149af857c4bface8ad712e418a63f1">More...</a><br /></td></tr>
@@ -152,7 +156,7 @@ class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
 <p class="definition">Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00042">42</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a1bb4c9ebe62c1b18326b3aed78b1e484"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1bb4c9ebe62c1b18326b3aed78b1e484">&#9670;&nbsp;</a></span>configure()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bb4c9ebe62c1b18326b3aed78b1e484">&#9670;&nbsp;</a></span>configure() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -187,6 +191,53 @@ class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
 <div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    {</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;K&gt;();</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        k-&gt;configure(std::forward&lt;Args&gt;(args)...);</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        _kernel = std::move(k);</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
+<a id="a05c0100e33f5dfe143c7a70d2644a93b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05c0100e33f5dfe143c7a70d2644a93b">&#9670;&nbsp;</a></span>configure() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void configure </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td>
+          <td class="paramname"><em>gpu_target</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Args &amp;&amp;...&#160;</td>
+          <td class="paramname"><em>args</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Configure the kernel setting the GPU target as well. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">gpu_target</td><td>GPUTarget to set </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>Configuration arguments. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00062">62</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    {</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;K&gt;();</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        k-&gt;set_target(gpu_target);</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        k-&gt;configure(std::forward&lt;Args&gt;(args)...);</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        _kernel = std::move(k);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    }</div></div><!-- fragment -->
+</div>
+</div>
 <a id="ab8b6b10969f8435d21a0fa6e46362d59"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab8b6b10969f8435d21a0fa6e46362d59">&#9670;&nbsp;</a></span>validate()</h2>
 
@@ -219,8 +270,8 @@ class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00061">61</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    {</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae02c6fc90d9c60c634bfa258049eb46b">K::validate</a>(std::forward&lt;Args&gt;(args)...);</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ae02c6fc90d9c60c634bfa258049eb46b"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ae02c6fc90d9c60c634bfa258049eb46b">arm_compute::test::validation::validate</a></div><div class="ttdeci">validate(dst.info() -&gt;valid_region(), valid_region)</div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00074">74</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    {</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae02c6fc90d9c60c634bfa258049eb46b">K::validate</a>(std::forward&lt;Args&gt;(args)...);</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ae02c6fc90d9c60c634bfa258049eb46b"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ae02c6fc90d9c60c634bfa258049eb46b">arm_compute::test::validation::validate</a></div><div class="ttdeci">validate(dst.info() -&gt;valid_region(), valid_region)</div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae02c6fc90d9c60c634bfa258049eb46b">arm_compute::test::validation::validate()</a>.</p>
 
@@ -235,7 +286,7 @@ class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml">CLSynthetizeFunction</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:40 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

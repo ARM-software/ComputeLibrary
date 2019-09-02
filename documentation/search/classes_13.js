@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['savenumpyaccessor',['SaveNumPyAccessor',['../classarm__compute_1_1graph__utils_1_1_save_num_py_accessor.xhtml',1,'arm_compute::graph_utils']]],
   ['scalelayer',['ScaleLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_scale_layer.xhtml',1,'arm_compute::graph::frontend']]],
   ['scheduler',['Scheduler',['../classarm__compute_1_1_scheduler.xhtml',1,'arm_compute']]],
   ['schedulerclock',['SchedulerClock',['../classarm__compute_1_1test_1_1framework_1_1_scheduler_clock.xhtml',1,'arm_compute::test::framework']]],

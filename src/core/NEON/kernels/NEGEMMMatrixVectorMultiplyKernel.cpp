@@ -179,8 +179,8 @@ void NEGEMMMatrixVectorMultiplyKernel::matrix_vector_multiply<uint8_t, uint8_t, 
     Iterator in2(_input1, window_w);
     Iterator out(_output, window_out);
 
-    const int input_offset   = -_input0->info()->quantization_info().offset;
-    const int weights_offset = -_input1->info()->quantization_info().offset;
+    const int input_offset   = -_input0->info()->quantization_info().uniform().offset;
+    const int weights_offset = -_input1->info()->quantization_info().uniform().offset;
 
     const int input_w          = _input0->info()->dimension(0);
     const int input_h          = _input0->info()->dimension(1);

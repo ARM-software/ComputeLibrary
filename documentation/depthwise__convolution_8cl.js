@@ -1,6 +1,5 @@
 var depthwise__convolution_8cl =
 [
-    [ "ACTIVATION_FUNC", "depthwise__convolution_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9", null ],
     [ "CONVOLUTION1x3_BIFROST2X1_STRIDE1", "depthwise__convolution_8cl.xhtml#ae40b0f25b3985d4853b944151ffddb44", null ],
     [ "CONVOLUTION1x3_BIFROST2X1_STRIDE2", "depthwise__convolution_8cl.xhtml#a2da35283a28c35fd9f8b0d534e5a5a44", null ],
     [ "CONVOLUTION1x3_BIFROST4X1_STRIDE1", "depthwise__convolution_8cl.xhtml#a0916b921e5c01cc64afede6dc7bd5caa", null ],

@@ -134,8 +134,7 @@ std::pair<Status, Window> validate_and_configure_window_nhwc(ITensorInfo *input,
 
     if(use_padding)
     {
-        AccessWindowStatic input_access(input, 0, -border_size.top, use_padding ? ceil_to_multiple(input->tensor_shape()[0], num_elems_processed_per_iteration) : num_elems_processed_per_iteration,
-                                        input->tensor_shape()[1]);
+        AccessWindowStatic     input_access(input, 0, -border_size.top, ceil_to_multiple(input->tensor_shape()[0], num_elems_processed_per_iteration), input->tensor_shape()[1]);
         AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
         window_changed = update_window_and_padding(win, input_access, output_access);
         output->set_valid_region(calculate_valid_region_scale(*input, output->tensor_shape(), policy, sampling_policy, border_undefined));
@@ -170,7 +169,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
 template <typename T>
 inline void scale_nearest_nhwc_core(const ITensor *input, const ITensor *offsets, ITensor *output,
-                                    float hr, Window window, const Window &win_in, size_t stride_w, size_t stride_h, size_t stride_c)
+                                    float hr, Window window, const Window &win_in, size_t stride_w, size_t stride_h, size_t stride_c, float sampling_offset)
 {
     const int  window_step_x  = 16 / sizeof(T);
     const auto window_start_x = static_cast<int32_t>(window.x().start());
@@ -186,7 +185,7 @@ inline void scale_nearest_nhwc_core(const ITensor *input, const ITensor *offsets
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const int32_t offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-        const int     in_yi      = (id.z() + 0.5f) * hr;
+        const int     in_yi      = std::floor((id.z() + sampling_offset) * hr);
         const int     offset_row = in_yi * stride_h;
         int32_t       x          = window_start_x;
         for(; x < window_end_x - window_step_x; x += window_step_x)
@@ -218,8 +217,9 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
     const int input_height = input->info()->dimension(2);
 
     T border_value;
-    if(use_padding)
+    if(use_padding && border_mode != BorderMode::REPLICATE)
     {
+        // configure() sets top border to 0 for BorderMode::REPLICATE and border_value is not needed in execute_window_loop() for REPLICATE
         border_value = *reinterpret_cast<T *>(input->buffer() + input->info()->offset_first_element_in_bytes() - stride_w);
     }
     else
@@ -234,9 +234,9 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 
     int border_size = (border_mode == BorderMode::UNDEFINED) ? 0 : 1;
 
-    const bool             is_quantized = (input->info()->data_type() == DataType::QASYMM8);
-    const QuantizationInfo iq_info      = input->info()->quantization_info();
-    const QuantizationInfo oq_info      = output->info()->quantization_info();
+    const bool                    is_quantized = (input->info()->data_type() == DataType::QASYMM8);
+    const UniformQuantizationInfo iq_info      = input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info      = output->info()->quantization_info().uniform();
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -294,11 +294,11 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
             //dequantize quantized input
             if(is_quantized)
             {
-                float inp00 = iq_info.dequantize(a00);
-                float inp01 = iq_info.dequantize(a01);
-                float inp10 = iq_info.dequantize(a10);
-                float inp11 = iq_info.dequantize(a11);
-                res         = static_cast<T>(oq_info.quantize((inp00 * w1 + inp01 * w2 + inp10 * w3 + inp11 * w4), RoundingPolicy::TO_NEAREST_UP));
+                float inp00 = dequantize_qasymm8(a00, iq_info);
+                float inp01 = dequantize_qasymm8(a01, iq_info);
+                float inp10 = dequantize_qasymm8(a10, iq_info);
+                float inp11 = dequantize_qasymm8(a11, iq_info);
+                res         = static_cast<T>(quantize_qasymm8((inp00 * w1 + inp01 * w2 + inp10 * w3 + inp11 * w4), oq_info));
             }
             else
             {
@@ -377,7 +377,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     // Add constant border only on top in case of NHWC layout
     if(data_layout == DataLayout::NHWC)
     {
-        _border_size = (border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR && use_padding) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
+        _border_size = (border_mode != BorderMode::REPLICATE && policy == InterpolationPolicy::BILINEAR && use_padding) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
     }
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
@@ -459,7 +459,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
                 const auto           offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
                 const uint8_t *const in_ptr      = in.ptr();
 
-                const int in_yi         = std::floor((id.y() + 0.5f) * hr);
+                const int in_yi         = std::floor((id.y() + _sampling_offset) * hr);
                 const int in_yi_clamped = std::min(static_cast<int>(_input->info()->dimension(1)), std::max(in_yi, -1));
                 ARM_COMPUTE_ERROR_ON(in_yi_clamped < -1 || in_yi_clamped > static_cast<int>(_input->info()->dimension(1)));
                 const int offset_row = in_yi_clamped * input_stride;
@@ -500,7 +500,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
             {
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
 
-                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr);
                 const int offset_row = in_yi * input_stride;
 
                 tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
@@ -541,7 +541,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
             {
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
 
-                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr);
                 const int offset_row = in_yi * input_stride;
 
                 tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
@@ -584,7 +584,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
             {
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
 
-                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr);
                 const int offset_row = in_yi * input_stride;
 
                 tmp.val[0] = vsetq_lane_f32(*reinterpret_cast<const float *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
@@ -614,7 +614,6 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
         }
         default:
             ARM_COMPUTE_ERROR("Not supported");
-            break;
     }
 }
 
@@ -650,9 +649,9 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
     const size_t in_stide_in_bytes = _input->info()->strides_in_bytes()[1];
     const size_t in_stride         = in_stide_in_bytes / _input->info()->element_size();
 
-    const bool             is_quantized = (_input->info()->data_type() == DataType::QASYMM8);
-    const QuantizationInfo iq_info      = _input->info()->quantization_info();
-    const QuantizationInfo oq_info      = _output->info()->quantization_info();
+    const bool                    is_quantized = (_input->info()->data_type() == DataType::QASYMM8);
+    const UniformQuantizationInfo iq_info      = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info      = _output->info()->quantization_info().uniform();
 
     switch(_input->info()->data_type())
     {
@@ -936,7 +935,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
             {
-                scale_nearest_nhwc_core<uint8_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c);
+                scale_nearest_nhwc_core<uint8_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
             }
             else
             {
@@ -949,7 +948,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
             {
-                scale_nearest_nhwc_core<int16_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c);
+                scale_nearest_nhwc_core<int16_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
             }
             else
             {
@@ -964,7 +963,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
             {
                 scale_nearest_nhwc_core<float16_t>(_input, _offsets, _output, hr,
-                                                   window, win_in, input_stride_w, input_stride_h, input_stride_c);
+                                                   window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
             }
             else
             {
@@ -978,7 +977,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
             {
-                scale_nearest_nhwc_core<float>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c);
+                scale_nearest_nhwc_core<float>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
             }
             else
             {

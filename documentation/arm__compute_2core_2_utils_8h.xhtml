@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -110,6 +110,7 @@ $(document).ready(function(){initNavTree('arm__compute_2core_2_utils_8h.xhtml','
 <code>#include &lt;algorithm&gt;</code><br />
 <code>#include &lt;cstdint&gt;</code><br />
 <code>#include &lt;cstdlib&gt;</code><br />
+<code>#include &lt;iomanip&gt;</code><br />
 <code>#include &lt;numeric&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
@@ -200,9 +201,9 @@ Functions</h2></td></tr>
 <tr class="memitem:afcd35973f3a5d2d4d3015e155f185a81"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afcd35973f3a5d2d4d3015e155f185a81">permute_strides</a> (Dimensions&lt; T &gt; &amp;dimensions, const PermutationVector &amp;perm)</td></tr>
 <tr class="memdesc:afcd35973f3a5d2d4d3015e155f185a81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Permutes the given dimensions according the permutation vector.  <a href="namespacearm__compute.xhtml#afcd35973f3a5d2d4d3015e155f185a81">More...</a><br /></td></tr>
 <tr class="separator:afcd35973f3a5d2d4d3015e155f185a81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8fe513433727c6644ada261165074cef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a8fe513433727c6644ada261165074cef">calculate_same_pad</a> (<a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> input_shape, <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> weights_shape, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> data_layout=DataLayout::NCHW, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;dilation=<a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1u, 1u))</td></tr>
-<tr class="memdesc:a8fe513433727c6644ada261165074cef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate padding requirements in case of SAME padding.  <a href="namespacearm__compute.xhtml#a8fe513433727c6644ada261165074cef">More...</a><br /></td></tr>
-<tr class="separator:a8fe513433727c6644ada261165074cef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6d4f0b9fedd979c5b768f9b34fda9f6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aa6d4f0b9fedd979c5b768f9b34fda9f6">calculate_same_pad</a> (<a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> input_shape, <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> weights_shape, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> data_layout=DataLayout::NCHW, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;dilation=<a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1u, 1u), const DimensionRoundingType &amp;rounding_type=DimensionRoundingType::FLOOR)</td></tr>
+<tr class="memdesc:aa6d4f0b9fedd979c5b768f9b34fda9f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate padding requirements in case of SAME padding.  <a href="namespacearm__compute.xhtml#aa6d4f0b9fedd979c5b768f9b34fda9f6">More...</a><br /></td></tr>
+<tr class="separator:aa6d4f0b9fedd979c5b768f9b34fda9f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9491bea9e3fcf8ac4a7cf79be64cc765"><td class="memItemLeft" align="right" valign="top">std::pair&lt; unsigned int, unsigned int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a9491bea9e3fcf8ac4a7cf79be64cc765">deconvolution_output_dimensions</a> (unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady, unsigned int stride_x, unsigned int stride_y)</td></tr>
 <tr class="memdesc:a9491bea9e3fcf8ac4a7cf79be64cc765"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns expected width and height of the deconvolution's output tensor.  <a href="namespacearm__compute.xhtml#a9491bea9e3fcf8ac4a7cf79be64cc765">More...</a><br /></td></tr>
 <tr class="separator:a9491bea9e3fcf8ac4a7cf79be64cc765"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -260,16 +261,19 @@ Functions</h2></td></tr>
 <tr class="memitem:a14f46283f316e7f0fad301d5c1507e9f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a14f46283f316e7f0fad301d5c1507e9f">is_data_type_quantized_asymmetric</a> (DataType dt)</td></tr>
 <tr class="memdesc:a14f46283f316e7f0fad301d5c1507e9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a given data type is of asymmetric quantized type.  <a href="namespacearm__compute.xhtml#a14f46283f316e7f0fad301d5c1507e9f">More...</a><br /></td></tr>
 <tr class="separator:a14f46283f316e7f0fad301d5c1507e9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a922cd85c475c0d725fc030116ea57979"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a922cd85c475c0d725fc030116ea57979">is_data_type_quantized_symmetric</a> (DataType dt)</td></tr>
+<tr class="memdesc:a922cd85c475c0d725fc030116ea57979"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a given data type is of symmetric quantized type.  <a href="namespacearm__compute.xhtml#a922cd85c475c0d725fc030116ea57979">More...</a><br /></td></tr>
+<tr class="separator:a922cd85c475c0d725fc030116ea57979"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9cd394c15b73f79ca1d98f5328064be2"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a9cd394c15b73f79ca1d98f5328064be2">float_to_string_with_full_precision</a> (float val)</td></tr>
 <tr class="memdesc:a9cd394c15b73f79ca1d98f5328064be2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a string with the float in full precision.  <a href="namespacearm__compute.xhtml#a9cd394c15b73f79ca1d98f5328064be2">More...</a><br /></td></tr>
 <tr class="separator:a9cd394c15b73f79ca1d98f5328064be2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22ef3e50f7dbf08c974a120588e1ad90"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a22ef3e50f7dbf08c974a120588e1ad90">num_of_elements_in_range</a> (const float start, const float end, const float step)</td></tr>
 <tr class="memdesc:a22ef3e50f7dbf08c974a120588e1ad90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of elements required to go from start to end with the wanted step.  <a href="namespacearm__compute.xhtml#a22ef3e50f7dbf08c974a120588e1ad90">More...</a><br /></td></tr>
 <tr class="separator:a22ef3e50f7dbf08c974a120588e1ad90"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4fb37558f66dd33689292aebf4f843c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ad4fb37558f66dd33689292aebf4f843c"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ad4fb37558f66dd33689292aebf4f843c">check_value_range</a> (T val, DataType dt, QuantizationInfo quant_info=QuantizationInfo())</td></tr>
-<tr class="memdesc:ad4fb37558f66dd33689292aebf4f843c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if the value can be represented by the given data type.  <a href="namespacearm__compute.xhtml#ad4fb37558f66dd33689292aebf4f843c">More...</a><br /></td></tr>
-<tr class="separator:ad4fb37558f66dd33689292aebf4f843c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afea13b8f36cd9e409d8ed686f1200ec3"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:afea13b8f36cd9e409d8ed686f1200ec3"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afea13b8f36cd9e409d8ed686f1200ec3">check_value_range</a> (T val, DataType dt, QuantizationInfo qinfo=QuantizationInfo())</td></tr>
+<tr class="memdesc:afea13b8f36cd9e409d8ed686f1200ec3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true if the value can be represented by the given data type.  <a href="namespacearm__compute.xhtml#afea13b8f36cd9e409d8ed686f1200ec3">More...</a><br /></td></tr>
+<tr class="separator:afea13b8f36cd9e409d8ed686f1200ec3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -277,7 +281,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="arm__compute_2core_2_utils_8h.xhtml">Utils.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

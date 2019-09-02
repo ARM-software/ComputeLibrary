@@ -38,15 +38,18 @@ using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
 NELSTMLayer::NELSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _fully_connected_input_gate(), _gemm_input_gate(), _transpose_input_gate(), _accum_input_gate1(), _accum_input_gate2(), _subtract_input_gate(),
-      _pixelwise_mul_input_gate(), _activation_input_gate(), _fully_connected_forget_gate(), _gemm_forget_gate(), _transpose_forget_gate(), _accum_forget_gate1(), _accum_forget_gate2(),
-      _pixelwise_mul_forget_gate(), _activation_forget_gate(), _fully_connected_cell_state(), _gemm_cell_state1(), _gemm_cell_state2(), _transpose_cell_state(), _accum_cell_state1(), _accum_cell_state2(),
-      _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(), _pixelwise_mul_cell_state2(), _fully_connected_output(), _gemm_output(), _pixelwise_mul_output_state1(), _transpose_output(),
-      _accum_output1(), _accum_output2(), _activation_output(), _activation_output_state(), _pixelwise_mul_output_state2(), _fully_connected_output_state(), _gemm_output_state(), _accum_output_state(),
-      _projection_clip(), _copy_cell_state(), _copy_output(), _concat_scratch_buffer(), _concat_inputs_forget_gate(), _concat_weights_forget_gate(), _concat_weights_input_gate(), _concat_weights_output(),
-      _input_gate_out1(), _input_gate_out2(), _input_gate_out3(), _input_gate_out4(), _forget_gate_out1(), _forget_gate_out2(), _forget_gate_out3(), _forget_gate_out4(), _forget_gate_out5(),
-      _forget_gate_out6(), _cell_state_out1(), _cell_state_out2(), _cell_state_out3(), _cell_state_out4(), _cell_state_out5(), _output1(), _output2(), _output3(), _output4(), _cell_state_activation(),
-      _output_state1(), _ones(), _run_peephole_opt(false), _run_cifg_opt(false), _perform_cell_clipping(false), _has_projection_weights(false), _perform_projection_clipping(false), _is_prepared(false)
+    : _memory_group(std::move(memory_manager)), _fully_connected_input_gate(), _accum_input_gate1(), _subtract_input_gate(), _pixelwise_mul_input_gate(), _activation_input_gate(),
+      _fully_connected_forget_gate(), _accum_forget_gate1(), _pixelwise_mul_forget_gate(), _activation_forget_gate(), _fully_connected_cell_state(), _gemm_cell_state1(), _transpose_cell_state(),
+      _accum_cell_state1(), _accum_cell_state2(), _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(), _pixelwise_mul_cell_state2(), _fully_connected_output(),
+      _pixelwise_mul_output_state1(), _accum_output1(), _activation_output(), _activation_output_state(), _pixelwise_mul_output_state2(), _fully_connected_output_state(), _projection_clip(),
+      _copy_cell_state(), _copy_output(), _concat_scratch_buffer(), _concat_inputs_forget_gate(), _concat_weights_forget_gate(), _concat_weights_input_gate(), _concat_weights_output(),
+      _mean_std_norm_input_gate(), _pixelwise_mul_input_gate_coeff(), _accum_input_gate_bias(), _mean_std_norm_forget_gate(), _pixelwise_mul_forget_gate_coeff(), _accum_forget_gate_bias(),
+      _mean_std_norm_cell_gate(), _pixelwise_mul_cell_gate_coeff(), _accum_cell_gate_bias(), _mean_std_norm_output_gate(), _pixelwise_mul_output_gate_coeff(), _accum_output_gate_bias(), _input_gate_out1(),
+      _input_gate_out2(), _input_gate_out3(), _input_gate_out4(), _forget_gate_out1(), _forget_gate_out2(), _forget_gate_out3(), _forget_gate_out4(), _forget_gate_out5(), _forget_gate_out6(),
+      _cell_state_out1(), _cell_state_out2(), _cell_state_out3(), _cell_state_out4(), _cell_state_out5(), _output1(), _output2(), _output3(), _output4(), _cell_state_activation(), _output_state1(), _ones(),
+      _input_layer_norm_out1(), _input_layer_norm_out2(), _forget_layer_norm_out1(), _forget_layer_norm_out2(), _cell_layer_norm_out1(), _cell_layer_norm_out2(), _output_layer_norm_out1(),
+      _output_layer_norm_out2(), _run_peephole_opt(false), _run_cifg_opt(false), _perform_cell_clipping(false), _has_projection_weights(false), _perform_projection_clipping(false), _is_prepared(false),
+      _is_layer_norm_lstm(false)
 {
 }
 
@@ -64,6 +67,8 @@ void NELSTMLayer::configure(const ITensor *input,
                                  forget_gate_bias, cell_bias, output_gate_bias,
                                  output_state_in, cell_state_in,
                                  scratch_buffer, output_state_out, cell_state_out, output);
+
+    _is_layer_norm_lstm = lstm_params.use_layer_norm();
 
     // Set lstm parameters
     LSTMParams<ITensorInfo> lstm_params_info;
@@ -107,17 +112,17 @@ void NELSTMLayer::configure(const ITensor *input,
     inputs_vector.emplace_back(output_state_in);
 
     _memory_group.manage(&_forget_gate_out2);
-    _concat_inputs_forget_gate.configure(inputs_vector, &_forget_gate_out2);
+    _concat_inputs_forget_gate.configure(inputs_vector, &_forget_gate_out2, Window::DimX);
 
     std::vector<const ITensor *> weights_vector;
 
     weights_vector.emplace_back(input_to_forget_weights);
     weights_vector.emplace_back(recurrent_to_forget_weights);
 
-    _concat_weights_forget_gate.configure(weights_vector, &_forget_gate_out6);
+    _concat_weights_forget_gate.configure(weights_vector, &_forget_gate_out6, Window::DimX);
 
     _memory_group.manage(&_forget_gate_out5);
-    _fully_connected_forget_gate.configure(&_forget_gate_out2, &_forget_gate_out6, forget_gate_bias, &_forget_gate_out5);
+    _fully_connected_forget_gate.configure(&_forget_gate_out2, &_forget_gate_out6, (_is_layer_norm_lstm) ? nullptr : forget_gate_bias, &_forget_gate_out5);
     _memory_group.manage(&_forget_gate_out1);
     _memory_group.manage(&_forget_gate_out3);
     _forget_gate_out6.allocator()->allocate();
@@ -130,7 +135,7 @@ void NELSTMLayer::configure(const ITensor *input,
         _run_peephole_opt = true;
         _memory_group.manage(&_forget_gate_out4);
         _pixelwise_mul_forget_gate.configure(cell_state_in, lstm_params.cell_to_forget_weights(), &_forget_gate_out4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-        _accum_forget_gate2.configure(&_forget_gate_out5, &_forget_gate_out4, &_forget_gate_out3, ConvertPolicy::SATURATE);
+        _accum_forget_gate1.configure(&_forget_gate_out5, &_forget_gate_out4, &_forget_gate_out3, ConvertPolicy::SATURATE);
         _forget_gate_out4.allocator()->allocate();
         _forget_gate_out5.allocator()->allocate();
         forget_gate_out = &_forget_gate_out3;
@@ -138,6 +143,20 @@ void NELSTMLayer::configure(const ITensor *input,
     else
     {
         _forget_gate_out3.allocator()->allocate();
+    }
+    if(_is_layer_norm_lstm)
+    {
+        _forget_layer_norm_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _forget_layer_norm_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _memory_group.manage(&_forget_layer_norm_out1);
+        _memory_group.manage(&_forget_layer_norm_out2);
+        _mean_std_norm_forget_gate.configure(forget_gate_out);
+        _pixelwise_mul_forget_gate_coeff.configure(forget_gate_out, lstm_params.forget_layer_norm_weights(), &_forget_layer_norm_out1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+        // forget_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
+        forget_gate_out->allocator()->allocate();
+        _accum_forget_gate_bias.configure(&_forget_layer_norm_out1, forget_gate_bias, &_forget_layer_norm_out2, ConvertPolicy::SATURATE);
+        _forget_layer_norm_out1.allocator()->allocate();
+        forget_gate_out = &_forget_layer_norm_out2;
     }
     _activation_forget_gate.configure(forget_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
 
@@ -165,12 +184,12 @@ void NELSTMLayer::configure(const ITensor *input,
         lstm_weights.emplace_back(lstm_params.input_to_input_weights());
         lstm_weights.emplace_back(lstm_params.recurrent_to_input_weights());
 
-        _concat_weights_input_gate.configure(lstm_weights, &_input_gate_out2);
+        _concat_weights_input_gate.configure(lstm_weights, &_input_gate_out2, Window::DimX);
 
         _memory_group.manage(&_input_gate_out1);
         _memory_group.manage(&_input_gate_out4);
 
-        _fully_connected_input_gate.configure(&_forget_gate_out2, &_input_gate_out2, lstm_params.input_gate_bias(), &_input_gate_out3);
+        _fully_connected_input_gate.configure(&_forget_gate_out2, &_input_gate_out2, (_is_layer_norm_lstm) ? nullptr : lstm_params.input_gate_bias(), &_input_gate_out3);
         _input_gate_out2.allocator()->allocate();
         input_gate_out = &_input_gate_out3;
 
@@ -178,7 +197,7 @@ void NELSTMLayer::configure(const ITensor *input,
         {
             _memory_group.manage(&_input_gate_out4);
             _pixelwise_mul_input_gate.configure(cell_state_in, lstm_params.cell_to_input_weights(), &_input_gate_out4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-            _accum_input_gate2.configure(&_input_gate_out3, &_input_gate_out4, &_input_gate_out1, ConvertPolicy::SATURATE);
+            _accum_input_gate1.configure(&_input_gate_out3, &_input_gate_out4, &_input_gate_out1, ConvertPolicy::SATURATE);
             _input_gate_out3.allocator()->allocate();
             _input_gate_out4.allocator()->allocate();
             input_gate_out = &_input_gate_out1;
@@ -186,6 +205,21 @@ void NELSTMLayer::configure(const ITensor *input,
         else
         {
             _input_gate_out1.allocator()->allocate();
+        }
+
+        if(_is_layer_norm_lstm)
+        {
+            _input_layer_norm_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+            _input_layer_norm_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+            _memory_group.manage(&_input_layer_norm_out1);
+            _memory_group.manage(&_input_layer_norm_out2);
+            _mean_std_norm_input_gate.configure(input_gate_out);
+            _pixelwise_mul_input_gate_coeff.configure(input_gate_out, lstm_params.input_layer_norm_weights(), &_input_layer_norm_out1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+            // input_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
+            input_gate_out->allocator()->allocate();
+            _accum_input_gate_bias.configure(&_input_layer_norm_out1, lstm_params.input_gate_bias(), &_input_layer_norm_out2, ConvertPolicy::SATURATE);
+            _input_layer_norm_out1.allocator()->allocate();
+            input_gate_out = &_input_layer_norm_out2;
         }
         _activation_input_gate.configure(input_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
     }
@@ -200,7 +234,7 @@ void NELSTMLayer::configure(const ITensor *input,
     _cell_state_out5.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
     _memory_group.manage(&_cell_state_out1);
-    _fully_connected_cell_state.configure(input, input_to_cell_weights, cell_bias, &_cell_state_out1);
+    _fully_connected_cell_state.configure(input, input_to_cell_weights, (_is_layer_norm_lstm) ? nullptr : cell_bias, &_cell_state_out1);
     _memory_group.manage(&_cell_state_out2);
     _transpose_cell_state.configure(recurrent_to_cell_weights, &_cell_state_out2);
     _memory_group.manage(&_cell_state_out3);
@@ -208,10 +242,25 @@ void NELSTMLayer::configure(const ITensor *input,
     _cell_state_out2.allocator()->allocate();
     _memory_group.manage(&_cell_state_out4);
     _accum_cell_state1.configure(&_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
-    _activation_cell_state.configure(&_cell_state_out4, nullptr, activation_info);
+    Tensor *cell_state_out_ptr = &_cell_state_out4;
+    if(_is_layer_norm_lstm)
+    {
+        _cell_layer_norm_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _cell_layer_norm_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _memory_group.manage(&_cell_layer_norm_out1);
+        _memory_group.manage(&_cell_layer_norm_out2);
+        _mean_std_norm_cell_gate.configure(cell_state_out_ptr);
+        _pixelwise_mul_cell_gate_coeff.configure(cell_state_out_ptr, lstm_params.cell_layer_norm_weights(), &_cell_layer_norm_out1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+        // cell_state_out_ptr is going to be reassigned, so allocate the tensor that it was assigned to before
+        cell_state_out_ptr->allocator()->allocate();
+        _accum_cell_gate_bias.configure(&_cell_layer_norm_out1, cell_bias, &_cell_layer_norm_out2, ConvertPolicy::SATURATE);
+        _cell_layer_norm_out1.allocator()->allocate();
+        cell_state_out_ptr = &_cell_layer_norm_out2;
+    }
+    _activation_cell_state.configure(cell_state_out_ptr, nullptr, activation_info);
     _memory_group.manage(&_cell_state_out5);
-    _pixelwise_mul_cell_state1.configure(&_cell_state_out4, input_gate_out, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-    _cell_state_out4.allocator()->allocate();
+    _pixelwise_mul_cell_state1.configure(cell_state_out_ptr, input_gate_out, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+    cell_state_out_ptr->allocator()->allocate();
     _pixelwise_mul_cell_state2.configure(forget_gate_out, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _accum_cell_state2.configure(&_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
     _cell_state_out3.allocator()->allocate();
@@ -234,11 +283,11 @@ void NELSTMLayer::configure(const ITensor *input,
     in_out_weights.emplace_back(input_to_output_weights);
     in_out_weights.emplace_back(recurrent_to_output_weights);
 
-    _concat_weights_output.configure(in_out_weights, &_output2);
+    _concat_weights_output.configure(in_out_weights, &_output2, Window::DimX);
     _memory_group.manage(&_output1);
     _memory_group.manage(&_output4);
 
-    _fully_connected_output.configure(&_forget_gate_out2, &_output2, output_gate_bias, &_output4);
+    _fully_connected_output.configure(&_forget_gate_out2, &_output2, (_is_layer_norm_lstm) ? nullptr : output_gate_bias, &_output4);
 
     _output2.allocator()->allocate();
     _forget_gate_out2.allocator()->allocate();
@@ -250,7 +299,7 @@ void NELSTMLayer::configure(const ITensor *input,
 
         _memory_group.manage(&_output3);
         _pixelwise_mul_output_state1.configure(&_cell_state_out1, lstm_params.cell_to_output_weights(), &_output3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-        _accum_output2.configure(&_output4, &_output3, &_output1, ConvertPolicy::SATURATE);
+        _accum_output1.configure(&_output4, &_output3, &_output1, ConvertPolicy::SATURATE);
         _output4.allocator()->allocate();
         output_gate_out = &_output1;
 
@@ -260,6 +309,20 @@ void NELSTMLayer::configure(const ITensor *input,
     else
     {
         _output1.allocator()->allocate();
+    }
+    if(_is_layer_norm_lstm)
+    {
+        _output_layer_norm_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _output_layer_norm_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _memory_group.manage(&_output_layer_norm_out1);
+        _memory_group.manage(&_output_layer_norm_out2);
+        _mean_std_norm_output_gate.configure(output_gate_out);
+        _pixelwise_mul_output_gate_coeff.configure(output_gate_out, lstm_params.output_layer_norm_weights(), &_output_layer_norm_out1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+        // output_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
+        output_gate_out->allocator()->allocate();
+        _accum_output_gate_bias.configure(&_output_layer_norm_out1, output_gate_bias, &_output_layer_norm_out2, ConvertPolicy::SATURATE);
+        _output_layer_norm_out1.allocator()->allocate();
+        output_gate_out = &_output_layer_norm_out2;
     }
     _activation_output.configure(output_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
 
@@ -308,7 +371,7 @@ void NELSTMLayer::configure(const ITensor *input,
     scratch_inputs.emplace_back(&_cell_state_out1);
     scratch_inputs.emplace_back(forget_gate_out);
     scratch_inputs.emplace_back(output_gate_out);
-    _concat_scratch_buffer.configure(scratch_inputs, scratch_buffer);
+    _concat_scratch_buffer.configure(scratch_inputs, scratch_buffer, Window::DimX);
     input_gate_out->allocator()->allocate();
     _cell_state_out1.allocator()->allocate();
     forget_gate_out->allocator()->allocate();
@@ -362,6 +425,31 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
     const unsigned int num_batches = input->dimension(1);
     const unsigned int num_cells   = input_to_output_weights->dimension(1);
 
+    if(lstm_params.use_layer_norm())
+    {
+        // If CIFG is used, input layer normalization weights tensor is omitted
+        if(lstm_params.has_cifg_opt())
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.input_layer_norm_weights() != nullptr);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lstm_params.input_layer_norm_weights());
+            ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.input_layer_norm_weights()->num_dimensions() > 1);
+            ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.input_layer_norm_weights()->dimension(0) != num_batches);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, lstm_params.input_layer_norm_weights());
+        }
+
+        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lstm_params.forget_layer_norm_weights(), lstm_params.cell_layer_norm_weights(), lstm_params.output_layer_norm_weights());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, lstm_params.forget_layer_norm_weights(), lstm_params.cell_layer_norm_weights(), lstm_params.output_layer_norm_weights());
+        ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.forget_layer_norm_weights()->num_dimensions() > 1);
+        ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.cell_layer_norm_weights()->num_dimensions() > 1);
+        ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.output_layer_norm_weights()->num_dimensions() > 1);
+        ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.forget_layer_norm_weights()->dimension(0) != num_batches);
+        ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.cell_layer_norm_weights()->dimension(0) != num_batches);
+        ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.output_layer_norm_weights()->dimension(0) != num_batches);
+    }
+
     // Check peephole optimization
     if(lstm_params.has_peephole_opt())
     {
@@ -383,16 +471,24 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
     std::vector<const ITensorInfo *> inputs_vector;
     inputs_vector.emplace_back(input);
     inputs_vector.emplace_back(output_state_in);
-    TensorInfo forget_gate_concat;
-    ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayer::validate(inputs_vector, &forget_gate_concat));
+    const TensorShape concat_shape       = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, 0);
+    TensorInfo        forget_gate_concat = TensorInfo(concat_shape, 1, input->data_type());
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(inputs_vector, &forget_gate_concat, Window::DimX));
 
     // Validate forget gate
-    ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, input_to_forget_weights, forget_gate_bias, &forget_gate));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, input_to_forget_weights, (lstm_params.use_layer_norm()) ? nullptr : forget_gate_bias, &forget_gate));
 
     if(lstm_params.has_peephole_opt())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_forget_weights(), &forget_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
         ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
+    }
+    if(lstm_params.use_layer_norm())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEMeanStdDevNormalizationLayer::validate(&forget_gate));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&forget_gate, lstm_params.forget_layer_norm_weights(), &forget_gate, 1, ConvertPolicy::SATURATE,
+                                                                              RoundingPolicy::TO_ZERO));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_gate, forget_gate_bias, &forget_gate, ConvertPolicy::SATURATE));
     }
     ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&forget_gate, &forget_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
 
@@ -409,9 +505,10 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
         std::vector<const ITensorInfo *> lstm_weights;
         lstm_weights.emplace_back(lstm_params.input_to_input_weights());
         lstm_weights.emplace_back(lstm_params.recurrent_to_input_weights());
-        TensorInfo lstm_gate_concat;
-        ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayer::validate(lstm_weights, &lstm_gate_concat));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, lstm_params.input_to_input_weights(), lstm_params.input_gate_bias(), &input_gate));
+        TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(lstm_weights, 0);
+        TensorInfo  lstm_gate_concat          = TensorInfo(lstm_weights_concat_shape, 1, input->data_type());
+        ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(lstm_weights, &lstm_gate_concat, Window::DimX));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, lstm_params.input_to_input_weights(), (lstm_params.use_layer_norm()) ? nullptr : lstm_params.input_gate_bias(), &input_gate));
 
         if(lstm_params.has_peephole_opt())
         {
@@ -419,6 +516,13 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
             ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.cell_to_input_weights()->num_dimensions() > 1);
             ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_input_weights(), &input_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
             ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&input_gate, &input_gate, &input_gate, ConvertPolicy::SATURATE));
+        }
+
+        if(lstm_params.use_layer_norm())
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR(NEMeanStdDevNormalizationLayer::validate(&input_gate));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&input_gate, lstm_params.input_layer_norm_weights(), &input_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&input_gate, lstm_params.input_gate_bias(), &input_gate, ConvertPolicy::SATURATE));
         }
         ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&input_gate, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
     }
@@ -428,9 +532,16 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
     }
 
     // Validate cell state
-    ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, input_to_cell_weights, cell_bias, &cell_state_tmp));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, input_to_cell_weights, (lstm_params.use_layer_norm()) ? nullptr : cell_bias, &cell_state_tmp));
     ARM_COMPUTE_RETURN_ON_ERROR(NEGEMM::validate(output_state_in, &units_out_transposed_info, nullptr, &cell_state_tmp, 1.f, 0.f, GEMMInfo()));
     ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&cell_state_tmp, &cell_state_tmp, &cell_state_tmp, ConvertPolicy::SATURATE));
+    if(lstm_params.use_layer_norm())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEMeanStdDevNormalizationLayer::validate(&cell_state_tmp));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&cell_state_tmp, lstm_params.cell_layer_norm_weights(), &cell_state_tmp, 1, ConvertPolicy::SATURATE,
+                                                                              RoundingPolicy::TO_ZERO));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&cell_state_tmp, cell_bias, &cell_state_tmp, ConvertPolicy::SATURATE));
+    }
     ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&cell_state_tmp, nullptr, activation_info));
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&cell_state_tmp, &input_gate, &cell_state_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&cell_state_tmp, &forget_gate, &cell_state_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
@@ -445,16 +556,24 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
     std::vector<const ITensorInfo *> in_out_weights;
     in_out_weights.emplace_back(input_to_output_weights);
     in_out_weights.emplace_back(recurrent_to_output_weights);
-    TensorInfo in_out_gate_concat;
-    ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayer::validate(in_out_weights, &in_out_gate_concat));
+    TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(in_out_weights, 0);
+    TensorInfo  in_out_gate_concat          = TensorInfo(in_out_weights_concat_shape, 1, input->data_type());
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(in_out_weights, &in_out_gate_concat, Window::DimX));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, input_to_output_weights, output_gate_bias, &output_gate_tmp));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, input_to_output_weights, (lstm_params.use_layer_norm()) ? nullptr : output_gate_bias, &output_gate_tmp));
 
     if(lstm_params.has_peephole_opt())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&cell_state_tmp, lstm_params.cell_to_output_weights(), &output_gate_tmp, 1, ConvertPolicy::SATURATE,
                                                                               RoundingPolicy::TO_ZERO));
         ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&output_gate_tmp, &output_gate_tmp, &output_gate_tmp, ConvertPolicy::SATURATE));
+    }
+    if(lstm_params.use_layer_norm())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEMeanStdDevNormalizationLayer::validate(&output_gate_tmp));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&output_gate_tmp, lstm_params.output_layer_norm_weights(), &output_gate_tmp, 1, ConvertPolicy::SATURATE,
+                                                                              RoundingPolicy::TO_ZERO));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&output_gate_tmp, output_gate_bias, &output_gate_tmp, ConvertPolicy::SATURATE));
     }
     ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&output_gate_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
 
@@ -485,7 +604,7 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
     inputs_vector_info_raw.push_back(&forget_gate);
     inputs_vector_info_raw.push_back(&output_gate_tmp);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayer::validate(inputs_vector_info_raw, scratch_buffer));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(inputs_vector_info_raw, scratch_buffer, Window::DimX));
     return Status{};
 }
 
@@ -501,7 +620,13 @@ void NELSTMLayer::run()
     if(_run_peephole_opt)
     {
         NEScheduler::get().schedule(&_pixelwise_mul_forget_gate, Window::DimY);
-        _accum_forget_gate2.run();
+        _accum_forget_gate1.run();
+    }
+    if(_is_layer_norm_lstm)
+    {
+        _mean_std_norm_forget_gate.run();
+        NEScheduler::get().schedule(&_pixelwise_mul_forget_gate_coeff, Window::DimY);
+        NEScheduler::get().schedule(&_accum_forget_gate_bias, Window::DimY);
     }
     NEScheduler::get().schedule(&_activation_forget_gate, Window::DimY);
 
@@ -524,7 +649,14 @@ void NELSTMLayer::run()
         if(_run_peephole_opt)
         {
             NEScheduler::get().schedule(&_pixelwise_mul_input_gate, Window::DimY);
-            _accum_input_gate2.run();
+            _accum_input_gate1.run();
+        }
+
+        if(_is_layer_norm_lstm)
+        {
+            _mean_std_norm_input_gate.run();
+            NEScheduler::get().schedule(&_pixelwise_mul_input_gate_coeff, Window::DimY);
+            NEScheduler::get().schedule(&_accum_input_gate_bias, Window::DimY);
         }
         NEScheduler::get().schedule(&_activation_input_gate, Window::DimY);
     }
@@ -533,6 +665,12 @@ void NELSTMLayer::run()
     NEScheduler::get().schedule(&_transpose_cell_state, Window::DimY);
     _gemm_cell_state1.run();
     NEScheduler::get().schedule(&_accum_cell_state1, Window::DimY);
+    if(_is_layer_norm_lstm)
+    {
+        _mean_std_norm_cell_gate.run();
+        NEScheduler::get().schedule(&_pixelwise_mul_cell_gate_coeff, Window::DimY);
+        NEScheduler::get().schedule(&_accum_cell_gate_bias, Window::DimY);
+    }
     NEScheduler::get().schedule(&_activation_cell_state, Window::DimY);
     NEScheduler::get().schedule(&_pixelwise_mul_cell_state1, Window::DimY);
     NEScheduler::get().schedule(&_pixelwise_mul_cell_state2, Window::DimY);
@@ -547,7 +685,13 @@ void NELSTMLayer::run()
     if(_run_peephole_opt)
     {
         NEScheduler::get().schedule(&_pixelwise_mul_output_state1, Window::DimY);
-        _accum_output2.run();
+        _accum_output1.run();
+    }
+    if(_is_layer_norm_lstm)
+    {
+        _mean_std_norm_output_gate.run();
+        NEScheduler::get().schedule(&_pixelwise_mul_output_gate_coeff, Window::DimY);
+        NEScheduler::get().schedule(&_accum_output_gate_bias, Window::DimY);
     }
     NEScheduler::get().schedule(&_activation_output, Window::DimY);
 

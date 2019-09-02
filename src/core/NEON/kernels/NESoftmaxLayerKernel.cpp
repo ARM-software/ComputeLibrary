@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -595,7 +595,7 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
     const int start_x     = in.info()->valid_region().anchor.x();
     const int input_width = in.info()->valid_region().shape.x();
 
-    const float scale_beta = -beta * in.info()->quantization_info().scale;
+    const float scale_beta = -beta * in.info()->quantization_info().uniform().scale;
 
     Iterator in_it(&in, window);
     Iterator max_it(&max, window);

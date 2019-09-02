@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,12 +38,9 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
 class Coordinates;
-} // namespace arm_compute
 
 namespace
 {
@@ -56,7 +53,7 @@ Status validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITe
 }
 std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITensorInfo *input, ITensorInfo *output)
 {
-    const unsigned int num_elems_processed_per_iteration = 1;
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
@@ -127,6 +124,14 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTens
     auto win_config = validate_and_configure_window_matrix_a_reduction(_input->info(), _output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
+
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(_input->info()->dimension(2));
 }
 
 Status CLGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row)
@@ -156,7 +161,7 @@ void CLGEMMLowpMatrixAReductionKernel::run(const Window &window, cl::CommandQueu
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_out);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(collapsed.slide_window_slice_2D(slice_out));
 }
@@ -213,3 +218,4 @@ void CLGEMMLowpMatrixBReductionKernel::run(const Window &window, cl::CommandQueu
     }
     while(collapsed.slide_window_slice_2D(slice_out));
 }
+} // namespace arm_compute

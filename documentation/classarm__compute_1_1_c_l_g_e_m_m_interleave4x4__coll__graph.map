@@ -1,5 +1,0 @@
-<map id="CLGEMMInterleave4x4" name="CLGEMMInterleave4x4">
-<area shape="rect" id="node1" title="Basic function to execute CLGEMMInterleave4x4Kernel." alt="" coords="5,155,169,181"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple_function.xhtml" title="Basic interface for functions which have a single OpenCL kernel." alt="" coords="18,80,157,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="48,5,127,32"/>
-</map>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,10 +55,10 @@ public:
      *                     Sum will have the same number of dimensions as input.
      * @param[out] output  Destination tensor. Data types and data layouts supported: Same as @p input.
      *                     Output will have the same number of dimensions as input.
-     * @param[in]  axis    Axis along which to reduce. Supported reduction axis : 0, 1, 2
+     * @param[in]  axis    Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in]  epsilon Lower bound value for the normalization.
      */
-    void configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, unsigned int axis, float epsilon);
+    void configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayerKernel.
      *
@@ -67,12 +67,12 @@ public:
      *                    Sum will have the same number of dimensions as input.
      * @param[in] output  Destination tensor info. Data types and data layouts supported: Same as @p input.
      *                    Output will have the same number of dimensions as input.
-     * @param[in] axis    Axis along which to reduce. Supported reduction axis : 0, 1, 2
+     * @param[in] axis    Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in] epsilon Lower bound value for the normalization.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -81,7 +81,7 @@ private:
     const ICLTensor *_input;
     const ICLTensor *_sum;
     ICLTensor       *_output;
-    unsigned int     _axis;
+    unsigned int     _actual_axis;
     float            _epsilon;
 };
 } // namespace arm_compute

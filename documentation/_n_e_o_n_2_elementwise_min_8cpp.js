@@ -10,6 +10,6 @@ var _n_e_o_n_2_elementwise_min_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_elementwise_min_8cpp.xhtml#a7537bbf42c3e51f56314b8a2b6d15090", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_elementwise_min_8cpp.xhtml#a30647a8ae5ed30e427fe363a464f37fa", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_elementwise_min_8cpp.xhtml#a78e3e5a0be2d9dc8b2c553fc948c6486", null ],
-    [ "TEST_SUITE_END", "_n_e_o_n_2_elementwise_min_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_elementwise_min_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "NEElementwiseMinFixture< int16_t >", "_n_e_o_n_2_elementwise_min_8cpp.xhtml#ace64c392f8bed8e5753727cc847bf7cc", null ]
 ];

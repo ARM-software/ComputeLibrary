@@ -9,7 +9,6 @@ var annotated_dup =
     [ "Keypoint", "struct_keypoint.xhtml", "struct_keypoint" ],
     [ "Tensor3D", "struct_tensor3_d.xhtml", "struct_tensor3_d" ],
     [ "Tensor4D", "struct_tensor4_d.xhtml", "struct_tensor4_d" ],
-    [ "TransformImpl", "struct_transform_impl.xhtml", null ],
     [ "TransposeInterleaveCommon", "struct_transpose_interleave_common.xhtml", null ],
     [ "Vector", "struct_vector.xhtml", "struct_vector" ]
 ];

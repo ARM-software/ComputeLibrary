@@ -1,8 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml" title="Tensor handle interface object." alt="" coords="5,107,116,133"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml" title="OpenCL Sub&#45;Tensor handle interface object." alt="" coords="165,5,314,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml" title="OpenCL Tensor handle interface object." alt="" coords="178,56,301,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml" title="GLES compute tensor handle interface object." alt="" coords="176,107,303,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml" title="NEON Sub&#45;Tensor handle interface object." alt="" coords="164,157,315,184"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml" title="NEON Tensor handle interface object." alt="" coords="176,208,303,235"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_scheduler.xhtml" title="Scheduler interface to run kernels." alt="" coords="5,56,95,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_p_p_scheduler.xhtml" title="C++11 implementation of a pool of threads to automatically split a kernel&#39;s execution among several t..." alt="" coords="172,5,283,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_o_m_p_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads." alt="" coords="170,56,285,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_single_thread_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads." alt="" coords="143,107,312,133"/>
 </map>

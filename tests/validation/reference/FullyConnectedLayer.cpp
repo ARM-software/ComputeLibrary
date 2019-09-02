@@ -67,12 +67,16 @@ void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &w
     const TB *bias_ptr    = bias.data();
     T        *dst_ptr     = dst.data() + offset_dst;
 
-    const int   input_offset   = -src.quantization_info().offset;
-    const float input_scale    = src.quantization_info().scale;
-    const int   weights_offset = -weights.quantization_info().offset;
-    const float weights_scale  = weights.quantization_info().scale;
-    const int   output_offset  = dst.quantization_info().offset;
-    const float output_scale   = dst.quantization_info().scale;
+    const UniformQuantizationInfo iq_info = src.quantization_info().uniform();
+    const UniformQuantizationInfo wq_info = weights.quantization_info().uniform();
+    const UniformQuantizationInfo oq_info = dst.quantization_info().uniform();
+
+    const int   input_offset   = -iq_info.offset;
+    const float input_scale    = iq_info.scale;
+    const int   weights_offset = -wq_info.offset;
+    const float weights_scale  = wq_info.scale;
+    const int   output_offset  = oq_info.offset;
+    const float output_scale   = oq_info.scale;
 
     int         output_multiplier = 0;
     int         output_shift      = 0;

@@ -43,7 +43,7 @@ using namespace arm_compute::misc::shape_calculator;
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _asm_glue(memory_manager), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(),
       _offset_contribution_kernel(), _offset_contribution_output_stage_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _mm_result_s32(), _original_b(nullptr), _a_offset(0), _b_offset(0),
-      _run_vector_matrix_multiplication(false), _dot_product_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false), _fuse_output_stage(false)
+      _run_vector_matrix_multiplication(false), _assembly_path(false), _fused_assembly_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false), _fuse_output_stage(false)
 {
 }
 
@@ -61,22 +61,20 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     _mtx_b_reshape_kernel = nullptr;
 
     // Set internal variables
-    _a_offset                         = a->info()->quantization_info().offset;
-    _b_offset                         = b->info()->quantization_info().offset;
+    _a_offset                         = a->info()->quantization_info().uniform().offset;
+    _b_offset                         = b->info()->quantization_info().uniform().offset;
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
     _is_prepared                      = false;
+    _fused_assembly_path              = false;
     _original_b                       = b;
 
     // If GEMMLowpOutputStage != NONE, fuse the offset contribution with the output stage
     if(gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE)
     {
         _fuse_output_stage = true;
-
         _memory_group.manage(&_mm_result_s32);
-
         TensorInfo info_mm_result_s32(output->info()->tensor_shape(), 1, DataType::S32);
-
         _mm_result_s32.allocator()->init(info_mm_result_s32);
     }
 
@@ -87,8 +85,16 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         case DataType::U8:
         case DataType::S8:
         {
-            _asm_glue.configure(a, b, _fuse_output_stage ? &_mm_result_s32 : output, 1.f, 0.f, _reshape_b_only_on_first_run);
-            _dot_product_path = _asm_glue.is_configured();
+            if(a->info()->data_type() == DataType::QASYMM8 && gemm_info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
+            {
+                _asm_glue.configure(a, b, c, output, 1.f, 0.f, gemm_info);
+                _fused_assembly_path = _asm_glue.is_configured();
+            }
+            else
+            {
+                _asm_glue.configure(a, b, nullptr, _fuse_output_stage ? &_mm_result_s32 : output, 1.f, 0.f, gemm_info);
+            }
+            _assembly_path = _asm_glue.is_configured();
             break;
         }
         default:
@@ -98,7 +104,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         }
     }
 #endif /* __aarch64__ */
-    if(!(_dot_product_path || _run_vector_matrix_multiplication))
+    if(!(_assembly_path || _run_vector_matrix_multiplication))
     {
         matrix_a = &_tmp_a;
         matrix_b = &_tmp_b;
@@ -130,63 +136,64 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         }
     }
 
-    // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
-    if(_a_offset != 0)
+    if(!_fused_assembly_path)
     {
-        TensorInfo info_vector_sum_col(compute_reductionA_shape(*b->info()), 1, DataType::S32);
-
-        _vector_sum_col.allocator()->init(info_vector_sum_col);
-        if(!_reshape_b_only_on_first_run)
+        // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
+        if(_a_offset != 0)
         {
-            _memory_group.manage(&_vector_sum_col);
+            TensorInfo info_vector_sum_col(compute_reductionA_shape(*b->info()), 1, DataType::S32);
+
+            _vector_sum_col.allocator()->init(info_vector_sum_col);
+            if(!_reshape_b_only_on_first_run)
+            {
+                _memory_group.manage(&_vector_sum_col);
+            }
+
+            // Configure Matrix B reduction kernel
+            _mtx_b_reduction_kernel.configure(b, &_vector_sum_col, a->info()->dimension(0), false);
         }
 
-        // Configure Matrix B reduction kernel
-        _mtx_b_reduction_kernel.configure(b, &_vector_sum_col, a->info()->dimension(0), false);
-    }
-
-    // Initialize Matrix A reduction kernel only if _b_offset is not equal to 0
-    if(_b_offset != 0)
-    {
-        TensorInfo info_vector_sum_row(compute_reductionB_shape(*a->info()), 1, DataType::S32);
-
-        _vector_sum_row.allocator()->init(info_vector_sum_row);
-        _memory_group.manage(&_vector_sum_row);
-
-        // Configure matrix A reduction kernel
-        _mtx_a_reduction_kernel.configure(a, &_vector_sum_row, a->info()->dimension(0), false);
-    }
-
-    if(_fuse_output_stage)
-    {
-        // Configure matrix multiply kernel
-        if(!_dot_product_path)
+        // Initialize Matrix A reduction kernel only if _b_offset is not equal to 0
+        if(_b_offset != 0)
         {
-            auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
-            k->configure(matrix_a, matrix_b, &_mm_result_s32);
-            _mm_kernel = std::move(k);
+            TensorInfo info_vector_sum_row(compute_reductionB_shape(*a->info()), 1, DataType::S32);
+
+            _vector_sum_row.allocator()->init(info_vector_sum_row);
+            _memory_group.manage(&_vector_sum_row);
+
+            // Configure matrix A reduction kernel
+            _mtx_a_reduction_kernel.configure(a, &_vector_sum_row, a->info()->dimension(0), false);
         }
 
-        _offset_contribution_output_stage_kernel.configure(&_mm_result_s32, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, c, output, a->info()->dimension(0),
-                                                           _a_offset, _b_offset, gemm_info.gemmlowp_output_stage());
-
-        _mm_result_s32.allocator()->allocate();
-    }
-    else
-    {
-        // Configure matrix multiply kernel
-        if(!_dot_product_path)
+        if(_fuse_output_stage)
         {
-            auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
-            k->configure(matrix_a, matrix_b, output);
-            _mm_kernel = std::move(k);
+            // Configure matrix multiply kernel
+            if(!_assembly_path)
+            {
+                auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
+                k->configure(matrix_a, matrix_b, &_mm_result_s32);
+                _mm_kernel = std::move(k);
+            }
+
+            _offset_contribution_output_stage_kernel.configure(&_mm_result_s32, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, c, output, a->info()->dimension(0),
+                                                               _a_offset, _b_offset, gemm_info.gemmlowp_output_stage());
         }
-        // Configure offset contribution kernel
-        _offset_contribution_kernel.configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a->info()->dimension(0), _a_offset, _b_offset);
+        else
+        {
+            // Configure matrix multiply kernel
+            if(!_assembly_path)
+            {
+                auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpMatrixMultiplyKernel>();
+                k->configure(matrix_a, matrix_b, output);
+                _mm_kernel = std::move(k);
+            }
+            // Configure offset contribution kernel
+            _offset_contribution_kernel.configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a->info()->dimension(0), _a_offset, _b_offset);
+        }
     }
 
     // Allocate tensors
-    if(!_dot_product_path && !_run_vector_matrix_multiplication)
+    if(!_assembly_path && !_run_vector_matrix_multiplication)
     {
         _tmp_a.allocator()->allocate();
         if(!_reshape_b_only_on_first_run)
@@ -195,14 +202,22 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         }
     }
 
-    if(_a_offset != 0 && !_reshape_b_only_on_first_run)
+    if(!_fused_assembly_path)
     {
-        _vector_sum_col.allocator()->allocate();
+        if(_a_offset != 0 && !_reshape_b_only_on_first_run)
+        {
+            _vector_sum_col.allocator()->allocate();
+        }
+
+        if(_b_offset != 0)
+        {
+            _vector_sum_row.allocator()->allocate();
+        }
     }
 
-    if(_b_offset != 0)
+    if(_fuse_output_stage)
     {
-        _vector_sum_row.allocator()->allocate();
+        _mm_result_s32.allocator()->allocate();
     }
 }
 
@@ -224,9 +239,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     TensorInfo tmp_b_info{};
     TensorInfo mm_result_s32_info{};
 
-    int32_t    a_offset                    = a->quantization_info().offset;
-    int32_t    b_offset                    = b->quantization_info().offset;
-    const bool reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
+    int32_t a_offset = a->quantization_info().uniform().offset;
+    int32_t b_offset = b->quantization_info().uniform().offset;
 
     bool fuse_output_stage = gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE;
     if(fuse_output_stage)
@@ -235,7 +249,17 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     }
 
     // Check if we need to run the optimized assembly kernel
-    const bool run_optimised = bool(NEGEMMAssemblyDispatch::validate(a, b, fuse_output_stage ? &mm_result_s32_info : output, 1.f, 0.f, reshape_b_only_on_first_run));
+    bool run_optimised             = false;
+    bool run_optimised_requantized = false;
+    if(is_data_type_quantized_asymmetric(a->data_type()))
+    {
+        run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a, b, c, output, 1.f, 0.f, gemm_info));
+        run_optimised_requantized = run_optimised;
+    }
+    else
+    {
+        run_optimised = bool(NEGEMMAssemblyDispatch::validate(a, b, nullptr, fuse_output_stage ? &mm_result_s32_info : output, 1.f, 0.f, gemm_info));
+    }
 
     if(run_optimised)
     {
@@ -287,52 +311,55 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         }
     }
 
-    TensorInfo info_vector_sum_col{};
-    TensorInfo info_vector_sum_row{};
-
-    // Validate matrix B reduction kernel only if _a_offset is not equal to 0
-    if(a_offset != 0)
+    if(!run_optimised_requantized)
     {
-        info_vector_sum_col = TensorInfo(compute_reductionA_shape(*b), 1, DataType::S32);
+        TensorInfo info_vector_sum_col{};
+        TensorInfo info_vector_sum_row{};
 
-        // Configure Matrix B reduction kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixBReductionKernel::validate(b, &info_vector_sum_col, a->dimension(0), false));
-    }
-
-    // Validate Matrix A reduction kernel only if _b_offset is not equal to 0
-    if(b_offset != 0)
-    {
-        info_vector_sum_row = TensorInfo(compute_reductionB_shape(*a), 1, DataType::S32);
-
-        // Configure matrix A reduction kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(a, &info_vector_sum_row, a->dimension(0), false));
-    }
-
-    if(fuse_output_stage)
-    {
-        if(!run_optimised)
+        // Validate matrix B reduction kernel only if _a_offset is not equal to 0
+        if(a_offset != 0)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &mm_result_s32_info));
+            info_vector_sum_col = TensorInfo(compute_reductionA_shape(*b), 1, DataType::S32);
+
+            // Configure Matrix B reduction kernel
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixBReductionKernel::validate(b, &info_vector_sum_col, a->dimension(0), false));
         }
 
-        // Validate offset contribution kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOffsetContributionOutputStageKernel::validate(&mm_result_s32_info,
-                                                                                            a_offset == 0 ? nullptr : &info_vector_sum_col,
-                                                                                            b_offset == 0 ? nullptr : &info_vector_sum_row,
-                                                                                            c, output, a_offset, b_offset,
-                                                                                            gemm_info.gemmlowp_output_stage()));
-    }
-    else
-    {
-        if(!run_optimised)
+        // Validate Matrix A reduction kernel only if _b_offset is not equal to 0
+        if(b_offset != 0)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output));
+            info_vector_sum_row = TensorInfo(compute_reductionB_shape(*a), 1, DataType::S32);
+
+            // Configure matrix A reduction kernel
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(a, &info_vector_sum_row, a->dimension(0), false));
         }
-        // Validate offset contribution kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOffsetContributionKernel::validate(output,
-                                                                                 a_offset == 0 ? nullptr : &info_vector_sum_col,
-                                                                                 b_offset == 0 ? nullptr : &info_vector_sum_row,
-                                                                                 a_offset, b_offset));
+
+        if(fuse_output_stage)
+        {
+            if(!run_optimised)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &mm_result_s32_info));
+            }
+
+            // Validate offset contribution kernel
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOffsetContributionOutputStageKernel::validate(&mm_result_s32_info,
+                                                                                                a_offset == 0 ? nullptr : &info_vector_sum_col,
+                                                                                                b_offset == 0 ? nullptr : &info_vector_sum_row,
+                                                                                                c, output, a_offset, b_offset,
+                                                                                                gemm_info.gemmlowp_output_stage()));
+        }
+        else
+        {
+            if(!run_optimised)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output));
+            }
+            // Validate offset contribution kernel
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOffsetContributionKernel::validate(output,
+                                                                                     a_offset == 0 ? nullptr : &info_vector_sum_col,
+                                                                                     b_offset == 0 ? nullptr : &info_vector_sum_row,
+                                                                                     a_offset, b_offset));
+        }
     }
     return Status{};
 }
@@ -363,27 +390,30 @@ void NEGEMMLowpMatrixMultiplyCore::run()
         NEScheduler::get().schedule(_mm_kernel.get(), Window::DimY);
     }
 
-    // Run matrix A reduction kernel only if _b_offset is not equal to 0
-    if(_b_offset != 0)
+    if(!_fused_assembly_path)
     {
-        NEScheduler::get().schedule(&_mtx_a_reduction_kernel, Window::DimX);
-    }
+        // Run matrix A reduction kernel only if _b_offset is not equal to 0
+        if(_b_offset != 0)
+        {
+            NEScheduler::get().schedule(&_mtx_a_reduction_kernel, Window::DimX);
+        }
 
-    // Run matrix B reduction kernel only if _a_offset is not equal to 0
-    if(_a_offset != 0 && !_reshape_b_only_on_first_run)
-    {
-        NEScheduler::get().schedule(&_mtx_b_reduction_kernel, Window::DimX);
-    }
+        // Run matrix B reduction kernel only if _a_offset is not equal to 0
+        if(_a_offset != 0 && !_reshape_b_only_on_first_run)
+        {
+            NEScheduler::get().schedule(&_mtx_b_reduction_kernel, Window::DimX);
+        }
 
-    if(_fuse_output_stage)
-    {
-        // Run offset contribution kernel
-        NEScheduler::get().schedule(&_offset_contribution_output_stage_kernel, Window::DimY);
-    }
-    else
-    {
-        // Run offset contribution kernel
-        NEScheduler::get().schedule(&_offset_contribution_kernel, Window::DimY);
+        if(_fuse_output_stage)
+        {
+            // Run offset contribution kernel
+            NEScheduler::get().schedule(&_offset_contribution_output_stage_kernel, Window::DimY);
+        }
+        else
+        {
+            // Run offset contribution kernel
+            NEScheduler::get().schedule(&_offset_contribution_kernel, Window::DimY);
+        }
     }
 }
 

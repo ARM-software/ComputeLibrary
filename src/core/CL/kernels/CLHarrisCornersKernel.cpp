@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,6 +107,21 @@ void CLHarrisScoreKernel::configure(const ICLImage *input1, const ICLImage *inpu
     output_access.set_valid_region(win, valid_region, border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = harris_score_kernel_name.str();
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input1->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input1->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input1->info()->dimension(1));
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input2->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input2->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input2->info()->dimension(1));
 }
 
 void CLHarrisScoreKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -121,7 +136,7 @@ void CLHarrisScoreKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _input1, slice);
         add_2D_tensor_argument(idx, _input2, slice);
         add_2D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

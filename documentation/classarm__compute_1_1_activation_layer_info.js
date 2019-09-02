@@ -11,7 +11,8 @@ var classarm__compute_1_1_activation_layer_info =
       [ "ABS", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa7d8a220d2262f9d6c658d549ee12cf2c", null ],
       [ "SQUARE", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa12dec4e1f7ec620651b2b95c440ffac0", null ],
       [ "SQRT", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa36875f2500a09ee35d0bb7eb8c0b91b0", null ],
-      [ "LINEAR", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaaaac544aacc3615aada24897a215f5046", null ]
+      [ "LINEAR", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaaaac544aacc3615aada24897a215f5046", null ],
+      [ "IDENTITY", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaad8156d3c6735d75d8a1b8dedd0e79c8b", null ]
     ] ],
     [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml#ac06d9557031b0febb70869efd793cb38", null ],
     [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml#af56abff12f887fddfa02e0bc18a318a1", null ],

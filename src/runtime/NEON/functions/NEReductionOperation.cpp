@@ -78,7 +78,78 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     {
         // Configure fill border kernel
         const BorderSize fill_border_size = _reduction_kernel.border_size();
-        const PixelValue pixelValue       = (op == ReductionOperation::PROD) ? PixelValue(1, input->info()->data_type(), input->info()->quantization_info()) : PixelValue(0, input->info()->data_type());
+        PixelValue       pixelValue;
+        switch(op)
+        {
+            case ReductionOperation::PROD:
+            {
+                pixelValue = PixelValue(1, input->info()->data_type(), input->info()->quantization_info());
+                break;
+            }
+            case ReductionOperation::MIN:
+            {
+                switch(input->info()->data_type())
+                {
+                    case DataType::F32:
+                    {
+                        pixelValue = PixelValue(std::numeric_limits<float>::max());
+                        break;
+                    }
+                    case DataType::F16:
+                    {
+                        pixelValue = PixelValue(static_cast<half>(65504.0f));
+                        break;
+                    }
+                    case DataType::QASYMM8:
+                    {
+                        pixelValue = PixelValue(255, input->info()->data_type(), input->info()->quantization_info());
+                        break;
+                    }
+                    default:
+                    {
+                        ARM_COMPUTE_ERROR("Unsupported DataType");
+                    }
+                }
+                break;
+            }
+            case ReductionOperation::MAX:
+            {
+                switch(input->info()->data_type())
+                {
+                    case DataType::F32:
+                    {
+                        pixelValue = PixelValue(-std::numeric_limits<float>::max());
+                        break;
+                    }
+                    case DataType::F16:
+                    {
+                        pixelValue = PixelValue(static_cast<half>(-65504.0f));
+                        break;
+                    }
+                    case DataType::QASYMM8:
+                    {
+                        pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
+                        break;
+                    }
+                    default:
+                    {
+                        ARM_COMPUTE_ERROR("Unsupported DataType");
+                    }
+                }
+                break;
+            }
+            case ReductionOperation::ARG_IDX_MAX:
+            case ReductionOperation::ARG_IDX_MIN:
+            case ReductionOperation::MEAN_SUM:
+            case ReductionOperation::SUM_SQUARE:
+            case ReductionOperation::SUM:
+            {
+                pixelValue = PixelValue(0, input->info()->data_type());
+                break;
+            }
+            default:
+                ARM_COMPUTE_ERROR("Reduction Operation unsupported");
+        }
         _fill_border_kernel.configure(input, fill_border_size, BorderMode::CONSTANT, pixelValue);
     }
 }

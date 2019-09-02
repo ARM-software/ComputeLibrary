@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+#include <cmath>
+
 namespace arm_compute
 {
 /** Exponent polynomial coefficients */
@@ -54,6 +56,12 @@ const std::array<float32x4_t, 8> log_tab =
     }
 };
 
+/** Sin polynomial coefficients */
+constexpr float te_sin_coeff2 = 0.166666666666f; // 1/(2*3)
+constexpr float te_sin_coeff3 = 0.05f;           // 1/(4*5)
+constexpr float te_sin_coeff4 = 0.023809523810f; // 1/(6*7)
+constexpr float te_sin_coeff5 = 0.013888888889f; // 1/(8*9)
+
 #ifndef DOXYGEN_SKIP_THIS
 inline float32x4_t vfloorq_f32(float32x4_t val)
 {
@@ -63,6 +71,27 @@ inline float32x4_t vfloorq_f32(float32x4_t val)
     const float32x4_t r = vcvtq_f32_s32(z);
 
     return vbslq_f32(vcgtq_f32(r, val), vsubq_f32(r, CONST_1), r);
+}
+
+inline float32x4_t vroundq_rte_f32(float32x4_t val)
+{
+#ifdef __aarch64__
+    return vrndnq_f32(val);
+#else  // __aarch64__
+    static const float32x4_t CONST_HALF_FLOAT = vdupq_n_f32(0.5f);
+    static const float32x4_t CONST_1_FLOAT    = vdupq_n_f32(1.f);
+    static const int32x4_t   CONST_1_INT      = vdupq_n_s32(1);
+    const float32x4_t        floor_val        = vfloorq_f32(val);
+    const float32x4_t        diff             = vsubq_f32(val, floor_val);
+
+    /*
+    * Select the floor value when (diff<0.5 || (diff==0.5 && floor_val%2==0).
+    * This condition is checked by vorrq_u32(vcltq_f32(diff, CONST_HALF_FLOAT) ,vandq_u32(vceqq_f32(diff, CONST_HALF_FLOAT) , vmvnq_u32(vtstq_s32(vandq_s32(vcvtq_s32_f32(floor_val), CONST_1_INT),CONST_1_INT))))
+    */
+
+    return vbslq_f32(vorrq_u32(vcltq_f32(diff, CONST_HALF_FLOAT), vandq_u32(vceqq_f32(diff, CONST_HALF_FLOAT), vmvnq_u32(vtstq_s32(vandq_s32(vcvtq_s32_f32(floor_val), CONST_1_INT), CONST_1_INT)))),
+                     floor_val, vaddq_f32(floor_val, CONST_1_FLOAT));
+#endif // __aarch64__
 }
 
 inline float32x2_t vinvsqrt_f32(float32x2_t x)
@@ -169,7 +198,113 @@ inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
 {
     return vexpq_f32(vmulq_f32(n, vlogq_f32(val)));
 }
+
+inline float32x4_t vsinq_f32(float32x4_t val)
+{
+    const float32x4_t pi_v   = vdupq_n_f32(M_PI);
+    const float32x4_t pio2_v = vdupq_n_f32(M_PI / 2);
+    const float32x4_t ipi_v  = vdupq_n_f32(1 / M_PI);
+
+    //Find positive or negative
+    const int32x4_t  c_v    = vabsq_s32(vcvtq_s32_f32(vmulq_f32(val, ipi_v)));
+    const uint32x4_t sign_v = vcleq_f32(val, vdupq_n_f32(0));
+    const uint32x4_t odd_v  = vandq_u32(vreinterpretq_u32_s32(c_v), vdupq_n_u32(1));
+
+    uint32x4_t neg_v = veorq_u32(odd_v, sign_v);
+
+    //Modulus a - (n * int(a*(1/n)))
+    float32x4_t      ma    = vsubq_f32(vabsq_f32(val), vmulq_f32(pi_v, vcvtq_f32_s32(c_v)));
+    const uint32x4_t reb_v = vcgeq_f32(ma, pio2_v);
+
+    //Rebase a between 0 and pi/2
+    ma = vbslq_f32(reb_v, vsubq_f32(pi_v, ma), ma);
+
+    //Taylor series
+    const float32x4_t ma2 = vmulq_f32(ma, ma);
+
+    //2nd elem: x^3 / 3!
+    float32x4_t elem = vmulq_f32(vmulq_f32(ma, ma2), vdupq_n_f32(te_sin_coeff2));
+    float32x4_t res  = vsubq_f32(ma, elem);
+
+    //3rd elem: x^5 / 5!
+    elem = vmulq_f32(vmulq_f32(elem, ma2), vdupq_n_f32(te_sin_coeff3));
+    res  = vaddq_f32(res, elem);
+
+    //4th elem: x^7 / 7!float32x2_t vsin_f32(float32x2_t val)
+    elem = vmulq_f32(vmulq_f32(elem, ma2), vdupq_n_f32(te_sin_coeff4));
+    res  = vsubq_f32(res, elem);
+
+    //5th elem: x^9 / 9!
+    elem = vmulq_f32(vmulq_f32(elem, ma2), vdupq_n_f32(te_sin_coeff5));
+    res  = vaddq_f32(res, elem);
+
+    //Change of sign
+    neg_v = vshlq_n_u32(neg_v, 31);
+    res   = vreinterpretq_f32_u32(veorq_u32(vreinterpretq_u32_f32(res), neg_v));
+    return res;
+}
+
+inline float32x2_t vsin_f32(float32x2_t val)
+{
+    const float32x2_t pi_v   = vdup_n_f32(M_PI);
+    const float32x2_t pio2_v = vdup_n_f32(M_PI / 2);
+    const float32x2_t ipi_v  = vdup_n_f32(1 / M_PI);
+
+    //Find positive or negative
+    const int32x2_t  c_v    = vabs_s32(vcvt_s32_f32(vmul_f32(val, ipi_v)));
+    const uint32x2_t sign_v = vcle_f32(val, vdup_n_f32(0));
+    const uint32x2_t odd_v  = vand_u32(vreinterpret_u32_s32(c_v), vdup_n_u32(1));
+
+    uint32x2_t neg_v = veor_u32(odd_v, sign_v);
+
+    //Modulus a - (n * int(a*(1/n)))
+    float32x2_t      ma    = vsub_f32(vabs_f32(val), vmul_f32(pi_v, vcvt_f32_s32(c_v)));
+    const uint32x2_t reb_v = vcge_f32(ma, pio2_v);
+
+    //Rebase a between 0 and pi/2
+    ma = vbsl_f32(reb_v, vsub_f32(pi_v, ma), ma);
+
+    //Taylor series
+    const float32x2_t ma2 = vmul_f32(ma, ma);
+
+    //2nd elem: x^3 / 3!
+    float32x2_t elem = vmul_f32(vmul_f32(ma, ma2), vdup_n_f32(te_sin_coeff2));
+    float32x2_t res  = vsub_f32(ma, elem);
+
+    //3rd elem: x^5 / 5!
+    elem = vmul_f32(vmul_f32(elem, ma2), vdup_n_f32(te_sin_coeff3));
+    res  = vadd_f32(res, elem);
+
+    //4th elem: x^7 / 7!float32x2_t vsin_f32(float32x2_t val)
+    elem = vmul_f32(vmul_f32(elem, ma2), vdup_n_f32(te_sin_coeff4));
+    res  = vsub_f32(res, elem);
+
+    //5th elem: x^9 / 9!
+    elem = vmul_f32(vmul_f32(elem, ma2), vdup_n_f32(te_sin_coeff5));
+    res  = vadd_f32(res, elem);
+
+    //Change of sign
+    neg_v = vshl_n_u32(neg_v, 31);
+    res   = vreinterpret_f32_u32(veor_u32(vreinterpret_u32_f32(res), neg_v));
+    return res;
+}
+
 #endif /* DOXYGEN_SKIP_THIS */
+
+inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent)
+{
+    const int32x4_t shift_vec  = vdupq_n_s32(-exponent);
+    const int32x4_t fixup      = vshrq_n_s32(vandq_s32(x, shift_vec), 31);
+    const int32x4_t fixed_up_x = vqaddq_s32(x, fixup);
+    return vrshlq_s32(fixed_up_x, shift_vec);
+}
+
+inline int32_t rounding_divide_by_pow2(int32_t x, int exponent)
+{
+    const int32_t mask      = (1 << exponent) - 1;
+    const int32_t threshold = (mask >> 1) + (x < 0 ? 1 : 0);
+    return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
+}
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Exponent polynomial coefficients */
@@ -184,6 +319,12 @@ inline float16x8_t vfloorq_f16(float16x8_t val)
 
     return vbslq_f16(vcgtq_f16(r, val), vsubq_f16(r, CONST_1), r);
 }
+
+inline float16x8_t vroundq_rte_f16(float16x8_t val)
+{
+    return vrndnq_f16(val);
+}
+
 inline float16x4_t vinvsqrt_f16(float16x4_t x)
 {
     float16x4_t sqrt_reciprocal = vrsqrte_f16(x);
@@ -276,6 +417,30 @@ inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
 
     return vcombine_f16(vcvt_f16_f32(res0_f32), vcvt_f16_f32(res1_f32));
 }
+
+inline float16x8_t vsinq_f16(float16x8_t val)
+{
+    const float32x4_t val_high = vcvt_f32_f16(vget_high_f16(val));
+    const float32x4_t val_low  = vcvt_f32_f16(vget_low_f16(val));
+
+    const float32x4_t res_high = vsinq_f32(val_high);
+    const float32x4_t res_low  = vsinq_f32(val_low);
+
+    return vcombine_f16(vcvt_f16_f32(res_low), vcvt_f16_f32(res_high));
+}
+
+inline float16x4_t vsin_f16(float16x4_t val)
+{
+    const float32x4_t val_f32  = vcvt_f32_f16(val);
+    const float32x2_t val_high = vget_high_f32(val_f32);
+    const float32x2_t val_low  = vget_low_f32(val_f32);
+
+    const float32x2_t res_high = vsin_f32(val_high);
+    const float32x2_t res_low  = vsin_f32(val_low);
+
+    return vcvt_f16_f32(vcombine_f32(res_low, res_high));
+}
+
 #endif /* DOXYGEN_SKIP_THIS */
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute

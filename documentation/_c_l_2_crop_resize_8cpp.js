@@ -7,7 +7,7 @@ var _c_l_2_crop_resize_8cpp =
     [ "combine", "_c_l_2_crop_resize_8cpp.xhtml#a31d1210c97e7f5df50ed4ae9c9dc7a31", null ],
     [ "DATA_TEST_CASE", "_c_l_2_crop_resize_8cpp.xhtml#a04e62cc8a8ee2c1853ae213dc465c9be", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_crop_resize_8cpp.xhtml#add46fedf348458126c6794bc6fa7c0e2", null ],
-    [ "TEST_SUITE_END", "_c_l_2_crop_resize_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_c_l_2_crop_resize_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLCropResizeFixture< int16_t >", "_c_l_2_crop_resize_8cpp.xhtml#accec09308249e774d035fc017c30aaae", null ],
     [ "CLCropResizeFixture< int32_t >", "_c_l_2_crop_resize_8cpp.xhtml#a045c17a05b1076fb280107d43ab6a87b", null ],
     [ "CLCropResizeFixture< uint16_t >", "_c_l_2_crop_resize_8cpp.xhtml#a9c5f645acf5c43ba32938abb6463ec7d", null ],

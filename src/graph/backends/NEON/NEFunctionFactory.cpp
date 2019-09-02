@@ -65,8 +65,8 @@ struct NEConvolutionLayerFunctions
 /** Collection of CL depthwise convolution functions */
 struct NEDepthwiseConvolutionLayerFunctions
 {
-    using GenericDepthwiseConvolutionLayer = NEDepthwiseConvolutionLayer;
-    using DepthwiseConvolutionLayer3x3     = NEDepthwiseConvolutionLayer3x3;
+    using GenericDepthwiseConvolutionLayer   = NEDepthwiseConvolutionLayer;
+    using OptimizedDepthwiseConvolutionLayer = NEDepthwiseConvolutionLayerOptimized;
 };
 
 /** Collection of CL element-wise functions */
@@ -80,8 +80,9 @@ struct NEEltwiseFunctions
 /** Function and tensor types to be used inside a NEON fused convolution/batch normalization layer */
 struct NEFusedLayerTypes
 {
-    using ConvolutionLayer       = NEConvolutionLayer;
-    using FuseBatchNormalization = NEFuseBatchNormalization;
+    using ConvolutionLayer          = NEConvolutionLayer;
+    using DepthwiseConvolutionLayer = NEDepthwiseConvolutionLayer;
+    using FuseBatchNormalization    = NEFuseBatchNormalization;
 };
 
 namespace detail
@@ -214,6 +215,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_depthwise_convolution_layer<NEDepthwiseConvolutionLayerFunctions, NETargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
             return detail::create_detection_output_layer<CPPDetectionOutputLayer, NETargetInfo>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
+        case NodeType::DetectionPostProcessLayer:
+            return detail::create_detection_post_process_layer<CPPDetectionPostProcessLayer, NETargetInfo>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::EltwiseLayer:
             return detail::create_eltwise_layer<NEEltwiseFunctions, NETargetInfo>(*polymorphic_downcast<EltwiseLayerNode *>(node));
         case NodeType::FlattenLayer:
@@ -222,6 +225,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_fully_connected_layer<NEFullyConnectedLayer, NETargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
         case NodeType::FusedConvolutionBatchNormalizationLayer:
             return detail::create_fused_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(*polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(node));
+        case NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer:
+            return detail::create_fused_depthwise_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(*polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node));
         case NodeType::NormalizationLayer:
             return detail::create_normalization_layer<NENormalizationLayer, NETargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
         case NodeType::PermuteLayer:
@@ -230,6 +235,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_pooling_layer<NEPoolingLayer, NETargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
         case NodeType::PriorBoxLayer:
             return detail::create_priorbox_layer<NEPriorBoxLayer, NETargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
+        case NodeType::QuantizationLayer:
+            return detail::create_quantization_layer<NEQuantizationLayer, NETargetInfo>(*polymorphic_downcast<QuantizationLayerNode *>(node));
         case NodeType::ReorgLayer:
             return detail::create_reorg_layer<NEReorgLayer, NETargetInfo>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:

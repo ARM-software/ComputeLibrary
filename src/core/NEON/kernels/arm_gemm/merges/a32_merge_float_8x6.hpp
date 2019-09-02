@@ -61,12 +61,16 @@ inline void MergeResults<8, 6, false>(float *out, const float *in, const int ldo
                 switch ((y + 5) - ymax) {
                     case 4:
                         outptr1 = dummyres;
+                        // fall through
                     case 3:
                         outptr2 = dummyres;
+                        // fall through
                     case 2:
                         outptr3 = dummyres;
+                        // fall through
                     case 1:
                         outptr4 = dummyres;
+                        // fall through
                     case 0:
                         outptr5 = dummyres;
                         break;

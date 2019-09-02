@@ -6,6 +6,6 @@ var validation_2_c_l_2_normalization_layer_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_normalization_layer_8cpp.xhtml#a73c4dcd752bdf6e6c76b293af0d0f3d8", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_normalization_layer_8cpp.xhtml#a4b1005817e3e850db979775f8c757030", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_normalization_layer_8cpp.xhtml#a09929aa316ea25237bfff2f344f05634", null ],
-    [ "TEST_SUITE_END", "validation_2_c_l_2_normalization_layer_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "validation_2_c_l_2_normalization_layer_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLNormalizationLayerFixture< float >", "validation_2_c_l_2_normalization_layer_8cpp.xhtml#a129a1e26d5a015161e1a1affcbad0e55", null ]
 ];

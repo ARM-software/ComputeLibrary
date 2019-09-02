@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,6 +78,15 @@ void CLGradientKernel::configure(const ICLTensor *gx, const ICLTensor *gy, ICLTe
     phase_access.set_valid_region(win, _gx->info()->valid_region());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(gx->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(gx->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(gx->info()->dimension(1));
 }
 
 void CLGradientKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -93,7 +102,7 @@ void CLGradientKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _gy, slice);
         add_2D_tensor_argument(idx, _magnitude, slice);
         add_2D_tensor_argument(idx, _phase, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }
@@ -124,7 +133,8 @@ void CLEdgeNonMaxSuppressionKernel::configure(const ICLTensor *magnitude, const 
     built_opts.emplace("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("suppress_non_maximum", built_opts));
+    const std::string kernel_name = std::string("suppress_non_maximum");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, built_opts));
 
     // Set minimum threshold argument
     unsigned int idx = 3 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
@@ -146,6 +156,17 @@ void CLEdgeNonMaxSuppressionKernel::configure(const ICLTensor *magnitude, const 
     output_access.set_valid_region(win, _magnitude->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(output->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(border_undefined);
 }
 
 void CLEdgeNonMaxSuppressionKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -160,7 +181,7 @@ void CLEdgeNonMaxSuppressionKernel::run(const Window &window, cl::CommandQueue &
         add_2D_tensor_argument(idx, _magnitude, slice);
         add_2D_tensor_argument(idx, _phase, slice);
         add_2D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }
@@ -195,7 +216,8 @@ void CLEdgeTraceKernel::configure(const ICLTensor *input, ICLTensor *output, int
     built_opts.emplace("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("hysteresis", built_opts));
+    const std::string kernel_name = std::string("hysteresis");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, built_opts));
 
     // Set constant kernel args
     unsigned int width  = _input->info()->dimension(0);
@@ -231,6 +253,21 @@ void CLEdgeTraceKernel::configure(const ICLTensor *input, ICLTensor *output, int
     l1_stack_counter_access.set_valid_region(win, _input->info()->valid_region());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += lower_string(string_from_format(output->info()->format()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLEdgeTraceKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -249,7 +286,7 @@ void CLEdgeTraceKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _l1_stack, slice);
         add_2D_tensor_argument(idx, _l1_stack_counter, slice);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

@@ -9,7 +9,7 @@ var validation_2_c_l_2_batch_normalization_layer_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_batch_normalization_layer_8cpp.xhtml#a1d2fbcf7aa6319b71a40377f2de2fc36", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_batch_normalization_layer_8cpp.xhtml#ac3dc00bc88656d33686fbb2391b73e86", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_batch_normalization_layer_8cpp.xhtml#ae4a31f2ba6ae1a69845aa352acc16592", null ],
-    [ "TEST_SUITE_END", "validation_2_c_l_2_batch_normalization_layer_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "validation_2_c_l_2_batch_normalization_layer_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "zip", "validation_2_c_l_2_batch_normalization_layer_8cpp.xhtml#a96f9e78d0c2a93f0e3a876eeae4be4b0", null ],
     [ "beta_info", "validation_2_c_l_2_batch_normalization_layer_8cpp.xhtml#a4117a6db63ae46d644756cbfff7fe74b", null ],
     [ "CLBatchNormalizationLayerFixture< half >", "validation_2_c_l_2_batch_normalization_layer_8cpp.xhtml#a4da3a5c737246cbb15c2c55c8b9f4f0f", null ],

@@ -89,22 +89,21 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                                   _memory_group;
-    NEHOGGradient                                                 _gradient_kernel;
-    std::vector<std::unique_ptr<NEHOGOrientationBinningKernel>>   _orient_bin_kernel;
-    std::vector<std::unique_ptr<NEHOGBlockNormalizationKernel>>   _block_norm_kernel;
-    std::vector<std::unique_ptr<NEHOGDetector>>                   _hog_detect_kernel;
-    std::unique_ptr<CPPDetectionWindowNonMaximaSuppressionKernel> _non_maxima_kernel;
-    std::vector<std::unique_ptr<Tensor>>                          _hog_space;
-    std::vector<std::unique_ptr<Tensor>>                          _hog_norm_space;
-    IDetectionWindowArray                                        *_detection_windows;
-    Tensor                                                        _mag;
-    Tensor                                                        _phase;
-    bool                                                          _non_maxima_suppression;
-    size_t                                                        _num_orient_bin_kernel;
-    size_t                                                        _num_block_norm_kernel;
-    size_t                                                        _num_hog_detect_kernel;
+    MemoryGroup                                  _memory_group;
+    NEHOGGradient                                _gradient_kernel;
+    std::vector<NEHOGOrientationBinningKernel>   _orient_bin_kernel;
+    std::vector<NEHOGBlockNormalizationKernel>   _block_norm_kernel;
+    std::vector<NEHOGDetector>                   _hog_detect_kernel;
+    CPPDetectionWindowNonMaximaSuppressionKernel _non_maxima_kernel;
+    std::vector<Tensor>                          _hog_space;
+    std::vector<Tensor>                          _hog_norm_space;
+    IDetectionWindowArray                       *_detection_windows;
+    Tensor                                       _mag;
+    Tensor                                       _phase;
+    bool                                         _non_maxima_suppression;
+    size_t                                       _num_orient_bin_kernel;
+    size_t                                       _num_block_norm_kernel;
+    size_t                                       _num_hog_detect_kernel;
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEHOGMULTIDETECTION_H__ */

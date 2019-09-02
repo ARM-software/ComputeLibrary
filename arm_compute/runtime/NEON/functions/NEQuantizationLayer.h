@@ -48,14 +48,14 @@ public:
     NEQuantizationLayer() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: F32
-     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8
+     * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: F32/F16.
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QSYMM16
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEQuantizationLayer
      *
-     * @param[in] input  Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: F32.
-     * @param[in] output Output tensor info. Data types supported: QASYMM8
+     * @param[in] input  Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: F32/F16.
+     * @param[in] output Output tensor info. Data types supported: QASYMM8/QSYMM16
      *
      * @return a status
      */

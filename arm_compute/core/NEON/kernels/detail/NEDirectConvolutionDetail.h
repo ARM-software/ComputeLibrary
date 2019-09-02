@@ -282,11 +282,31 @@ inline float32x4x2_t convolve_3x3<2>(const float *in_top, const float *in_mid, c
                                      int input_offset)
 {
     ARM_COMPUTE_UNUSED(input_offset);
+    const float32x4x2_t vtop     = vld2q_f32(in_top);
+    const float32x4x2_t vmid     = vld2q_f32(in_mid);
+    const float32x4x2_t vlow     = vld2q_f32(in_low);
+    const float32x4_t   vtop_end = vld1q_f32(in_top + 8);
+    const float32x4_t   vmid_end = vld1q_f32(in_mid + 8);
+    const float32x4_t   vlow_end = vld1q_f32(in_low + 8);
 
-    float32x4x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2, input_offset);
-    out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 2), out.val[0], 1);
-    out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[1], 0), out.val[0], 2);
-    out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[1], 2), out.val[0], 3);
+    float32x4x2_t out =
+        {
+            {
+              vmulq_f32(vtop.val[0], m0.val[0]),
+              vdupq_n_f32(0)
+            }
+        };
+    out.val[0] = vmlaq_f32(out.val[0], vtop.val[1], m0.val[1]);
+    out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vtop.val[0], vtop_end, 1), m0.val[2]);
+
+    out.val[0] = vmlaq_f32(out.val[0], vmid.val[0], m1.val[0]);
+    out.val[0] = vmlaq_f32(out.val[0], vmid.val[1], m1.val[1]);
+    out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vmid.val[0], vmid_end, 1), m1.val[2]);
+
+    out.val[0] = vmlaq_f32(out.val[0], vlow.val[0], m2.val[0]);
+    out.val[0] = vmlaq_f32(out.val[0], vlow.val[1], m2.val[1]);
+    out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vlow.val[0], vlow_end, 1), m2.val[2]);
+
     return out;
 }
 
@@ -841,14 +861,31 @@ inline float16x8x2_t convolve_3x3<2>(const float16_t *in_top, const float16_t *i
                                      int input_offset)
 {
     ARM_COMPUTE_UNUSED(input_offset);
-    float16x8x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 2), out.val[0], 1);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 4), out.val[0], 2);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 3);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 0), out.val[0], 4);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 2), out.val[0], 5);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 4), out.val[0], 6);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 6), out.val[0], 7);
+    const float16x8x2_t vtop     = vld2q_f16(in_top);
+    const float16x8x2_t vmid     = vld2q_f16(in_mid);
+    const float16x8x2_t vlow     = vld2q_f16(in_low);
+    const float16x8_t   vtop_end = vld1q_f16(in_top + 16);
+    const float16x8_t   vmid_end = vld1q_f16(in_mid + 16);
+    const float16x8_t   vlow_end = vld1q_f16(in_low + 16);
+
+    float16x8x2_t out =
+        {
+            {
+              vmulq_f16(vtop.val[0], m0.val[0]),
+              vdupq_n_f16(0)
+            }
+        };
+    out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vtop.val[1], m0.val[1]));
+    out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vextq_f16(vtop.val[0], vtop_end, 1), m0.val[2]));
+
+    out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vmid.val[0], m1.val[0]));
+    out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vmid.val[1], m1.val[1]));
+    out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vextq_f16(vmid.val[0], vmid_end, 1), m1.val[2]));
+
+    out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vlow.val[0], m2.val[0]));
+    out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vlow.val[1], m2.val[1]));
+    out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vextq_f16(vlow.val[0], vlow_end, 1), m2.val[2]));
+
     return out;
 }
 

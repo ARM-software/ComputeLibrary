@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,7 +84,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 2:
                     {
                         long w = xmax - i;
@@ -135,7 +135,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 3:
                     {
                         long w = xmax - i;
@@ -198,7 +198,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 4:
                     {
                         long w = xmax - i;
@@ -272,7 +272,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 5:
                     {
                         long w = xmax - i;
@@ -358,7 +358,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 6:
                     {
                         long w = xmax - i;
@@ -456,7 +456,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 7:
                     {
                         long w = xmax - i;
@@ -566,7 +566,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 default:
                 case 8:
                     {
@@ -688,8 +688,8 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
-                
+
+
                 }
             }
             else
@@ -739,7 +739,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 2:
                     {
                         long w = xmax - i;
@@ -802,7 +802,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 3:
                     {
                         long w = xmax - i;
@@ -883,7 +883,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 4:
                     {
                         long w = xmax - i;
@@ -981,7 +981,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 5:
                     {
                         long w = xmax - i;
@@ -1097,7 +1097,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 6:
                     {
                         long w = xmax - i;
@@ -1231,7 +1231,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 case 7:
                     {
                         long w = xmax - i;
@@ -1383,7 +1383,7 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
+
                 default:
                 case 8:
                     {
@@ -1553,8 +1553,8 @@ inline void MergeResults<3, 8, true>(float *out, const float *in, const int ldou
                         );
                     }
                     break;
-                
-                
+
+
                 }
             }
         }

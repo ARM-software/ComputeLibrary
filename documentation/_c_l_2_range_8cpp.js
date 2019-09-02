@@ -7,7 +7,7 @@ var _c_l_2_range_8cpp =
     [ "combine", "_c_l_2_range_8cpp.xhtml#a67e392360024f7106a814486c2d326d3", null ],
     [ "DATA_TEST_CASE", "_c_l_2_range_8cpp.xhtml#aae54270fd6f7436ab14dfef4910984a5", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_range_8cpp.xhtml#a74828548c6d7881db8eed5fc1cff11a4", null ],
-    [ "TEST_SUITE_END", "_c_l_2_range_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_c_l_2_range_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLRangeFixture< float >", "_c_l_2_range_8cpp.xhtml#a990f1d5d2348970b3301e3166a404b4f", null ],
     [ "CLRangeFixture< half >", "_c_l_2_range_8cpp.xhtml#aab6ce1adb1c41b7d8fd4ab24b2d8c6f0", null ],
     [ "CLRangeFixture< int16_t >", "_c_l_2_range_8cpp.xhtml#a77a1a2caa1c67fc5790f21e7c501940a", null ],

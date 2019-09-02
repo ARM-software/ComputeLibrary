@@ -1,3 +1,11 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1_detection_window.xhtml" title="Detection window used for the object detection." alt="" coords="5,5,136,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_dataset.xhtml" title="Abstract dataset base class." alt="" coords="5,97,79,123"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml" title="Implementation of a dataset representing all combinations of values of the input datasets." alt="" coords="127,5,309,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml" title="Implementation of a dataset representing the concatenation of the input datasets." alt="" coords="143,71,293,98"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_named_dataset.xhtml" title="Abstract implementation of a named dataset." alt="" coords="158,122,278,149"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset.xhtml" title="Implementation of a dataset representing pairs of values of the input datasets." alt="" coords="143,173,293,199"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset.xhtml" title="Implementation of a dataset created from a container." alt="" coords="365,46,537,73"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset.xhtml" title="Implementation of a dataset created from an initializer list." alt="" coords="357,97,545,123"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset.xhtml" title="Implementation of a dataset created from a range of values." alt="" coords="376,147,527,174"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset.xhtml" title="Implementation of a dataset holding a single value." alt="" coords="366,198,537,225"/>
 </map>

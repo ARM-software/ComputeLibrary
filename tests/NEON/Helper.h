@@ -88,6 +88,26 @@ public:
     }
 };
 
+/** As above but this also setups a Zero border on the input tensor of the kernel's bordersize */
+template <typename K>
+class NESynthetizeFunctionWithZeroConstantKernelBorder : public INESimpleFunction
+{
+public:
+    /** Configure the kernel.
+     *
+     * @param[in] first First configuration argument.
+     * @param[in] args  Rest of the configuration arguments.
+     */
+    template <typename T, typename... Args>
+    void configure(T first, Args &&... args)
+    {
+        auto k = arm_compute::support::cpp14::make_unique<K>();
+        k->configure(first, std::forward<Args>(args)...);
+        _kernel = std::move(k);
+        _border_handler.configure(first, BorderSize(_kernel->border_size()), BorderMode::CONSTANT, PixelValue());
+    }
+};
+
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_NEON_HELPER_H__ */

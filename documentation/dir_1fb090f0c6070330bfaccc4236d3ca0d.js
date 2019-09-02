@@ -60,7 +60,8 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
     [ "KernelDescriptors.h", "_kernel_descriptors_8h.xhtml", [
       [ "FFTScaleKernelInfo", "structarm__compute_1_1_f_f_t_scale_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_scale_kernel_info" ],
       [ "FFTDigitReverseKernelInfo", "structarm__compute_1_1_f_f_t_digit_reverse_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_digit_reverse_kernel_info" ],
-      [ "FFTRadixStageKernelInfo", "structarm__compute_1_1_f_f_t_radix_stage_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_radix_stage_kernel_info" ]
+      [ "FFTRadixStageKernelInfo", "structarm__compute_1_1_f_f_t_radix_stage_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_radix_stage_kernel_info" ],
+      [ "GEMMKernelInfo", "structarm__compute_1_1_g_e_m_m_kernel_info.xhtml", "structarm__compute_1_1_g_e_m_m_kernel_info" ]
     ] ],
     [ "Log.h", "_log_8h.xhtml", "_log_8h" ],
     [ "MultiImageInfo.h", "_multi_image_info_8h.xhtml", [
@@ -72,8 +73,7 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
     [ "PyramidInfo.h", "_pyramid_info_8h.xhtml", [
       [ "PyramidInfo", "classarm__compute_1_1_pyramid_info.xhtml", "classarm__compute_1_1_pyramid_info" ]
     ] ],
-    [ "QAsymm8.h", "_q_asymm8_8h.xhtml", "_q_asymm8_8h" ],
-    [ "QAsymm8.inl", "_q_asymm8_8inl.xhtml", null ],
+    [ "QuantizationInfo.h", "_quantization_info_8h.xhtml", "_quantization_info_8h" ],
     [ "Rounding.h", "_rounding_8h.xhtml", "_rounding_8h" ],
     [ "Size2D.h", "_size2_d_8h.xhtml", [
       [ "Size2D", "classarm__compute_1_1_size2_d.xhtml", "classarm__compute_1_1_size2_d" ]

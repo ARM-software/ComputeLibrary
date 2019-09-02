@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,10 +33,13 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
+constexpr unsigned int num_elems_read_per_iteration = 4;
+constexpr unsigned int num_rows_read_per_iteration  = 4;
+
 Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input0);
@@ -50,9 +53,6 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
 {
-    constexpr unsigned int num_elems_read_per_iteration = 4;
-    constexpr unsigned int num_rows_read_per_iteration  = 4;
-
     const unsigned int border_x = ceil_to_multiple(input0->dimension(0), num_elems_read_per_iteration) - input0->dimension(0);
     const unsigned int border_y = ceil_to_multiple(input0->dimension(1), num_rows_read_per_iteration) - input0->dimension(1);
 
@@ -104,15 +104,16 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
     // Add static arguments
     if(is_quantized)
     {
+        const UniformQuantizationInfo iq0_info = _input0->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq1_info = _input1->info()->quantization_info().uniform();
+
         unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor() + num_arguments_per_1D_tensor();
-        _kernel.setArg<int>(idx++, -_input0->info()->quantization_info().offset);
-        _kernel.setArg<int>(idx++, -_input1->info()->quantization_info().offset);
+        _kernel.setArg<int>(idx++, -iq0_info.offset);
+        _kernel.setArg<int>(idx++, -iq1_info.offset);
     }
 
     // Configure kernel window
-    const unsigned int num_elems_read_per_iteration = 4;
-
-    _num_rows_read_per_iteration = 4;
+    _num_rows_read_per_iteration = num_rows_read_per_iteration;
 
     const unsigned int border_x = ceil_to_multiple(input0->info()->dimension(0), num_elems_read_per_iteration) - input0->info()->dimension(0);
     const unsigned int border_y = ceil_to_multiple(input0->info()->dimension(1), _num_rows_read_per_iteration) - input0->info()->dimension(1);
@@ -169,3 +170,4 @@ void CLGEMMMatrixVectorMultiplyKernel::run(const Window &window, cl::CommandQueu
     }
     while(window.slide_window_slice_3D(slice_in) && window.slide_window_slice_3D(slice_out));
 }
+} // namespace arm_compute

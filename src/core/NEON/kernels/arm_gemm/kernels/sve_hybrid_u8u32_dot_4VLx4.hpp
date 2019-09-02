@@ -43,7 +43,7 @@ public:
     typedef void (*kern_type)(const uint8_t *, int, const uint8_t *, uint32_t *, int, uint32_t, int, int, int);
 
     /* Kernel blocking parameters */
-    static unsigned int out_height()
+    static constexpr unsigned int out_height()
     {
         return 4;
     }

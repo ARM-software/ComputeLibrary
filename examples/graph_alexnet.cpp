@@ -148,12 +148,26 @@ public:
 
         // Finalize graph
         GraphConfig config;
+
         config.num_threads = common_params.threads;
         config.use_tuner   = common_params.enable_tuner;
         config.tuner_mode  = common_params.tuner_mode;
         config.tuner_file  = common_params.tuner_file;
 
+        // Load the precompiled kernels from a file into the kernel library, in this way the next time they are needed
+        // compilation won't be required.
+        if(common_params.enable_cl_cache)
+        {
+            restore_program_cache_from_file();
+        }
+
         graph.finalize(common_params.target, config);
+
+        // Save the opencl kernels to a file
+        if(common_opts.enable_cl_cache)
+        {
+            save_program_cache_to_file();
+        }
 
         return true;
     }

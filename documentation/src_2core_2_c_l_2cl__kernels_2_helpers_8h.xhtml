@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -125,6 +125,12 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
+<tr class="memitem:ab5975aa797b02c8e21551e4a3425c499"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ab5975aa797b02c8e21551e4a3425c499">GPU_ARCH_MIDGARD</a>&#160;&#160;&#160;0x100</td></tr>
+<tr class="separator:ab5975aa797b02c8e21551e4a3425c499"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec09a338dceecbe27346707f420fcd4f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#aec09a338dceecbe27346707f420fcd4f">GPU_ARCH_BIFROST</a>&#160;&#160;&#160;0x200</td></tr>
+<tr class="separator:aec09a338dceecbe27346707f420fcd4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88fa737059e67b4b17ec980e5877361e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a88fa737059e67b4b17ec980e5877361e">CONCAT</a>(a,  b)&#160;&#160;&#160;a##b</td></tr>
+<tr class="separator:a88fa737059e67b4b17ec980e5877361e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4b532a93c757194ec73b6790a3e6b1f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ae4b532a93c757194ec73b6790a3e6b1f">EXPAND</a>(x)&#160;&#160;&#160;x</td></tr>
 <tr class="separator:ae4b532a93c757194ec73b6790a3e6b1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabdbe431f2713c5c2604cb9872b66aab"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#aabdbe431f2713c5c2604cb9872b66aab">CLAMP</a>(x,  min_val,  max_val)&#160;&#160;&#160;min(max(x, min_val), max_val)</td></tr>
@@ -141,6 +147,26 @@ Macros</h2></td></tr>
 <tr class="separator:a08069d303d2082bb5db214244a634c0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6083fd110e3a4572725f6a020c1681ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a6083fd110e3a4572725f6a020c1681ae">half1</a>&#160;&#160;&#160;half</td></tr>
 <tr class="separator:a6083fd110e3a4572725f6a020c1681ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a50e64f7c3342a0562ad1d3dd021b7b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a6a50e64f7c3342a0562ad1d3dd021b7b">char1</a>&#160;&#160;&#160;char</td></tr>
+<tr class="separator:a6a50e64f7c3342a0562ad1d3dd021b7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1cca1df4e80176a668ae6672494d99ff"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a1cca1df4e80176a668ae6672494d99ff">uchar1</a>&#160;&#160;&#160;uchar</td></tr>
+<tr class="separator:a1cca1df4e80176a668ae6672494d99ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a881bd536ec58fbb321d2fd3445f1acfd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a881bd536ec58fbb321d2fd3445f1acfd">short1</a>&#160;&#160;&#160;short</td></tr>
+<tr class="separator:a881bd536ec58fbb321d2fd3445f1acfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae39ef8da699c67b0fa4c8e23ee501527"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ae39ef8da699c67b0fa4c8e23ee501527">ushort1</a>&#160;&#160;&#160;ushort</td></tr>
+<tr class="separator:ae39ef8da699c67b0fa4c8e23ee501527"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedcd837de58f1534fba6848ec222dfaa"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#aedcd837de58f1534fba6848ec222dfaa">int1</a>&#160;&#160;&#160;int</td></tr>
+<tr class="separator:aedcd837de58f1534fba6848ec222dfaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a628b70649d20079deb65ef76024e7a3c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a628b70649d20079deb65ef76024e7a3c">uint1</a>&#160;&#160;&#160;uint</td></tr>
+<tr class="separator:a628b70649d20079deb65ef76024e7a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06dfafa60c7625ce72c32e564bca98c5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a06dfafa60c7625ce72c32e564bca98c5">long1</a>&#160;&#160;&#160;long</td></tr>
+<tr class="separator:a06dfafa60c7625ce72c32e564bca98c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f4c95c4c3b8109cba7b53fe555ce8cd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a0f4c95c4c3b8109cba7b53fe555ce8cd">ulong1</a>&#160;&#160;&#160;ulong</td></tr>
+<tr class="separator:a0f4c95c4c3b8109cba7b53fe555ce8cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc30a7690418156dd429314c58634328"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#adc30a7690418156dd429314c58634328">double1</a>&#160;&#160;&#160;double</td></tr>
+<tr class="separator:adc30a7690418156dd429314c58634328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7d6861d3efed38307fbf891ecc63002"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ac7d6861d3efed38307fbf891ecc63002">vload1</a>(OFFSET,  PTR)&#160;&#160;&#160;*(OFFSET + PTR)</td></tr>
+<tr class="separator:ac7d6861d3efed38307fbf891ecc63002"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae802822defb0fa3a7f74f98e324696cb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ae802822defb0fa3a7f74f98e324696cb">VEC_DATA_TYPE_STR</a>(type,  size)&#160;&#160;&#160;type##size</td></tr>
 <tr class="separator:ae802822defb0fa3a7f74f98e324696cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36f754c05b6fddf6df0d8d0a74f8159f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(type,  size)&#160;&#160;&#160;<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ae802822defb0fa3a7f74f98e324696cb">VEC_DATA_TYPE_STR</a>(type, size)</td></tr>
@@ -237,6 +263,22 @@ Functions</h2></td></tr>
 <tr class="separator:ad442fb5ec8be1fff97f543150de5d822"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="a6a50e64f7c3342a0562ad1d3dd021b7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a50e64f7c3342a0562ad1d3dd021b7b">&#9670;&nbsp;</a></span>char1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define char1&#160;&#160;&#160;char</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00060">60</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
 <a id="a0f6ad555d097377151003a5119ccee45"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0f6ad555d097377151003a5119ccee45">&#9670;&nbsp;</a></span>CL_VEC_DATA_TYPE</h2>
 
@@ -263,7 +305,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00060">60</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00076">76</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -293,7 +335,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00059">59</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00075">75</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -329,7 +371,37 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00045">45</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00050">50</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="a88fa737059e67b4b17ec980e5877361e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88fa737059e67b4b17ec980e5877361e">&#9670;&nbsp;</a></span>CONCAT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CONCAT</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">a, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">b&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;a##b</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00046">46</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -359,7 +431,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00063">63</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00079">79</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -389,7 +461,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00066">66</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00082">82</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -425,7 +497,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00069">69</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00085">85</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -461,7 +533,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00068">68</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00084">84</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -491,7 +563,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00065">65</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00081">81</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -521,7 +593,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00062">62</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00078">78</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -541,7 +613,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00125">125</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00141">141</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -561,7 +633,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00125">125</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00141">141</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -581,7 +653,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00122">122</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00138">138</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -601,7 +673,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00113">113</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00129">129</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -621,7 +693,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00116">116</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00132">132</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -640,9 +712,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a912ccbcc4235bf1274c95d05b50440d4">update_tensor3D_workitem_ptr</a>(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \</div><div class="line">                                 name##_stride_z, name##_step_z)</div><div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a912ccbcc4235bf1274c95d05b50440d4"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a912ccbcc4235bf1274c95d05b50440d4">update_tensor3D_workitem_ptr</a></div><div class="ttdeci">Tensor3D update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)</div><div class="ttdoc">Wrap 3D tensor information into an tensor structure, and make the pointer point at this workitem's da...</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00264">helpers.h:264</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a912ccbcc4235bf1274c95d05b50440d4">update_tensor3D_workitem_ptr</a>(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \</div><div class="line">                                 name##_stride_z, name##_step_z)</div><div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a912ccbcc4235bf1274c95d05b50440d4"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a912ccbcc4235bf1274c95d05b50440d4">update_tensor3D_workitem_ptr</a></div><div class="ttdeci">Tensor3D update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)</div><div class="ttdoc">Wrap 3D tensor information into an tensor structure, and make the pointer point at this workitem's da...</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00280">helpers.h:280</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00128">128</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00144">144</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -662,7 +734,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00132">132</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00148">148</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -691,9 +763,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a87a9d201ccc6b81332852d562bb7ee13">update_tensor4D_workitem_ptr</a>(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \</div><div class="line">                                 name##_stride_z, name##_step_z, name##_stride_w, name##_step_w, mod_size)</div><div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a87a9d201ccc6b81332852d562bb7ee13"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a87a9d201ccc6b81332852d562bb7ee13">update_tensor4D_workitem_ptr</a></div><div class="ttdeci">Tensor4D update_tensor4D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z, uint stride_w, uint step_w, uint mod_size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00278">helpers.h:278</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a87a9d201ccc6b81332852d562bb7ee13">update_tensor4D_workitem_ptr</a>(name##_ptr, name##_offset_first_element_in_bytes, name##_stride_x, name##_step_x, name##_stride_y, name##_step_y, \</div><div class="line">                                 name##_stride_z, name##_step_z, name##_stride_w, name##_step_w, mod_size)</div><div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a87a9d201ccc6b81332852d562bb7ee13"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a87a9d201ccc6b81332852d562bb7ee13">update_tensor4D_workitem_ptr</a></div><div class="ttdeci">Tensor4D update_tensor4D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z, uint stride_w, uint step_w, uint mod_size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00294">helpers.h:294</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00135">135</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00151">151</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -723,7 +795,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00139">139</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00155">155</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -743,7 +815,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00107">107</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00123">123</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -763,7 +835,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00110">110</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00126">126</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="adc30a7690418156dd429314c58634328"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc30a7690418156dd429314c58634328">&#9670;&nbsp;</a></span>double1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define double1&#160;&#160;&#160;double</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00068">68</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -783,7 +871,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00043">43</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00048">48</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -799,7 +887,39 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00053">53</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00058">58</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="aec09a338dceecbe27346707f420fcd4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec09a338dceecbe27346707f420fcd4f">&#9670;&nbsp;</a></span>GPU_ARCH_BIFROST</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define GPU_ARCH_BIFROST&#160;&#160;&#160;0x200</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00044">44</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="ab5975aa797b02c8e21551e4a3425c499"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5975aa797b02c8e21551e4a3425c499">&#9670;&nbsp;</a></span>GPU_ARCH_MIDGARD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define GPU_ARCH_MIDGARD&#160;&#160;&#160;0x100</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00043">43</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -815,7 +935,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00054">54</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00059">59</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -835,7 +955,55 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">__global uchar *name##_ptr,      \</div><div class="line">    uint        name##_stride_x, \</div><div class="line">    uint        name##_step_x,   \</div><div class="line">    uint        name##_stride_y, \</div><div class="line">    uint        name##_step_y,   \</div><div class="line">    uint        name##_offset_first_element_in_bytes</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00077">77</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00093">93</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="aedcd837de58f1534fba6848ec222dfaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedcd837de58f1534fba6848ec222dfaa">&#9670;&nbsp;</a></span>int1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define int1&#160;&#160;&#160;int</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00064">64</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="a06dfafa60c7625ce72c32e564bca98c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06dfafa60c7625ce72c32e564bca98c5">&#9670;&nbsp;</a></span>long1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define long1&#160;&#160;&#160;long</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00066">66</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="a881bd536ec58fbb321d2fd3445f1acfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a881bd536ec58fbb321d2fd3445f1acfd">&#9670;&nbsp;</a></span>short1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define short1&#160;&#160;&#160;short</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00062">62</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -855,7 +1023,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">__global uchar *name##_ptr,      \</div><div class="line">    uint        name##_stride_x, \</div><div class="line">    uint        name##_step_x,   \</div><div class="line">    uint        name##_stride_y, \</div><div class="line">    uint        name##_step_y,   \</div><div class="line">    uint        name##_stride_z, \</div><div class="line">    uint        name##_step_z,   \</div><div class="line">    uint        name##_offset_first_element_in_bytes</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00085">85</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00101">101</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -875,7 +1043,71 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">__global uchar *name##_ptr,      \</div><div class="line">    uint        name##_stride_x, \</div><div class="line">    uint        name##_step_x,   \</div><div class="line">    uint        name##_stride_y, \</div><div class="line">    uint        name##_step_y,   \</div><div class="line">    uint        name##_stride_z, \</div><div class="line">    uint        name##_step_z,   \</div><div class="line">    uint        name##_stride_w, \</div><div class="line">    uint        name##_step_w,   \</div><div class="line">    uint        name##_offset_first_element_in_bytes</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00095">95</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00111">111</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="a1cca1df4e80176a668ae6672494d99ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1cca1df4e80176a668ae6672494d99ff">&#9670;&nbsp;</a></span>uchar1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define uchar1&#160;&#160;&#160;uchar</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00061">61</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="a628b70649d20079deb65ef76024e7a3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a628b70649d20079deb65ef76024e7a3c">&#9670;&nbsp;</a></span>uint1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define uint1&#160;&#160;&#160;uint</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00065">65</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="a0f4c95c4c3b8109cba7b53fe555ce8cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f4c95c4c3b8109cba7b53fe555ce8cd">&#9670;&nbsp;</a></span>ulong1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ulong1&#160;&#160;&#160;ulong</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00067">67</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="ae39ef8da699c67b0fa4c8e23ee501527"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae39ef8da699c67b0fa4c8e23ee501527">&#9670;&nbsp;</a></span>ushort1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ushort1&#160;&#160;&#160;ushort</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00063">63</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -905,7 +1137,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">57</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00073">73</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -935,7 +1167,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00056">56</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00072">72</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -955,7 +1187,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">__global uchar *name##_ptr,      \</div><div class="line">    uint        name##_stride_x, \</div><div class="line">    uint        name##_step_x,   \</div><div class="line">    uint        name##_offset_first_element_in_bytes</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00071">71</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00087">87</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -975,7 +1207,37 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00048">48</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00053">53</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+
+</div>
+</div>
+<a id="ac7d6861d3efed38307fbf891ecc63002"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7d6861d3efed38307fbf891ecc63002">&#9670;&nbsp;</a></span>vload1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define vload1</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">OFFSET, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">PTR&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;*(OFFSET + PTR)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00070">70</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -995,7 +1257,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00047">47</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00052">52</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -1015,7 +1277,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00051">51</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00056">56</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -1035,7 +1297,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00050">50</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00055">55</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
 
 </div>
 </div>
@@ -1155,14 +1417,14 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00312">312</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;{</div><div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;    <span class="keywordflow">return</span> img-&gt;<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + x * img-&gt;<a class="code" href="struct_image.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">stride_x</a> + y * img-&gt;<a class="code" href="struct_image.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">stride_y</a>;</div><div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;}</div><div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00153">helpers.h:153</a></div></div>
-<div class="ttc" id="struct_image_xhtml_a4f0b90c9ecd6e57ceb3f37332fefe8f1"><div class="ttname"><a href="struct_image.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">Image::stride_y</a></div><div class="ttdeci">int stride_y</div><div class="ttdoc">Stride of the image in Y dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00156">helpers.h:156</a></div></div>
-<div class="ttc" id="struct_image_xhtml_ae01febbfd0689ef709f3ff6fdd2abc7e"><div class="ttname"><a href="struct_image.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">Image::stride_x</a></div><div class="ttdeci">int stride_x</div><div class="ttdoc">Stride of the image in X dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00155">helpers.h:155</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00328">328</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;{</div><div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;    <span class="keywordflow">return</span> img-&gt;<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + x * img-&gt;<a class="code" href="struct_image.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">stride_x</a> + y * img-&gt;<a class="code" href="struct_image.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">stride_y</a>;</div><div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;}</div><div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00169">helpers.h:169</a></div></div>
+<div class="ttc" id="struct_image_xhtml_a4f0b90c9ecd6e57ceb3f37332fefe8f1"><div class="ttname"><a href="struct_image.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">Image::stride_y</a></div><div class="ttdeci">int stride_y</div><div class="ttdoc">Stride of the image in Y dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00172">helpers.h:172</a></div></div>
+<div class="ttc" id="struct_image_xhtml_ae01febbfd0689ef709f3ff6fdd2abc7e"><div class="ttname"><a href="struct_image.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">Image::stride_x</a></div><div class="ttdeci">int stride_x</div><div class="ttdoc">Stride of the image in X dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00171">helpers.h:171</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00153">Image::ptr</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00155">Image::stride_x</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00156">Image::stride_y</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00169">Image::ptr</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00171">Image::stride_x</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00172">Image::stride_y</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="warp__helpers_8h_source.xhtml#l00095">bilinear_interpolate_with_border()</a>, <a class="el" href="warp__helpers__quantized_8h_source.xhtml#l00084">bilinear_interpolate_with_border_quantized()</a>, <a class="el" href="reference_2_bounding_box_transform_8cpp_source.xhtml#l00040">arm_compute::test::validation::reference::bounding_box_transform()</a>, <a class="el" href="channel__combine_8cl_source.xhtml#l00317">channel_combine_NV()</a>, <a class="el" href="_open_c_l_8cpp_source.xhtml#l00530">clEnqueueMapBuffer()</a>, <a class="el" href="_open_c_l_8cpp_source.xhtml#l00473">clEnqueueReadBuffer()</a>, <a class="el" href="_open_c_l_8cpp_source.xhtml#l00450">clEnqueueWriteBuffer()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00364">arm_compute::test::colorconvert_helper::detail::colorconvert_nv12_to_rgb()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00709">arm_compute::test::colorconvert_helper::detail::colorconvert_yuyv_to_iyuv()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00647">arm_compute::test::colorconvert_helper::detail::colorconvert_yuyv_to_nv12()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00273">arm_compute::test::colorconvert_helper::detail::colorconvert_yuyv_to_rgb()</a>, <a class="el" href="_c_l_histogram_kernel_8cpp_source.xhtml#l00053">CLHistogramKernel::configure()</a>, <a class="el" href="_g_c_concatenate_layer_8cpp_source.xhtml#l00043">GCConcatenateLayer::configure()</a>, <a class="el" href="_c_l_tile_kernel_8cpp_source.xhtml#l00068">CLTileKernel::configure()</a>, <a class="el" href="_c_l_concatenate_layer_8cpp_source.xhtml#l00047">CLConcatenateLayer::configure()</a>, <a class="el" href="_n_e_concatenate_layer_8cpp_source.xhtml#l00047">NEConcatenateLayer::configure()</a>, <a class="el" href="_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float_kernel_8cpp_source.xhtml#l00123">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel::configure()</a>, <a class="el" href="_c_l_histogram_kernel_8cpp_source.xhtml#l00149">CLHistogramBorderKernel::configure()</a>, <a class="el" href="_c_l_fast_corners_kernel_8cpp_source.xhtml#l00115">CLCopyToArrayKernel::configure()</a>, <a class="el" href="_c_l_g_e_m_m_lowp_output_stage_8cpp_source.xhtml#l00061">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::configure()</a>, <a class="el" href="_window_iterator_8h_source.xhtml#l00044">arm_compute::convert_window_coord_to_position()</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00081">convolution3x3()</a>, <a class="el" href="convolution5x5_8cl_source.xhtml#l00087">convolution5x1()</a>, <a class="el" href="convolution5x5_8cl_source.xhtml#l00157">convolution5x5()</a>, <a class="el" href="convolution7x7_8cl_source.xhtml#l00097">convolution7x1()</a>, <a class="el" href="convolution7x7_8cl_source.xhtml#l00200">convolution7x7()</a>, <a class="el" href="convolution9x9_8cl_source.xhtml#l00108">convolution9x1()</a>, <a class="el" href="convolution9x9_8cl_source.xhtml#l00253">convolution9x9()</a>, <a class="el" href="convolution__rectangle_8cl_source.xhtml#l00064">convolution_rectangle()</a>, <a class="el" href="convolution5x5_8cl_source.xhtml#l00203">convolution_separable1x5_static()</a>, <a class="el" href="convolution7x7_8cl_source.xhtml#l00252">convolution_separable1x7_static()</a>, <a class="el" href="convolution9x9_8cl_source.xhtml#l00314">convolution_separable1x9_static()</a>, <a class="el" href="channel__combine_8cl_source.xhtml#l00389">copy_planes_3p()</a>, <a class="el" href="_error_8cpp_source.xhtml#l00034">arm_compute::create_error_va_list()</a>, <a class="el" href="validation_2_c_l_2_histogram_8cpp_source.xhtml#l00048">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="reference_2_deconvolution_layer_8cpp_source.xhtml#l00037">arm_compute::test::validation::reference::deconvolution_layer()</a>, <a class="el" href="derivative_8cl_source.xhtml#l00050">derivative()</a>, <a class="el" href="dilate_8cl_source.xhtml#l00041">dilate()</a>, <a class="el" href="erode_8cl_source.xhtml#l00041">erode()</a>, <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00051">ICLMemoryRegion::extract_subregion()</a>, <a class="el" href="_memory_region_8h_source.xhtml#l00093">MemoryRegion::extract_subregion()</a>, <a class="el" href="_g_c_memory_region_8cpp_source.xhtml#l00091">GCBufferMemoryRegion::extract_subregion()</a>, <a class="el" href="validation_2reference_2_fast_corners_8cpp_source.xhtml#l00152">arm_compute::test::validation::reference::fast_corners()</a>, <a class="el" href="_assets_library_8h_source.xhtml#l00562">AssetsLibrary::fill()</a>, <a class="el" href="fill__border_8cl_source.xhtml#l00122">fill_image_borders_constant()</a>, <a class="el" href="fill__border_8cl_source.xhtml#l00046">fill_image_borders_replicate()</a>, <a class="el" href="reference_2_gather_8cpp_source.xhtml#l00040">arm_compute::test::validation::reference::gather()</a>, <a class="el" href="gaussian__pyramid_8cl_source.xhtml#l00088">gaussian5x1_sub_y()</a>, <a class="el" href="_open_g_l_e_s_8cpp_source.xhtml#l00607">glMapBufferRange()</a>, <a class="el" href="harris__corners_8cl_source.xhtml#l00138">harris_score_1x5()</a>, <a class="el" href="harris__corners_8cl_source.xhtml#l00253">harris_score_1x7()</a>, <a class="el" href="harris__corners_8cl_source.xhtml#l00053">harris_score_3x3()</a>, <a class="el" href="histogram_8cl_source.xhtml#l00141">hist_border_kernel()</a>, <a class="el" href="histogram_8cl_source.xhtml#l00068">hist_local_kernel()</a>, <a class="el" href="validation_2reference_2_histogram_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::histogram()</a>, <a class="el" href="canny_8cl_source.xhtml#l00325">hysteresis()</a>, <a class="el" href="integral__image_8cl_source.xhtml#l00041">integral_horizontal()</a>, <a class="el" href="integral__image_8cl_source.xhtml#l00085">integral_vertical()</a>, <a class="el" href="optical__flow__pyramid__lk_8cl_source.xhtml#l00211">lktracker_stage0()</a>, <a class="el" href="optical__flow__pyramid__lk_8cl_source.xhtml#l00361">lktracker_stage1()</a>, <a class="el" href="mean__stddev_8cl_source.xhtml#l00042">mean_stddev_accumulate()</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00065">minmax()</a>, <a class="el" href="non__linear__filter3x3_8cl_source.xhtml#l00044">non_linear_filter_box3x3()</a>, <a class="el" href="non__linear__filter5x5_8cl_source.xhtml#l00339">non_linear_filter_box5x5()</a>, <a class="el" href="non__linear__filter3x3_8cl_source.xhtml#l00099">non_linear_filter_cross3x3()</a>, <a class="el" href="non__linear__filter5x5_8cl_source.xhtml#l00387">non_linear_filter_cross5x5()</a>, <a class="el" href="non__linear__filter3x3_8cl_source.xhtml#l00150">non_linear_filter_disk3x3()</a>, <a class="el" href="non__linear__filter5x5_8cl_source.xhtml#l00444">non_linear_filter_disk5x5()</a>, <a class="el" href="nonmax_8cl_source.xhtml#l00041">non_max_suppression()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00772">arm_compute::test::colorconvert_helper::detail::nv_to_iyuv()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00795">arm_compute::test::colorconvert_helper::detail::nv_to_yuv4()</a>, <a class="el" href="_sub_tensor_info_8cpp_source.xhtml#l00126">SubTensorInfo::offset_element_in_bytes()</a>, <a class="el" href="src_2core_2_tensor_info_8cpp_source.xhtml#l00386">TensorInfo::offset_element_in_bytes()</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00309">SimpleTensor&lt; uint8_t &gt;::operator[]()</a>, <a class="el" href="warp__helpers_8h_source.xhtml#l00059">read_texels4()</a>, <a class="el" href="reference_2_reorg_layer_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::reorg_layer()</a>, <a class="el" href="roi__pooling__layer_8cl_source.xhtml#l00125">roi_pooling_layer()</a>, <a class="el" href="_n_e_reorg_layer_kernel_8cpp_source.xhtml#l00105">NEReorgLayerKernel::run()</a>, <a class="el" href="_n_e_depth_convert_layer_kernel_8cpp_source.xhtml#l00128">NEDepthConvertLayerKernel::run()</a>, <a class="el" href="_c_p_p_box_with_non_maxima_suppression_limit_kernel_8cpp_source.xhtml#l00198">CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()</a>, <a class="el" href="scharr__filter_8cl_source.xhtml#l00050">scharr3x3()</a>, <a class="el" href="reference_2_select_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::select()</a>, <a class="el" href="_padding_calculator_8h_source.xhtml#l00127">PaddingCalculator::set_access_offset()</a>, <a class="el" href="_slice_operations_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::slice()</a>, <a class="el" href="sobel__filter_8cl_source.xhtml#l00154">sobel1x5()</a>, <a class="el" href="sobel__filter_8cl_source.xhtml#l00054">sobel3x3()</a>, <a class="el" href="sobel__filter_8cl_source.xhtml#l00206">sobel5x1()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00307">softmax_layer_max_shift_exp_sum_parallel()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00158">softmax_layer_max_shift_exp_sum_serial()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00101">softmax_layer_norm()</a>, <a class="el" href="slice__ops_8cl_source.xhtml#l00056">strided_slice()</a>, <a class="el" href="_slice_operations_8cpp_source.xhtml#l00080">arm_compute::test::validation::reference::strided_slice()</a>, <a class="el" href="canny_8cl_source.xhtml#l00189">suppress_non_maximum()</a>, <a class="el" href="tablelookup_8cl_source.xhtml#l00084">tablelookup_S16()</a>, <a class="el" href="transpose_8cl_source.xhtml#l00148">transpose()</a>, <a class="el" href="_n_e_concatenate_layer_8cpp_source.xhtml#l00100">NEConcatenateLayer::validate()</a>, <a class="el" href="_c_l_concatenate_layer_8cpp_source.xhtml#l00130">CLConcatenateLayer::validate()</a>, <a class="el" href="_n_e_asymm_8h_source.xhtml#l00185">arm_compute::vdequantize()</a>, and <a class="el" href="_n_e_asymm_8h_source.xhtml#l00233">arm_compute::vquantize()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="warp__helpers_8h_source.xhtml#l00095">bilinear_interpolate_with_border()</a>, <a class="el" href="warp__helpers__quantized_8h_source.xhtml#l00084">bilinear_interpolate_with_border_quantized()</a>, <a class="el" href="reference_2_bounding_box_transform_8cpp_source.xhtml#l00040">arm_compute::test::validation::reference::bounding_box_transform()</a>, <a class="el" href="channel__combine_8cl_source.xhtml#l00317">channel_combine_NV()</a>, <a class="el" href="_open_c_l_8cpp_source.xhtml#l00530">clEnqueueMapBuffer()</a>, <a class="el" href="_open_c_l_8cpp_source.xhtml#l00473">clEnqueueReadBuffer()</a>, <a class="el" href="_open_c_l_8cpp_source.xhtml#l00450">clEnqueueWriteBuffer()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00364">arm_compute::test::colorconvert_helper::detail::colorconvert_nv12_to_rgb()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00709">arm_compute::test::colorconvert_helper::detail::colorconvert_yuyv_to_iyuv()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00647">arm_compute::test::colorconvert_helper::detail::colorconvert_yuyv_to_nv12()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00273">arm_compute::test::colorconvert_helper::detail::colorconvert_yuyv_to_rgb()</a>, <a class="el" href="_c_l_histogram_kernel_8cpp_source.xhtml#l00053">CLHistogramKernel::configure()</a>, <a class="el" href="_g_c_concatenate_layer_8cpp_source.xhtml#l00043">GCConcatenateLayer::configure()</a>, <a class="el" href="_c_l_tile_kernel_8cpp_source.xhtml#l00068">CLTileKernel::configure()</a>, <a class="el" href="_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float_kernel_8cpp_source.xhtml#l00123">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel::configure()</a>, <a class="el" href="_c_l_histogram_kernel_8cpp_source.xhtml#l00158">CLHistogramBorderKernel::configure()</a>, <a class="el" href="_c_l_fast_corners_kernel_8cpp_source.xhtml#l00133">CLCopyToArrayKernel::configure()</a>, <a class="el" href="_c_l_g_e_m_m_lowp_output_stage_8cpp_source.xhtml#l00062">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::configure()</a>, <a class="el" href="_window_iterator_8h_source.xhtml#l00044">arm_compute::convert_window_coord_to_position()</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00081">convolution3x3()</a>, <a class="el" href="convolution5x5_8cl_source.xhtml#l00087">convolution5x1()</a>, <a class="el" href="convolution5x5_8cl_source.xhtml#l00157">convolution5x5()</a>, <a class="el" href="convolution7x7_8cl_source.xhtml#l00097">convolution7x1()</a>, <a class="el" href="convolution7x7_8cl_source.xhtml#l00200">convolution7x7()</a>, <a class="el" href="convolution9x9_8cl_source.xhtml#l00108">convolution9x1()</a>, <a class="el" href="convolution9x9_8cl_source.xhtml#l00253">convolution9x9()</a>, <a class="el" href="convolution__rectangle_8cl_source.xhtml#l00064">convolution_rectangle()</a>, <a class="el" href="convolution5x5_8cl_source.xhtml#l00203">convolution_separable1x5_static()</a>, <a class="el" href="convolution7x7_8cl_source.xhtml#l00252">convolution_separable1x7_static()</a>, <a class="el" href="convolution9x9_8cl_source.xhtml#l00314">convolution_separable1x9_static()</a>, <a class="el" href="channel__combine_8cl_source.xhtml#l00389">copy_planes_3p()</a>, <a class="el" href="_error_8cpp_source.xhtml#l00034">arm_compute::create_error_va_list()</a>, <a class="el" href="validation_2_c_l_2_histogram_8cpp_source.xhtml#l00048">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="reference_2_deconvolution_layer_8cpp_source.xhtml#l00037">arm_compute::test::validation::reference::deconvolution_layer()</a>, <a class="el" href="derivative_8cl_source.xhtml#l00050">derivative()</a>, <a class="el" href="dilate_8cl_source.xhtml#l00041">dilate()</a>, <a class="el" href="erode_8cl_source.xhtml#l00041">erode()</a>, <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00051">ICLMemoryRegion::extract_subregion()</a>, <a class="el" href="_memory_region_8h_source.xhtml#l00093">MemoryRegion::extract_subregion()</a>, <a class="el" href="_g_c_memory_region_8cpp_source.xhtml#l00091">GCBufferMemoryRegion::extract_subregion()</a>, <a class="el" href="validation_2reference_2_fast_corners_8cpp_source.xhtml#l00152">arm_compute::test::validation::reference::fast_corners()</a>, <a class="el" href="_assets_library_8h_source.xhtml#l00562">AssetsLibrary::fill()</a>, <a class="el" href="fill__border_8cl_source.xhtml#l00122">fill_image_borders_constant()</a>, <a class="el" href="fill__border_8cl_source.xhtml#l00046">fill_image_borders_replicate()</a>, <a class="el" href="reference_2_gather_8cpp_source.xhtml#l00040">arm_compute::test::validation::reference::gather()</a>, <a class="el" href="gaussian__pyramid_8cl_source.xhtml#l00088">gaussian5x1_sub_y()</a>, <a class="el" href="_open_g_l_e_s_8cpp_source.xhtml#l00607">glMapBufferRange()</a>, <a class="el" href="harris__corners_8cl_source.xhtml#l00138">harris_score_1x5()</a>, <a class="el" href="harris__corners_8cl_source.xhtml#l00253">harris_score_1x7()</a>, <a class="el" href="harris__corners_8cl_source.xhtml#l00053">harris_score_3x3()</a>, <a class="el" href="histogram_8cl_source.xhtml#l00141">hist_border_kernel()</a>, <a class="el" href="histogram_8cl_source.xhtml#l00068">hist_local_kernel()</a>, <a class="el" href="validation_2reference_2_histogram_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::histogram()</a>, <a class="el" href="canny_8cl_source.xhtml#l00325">hysteresis()</a>, <a class="el" href="integral__image_8cl_source.xhtml#l00041">integral_horizontal()</a>, <a class="el" href="integral__image_8cl_source.xhtml#l00085">integral_vertical()</a>, <a class="el" href="optical__flow__pyramid__lk_8cl_source.xhtml#l00211">lktracker_stage0()</a>, <a class="el" href="optical__flow__pyramid__lk_8cl_source.xhtml#l00361">lktracker_stage1()</a>, <a class="el" href="_m_mapped_file_8cpp_source.xhtml#l00092">MMappedFile::map()</a>, <a class="el" href="mean__stddev_8cl_source.xhtml#l00042">mean_stddev_accumulate()</a>, <a class="el" href="minmaxloc_8cl_source.xhtml#l00065">minmax()</a>, <a class="el" href="non__linear__filter3x3_8cl_source.xhtml#l00044">non_linear_filter_box3x3()</a>, <a class="el" href="non__linear__filter5x5_8cl_source.xhtml#l00339">non_linear_filter_box5x5()</a>, <a class="el" href="non__linear__filter3x3_8cl_source.xhtml#l00099">non_linear_filter_cross3x3()</a>, <a class="el" href="non__linear__filter5x5_8cl_source.xhtml#l00387">non_linear_filter_cross5x5()</a>, <a class="el" href="non__linear__filter3x3_8cl_source.xhtml#l00150">non_linear_filter_disk3x3()</a>, <a class="el" href="non__linear__filter5x5_8cl_source.xhtml#l00444">non_linear_filter_disk5x5()</a>, <a class="el" href="nonmax_8cl_source.xhtml#l00041">non_max_suppression()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00772">arm_compute::test::colorconvert_helper::detail::nv_to_iyuv()</a>, <a class="el" href="_color_convert_helper_8h_source.xhtml#l00795">arm_compute::test::colorconvert_helper::detail::nv_to_yuv4()</a>, <a class="el" href="_sub_tensor_info_8cpp_source.xhtml#l00126">SubTensorInfo::offset_element_in_bytes()</a>, <a class="el" href="src_2core_2_tensor_info_8cpp_source.xhtml#l00386">TensorInfo::offset_element_in_bytes()</a>, <a class="el" href="_simple_tensor_8h_source.xhtml#l00309">SimpleTensor&lt; uint8_t &gt;::operator[]()</a>, <a class="el" href="warp__helpers_8h_source.xhtml#l00059">read_texels4()</a>, <a class="el" href="reference_2_reorg_layer_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::reorg_layer()</a>, <a class="el" href="roi__pooling__layer_8cl_source.xhtml#l00125">roi_pooling_layer()</a>, <a class="el" href="_n_e_reorg_layer_kernel_8cpp_source.xhtml#l00105">NEReorgLayerKernel::run()</a>, <a class="el" href="_c_p_p_box_with_non_maxima_suppression_limit_kernel_8cpp_source.xhtml#l00198">CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()</a>, <a class="el" href="scharr__filter_8cl_source.xhtml#l00050">scharr3x3()</a>, <a class="el" href="reference_2_select_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::select()</a>, <a class="el" href="_padding_calculator_8h_source.xhtml#l00127">PaddingCalculator::set_access_offset()</a>, <a class="el" href="_slice_operations_8cpp_source.xhtml#l00038">arm_compute::test::validation::reference::slice()</a>, <a class="el" href="sobel__filter_8cl_source.xhtml#l00154">sobel1x5()</a>, <a class="el" href="sobel__filter_8cl_source.xhtml#l00054">sobel3x3()</a>, <a class="el" href="sobel__filter_8cl_source.xhtml#l00206">sobel5x1()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00307">softmax_layer_max_shift_exp_sum_parallel()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00158">softmax_layer_max_shift_exp_sum_serial()</a>, <a class="el" href="softmax__layer_8cl_source.xhtml#l00101">softmax_layer_norm()</a>, <a class="el" href="slice__ops_8cl_source.xhtml#l00056">strided_slice()</a>, <a class="el" href="_slice_operations_8cpp_source.xhtml#l00080">arm_compute::test::validation::reference::strided_slice()</a>, <a class="el" href="canny_8cl_source.xhtml#l00189">suppress_non_maximum()</a>, <a class="el" href="tablelookup_8cl_source.xhtml#l00084">tablelookup_S16()</a>, <a class="el" href="tests_2validation_2_u_n_i_t_2_tensor_info_8cpp_source.xhtml#l00154">arm_compute::test::validation::TEST_CASE()</a>, <a class="el" href="transpose_8cl_source.xhtml#l00148">transpose()</a>, <a class="el" href="_n_e_asymm_8h_source.xhtml#l00164">arm_compute::vdequantize()</a>, and <a class="el" href="_n_e_asymm_8h_source.xhtml#l00258">arm_compute::vquantize()</a>.</p>
 
 </div>
 </div>
@@ -1223,13 +1485,13 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00324">324</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;{</div><div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;    <span class="keywordflow">return</span> tensor-&gt;<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + x * tensor-&gt;<a class="code" href="struct_tensor3_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">stride_x</a> + y * tensor-&gt;<a class="code" href="struct_tensor3_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">stride_y</a> + z * tensor-&gt;<a class="code" href="struct_tensor3_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c">stride_z</a>;</div><div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;}</div><div class="ttc" id="struct_tensor3_d_xhtml_ad5ff7a2b2bd0eec50fe09c254b127d1c"><div class="ttname"><a href="struct_tensor3_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c">Tensor3D::stride_z</a></div><div class="ttdeci">int stride_z</div><div class="ttdoc">Stride of the image in Z dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00166">helpers.h:166</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml_ae01febbfd0689ef709f3ff6fdd2abc7e"><div class="ttname"><a href="struct_tensor3_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">Tensor3D::stride_x</a></div><div class="ttdeci">int stride_x</div><div class="ttdoc">Stride of the image in X dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00164">helpers.h:164</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00162">helpers.h:162</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml_a4f0b90c9ecd6e57ceb3f37332fefe8f1"><div class="ttname"><a href="struct_tensor3_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">Tensor3D::stride_y</a></div><div class="ttdeci">int stride_y</div><div class="ttdoc">Stride of the image in Y dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00165">helpers.h:165</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00340">340</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;{</div><div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;    <span class="keywordflow">return</span> tensor-&gt;<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + x * tensor-&gt;<a class="code" href="struct_tensor3_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">stride_x</a> + y * tensor-&gt;<a class="code" href="struct_tensor3_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">stride_y</a> + z * tensor-&gt;<a class="code" href="struct_tensor3_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c">stride_z</a>;</div><div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;}</div><div class="ttc" id="struct_tensor3_d_xhtml_ad5ff7a2b2bd0eec50fe09c254b127d1c"><div class="ttname"><a href="struct_tensor3_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c">Tensor3D::stride_z</a></div><div class="ttdeci">int stride_z</div><div class="ttdoc">Stride of the image in Z dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00182">helpers.h:182</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml_ae01febbfd0689ef709f3ff6fdd2abc7e"><div class="ttname"><a href="struct_tensor3_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">Tensor3D::stride_x</a></div><div class="ttdeci">int stride_x</div><div class="ttdoc">Stride of the image in X dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00180">helpers.h:180</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00178">helpers.h:178</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml_a4f0b90c9ecd6e57ceb3f37332fefe8f1"><div class="ttname"><a href="struct_tensor3_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">Tensor3D::stride_y</a></div><div class="ttdeci">int stride_y</div><div class="ttdoc">Stride of the image in Y dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00181">helpers.h:181</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00162">Tensor3D::ptr</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00164">Tensor3D::stride_x</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00165">Tensor3D::stride_y</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00166">Tensor3D::stride_z</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00178">Tensor3D::ptr</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00180">Tensor3D::stride_x</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00181">Tensor3D::stride_y</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00182">Tensor3D::stride_z</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="fft_8cl_source.xhtml#l00855">fft_radix_2_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l00925">fft_radix_2_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l00281">fft_radix_2_first_stage_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l00995">fft_radix_3_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l01068">fft_radix_3_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l00330">fft_radix_3_first_stage_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l00379">fft_radix_3_first_stage_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l01141">fft_radix_4_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l01217">fft_radix_4_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l00477">fft_radix_4_first_stage_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l01293">fft_radix_5_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l01372">fft_radix_5_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l00530">fft_radix_5_first_stage_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l00579">fft_radix_5_first_stage_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l01451">fft_radix_7_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l01536">fft_radix_7_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l00634">fft_radix_7_first_stage_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l00685">fft_radix_7_first_stage_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l01621">fft_radix_8_axis_0()</a>, <a class="el" href="fft_8cl_source.xhtml#l01709">fft_radix_8_axis_1()</a>, <a class="el" href="fft_8cl_source.xhtml#l00791">fft_radix_8_first_stage_axis_1()</a>, <a class="el" href="pooling__layer_8cl_source.xhtml#l00204">pooling_layer_2()</a>, <a class="el" href="pooling__layer_8cl_source.xhtml#l00268">pooling_layer_3()</a>, <a class="el" href="pooling__layer_8cl_source.xhtml#l00543">pooling_layer_MxN_nhwc()</a>, <a class="el" href="pooling__layer__quantized_8cl_source.xhtml#l00095">pooling_layer_MxN_quantized_nchw()</a>, <a class="el" href="pooling__layer__quantized_8cl_source.xhtml#l00203">pooling_layer_MxN_quantized_nhwc()</a>, <a class="el" href="reshape__layer_8cl_source.xhtml#l00049">reshape_layer()</a>, <a class="el" href="roi__pooling__layer_8cl_source.xhtml#l00061">roi_pool_1x1()</a>, <a class="el" href="roi__pooling__layer_8cl_source.xhtml#l00125">roi_pooling_layer()</a>, <a class="el" href="upsample__layer_8cl_source.xhtml#l00052">upsample_layer_nchw()</a>, and <a class="el" href="upsample__layer_8cl_source.xhtml#l00107">upsample_layer_nhwc()</a>.</p>
 
@@ -1299,15 +1561,15 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00337">337</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;{</div><div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;    <span class="keywordflow">return</span> tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + x * tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">stride_x</a> + y * tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">stride_y</a> + z * tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c">stride_z</a> + <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1a367830ae09bf6138df822888ec1d71">w</a> * tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#a13a60f6e75f64f1953b8858ea454a880">stride_w</a>;</div><div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a1a367830ae09bf6138df822888ec1d71"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a1a367830ae09bf6138df822888ec1d71">arm_compute::test::validation::w</a></div><div class="ttdeci">SimpleTensor&lt; float &gt; w</div><div class="ttdef"><b>Definition:</b> <a href="_c_p_p_2_d_f_t_8cpp_source.xhtml#l00156">DFT.cpp:156</a></div></div>
-<div class="ttc" id="struct_tensor4_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor4D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00172">helpers.h:172</a></div></div>
-<div class="ttc" id="struct_tensor4_d_xhtml_a13a60f6e75f64f1953b8858ea454a880"><div class="ttname"><a href="struct_tensor4_d.xhtml#a13a60f6e75f64f1953b8858ea454a880">Tensor4D::stride_w</a></div><div class="ttdeci">int stride_w</div><div class="ttdoc">Stride of the image in W dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00177">helpers.h:177</a></div></div>
-<div class="ttc" id="struct_tensor4_d_xhtml_a4f0b90c9ecd6e57ceb3f37332fefe8f1"><div class="ttname"><a href="struct_tensor4_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">Tensor4D::stride_y</a></div><div class="ttdeci">int stride_y</div><div class="ttdoc">Stride of the image in Y dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00175">helpers.h:175</a></div></div>
-<div class="ttc" id="struct_tensor4_d_xhtml_ae01febbfd0689ef709f3ff6fdd2abc7e"><div class="ttname"><a href="struct_tensor4_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">Tensor4D::stride_x</a></div><div class="ttdeci">int stride_x</div><div class="ttdoc">Stride of the image in X dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00174">helpers.h:174</a></div></div>
-<div class="ttc" id="struct_tensor4_d_xhtml_ad5ff7a2b2bd0eec50fe09c254b127d1c"><div class="ttname"><a href="struct_tensor4_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c">Tensor4D::stride_z</a></div><div class="ttdeci">int stride_z</div><div class="ttdoc">Stride of the image in Z dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00176">helpers.h:176</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00353">353</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;{</div><div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;    <span class="keywordflow">return</span> tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + x * tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">stride_x</a> + y * tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">stride_y</a> + z * tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c">stride_z</a> + <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1a367830ae09bf6138df822888ec1d71">w</a> * tensor-&gt;<a class="code" href="struct_tensor4_d.xhtml#a13a60f6e75f64f1953b8858ea454a880">stride_w</a>;</div><div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a1a367830ae09bf6138df822888ec1d71"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a1a367830ae09bf6138df822888ec1d71">arm_compute::test::validation::w</a></div><div class="ttdeci">SimpleTensor&lt; float &gt; w</div><div class="ttdef"><b>Definition:</b> <a href="_c_p_p_2_d_f_t_8cpp_source.xhtml#l00156">DFT.cpp:156</a></div></div>
+<div class="ttc" id="struct_tensor4_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor4D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00188">helpers.h:188</a></div></div>
+<div class="ttc" id="struct_tensor4_d_xhtml_a13a60f6e75f64f1953b8858ea454a880"><div class="ttname"><a href="struct_tensor4_d.xhtml#a13a60f6e75f64f1953b8858ea454a880">Tensor4D::stride_w</a></div><div class="ttdeci">int stride_w</div><div class="ttdoc">Stride of the image in W dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00193">helpers.h:193</a></div></div>
+<div class="ttc" id="struct_tensor4_d_xhtml_a4f0b90c9ecd6e57ceb3f37332fefe8f1"><div class="ttname"><a href="struct_tensor4_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1">Tensor4D::stride_y</a></div><div class="ttdeci">int stride_y</div><div class="ttdoc">Stride of the image in Y dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00191">helpers.h:191</a></div></div>
+<div class="ttc" id="struct_tensor4_d_xhtml_ae01febbfd0689ef709f3ff6fdd2abc7e"><div class="ttname"><a href="struct_tensor4_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">Tensor4D::stride_x</a></div><div class="ttdeci">int stride_x</div><div class="ttdoc">Stride of the image in X dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00190">helpers.h:190</a></div></div>
+<div class="ttc" id="struct_tensor4_d_xhtml_ad5ff7a2b2bd0eec50fe09c254b127d1c"><div class="ttname"><a href="struct_tensor4_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c">Tensor4D::stride_z</a></div><div class="ttdeci">int stride_z</div><div class="ttdoc">Stride of the image in Z dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00192">helpers.h:192</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00172">Tensor4D::ptr</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00177">Tensor4D::stride_w</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00174">Tensor4D::stride_x</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00175">Tensor4D::stride_y</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00176">Tensor4D::stride_z</a>, and <a class="el" href="_c_p_p_2_d_f_t_8cpp_source.xhtml#l00156">arm_compute::test::validation::w</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00188">Tensor4D::ptr</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00193">Tensor4D::stride_w</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00190">Tensor4D::stride_x</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00191">Tensor4D::stride_y</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00192">Tensor4D::stride_z</a>, and <a class="el" href="_c_p_p_2_d_f_t_8cpp_source.xhtml#l00156">arm_compute::test::validation::w</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="pooling__layer_8cl_source.xhtml#l00543">pooling_layer_MxN_nhwc()</a>, and <a class="el" href="pooling__layer__quantized_8cl_source.xhtml#l00203">pooling_layer_MxN_quantized_nhwc()</a>.</p>
 
@@ -1399,12 +1661,12 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A 3D tensor object </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00238">238</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;{</div><div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> img =</div><div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    {</div><div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;        .<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;        .stride_y                      = stride_y</div><div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    };</div><div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    img.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += img.<a class="code" href="struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x + get_global_id(1) * step_y + get_global_id(2) * step_z;</div><div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    <span class="keywordflow">return</span> img;</div><div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;}</div><div class="ttc" id="struct_image_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd">Image::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00154">helpers.h:154</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00151">helpers.h:151</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00153">helpers.h:153</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00254">254</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;{</div><div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> img =</div><div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;    {</div><div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;        .<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        .stride_y                      = stride_y</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    };</div><div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    img.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += img.<a class="code" href="struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x + get_global_id(1) * step_y + get_global_id(2) * step_z;</div><div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;    <span class="keywordflow">return</span> img;</div><div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;}</div><div class="ttc" id="struct_image_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd">Image::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00170">helpers.h:170</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00167">helpers.h:167</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00169">helpers.h:169</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00154">Image::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00153">Image::ptr</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00170">Image::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00169">Image::ptr</a>.</p>
 
 </div>
 </div>
@@ -1480,12 +1742,12 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>An image object </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00212">212</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;{</div><div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> img =</div><div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    {</div><div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;        .<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;        .stride_y                      = stride_y</div><div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    };</div><div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;    img.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += img.<a class="code" href="struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x + get_global_id(1) * step_y;</div><div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    <span class="keywordflow">return</span> img;</div><div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;}</div><div class="ttc" id="struct_image_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd">Image::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00154">helpers.h:154</a></div></div>
-<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00151">helpers.h:151</a></div></div>
-<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00153">helpers.h:153</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00228">228</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;{</div><div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    <a class="code" href="struct_image.xhtml">Image</a> img =</div><div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;    {</div><div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;        .<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;        .stride_y                      = stride_y</div><div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;    };</div><div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;    img.<a class="code" href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += img.<a class="code" href="struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x + get_global_id(1) * step_y;</div><div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;    <span class="keywordflow">return</span> img;</div><div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;}</div><div class="ttc" id="struct_image_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_image.xhtml#a35e5a91338398273f3b4a6010004bddd">Image::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00170">helpers.h:170</a></div></div>
+<div class="ttc" id="struct_image_xhtml"><div class="ttname"><a href="struct_image.xhtml">Image</a></div><div class="ttdoc">Structure to hold Image information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00167">helpers.h:167</a></div></div>
+<div class="ttc" id="struct_image_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_image.xhtml#acf52c23cbd7424606c10a606524e3e32">Image::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00169">helpers.h:169</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00154">Image::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00153">Image::ptr</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00170">Image::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00169">Image::ptr</a>.</p>
 
 </div>
 </div>
@@ -1575,12 +1837,12 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A 3D tensor object </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00264">264</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;{</div><div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;    <a class="code" href="struct_tensor3_d.xhtml">Tensor3D</a> tensor =</div><div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;    {</div><div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;        .<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;        .stride_y                      = stride_y,</div><div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;        .stride_z                      = stride_z</div><div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    };</div><div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;    tensor.<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += tensor.<a class="code" href="struct_tensor3_d.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x + get_global_id(1) * step_y + get_global_id(2) * step_z;</div><div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;    <span class="keywordflow">return</span> tensor;</div><div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;}</div><div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00160">helpers.h:160</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00162">helpers.h:162</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_tensor3_d.xhtml#a35e5a91338398273f3b4a6010004bddd">Tensor3D::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00163">helpers.h:163</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00280">280</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;{</div><div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    <a class="code" href="struct_tensor3_d.xhtml">Tensor3D</a> tensor =</div><div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    {</div><div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;        .<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;        .stride_y                      = stride_y,</div><div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;        .stride_z                      = stride_z</div><div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;    };</div><div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    tensor.<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += tensor.<a class="code" href="struct_tensor3_d.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x + get_global_id(1) * step_y + get_global_id(2) * step_z;</div><div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;    <span class="keywordflow">return</span> tensor;</div><div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;}</div><div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00176">helpers.h:176</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00178">helpers.h:178</a></div></div>
+<div class="ttc" id="struct_tensor3_d_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_tensor3_d.xhtml#a35e5a91338398273f3b4a6010004bddd">Tensor3D::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00179">helpers.h:179</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00163">Tensor3D::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00162">Tensor3D::ptr</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00179">Tensor3D::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00178">Tensor3D::ptr</a>.</p>
 
 </div>
 </div>
@@ -1672,12 +1934,12 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00278">278</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;{</div><div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    <a class="code" href="struct_tensor4_d.xhtml">Tensor4D</a> tensor =</div><div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    {</div><div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;        .<a class="code" href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;        .stride_y                      = stride_y,</div><div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;        .stride_z                      = stride_z,</div><div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;        .stride_w                      = stride_w</div><div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;    };</div><div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;</div><div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    tensor.<a class="code" href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += tensor.<a class="code" href="struct_tensor4_d.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x + get_global_id(1) * step_y + (get_global_id(2) % mod_size) * step_z + (get_global_id(2) / mod_size) * step_w;</div><div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;    <span class="keywordflow">return</span> tensor;</div><div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;}</div><div class="ttc" id="struct_tensor4_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor4D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00172">helpers.h:172</a></div></div>
-<div class="ttc" id="struct_tensor4_d_xhtml"><div class="ttname"><a href="struct_tensor4_d.xhtml">Tensor4D</a></div><div class="ttdoc">Structure to hold 4D tensor information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00170">helpers.h:170</a></div></div>
-<div class="ttc" id="struct_tensor4_d_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_tensor4_d.xhtml#a35e5a91338398273f3b4a6010004bddd">Tensor4D::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00173">helpers.h:173</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00294">294</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;{</div><div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    <a class="code" href="struct_tensor4_d.xhtml">Tensor4D</a> tensor =</div><div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;    {</div><div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;        .<a class="code" href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;        .stride_y                      = stride_y,</div><div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;        .stride_z                      = stride_z,</div><div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;        .stride_w                      = stride_w</div><div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;    };</div><div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;</div><div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;    tensor.<a class="code" href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += tensor.<a class="code" href="struct_tensor4_d.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x + get_global_id(1) * step_y + (get_global_id(2) % mod_size) * step_z + (get_global_id(2) / mod_size) * step_w;</div><div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;    <span class="keywordflow">return</span> tensor;</div><div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;}</div><div class="ttc" id="struct_tensor4_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor4_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor4D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00188">helpers.h:188</a></div></div>
+<div class="ttc" id="struct_tensor4_d_xhtml"><div class="ttname"><a href="struct_tensor4_d.xhtml">Tensor4D</a></div><div class="ttdoc">Structure to hold 4D tensor information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00186">helpers.h:186</a></div></div>
+<div class="ttc" id="struct_tensor4_d_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_tensor4_d.xhtml#a35e5a91338398273f3b4a6010004bddd">Tensor4D::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00189">helpers.h:189</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00173">Tensor4D::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00172">Tensor4D::ptr</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00189">Tensor4D::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00188">Tensor4D::ptr</a>.</p>
 
 </div>
 </div>
@@ -1739,12 +2001,12 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>An image object </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00189">189</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;{</div><div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    <a class="code" href="struct_vector.xhtml">Vector</a> vector =</div><div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    {</div><div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;        .<a class="code" href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    };</div><div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    vector.<a class="code" href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += vector.<a class="code" href="struct_vector.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x;</div><div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="keywordflow">return</span> vector;</div><div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;}</div><div class="ttc" id="struct_vector_xhtml"><div class="ttname"><a href="struct_vector.xhtml">Vector</a></div><div class="ttdoc">Structure to hold Vector information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00143">helpers.h:143</a></div></div>
-<div class="ttc" id="struct_vector_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">Vector::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00145">helpers.h:145</a></div></div>
-<div class="ttc" id="struct_vector_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_vector.xhtml#a35e5a91338398273f3b4a6010004bddd">Vector::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00146">helpers.h:146</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00205">205</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;{</div><div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    <a class="code" href="struct_vector.xhtml">Vector</a> vector =</div><div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    {</div><div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        .<a class="code" href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>                           = ptr,</div><div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        .offset_first_element_in_bytes = offset_first_element_in_bytes,</div><div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        .stride_x                      = stride_x,</div><div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    };</div><div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    vector.<a class="code" href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> += vector.<a class="code" href="struct_vector.xhtml#a35e5a91338398273f3b4a6010004bddd">offset_first_element_in_bytes</a> + get_global_id(0) * step_x;</div><div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    <span class="keywordflow">return</span> vector;</div><div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;}</div><div class="ttc" id="struct_vector_xhtml"><div class="ttname"><a href="struct_vector.xhtml">Vector</a></div><div class="ttdoc">Structure to hold Vector information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00159">helpers.h:159</a></div></div>
+<div class="ttc" id="struct_vector_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">Vector::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00161">helpers.h:161</a></div></div>
+<div class="ttc" id="struct_vector_xhtml_a35e5a91338398273f3b4a6010004bddd"><div class="ttname"><a href="struct_vector.xhtml#a35e5a91338398273f3b4a6010004bddd">Vector::offset_first_element_in_bytes</a></div><div class="ttdeci">int offset_first_element_in_bytes</div><div class="ttdoc">The offset of the first element in the source image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00162">helpers.h:162</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00146">Vector::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00145">Vector::ptr</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00162">Vector::offset_first_element_in_bytes</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00161">Vector::ptr</a>.</p>
 
 </div>
 </div>
@@ -1791,11 +2053,11 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00301">301</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;{</div><div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;    <span class="keywordflow">return</span> vec-&gt;<a class="code" href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + x * vec-&gt;<a class="code" href="struct_vector.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">stride_x</a>;</div><div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;}</div><div class="ttc" id="struct_vector_xhtml_ae01febbfd0689ef709f3ff6fdd2abc7e"><div class="ttname"><a href="struct_vector.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">Vector::stride_x</a></div><div class="ttdeci">int stride_x</div><div class="ttdoc">Stride of the image in X dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00147">helpers.h:147</a></div></div>
-<div class="ttc" id="struct_vector_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">Vector::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00145">helpers.h:145</a></div></div>
+<p class="definition">Definition at line <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00317">317</a> of file <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;{</div><div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;    <span class="keywordflow">return</span> vec-&gt;<a class="code" href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a> + x * vec-&gt;<a class="code" href="struct_vector.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">stride_x</a>;</div><div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;}</div><div class="ttc" id="struct_vector_xhtml_ae01febbfd0689ef709f3ff6fdd2abc7e"><div class="ttname"><a href="struct_vector.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e">Vector::stride_x</a></div><div class="ttdeci">int stride_x</div><div class="ttdoc">Stride of the image in X dimension (in bytes)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00163">helpers.h:163</a></div></div>
+<div class="ttc" id="struct_vector_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_vector.xhtml#acf52c23cbd7424606c10a606524e3e32">Vector::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00161">helpers.h:161</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00145">Vector::ptr</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00147">Vector::stride_x</a>.</p>
+<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00161">Vector::ptr</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00163">Vector::stride_x</a>.</p>
 
 </div>
 </div>
@@ -1805,7 +2067,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml">helpers.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -10,6 +10,6 @@ var _n_e_o_n_2_elementwise_max_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_elementwise_max_8cpp.xhtml#a8ff4f77afdf6250913b204da84ba4971", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_elementwise_max_8cpp.xhtml#a78d0160e680ef164ace1c5eeae4c8396", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_elementwise_max_8cpp.xhtml#a3d315d475f71efb169360e5a3e6a34ee", null ],
-    [ "TEST_SUITE_END", "_n_e_o_n_2_elementwise_max_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_elementwise_max_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "NEElementwiseMaxFixture< int16_t >", "_n_e_o_n_2_elementwise_max_8cpp.xhtml#aed0110369a7707068f54a52e3da9a821", null ]
 ];

@@ -6,6 +6,7 @@ var _g_p_u_target_8h =
       [ "GPU_ARCH_MASK", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a57a3b40730a5af7ea3e13eb4bba56d82", null ],
       [ "MIDGARD", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3afa362f4daec88442a387ff7cda411a38", null ],
       [ "BIFROST", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3aa78cc0fd1cab24af0fad71dc4c256f8e", null ],
+      [ "VALHALL", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a35213429e39ad02be7c3c44fc87cde57", null ],
       [ "T600", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a6855a4342969d2b58c96d95385d6e673", null ],
       [ "T700", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a664a94fa85b127eabc7bed25091843fd", null ],
       [ "T800", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3aae926a8537ded0221329aa9a89b84048", null ],
@@ -17,8 +18,9 @@ var _g_p_u_target_8h =
       [ "G52", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a3731064380218cfc2b9613d2b6293cfb", null ],
       [ "G52LIT", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a4b3e9b93a7e833f9d7ab01d4cf9f7837", null ],
       [ "G76", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3aa46ce37da51477a1af33a8810e0ed04d", null ],
-      [ "TTRX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3ab39f7e42574174cf9ee7da726bdb13b4", null ],
-      [ "TBOX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a53e518b6393904e797819c7a941f9ddc", null ]
+      [ "G77", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a8e081b1cdec7bc064a67f31560ef7fe0", null ],
+      [ "TBOX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a53e518b6393904e797819c7a941f9ddc", null ],
+      [ "TODX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a6903f06b87f56a4cd0df268ee94dbd6f", null ]
     ] ],
     [ "get_arch_from_target", "_g_p_u_target_8h.xhtml#a2355c2bf5d1950088937416baea24fe6", null ],
     [ "get_target_from_name", "_g_p_u_target_8h.xhtml#a0dc6fb54ac0bbc7bf512fe0ca7414076", null ],

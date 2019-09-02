@@ -87,7 +87,7 @@ void select_op_8(const ITensor *cond, const ITensor *in1, const ITensor *in2, IT
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr)
+    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr) -> VectorType
     {
         static const auto zero = wrapper::vdup_n(static_cast<uint8_t>(0), arm_compute::wrapper::traits::vector_128_tag());
         return wrapper::vcgt(wrapper::vloadq(condition_ptr), zero);
@@ -101,7 +101,7 @@ void select_op_16(const ITensor *cond, const ITensor *in1, const ITensor *in2, I
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr)
+    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr) -> VectorType
     {
         static const auto zero = wrapper::vdup_n(static_cast<uint16_t>(0), arm_compute::wrapper::traits::vector_128_tag());
         return wrapper::vcgt(wrapper::vmovl(wrapper::vload(condition_ptr)), zero);
@@ -115,7 +115,7 @@ void select_op_32(const ITensor *cond, const ITensor *in1, const ITensor *in2, I
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr)
+    select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr) -> VectorType
     {
         static const auto zero = wrapper::vdup_n(static_cast<uint32_t>(0), arm_compute::wrapper::traits::vector_128_tag());
         return wrapper::vcgt(wrapper::vmovl(wrapper::vgetlow(wrapper::vmovl(wrapper::vload(condition_ptr)))), zero);

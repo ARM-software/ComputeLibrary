@@ -1,4 +1,4 @@
 var _quantization_layer_8h =
 [
-    [ "quantization_layer", "_quantization_layer_8h.xhtml#a252c69a083b2d30152aae9715d303470", null ]
+    [ "quantization_layer", "_quantization_layer_8h.xhtml#a4ca6df865d7c7b1ef0863135de905560", null ]
 ];

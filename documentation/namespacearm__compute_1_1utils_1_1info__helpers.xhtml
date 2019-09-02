@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -148,9 +148,9 @@ Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_info_helpers_8h_source.xhtml#l00042">42</a> of file <a class="el" href="_info_helpers_8h_source.xhtml">InfoHelpers.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordflow">return</span> activation_info.enabled() &amp;&amp; activation_info.activation() == ActivationLayerInfo::ActivationFunction::RELU;</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">References <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01495">ActivationLayerInfo::activation()</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01510">ActivationLayerInfo::enabled()</a>, and <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaad346bb4679d29be241279f15d7795c1c">ActivationLayerInfo::RELU</a>.</p>
+<p class="reference">References <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01550">ActivationLayerInfo::activation()</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01565">ActivationLayerInfo::enabled()</a>, and <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaad346bb4679d29be241279f15d7795c1c">ActivationLayerInfo::RELU</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_depthwise_convolution_assembly_dispatch_8cpp_source.xhtml#l00210">NEDepthwiseConvolutionAssemblyDispatch::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_depthwise_convolution_assembly_dispatch_8cpp_source.xhtml#l00320">NEDepthwiseConvolutionAssemblyDispatch::validate()</a>.</p>
 
 </div>
 </div>
@@ -189,9 +189,9 @@ Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_info_helpers_8h_source.xhtml#l00053">53</a> of file <a class="el" href="_info_helpers_8h_source.xhtml">InfoHelpers.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;{</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">bool</span> is_lu_bounded_relu = activation_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                                    &amp;&amp; activation_info.a() == 6.f &amp;&amp; activation_info.b() == 0.f;</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">bool</span> is_bounded_relu = activation_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                                 &amp;&amp; activation_info.a() == 6.f;</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordflow">return</span> activation_info.enabled() &amp;&amp; (is_lu_bounded_relu || is_bounded_relu);</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">References <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01500">ActivationLayerInfo::a()</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01495">ActivationLayerInfo::activation()</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01505">ActivationLayerInfo::b()</a>, <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaacc516ab03b98f1c908ddf6ed4a7c45e9">ActivationLayerInfo::BOUNDED_RELU</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01510">ActivationLayerInfo::enabled()</a>, and <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaaab1d4411a9e7f5e82002512cddfdc33a">ActivationLayerInfo::LU_BOUNDED_RELU</a>.</p>
+<p class="reference">References <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01555">ActivationLayerInfo::a()</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01550">ActivationLayerInfo::activation()</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01560">ActivationLayerInfo::b()</a>, <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaacc516ab03b98f1c908ddf6ed4a7c45e9">ActivationLayerInfo::BOUNDED_RELU</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01565">ActivationLayerInfo::enabled()</a>, and <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaaab1d4411a9e7f5e82002512cddfdc33a">ActivationLayerInfo::LU_BOUNDED_RELU</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_depthwise_convolution_assembly_dispatch_8cpp_source.xhtml#l00210">NEDepthwiseConvolutionAssemblyDispatch::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_depthwise_convolution_assembly_dispatch_8cpp_source.xhtml#l00320">NEDepthwiseConvolutionAssemblyDispatch::validate()</a>.</p>
 
 </div>
 </div>
@@ -201,7 +201,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1utils.xhtml">utils</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1utils_1_1info__helpers.xhtml">info_helpers</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

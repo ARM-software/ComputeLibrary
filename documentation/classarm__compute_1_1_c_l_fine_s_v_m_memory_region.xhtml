@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -224,8 +224,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00139">139</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    : ICLSVMMemoryRegion(std::move(ctx), flags, <a class="code" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>, alignment)</div><div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;{</div><div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_memory_region_xhtml_a259cb5a711406a8c3e5d937eb9350cca"><div class="ttname"><a href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">arm_compute::IMemoryRegion::size</a></div><div class="ttdeci">size_t size() const</div><div class="ttdoc">Memory region size accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_memory_region_8h_source.xhtml#l00073">IMemoryRegion.h:73</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00145">145</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    : ICLSVMMemoryRegion(std::move(ctx), flags, <a class="code" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>, alignment)</div><div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;{</div><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_memory_region_xhtml_a259cb5a711406a8c3e5d937eb9350cca"><div class="ttname"><a href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">arm_compute::IMemoryRegion::size</a></div><div class="ttdeci">size_t size() const</div><div class="ttdoc">Memory region size accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_memory_region_8h_source.xhtml#l00073">IMemoryRegion.h:73</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -276,8 +276,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a929af627a6a0430539998d12024d6c69">ICLMemoryRegion</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00144">144</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;{</div><div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    <span class="keywordflow">if</span>(blocking)</div><div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    {</div><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;        <a class="code" href="_open_c_l_8cpp.xhtml#ac78e93d371eecbe98f00bdf965c98ed6">clFinish</a>(q.get());</div><div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    }</div><div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    _mapping = _ptr;</div><div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    <span class="keywordflow">return</span> _mapping;</div><div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;}</div><div class="ttc" id="_open_c_l_8cpp_xhtml_ac78e93d371eecbe98f00bdf965c98ed6"><div class="ttname"><a href="_open_c_l_8cpp.xhtml#ac78e93d371eecbe98f00bdf965c98ed6">clFinish</a></div><div class="ttdeci">cl_int clFinish(cl_command_queue command_queue)</div><div class="ttdef"><b>Definition:</b> <a href="_open_c_l_8cpp_source.xhtml#l00639">OpenCL.cpp:639</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00150">150</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;{</div><div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    <span class="keywordflow">if</span>(blocking)</div><div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    {</div><div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;        <a class="code" href="_open_c_l_8cpp.xhtml#ac78e93d371eecbe98f00bdf965c98ed6">clFinish</a>(q.get());</div><div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    }</div><div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    _mapping = _ptr;</div><div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    <span class="keywordflow">return</span> _mapping;</div><div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;}</div><div class="ttc" id="_open_c_l_8cpp_xhtml_ac78e93d371eecbe98f00bdf965c98ed6"><div class="ttname"><a href="_open_c_l_8cpp.xhtml#ac78e93d371eecbe98f00bdf965c98ed6">clFinish</a></div><div class="ttdeci">cl_int clFinish(cl_command_queue command_queue)</div><div class="ttdef"><b>Definition:</b> <a href="_open_c_l_8cpp_source.xhtml#l00639">OpenCL.cpp:639</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_open_c_l_8cpp_source.xhtml#l00639">clFinish()</a>.</p>
 
@@ -318,8 +318,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a0ee6b952accaff0f7e8e61bda7889102">ICLMemoryRegion</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00154">154</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;{</div><div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    <a class="code" href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a>(q);</div><div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    _mapping = <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a6dc630a6ae9cc063b3924bcea8dee9d6"><div class="ttname"><a href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(...)</div><div class="ttdoc">To avoid unused variables warnings.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00160">Error.h:160</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00160">160</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;{</div><div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    <a class="code" href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a>(q);</div><div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    _mapping = <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a6dc630a6ae9cc063b3924bcea8dee9d6"><div class="ttname"><a href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(...)</div><div class="ttdoc">To avoid unused variables warnings.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00160">Error.h:160</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00160">ARM_COMPUTE_UNUSED</a>.</p>
 
@@ -335,7 +335,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_fine_s_v_m_memory_region.xhtml">CLFineSVMMemoryRegion</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:29 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

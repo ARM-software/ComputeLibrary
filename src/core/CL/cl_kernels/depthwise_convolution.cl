@@ -24,14 +24,7 @@
 
 #include "helpers.h"
 
-#if defined(FUSED_ACTIVATION)
-#define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-#define SELECT_TYPE VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
-#include "activation_helpers.h"
-#define ACTIVATION_FUNC(x) ACTIVATION_OP(FUSED_ACTIVATION, x)
-#else /* defined(FUSED_ACTIVATION) */
-#define ACTIVATION_FUNC(x) (x)
-#endif /* defined(FUSED_ACTIVATION) */
+#include "activation_float_helpers.h"
 
 /** Get the pointer position at a certain offset in x and y direction.
  *
@@ -287,21 +280,25 @@ inline float2 convolution1x3_stride_3(__global const uchar *left_pixel,
  * @return a float2 containing 2 convoluted values.
  */
 inline float2 convolution3x3(
-    Image      *src,
+    __global const uchar *src,
+    unsigned int          src_stride_y,
     const float mat0, const float mat1, const float mat2,
     const float mat3, const float mat4, const float mat5,
     const float mat6, const float mat7, const float mat8)
 {
     float2 pixels;
 
-    pixels = convolution1x3(offset(src, 0, 0), mat0, mat1, mat2);
-    pixels += convolution1x3(offset(src, 0, DILATION_Y), mat3, mat4, mat5);
-    pixels += convolution1x3(offset(src, 0, DILATION_Y * 2), mat6, mat7, mat8);
+    pixels = convolution1x3((src + 0 * DILATION_Y * src_stride_y), mat0, mat1, mat2);
+    pixels += convolution1x3((src + 1 * DILATION_Y * src_stride_y), mat3, mat4, mat5);
+    pixels += convolution1x3((src + 2 * DILATION_Y * src_stride_y), mat6, mat7, mat8);
 
     return pixels;
 }
 
 /** This OpenCL kernel computes the depthwise convolution 3x3
+ *
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -345,30 +342,36 @@ __kernel void depthwise_convolution_3x3(
     Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
-#if defined(HAS_BIAS)
-    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
-#endif //defined(HAS_BIAS)
+
+    float2 pixels = 0.0f;
 
     // Extract channel and linearized batch indices
     const int channel = get_global_id(2) % DST_CHANNELS;
     const int batch   = get_global_id(2) / DST_CHANNELS;
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
-    src.ptr -= batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z + (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
 
-    uchar3 offset          = (uchar3)(0, 1, 2) * (uchar3)weights_stride_y;
-    float3 weights_values0 = vload3(0, (__global float *)(weights_addr + offset.s0));
-    float3 weights_values1 = vload3(0, (__global float *)(weights_addr + offset.s1));
-    float3 weights_values2 = vload3(0, (__global float *)(weights_addr + offset.s2));
+    __global uchar *src_addr = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
-    float2 pixels = convolution3x3(&src, weights_values0.s0, weights_values0.s1, weights_values0.s2,
-                                   weights_values1.s0, weights_values1.s1, weights_values1.s2,
-                                   weights_values2.s0, weights_values2.s1, weights_values2.s2);
+    // Load the weights
+    float3 weights_values0 = vload3(0, (__global float *)(weights_addr + 0 * weights_stride_y));
+    float3 weights_values1 = vload3(0, (__global float *)(weights_addr + 1 * weights_stride_y));
+    float3 weights_values2 = vload3(0, (__global float *)(weights_addr + 2 * weights_stride_y));
+
+    pixels = convolution3x3(src_addr, src_stride_y,
+                            weights_values0.s0, weights_values0.s1, weights_values0.s2,
+                            weights_values1.s0, weights_values1.s1, weights_values1.s2,
+                            weights_values2.s0, weights_values2.s1, weights_values2.s2);
 #if defined(HAS_BIAS)
-    pixels += (float2)(*((__global float *)(biases.ptr + channel * biases_stride_x)));
+    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+
+    float bias = *((__global float *)(vector_offset(&biases, channel)));
+
+    pixels += (float2)bias;
 #endif //defined(HAS_BIAS)
 
-    vstore2(ACTIVATION_FUNC(pixels), 0, (__global float *)dst.ptr);
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels, A_VAL, B_VAL), 0, (__global float *)dst.ptr);
 }
 #endif //defined(CONV_STRIDE_X)
 
@@ -455,11 +458,10 @@ inline float2 convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(__global uc
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the depthwise convolution 3x3 when both
  * stride_x and stride_y are equal to 1
  *
- * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float.
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
- * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=float
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -567,20 +569,19 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
     pixels3 += (float2)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore2(ACTIVATION_FUNC(pixels0), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
-    vstore2(ACTIVATION_FUNC(pixels1), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
-    vstore2(ACTIVATION_FUNC(pixels2), 0, (__global float *)(dst.ptr + 2 * dst_stride_y));
-    vstore2(ACTIVATION_FUNC(pixels3), 0, (__global float *)(dst.ptr + 3 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels0, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels1, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels2, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 2 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels3, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 3 * dst_stride_y));
 }
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the depthwise convolution 3x3 when both
  * stride_x and stride_y are equal to 2
  *
- * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float.
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
- * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=float
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -678,8 +679,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     pixels1 += (float2)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore2(ACTIVATION_FUNC(pixels0), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
-    vstore2(ACTIVATION_FUNC(pixels1), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels0, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
+    vstore2(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels1, A_VAL, B_VAL), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
 }
 
 #endif // defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F32)
@@ -1182,11 +1183,10 @@ inline half4 convolution3x3_f16(
 
 /** This OpenCL kernel computes the depthwise convolution 3x3
  *
- * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=half. Supported data types: half.
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
- * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1253,7 +1253,7 @@ __kernel void depthwise_convolution_3x3_f16(
     pixels += (half4)(*((__global half *)(biases.ptr + channel * biases_stride_x)));
 #endif //defined(HAS_BIAS)
 
-    vstore4(ACTIVATION_FUNC(pixels), 0, (__global half *)dst.ptr);
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels, A_VAL, B_VAL), 0, (__global half *)dst.ptr);
 }
 #endif // defined(DEPTH_MULTIPLIER)
 #endif // defined(CONV_STRIDE_X)
@@ -1261,11 +1261,10 @@ __kernel void depthwise_convolution_3x3_f16(
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the 16bit floating point depthwise convolution 3x3
  * when both stride_x and stride_y are equal to 1
  *
- * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=half. Supported data types: half.
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
- * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1376,20 +1375,19 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
     pixels3 += (half4)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore4(ACTIVATION_FUNC(pixels0), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
-    vstore4(ACTIVATION_FUNC(pixels1), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
-    vstore4(ACTIVATION_FUNC(pixels2), 0, (__global half *)(dst.ptr + 2 * dst_stride_y));
-    vstore4(ACTIVATION_FUNC(pixels3), 0, (__global half *)(dst.ptr + 3 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels0, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels1, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels2, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 2 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels3, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 3 * dst_stride_y));
 }
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes 16bit floating point the depthwise convolution 3x3
  * when both stride_x and stride_y are equal to 2
  *
- * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=half. Supported data types: half.
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
- * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1489,8 +1487,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     pixels1 += (half4)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore4(ACTIVATION_FUNC(pixels0), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
-    vstore4(ACTIVATION_FUNC(pixels1), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels0, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, pixels1, A_VAL, B_VAL), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
 }
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F16)
 
@@ -1512,10 +1510,9 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
  * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
  * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
- * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
- * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1652,7 +1649,7 @@ __kernel void depthwise_convolution_3x3_nhwc(
 #endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
-    (ACTIVATION_FUNC(acc), 0, (__global DATA_TYPE *)(dst_addr));
+    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr));
 }
 #endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
@@ -1666,10 +1663,9 @@ __kernel void depthwise_convolution_3x3_nhwc(
  * @note The number of planes processed per thread must be passed at compile time using -DNUM_PLANES_PROCESSED (i.e. -DNUM_PLANES_PROCESSED=2)
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_TOP (e.g. -DCONV_PAD_TOP=1)
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
- * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
- * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1857,18 +1853,18 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
 #endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
-    (ACTIVATION_FUNC(acc0), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
+    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc0, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
     VSTORE(VEC_SIZE)
-    (ACTIVATION_FUNC(acc1), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
+    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc1, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
 
 #if((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     if((z * NUM_PLANES_PROCESSED + 1) < DST_DIM_2)
 #endif // ((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     {
         VSTORE(VEC_SIZE)
-        (ACTIVATION_FUNC(acc2), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z));
+        (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc2, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z));
         VSTORE(VEC_SIZE)
-        (ACTIVATION_FUNC(acc3), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z));
+        (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, acc3, A_VAL, B_VAL), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z));
     }
 }
 

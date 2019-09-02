@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -105,6 +105,9 @@ $(document).ready(function(){initNavTree('globals_t.xhtml','');});
 <li>tablelookup_U8()
 : <a class="el" href="tablelookup_8cl.xhtml#ad64728d0b577942fb98aca553bca7f77">tablelookup.cl</a>
 </li>
+<li>tanh_op
+: <a class="el" href="activation__float__helpers_8h.xhtml#a0bd249f46d4fb9dc5cfcb062761c55bb">activation_float_helpers.h</a>
+</li>
 <li>Tensor3D
 : <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a1a857bfe99727c6051e9a3ee285d70f6">helpers.h</a>
 </li>
@@ -147,9 +150,6 @@ $(document).ready(function(){initNavTree('globals_t.xhtml','');});
 <li>threshold_range()
 : <a class="el" href="threshold_8cl.xhtml#a2e3f1b089d9b33880c9bb6e98f294bba">threshold.cl</a>
 </li>
-<li>Transform()
-: <a class="el" href="transform_8hpp.xhtml#a26afdd476f20600b47f35560ccfe23a9">transform.hpp</a>
-</li>
 <li>transform_bilinear()
 : <a class="el" href="scale_8cl.xhtml#a1990e87858b15b8fce3f63965fb9b86c">scale.cl</a>
 </li>
@@ -174,12 +174,32 @@ $(document).ready(function(){initNavTree('globals_t.xhtml','');});
 <li>TRANSPOSE_8x8
 : <a class="el" href="transpose_8cl.xhtml#ad037a4e8ddc84de9c0512a2d4ee693bf">transpose.cl</a>
 </li>
+<li>TRANSPOSE_K0X1
+: <a class="el" href="gemm__helpers_8h.xhtml#a3331788b9b76de48804ede36995f2b65">gemm_helpers.h</a>
+</li>
+<li>TRANSPOSE_K0X16
+: <a class="el" href="gemm__helpers_8h.xhtml#ab7f7711d7dd26714ebee9d07b8ce58a3">gemm_helpers.h</a>
+</li>
+<li>TRANSPOSE_K0X2
+: <a class="el" href="gemm__helpers_8h.xhtml#a6b46fdbc87c7084bdc63a2f9520ddb83">gemm_helpers.h</a>
+</li>
+<li>TRANSPOSE_K0X3
+: <a class="el" href="gemm__helpers_8h.xhtml#a08e69d6b2e06e2ef4bc9ba21488ddf8f">gemm_helpers.h</a>
+</li>
+<li>TRANSPOSE_K0X4
+: <a class="el" href="gemm__helpers_8h.xhtml#a5044f846186656923b4b6a6018dd1d42">gemm_helpers.h</a>
+</li>
+<li>TRANSPOSE_K0X8
+: <a class="el" href="gemm__helpers_8h.xhtml#a221e4dab7bfbca55e7d79174f140a754">gemm_helpers.h</a>
+</li>
+<li>TRANSPOSE_K0XN0
+: <a class="el" href="gemm__helpers_8h.xhtml#af83fba9e0a00fc38a71258f0052b9c24">gemm_helpers.h</a>
+</li>
 <li>TWIDDLE_FACTOR_MULTIPLICATION
 : <a class="el" href="fft_8cl.xhtml#ad4dcc4a8b94f263cd19c59fdc2cec3d2">fft.cl</a>
 </li>
 <li>TYPE
-: <a class="el" href="activation__layer_8cl.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">activation_layer.cl</a>
-, <a class="el" href="activation__layer__qa8_8cl.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">activation_layer_qa8.cl</a>
+: <a class="el" href="activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">activation_quant_helpers.h</a>
 </li>
 <li>type_max
 : <a class="el" href="minmaxloc_8cl.xhtml#a4464d6f922ea17b4a9ca6a2cec7ddb75">minmaxloc.cl</a>
@@ -197,7 +217,7 @@ $(document).ready(function(){initNavTree('globals_t.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:39 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

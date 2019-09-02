@@ -140,12 +140,14 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
     return ret;
 }
 
-NumPyAccessor::NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream)
+NumPyAccessor::NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, DataLayout data_layout, std::ostream &output_stream)
     : _npy_tensor(), _filename(std::move(npy_path)), _output_stream(output_stream)
 {
-    NumPyBinLoader loader(_filename);
+    NumPyBinLoader loader(_filename, data_layout);
 
     TensorInfo info(shape, 1, data_type);
+    info.set_data_layout(data_layout);
+
     _npy_tensor.allocator()->init(info);
     _npy_tensor.allocator()->allocate();
 
@@ -180,6 +182,20 @@ bool NumPyAccessor::access_tensor(ITensor &tensor)
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
+
+    return false;
+}
+
+SaveNumPyAccessor::SaveNumPyAccessor(std::string npy_name, const bool is_fortran)
+    : _npy_name(std::move(npy_name)), _is_fortran(is_fortran)
+{
+}
+
+bool SaveNumPyAccessor::access_tensor(ITensor &tensor)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
+
+    utils::save_to_npy(tensor, _npy_name, _is_fortran);
 
     return false;
 }

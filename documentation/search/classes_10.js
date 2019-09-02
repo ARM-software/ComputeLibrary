@@ -17,7 +17,7 @@ var searchData=
   ['ppmloader',['PPMLoader',['../classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml',1,'arm_compute::utils']]],
   ['ppmwriter',['PPMWriter',['../classarm__compute_1_1graph__utils_1_1_p_p_m_writer.xhtml',1,'arm_compute::graph_utils']]],
   ['prettyprinter',['PrettyPrinter',['../classarm__compute_1_1test_1_1framework_1_1_pretty_printer.xhtml',1,'arm_compute::test::framework']]],
-  ['printer',['Printer',['../classarm__compute_1_1logging_1_1_printer.xhtml',1,'Printer'],['../classarm__compute_1_1test_1_1framework_1_1_printer.xhtml',1,'Printer']]],
+  ['printer',['Printer',['../classarm__compute_1_1test_1_1framework_1_1_printer.xhtml',1,'Printer'],['../classarm__compute_1_1logging_1_1_printer.xhtml',1,'Printer']]],
   ['priorboxlayer',['PriorBoxLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_prior_box_layer.xhtml',1,'arm_compute::graph::frontend']]],
   ['priorboxlayerinfo',['PriorBoxLayerInfo',['../classarm__compute_1_1_prior_box_layer_info.xhtml',1,'arm_compute']]],
   ['priorboxlayernode',['PriorBoxLayerNode',['../classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml',1,'arm_compute::graph']]],

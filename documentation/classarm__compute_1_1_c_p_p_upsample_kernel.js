@@ -4,7 +4,7 @@ var classarm__compute_1_1_c_p_p_upsample_kernel =
     [ "CPPUpsampleKernel", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#ade0b22ebd85d13fa476cbb3260b675b8", null ],
     [ "CPPUpsampleKernel", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#a38b5fc616bb3800be24e8ac5c1016eaa", null ],
     [ "~CPPUpsampleKernel", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#a54e158debdfed307691fef9de2124019", null ],
-    [ "configure", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#a84b9f39cc1a119dc9da89cf2ccbdf7b7", null ],
+    [ "configure", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#a5bd748aa9f884e81f164a996527dffa9", null ],
     [ "is_parallelisable", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283", null ],
     [ "name", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#a52da9c61c30da42133ca5db7580f2afa", null ],

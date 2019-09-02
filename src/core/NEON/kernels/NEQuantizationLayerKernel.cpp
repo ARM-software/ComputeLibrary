@@ -107,6 +107,7 @@ void NEQuantizationLayerKernel::quantize(const Window &window, const Quantizatio
     const auto     window_start_x = static_cast<int>(window.x().start());
     const auto     window_end_x   = static_cast<int>(window.x().end());
 
+    const UniformQuantizationInfo uqinfo = qinfo.uniform();
 #ifdef __aarch64__
     constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_EVEN;
 #else  //__aarch64__
@@ -127,12 +128,12 @@ void NEQuantizationLayerKernel::quantize(const Window &window, const Quantizatio
         int x = window_start_x;
         for(; x <= (window_end_x - window_step); x += window_step)
         {
-            wrapper::vstore(&output_ptr[x], vquantize(load_value(&input_ptr[x]), qinfo));
+            wrapper::vstore(&output_ptr[x], vquantize(load_value(&input_ptr[x]), uqinfo));
         }
         // Compute left-over elements
         for(; x < window_end_x; ++x)
         {
-            output_ptr[x] = qinfo.quantize(input_ptr[x], rounding_policy);
+            output_ptr[x] = quantize_qasymm8(input_ptr[x], uqinfo, rounding_policy);
         }
     },
     input, output);

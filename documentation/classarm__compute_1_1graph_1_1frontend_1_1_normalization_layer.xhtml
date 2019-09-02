@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -136,7 +136,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Normalization Layer. </p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00702">702</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00731">731</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ada275ffd82f624b62bdbc2f01349fe33"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ada275ffd82f624b62bdbc2f01349fe33">&#9670;&nbsp;</a></span>NormalizationLayer()</h2>
@@ -170,8 +170,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00709">709</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00710"></a><span class="lineno">  710</span>&#160;        : _norm_info(norm_info)</div><div class="line"><a name="l00711"></a><span class="lineno">  711</span>&#160;    {</div><div class="line"><a name="l00712"></a><span class="lineno">  712</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00738">738</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00739"></a><span class="lineno">  739</span>&#160;        : _norm_info(norm_info)</div><div class="line"><a name="l00740"></a><span class="lineno">  740</span>&#160;    {</div><div class="line"><a name="l00741"></a><span class="lineno">  741</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -210,11 +210,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00714">714</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00715"></a><span class="lineno">  715</span>&#160;    {</div><div class="line"><a name="l00716"></a><span class="lineno">  716</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00717"></a><span class="lineno">  717</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00718"></a><span class="lineno">  718</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a542464b49825a7f82b42909409405010">GraphBuilder::add_normalization_node</a>(s.graph(), common_params, input, _norm_info);</div><div class="line"><a name="l00719"></a><span class="lineno">  719</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a542464b49825a7f82b42909409405010"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a542464b49825a7f82b42909409405010">arm_compute::graph::GraphBuilder::add_normalization_node</a></div><div class="ttdeci">static NodeID add_normalization_node(Graph &amp;g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info)</div><div class="ttdoc">Adds a normalization layer node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00508">GraphBuilder.cpp:508</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00743">743</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00744"></a><span class="lineno">  744</span>&#160;    {</div><div class="line"><a name="l00745"></a><span class="lineno">  745</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00746"></a><span class="lineno">  746</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00747"></a><span class="lineno">  747</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a542464b49825a7f82b42909409405010">GraphBuilder::add_normalization_node</a>(s.graph(), common_params, input, _norm_info);</div><div class="line"><a name="l00748"></a><span class="lineno">  748</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a542464b49825a7f82b42909409405010"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a542464b49825a7f82b42909409405010">arm_compute::graph::GraphBuilder::add_normalization_node</a></div><div class="ttdeci">static NodeID add_normalization_node(Graph &amp;g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info)</div><div class="ttdoc">Adds a normalization layer node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00538">GraphBuilder.cpp:538</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_ad8227ba86a01f26e4f173cd5e219d5d1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const</div><div class="ttdoc">Layer name accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00508">GraphBuilder::add_normalization_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
+<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00538">GraphBuilder::add_normalization_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
 
 </div>
 </div>
@@ -227,7 +227,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_normalization_layer.xhtml">NormalizationLayer</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

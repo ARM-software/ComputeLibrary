@@ -30,14 +30,14 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
-
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/helpers/float_ops.h"
 #include "support/ToolchainSupport.h"
 
 #include <cmath>
+#include <set>
 
 using namespace arm_compute;
 
@@ -46,12 +46,28 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
-                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
-                                    "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
+
+    static std::set<ActivationLayerInfo::ActivationFunction> quantized_supported_activations =
+    {
+        ActivationLayerInfo::ActivationFunction::RELU,
+        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+        ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+        ActivationLayerInfo::ActivationFunction::LOGISTIC,
+        ActivationLayerInfo::ActivationFunction::TANH
+    };
+    const DataType                                data_type = input->data_type();
+    const QuantizationInfo                       &oq_info   = (output != nullptr) ? output->quantization_info() : input->quantization_info();
+    const ActivationLayerInfo::ActivationFunction f_act     = act_info.activation();
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(data_type) && (quantized_supported_activations.count(f_act) == 0),
+                                    "For Quantized data type only tanh, logistic, relu and lower/upper bounded relu are supported");
+
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 128.f, 128)));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 256.f, 0)));
+
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
@@ -122,45 +138,37 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     int                a_const_int                       = 0;
     int                b_const_int                       = 0;
 
+    const ActivationLayerInfo::ActivationFunction f_act                       = act_info.activation();
+    const bool                                    is_quantized                = is_data_type_quantized(dt);
+    const bool                                    perform_activation_in_float = (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) || (f_act == ActivationLayerInfo::ActivationFunction::TANH);
+
     // Create quantized version of constants a, b if needed
-    if(is_data_type_quantized(dt))
+    if(dt == DataType::QASYMM8)
     {
-        a_const_int = input->info()->quantization_info().quantize(a_const, RoundingPolicy::TO_NEAREST_UP);
-        b_const_int = input->info()->quantization_info().quantize(b_const, RoundingPolicy::TO_NEAREST_UP);
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        a_const_int                           = quantize_qasymm8(a_const, iq_info);
+        b_const_int                           = quantize_qasymm8(b_const, iq_info);
+    }
+    else if(dt == DataType::QSYMM16)
+    {
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        a_const_int                           = quantize_qsymm16(a_const, iq_info);
+        b_const_int                           = quantize_qsymm16(b_const, iq_info);
     }
 
-    const bool is_logistic_activation_quantized = is_data_type_quantized_asymmetric(dt) && act_info.activation() == ActivationLayerInfo::ActivationFunction::LOGISTIC;
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option_if(!is_logistic_activation_quantized, "-DACT=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option_if(perform_activation_in_float, "-DFLOAT_DOMAIN");
+    build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
+    build_opts.add_option(("-DACT=" + lower_string(string_from_activation_func(f_act))));
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
-    build_opts.add_option(("-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(dt)));
     build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
-    if(is_data_type_quantized(dt))
+    // Set A, B constants in build options
+    if(is_quantized && !perform_activation_in_float)
     {
         build_opts.add_option(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
         build_opts.add_option(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
-
-        const int   o1 = input->info()->quantization_info().offset;
-        const float s1 = input->info()->quantization_info().scale;
-        // Quantized value of 0 corresponds to the offset o1
-        build_opts.add_option(("-DCONST_0=" + support::cpp11::to_string(o1)));
-        build_opts.add_option(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
-        build_opts.add_option(("-DO1_VAL=" + support::cpp11::to_string(o1)));
-
-        // Set scale and offset of the input and output if they have different quantization info
-        if(is_data_type_quantized_asymmetric(dt) && output != nullptr)
-        {
-            const float s2 = output->info()->quantization_info().scale;
-            const int   o2 = output->info()->quantization_info().offset;
-
-            if(o1 != o2 || s1 != s2)
-            {
-                build_opts.add_option(("-DS2_VAL=" + float_to_string_with_full_precision(s2)));
-                build_opts.add_option(("-DO2_VAL=" + support::cpp11::to_string(o2)));
-            }
-        }
     }
     else
     {
@@ -168,13 +176,34 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         build_opts.add_option(("-DB_VAL=" + float_to_string_with_full_precision(b_const)));
     }
 
-    build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
+    // Set quantization info build options
+    if(is_quantized)
+    {
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+
+        // Quantized value of 0 corresponds to the offset o1
+        build_opts.add_option(("-DCONST_0=" + (is_data_type_quantized_asymmetric(dt) ? support::cpp11::to_string(iq_info.offset) : "0")));
+        build_opts.add_option(("-DS1_VAL=" + float_to_string_with_full_precision(iq_info.scale)));
+        build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DO1_VAL=" + support::cpp11::to_string(iq_info.offset));
+
+        // Set scale and offset of the input and output if they have different quantization info
+        if(output != nullptr)
+        {
+            const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+
+            if(iq_info != oq_info)
+            {
+                build_opts.add_option(("-DS2_VAL=" + float_to_string_with_full_precision(oq_info.scale)));
+                build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DO2_VAL=" + support::cpp11::to_string(oq_info.offset));
+            }
+        }
+    }
 
     // Create kernel
     std::string kernel_name = std::string("activation_layer");
-    if(is_data_type_quantized_asymmetric(dt))
+    if(is_quantized)
     {
-        kernel_name += is_logistic_activation_quantized ? std::string("_logistic_qa8") : std::string("_qa8");
+        kernel_name += perform_activation_in_float ? std::string("_quant_f32") : std::string("_quant");
     }
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 

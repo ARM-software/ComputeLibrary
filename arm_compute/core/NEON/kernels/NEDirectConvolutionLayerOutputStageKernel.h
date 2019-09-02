@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,22 +59,27 @@ public:
      * @param[in]      bias                         (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
      * @param[out]     output                       (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
      *                                              Data type supported: F16/F32
-     * @param[in]      result_fixedpoint_multiplier (Optional)Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
-     * @param[in]      result_shift                 (Optional)Integer value used to round to nearest division by a power-of-two the result after the fixed point multiplication
-     * @param[in]      result_offset_after_shift    (Optional)Offset to be applied to result before converting it back to QASYMM8
+     * @param[in]      result_fixedpoint_multiplier (Optional) Fixed point value to be multiplied to each element of the input matrix once the result_offset has been added
+     * @param[in]      result_shift                 (Optional) Integer value used to round the result of the fixed point multiplication to nearest division by a power-of-two
+     * @param[in]      result_offset_after_shift    (Optional) Offset to be applied to result before converting it back to QASYMM8
      */
     void configure(ITensor *input, const ITensor *bias = nullptr, ITensor *output = nullptr,
                    int result_fixedpoint_multiplier = 0, int result_shift = 0, int result_offset_after_shift = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayerOutputStageKernel
      *
-     * @param[in] input  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                   Data type supported: F16/F32
-     * @param[in] bias   (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
-     * @param[in] output (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
-     *                         Data type supported: F16/F32
+     * @param[in] input                        Input to add the bias to. If @p output is not specified then accumulation is done in-place.
+     *                                         Data type supported: F16/F32
+     * @param[in] bias                         (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
+     * @param[in] output                       (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
+     *                                         Data type supported: F16/F32
+     * @param[in] result_fixedpoint_multiplier (Optional) Fixed point value to be multiplied to each element of the input matrix once the result_offset has been added
+     * @param[in] result_shift                 (Optional) Integer value used to round the result of the fixed point multiplication to nearest division by a power-of-two
+     * @param[in] result_offset_after_shift    (Optional) Offset to be applied to result before converting it back to QASYMM8
+     *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias = nullptr, const ITensorInfo *output = nullptr);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias = nullptr, const ITensorInfo *output = nullptr,
+                           int result_fixedpoint_multiplier = 0, int result_shift = 0, int result_offset_after_shift = 0);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

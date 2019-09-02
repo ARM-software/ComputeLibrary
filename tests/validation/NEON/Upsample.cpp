@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 template <typename T>
 using NEUpsampleLayerFixture = UpsampleLayerFixture<Tensor, Accessor, NEUpsampleLayer, T>;
 
+template <typename T>
+using NEUpsampleLayerQuantizedFixture = UpsampleLayerQuantizedFixture<Tensor, Accessor, NEUpsampleLayer, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEUpsampleLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
@@ -136,11 +139,12 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEUpsampleLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                     framework::dataset::make("PadInfo", { Size2D(2, 2) })),
-                                                                                                             framework::dataset::make("UpsamplingPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEUpsampleLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                      framework::dataset::make("PadInfo", { Size2D(2, 2) })),
+                                                                                                                      framework::dataset::make("UpsamplingPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
+                                                                                                                      framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))))
 {
     // Validate output
     validate(Accessor(_target), _reference);

@@ -116,12 +116,16 @@ void CLWidthConcatenate2TensorsKernel::configure(const ICLTensor *input1, const 
     const bool have_different_qinfo = helpers::tensor_info::tensors_have_different_quantization_info(output->info(), input1->info(), input2->info());
     if(is_data_type_quantized_asymmetric(input1->info()->data_type()) && have_different_qinfo)
     {
-        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().scale));
-        build_opts.add_option("-DOFFSET_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().scale));
-        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
+        const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info  = output->info()->quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iq1_info.offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iq1_info.scale));
+        build_opts.add_option("-DOFFSET_IN2=" + float_to_string_with_full_precision(iq2_info.offset));
+        build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(iq2_info.scale));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oq_info.offset));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oq_info.scale));
     }
 
     // Create kernel
@@ -132,6 +136,9 @@ void CLWidthConcatenate2TensorsKernel::configure(const ICLTensor *input1, const 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     ICLKernel::configure_internal(std::get<1>(win_config));
+
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     // Pass paddings as arguments to the kernel
     const unsigned int input1_width         = input1->info()->dimension(0);

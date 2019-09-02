@@ -65,6 +65,8 @@ const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::
                      * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
+
+const auto add_bias_dataset = framework::dataset::make("AddBias", { true, false });
 } // namespace
 
 TEST_SUITE(CL)
@@ -72,60 +74,46 @@ TEST_SUITE(DeconvolutionLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Mismatching data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Invalid weights shape
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),   // Non supported data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),  // Invalid bias shape
                                             TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32), // Window shrink
-                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32), // Inner border different from 0
                                             TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
                                           }),
     framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                               TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                           })),
     framework::dataset::make("BiasInfo",  { TensorInfo(TensorShape(1U), 1, DataType::F16),
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(25U, 11U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(4U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(4U), 1, DataType::S32),
-                                            TensorInfo(TensorShape(4U), 1, DataType::S32),
                                           })),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(13U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(11U, 9U, 1U, 3U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                           })),
     framework::dataset::make("PadStrideInfo", { PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
+                                                PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 1, 1),
                                                 PadStrideInfo(1, 1, 0, 0),
-                                                PadStrideInfo(1, 1, 0, 0),
                                            })),
-    framework::dataset::make("ax",          {   0U,
-                                                0U,
-                                                0U,
-                                                0U,
-                                                0U,
-                                            })),
-   framework::dataset::make("ay",           {   0U,
-                                                0U,
-                                                0U,
-                                                0U,
-                                                1U,
-                                                0U,
-                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, true, true })),
-    input_info, weights_info, bias_info, output_info, pad_info, ax, ay, expected)
+    framework::dataset::make("Expected", { false, false, false, false, false, true })),
+    input_info, weights_info, bias_info, output_info, pad_info, expected)
 {
-    bool is_valid = bool(CLDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info, ax, ay));
+    bool is_valid = bool(CLDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -147,8 +135,9 @@ TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
 TEST_SUITE(W4x4)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<float>, framework::DatasetMode::NIGHTLY, combine(combine(data4x4, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                            data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                    data_layouts_dataset),
+                                                                                                            add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -156,14 +145,17 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<float>, framework::Da
 TEST_SUITE_END() // W4x4
 
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::PRECOMMIT, combine(combine(data3x3_precommit, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                   data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data3x3_precommit, framework::dataset::make("DataType",
+                                                                                                                   DataType::F32)),
+                                                                                                                   data_layouts_dataset),
+                                                                                                                   add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(combine(data3x3, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                 data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                 data_layouts_dataset),
+                                                                                                                 add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -171,8 +163,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<float>, framewor
 TEST_SUITE_END() // W3x3
 
 TEST_SUITE(W2x2)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture2x2<float>, framework::DatasetMode::PRECOMMIT, combine(combine(data2x2_precommit, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                   data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture2x2<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data2x2_precommit, framework::dataset::make("DataType",
+                                                                                                                   DataType::F32)),
+                                                                                                                   data_layouts_dataset),
+                                                                                                                   add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -180,8 +174,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture2x2<float>, framewor
 TEST_SUITE_END() // W2x2
 
 TEST_SUITE(W1x1)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<float>, framework::DatasetMode::NIGHTLY, combine(combine(data1x1, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                            data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data1x1, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                    data_layouts_dataset),
+                                                                                                            add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -193,7 +188,9 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 
 TEST_SUITE(W4x4)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<half>, framework::DatasetMode::NIGHTLY, combine(combine(data4x4, framework::dataset::make("DataType", DataType::F16)), data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                   data_layouts_dataset),
+                                                                                                           add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -201,14 +198,17 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<half>, framework::Dat
 TEST_SUITE_END() // W4x4
 
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::PRECOMMIT, combine(combine(data3x3_precommit, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                  data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data3x3_precommit, framework::dataset::make("DataType",
+                                                                                                                  DataType::F16)),
+                                                                                                                  data_layouts_dataset),
+                                                                                                                  add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(data3x3, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                        data_layouts_dataset),
+                                                                                                                add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -216,8 +216,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<half>, framework
 TEST_SUITE_END() // W3x3
 
 TEST_SUITE(W2x2)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture2x2<half>, framework::DatasetMode::PRECOMMIT, combine(combine(data2x2_precommit, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                  data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture2x2<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data2x2_precommit, framework::dataset::make("DataType",
+                                                                                                                  DataType::F16)),
+                                                                                                                  data_layouts_dataset),
+                                                                                                                  add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -225,7 +227,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture2x2<half>, framework
 TEST_SUITE_END() // W2x2
 
 TEST_SUITE(W1x1)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<half>, framework::DatasetMode::NIGHTLY, combine(combine(data1x1, framework::dataset::make("DataType", DataType::F16)), data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data1x1, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                   data_layouts_dataset),
+                                                                                                           add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -251,10 +255,11 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 
 TEST_SUITE(W4x4)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data4x4, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))),
+                                                                                                                       add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -262,18 +267,21 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<uint8_t>, fr
 TEST_SUITE_END() // W4x4
 
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data3x3_precommit, framework::dataset::make("DataType",
-                       DataType::QASYMM8)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data3x3_precommit,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))),
+                       add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data3x3, framework::dataset::make("DataType",
                        DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))),
+                       add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -281,10 +289,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t
 TEST_SUITE_END() // W3x3
 
 TEST_SUITE(W2x2)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture2x2<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data2x2_precommit, framework::dataset::make("DataType",
-                       DataType::QASYMM8)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture2x2<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data2x2_precommit,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))),
+                       add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -292,10 +302,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture2x2<uint8_t
 TEST_SUITE_END() // W2x2
 
 TEST_SUITE(W1x1)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data1x1, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data1x1, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))),
+                                                                                                                       add_bias_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);

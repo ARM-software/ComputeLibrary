@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,10 +57,10 @@ public:
      *                     Sum will have the same number of dimensions as input.
      * @param[out] output  Destination tensor. Data types and data layouts supported: same as @p input.
      *                     Output will have the same number of dimensions as input.
-     * @param[in]  axis    Dimension along which to reduce. Supported reduction axis : 0, 1, 2
+     * @param[in]  axis    Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in]  epsilon Lower bound value for the normalization.
      */
-    void configure(const ITensor *input, const ITensor *sum, ITensor *output, unsigned int axis, float epsilon);
+    void configure(const ITensor *input, const ITensor *sum, ITensor *output, int axis, float epsilon);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEL2NormalizeLayerKernel.
      *
@@ -69,12 +69,12 @@ public:
      *                    Sum will have the same number of dimensions as input.
      * @param[in] output  Destination tensor info. Data types and data layouts supported: same as @p input.
      *                    Output will have the same number of dimensions as input.
-     * @param[in] axis    Dimension along which to reduce. Supported reduction axis : 0, 1, 2
+     * @param[in] axis    Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in] epsilon Lower bound value for the normalization.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -83,7 +83,7 @@ private:
     const ITensor *_input;
     const ITensor *_sum;
     ITensor       *_output;
-    unsigned int   _axis;
+    unsigned int   _actual_axis;
     float          _epsilon;
 };
 } // namespace arm_compute

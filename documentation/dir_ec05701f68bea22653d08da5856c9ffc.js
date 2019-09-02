@@ -9,6 +9,7 @@ var dir_ec05701f68bea22653d08da5856c9ffc =
     [ "DepthConcatenateLayer.cpp", "benchmark_2_n_e_o_n_2_depth_concatenate_layer_8cpp.xhtml", "benchmark_2_n_e_o_n_2_depth_concatenate_layer_8cpp" ],
     [ "DequantizationLayer.cpp", "benchmark_2_n_e_o_n_2_dequantization_layer_8cpp.xhtml", "benchmark_2_n_e_o_n_2_dequantization_layer_8cpp" ],
     [ "DirectConvolutionLayer.cpp", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp" ],
+    [ "ElementwiseSin.cpp", "benchmark_2_n_e_o_n_2_elementwise_sin_8cpp.xhtml", "benchmark_2_n_e_o_n_2_elementwise_sin_8cpp" ],
     [ "EqualizeHistogram.cpp", "benchmark_2_n_e_o_n_2_equalize_histogram_8cpp.xhtml", "benchmark_2_n_e_o_n_2_equalize_histogram_8cpp" ],
     [ "FastCorners.cpp", "benchmark_2_n_e_o_n_2_fast_corners_8cpp.xhtml", "benchmark_2_n_e_o_n_2_fast_corners_8cpp" ],
     [ "FFT.cpp", "tests_2benchmark_2_n_e_o_n_2fft_8cpp.xhtml", "tests_2benchmark_2_n_e_o_n_2fft_8cpp" ],

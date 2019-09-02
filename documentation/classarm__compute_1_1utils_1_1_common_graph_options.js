@@ -9,6 +9,7 @@ var classarm__compute_1_1utils_1_1_common_graph_options =
     [ "data_layout", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#aa276d896db24e95060047eb2f886614d", null ],
     [ "data_path", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a10f94123b5c23f4d0ee7362c2617d812", null ],
     [ "data_type", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a07e18432725b2e2d3c0a5625a8aea8a8", null ],
+    [ "enable_cl_cache", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#aa1fb173121a67e58388e74cf4f9f42f4", null ],
     [ "enable_tuner", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#afb574a4d09ddbdd9675da603fbad34a4", null ],
     [ "fast_math_hint", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#acb7fa90ec602efaaee1e7ab25ccbfa98", null ],
     [ "help", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#acb3f1fc6ee2cea2cf9074e7dfa4acf2b", null ],

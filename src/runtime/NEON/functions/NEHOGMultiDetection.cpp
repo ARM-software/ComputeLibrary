@@ -126,12 +126,18 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
     _num_block_norm_kernel  = input_block_norm.size(); // Number of NEHOGBlockNormalizationKernel kernels to compute
     _num_hog_detect_kernel  = input_hog_detect.size(); // Number of NEHOGDetector functions to compute
 
-    _orient_bin_kernel.reserve(_num_orient_bin_kernel);
-    _block_norm_kernel.reserve(_num_block_norm_kernel);
-    _hog_detect_kernel.reserve(_num_hog_detect_kernel);
-    _hog_space.reserve(_num_orient_bin_kernel);
-    _hog_norm_space.reserve(_num_block_norm_kernel);
-    _non_maxima_kernel = arm_compute::support::cpp14::make_unique<CPPDetectionWindowNonMaximaSuppressionKernel>();
+    _orient_bin_kernel.clear();
+    _block_norm_kernel.clear();
+    _hog_detect_kernel.clear();
+    _hog_space.clear();
+    _hog_norm_space.clear();
+
+    _orient_bin_kernel.resize(_num_orient_bin_kernel);
+    _block_norm_kernel.resize(_num_block_norm_kernel);
+    _hog_detect_kernel.resize(_num_hog_detect_kernel);
+    _hog_space.resize(_num_orient_bin_kernel);
+    _hog_norm_space.resize(_num_block_norm_kernel);
+    _non_maxima_kernel = CPPDetectionWindowNonMaximaSuppressionKernel();
 
     // Allocate tensors for magnitude and phase
     TensorInfo info_mag(shape_img, Format::S16);
@@ -167,17 +173,13 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
 
         // Allocate HOG space
         TensorInfo info_space(shape_hog_space, num_bins, DataType::F32);
-        auto       hog_space_tensor = support::cpp14::make_unique<Tensor>();
-        hog_space_tensor->allocator()->init(info_space);
+        _hog_space[i].allocator()->init(info_space);
 
         // Manage intermediate buffers
-        _memory_group.manage(hog_space_tensor.get());
+        _memory_group.manage(&_hog_space[i]);
 
         // Initialise orientation binning kernel
-        auto orient_bin_kernel = support::cpp14::make_unique<NEHOGOrientationBinningKernel>();
-        orient_bin_kernel->configure(&_mag, &_phase, hog_space_tensor.get(), multi_hog->model(idx_multi_hog)->info());
-        _orient_bin_kernel.emplace_back(std::move(orient_bin_kernel));
-        _hog_space.emplace_back(std::move(hog_space_tensor));
+        _orient_bin_kernel[i].configure(&_mag, &_phase, &_hog_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
     // Allocate intermediate tensors
@@ -192,23 +194,19 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
 
         // Allocate normalized HOG space
         TensorInfo tensor_info(*(multi_hog->model(idx_multi_hog)->info()), width, height);
-        auto       hog_norm_space_tensor = support::cpp14::make_unique<Tensor>();
-        hog_norm_space_tensor->allocator()->init(tensor_info);
+        _hog_norm_space[i].allocator()->init(tensor_info);
 
         // Manage intermediate buffers
-        _memory_group.manage(hog_norm_space_tensor.get());
+        _memory_group.manage(&_hog_norm_space[i]);
 
         // Initialize block normalization kernel
-        auto block_norm_kernel = support::cpp14::make_unique<NEHOGBlockNormalizationKernel>();
-        block_norm_kernel->configure(_hog_space[idx_orient_bin].get(), hog_norm_space_tensor.get(), multi_hog->model(idx_multi_hog)->info());
-        _block_norm_kernel.emplace_back(std::move(block_norm_kernel));
-        _hog_norm_space.emplace_back(std::move(hog_norm_space_tensor));
+        _block_norm_kernel[i].configure(&_hog_space[idx_orient_bin], &_hog_norm_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
     // Allocate intermediate tensors
     for(size_t i = 0; i < _num_orient_bin_kernel; ++i)
     {
-        _hog_space[i].get()->allocator()->allocate();
+        _hog_space[i].allocator()->allocate();
     }
 
     // Configure HOG detector kernel
@@ -216,18 +214,16 @@ void NEHOGMultiDetection::configure(ITensor *input, const IMultiHOG *multi_hog, 
     {
         const size_t idx_block_norm = input_hog_detect[i];
 
-        auto hog_detect_kernel = support::cpp14::make_unique<NEHOGDetector>();
-        hog_detect_kernel->configure(_hog_norm_space[idx_block_norm].get(), multi_hog->model(i), detection_windows, detection_window_strides->at(i), threshold, i);
-        _hog_detect_kernel.emplace_back(std::move(hog_detect_kernel));
+        _hog_detect_kernel[i].configure(&_hog_norm_space[idx_block_norm], multi_hog->model(i), detection_windows, detection_window_strides->at(i), threshold, i);
     }
 
     // Configure non maxima suppression kernel
-    _non_maxima_kernel->configure(_detection_windows, min_distance);
+    _non_maxima_kernel.configure(_detection_windows, min_distance);
 
     // Allocate intermediate tensors
     for(size_t i = 0; i < _num_block_norm_kernel; ++i)
     {
-        _hog_norm_space[i]->allocator()->allocate();
+        _hog_norm_space[i].allocator()->allocate();
     }
 }
 
@@ -246,24 +242,24 @@ void NEHOGMultiDetection::run()
     // Run orientation binning kernel
     for(auto &kernel : _orient_bin_kernel)
     {
-        NEScheduler::get().schedule(kernel.get(), Window::DimY);
+        NEScheduler::get().schedule(&kernel, Window::DimY);
     }
 
     // Run block normalization kernel
     for(auto &kernel : _block_norm_kernel)
     {
-        NEScheduler::get().schedule(kernel.get(), Window::DimY);
+        NEScheduler::get().schedule(&kernel, Window::DimY);
     }
 
     // Run HOG detector kernel
     for(auto &kernel : _hog_detect_kernel)
     {
-        kernel->run();
+        kernel.run();
     }
 
     // Run non-maxima suppression kernel if enabled
     if(_non_maxima_suppression)
     {
-        NEScheduler::get().schedule(_non_maxima_kernel.get(), Window::DimY);
+        NEScheduler::get().schedule(&_non_maxima_kernel, Window::DimY);
     }
 }

@@ -36,8 +36,8 @@ FusedConvolutionBatchNormalizationNode::FusedConvolutionBatchNormalizationNode(f
                                                                                unsigned int      num_groups,
                                                                                ConvolutionMethod method,
                                                                                FastMathHint      fast_math_hint,
-                                                                               QuantizationInfo out_quant_info, ActivationLayerInfo fused_activation)
-    : _epsilon(epsilon), _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(out_quant_info), _fused_activation(fused_activation)
+                                                                               ActivationLayerInfo fused_activation)
+    : _epsilon(epsilon), _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _fused_activation(fused_activation)
 {
     _input_edges.resize(7, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -132,10 +132,6 @@ TensorDescriptor FusedConvolutionBatchNormalizationNode::configure_output(size_t
     ARM_COMPUTE_ERROR_ON(src == nullptr || weights == nullptr);
 
     TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), _info);
-    if(!_out_quant_info.empty())
-    {
-        output_info.quant_info = _out_quant_info;
-    }
 
     return output_info;
 }

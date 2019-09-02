@@ -26,8 +26,9 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
+#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/Requires.h"
 
 #include <memory>
 #include <vector>
@@ -41,9 +42,10 @@ class Status;
 
 /** Basic function to execute concatenate tensors along a given axis. This function calls the following kernels:
  *
- * -# @ref NEWidthConcatenateLayer (if underlying concatenation axis is 0).
+ * -# @ref NEWidthConcatenateLayerKernel (if underlying concatenation axis is 0).
  * -# @ref NEHeightConcatenateLayerKernel (if underlying concatenation axis is 1).
- * -# @ref NEDepthConcatenateLayer (if underlying concatenation axis is 2).
+ * -# @ref NEDepthConcatenateLayerKernel (if underlying concatenation axis is 2).
+ * -# @ref NEBatchConcatenateLayerKernel (if underlying concatenation axis is 3).
  */
 class NEConcatenateLayer : public IFunction
 {
@@ -53,28 +55,37 @@ public:
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayer, @ref NEHeightConcatenateLayerKernel and @ref NEDepthConcatenateLayer.
+     * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayerKernel, @ref NEHeightConcatenateLayerKernel and @ref NEDepthConcatenateLayerKernel.
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
-     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1 and 2.
+     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
-    void configure(const std::vector<ITensor *> &inputs_vector, ITensor *output, size_t axis);
+    void configure(std::vector<ITensor *> inputs_vector, ITensor *output, size_t axis);
+    void configure(std::vector<const ITensor *> inputs_vector, ITensor *output, size_t axis);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayer, @ref NEHeightConcatenateLayerKernel and @ref NEDepthConcatenateLayer.
+     * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayerKernel, @ref NEHeightConcatenateLayerKernel and @ref NEDepthConcatenateLayerKernel.
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
-     * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1 and 2.
+     * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      *
      * @return a status
      */
     static Status validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
+    static Status validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis);
 
     // Inherited methods overridden:
     void run() override;
+
+private:
+    template <typename TensorType, REQUIRES_TA(std::is_same<typename std::remove_cv<TensorType>::type, ITensor>::value)>
+    void configure_internal(std::vector<TensorType *> &&inputs_vector, ITensor *output, size_t axis);
+
+    template <typename TensorInfoType, REQUIRES_TA(std::is_same<typename std::remove_cv<TensorInfoType>::type, ITensorInfo>::value)>
+    static Status validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output, size_t axis);
 
 private:
     std::vector<std::unique_ptr<INEKernel>> _concat_kernels;

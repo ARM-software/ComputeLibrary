@@ -3,6 +3,7 @@ var searchData=
   ['randomaccessor',['RandomAccessor',['../classarm__compute_1_1graph__utils_1_1_random_accessor.xhtml',1,'arm_compute::graph_utils']]],
   ['rangedataset',['RangeDataset',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset.xhtml',1,'arm_compute::test::framework::dataset']]],
   ['rangeduniformdistribution',['RangedUniformDistribution',['../classarm__compute_1_1utils_1_1random_1_1_ranged_uniform_distribution.xhtml',1,'arm_compute::utils::random']]],
+  ['rawfloat',['RawFloat',['../unionarm__compute_1_1helpers_1_1float__ops_1_1_raw_float.xhtml',1,'arm_compute::helpers::float_ops']]],
   ['rawlutaccessor',['RawLutAccessor',['../classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml',1,'arm_compute::test']]],
   ['rawtensor',['RawTensor',['../classarm__compute_1_1test_1_1_raw_tensor.xhtml',1,'arm_compute::test']]],
   ['rectangle',['Rectangle',['../structarm__compute_1_1_rectangle.xhtml',1,'arm_compute']]],

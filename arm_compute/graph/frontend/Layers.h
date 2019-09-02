@@ -370,26 +370,23 @@ class DeconvolutionLayer final : public ILayer
 public:
     /** Construct a convolution layer.
      *
-     * @param[in] conv_width   Convolution width.
-     * @param[in] conv_height  Convolution height.
-     * @param[in] ofm          Output feature map.
-     * @param[in] weights      Accessor to get kernel weights from.
-     * @param[in] bias         Accessor to get kernel bias from.
-     * @param[in] deconv_info  Padding and stride information.
-     * @param[in] inner_border Inner border padding (right, top)
+     * @param[in] conv_width  Convolution width.
+     * @param[in] conv_height Convolution height.
+     * @param[in] ofm         Output feature map.
+     * @param[in] weights     Accessor to get kernel weights from.
+     * @param[in] bias        Accessor to get kernel bias from.
+     * @param[in] deconv_info Padding and stride information.
      */
     DeconvolutionLayer(unsigned int        conv_width,
                        unsigned int        conv_height,
                        unsigned int        ofm,
                        ITensorAccessorUPtr weights,
                        ITensorAccessorUPtr bias,
-                       PadStrideInfo       deconv_info,
-                       Size2D              inner_border)
+                       PadStrideInfo       deconv_info)
         : _conv_width(conv_width),
           _conv_height(conv_height),
           _ofm(ofm),
           _deconv_info(std::move(deconv_info)),
-          _inner_border(inner_border),
           _weights(std::move(weights)),
           _bias(std::move(bias))
     {
@@ -400,7 +397,7 @@ public:
         NodeIdxPair input         = { s.tail_node(), 0 };
         NodeParams  common_params = { name(), s.hints().target_hint };
         return GraphBuilder::add_deconvolution_node(s.graph(), common_params, input,
-                                                    Size2D(_conv_width, _conv_height), _ofm, _deconv_info, _inner_border,
+                                                    Size2D(_conv_width, _conv_height), _ofm, _deconv_info,
                                                     std::move(_weights), std::move(_bias));
     }
 
@@ -409,7 +406,6 @@ private:
     unsigned int        _conv_height;
     unsigned int        _ofm;
     const PadStrideInfo _deconv_info;
-    Size2D              _inner_border;
     ITensorAccessorUPtr _weights;
     ITensorAccessorUPtr _bias;
 };
@@ -496,6 +492,39 @@ private:
     SubStream                _ss_conf;
     SubStream                _ss_prior;
     DetectionOutputLayerInfo _detect_info;
+};
+/** DetectionOutputPostProcess Layer */
+class DetectionPostProcessLayer final : public ILayer
+{
+public:
+    /** Construct a detection output layer.
+     *
+     * @param[in] sub_stream_class_prediction Class prediction graph sub-stream.
+     * @param[in] detect_info                 DetectionOutput parameters.
+     * @param[in] anchors                     Accessor to get anchors tensor data from.
+     * @param[in] out_quant_info              (Optional) Output quantization info
+     */
+    DetectionPostProcessLayer(SubStream &&sub_stream_class_prediction, DetectionPostProcessLayerInfo detect_info, ITensorAccessorUPtr anchors,
+                              const QuantizationInfo out_quant_info = QuantizationInfo())
+        : _sub_stream_class_prediction(std::move(sub_stream_class_prediction)), _detect_info(detect_info), _anchors(std::move(anchors)), _out_quant_info(std::move(out_quant_info))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        ARM_COMPUTE_ERROR_ON(_anchors == nullptr);
+
+        NodeParams  common_params          = { name(), s.hints().target_hint };
+        NodeIdxPair input_box_encoding     = { s.tail_node(), 0 };
+        NodeIdxPair input_class_prediction = { _sub_stream_class_prediction.tail_node(), 0 };
+        return GraphBuilder::add_detection_post_process_node(s.graph(), common_params, input_box_encoding, input_class_prediction, _detect_info, std::move(_anchors), std::move(_out_quant_info));
+    }
+
+private:
+    SubStream                     _sub_stream_class_prediction;
+    DetectionPostProcessLayerInfo _detect_info;
+    ITensorAccessorUPtr           _anchors;
+    const QuantizationInfo        _out_quant_info;
 };
 /** Dummy Layer */
 class DummyLayer final : public ILayer
@@ -854,6 +883,30 @@ public:
 private:
     SubStream         _ss;
     PriorBoxLayerInfo _prior_info;
+};
+
+/** Quantization Layer */
+class QuantizationLayer final : public ILayer
+{
+public:
+    /** Construct a quantization layer.
+     *
+     * @param[in] out_quant_info Output tensor quantization info
+     */
+    QuantizationLayer(QuantizationInfo out_quant_info)
+        : _out_quant_info(out_quant_info)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_quantization_node(s.graph(), common_params, input, _out_quant_info);
+    }
+
+private:
+    QuantizationInfo _out_quant_info;
 };
 
 /** Reorg Layer */

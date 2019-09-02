@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
+#include "arm_compute/core/KernelDescriptors.h"
+
 namespace arm_compute
 {
 class ICLTensor;
@@ -49,10 +51,12 @@ public:
     CLGEMMMatrixMultiplyReshapedKernel &operator=(CLGEMMMatrixMultiplyReshapedKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32/F16. The number of dimensions for the LHS matrix must be less or equal than 4
+     * @param[in]  input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32. The number of dimensions for the LHS matrix must be less or equal than 4
      * @param[in]  input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3
+     * @param[in]  input2    Input tensor containing the bias matrix. Data type supported: same as @p input0.
      * @param[out] output    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in]  alpha     Weight of the matrix product
+     * @param[in]  beta      Weight of the matrix bias
      * @param[in]  lhs_info  LHS matrix information used for reshaping the input0 tensor.  Only the following values are supported:
      *                       lhs_info.m0: 2,3,4,5,6,7,8
      *                       lhs_info.k0: 2,3,4,8,16
@@ -65,14 +69,17 @@ public:
      *
      * @note lhs_info.k0 must be equal to rhs_info.k0
      */
-    void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
-                   const GEMMReshapeInfo &gemm_info);
+    void configure(const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
+                   const GEMMRHSMatrixInfo &rhs_info,
+                   const GEMMKernelInfo    &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyReshapedKernel
      *
-     * @param[in] input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32/F16. The number of dimensions for the LHS matrix must be less or equal than 4
+     * @param[in] input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32. The number of dimensions for the LHS matrix must be less or equal than 4
      * @param[in] input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3
+     * @param[in] input2    Input tensor info containing the bias matrix. Data type supported: same as @p input0.
      * @param[in] output    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in] alpha     Weight of the matrix product
+     * @param[in] beta      Weight of the matrix bias
      * @param[in] lhs_info  LHS matrix information used for reshaping the input0 tensor.  Only the following values are supported:
      *                      lhs_info.m0: 2,3,4,5,6,7,8
      *                      lhs_info.k0: 2,3,4,8,16
@@ -87,8 +94,9 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, float alpha, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
-                           const GEMMReshapeInfo &gemm_info);
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
+                           const GEMMRHSMatrixInfo &rhs_info,
+                           const GEMMKernelInfo    &gemm_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -96,11 +104,14 @@ public:
 private:
     const ICLTensor *_input0;
     const ICLTensor *_input1;
+    const ICLTensor *_input2;
     ICLTensor       *_output;
     bool             _slide_matrix_b;
     bool             _reinterpret_output_as_3d;
     unsigned int     _k;
     bool             _use_dummy_work_items;
+    bool             _add_bias;
+    bool             _broadcast_bias;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGEMMMATRIXMULTIPLYRESHAPEDKERNEL_H__*/

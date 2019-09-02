@@ -53,9 +53,9 @@ void depth_concat(const ITensor *in, ITensor *out, int depth_offset, const Windo
     Iterator input(in, window);
     Iterator output(out, window);
 
-    const DataType          dt           = in->info()->data_type();
-    const QuantizationInfo &input_qinfo  = in->info()->quantization_info();
-    const QuantizationInfo &output_qinfo = out->info()->quantization_info();
+    const DataType                dt           = in->info()->data_type();
+    const UniformQuantizationInfo input_qinfo  = in->info()->quantization_info().uniform();
+    const UniformQuantizationInfo output_qinfo = out->info()->quantization_info().uniform();
     if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
         execute_window_loop(window, [&](const Coordinates &)
@@ -149,6 +149,9 @@ void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     INEKernel::configure(std::get<1>(win_config));
+
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 }
 
 Status NEDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,

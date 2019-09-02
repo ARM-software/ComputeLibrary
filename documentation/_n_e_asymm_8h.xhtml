@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -104,7 +104,8 @@ $(document).ready(function(){initNavTree('_n_e_asymm_8h.xhtml','');});
 <div class="title">NEAsymm.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;arm_neon.h&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="_n_e_math_8h_source.xhtml">arm_compute/core/NEON/NEMath.h</a>&quot;</code><br />
+<code>#include &lt;arm_neon.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_asymm_8inl_source.xhtml">arm_compute/core/NEON/NEAsymm.inl</a>&quot;</code><br />
 </div>
 <p><a href="_n_e_asymm_8h_source.xhtml">Go to the source code of this file.</a></p>
@@ -135,12 +136,6 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a5e28a3911204ac952601f512c82b48f1"><td class="memItemLeft" align="right" valign="top">int32x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a5e28a3911204ac952601f512c82b48f1">rounding_divide_by_pow2</a> (int32x4_t x, int exponent)</td></tr>
-<tr class="memdesc:a5e28a3911204ac952601f512c82b48f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Round to the nearest division by a power-of-two using exponent.  <a href="namespacearm__compute.xhtml#a5e28a3911204ac952601f512c82b48f1">More...</a><br /></td></tr>
-<tr class="separator:a5e28a3911204ac952601f512c82b48f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe3908fe41d9f2559f4a9eab1997fe61"><td class="memItemLeft" align="right" valign="top">int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afe3908fe41d9f2559f4a9eab1997fe61">rounding_divide_by_pow2</a> (int32_t x, int exponent)</td></tr>
-<tr class="memdesc:afe3908fe41d9f2559f4a9eab1997fe61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Round to the nearest division by a power-of-two using exponent.  <a href="namespacearm__compute.xhtml#afe3908fe41d9f2559f4a9eab1997fe61">More...</a><br /></td></tr>
-<tr class="separator:afe3908fe41d9f2559f4a9eab1997fe61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba8de9eaa10a7cb45c5aa603585d0e4c"><td class="memItemLeft" align="right" valign="top">uint8x16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aba8de9eaa10a7cb45c5aa603585d0e4c">vmlaq_qasymm8</a> (qasymm8x16_t vd, float32x4_t vs, float32x4_t vo)</td></tr>
 <tr class="memdesc:aba8de9eaa10a7cb45c5aa603585d0e4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a multiply-accumulate on all 16 components of a QASYMM8 vector.  <a href="namespacearm__compute.xhtml#aba8de9eaa10a7cb45c5aa603585d0e4c">More...</a><br /></td></tr>
 <tr class="separator:aba8de9eaa10a7cb45c5aa603585d0e4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,18 +147,24 @@ Functions</h2></td></tr>
 <tr class="memitem:a86f8bf876974759725e39496be2cc7f9"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a86f8bf876974759725e39496be2cc7f9">finalize_quantization</a> (int32_t in_value, int result_fixedpoint_multiplier, int32_t result_shift, int32_t result_offset_after_shift_s32, uint8_t min_u8, uint8_t max_u8)</td></tr>
 <tr class="memdesc:a86f8bf876974759725e39496be2cc7f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs final quantization step on single element.  <a href="namespacearm__compute.xhtml#a86f8bf876974759725e39496be2cc7f9">More...</a><br /></td></tr>
 <tr class="separator:a86f8bf876974759725e39496be2cc7f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41248f8ebe3a2ba4bdad26fb4f1afe2b"><td class="memItemLeft" align="right" valign="top">float32x4x2_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a41248f8ebe3a2ba4bdad26fb4f1afe2b">vdequantize</a> (const uint8x8_t &amp;qv, const QuantizationInfo &amp;qi)</td></tr>
-<tr class="memdesc:a41248f8ebe3a2ba4bdad26fb4f1afe2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a neon vector holding 8 quantized values.  <a href="namespacearm__compute.xhtml#a41248f8ebe3a2ba4bdad26fb4f1afe2b">More...</a><br /></td></tr>
-<tr class="separator:a41248f8ebe3a2ba4bdad26fb4f1afe2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04ae4ae815c47d443852428a0528a7d2"><td class="memItemLeft" align="right" valign="top">float32x4x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a04ae4ae815c47d443852428a0528a7d2">vdequantize</a> (const uint8x16_t &amp;qv, const QuantizationInfo &amp;qi)</td></tr>
-<tr class="memdesc:a04ae4ae815c47d443852428a0528a7d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a neon vector holding 16 quantized values.  <a href="namespacearm__compute.xhtml#a04ae4ae815c47d443852428a0528a7d2">More...</a><br /></td></tr>
-<tr class="separator:a04ae4ae815c47d443852428a0528a7d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a020b4cb373a77a7d14da330a4a6ce3fd"><td class="memItemLeft" align="right" valign="top">uint8x8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a020b4cb373a77a7d14da330a4a6ce3fd">vquantize</a> (const float32x4x2_t &amp;qv, const QuantizationInfo &amp;qi)</td></tr>
-<tr class="memdesc:a020b4cb373a77a7d14da330a4a6ce3fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a neon vector holding 8 floating point values.  <a href="namespacearm__compute.xhtml#a020b4cb373a77a7d14da330a4a6ce3fd">More...</a><br /></td></tr>
-<tr class="separator:a020b4cb373a77a7d14da330a4a6ce3fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6554986624335b7c05f968342630f530"><td class="memItemLeft" align="right" valign="top">uint8x16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a6554986624335b7c05f968342630f530">vquantize</a> (const float32x4x4_t &amp;qv, const QuantizationInfo &amp;qi)</td></tr>
-<tr class="memdesc:a6554986624335b7c05f968342630f530"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a neon vector holding 16 floating point values.  <a href="namespacearm__compute.xhtml#a6554986624335b7c05f968342630f530">More...</a><br /></td></tr>
-<tr class="separator:a6554986624335b7c05f968342630f530"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a485ae62f3ade6c8d33c5c2e85b29c3a7"><td class="memItemLeft" align="right" valign="top">float32x4x2_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a485ae62f3ade6c8d33c5c2e85b29c3a7">vdequantize</a> (const uint8x8_t &amp;qv, const UniformQuantizationInfo &amp;qi)</td></tr>
+<tr class="memdesc:a485ae62f3ade6c8d33c5c2e85b29c3a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a neon vector holding 8 quantized values.  <a href="namespacearm__compute.xhtml#a485ae62f3ade6c8d33c5c2e85b29c3a7">More...</a><br /></td></tr>
+<tr class="separator:a485ae62f3ade6c8d33c5c2e85b29c3a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7048ece2af58ce75587256d7980db171"><td class="memItemLeft" align="right" valign="top">float32x4x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a7048ece2af58ce75587256d7980db171">vdequantize</a> (const uint8x16_t &amp;qv, const UniformQuantizationInfo &amp;qi)</td></tr>
+<tr class="memdesc:a7048ece2af58ce75587256d7980db171"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a neon vector holding 16 quantized values.  <a href="namespacearm__compute.xhtml#a7048ece2af58ce75587256d7980db171">More...</a><br /></td></tr>
+<tr class="separator:a7048ece2af58ce75587256d7980db171"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afefd32b0cf61750c523e6d15790a561e"><td class="memItemLeft" align="right" valign="top">float32x4x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afefd32b0cf61750c523e6d15790a561e">vdequantize</a> (const uint8x16_t &amp;qv, float scale, int32_t <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>)</td></tr>
+<tr class="memdesc:afefd32b0cf61750c523e6d15790a561e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize following an asymmetric quantization scheme a neon vector holding 16 quantized values.  <a href="namespacearm__compute.xhtml#afefd32b0cf61750c523e6d15790a561e">More...</a><br /></td></tr>
+<tr class="separator:afefd32b0cf61750c523e6d15790a561e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a496aa10035fdc8a0e86dde37b64f8228"><td class="memItemLeft" align="right" valign="top">float32x4x4_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a496aa10035fdc8a0e86dde37b64f8228">vdequantize</a> (const int8x16_t &amp;qv, float scale)</td></tr>
+<tr class="memdesc:a496aa10035fdc8a0e86dde37b64f8228"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize following a symmetric quantization scheme a neon vector holding 16 quantized values.  <a href="namespacearm__compute.xhtml#a496aa10035fdc8a0e86dde37b64f8228">More...</a><br /></td></tr>
+<tr class="separator:a496aa10035fdc8a0e86dde37b64f8228"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ff1249e423ae9bfab075f5317c4d004"><td class="memItemLeft" align="right" valign="top">uint8x8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a4ff1249e423ae9bfab075f5317c4d004">vquantize</a> (const float32x4x2_t &amp;qv, const UniformQuantizationInfo &amp;qi)</td></tr>
+<tr class="memdesc:a4ff1249e423ae9bfab075f5317c4d004"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a neon vector holding 8 floating point values.  <a href="namespacearm__compute.xhtml#a4ff1249e423ae9bfab075f5317c4d004">More...</a><br /></td></tr>
+<tr class="separator:a4ff1249e423ae9bfab075f5317c4d004"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42c040989e7f451dd9f2efa7384b89f6"><td class="memItemLeft" align="right" valign="top">uint8x16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a42c040989e7f451dd9f2efa7384b89f6">vquantize</a> (const float32x4x4_t &amp;qv, const UniformQuantizationInfo &amp;qi)</td></tr>
+<tr class="memdesc:a42c040989e7f451dd9f2efa7384b89f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a neon vector holding 16 floating point values.  <a href="namespacearm__compute.xhtml#a42c040989e7f451dd9f2efa7384b89f6">More...</a><br /></td></tr>
+<tr class="separator:a42c040989e7f451dd9f2efa7384b89f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -171,7 +172,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml">NEON</a></li><li class="navelem"><a class="el" href="_n_e_asymm_8h.xhtml">NEAsymm.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

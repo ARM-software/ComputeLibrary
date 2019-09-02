@@ -13,6 +13,7 @@ var classarm__compute_1_1_c_l_sub_tensor =
     [ "operator=", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a9e7404a38329c9f1fcce42b8098dc6f9", null ],
     [ "operator=", "classarm__compute_1_1_c_l_sub_tensor.xhtml#aee53085b838758adfce05657de25f5c5", null ],
     [ "parent", "classarm__compute_1_1_c_l_sub_tensor.xhtml#ae06581a05b08fb202d499444ae791e15", null ],
+    [ "quantization", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a6d614dfaa0606b7fef13f3e26d745b48", null ],
     [ "unmap", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c", null ],
     [ "unmap", "classarm__compute_1_1_c_l_sub_tensor.xhtml#af974a2360069c2ef8df4496d00e4f6cc", null ]
 ];

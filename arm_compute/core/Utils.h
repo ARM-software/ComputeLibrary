@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <iomanip>
 #include <numeric>
 #include <sstream>
 #include <string>
@@ -111,10 +112,13 @@ inline size_t data_size_from_type(DataType data_type)
     {
         case DataType::U8:
         case DataType::S8:
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return 1;
         case DataType::U16:
         case DataType::S16:
+        case DataType::QSYMM16:
         case DataType::F16:
             return 2;
         case DataType::F32:
@@ -183,10 +187,13 @@ inline size_t element_size_from_data_type(DataType dt)
     {
         case DataType::S8:
         case DataType::U8:
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return 1;
         case DataType::U16:
         case DataType::S16:
+        case DataType::QSYMM16:
         case DataType::F16:
             return 2;
         case DataType::U32:
@@ -521,7 +528,10 @@ inline DataType get_promoted_data_type(DataType dt)
             return DataType::U32;
         case DataType::S16:
             return DataType::S32;
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+        case DataType::QSYMM16:
         case DataType::F16:
         case DataType::U32:
         case DataType::S32:
@@ -829,10 +839,12 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
  * @param[in] conv_info     Convolution information (containing strides)
  * @param[in] data_layout   (Optional) Data layout of the input and weights tensor
  * @param[in] dilation      (Optional) Dilation factor used in the convolution.
+ * @param[in] rounding_type (Optional) Dimension rounding type when down-scaling.
  *
  * @return PadStrideInfo for SAME padding
  */
-PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW, const Size2D &dilation = Size2D(1u, 1u));
+PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW, const Size2D &dilation = Size2D(1u, 1u),
+                                 const DimensionRoundingType &rounding_type = DimensionRoundingType::FLOOR);
 
 /** Returns expected width and height of the deconvolution's output tensor.
  *
@@ -999,7 +1011,10 @@ inline bool is_data_type_quantized(DataType dt)
 {
     switch(dt)
     {
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+        case DataType::QSYMM16:
             return true;
         default:
             return false;
@@ -1010,13 +1025,32 @@ inline bool is_data_type_quantized(DataType dt)
  *
  * @param[in] dt Input data type.
  *
- * @return True if data type is of symmetric quantized type, else false.
+ * @return True if data type is of asymmetric quantized type, else false.
  */
 inline bool is_data_type_quantized_asymmetric(DataType dt)
 {
     switch(dt)
     {
         case DataType::QASYMM8:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/** Check if a given data type is of symmetric quantized type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of symmetric quantized type, else false.
+ */
+inline bool is_data_type_quantized_symmetric(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+        case DataType::QSYMM16:
             return true;
         default:
             return false;
@@ -1059,14 +1093,14 @@ inline size_t num_of_elements_in_range(const float start, const float end, const
 
 /** Returns true if the value can be represented by the given data type
  *
- * @param[in] val        value to be checked
- * @param[in] dt         data type that is checked
- * @param[in] quant_info quantization info if the data type is QASYMM8
+ * @param[in] val   value to be checked
+ * @param[in] dt    data type that is checked
+ * @param[in] qinfo (Optional) quantization info if the data type is QASYMM8
  *
  * @return true if the data type can hold the value.
  */
 template <typename T>
-bool check_value_range(T val, DataType dt, QuantizationInfo quant_info = QuantizationInfo())
+bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = QuantizationInfo())
 {
     switch(dt)
     {
@@ -1074,8 +1108,8 @@ bool check_value_range(T val, DataType dt, QuantizationInfo quant_info = Quantiz
             return ((static_cast<uint8_t>(val) == val) && val >= std::numeric_limits<uint8_t>::lowest() && val <= std::numeric_limits<uint8_t>::max());
         case DataType::QASYMM8:
         {
-            double min = static_cast<double>(quant_info.dequantize(0));
-            double max = static_cast<double>(quant_info.dequantize(std::numeric_limits<uint8_t>::max()));
+            double min = static_cast<double>(dequantize_qasymm8(0, qinfo));
+            double max = static_cast<double>(dequantize_qasymm8(std::numeric_limits<uint8_t>::max(), qinfo));
             return ((double)val >= min && (double)val <= max);
         }
         case DataType::S8:
@@ -1119,6 +1153,8 @@ template <typename T>
 void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int n, int stream_width = 0, const std::string &element_delim = " ")
 {
     using print_type = typename std::conditional<std::is_floating_point<T>::value, T, int>::type;
+    std::ios stream_status(nullptr);
+    stream_status.copyfmt(s);
 
     for(unsigned int i = 0; i < n; ++i)
     {
@@ -1138,6 +1174,9 @@ void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int
             s << std::right << static_cast<print_type>(ptr[i]) << element_delim;
         }
     }
+
+    // Restore output stream flags
+    s.copyfmt(stream_status);
 }
 
 /** Identify the maximum width of n consecutive elements.

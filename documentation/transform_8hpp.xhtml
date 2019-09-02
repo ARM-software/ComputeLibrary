@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -96,98 +96,21 @@ $(document).ready(function(){initNavTree('transform_8hpp.xhtml','');});
 </div>
 
 <div class="header">
-  <div class="summary">
-<a href="#nested-classes">Data Structures</a> &#124;
-<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">transform.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="transforms_2list_8hpp_source.xhtml">transforms/list.hpp</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="utils_8hpp_source.xhtml">utils.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="transforms_2list_8hpp_source.xhtml">transforms/list.hpp</a>&quot;</code><br />
 </div>
 <p><a href="transform_8hpp_source.xhtml">Go to the source code of this file.</a></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_transform_impl.xhtml">TransformImpl&lt; tIntBy, BlockBy, Transposed, TOutSize, TInSize, sve &gt;</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a26afdd476f20600b47f35560ccfe23a9"><td class="memTemplParams" colspan="2">template&lt;unsigned int IntBy, unsigned int BlockBy, bool Transposed, bool sve = false, typename TOut , typename TIn &gt; </td></tr>
-<tr class="memitem:a26afdd476f20600b47f35560ccfe23a9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="transform_8hpp.xhtml#a26afdd476f20600b47f35560ccfe23a9">Transform</a> (TOut *out, const TIn *const in, const int stride, const int k0, const int kmax, const int x0, const int xmax)</td></tr>
-<tr class="separator:a26afdd476f20600b47f35560ccfe23a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="a26afdd476f20600b47f35560ccfe23a9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26afdd476f20600b47f35560ccfe23a9">&#9670;&nbsp;</a></span>Transform()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Transform </td>
-          <td>(</td>
-          <td class="paramtype">TOut *&#160;</td>
-          <td class="paramname"><em>out</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const TIn *const&#160;</td>
-          <td class="paramname"><em>in</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>stride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>k0</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>kmax</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>x0</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>xmax</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="transform_8hpp_source.xhtml#l00105">105</a> of file <a class="el" href="transform_8hpp_source.xhtml">transform.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  {</div><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="comment">// Redirect to a specialised implementation predicated on argument size.</span></div><div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  <a class="code" href="struct_transform_impl.xhtml">TransformImpl</a>&lt;IntBy, BlockBy, Transposed, <span class="keyword">sizeof</span>(TOut), <span class="keyword">sizeof</span>(TIn), sve&gt;<a class="code" href="transform_8hpp.xhtml#a26afdd476f20600b47f35560ccfe23a9">::Transform</a>(</div><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    out, in, stride, k0, kmax, x0, xmax</div><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  );</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;}</div><div class="ttc" id="transform_8hpp_xhtml_a26afdd476f20600b47f35560ccfe23a9"><div class="ttname"><a href="transform_8hpp.xhtml#a26afdd476f20600b47f35560ccfe23a9">Transform</a></div><div class="ttdeci">void Transform(TOut *out, const TIn *const in, const int stride, const int k0, const int kmax, const int x0, const int xmax)</div><div class="ttdef"><b>Definition:</b> <a href="transform_8hpp_source.xhtml#l00105">transform.hpp:105</a></div></div>
-<div class="ttc" id="struct_transform_impl_xhtml"><div class="ttname"><a href="struct_transform_impl.xhtml">TransformImpl</a></div><div class="ttdef"><b>Definition:</b> <a href="transform_8hpp_source.xhtml#l00038">transform.hpp:38</a></div></div>
-</div><!-- fragment -->
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_1ce938f580a6f304b99685e2c1dd19db.xhtml">kernels</a></li><li class="navelem"><a class="el" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="transform_8hpp.xhtml">transform.hpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

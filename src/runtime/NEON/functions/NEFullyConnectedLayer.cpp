@@ -44,8 +44,8 @@ Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const I
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
-        const QuantizationInfo input_quantization_info(input.quantization_info().scale, -input.quantization_info().offset);
-        const QuantizationInfo weights_quantization_info(weights.quantization_info().scale, -weights.quantization_info().offset);
+        const QuantizationInfo input_quantization_info(input.quantization_info().uniform().scale, -input.quantization_info().uniform().offset);
+        const QuantizationInfo weights_quantization_info(weights.quantization_info().uniform().scale, -weights.quantization_info().uniform().offset);
 
         // Validate gemmlowp function
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyCore::validate(&input.clone()->set_quantization_info(input_quantization_info),
@@ -90,8 +90,8 @@ void NEFullyConnectedLayer::configure_mm(const ITensor *input, const ITensor *we
         const QuantizationInfo input_quantization_info   = input->info()->quantization_info();
         const QuantizationInfo weights_quantization_info = weights->info()->quantization_info();
 
-        input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
-        weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
+        input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.uniform().scale, -input_quantization_info.uniform().offset));
+        weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.uniform().scale, -weights_quantization_info.uniform().offset));
 
         // Configure gemmlowp function
         _mm_gemmlowp.configure(input, weights, nullptr, output);
@@ -227,11 +227,15 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     // Configure output stage for asymmetric quantized types
     if(_is_quantized)
     {
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+
+        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
         int   output_multiplier;
         int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
+        _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, oq_info.offset);
         _gemmlowp_output.allocator()->allocate();
     }
 
@@ -324,6 +328,13 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     // Validate output stage for asymmetric quantized types
     if(is_quantized)
     {
+        const UniformQuantizationInfo iq_info    = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info    = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info    = output->quantization_info().uniform();
+        const float                   multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
+
+        ARM_COMPUTE_UNUSED(multiplier);
+        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&gemmlowp_output, biases, output));
     }
 

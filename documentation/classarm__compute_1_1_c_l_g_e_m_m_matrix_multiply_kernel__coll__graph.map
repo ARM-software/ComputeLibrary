@@ -1,5 +1,5 @@
 <map id="CLGEMMMatrixMultiplyKernel" name="CLGEMMMatrixMultiplyKernel">
-<area shape="rect" id="node1" title="OpenCL kernel to multiply two input matrices &quot;A&quot; and &quot;B&quot; and add a vector &quot;C&quot; if provided." alt="" coords="5,215,209,241"/>
+<area shape="rect" id="node1" title="OpenCL kernel to multiply two input matrices &quot;A&quot; and &quot;B&quot; and add a martix &quot;C&quot; if provided." alt="" coords="5,215,209,241"/>
 <area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="9,81,89,108"/>
 <area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="17,5,81,32"/>
 <area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor." alt="" coords="113,81,193,108"/>

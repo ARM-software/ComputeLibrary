@@ -1,3 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1_key_point.xhtml" title="Keypoint type." alt="" coords="5,5,81,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_tensor_allocator.xhtml" title="Interface to allocate tensors." alt="" coords="5,56,128,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_tensor_allocator.xhtml" title="Basic implementation of a CL memory tensor allocator." alt="" coords="179,5,312,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_g_c_tensor_allocator.xhtml" title="Basic implementation of a GLES memory tensor allocator." alt="" coords="176,56,315,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_tensor_allocator.xhtml" title="Basic implementation of a CPU memory tensor allocator." alt="" coords="186,107,305,133"/>
 </map>

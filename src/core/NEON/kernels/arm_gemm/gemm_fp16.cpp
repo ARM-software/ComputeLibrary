@@ -114,10 +114,9 @@ const GemmImplementation<__fp16, __fp16> *gemm_implementation_list<__fp16, __fp1
 }
 
 /* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<__fp16, __fp16> gemm<__fp16, __fp16>(const GemmArgs<__fp16> &args);
-template KernelDescription get_gemm_method<__fp16, __fp16>(const GemmArgs<__fp16> &args);
-template bool method_is_compatible<__fp16, __fp16>(GemmMethod method, const GemmArgs<__fp16> &args);
-template std::vector<KernelDescription> get_compatible_kernels<__fp16, __fp16> (const GemmArgs<__fp16> &args);
+template UniqueGemmCommon<__fp16, __fp16> gemm<__fp16, __fp16, Nothing>(const GemmArgs<__fp16> &args, const Nothing &);
+template KernelDescription get_gemm_method<__fp16, __fp16, Nothing>(const GemmArgs<__fp16> &args, const Nothing &);
+template std::vector<KernelDescription> get_compatible_kernels<__fp16, __fp16, Nothing>(const GemmArgs<__fp16> &args, const Nothing &);
 
 } // namespace arm_gemm
 

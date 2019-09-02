@@ -45,13 +45,9 @@ public:
      */
     static std::unique_ptr<ICLGEMMKernelConfiguration> create(GPUTarget arch)
     {
-        switch(get_arch_from_target(arch))
-        {
-            case GPUTarget::BIFROST:
-                return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(arch);
-            default:
-                return nullptr;
-        }
+        // Note: At the moment we only support Bifrost architecture. However, we should have a dedicated path for each GPU architecture
+        // using get_arch_from_target(arch)
+        return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(arch);
     }
 };
 } // namespace cl_gemm

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,51 +26,24 @@
 
 #if defined(DATA_TYPE) && defined(OPERATION)
 
-#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
-/** Calculate reverse square root
- *
- * @param[in] input Pointer to the first element.
- *
- * @return reverse square root
- */
-inline VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) inverse_sqrt(const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) input)
-{
-    return rsqrt(input);
-}
-
-/** Calculate exponential
- *
- * @param[in] input Pointer to the first element.
- *
- * @return exponential
- */
-inline VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) exponential(const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) input)
-{
-    return exp(input);
-}
-#else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
-/** Calculate reverse square root
- *
- * @param[in] input Single element.
- *
- * @return reverse square root
- */
-inline DATA_TYPE inverse_sqrt(const DATA_TYPE input)
-{
-    return rsqrt(input);
-}
-
-/** Calculate exponential
- *
- * @param[in] input Single element.
- *
- * @return exponential
- */
-inline DATA_TYPE exponential(const DATA_TYPE input)
-{
-    return exp(input);
-}
-#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+// Calculate exponential
+#define exp_op(input) exp(input)
+// Calculate reverse square root
+#define rsqrt_op(input) rsqrt(input)
+// Calculate negative
+#define neg_op(input) (-input)
+// Calculate sine
+#define sin_op(input) sin(input)
+// Calculate abs for floating point values
+#define fabs_op(input) fabs(input)
+// Calculate natural_log
+#define natural_log_op(input) log(input)
+// Calculate round (Cannot use round function as it rounds halfway cases away from zero).
+#if defined(VEC_SIZE)
+#define round_op(input) CONVERT(CONVERT_SAT_ROUND(input, VEC_DATA_TYPE(int, VEC_SIZE), rte), VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))
+#else // defined(VEC_SIZE
+#define round_op(input) CONVERT(CONVERT_SAT_ROUND(input, int, rte), DATA_TYPE)
+#endif // defined(VEC_SIZE
 
 /** Applies element wise unary operator in a tensor.
  *

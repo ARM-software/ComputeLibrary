@@ -7,5 +7,5 @@
 <area shape="rect" id="node6" href="$classarm__compute_1_1_tensor_shape.xhtml" title="Shape of a tensor." alt="" coords="482,184,586,211"/>
 <area shape="rect" id="node7" href="$classarm__compute_1_1_dimensions.xhtml" title=" " alt="" coords="452,95,616,121"/>
 <area shape="rect" id="node8" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality." alt="" coords="467,5,601,32"/>
-<area shape="rect" id="node9" href="$structarm__compute_1_1_quantization_info.xhtml" title="Quantization settings (used for QASYMM8 data type)" alt="" coords="611,184,737,211"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1_quantization_info.xhtml" title="Quantization information." alt="" coords="611,184,737,211"/>
 </map>

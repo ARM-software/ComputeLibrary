@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,7 +87,7 @@ TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, Dat
     : TensorInfo()
 {
     init(tensor_shape, num_channels, data_type);
-    _quantization_info = quantization_info;
+    _quantization_info = std::move(quantization_info);
 }
 
 TensorInfo::TensorInfo(const HOGInfo &hog_info, unsigned int width, unsigned int height)

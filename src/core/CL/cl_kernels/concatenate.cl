@@ -406,7 +406,7 @@ __kernel void concatenate_height(
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  offsets                           The offsets to the first valid element of the output tensor in bytes
  */
-__kernel void concatenate_depth(
+__kernel void concatenate(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     int offset)

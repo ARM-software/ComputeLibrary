@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,14 @@ namespace arm_compute
  * @return The calculated floor vector.
  */
 float32x4_t vfloorq_f32(float32x4_t val);
+
+/** Calculate round value of a vector to nearest with ties to even.
+ *
+ * @param[in] val Input vector value in F32 format.
+ *
+ * @return The calculated round vector.
+ */
+float32x4_t vroundq_rte_f32(float32x4_t val);
 
 /** Calculate inverse square root.
  *
@@ -116,6 +124,44 @@ float32x4_t vtanhq_f32(float32x4_t val);
  */
 float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
 
+/** Round to the nearest division by a power-of-two using exponent
+ *
+ * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
+ *
+ * @param[in] x        Vector of 4 elements
+ * @param[in] exponent Integer value used to round to nearest division by a power-of-two
+ *
+ * @return the nearest division by a power-of-two using exponent
+ */
+int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent);
+
+/** Round to the nearest division by a power-of-two using exponent
+ *
+ * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
+ *
+ * @param[in] x        Element to divide.
+ * @param[in] exponent Integer value used to round to nearest division by a power-of-two
+ *
+ * @return the nearest division by a power-of-two using exponent
+ */
+int32_t rounding_divide_by_pow2(int32_t x, int exponent);
+
+/** Calculate sine.
+ *
+ * @param[in] val Input vector value in radians, F32 format.
+ *
+ * @return The calculated sine.
+ */
+float32x4_t vsinq_f32(float32x4_t val);
+
+/** Calculate sine.
+ *
+ * @param[in] val Input vector value in radians, F32 format.
+ *
+ * @return The calculated sine.
+ */
+float32x2_t vsin_f32(float32x2_t val);
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Calculate hyperbolic tangent.
  *
@@ -123,11 +169,19 @@ float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
  *
  * @note We clamp x to [-5,5] to avoid overflowing issues.
  *
- * @param[in] val Input vector value in F32 format.
+ * @param[in] val Input vector value in F16 format.
  *
  * @return The calculated Hyperbolic Tangent.
  */
 float16x8_t vtanhq_f16(float16x8_t val);
+
+/** Calculate round value of a vector to nearest with ties to even.
+ *
+ * @param[in] val Input vector value in F16 format.
+ *
+ * @return The calculated round vector.
+ */
+float16x8_t vroundq_rte_f16(float16x8_t val);
 
 /** Calculate reciprocal.
  *
@@ -179,6 +233,15 @@ float16x8_t vexpq_f16(float16x8_t x);
  * @return The calculated power.
  */
 float16x8_t vpowq_f16(float16x8_t val, float16x8_t n);
+
+/** Calculate sine.
+ *
+ * @param[in] val Input vector value in radians, F16 format.
+ *
+ * @return The calculated sine.
+ */
+float16x8_t vsinq_f16(float16x8_t val);
+
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #include "arm_compute/core/NEON/NEMath.inl"

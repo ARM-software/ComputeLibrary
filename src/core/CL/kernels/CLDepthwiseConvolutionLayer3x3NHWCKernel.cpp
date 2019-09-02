@@ -55,7 +55,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1); // COMPMID-1071 Add depth multiplier support for NHWC
 
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1);
-    ARM_COMPUTE_RETURN_ERROR_ON(std::max(conv_info.pad_top(), conv_info.pad_bottom()) > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(std::max(conv_info.pad_top(), conv_info.pad_bottom()) > 4);
 
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
 
@@ -96,6 +96,17 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
     }
 
+    if(is_qasymm)
+    {
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = (output->total_size() != 0) ? output->quantization_info().uniform() : iq_info;
+
+        float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
+        ARM_COMPUTE_UNUSED(multiplier);
+        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
+    }
+
     return Status{};
 }
 
@@ -109,12 +120,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(
                                          *input, TensorInfo(TensorShape(weights_width, weights_height), 1, weights->data_type()).set_data_layout(DataLayout::NCHW), conv_info, depth_multiplier, dilation);
 
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output,
-                       output_shape,
-                       1,
-                       input->data_type(),
-                       input->quantization_info());
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
 
     const bool is_qasymm              = is_data_type_quantized_asymmetric(input->data_type());
     const bool is_stride_1_dilation_1 = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1) && dilation.x() == 1 && dilation.y() == 1);
@@ -202,7 +208,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->info()->element_size());
 
     CLBuildOptions build_opts;
-    build_opts.add_option_if(act_info.enabled(), "-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_accessed_per_iteration));
     build_opts.add_option("-DSRC_DIM_2=" + support::cpp11::to_string(_input->info()->dimension(2)));
@@ -213,30 +219,34 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
 
     if(is_qasymm)
     {
-        float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        const UniformQuantizationInfo iq_info = _input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = _weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = _output->info()->quantization_info().uniform();
+
+        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
         int   output_multiplier = 0;
         int   output_shift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
-        build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-_input->info()->quantization_info().offset));
-        build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-_weights->info()->quantization_info().offset));
-        build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(_output->info()->quantization_info().offset));
-        build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * input->info()->quantization_info().offset * weights->info()->quantization_info().offset));
+        build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-iq_info.offset));
+        build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-wq_info.offset));
+        build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(oq_info.offset));
+        build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * iq_info.offset * wq_info.offset));
         build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
         build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
 
         if(act_info.enabled())
         {
-            const int a_val = output->info()->quantization_info().quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_val = output->info()->quantization_info().quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
-            const int o1    = output->info()->quantization_info().offset;
+            const int a_val = quantize_qasymm8(act_info.a(), oq_info);
+            const int b_val = quantize_qasymm8(act_info.b(), oq_info);
+            const int o1    = oq_info.offset;
 
             build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
             build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));
             build_opts.add_option("-DCONST_0=" + support::cpp11::to_string(o1));
 
-            const float s1 = input->info()->quantization_info().scale;
+            const float s1 = iq_info.scale;
             build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
             build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
         }
@@ -245,7 +255,6 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     {
         build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
         build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
-        build_opts.add_option_if(act_info.enabled(), "-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
         build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(_input->info()->data_type()));
     }
 
@@ -345,6 +354,41 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
         add_1D_tensor_argument(idx, _biases, win_biases);
     }
 
+    // Calculate the max_offset.
+    // max_offset is the offset for the last NOT valid value in the Z dimension (spatial dimension Y for NHWC)
+    //  |******************|
+    //  |     pad_top      |
+    //  |******************|
+    //  |                  |
+    //  |      plane0      |
+    //  |      batch0      |
+    //  |__________________|
+    //  |******************|       Batch 0
+    //  |    pad_bottom    |
+    //  |     pad_top      |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |      batch0      |
+    //  |__________________|-----> max_offset
+    //  |******************|
+    //  |    pad_bottom    |
+    //  |     pad_top      |
+    //  |******************|
+    //  |                  |
+    //  |      plane0      |
+    //  |      batch1      |
+    //  |__________________|
+    //  |******************|       Batch 1
+    //  |    pad_bottom    |
+    //  |     pad_top      |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |      batch1      |
+    //  |__________________|
+    //  |     pad_bottom   |
+    //  |******************|
     const int max_offset = _input->info()->strides_in_bytes().z() * _input->info()->dimension(2) - (_input->info()->padding().bottom + _input->info()->padding().top) *
                            _input->info()->strides_in_bytes().y();
     _kernel.setArg(idx, max_offset);

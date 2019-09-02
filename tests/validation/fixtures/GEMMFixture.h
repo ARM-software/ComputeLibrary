@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_GEMM_FIXTURE
 #define ARM_COMPUTE_TEST_GEMM_FIXTURE
 
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "tests/AssetsLibrary.h"
@@ -32,6 +33,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/GEMM.h"
 
 #include <random>
@@ -42,7 +44,7 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_ouput_as_3d = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false>
 class GEMMValidationFixture : public framework::Fixture
 {
 public:
@@ -85,7 +87,13 @@ protected:
         // The GEMMinfo includes the values of the depth in case of reinterpreted 3d output.
         // If the output shape has the same number of dimensions of the input the method called is a 2D matrix multiplication (depth_output_reinterpreted_as_3D = 0),
         // in the other case we have to use the reinterpreted version of GEMM (depth_output_reinterpreted_as_3D = depth of the 3D output).
-        gemm.configure(&a, &b, (disable_c) ? nullptr : &c, &dst, alpha, beta, GEMMInfo(false, false, false, (reinterpret_ouput_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d));
+        gemm.configure(&a,
+                       &b,
+                       (disable_c) ? nullptr : &c,
+                       &dst,
+                       alpha, beta,
+                       GEMMInfo(false, false, false, (reinterpret_output_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), false, (reinterpret_input_as_3d
+                                || reinterpret_output_as_3d)));
         ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -120,6 +128,7 @@ protected:
                                       DataType data_type)
     {
         TensorShape shape_a_to_use = shape_a;
+
         if(reinterpret_input_as_3d)
         {
             // Collapse the second and third dimension if the input is 3D
@@ -129,22 +138,529 @@ protected:
         // Create reference
         SimpleTensor<T> a{ shape_a_to_use, data_type, 1 };
         SimpleTensor<T> b{ shape_b, data_type, 1 };
-        SimpleTensor<T> c{ shape_c, data_type, 1 };
+        SimpleTensor<T> c{ output_shape, data_type, 1 };
 
         // Fill reference
         fill(a, 0);
         fill(b, 1);
-        if(!disable_c)
+        fill(c, 2);
+
+        if(reinterpret_input_as_3d || reinterpret_output_as_3d)
         {
-            fill(c, 2);
-            return reference::gemm<T>(a, b, c, alpha, beta);
+            const int n          = shape_b[0];
+            const int m          = reinterpret_output_as_3d ? output_shape[1] * output_shape[2] : output_shape[1];
+            const int batch_size = reinterpret_output_as_3d ? output_shape[3] : output_shape[2];
+
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(c.data() + i * n, c.data(), n * sizeof(T));
+            }
         }
-        else
+
+        // Setting beta to 0 will effectively disable C for the
+        // computation of the reference: alpha * A * B + 0 * C
+        return reference::gemm<T>(a, b, c, alpha, disable_c ? 0.f : beta);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename T, typename GEMMFunctionType>
+class GEMMMatrixMultiplyValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, bool broadcast_bias, bool fp16_mixed_precision, const ActivationLayerInfo &act_info,
+               DataType data_type, GPUTarget gpu_arch)
+    {
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n,
+                                     broadcast_bias ? 1 : m,
+                                     broadcast_bias ? 1 : batch_size);
+
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, fp16_mixed_precision, act_info, gpu_arch);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        library->fill(tensor, distribution, i);
+
+        // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
+        std::uniform_real_distribution<> distribution_inf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        library->fill_borders_with_garbage(tensor, distribution_inf, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                              bool fp16_mixed_precision, const ActivationLayerInfo &act_info, GPUTarget gpu_arch)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType dst;
+
+        const unsigned int m = lhs_shape[1];
+        const unsigned int n = rhs_shape[0];
+        const unsigned int k = lhs_shape[0];
+        GEMMReshapeInfo    reshape_info(m, n, k, 1, 1, 0, false, broadcast_bias);
+
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        GEMMFunctionType gemm;
+        gemm.configure(gpu_arch, &lhs, &rhs, &bias, &dst, alpha, beta, false, reshape_info, fp16_mixed_precision, act_info);
+
+        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
+
+        // Compute GEMM
+        gemm.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape[0]          = rhs_shape[0];
+        dst_shape[1]          = lhs_shape[1];
+
+        // Create reference
+        SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
+        SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
+
+        // Fill reference
+        fill(lhs, 0);
+        fill(rhs, 1);
+        fill(bias, 2);
+
+        if(broadcast_bias)
         {
-            // Setting beta to 0 will effectively disable C for the
-            // computation of the reference: alpha * A * B + 0 * C
-            return reference::gemm<T>(a, b, c, alpha, 0.f);
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+            }
         }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename T, typename GEMMFunctionType>
+class GEMMMatrixMultiply3DValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, bool broadcast_bias, bool fp16_mixed_precision,
+               const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch)
+    {
+        // In case of GEMM3D, m is the product between m_w and m_h
+        const unsigned int m = m_w * m_h;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n, 1, 1);
+
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, fp16_mixed_precision, act_info, gpu_arch);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        library->fill(tensor, distribution, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                              bool fp16_mixed_precision, const ActivationLayerInfo &act_info, GPUTarget gpu_arch)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType dst;
+
+        const unsigned int m = lhs_shape[1];
+        const unsigned int n = rhs_shape[0];
+        const unsigned int k = lhs_shape[0];
+        GEMMReshapeInfo    reshape_info(m, n, k, 1, 1, m_h, false, true);
+
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        GEMMFunctionType gemm;
+        gemm.configure(gpu_arch, &lhs, &rhs, &bias, &dst, alpha, beta, false, reshape_info, fp16_mixed_precision, act_info);
+
+        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
+
+        // Compute GEMM
+        gemm.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                                      const ActivationLayerInfo &act_info)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape.set(0, rhs_shape[0]);
+        dst_shape.set(1, lhs_shape[1] / m_h);
+        dst_shape.set(2, m_h);
+        dst_shape.set(3, lhs_shape[2]);
+
+        // Create reference
+        SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
+        SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
+
+        // Fill reference
+        fill(lhs, 0);
+        fill(rhs, 1);
+        fill(bias, 2);
+
+        // In case of broadcast, we need simply copy the first into the following "M" ones
+        for(int i = 1; i < m * batch_size; i++)
+        {
+            memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename T, typename ReshapeLHSFunctionType, typename ReshapeRHSFunctionType, typename GEMMFunctionType>
+class GEMMMatrixMultiplyInterleavedTransposedValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, unsigned int v0, unsigned int h0, bool broadcast_bias, bool fp16_mixed_precision,
+               const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch)
+    {
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0         = 4;
+        lhs_info.k0         = 4;
+        lhs_info.v0         = v0;
+        lhs_info.interleave = true;
+        lhs_info.transpose  = true;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0         = 16 / sizeof(T);
+        rhs_info.k0         = 1;
+        rhs_info.h0         = h0;
+        rhs_info.interleave = false;
+        rhs_info.transpose  = false;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n,
+                                     broadcast_bias ? 1 : m,
+                                     broadcast_bias ? 1 : batch_size);
+
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, fp16_mixed_precision, act_info, gpu_arch);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        library->fill(tensor, distribution, i);
+
+        // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
+        std::uniform_real_distribution<> distribution_inf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        library->fill_borders_with_garbage(tensor, distribution_inf, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, bool fp16_mixed_precision, const ActivationLayerInfo &act_info, GPUTarget gpu_arch)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType lhs_reshaped;
+        TensorType rhs_reshaped;
+        TensorType dst;
+
+        const unsigned int m = lhs_shape[1];
+        const unsigned int n = rhs_shape[0];
+        const unsigned int k = lhs_shape[0];
+        GEMMReshapeInfo    reshape_info(m, n, k, rhs_info.h0, lhs_info.v0, 0, false, broadcast_bias);
+
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        ReshapeLHSFunctionType reshape_lhs;
+        ReshapeRHSFunctionType reshape_rhs;
+        GEMMFunctionType       gemm;
+        reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
+        reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
+        gemm.configure(gpu_arch, &lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, true, reshape_info, fp16_mixed_precision, act_info);
+
+        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        lhs_reshaped.allocator()->allocate();
+        rhs_reshaped.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
+
+        // Compute GEMM
+        reshape_lhs.run();
+        reshape_rhs.run();
+        gemm.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape[0]          = rhs_shape[0];
+        dst_shape[1]          = lhs_shape[1];
+
+        // Create reference
+        SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
+        SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
+
+        // Fill reference
+        fill(lhs, 0);
+        fill(rhs, 1);
+        fill(bias, 2);
+
+        if(broadcast_bias)
+        {
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+            }
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename T, typename ReshapeLHSFunctionType, typename ReshapeRHSFunctionType, typename GEMMFunctionType>
+class GEMMMatrixMultiplyInterleavedTransposed3DValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, unsigned int v0, unsigned int h0, bool broadcast_bias,
+               bool fp16_mixed_precision, const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch)
+    {
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0         = 4;
+        lhs_info.k0         = 4;
+        lhs_info.v0         = v0;
+        lhs_info.interleave = true;
+        lhs_info.transpose  = true;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0         = 16 / sizeof(T);
+        rhs_info.k0         = 1;
+        rhs_info.h0         = h0;
+        rhs_info.interleave = false;
+        rhs_info.transpose  = false;
+
+        // In case of GEMM3D, m is the product between m_w and m_h
+        const unsigned int m = m_w * m_h;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n, 1, 1);
+
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, fp16_mixed_precision, act_info, gpu_arch);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        library->fill(tensor, distribution, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, unsigned int m_h, bool fp16_mixed_precision, const ActivationLayerInfo &act_info, GPUTarget gpu_arch)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType lhs_reshaped;
+        TensorType rhs_reshaped;
+        TensorType dst;
+
+        const unsigned int m = lhs_shape[1];
+        const unsigned int n = rhs_shape[0];
+        const unsigned int k = lhs_shape[0];
+        GEMMReshapeInfo    reshape_info(m, n, k, rhs_info.h0, lhs_info.v0, m_h, false, true);
+
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        ReshapeLHSFunctionType reshape_lhs;
+        ReshapeRHSFunctionType reshape_rhs;
+        GEMMFunctionType       gemm;
+        reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
+        reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
+        gemm.configure(gpu_arch, &lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, true, reshape_info, fp16_mixed_precision, act_info);
+
+        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        lhs_reshaped.allocator()->allocate();
+        rhs_reshaped.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
+
+        // Compute GEMM
+        reshape_lhs.run();
+        reshape_rhs.run();
+        gemm.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                                      const ActivationLayerInfo &act_info)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape.set(0, rhs_shape[0]);
+        dst_shape.set(1, lhs_shape[1] / m_h);
+        dst_shape.set(2, m_h);
+        dst_shape.set(3, lhs_shape[2]);
+
+        // Create reference
+        SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
+        SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
+
+        // Fill reference
+        fill(lhs, 0);
+        fill(rhs, 1);
+        fill(bias, 2);
+
+        // In case of broadcast, we need simply copy the first into the following "M" ones
+        for(int i = 1; i < m * batch_size; i++)
+        {
+            memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -157,7 +673,7 @@ class GEMMMatrixMultiplyReshapedValidationFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0, bool interleave_lhs,
-               bool interleave_rhs, DataType data_type, float alpha)
+               bool interleave_rhs, DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = m0;
@@ -176,9 +692,12 @@ public:
         // Set the tensor shapes for LHS and RHS matrices
         const TensorShape lhs_shape(k, m, batch_size);
         const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n,
+                                     broadcast_bias ? 1 : m,
+                                     broadcast_bias ? 1 : batch_size);
 
-        _target    = compute_target(lhs_shape, rhs_shape, lhs_info, rhs_info, data_type, alpha);
-        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -193,11 +712,13 @@ protected:
         library->fill_borders_with_garbage(tensor, distribution_inf, i);
     }
 
-    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, DataType data_type, float alpha)
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         // Create tensors
-        TensorType lhs = create_tensor<TensorType>(lhs_shape, data_type, 1);
-        TensorType rhs = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
         TensorType lhs_reshaped;
         TensorType rhs_reshaped;
         TensorType dst;
@@ -205,6 +726,14 @@ protected:
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = 0;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = broadcast_bias;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -214,20 +743,23 @@ protected:
         GEMMFunctionType       gemm;
         reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, alpha, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
+        gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
         lhs_reshaped.allocator()->allocate();
         rhs_reshaped.allocator()->allocate();
+        bias.allocator()->allocate();
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -235,6 +767,7 @@ protected:
         // Fill tensors
         fill(AccessorType(lhs), 0);
         fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
 
         // Compute GEMM
         reshape_lhs.run();
@@ -244,7 +777,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape[0]          = rhs_shape[0];
@@ -253,13 +787,27 @@ protected:
         // Create reference
         SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
         SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
-        SimpleTensor<T> c{ dst_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
 
         // Fill reference
         fill(lhs, 0);
         fill(rhs, 1);
+        fill(bias, 2);
 
-        return reference::gemm<T>(lhs, rhs, c, alpha, 0.0f);
+        if(broadcast_bias)
+        {
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+            }
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -273,7 +821,7 @@ public:
     template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0,
                bool interleave_lhs,
-               bool interleave_rhs, DataType data_type, float alpha)
+               bool interleave_rhs, DataType data_type, float alpha, float beta, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = m0;
@@ -295,9 +843,10 @@ public:
         // Set the tensor shapes for LHS and RHS matrices
         const TensorShape lhs_shape(k, m, batch_size);
         const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n, 1, 1);
 
-        _target    = compute_target(lhs_shape, rhs_shape, lhs_info, rhs_info, data_type, alpha, m_h);
-        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, m_h);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -308,12 +857,13 @@ protected:
         library->fill(tensor, distribution, i);
     }
 
-    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, DataType data_type, float alpha,
-                              unsigned int m_h)
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, unsigned int m_h, const ActivationLayerInfo &act_info)
     {
         // Create tensors
-        TensorType lhs = create_tensor<TensorType>(lhs_shape, data_type, 1);
-        TensorType rhs = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
         TensorType lhs_reshaped;
         TensorType rhs_reshaped;
         TensorType dst;
@@ -321,6 +871,14 @@ protected:
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = m_h;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = true;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -330,27 +888,31 @@ protected:
         GEMMFunctionType       gemm;
         reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, alpha, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
+        gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
         lhs_reshaped.allocator()->allocate();
         rhs_reshaped.allocator()->allocate();
+        bias.allocator()->allocate();
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(lhs), 0);
         fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
 
         // Compute GEMM
         reshape_lhs.run();
@@ -360,7 +922,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, unsigned int m_h)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape.set(0, rhs_shape[0]);
@@ -371,13 +934,24 @@ protected:
         // Create reference
         SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
         SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
-        SimpleTensor<T> c{ dst_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
 
         // Fill reference
         fill(lhs, 0);
         fill(rhs, 1);
+        fill(bias, 2);
 
-        return reference::gemm<T>(lhs, rhs, c, alpha, 0.0f);
+        // In case of broadcast, we need simply copy the first into the following "M" ones
+        for(int i = 1; i < m * batch_size; i++)
+        {
+            memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -390,7 +964,7 @@ class GEMMMatrixMultiplyReshapedOnlyRHSValidationFixture : public framework::Fix
 public:
     template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
-               bool interleave_rhs, bool transpose_rhs, DataType data_type, float alpha)
+               bool interleave_rhs, bool transpose_rhs, DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = m0;
@@ -406,9 +980,12 @@ public:
         // Set the tensor shapes for LHS and RHS matrices
         const TensorShape lhs_shape(k, m, batch_size);
         const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n,
+                                     broadcast_bias ? 1 : m,
+                                     broadcast_bias ? 1 : batch_size);
 
-        _target    = compute_target(lhs_shape, rhs_shape, lhs_info, rhs_info, data_type, alpha);
-        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -423,17 +1000,27 @@ protected:
         library->fill_borders_with_garbage(tensor, distribution_inf, i);
     }
 
-    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, DataType data_type, float alpha)
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         // Create tensors
-        TensorType lhs = create_tensor<TensorType>(lhs_shape, data_type, 1);
-        TensorType rhs = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
         TensorType rhs_reshaped;
         TensorType dst;
 
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = 0;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = broadcast_bias;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -441,25 +1028,29 @@ protected:
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs, &rhs_reshaped, &dst, alpha, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
+        gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
         rhs_reshaped.allocator()->allocate();
+        bias.allocator()->allocate();
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(lhs), 0);
         fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
 
         // Compute GEMM
         reshape_rhs.run();
@@ -468,7 +1059,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape[0]          = rhs_shape[0];
@@ -477,13 +1069,27 @@ protected:
         // Create reference
         SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
         SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
-        SimpleTensor<T> c{ dst_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
 
         // Fill reference
         fill(lhs, 0);
         fill(rhs, 1);
+        fill(bias, 2);
 
-        return reference::gemm<T>(lhs, rhs, c, alpha, 0.0f);
+        if(broadcast_bias)
+        {
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+            }
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -496,7 +1102,7 @@ class GEMMMatrixMultiplyReshapedOnlyRHS3DValidationFixture : public framework::F
 public:
     template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
-               bool interleave_rhs, bool transpose_rhs, DataType data_type, float alpha)
+               bool interleave_rhs, bool transpose_rhs, DataType data_type, float alpha, float beta, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = m0;
@@ -515,9 +1121,10 @@ public:
         // Set the tensor shapes for LHS and RHS matrices
         const TensorShape lhs_shape(k, m, batch_size);
         const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n, 1, 1);
 
-        _target    = compute_target(lhs_shape, rhs_shape, lhs_info, rhs_info, data_type, alpha, m_h);
-        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, m_h);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -528,18 +1135,28 @@ protected:
         library->fill(tensor, distribution, i);
     }
 
-    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, DataType data_type, float alpha,
-                              unsigned int m_h)
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta,
+                              unsigned int m_h, const ActivationLayerInfo &act_info)
     {
         // Create tensors
-        TensorType lhs = create_tensor<TensorType>(lhs_shape, data_type, 1);
-        TensorType rhs = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
         TensorType rhs_reshaped;
         TensorType dst;
 
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = m_h;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = true;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -547,25 +1164,29 @@ protected:
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs, &rhs_reshaped, &dst, alpha, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h));
+        gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         lhs.allocator()->allocate();
         rhs.allocator()->allocate();
         rhs_reshaped.allocator()->allocate();
+        bias.allocator()->allocate();
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(lhs), 0);
         fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
 
         // Compute GEMM
         reshape_rhs.run();
@@ -574,7 +1195,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, unsigned int m_h)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape.set(0, rhs_shape[0]);
@@ -585,18 +1207,282 @@ protected:
         // Create reference
         SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
         SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
-        SimpleTensor<T> c{ dst_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
 
         // Fill reference
         fill(lhs, 0);
         fill(rhs, 1);
+        fill(bias, 2);
 
-        return reference::gemm<T>(lhs, rhs, c, alpha, 0.0f);
+        // In case of broadcast, we need simply copy the first into the following "M" ones
+        for(int i = 1; i < m * batch_size; i++)
+        {
+            memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
+
+template <typename TensorType, typename AccessorType, typename T, typename GEMMFunctionType>
+class GEMMMatrixMultiplyNativeValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta, bool broadcast_bias,
+               const ActivationLayerInfo &act_info)
+    {
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0 = m0;
+        lhs_info.k0 = k0;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0 = n0;
+        rhs_info.k0 = k0;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n,
+                                     broadcast_bias ? 1 : m,
+                                     broadcast_bias ? 1 : batch_size);
+
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        library->fill(tensor, distribution, i);
+
+        // Fill border with infinity in order to check the presence of NaN values (i.e. inf * 0)
+        std::uniform_real_distribution<> distribution_inf(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        library->fill_borders_with_garbage(tensor, distribution_inf, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType dst;
+
+        const unsigned int M = lhs_shape[1];
+        const unsigned int N = rhs_shape[0];
+        const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = 0;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = broadcast_bias;
+        kernel_info.activation_info         = act_info;
+
+        // Create and configure function
+        GEMMFunctionType gemm;
+        gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
+
+        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
+
+        // Compute GEMM
+        gemm.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape[0]          = rhs_shape[0];
+        dst_shape[1]          = lhs_shape[1];
+
+        // Create reference
+        SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
+        SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
+
+        // Fill reference
+        fill(lhs, 0);
+        fill(rhs, 1);
+        fill(bias, 2);
+
+        if(broadcast_bias)
+        {
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+            }
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename T, typename GEMMFunctionType>
+class GEMMMatrixMultiplyNative3DValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta,
+               const ActivationLayerInfo &act_info)
+    {
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0 = m0;
+        lhs_info.k0 = k0;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0 = n0;
+        rhs_info.k0 = k0;
+
+        // In case of GEMM3D, m is the product between m_w and m_h
+        const unsigned int m = m_w * m_h;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+        const TensorShape bias_shape(n, 1, 1);
+
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        library->fill(tensor, distribution, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                              DataType data_type, float alpha, float beta, unsigned int m_h, const ActivationLayerInfo &act_info)
+    {
+        // Create tensors
+        TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
+        TensorType rhs  = create_tensor<TensorType>(rhs_shape, data_type, 1);
+        TensorType bias = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType dst;
+
+        const unsigned int M = lhs_shape[1];
+        const unsigned int N = rhs_shape[0];
+        const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = m_h;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = true;
+        kernel_info.activation_info         = act_info;
+
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        GEMMFunctionType gemm;
+        gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
+
+        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+        fill(AccessorType(bias), 2);
+
+        // Compute GEMM
+        gemm.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                                      const ActivationLayerInfo &act_info)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape.set(0, rhs_shape[0]);
+        dst_shape.set(1, lhs_shape[1] / m_h);
+        dst_shape.set(2, m_h);
+        dst_shape.set(3, lhs_shape[2]);
+
+        // Create reference
+        SimpleTensor<T> lhs{ lhs_shape, data_type, 1 };
+        SimpleTensor<T> rhs{ rhs_shape, data_type, 1 };
+        SimpleTensor<T> bias{ dst_shape, data_type, 1 };
+
+        const int n          = rhs_shape[0];
+        const int m          = lhs_shape[1];
+        const int batch_size = lhs_shape[2];
+
+        // Fill reference
+        fill(lhs, 0);
+        fill(rhs, 1);
+        fill(bias, 2);
+
+        // In case of broadcast, we need simply copy the first into the following "M" ones
+        for(int i = 1; i < m * batch_size; i++)
+        {
+            memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
+        }
+
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

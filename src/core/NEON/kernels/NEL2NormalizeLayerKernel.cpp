@@ -40,6 +40,8 @@ namespace arm_compute
 {
 namespace
 {
+constexpr int max_input_tensor_dim = 3;
+
 template <typename T, int S>
 void l2_normalize_X(const ITensor *in, const ITensor *sum, ITensor *out, float epsilon, const Window &window)
 {
@@ -141,19 +143,20 @@ void l2_normalize_Z(const ITensor *in, const ITensor *sum, ITensor *out, float e
     while(window.slide_window_slice_3D(in_slice) && window.slide_window_slice_3D(sum_slice));
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
     ARM_COMPUTE_UNUSED(epsilon);
 
+    const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 2, "Axis greater than 2 is not supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Normalization axis greater than max number of dimensions");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(actual_axis > 2, "Actual axis greater than 2 is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(actual_axis >= TensorShape::num_max_dimensions, "Actual normalization axis greater than max number of dimensions");
 
     // Reduce shape on axis
     TensorShape sum_shape = input->tensor_shape();
-    sum_shape.set(axis, 1);
+    sum_shape.set(actual_axis, 1);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(sum->tensor_shape(), sum_shape);
 
     if(output->total_size() != 0)
@@ -167,10 +170,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, cons
     return Status{};
 }
 
-std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *sum, ITensorInfo *output, unsigned int axis)
+std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *sum, ITensorInfo *output, int axis)
 {
+    const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
     const unsigned int num_elems_processed_per_iteration     = 16 / data_size_from_type(input->data_type());
-    const unsigned int num_elems_processed_per_iteration_sum = (axis == 0) ? 1 : num_elems_processed_per_iteration;
+    const unsigned int num_elems_processed_per_iteration_sum = (actual_axis == 0) ? 1 : num_elems_processed_per_iteration;
 
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
@@ -191,11 +195,11 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
 } // namespace
 
 NEL2NormalizeLayerKernel::NEL2NormalizeLayerKernel()
-    : _input(nullptr), _sum(nullptr), _output(nullptr), _axis(0), _epsilon(1e-12)
+    : _input(nullptr), _sum(nullptr), _output(nullptr), _actual_axis(0), _epsilon(1e-12)
 {
 }
 
-void NEL2NormalizeLayerKernel::configure(const ITensor *input, const ITensor *sum, ITensor *output, unsigned int axis, float epsilon)
+void NEL2NormalizeLayerKernel::configure(const ITensor *input, const ITensor *sum, ITensor *output, int axis, float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), sum->info(), output->info(), axis, epsilon));
@@ -203,7 +207,7 @@ void NEL2NormalizeLayerKernel::configure(const ITensor *input, const ITensor *su
     _input   = input;
     _sum     = sum;
     _output  = output;
-    _axis    = axis;
+    _actual_axis    = wrap_around(axis, max_input_tensor_dim);
     _epsilon = epsilon;
 
     // Configure kernel window
@@ -213,7 +217,7 @@ void NEL2NormalizeLayerKernel::configure(const ITensor *input, const ITensor *su
     INEKernel::configure(std::get<1>(win_config));
 }
 
-Status NEL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon)
+Status NEL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, sum, output, axis, epsilon));
     ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), sum->clone().get(), output->clone().get(), axis)));
@@ -227,7 +231,7 @@ void NEL2NormalizeLayerKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    switch(_axis)
+    switch(_actual_axis)
     {
         case 0:
             switch(_input->info()->data_type())

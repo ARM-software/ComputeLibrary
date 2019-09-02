@@ -172,7 +172,7 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option_if(act_info.enabled(), "-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
     build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
 
@@ -184,8 +184,6 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     {
         build_opts.add_option("-DVEC_SIZE=4");
     }
-
-    build_opts.add_option_if(act_info.enabled(), "-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
 
     build_opts.add_option_if(_bias != nullptr, std::string("-DHAS_BIAS"));
     build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));

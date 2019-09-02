@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_CL_TYPES_H__
 #define __ARM_COMPUTE_CL_TYPES_H__
 
+#include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/GPUTarget.h"
 
 #include <string>
@@ -52,6 +53,24 @@ struct CLDeviceOptions
     GPUTarget   gpu_target;  /**< GPU target architecture/instance */
     size_t      num_cores;   /**< Number of cores */
     size_t      cache_size;  /**< Cache size */
+};
+
+/** OpenCL quantization data */
+struct CLQuantization
+{
+    /** Default Constructor */
+    CLQuantization()
+        : scale(nullptr), offset(nullptr) {};
+    /** Constructor
+     *
+     * @param[in] scale  OpenCL scale array
+     * @param[in] offset OpenCL offset array
+     */
+    CLQuantization(const ICLFloatArray *scale, const ICLInt32Array *offset)
+        : scale(scale), offset(offset) {};
+
+    const ICLFloatArray *scale;  /**< Quantization scale array */
+    const ICLInt32Array *offset; /**< Quantization offset array */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CL_TYPES_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,7 @@ public:
     static TensorDescriptor compute_weights_descriptor(const TensorDescriptor &input_descriptor,
                                                        unsigned int            num_outputs,
                                                        FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
-                                                       QuantizationInfo        weights_quant_info = QuantizationInfo());
+                                                       const QuantizationInfo &weights_quant_info = QuantizationInfo());
     /** Computes fully connected layer output descriptor
      *
      * @warning Works for inputs with 1D batch space
@@ -70,7 +70,7 @@ public:
      */
     static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
                                                       unsigned int            num_outputs,
-                                                      QuantizationInfo        out_quant_info = QuantizationInfo());
+                                                      const QuantizationInfo &out_quant_info = QuantizationInfo());
     /** Fully connected layer addition information
      *
      * @return Additional information about the fully connected layer

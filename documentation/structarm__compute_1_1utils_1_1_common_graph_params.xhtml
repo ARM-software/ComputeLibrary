@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -128,6 +128,8 @@ Data Fields</h2></td></tr>
 <tr class="separator:aa56f0562febf49bc0e29a4257551191b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2e53638e2c19bbbe968b95f60256cee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#ad2e53638e2c19bbbe968b95f60256cee">enable_tuner</a> { false }</td></tr>
 <tr class="separator:ad2e53638e2c19bbbe968b95f60256cee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4170b9a9eb611db146c5a776dc191ef"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#ab4170b9a9eb611db146c5a776dc191ef">enable_cl_cache</a> { false }</td></tr>
+<tr class="separator:ab4170b9a9eb611db146c5a776dc191ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ebea56a33e2632ae2a9b25b160e0705"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#ae76ef5bd3ad69f7380ebb3ac6033ec5c">arm_compute::CLTunerMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a3ebea56a33e2632ae2a9b25b160e0705">tuner_mode</a> { <a class="el" href="namespacearm__compute.xhtml#a4c9101ca1a1f72f48efff28b4b9a6495a1e23852820b9154316c7c06e2b7ba051">CLTunerMode::NORMAL</a> }</td></tr>
 <tr class="separator:a3ebea56a33e2632ae2a9b25b160e0705"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acafd85ac6eb76b9037643104b48403e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11">arm_compute::graph::FastMathHint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#acafd85ac6eb76b9037643104b48403e9">fast_math_hint</a> { <a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11ab9f5c797ebbf55adccdd8539a65a0241">arm_compute::graph::FastMathHint::Disabled</a> }</td></tr>
@@ -152,7 +154,7 @@ Data Fields</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Structure holding all the common graph parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00089">89</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00090">90</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 </div><h2 class="groupheader">Field Documentation</h2>
 <a id="aa56f0562febf49bc0e29a4257551191b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa56f0562febf49bc0e29a4257551191b">&#9670;&nbsp;</a></span>data_layout</h2>
@@ -166,7 +168,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00095">95</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00096">96</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -184,7 +186,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00099">99</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00101">101</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -202,7 +204,25 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00094">94</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00095">95</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
+
+</div>
+</div>
+<a id="ab4170b9a9eb611db146c5a776dc191ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4170b9a9eb611db146c5a776dc191ef">&#9670;&nbsp;</a></span>enable_cl_cache</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool enable_cl_cache { false }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00098">98</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -220,7 +240,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00096">96</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00097">97</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -238,7 +258,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00098">98</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00100">100</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -256,9 +276,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00091">91</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00092">92</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00180">arm_compute::utils::consume_common_graph_parameters()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00183">arm_compute::utils::consume_common_graph_parameters()</a>.</p>
 
 </div>
 </div>
@@ -274,9 +294,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00100">100</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00102">102</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00438">arm_compute::graph_utils::get_input_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00464">arm_compute::graph_utils::get_input_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
 </div>
 </div>
@@ -292,9 +312,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00101">101</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00103">103</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00517">arm_compute::graph_utils::get_detection_output_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00484">arm_compute::graph_utils::get_output_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00543">arm_compute::graph_utils::get_detection_output_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00510">arm_compute::graph_utils::get_output_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
 </div>
 </div>
@@ -310,7 +330,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00094">94</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -328,7 +348,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00092">92</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -346,7 +366,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00104">104</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00106">106</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -364,7 +384,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00097">97</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00099">99</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
@@ -382,9 +402,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00102">102</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00104">104</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00517">arm_compute::graph_utils::get_detection_output_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00438">arm_compute::graph_utils::get_input_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00484">arm_compute::graph_utils::get_output_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00543">arm_compute::graph_utils::get_detection_output_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00464">arm_compute::graph_utils::get_input_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00510">arm_compute::graph_utils::get_output_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
 </div>
 </div>
@@ -400,9 +420,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00103">103</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00105">105</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00438">arm_compute::graph_utils::get_input_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00464">arm_compute::graph_utils::get_input_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
 </div>
 </div>
@@ -418,9 +438,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00106">106</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00108">108</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00517">arm_compute::graph_utils::get_detection_output_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00438">arm_compute::graph_utils::get_input_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00484">arm_compute::graph_utils::get_output_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00543">arm_compute::graph_utils::get_detection_output_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00464">arm_compute::graph_utils::get_input_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00510">arm_compute::graph_utils::get_output_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
 </div>
 </div>
@@ -436,9 +456,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00105">105</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_common_graph_options_8h_source.xhtml#l00107">107</a> of file <a class="el" href="_common_graph_options_8h_source.xhtml">CommonGraphOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00517">arm_compute::graph_utils::get_detection_output_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00438">arm_compute::graph_utils::get_input_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00484">arm_compute::graph_utils::get_output_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00543">arm_compute::graph_utils::get_detection_output_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00464">arm_compute::graph_utils::get_input_accessor()</a>, <a class="el" href="_graph_utils_8h_source.xhtml#l00510">arm_compute::graph_utils::get_output_accessor()</a>, and <a class="el" href="_common_graph_options_8cpp_source.xhtml#l00076">arm_compute::utils::operator&lt;&lt;()</a>.</p>
 
 </div>
 </div>
@@ -451,7 +471,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1utils.xhtml">utils</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml">CommonGraphParams</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:37 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

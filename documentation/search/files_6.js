@@ -21,6 +21,7 @@ var searchData=
   ['flattenlayer_2eh',['FlattenLayer.h',['../_flatten_layer_8h.xhtml',1,'']]],
   ['flattenlayernode_2ecpp',['FlattenLayerNode.cpp',['../_flatten_layer_node_8cpp.xhtml',1,'']]],
   ['flattenlayernode_2eh',['FlattenLayerNode.h',['../_flatten_layer_node_8h.xhtml',1,'']]],
+  ['float_5fops_2eh',['float_ops.h',['../float__ops_8h.xhtml',1,'']]],
   ['floor_2ecl',['floor.cl',['../floor_8cl.xhtml',1,'']]],
   ['floor_2ecpp',['Floor.cpp',['../benchmark_2_c_l_2_floor_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_floor_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_floor_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_floor_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2reference_2_floor_8cpp.xhtml',1,'(Global Namespace)']]],
   ['floor_2eh',['Floor.h',['../_floor_8h.xhtml',1,'']]],
@@ -31,7 +32,12 @@ var searchData=
   ['fullyconnectedlayernode_2eh',['FullyConnectedLayerNode.h',['../_fully_connected_layer_node_8h.xhtml',1,'']]],
   ['functiondescriptors_2eh',['FunctionDescriptors.h',['../_function_descriptors_8h.xhtml',1,'']]],
   ['functionhelpers_2eh',['FunctionHelpers.h',['../_function_helpers_8h.xhtml',1,'']]],
+  ['fusebatchnormalization_2ecpp',['FuseBatchNormalization.cpp',['../_c_l_2_fuse_batch_normalization_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_fuse_batch_normalization_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_fuse_batch_normalization_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['fusebatchnormalization_2eh',['FuseBatchNormalization.h',['../_fuse_batch_normalization_8h.xhtml',1,'']]],
   ['fusedconvolutionbatchnormalizationfunction_2eh',['FusedConvolutionBatchNormalizationFunction.h',['../_fused_convolution_batch_normalization_function_8h.xhtml',1,'']]],
   ['fusedconvolutionbatchnormalizationnode_2ecpp',['FusedConvolutionBatchNormalizationNode.cpp',['../_fused_convolution_batch_normalization_node_8cpp.xhtml',1,'']]],
-  ['fusedconvolutionbatchnormalizationnode_2eh',['FusedConvolutionBatchNormalizationNode.h',['../_fused_convolution_batch_normalization_node_8h.xhtml',1,'']]]
+  ['fusedconvolutionbatchnormalizationnode_2eh',['FusedConvolutionBatchNormalizationNode.h',['../_fused_convolution_batch_normalization_node_8h.xhtml',1,'']]],
+  ['fuseddepthwiseconvolutionbatchnormalizationfunction_2eh',['FusedDepthwiseConvolutionBatchNormalizationFunction.h',['../_fused_depthwise_convolution_batch_normalization_function_8h.xhtml',1,'']]],
+  ['fuseddepthwiseconvolutionbatchnormalizationnode_2ecpp',['FusedDepthwiseConvolutionBatchNormalizationNode.cpp',['../_fused_depthwise_convolution_batch_normalization_node_8cpp.xhtml',1,'']]],
+  ['fuseddepthwiseconvolutionbatchnormalizationnode_2eh',['FusedDepthwiseConvolutionBatchNormalizationNode.h',['../_fused_depthwise_convolution_batch_normalization_node_8h.xhtml',1,'']]]
 ];

@@ -35,29 +35,29 @@
 
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
-CLL2NormalizeLayerKernel::CLL2NormalizeLayerKernel()
-    : _input(nullptr), _sum(nullptr), _output(nullptr), _axis(0), _epsilon(1e-12)
+namespace arm_compute
 {
-}
-
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon)
+constexpr int max_input_tensor_dim = 3;
+
+constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
     ARM_COMPUTE_UNUSED(epsilon);
 
+    const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 2, "Axis greater than 2 is not supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(actual_axis > 2, "Actual axis greater than 2 is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(actual_axis >= TensorShape::num_max_dimensions, "Actual normalization axis greater than max number of dimensions");
 
     // Reduce shape on axis
     TensorShape sum_shape = input->tensor_shape();
-    sum_shape.set(axis, 1);
+    sum_shape.set(actual_axis, 1);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(sum->tensor_shape(), sum_shape);
 
     if(output->total_size() != 0)
@@ -73,8 +73,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, cons
 
 std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
-    const unsigned int num_elems_processed_per_iteration = 16;
-
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
     // Output tensor auto initialization if not yet initialized
@@ -92,18 +90,21 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
 }
 } // namespace
 
-void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, unsigned int axis, float epsilon)
+CLL2NormalizeLayerKernel::CLL2NormalizeLayerKernel()
+    : _input(nullptr), _sum(nullptr), _output(nullptr), _actual_axis(0), _epsilon(1e-12)
+{
+}
+
+void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), sum->info(), output->info(), axis, epsilon));
 
-    _input   = input;
-    _sum     = sum;
-    _output  = output;
-    _axis    = axis;
-    _epsilon = epsilon;
-
-    const unsigned int num_elems_processed_per_iteration = 16;
+    _input       = input;
+    _sum         = sum;
+    _output      = output;
+    _actual_axis = wrap_around(axis, max_input_tensor_dim);
+    _epsilon     = epsilon;
 
     // Set build options
     std::set<std::string> build_opts;
@@ -113,7 +114,7 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     // Create kernel
     std::string  kernel_name;
     unsigned int idx = 0;
-    switch(axis)
+    switch(_actual_axis)
     {
         case 0:
             kernel_name = "x";
@@ -128,18 +129,18 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
             idx         = num_arguments_per_3D_tensor() * 3;
             break;
         default:
-            ARM_COMPUTE_ERROR("Not supported");
+            ARM_COMPUTE_ERROR("Axis not supported");
     }
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("l2_normalize_" + kernel_name, build_opts));
 
     // Set epsilon argument
     if(input->info()->data_type() == DataType::F32)
     {
-        _kernel.setArg<cl_uint>(idx, _epsilon);
+        _kernel.setArg<cl_float>(idx, _epsilon);
     }
     else
     {
-        _kernel.setArg<cl_ushort>(idx, _epsilon);
+        _kernel.setArg<cl_half>(idx, _epsilon);
     }
 
     // Configure kernel window
@@ -149,7 +150,7 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     ICLKernel::configure_internal(std::get<1>(win_config));
 }
 
-Status CLL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon)
+Status CLL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, sum, output, axis, epsilon));
     ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get())));
@@ -164,7 +165,7 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
 
     Window window_sum(window);
 
-    switch(_axis)
+    switch(_actual_axis)
     {
         case 0:
         {
@@ -218,3 +219,4 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
             ARM_COMPUTE_ERROR("Not supported");
     }
 }
+} // namespace arm_compute

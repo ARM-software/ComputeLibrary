@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,8 @@
  */
 
 #pragma once
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/depthwise.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/common/qasymm8.hpp"
+#include "depthwise.hpp"
+#include "qasymm8.hpp"
 
 namespace depthwise
 {
@@ -70,6 +70,33 @@ class QAsymm8DepthwiseConvolution : public DepthwiseConvolutionBase<
 
     QAsymm8DepthwiseConvolution(
       int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+      int n_output_rows, int n_output_cols,
+      nck::ActivationFunction activation,
+      const qasymm8::QAsymm8Params& weight_quantisation,
+      const qasymm8::QAsymm8Params& input_quantisation,
+      const qasymm8::QAsymm8Params& output_quantisation,
+      unsigned int padding_top,
+      unsigned int padding_left,
+      unsigned int padding_bottom,
+      unsigned int padding_right
+    );
+
+    QAsymm8DepthwiseConvolution(
+      int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+      nck::ActivationFunction activation,
+      const qasymm8::QAsymm8Params& weight_quantisation,
+      const qasymm8::QAsymm8Params& input_quantisation,
+      const qasymm8::QAsymm8Params& output_quantisation,
+      const qasymm8::QAsymm8RescaleParams& rescale_parameters,
+      unsigned int padding_top,
+      unsigned int padding_left,
+      unsigned int padding_bottom,
+      unsigned int padding_right
+    );
+
+    QAsymm8DepthwiseConvolution(
+      int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+      int n_output_rows, int n_output_cols,
       nck::ActivationFunction activation,
       const qasymm8::QAsymm8Params& weight_quantisation,
       const qasymm8::QAsymm8Params& input_quantisation,

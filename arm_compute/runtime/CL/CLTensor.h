@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensorAllocator;
 class ITensorInfo;
 
@@ -66,6 +67,7 @@ public:
     TensorInfo       *info() const override;
     TensorInfo       *info() override;
     const cl::Buffer &cl_buffer() const override;
+    CLQuantization    quantization() const override;
 
 protected:
     // Inherited methods overridden:

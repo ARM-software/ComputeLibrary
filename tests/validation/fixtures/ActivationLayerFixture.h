@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,14 +49,16 @@ public:
     template <typename...>
     void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
     {
-        _quantization_info = quantization_info;
-        _data_type         = data_type;
-        _function          = function;
-
         ActivationLayerInfo info(function, alpha_beta, alpha_beta);
 
-        _target    = compute_target(shape, in_place, info, data_type, quantization_info);
-        _reference = compute_reference(shape, info, data_type, quantization_info);
+        _in_place                 = in_place;
+        _data_type                = data_type;
+        _output_quantization_info = calculate_output_quantization_info(_data_type, info, quantization_info);
+        _input_quantization_info  = in_place ? _output_quantization_info : quantization_info;
+
+        _function  = function;
+        _target    = compute_target(shape, info);
+        _reference = compute_reference(shape, info);
     }
 
 protected:
@@ -71,7 +73,7 @@ protected:
             std::uniform_real_distribution<> distribution(min_bound, max_bound);
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized_asymmetric(tensor.data_type()))
+        else if(is_data_type_quantized(tensor.data_type()))
         {
             library->fill_tensor_uniform(tensor, 0);
         }
@@ -85,16 +87,16 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape, bool in_place, ActivationLayerInfo info, DataType data_type, QuantizationInfo quantization_info)
+    TensorType compute_target(const TensorShape &shape, ActivationLayerInfo info)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
-        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
+        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, _input_quantization_info);
+        TensorType dst = create_tensor<TensorType>(shape, _data_type, 1, _output_quantization_info);
 
         // Create and configure function
         FunctionType act_layer;
 
-        TensorType *dst_ptr = in_place ? &src : &dst;
+        TensorType *dst_ptr = _in_place ? nullptr : &dst;
 
         act_layer.configure(&src, dst_ptr, info);
 
@@ -105,7 +107,7 @@ protected:
         src.allocator()->allocate();
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-        if(!in_place)
+        if(!_in_place)
         {
             dst.allocator()->allocate();
             ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -117,7 +119,7 @@ protected:
         // Compute function
         act_layer.run();
 
-        if(in_place)
+        if(_in_place)
         {
             return src;
         }
@@ -127,20 +129,62 @@ protected:
         }
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo info, DataType data_type, QuantizationInfo quantization_info)
+    SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo info)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, quantization_info };
+        SimpleTensor<T> src{ shape, _data_type, 1, _input_quantization_info };
 
         // Fill reference
         fill(src);
 
-        return reference::activation_layer<T>(src, info);
+        return reference::activation_layer<T>(src, info, _output_quantization_info);
     }
 
+private:
+    QuantizationInfo calculate_output_quantization_info(DataType dt, const ActivationLayerInfo &act_info, const QuantizationInfo &default_qinfo)
+    {
+        auto qasymm8_max = float(std::numeric_limits<uint8_t>::max()) + 1.f;
+        auto qsymm16_max = float(std::numeric_limits<int16_t>::max()) + 1.f;
+
+        switch(act_info.activation())
+        {
+            case ActivationLayerInfo::ActivationFunction::TANH:
+                if(dt == DataType::QSYMM16)
+                {
+                    return QuantizationInfo(1.f / qsymm16_max, 0);
+                }
+                else if(dt == DataType::QASYMM8)
+                {
+                    return QuantizationInfo(1.f / (0.5 * qasymm8_max), int(0.5 * qasymm8_max));
+                }
+                else
+                {
+                    return default_qinfo;
+                }
+            case ActivationLayerInfo::ActivationFunction::LOGISTIC:
+                if(dt == DataType::QSYMM16)
+                {
+                    return QuantizationInfo(1.f / qsymm16_max, 0);
+                }
+                else if(dt == DataType::QASYMM8)
+                {
+                    return QuantizationInfo(1.f / qasymm8_max, 0);
+                }
+                else
+                {
+                    return default_qinfo;
+                }
+            default:
+                return default_qinfo;
+        }
+    }
+
+protected:
     TensorType                              _target{};
     SimpleTensor<T>                         _reference{};
-    QuantizationInfo                        _quantization_info{};
+    bool                                    _in_place{};
+    QuantizationInfo                        _input_quantization_info{};
+    QuantizationInfo                        _output_quantization_info{};
     DataType                                _data_type{};
     ActivationLayerInfo::ActivationFunction _function{};
 };

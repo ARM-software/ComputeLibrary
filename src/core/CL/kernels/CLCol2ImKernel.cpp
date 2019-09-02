@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,9 +35,10 @@
 
 #include <cmath>
 
-using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims, unsigned int num_groups)
@@ -64,7 +65,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_col2im_shape(*input, convolved_dims, true, num_groups)).set_data_layout(DataLayout::NCHW));
 
-    const unsigned int num_elems_read_per_iteration = 8;
+    constexpr unsigned int num_elems_read_per_iteration = 8;
 
     // Configure window
     Window win = calculate_max_window(*input, Steps(num_elems_read_per_iteration));
@@ -166,3 +167,4 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
     }
     while(collapsed.slide_window_slice_3D(slice) && collapsed_out.slide_window_slice_4D(slice_out));
 }
+} // namespace arm_compute

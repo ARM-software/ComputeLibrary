@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,43 +68,6 @@ struct GCEltwiseFunctions
 
 namespace detail
 {
-// Specialize functions
-template <>
-std::unique_ptr<IFunction> create_concatenate_layer<GCDepthConcatenateLayer, GCTargetInfo>(ConcatenateLayerNode &node)
-{
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Creating Concatenate node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
-    ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
-
-    // Return nullptr if depth concatenate is switched off
-    if(!node.is_enabled())
-    {
-        return nullptr;
-    }
-
-    // Extract IO and info
-    std::vector<GCTargetInfo::TensorType *> inputs;
-    for(unsigned int i = 0; i < node.num_inputs(); ++i)
-    {
-        inputs.push_back(get_backing_tensor<GCTargetInfo>(node.input(i)));
-    }
-    typename GCTargetInfo::TensorType *output = get_backing_tensor<GCTargetInfo>(node.output(0));
-
-    // Create and configure function
-    auto func = support::cpp14::make_unique<GCDepthConcatenateLayer>();
-    func->configure(inputs, output);
-
-    // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
-                               << node.name()
-                               << " Target " << GCTargetInfo::TargetType
-                               << " Data Type: " << output->info()->data_type()
-                               << " Shape: " << output->info()->tensor_shape()
-                               << " Num Inputs: " << inputs.size()
-                               << std::endl);
-
-    return std::move(func);
-}
-
 template <>
 std::unique_ptr<IFunction> create_convolution_layer<GCConvolutionLayerFunctions, GCTargetInfo>(ConvolutionLayerNode &node, GraphContext &ctx)
 {
@@ -282,7 +245,7 @@ std::unique_ptr<IFunction> GCFunctionFactory::create(INode *node, GraphContext &
         case NodeType::ConvolutionLayer:
             return detail::create_convolution_layer<GCConvolutionLayerFunctions, GCTargetInfo>(*polymorphic_downcast<ConvolutionLayerNode *>(node), ctx);
         case NodeType::ConcatenateLayer:
-            return detail::create_concatenate_layer<GCDepthConcatenateLayer, GCTargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
+            return detail::create_concatenate_layer<GCConcatenateLayer, GCTargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::create_depthwise_convolution_layer<GCDepthwiseConvolutionLayerFunctions, GCTargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::EltwiseLayer:

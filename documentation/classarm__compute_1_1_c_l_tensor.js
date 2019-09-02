@@ -7,6 +7,7 @@ var classarm__compute_1_1_c_l_tensor =
     [ "info", "classarm__compute_1_1_c_l_tensor.xhtml#a2edd900d6f8eb9a995be55adfffbede5", null ],
     [ "map", "classarm__compute_1_1_c_l_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002", null ],
     [ "map", "classarm__compute_1_1_c_l_tensor.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0", null ],
+    [ "quantization", "classarm__compute_1_1_c_l_tensor.xhtml#a6d614dfaa0606b7fef13f3e26d745b48", null ],
     [ "unmap", "classarm__compute_1_1_c_l_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c", null ],
     [ "unmap", "classarm__compute_1_1_c_l_tensor.xhtml#af974a2360069c2ef8df4496d00e4f6cc", null ]
 ];

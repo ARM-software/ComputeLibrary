@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -107,8 +107,7 @@ $(document).ready(function(){initNavTree('arm__compute_2core_2_types_8h.xhtml','
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_coordinates_8h_source.xhtml">arm_compute/core/Coordinates.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_q_asymm8_8h_source.xhtml">arm_compute/core/QAsymm8.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_rounding_8h_source.xhtml">arm_compute/core/Rounding.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_quantization_info_8h_source.xhtml">arm_compute/core/QuantizationInfo.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_size2_d_8h_source.xhtml">arm_compute/core/Size2D.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_strides_8h_source.xhtml">arm_compute/core/Strides.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_tensor_shape_8h_source.xhtml">arm_compute/core/TensorShape.h</a>&quot;</code><br />
@@ -116,6 +115,7 @@ $(document).ready(function(){initNavTree('arm__compute_2core_2_types_8h.xhtml','
 <code>#include &lt;cmath&gt;</code><br />
 <code>#include &lt;cstddef&gt;</code><br />
 <code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;map&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;utility&gt;</code><br />
 </div>
@@ -123,9 +123,6 @@ $(document).ready(function(){initNavTree('arm__compute_2core_2_types_8h.xhtml','
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantization settings (used for QASYMM8 data type)  <a href="structarm__compute_1_1_quantization_info.xhtml#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Container for valid region of a window.  <a href="structarm__compute_1_1_valid_region.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,6 +158,9 @@ Data Structures</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_detection_output_layer_info.xhtml">DetectionOutputLayerInfo</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detection Output layer info.  <a href="classarm__compute_1_1_detection_output_layer_info.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_detection_post_process_layer_info.xhtml">DetectionPostProcessLayerInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detection Output layer info.  <a href="classarm__compute_1_1_detection_post_process_layer_info.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pooling Layer Information class.  <a href="classarm__compute_1_1_pooling_layer_info.xhtml#details">More...</a><br /></td></tr>
@@ -242,6 +242,10 @@ Typedefs</h2></td></tr>
 <tr class="memitem:afe9e10e5fdfd1e2665ac17c75c0cacd8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afe9e10e5fdfd1e2665ac17c75c0cacd8">Multiples</a> = std::vector&lt; uint32_t &gt;</td></tr>
 <tr class="memdesc:afe9e10e5fdfd1e2665ac17c75c0cacd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Information to produce a tiled version of a <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface.">Tensor</a>.  <a href="namespacearm__compute.xhtml#afe9e10e5fdfd1e2665ac17c75c0cacd8">More...</a><br /></td></tr>
 <tr class="separator:afe9e10e5fdfd1e2665ac17c75c0cacd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2b075b5da72ec6bb14f90c202443eb0"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aa2b075b5da72ec6bb14f90c202443eb0">BBox</a> = std::array&lt; float, 4 &gt;</td></tr>
+<tr class="separator:aa2b075b5da72ec6bb14f90c202443eb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6550ea34c33d2e943476386d6ba8bed"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ae6550ea34c33d2e943476386d6ba8bed">LabelBBox</a> = std::map&lt; int, std::vector&lt; BBox &gt; &gt;</td></tr>
+<tr class="separator:ae6550ea34c33d2e943476386d6ba8bed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -275,20 +279,24 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a696b031073e74bf2cb98e5ef201d4aa3">UNKNOWN</a>, 
 <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a6669348b484e3008dca2bfa8e85e40b5">U8</a>, 
 <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aafb0fced528eaac5fe170b763cda5975">S8</a>, 
-<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6af14462d71aa842202c3e4b272c7ec924">QASYMM8</a>, 
+<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a5f007421a4becd11c0666c2058b0b36c">QSYMM8</a>, 
 <br />
-&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aef9ef3ebca4d2b64b6ec83808bafa5f2">U16</a>, 
+&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6af14462d71aa842202c3e4b272c7ec924">QASYMM8</a>, 
+<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a34f500e941c4df30b870126ec868ebd5">QSYMM8_PER_CHANNEL</a>, 
+<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aef9ef3ebca4d2b64b6ec83808bafa5f2">U16</a>, 
 <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a6e0b0886efb94aec797f6b830329b72c">S16</a>, 
+<br />
+&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a3ca8a4ea8f992df3b462bc7b24d097c6">QSYMM16</a>, 
 <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6ac8bd5bedff8ef192d39a962afc0e19ee">U32</a>, 
 <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aa1e28eee0339658d39a8b4d325b56e9c">S32</a>, 
+<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a31d65cccd6593e4101db93fb878abcaa">U64</a>, 
 <br />
-&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a31d65cccd6593e4101db93fb878abcaa">U64</a>, 
-<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a115dca124dc6423c7a400b8a8a0270cc">S64</a>, 
+&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a115dca124dc6423c7a400b8a8a0270cc">S64</a>, 
 <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a56d8353718e6fdc78b8d69078a2cdb94">F16</a>, 
 <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a44ad4ef5a76e6aa6fb3e3fa079a54fda">F32</a>, 
+<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a1ad5f6f3069070ec4cbbdc94d5e61e0e">F64</a>, 
 <br />
-&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a1ad5f6f3069070ec4cbbdc94d5e61e0e">F64</a>, 
-<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6abd7ef6d4f35bc7d05c559b65032f15d1">SIZET</a>
+&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6abd7ef6d4f35bc7d05c559b65032f15d1">SIZET</a>
 <br />
  }</td></tr>
 <tr class="memdesc:ad8ed01ff3ff33333d8e19db4d2818bb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available data types.  <a href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">More...</a><br /></td></tr>
@@ -323,6 +331,11 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a6f66ec167e002c7c0549ff6c8a8939ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available DeconvolutionMethod.  <a href="namespacearm__compute.xhtml#a6f66ec167e002c7c0549ff6c8a8939ad">More...</a><br /></td></tr>
 <tr class="separator:a6f66ec167e002c7c0549ff6c8a8939ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb7e3dd8a833840aaaf618bd43ead0ca"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0ca">FuseBatchNormalizationType</a> { <a class="el" href="namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0caaf7fb587bad912d390b57a5d6e7ccc55d">CONVOLUTION</a>, 
+<a class="el" href="namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0caa481bc07ed7c792045e8b277c0c88f8d4">DEPTHWISECONVOLUTION</a>
+ }</td></tr>
+<tr class="memdesc:afb7e3dd8a833840aaaf618bd43ead0ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available FuseBatchNormalizationType.  <a href="namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0ca">More...</a><br /></td></tr>
+<tr class="separator:afb7e3dd8a833840aaaf618bd43ead0ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14d24d90ab4ba2956e92e27890ba4c91"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91">PaddingMode</a> { <a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a8d6b5cada83510220f59e00ce86d4d92">CONSTANT</a>, 
 <a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91ae4f6a05f82ed398f984f4bc1a55838df">REFLECT</a>, 
 <a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a161b3d9016563aba9ac190fc02ada9bb">SYMMETRIC</a>
@@ -423,7 +436,9 @@ Enumerations</h2></td></tr>
 <a class="el" href="namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45bac8074bb318fb85693233e64acc64c1ed">PROD</a>, 
 <br />
 &#160;&#160;<a class="el" href="namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45ba2ce6e134b828b72fad160fa17c8d1b64">SUM_SQUARE</a>, 
-<a class="el" href="namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a">SUM</a>
+<a class="el" href="namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a">SUM</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45bace31e2a082d17e038fcc6e3006166653">MIN</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45ba26a4b44a837bf97b972628509912b4a5">MAX</a>
 <br />
  }</td></tr>
 <tr class="memdesc:a5827eb9cb394e74af87f74bd354fb45b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available reduction operations.  <a href="namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45b">More...</a><br /></td></tr>
@@ -435,13 +450,23 @@ Enumerations</h2></td></tr>
 <a class="el" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aeace31e2a082d17e038fcc6e3006166653">MIN</a>, 
 <br />
 &#160;&#160;<a class="el" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea26a4b44a837bf97b972628509912b4a5">MAX</a>, 
-<a class="el" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea46ea186b87dc545033d86ba8d6e63916">SQUARED_DIFF</a>
+<a class="el" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea46ea186b87dc545033d86ba8d6e63916">SQUARED_DIFF</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aeac9c9c146c630ca5ef9197c73c032f4a6">POWER</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f">PRELU</a>
 <br />
  }</td></tr>
 <tr class="memdesc:a23d9f0c01c9e120dfb828ee922b7a8ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available element-wise operations.  <a href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8ae">More...</a><br /></td></tr>
 <tr class="separator:a23d9f0c01c9e120dfb828ee922b7a8ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5dad01b7eab116403241313417e0936d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936d">ElementWiseUnary</a> { <a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da66bac724670f51e77f3688d33ca0d781">RSQRT</a>, 
-<a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da8c670f8c37b95e1ed14a0ce414b049c7">EXP</a>
+<tr class="memitem:a5dad01b7eab116403241313417e0936d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936d">ElementWiseUnary</a> { <br />
+&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da66bac724670f51e77f3688d33ca0d781">RSQRT</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da8c670f8c37b95e1ed14a0ce414b049c7">EXP</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da5dd68b1a7db42a1cce4dce09dbaa179e">NEG</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da4b5ffcdaf38ce4d463171f5c977c5ab3">LOG</a>, 
+<br />
+&#160;&#160;<a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da7d8a220d2262f9d6c658d549ee12cf2c">ABS</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da5b001d63db54e7383587771eeb2018a1">SIN</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da2ea77cf582892014b30e6fa7e558350d">ROUND</a>
+<br />
  }</td></tr>
 <tr class="memdesc:a5dad01b7eab116403241313417e0936d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available element wise unary operations.  <a href="namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936d">More...</a><br /></td></tr>
 <tr class="separator:a5dad01b7eab116403241313417e0936d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -507,7 +532,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="arm__compute_2core_2_types_8h.xhtml">Types.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

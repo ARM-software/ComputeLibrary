@@ -79,6 +79,7 @@ Status validate_arguments_static(const ITensorInfo *input, const int block_shape
         ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channel] != output->tensor_shape()[idx_channel]);
         ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_batch] % (block_shape_x * block_shape_y) != 0);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
 
     return Status{};
@@ -111,7 +112,7 @@ void NESpaceToBatchLayerKernel::configure(const ITensor *input, const int block_
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     TensorShape output_shape = misc::shape_calculator::compute_space_to_batch_shape(input->info(), block_shape_x, block_shape_y, padding_left, padding_right);
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_static(input->info(), block_shape_x, block_shape_y, padding_left, padding_right, output->info()));
 
@@ -167,12 +168,6 @@ void NESpaceToBatchLayerKernel::run(const Window &window, const ThreadInfo &info
     const size_t batch_size = _input->info()->dimension(3);
 
     Window slice_out = window.first_slice_window_3D();
-    Window slice_in  = window.first_slice_window_4D();
-
-    slice_in.set(Window::DimX, Window::Dimension(0, 0, 0));
-    slice_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    slice_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    slice_in.set(3, Window::Dimension(0, 0, 0));
 
     int batch_id = 0;
 

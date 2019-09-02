@@ -9,7 +9,7 @@ var _c_l_2_reorg_layer_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_reorg_layer_8cpp.xhtml#a11be7f70e411b80709403919b692001d", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_reorg_layer_8cpp.xhtml#a4e8788d498826ee2823a0081f9565d97", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_reorg_layer_8cpp.xhtml#acd9642e1093be3211ddf14279ce20310", null ],
-    [ "TEST_SUITE_END", "_c_l_2_reorg_layer_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_c_l_2_reorg_layer_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLReorgLayerFixture< int16_t >", "_c_l_2_reorg_layer_8cpp.xhtml#a2832e7ae2ed5bf0aca37f413e7bf5b30", null ],
     [ "CLReorgLayerFixture< int8_t >", "_c_l_2_reorg_layer_8cpp.xhtml#a3f5f12afecfa47fa44797ef4496195bc", null ]
 ];

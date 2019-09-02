@@ -93,10 +93,12 @@ void CLQuantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     }
     ICLKernel::configure_internal(win);
 
+    const UniformQuantizationInfo qinfo = output->info()->quantization_info().uniform();
+
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DSCALE=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
-    build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(output->info()->quantization_info().offset));
+    build_opts.add_option("-DSCALE=" + float_to_string_with_full_precision(qinfo.scale));
+    build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qinfo.offset));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(input_width_x - vec_size_x, 0)));

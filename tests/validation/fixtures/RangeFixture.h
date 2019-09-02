@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,7 +95,9 @@ protected:
                 end += std::max(half(1.0f), static_cast<half>(distribution(gen))) * step;
                 return utility::clamp<float, half>(end);
             case DataType::QASYMM8:
-                return utility::clamp<float, uint8_t>(end + (float)distribution(gen) * step, qinfo_out.dequantize(0), qinfo_out.dequantize(std::numeric_limits<uint8_t>::max()));
+                return utility::clamp<float, uint8_t>(end + (float)distribution(gen) * step,
+                                                      dequantize_qasymm8(0, qinfo_out.uniform()),
+                                                      dequantize_qasymm8(std::numeric_limits<uint8_t>::max(), qinfo_out.uniform()));
             default:
                 return 0;
         }

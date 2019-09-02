@@ -52,13 +52,13 @@ public:
     ~NEDequantizationLayerKernel() = default;
     /** Set input, output tensors.
      *
-     * @param[in]  input  Source tensor. Data type supported: QASYMM8.
+     * @param[in]  input  Source tensor. Data type supported: QASYMM8/QSYMM8/QSYMM16.
      * @param[out] output Destination tensor with the same dimensions of input. Data type supported: F16/F32.
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEDequantizationLayerKernel
      *
-     * @param[in] input  Input tensor info. Data types supported: QASYMM8.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8/QSYMM8/QSYMM16.
      * @param[in] output Output tensor info. Data types supported: F16/F32.
      *
      * @return a status

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -134,6 +134,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa0bce17c5cd01f2b45cc59afd615913e"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#aa0bce17c5cd01f2b45cc59afd615913e">~ICLTensor</a> ()=default</td></tr>
 <tr class="memdesc:aa0bce17c5cd01f2b45cc59afd615913e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default virtual destructor.  <a href="#aa0bce17c5cd01f2b45cc59afd615913e">More...</a><br /></td></tr>
 <tr class="separator:aa0bce17c5cd01f2b45cc59afd615913e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff9433a5bb38873d6af3d45e6f638281"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structarm__compute_1_1_c_l_quantization.xhtml">CLQuantization</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#aff9433a5bb38873d6af3d45e6f638281">quantization</a> () const =0</td></tr>
+<tr class="memdesc:aff9433a5bb38873d6af3d45e6f638281"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to return the wrapped quantization info data.  <a href="#aff9433a5bb38873d6af3d45e6f638281">More...</a><br /></td></tr>
+<tr class="separator:aff9433a5bb38873d6af3d45e6f638281"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fb4c50755a0ef424652246838ed91a6"><td class="memItemLeft" align="right" valign="top">virtual const cl::Buffer &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#a1fb4c50755a0ef424652246838ed91a6">cl_buffer</a> () const =0</td></tr>
 <tr class="memdesc:a1fb4c50755a0ef424652246838ed91a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to return a reference to the OpenCL buffer containing the image's data.  <a href="#a1fb4c50755a0ef424652246838ed91a6">More...</a><br /></td></tr>
 <tr class="separator:a1fb4c50755a0ef424652246838ed91a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -178,7 +181,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for OpenCL tensor. </p>
 
-<p class="definition">Definition at line <a class="el" href="_i_c_l_tensor_8h_source.xhtml#l00040">40</a> of file <a class="el" href="_i_c_l_tensor_8h_source.xhtml">ICLTensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_i_c_l_tensor_8h_source.xhtml#l00042">42</a> of file <a class="el" href="_i_c_l_tensor_8h_source.xhtml">ICLTensor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a64399eb327ea2e4ecd2c8086a8dc01ce"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a64399eb327ea2e4ecd2c8086a8dc01ce">&#9670;&nbsp;</a></span>ICLTensor() <span class="overload">[1/3]</span></h2>
@@ -315,7 +318,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00053">53</a> of file <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml">ICLTensor.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;{</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keywordflow">return</span> _mapping;</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_c_l_f_f_t1_d_8cpp_source.xhtml#l00038">CLFFT1D::configure()</a>, <a class="el" href="_c_l_f_f_t_convolution_layer_8cpp_source.xhtml#l00098">CLFFTConvolutionLayer::configure()</a>, <a class="el" href="_c_l_direct_deconvolution_layer_8cpp_source.xhtml#l00108">CLDirectDeconvolutionLayer::configure()</a>, and <a class="el" href="_c_l_accessor_8h_source.xhtml#l00149">CLAccessor::data()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_f_f_t1_d_8cpp_source.xhtml#l00038">CLFFT1D::configure()</a>, <a class="el" href="_c_l_f_f_t_convolution_layer_8cpp_source.xhtml#l00098">CLFFTConvolutionLayer::configure()</a>, <a class="el" href="_c_l_direct_deconvolution_layer_8cpp_source.xhtml#l00107">CLDirectDeconvolutionLayer::configure()</a>, and <a class="el" href="_c_l_accessor_8h_source.xhtml#l00149">CLAccessor::data()</a>.</p>
 
 </div>
 </div>
@@ -424,7 +427,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00035">35</a> of file <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml">ICLTensor.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;{</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    _mapping = do_map(q, blocking);</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00046">ICLTensor::clear()</a>, <a class="el" href="_c_l_tensor_8cpp_source.xhtml#l00055">CLTensor::map()</a>, <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00066">CLSubTensor::map()</a>, <a class="el" href="_c_l_min_max_layer_kernel_8cpp_source.xhtml#l00119">CLMinMaxLayerKernel::reset()</a>, and <a class="el" href="_c_l_crop_resize_8cpp_source.xhtml#l00229">CLCropResize::run()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00046">ICLTensor::clear()</a>, <a class="el" href="_c_l_tensor_8cpp_source.xhtml#l00060">CLTensor::map()</a>, <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00071">CLSubTensor::map()</a>, <a class="el" href="_c_l_min_max_layer_kernel_8cpp_source.xhtml#l00119">CLMinMaxLayerKernel::reset()</a>, and <a class="el" href="_c_l_crop_resize_8cpp_source.xhtml#l00229">CLCropResize::run()</a>.</p>
 
 </div>
 </div>
@@ -484,6 +487,38 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aff9433a5bb38873d6af3d45e6f638281"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff9433a5bb38873d6af3d45e6f638281">&#9670;&nbsp;</a></span>quantization()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="structarm__compute_1_1_c_l_quantization.xhtml">CLQuantization</a> quantization </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interface to be implemented by the child class to return the wrapped quantization info data. </p>
+<dl class="section return"><dt>Returns</dt><dd>A wrapped quantization info object. </dd></dl>
+
+<p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a6d614dfaa0606b7fef13f3e26d745b48">CLSubTensor</a>, and <a class="el" href="classarm__compute_1_1_c_l_tensor.xhtml#a6d614dfaa0606b7fef13f3e26d745b48">CLTensor</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00061">CLSubTensor::quantization()</a>.</p>
+
+</div>
+</div>
 <a id="af974a2360069c2ef8df4496d00e4f6cc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af974a2360069c2ef8df4496d00e4f6cc">&#9670;&nbsp;</a></span>unmap()</h2>
 
@@ -511,7 +546,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00040">40</a> of file <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml">ICLTensor.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    do_unmap(q);</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    _mapping = <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00046">ICLTensor::clear()</a>, <a class="el" href="_c_l_min_max_layer_kernel_8cpp_source.xhtml#l00119">CLMinMaxLayerKernel::reset()</a>, <a class="el" href="_c_l_crop_resize_8cpp_source.xhtml#l00229">CLCropResize::run()</a>, <a class="el" href="_c_l_tensor_8cpp_source.xhtml#l00060">CLTensor::unmap()</a>, and <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00071">CLSubTensor::unmap()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00046">ICLTensor::clear()</a>, <a class="el" href="_c_l_min_max_layer_kernel_8cpp_source.xhtml#l00119">CLMinMaxLayerKernel::reset()</a>, <a class="el" href="_c_l_crop_resize_8cpp_source.xhtml#l00229">CLCropResize::run()</a>, <a class="el" href="_c_l_tensor_8cpp_source.xhtml#l00065">CLTensor::unmap()</a>, and <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00076">CLSubTensor::unmap()</a>.</p>
 
 </div>
 </div>
@@ -525,7 +560,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:32 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

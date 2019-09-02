@@ -21,8 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
@@ -38,8 +36,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
-#include "tests/validation/fixtures/GEMMInterleave4x4Fixture.h"
-#include "tests/validation/fixtures/GEMMTranspose1xWFixture.h"
 
 namespace arm_compute
 {
@@ -69,20 +65,6 @@ const auto data_transpose = framework::dataset::make("M", 8, 14) * framework::da
 TEST_SUITE(CL)
 TEST_SUITE(GEMM)
 
-TEST_SUITE(INTERLEAVE_4X4)
-using CLGEMMInterleave4x4 = CLSynthetizeFunctionWithZeroConstantBorder<CLGEMMInterleave4x4Kernel, 4>;
-
-TEST_SUITE(FP32)
-using CLGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<CLTensor, CLAccessor, CLGEMMInterleave4x4, float>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * framework::dataset::make("DataType", DataType::F32))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END() // FP32
-
-TEST_SUITE_END() // INTERLEAVE_4X4
-
 template <typename T>
 using CLGEMMFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM, T>;
 
@@ -91,19 +73,6 @@ using CLGEMMOutput3DFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM
 
 template <typename T>
 using CLGEMMInputOutput3DFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM, T, false, true, true>;
-
-TEST_SUITE(TRANSPOSE_1XW)
-using CLGEMMTranspose1xW        = CLSynthetizeFunctionWithZeroConstantBorder<CLGEMMTranspose1xWKernel, 4>;
-using CLGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixture<CLTensor, CLAccessor, CLGEMMTranspose1xW, float>;
-TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * framework::dataset::make("DataType", DataType::F32))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END() // FP32
-
-TEST_SUITE_END() //TRANSPOSE_1XW
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)

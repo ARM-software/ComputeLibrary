@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -135,9 +135,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4ef3acaf1a24c82ddf0c49898ff051f0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml#a4ef3acaf1a24c82ddf0c49898ff051f0">~CLFuseBatchNormalization</a> ()=default</td></tr>
 <tr class="memdesc:a4ef3acaf1a24c82ddf0c49898ff051f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a4ef3acaf1a24c82ddf0c49898ff051f0">More...</a><br /></td></tr>
 <tr class="separator:a4ef3acaf1a24c82ddf0c49898ff051f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9318443da4a42b12d5b7ecb60d9fe14a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml#a9318443da4a42b12d5b7ecb60d9fe14a">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *conv_weights, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *bn_mean, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *bn_var, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *fused_weights, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *fused_bias, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *conv_bias=nullptr, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *bn_beta=nullptr, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *bn_gamma=nullptr, float <a class="el" href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a>=0.001f)</td></tr>
-<tr class="memdesc:a9318443da4a42b12d5b7ecb60d9fe14a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a9318443da4a42b12d5b7ecb60d9fe14a">More...</a><br /></td></tr>
-<tr class="separator:a9318443da4a42b12d5b7ecb60d9fe14a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49821364328600f20fa538d64468709f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml#a49821364328600f20fa538d64468709f">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input_weights, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *bn_mean, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *bn_var, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *fused_weights, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *fused_bias, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input_bias=nullptr, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *bn_beta=nullptr, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *bn_gamma=nullptr, float <a class="el" href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a>=0.001f, FuseBatchNormalizationType fbn_type=FuseBatchNormalizationType::CONVOLUTION)</td></tr>
+<tr class="memdesc:a49821364328600f20fa538d64468709f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a49821364328600f20fa538d64468709f">More...</a><br /></td></tr>
+<tr class="separator:a49821364328600f20fa538d64468709f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -151,9 +151,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a621bb2b91dff1e06743ed90ddb8c38ca"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml#a621bb2b91dff1e06743ed90ddb8c38ca">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *conv_weights, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *bn_mean, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *bn_var, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *fused_weights, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *fused_bias, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *conv_bias=nullptr, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *bn_beta=nullptr, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *bn_gamma=nullptr, float <a class="el" href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a>=0.001f)</td></tr>
-<tr class="memdesc:a621bb2b91dff1e06743ed90ddb8c38ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml">CLFuseBatchNormalization</a>.  <a href="#a621bb2b91dff1e06743ed90ddb8c38ca">More...</a><br /></td></tr>
-<tr class="separator:a621bb2b91dff1e06743ed90ddb8c38ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0edd3b29f8bd62c14d3c08483f0234d8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml#a0edd3b29f8bd62c14d3c08483f0234d8">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input_weights, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *bn_mean, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *bn_var, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *fused_weights, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *fused_bias, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input_bias=nullptr, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *bn_beta=nullptr, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *bn_gamma=nullptr, float <a class="el" href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a>=0.001f, FuseBatchNormalizationType fbn_type=FuseBatchNormalizationType::CONVOLUTION)</td></tr>
+<tr class="memdesc:a0edd3b29f8bd62c14d3c08483f0234d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml">CLFuseBatchNormalization</a>.  <a href="#a0edd3b29f8bd62c14d3c08483f0234d8">More...</a><br /></td></tr>
+<tr class="separator:a0edd3b29f8bd62c14d3c08483f0234d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to fuse the batch normalization node to a preceding convolution node. </p>
@@ -265,8 +265,8 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a9318443da4a42b12d5b7ecb60d9fe14a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9318443da4a42b12d5b7ecb60d9fe14a">&#9670;&nbsp;</a></span>configure()</h2>
+<a id="a49821364328600f20fa538d64468709f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49821364328600f20fa538d64468709f">&#9670;&nbsp;</a></span>configure()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -275,7 +275,7 @@ Static Public Member Functions</h2></td></tr>
           <td class="memname">void configure </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td>
-          <td class="paramname"><em>conv_weights</em>, </td>
+          <td class="paramname"><em>input_weights</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -305,7 +305,7 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td>
-          <td class="paramname"><em>conv_bias</em> = <code>nullptr</code>, </td>
+          <td class="paramname"><em>input_bias</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -323,7 +323,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>epsilon</em> = <code>0.001f</code>&#160;</td>
+          <td class="paramname"><em>epsilon</em> = <code>0.001f</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0ca">FuseBatchNormalizationType</a>&#160;</td>
+          <td class="paramname"><em>fbn_type</em> = <code><a class="el" href="namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0caaf7fb587bad912d390b57a5d6e7ccc55d">FuseBatchNormalizationType::CONVOLUTION</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -336,24 +342,37 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the input and output tensors. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">conv_weights</td><td>Convolution layer weights tensor. Data type supported: F16/F32 </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bn_mean</td><td>Batch normalization layer mean tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bn_var</td><td>Batch normalization layer variance tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">fused_weights</td><td>Output fused weights tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">fused_bias</td><td>Output fused bias tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">conv_bias</td><td>(Optional) Convolution layer bias tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bn_beta</td><td>(Optional) Batch normalization layer beta tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bn_gamma</td><td>(Optional) Batch normalization layer gamma tensor. Same as <code>conv_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input_weights</td><td>Input weights tensor for convolution or depthwise convolution layer. Data type supported: F16/F32. Data layout supported: NCHW, NHWC </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bn_mean</td><td>Batch normalization layer mean tensor. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bn_var</td><td>Batch normalization layer variance tensor. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">fused_weights</td><td>Output fused weights tensor. It can be a nullptr in case of in-place computation. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">fused_bias</td><td>Output fused bias tensor. It can be a nullptr in case of in-place computation and input_bias != nullptr. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input_bias</td><td>(Optional) Input bias tensor for convolution or depthwise convolution layer. It can be a nullptr in case the bias tensor is not required. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bn_beta</td><td>(Optional) Batch normalization layer beta tensor. It can be a nullptr in case the beta tensor is not required. Same as <code>input_weights</code> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>if nullptr, bn_beta is set to 0.0 </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">bn_gamma</td><td>(Optional) Batch normalization layer gamma tensor. It can be a nullptr in case the gamma tensor is not required. Same as <code>input_weights</code> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>if nullptr, bn_gamma is set to 1.0 </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>(Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fbn_type</td><td>(Optional) Fused batch normalization type. Defaults to Convolution. </td></tr>
   </table>
   </dd>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_fuse_batch_normalization_8cpp_source.xhtml#l00039">39</a> of file <a class="el" href="_c_l_fuse_batch_normalization_8cpp_source.xhtml">CLFuseBatchNormalization.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    _fuse_bn_kernel.<a class="code" href="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml#a9318443da4a42b12d5b7ecb60d9fe14a">configure</a>(conv_weights, bn_mean, bn_var, fused_weights, fused_bias, conv_bias, bn_beta, bn_gamma, <a class="code" href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a>);</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div><div class="ttc" id="_asymm_helpers_8cpp_xhtml_a552dc3787d7ea1675f3e4e8993501d58"><div class="ttname"><a href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a></div><div class="ttdeci">constexpr float epsilon</div><div class="ttdef"><b>Definition:</b> <a href="_asymm_helpers_8cpp_source.xhtml#l00033">AsymmHelpers.cpp:33</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel_xhtml_a9318443da4a42b12d5b7ecb60d9fe14a"><div class="ttname"><a href="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml#a9318443da4a42b12d5b7ecb60d9fe14a">arm_compute::CLFuseBatchNormalizationKernel::configure</a></div><div class="ttdeci">void configure(const ICLTensor *conv_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var, ICLTensor *fused_weights, ICLTensor *fused_bias, const ICLTensor *conv_bias=nullptr, const ICLTensor *bn_beta=nullptr, const ICLTensor *bn_gamma=nullptr, float epsilon=0.001f)</div><div class="ttdoc">Set the source, destination of the kernel.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_fuse_batch_normalization_kernel_8cpp_source.xhtml#l00098">CLFuseBatchNormalizationKernel.cpp:98</a></div></div>
+<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    _fuse_bn_kernel.<a class="code" href="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml#a49821364328600f20fa538d64468709f">configure</a>(input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma, <a class="code" href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a>, fbn_type);</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div><div class="ttc" id="_asymm_helpers_8cpp_xhtml_a552dc3787d7ea1675f3e4e8993501d58"><div class="ttname"><a href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a></div><div class="ttdeci">constexpr float epsilon</div><div class="ttdef"><b>Definition:</b> <a href="_asymm_helpers_8cpp_source.xhtml#l00033">AsymmHelpers.cpp:33</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel_xhtml_a49821364328600f20fa538d64468709f"><div class="ttname"><a href="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml#a49821364328600f20fa538d64468709f">arm_compute::CLFuseBatchNormalizationKernel::configure</a></div><div class="ttdeci">void configure(const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var, ICLTensor *fused_weights, ICLTensor *fused_bias, const ICLTensor *input_bias=nullptr, const ICLTensor *bn_beta=nullptr, const ICLTensor *bn_gamma=nullptr, float epsilon=0.001f, FuseBatchNormalizationType fbn_type=FuseBatchNormalizationType::CONVOLUTION)</div><div class="ttdoc">Set the source, destination of the kernel.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_fuse_batch_normalization_kernel_8cpp_source.xhtml#l00107">CLFuseBatchNormalizationKernel.cpp:107</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_c_l_fuse_batch_normalization_kernel_8cpp_source.xhtml#l00098">CLFuseBatchNormalizationKernel::configure()</a>, and <a class="el" href="_asymm_helpers_8cpp_source.xhtml#l00033">epsilon</a>.</p>
+<p class="reference">References <a class="el" href="_c_l_fuse_batch_normalization_kernel_8cpp_source.xhtml#l00107">CLFuseBatchNormalizationKernel::configure()</a>, and <a class="el" href="_asymm_helpers_8cpp_source.xhtml#l00033">epsilon</a>.</p>
 
 </div>
 </div>
@@ -460,8 +479,8 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 
 </div>
 </div>
-<a id="a621bb2b91dff1e06743ed90ddb8c38ca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a621bb2b91dff1e06743ed90ddb8c38ca">&#9670;&nbsp;</a></span>validate()</h2>
+<a id="a0edd3b29f8bd62c14d3c08483f0234d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0edd3b29f8bd62c14d3c08483f0234d8">&#9670;&nbsp;</a></span>validate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -473,7 +492,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
           <td class="memname"><a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>conv_weights</em>, </td>
+          <td class="paramname"><em>input_weights</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -503,7 +522,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>conv_bias</em> = <code>nullptr</code>, </td>
+          <td class="paramname"><em>input_bias</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -521,7 +540,13 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>epsilon</em> = <code>0.001f</code>&#160;</td>
+          <td class="paramname"><em>epsilon</em> = <code>0.001f</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0ca">FuseBatchNormalizationType</a>&#160;</td>
+          <td class="paramname"><em>fbn_type</em> = <code><a class="el" href="namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0caaf7fb587bad912d390b57a5d6e7ccc55d">FuseBatchNormalizationType::CONVOLUTION</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -539,25 +564,38 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml">CLFuseBatchNormalization</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">conv_weights</td><td>Convolution layer weights tensor. Data type supported: F16/F32 </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bn_mean</td><td>Batch normalization layer mean tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bn_var</td><td>Batch normalization layer variance tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">fused_weights</td><td>Output fused weights tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">fused_bias</td><td>Output fused bias tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">conv_bias</td><td>(Optional) Convolution layer bias tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bn_beta</td><td>(Optional) Batch normalization layer beta tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bn_gamma</td><td>(Optional) Batch normalization layer gamma tensor. Same as <code>conv_weights</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>(Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input_weights</td><td>Input weights tensor info for convolution or depthwise convolution layer. Data type supported: F16/F32. Data layout supported: NCHW, NHWC </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bn_mean</td><td>Batch normalization layer mean tensor info. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bn_var</td><td>Batch normalization layer variance tensor info. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fused_weights</td><td>Output fused weights tensor info. It can be a nullptr in case of in-place computation. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fused_bias</td><td>Output fused bias tensor info. It can be a nullptr in case of in-place computation and input_bias != nullptr. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input_bias</td><td>(Optional) Input bias tensor info for convolution or depthwise convolution layer. It can be a nullptr in case the bias tensor is not required. Same as <code>input_weights</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bn_beta</td><td>(Optional) Batch normalization layer beta tensor info. It can be a nullptr in case the beta tensor is not required. Same as <code>input_weights</code> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>if nullptr, bn_beta is set to 0.0 </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">bn_gamma</td><td>(Optional) Batch normalization layer gamma tensor info. It can be a nullptr in case the gamma tensor is not required. Same as <code>input_weights</code> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>if nullptr, bn_gamma is set to 1.0 </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>(Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fbn_type</td><td>(Optional) Fused batch normalization type. Defaults to Convolution.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_fuse_batch_normalization_8cpp_source.xhtml#l00047">47</a> of file <a class="el" href="_c_l_fuse_batch_normalization_8cpp_source.xhtml">CLFuseBatchNormalization.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;{</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml#a621bb2b91dff1e06743ed90ddb8c38ca">CLFuseBatchNormalizationKernel::validate</a>(conv_weights, bn_mean, bn_var, fused_weights, fused_bias, conv_bias, bn_beta, bn_gamma, <a class="code" href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a>);</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;}</div><div class="ttc" id="_asymm_helpers_8cpp_xhtml_a552dc3787d7ea1675f3e4e8993501d58"><div class="ttname"><a href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a></div><div class="ttdeci">constexpr float epsilon</div><div class="ttdef"><b>Definition:</b> <a href="_asymm_helpers_8cpp_source.xhtml#l00033">AsymmHelpers.cpp:33</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel_xhtml_a621bb2b91dff1e06743ed90ddb8c38ca"><div class="ttname"><a href="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml#a621bb2b91dff1e06743ed90ddb8c38ca">arm_compute::CLFuseBatchNormalizationKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *conv_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var, const ITensorInfo *fused_weights, const ITensorInfo *fused_bias, const ITensorInfo *conv_bias=nullptr, const ITensorInfo *bn_beta=nullptr, const ITensorInfo *bn_gamma=nullptr, float epsilon=0.001f)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLFuseBatchNormalization...</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_fuse_batch_normalization_kernel_8cpp_source.xhtml#l00173">CLFuseBatchNormalizationKernel.cpp:173</a></div></div>
+<div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;{</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml#a0edd3b29f8bd62c14d3c08483f0234d8">CLFuseBatchNormalizationKernel::validate</a>(input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma, <a class="code" href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a>, fbn_type);</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;}</div><div class="ttc" id="_asymm_helpers_8cpp_xhtml_a552dc3787d7ea1675f3e4e8993501d58"><div class="ttname"><a href="_asymm_helpers_8cpp.xhtml#a552dc3787d7ea1675f3e4e8993501d58">epsilon</a></div><div class="ttdeci">constexpr float epsilon</div><div class="ttdef"><b>Definition:</b> <a href="_asymm_helpers_8cpp_source.xhtml#l00033">AsymmHelpers.cpp:33</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel_xhtml_a0edd3b29f8bd62c14d3c08483f0234d8"><div class="ttname"><a href="classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml#a0edd3b29f8bd62c14d3c08483f0234d8">arm_compute::CLFuseBatchNormalizationKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var, const ITensorInfo *fused_weights, const ITensorInfo *fused_bias, const ITensorInfo *input_bias=nullptr, const ITensorInfo *bn_beta=nullptr, const ITensorInfo *bn_gamma=nullptr, float epsilon=0.001f, FuseBatchNormalizationType fbn_type=FuseBatchNormalizationType::CONVOLUTION)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLFuseBatchNormalization...</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_fuse_batch_normalization_kernel_8cpp_source.xhtml#l00168">CLFuseBatchNormalizationKernel.cpp:168</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_asymm_helpers_8cpp_source.xhtml#l00033">epsilon</a>, and <a class="el" href="_c_l_fuse_batch_normalization_kernel_8cpp_source.xhtml#l00173">CLFuseBatchNormalizationKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="_asymm_helpers_8cpp_source.xhtml#l00033">epsilon</a>, and <a class="el" href="_c_l_fuse_batch_normalization_kernel_8cpp_source.xhtml#l00168">CLFuseBatchNormalizationKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -571,7 +609,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml">CLFuseBatchNormalization</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:29 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

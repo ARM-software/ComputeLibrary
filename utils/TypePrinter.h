@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_TYPE_PRINTER_H__
 #define __ARM_COMPUTE_TYPE_PRINTER_H__
 
-#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
@@ -316,15 +315,16 @@ inline std::string to_string(const GenerateProposalsInfo &proposals_info)
 
 /** Formatted output of the QuantizationInfo type.
  *
- * @param[out] os                Output stream.
- * @param[in]  quantization_info Type to output.
+ * @param[out] os    Output stream.
+ * @param[in]  qinfo Type to output.
  *
  * @return Modified output stream.
  */
-inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &quantization_info)
+inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &qinfo)
 {
-    os << "Scale:" << quantization_info.scale << "~"
-       << "Offset:" << quantization_info.offset;
+    const UniformQuantizationInfo uqinfo = qinfo.uniform();
+    os << "Scale:" << uqinfo.scale << "~";
+    os << "Offset:" << uqinfo.offset;
     return os;
 }
 
@@ -384,6 +384,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
             break;
         case ActivationLayerInfo::ActivationFunction::TANH:
             os << "TANH";
+            break;
+        case ActivationLayerInfo::ActivationFunction::IDENTITY:
+            os << "IDENTITY";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -616,8 +619,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
         case DataType::U8:
             os << "U8";
             break;
+        case DataType::QSYMM8:
+            os << "QSYMM8";
+            break;
         case DataType::QASYMM8:
             os << "QASYMM8";
+            break;
+        case DataType::QSYMM8_PER_CHANNEL:
+            os << "QSYMM8_PER_CHANNEL";
             break;
         case DataType::S8:
             os << "S8";
@@ -627,6 +636,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
             break;
         case DataType::S16:
             os << "S16";
+            break;
+        case DataType::QSYMM16:
+            os << "QSYMM16";
             break;
         case DataType::U32:
             os << "U32";
@@ -1391,6 +1403,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ArithmeticOperation 
         case ArithmeticOperation::SQUARED_DIFF:
             os << "SQUARED_DIFF";
             break;
+        case ArithmeticOperation::POWER:
+            os << "POWER";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -1439,6 +1454,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
             break;
         case ReductionOperation::PROD:
             os << "PROD";
+            break;
+        case ReductionOperation::MIN:
+            os << "MIN";
+            break;
+        case ReductionOperation::MAX:
+            os << "MAX";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -1512,6 +1533,15 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ElementWiseUnary &op
             break;
         case ElementWiseUnary::EXP:
             os << "EXP";
+            break;
+        case ElementWiseUnary::NEG:
+            os << "NEG";
+            break;
+        case ElementWiseUnary::LOG:
+            os << "LOG";
+            break;
+        case ElementWiseUnary::ROUND:
+            os << "ROUND";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -1872,6 +1902,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::BIFROST:
             os << "BIFROST";
             break;
+        case GPUTarget::VALHALL:
+            os << "VALHALL";
+            break;
         case GPUTarget::T600:
             os << "T600";
             break;
@@ -1899,11 +1932,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::G76:
             os << "G76";
             break;
-        case GPUTarget::TTRX:
-            os << "TTRX";
+        case GPUTarget::G77:
+            os << "G77";
             break;
         case GPUTarget::TBOX:
             os << "TBOX";
+            break;
+        case GPUTarget::TODX:
+            os << "TODX";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -2018,6 +2054,43 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DetectionOutputLayer
  * @return Formatted string.
  */
 inline std::string to_string(const DetectionOutputLayerInfo &detection_info)
+{
+    std::stringstream str;
+    str << detection_info;
+    return str.str();
+}
+/** Formatted output of the DetectionPostProcessLayerInfo type.
+ *
+ * @param[out] os             Output stream
+ * @param[in]  detection_info Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DetectionPostProcessLayerInfo &detection_info)
+{
+    os << "{MaxDetections=" << detection_info.max_detections() << ","
+       << "MaxClassesPerDetection=" << detection_info.max_classes_per_detection() << ","
+       << "NmsScoreThreshold=" << detection_info.nms_score_threshold() << ","
+       << "NmsIouThreshold=" << detection_info.iou_threshold() << ","
+       << "NumClasses=" << detection_info.num_classes() << ","
+       << "ScaleValue_y=" << detection_info.scale_value_y() << ","
+       << "ScaleValue_x=" << detection_info.scale_value_x() << ","
+       << "ScaleValue_h=" << detection_info.scale_value_h() << ","
+       << "ScaleValue_w=" << detection_info.scale_value_w() << ","
+       << "UseRegularNms=" << detection_info.use_regular_nms() << ","
+       << "DetectionPerClass=" << detection_info.detection_per_class()
+       << "}";
+
+    return os;
+}
+
+/** Formatted output of the DetectionPostProcessLayerInfo type.
+ *
+ * @param[in] detection_info Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const DetectionPostProcessLayerInfo &detection_info)
 {
     std::stringstream str;
     str << detection_info;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace reference
 template <typename T>
 SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape)
 {
-    SimpleTensor<T> result(dst_shape, src.data_type());
+    SimpleTensor<T> result(dst_shape, src.data_type(), 1, src.quantization_info());
 
     const auto width_out  = static_cast<int>(dst_shape[0]);
     const auto height_out = static_cast<int>(dst_shape[1]);
@@ -54,6 +54,9 @@ SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<in
 
     const auto padding_left = paddings[0];
     const auto padding_top  = paddings[2];
+
+    // Pad value must be logic zero
+    const auto pad_value = is_data_type_quantized(src.data_type()) ? src.quantization_info().uniform().offset : 0;
 
     int out_pos = 0;
     for(int outB = 0; outB < batch_out; ++outB)
@@ -74,7 +77,7 @@ SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<in
                     if(outH * block_height + shift_h < padding_top || outH * block_height + shift_h >= padding_top + height_in || outW * block_width + shift_w < padding_left
                        || outW * block_width + shift_w >= padding_left + width_in)
                     {
-                        result[out_pos] = 0;
+                        result[out_pos] = pad_value;
                     }
                     else
                     {
@@ -90,6 +93,7 @@ SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<in
 
 template SimpleTensor<float> space_to_batch(const SimpleTensor<float> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape);
 template SimpleTensor<half> space_to_batch(const SimpleTensor<half> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape);
+template SimpleTensor<uint8_t> space_to_batch(const SimpleTensor<uint8_t> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -19,9 +19,11 @@ var utils_2_utils_8h =
     [ "map", "utils_2_utils_8h.xhtml#a9c3303817ba653b5d1e78efb88d02bcf", null ],
     [ "parse_npy_header", "utils_2_utils_8h.xhtml#acdab4f47904c52221c85cc80f408f183", null ],
     [ "parse_ppm_header", "utils_2_utils_8h.xhtml#a3aa8f5f1b94f88fdf5b43a53e29379cf", null ],
+    [ "restore_program_cache_from_file", "utils_2_utils_8h.xhtml#a394a7513744bff536de8290ce870fd85", null ],
     [ "run_example", "utils_2_utils_8h.xhtml#a8249d4be92399495c0d3c9a5004aeb40", null ],
     [ "run_example", "utils_2_utils_8h.xhtml#ac6126fda74b244d4c9a75328a3f436a3", null ],
-    [ "save_to_npy", "utils_2_utils_8h.xhtml#a3f8c80e5ec379049ad0a9ba1d8ad5547", null ],
+    [ "save_program_cache_to_file", "utils_2_utils_8h.xhtml#a667b4012e6d9b8c07876c7ff5da9f68d", null ],
+    [ "save_to_npy", "utils_2_utils_8h.xhtml#a48c0efb64637ab6e965b32d7c683efe9", null ],
     [ "save_to_ppm", "utils_2_utils_8h.xhtml#a301d0b7bfd70f73fc1924f4281938d08", null ],
     [ "unmap", "utils_2_utils_8h.xhtml#a4ff2134cb88cb5a27120cddb98b59774", null ]
 ];

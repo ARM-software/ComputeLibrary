@@ -90,6 +90,7 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
         // Configure the function to transform the weights tensor from HWI -> IHW
         _permute_weights_to_nchw.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
         _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
+        _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
 
         input_to_use   = &_permuted_input;
         weights_to_use = &_permuted_weights;
@@ -130,7 +131,7 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     PixelValue &&zero_value(0.f);
     if(is_data_type_quantized_asymmetric(input->info()->data_type()))
     {
-        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().offset));
+        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().uniform().offset));
     }
     _border_handler.configure(input_to_use, _kernel->border_size(), BorderMode::CONSTANT, zero_value);
 }
@@ -141,15 +142,27 @@ Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
+    const bool                      is_quantized           = is_data_type_quantized_asymmetric(input->data_type());
     const bool                      is_nhwc                = input->data_layout() == DataLayout::NHWC;
     const bool                      needs_permute          = is_nhwc && (depth_multiplier > 1);
-    const bool                      needs_weights_reshape  = is_nhwc && (depth_multiplier == 1);
+    const bool                      needs_weights_reshape  = is_nhwc && (depth_multiplier == 1) && is_quantized;
     const bool                      is_stride_1            = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
     const bool                      is_stride_1_dilation_1 = (is_stride_1 && dilation.x() == 1 && dilation.y() == 1);
     const bool                      is_dot8_supported      = dot8_supported(CLKernelLibrary::get().get_device());
     DepthwiseConvolutionReshapeInfo info;
     info.c0        = 4;
     info.transpose = is_stride_1_dilation_1 && is_dot8_supported;
+
+    if(is_quantized)
+    {
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = (output->total_size() == 0) ? iq_info : output->quantization_info().uniform();
+
+        const float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
+        ARM_COMPUTE_UNUSED(multiplier);
+        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
+    }
 
     if(needs_permute)
     {
@@ -176,7 +189,10 @@ Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
             ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, &weights->clone()->set_tensor_shape(reshaped_weights_shape), biases, output, conv_info, depth_multiplier,
                                                                                            act_info, dilation));
         }
-        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation));
+        else
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation));
+        }
     }
     else
     {
@@ -288,6 +304,10 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
         const size_t patch_size = weights_w * weights_h + ((append_bias) ? 1 : 0);
         const size_t conv_size  = conv_w * conv_h;
 
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+
         // Im2Col configuration
         TensorShape shape_im2col = input->info()->tensor_shape();
         shape_im2col.set(0, patch_size);
@@ -319,11 +339,11 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
         // Output staged configuration
         if(_is_quantized)
         {
-            const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
+            const UniformQuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? iq_info : oq_info;
 
-            float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
-            int   output_multiplier;
-            int   output_shift;
+            int         output_multiplier = 0;
+            int         output_shift      = 0;
+            const float multiplier        = iq_info.scale * wq_info.scale / output_quant_info.scale;
             quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
             _output_stage_kernel.configure(&_output_reshaped, biases, output, output_multiplier, output_shift, output_quant_info.offset);
             _output_reshaped.allocator()->allocate();
@@ -334,8 +354,8 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
         PixelValue zero_w(static_cast<int32_t>(0));
         if(_is_quantized)
         {
-            zero_in = PixelValue(static_cast<int32_t>(input->info()->quantization_info().offset));
-            zero_w  = PixelValue(static_cast<int32_t>(weights->info()->quantization_info().offset));
+            zero_in = PixelValue(static_cast<int32_t>(iq_info.offset));
+            zero_w  = PixelValue(static_cast<int32_t>(wq_info.offset));
         }
         BorderSize border_size = _v2mm_kernel.border_size();
         _v2mm_input_fill_border.configure(&_input_reshaped, border_size, BorderMode::CONSTANT, zero_in);
@@ -368,7 +388,7 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 
     const bool can_run_optimised_3x3_kernel = (weights->dimension(idx_w) == 3) && (weights->dimension(idx_h) == 3);
 
-    if(can_run_optimised_3x3_kernel)
+    if(!can_run_optimised_3x3_kernel)
     {
         const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
 
@@ -410,6 +430,13 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 
         if(is_quantized)
         {
+            const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+            const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+            const UniformQuantizationInfo oq_info = (output->total_size() == 0) ? iq_info : output->quantization_info().uniform();
+
+            const float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
+            ARM_COMPUTE_UNUSED(multiplier);
+            ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
             ARM_COMPUTE_RETURN_ON_ERROR(CLDirectConvolutionLayerOutputStageKernel::validate(&output_reshaped, biases, output));
         }
 
@@ -421,7 +448,7 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     }
     else
     {
-        CLDepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, GPUTarget::MIDGARD, dilation);
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, GPUTarget::MIDGARD, dilation));
     }
     return Status{};
 }

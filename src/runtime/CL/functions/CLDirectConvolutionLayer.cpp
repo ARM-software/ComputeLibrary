@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
     PixelValue &&zero_value(0.f);
     if(is_data_type_quantized_asymmetric(input->info()->data_type()))
     {
-        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().offset));
+        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().uniform().offset));
     }
     _input_border_handler.configure(input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, zero_value);
 

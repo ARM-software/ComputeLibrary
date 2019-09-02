@@ -59,8 +59,8 @@ SimpleTensor<float> scale_image(const SimpleTensor<float> &in, const TensorShape
             case InterpolationPolicy::NEAREST_NEIGHBOR:
             {
                 //Calculate the source coords without -0.5f is equivalent to round the x_scr/y_src coords
-                float x_src = (idw + 0.5f) * wr;
-                float y_src = (idh + 0.5f) * hr;
+                float x_src = std::floor(idw * wr);
+                float y_src = std::floor(idh * hr);
                 in_id.set(1, x_src);
                 in_id.set(2, y_src);
 

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -217,9 +217,10 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_n_e_convert_fully_connected_weights_8cpp_source.xhtml#l00033">33</a> of file <a class="el" href="_n_e_convert_fully_connected_weights_8cpp_source.xhtml">NEConvertFullyConnectedWeights.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    _kernel.<a class="code" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#ac0cfd5b64b24f3dfae04ee3d0f258624">configure</a>(input, output, original_input_shape, data_layout);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel_xhtml_ac0cfd5b64b24f3dfae04ee3d0f258624"><div class="ttname"><a href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#ac0cfd5b64b24f3dfae04ee3d0f258624">arm_compute::NEConvertFullyConnectedWeightsKernel::configure</a></div><div class="ttdeci">void configure(const ITensor *input, ITensor *output, const TensorShape &amp;original_input_shape, DataLayout data_layout)</div><div class="ttdoc">Set the input and output tensor.</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_convert_fully_connected_weights_kernel_8cpp_source.xhtml#l00036">NEConvertFullyConnectedWeightsKernel.cpp:36</a></div></div>
+<div class="fragment"><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    _kernel.<a class="code" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#ac0cfd5b64b24f3dfae04ee3d0f258624">configure</a>(input, output, original_input_shape, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acf5f12bbab64dd614bd8220c97fe484f">data_layout</a>);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acf5f12bbab64dd614bd8220c97fe484f"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acf5f12bbab64dd614bd8220c97fe484f">arm_compute::test::validation::data_layout</a></div><div class="ttdeci">const DataLayout data_layout</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_im2_col_8cpp_source.xhtml#l00146">Im2Col.cpp:146</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel_xhtml_ac0cfd5b64b24f3dfae04ee3d0f258624"><div class="ttname"><a href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#ac0cfd5b64b24f3dfae04ee3d0f258624">arm_compute::NEConvertFullyConnectedWeightsKernel::configure</a></div><div class="ttdeci">void configure(const ITensor *input, ITensor *output, const TensorShape &amp;original_input_shape, DataLayout data_layout)</div><div class="ttdoc">Set the input and output tensor.</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_convert_fully_connected_weights_kernel_8cpp_source.xhtml#l00036">NEConvertFullyConnectedWeightsKernel.cpp:36</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_n_e_convert_fully_connected_weights_kernel_8cpp_source.xhtml#l00036">NEConvertFullyConnectedWeightsKernel::configure()</a>.</p>
+<p class="reference">References <a class="el" href="_n_e_convert_fully_connected_weights_kernel_8cpp_source.xhtml#l00036">NEConvertFullyConnectedWeightsKernel::configure()</a>, and <a class="el" href="_n_e_o_n_2_im2_col_8cpp_source.xhtml#l00146">arm_compute::test::validation::data_layout</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_n_e_fully_connected_layer_8cpp_source.xhtml#l00139">NEFullyConnectedLayer::configure()</a>.</p>
 
@@ -271,7 +272,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_window_8h_source.xhtml#l00047">Window::DimZ</a>, <a class="el" href="_scheduler_8cpp_source.xhtml#l00096">Scheduler::get()</a>, and <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">IScheduler::schedule()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_fully_connected_layer_8cpp_source.xhtml#l00369">NEFullyConnectedLayer::prepare()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_fully_connected_layer_8cpp_source.xhtml#l00380">NEFullyConnectedLayer::prepare()</a>.</p>
 
 </div>
 </div>
@@ -333,11 +334,12 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_n_e_convert_fully_connected_weights_8cpp_source.xhtml#l00039">39</a> of file <a class="el" href="_n_e_convert_fully_connected_weights_8cpp_source.xhtml">NEConvertFullyConnectedWeights.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a01b81c1c60fd95dc360fd7ad680f114b">NEConvertFullyConnectedWeightsKernel::validate</a>(input, output, original_input_shape, data_layout);</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel_xhtml_a01b81c1c60fd95dc360fd7ad680f114b"><div class="ttname"><a href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a01b81c1c60fd95dc360fd7ad680f114b">arm_compute::NEConvertFullyConnectedWeightsKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &amp;original_input_shape, DataLayout data_layout)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEConvertFullyConnectedW...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_convert_fully_connected_weights_kernel_8cpp_source.xhtml#l00066">NEConvertFullyConnectedWeightsKernel.cpp:66</a></div></div>
+<div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a01b81c1c60fd95dc360fd7ad680f114b">NEConvertFullyConnectedWeightsKernel::validate</a>(input, output, original_input_shape, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acf5f12bbab64dd614bd8220c97fe484f">data_layout</a>);</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acf5f12bbab64dd614bd8220c97fe484f"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acf5f12bbab64dd614bd8220c97fe484f">arm_compute::test::validation::data_layout</a></div><div class="ttdeci">const DataLayout data_layout</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_im2_col_8cpp_source.xhtml#l00146">Im2Col.cpp:146</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel_xhtml_a01b81c1c60fd95dc360fd7ad680f114b"><div class="ttname"><a href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a01b81c1c60fd95dc360fd7ad680f114b">arm_compute::NEConvertFullyConnectedWeightsKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &amp;original_input_shape, DataLayout data_layout)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEConvertFullyConnectedW...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_convert_fully_connected_weights_kernel_8cpp_source.xhtml#l00066">NEConvertFullyConnectedWeightsKernel.cpp:66</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_n_e_convert_fully_connected_weights_kernel_8cpp_source.xhtml#l00066">NEConvertFullyConnectedWeightsKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="_n_e_o_n_2_im2_col_8cpp_source.xhtml#l00146">arm_compute::test::validation::data_layout</a>, and <a class="el" href="_n_e_convert_fully_connected_weights_kernel_8cpp_source.xhtml#l00066">NEConvertFullyConnectedWeightsKernel::validate()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_fully_connected_layer_8cpp_source.xhtml#l00241">NEFullyConnectedLayer::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_fully_connected_layer_8cpp_source.xhtml#l00245">NEFullyConnectedLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -351,7 +353,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights.xhtml">NEConvertFullyConnectedWeights</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:32 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

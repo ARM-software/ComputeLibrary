@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -139,7 +139,12 @@ $(document).ready(function(){initNavTree('functions_e.xhtml','');});
 </li>
 <li>empty()
 : <a class="el" href="structarm__compute_1_1_border_size.xhtml#afaafdfc441c2433c70959e3dfe46fd97">BorderSize</a>
-, <a class="el" href="structarm__compute_1_1_quantization_info.xhtml#a644718bb2fb240de962dc3c9a1fdf0dc">QuantizationInfo</a>
+, <a class="el" href="classarm__compute_1_1_quantization_info.xhtml#a644718bb2fb240de962dc3c9a1fdf0dc">QuantizationInfo</a>
+, <a class="el" href="structarm__compute_1_1_uniform_quantization_info.xhtml#a644718bb2fb240de962dc3c9a1fdf0dc">UniformQuantizationInfo</a>
+</li>
+<li>enable_cl_cache
+: <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_options.xhtml#aa1fb173121a67e58388e74cf4f9f42f4">CommonGraphOptions</a>
+, <a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#ab4170b9a9eb611db146c5a776dc191ef">CommonGraphParams</a>
 </li>
 <li>enable_tuner
 : <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_options.xhtml#afb574a4d09ddbdd9675da603fbad34a4">CommonGraphOptions</a>
@@ -179,6 +184,7 @@ $(document).ready(function(){initNavTree('functions_e.xhtml','');});
 <li>epsilon()
 : <a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml#acd39aa81617eab4d3482fa904d5dee87">BatchNormalizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#acd39aa81617eab4d3482fa904d5dee87">FusedConvolutionBatchNormalizationNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml#acd39aa81617eab4d3482fa904d5dee87">FusedDepthwiseConvolutionBatchNormalizationNode</a>
 , <a class="el" href="structarm__compute_1_1_optical_flow_parameters.xhtml#a2dceb63003a97fa431d06d1d07edc449">OpticalFlowParameters</a>
 </li>
 <li>error
@@ -220,11 +226,13 @@ $(document).ready(function(){initNavTree('functions_e.xhtml','');});
 </li>
 <li>execute()
 : <a class="el" href="classarm__gemm_1_1_gemm_hybrid.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">GemmHybrid&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">GemmHybridQuantized&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_native.xhtml#a514bdec015ee0ca587b6444e9defc190">GemmNative&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_batched.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">GemvBatched&lt; To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_native_transposed.xhtml#a514bdec015ee0ca587b6444e9defc190">GemvNativeTransposed&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_pretransposed.xhtml#a514bdec015ee0ca587b6444e9defc190">GemvPretransposed&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_quantize_wrapper.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">QuantizeWrapper&lt; To, Tr, Tgemm &gt;</a>
 </li>
 <li>execute_function
 : <a class="el" href="classarm__compute_1_1graph_1_1_task_executor.xhtml#af356b3757a26ca474239624e161fb49c">TaskExecutor</a>
@@ -233,7 +241,10 @@ $(document).ready(function(){initNavTree('functions_e.xhtml','');});
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph_manager.xhtml#a4e179588488fda9085167dd70c29ff70">GraphManager</a>
 </li>
 <li>ExecutionTask()
-: <a class="el" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#aa79ba1bb93be484a7022b836eafabd88">ExecutionTask</a>
+: <a class="el" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#afb25be12a4800fe31bf8bad6807cb09a">ExecutionTask</a>
+</li>
+<li>exponent()
+: <a class="el" href="unionarm__compute_1_1helpers_1_1float__ops_1_1_raw_float.xhtml#a3fda27eb4e4896945317480496290159">RawFloat</a>
 </li>
 <li>extend_padding()
 : <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a0cd5aea514f03afb48ebe22581ea4c66">ITensorInfo</a>
@@ -258,7 +269,7 @@ $(document).ready(function(){initNavTree('functions_e.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,21 @@ SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, ElementWiseUnary o
             case ElementWiseUnary::EXP:
                 dst[i] = std::exp(src[i]);
                 break;
+            case ElementWiseUnary::NEG:
+                dst[i] = -src[i];
+                break;
+            case ElementWiseUnary::LOG:
+                dst[i] = std::log(src[i]);
+                break;
+            case ElementWiseUnary::ABS:
+                dst[i] = std::abs(src[i]);
+                break;
+            case ElementWiseUnary::SIN:
+                dst[i] = std::sin(src[i]);
+                break;
+            case ElementWiseUnary::ROUND:
+                dst[i] = std::nearbyint(src[i]);
+                break;
             default:
                 ARM_COMPUTE_ERROR("Not implemented");
         }
@@ -56,6 +71,7 @@ SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, ElementWiseUnary o
 
 template SimpleTensor<float> elementwise_unary(const SimpleTensor<float> &src, ElementWiseUnary op);
 template SimpleTensor<half> elementwise_unary(const SimpleTensor<half> &src, ElementWiseUnary op);
+template SimpleTensor<int32_t> elementwise_unary(const SimpleTensor<int32_t> &src, ElementWiseUnary op);
 } // namespace reference
 } // namespace validation
 } // namespace test

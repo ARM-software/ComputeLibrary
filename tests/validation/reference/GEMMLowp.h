@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,13 @@ SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(
 template <typename T>
 SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, int32_t result_fixedpoint_multiplier, int32_t result_shift,
                                                                                 int32_t result_offset_after_shift, int32_t min = 0, int32_t max = 0);
+
+template <typename T>
+SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<T> &in, int32_t result_fixedpoint_multiplier, int32_t result_shift,
+                                                                                int32_t min, int32_t max);
+template <typename T>
+SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, int32_t result_fixedpoint_multiplier,
+                                                                                int32_t result_shift, int32_t min, int32_t max);
 } // namespace reference
 } // namespace validation
 } // namespace test

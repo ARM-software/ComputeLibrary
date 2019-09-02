@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -136,7 +136,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>DetectionOutput Layer. </p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00472">472</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00468">468</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="add9af3fe9c394a1994f926a6268260ed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#add9af3fe9c394a1994f926a6268260ed">&#9670;&nbsp;</a></span>DetectionOutputLayer()</h2>
@@ -188,8 +188,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00481">481</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;        : _ss_conf(std::move(sub_stream_conf)), _ss_prior(std::move(sub_stream_prior)), _detect_info(detect_info)</div><div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;    {</div><div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00477">477</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;        : _ss_conf(std::move(sub_stream_conf)), _ss_prior(std::move(sub_stream_prior)), _detect_info(detect_info)</div><div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    {</div><div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -228,8 +228,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00486">486</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;    {</div><div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;        NodeParams  common_params  = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;        NodeIdxPair input_loc      = { s.tail_node(), 0 };</div><div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;        NodeIdxPair input_conf     = { _ss_conf.<a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a110fbabe5b6b600f0f5b1fec06ab1484">tail_node</a>(), 0 };</div><div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;        NodeIdxPair input_priorbox = { _ss_prior.<a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a110fbabe5b6b600f0f5b1fec06ab1484">tail_node</a>(), 0 };</div><div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aff2fa3e8e802bcefd6fdd5780aa096e1">GraphBuilder::add_detection_output_node</a>(s.graph(), common_params, input_loc, input_conf, input_priorbox, _detect_info);</div><div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_aff2fa3e8e802bcefd6fdd5780aa096e1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aff2fa3e8e802bcefd6fdd5780aa096e1">arm_compute::graph::GraphBuilder::add_detection_output_node</a></div><div class="ttdeci">static NodeID add_detection_output_node(Graph &amp;g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, const DetectionOutputLayerInfo &amp;detect_info)</div><div class="ttdoc">Adds a detection output layer node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00379">GraphBuilder.cpp:379</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00482">482</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;    {</div><div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;        NodeParams  common_params  = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;        NodeIdxPair input_loc      = { s.tail_node(), 0 };</div><div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;        NodeIdxPair input_conf     = { _ss_conf.<a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a110fbabe5b6b600f0f5b1fec06ab1484">tail_node</a>(), 0 };</div><div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;        NodeIdxPair input_priorbox = { _ss_prior.<a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a110fbabe5b6b600f0f5b1fec06ab1484">tail_node</a>(), 0 };</div><div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aff2fa3e8e802bcefd6fdd5780aa096e1">GraphBuilder::add_detection_output_node</a>(s.graph(), common_params, input_loc, input_conf, input_priorbox, _detect_info);</div><div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_aff2fa3e8e802bcefd6fdd5780aa096e1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aff2fa3e8e802bcefd6fdd5780aa096e1">arm_compute::graph::GraphBuilder::add_detection_output_node</a></div><div class="ttdeci">static NodeID add_detection_output_node(Graph &amp;g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, const DetectionOutputLayerInfo &amp;detect_info)</div><div class="ttdoc">Adds a detection output layer node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00379">GraphBuilder.cpp:379</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_stream_xhtml_a110fbabe5b6b600f0f5b1fec06ab1484"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a110fbabe5b6b600f0f5b1fec06ab1484">arm_compute::graph::frontend::IStream::tail_node</a></div><div class="ttdeci">NodeID tail_node()</div><div class="ttdoc">Returns the tail node of the Stream.</div><div class="ttdef"><b>Definition:</b> <a href="_i_stream_8h_source.xhtml#l00065">IStream.h:65</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_ad8227ba86a01f26e4f173cd5e219d5d1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const</div><div class="ttdoc">Layer name accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
@@ -246,7 +246,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_detection_output_layer.xhtml">DetectionOutputLayer</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

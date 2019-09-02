@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -135,9 +135,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac6b645dfffc8d1560da3b79538aba308"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml#ac6b645dfffc8d1560da3b79538aba308">~CLDeconvolutionLayerUpsample</a> ()=default</td></tr>
 <tr class="memdesc:ac6b645dfffc8d1560da3b79538aba308"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#ac6b645dfffc8d1560da3b79538aba308">More...</a><br /></td></tr>
 <tr class="separator:ac6b645dfffc8d1560da3b79538aba308"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afefc21cb9bbf278c5110778f28960b10"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml#afefc21cb9bbf278c5110778f28960b10">configure</a> (<a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, const <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> &amp;inner_border, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;info)</td></tr>
-<tr class="memdesc:afefc21cb9bbf278c5110778f28960b10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, interpolation type and border_mode.  <a href="#afefc21cb9bbf278c5110778f28960b10">More...</a><br /></td></tr>
-<tr class="separator:afefc21cb9bbf278c5110778f28960b10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bc1d8c0561d51c8dec8c3fcd0a3b63e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml#a4bc1d8c0561d51c8dec8c3fcd0a3b63e">configure</a> (<a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;info)</td></tr>
+<tr class="memdesc:a4bc1d8c0561d51c8dec8c3fcd0a3b63e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, interpolation type and border_mode.  <a href="#a4bc1d8c0561d51c8dec8c3fcd0a3b63e">More...</a><br /></td></tr>
+<tr class="separator:a4bc1d8c0561d51c8dec8c3fcd0a3b63e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -151,9 +151,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a26af7a2cfde78819fefb83897e8e7e0a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml#a26af7a2cfde78819fefb83897e8e7e0a">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> &amp;inner_border, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;info)</td></tr>
-<tr class="memdesc:a26af7a2cfde78819fefb83897e8e7e0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml">CLDeconvolutionLayerUpsample</a>.  <a href="#a26af7a2cfde78819fefb83897e8e7e0a">More...</a><br /></td></tr>
-<tr class="separator:a26af7a2cfde78819fefb83897e8e7e0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4523058888ebedd3b84f95f2e12e9c04"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml#a4523058888ebedd3b84f95f2e12e9c04">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;info)</td></tr>
+<tr class="memdesc:a4523058888ebedd3b84f95f2e12e9c04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml">CLDeconvolutionLayerUpsample</a>.  <a href="#a4523058888ebedd3b84f95f2e12e9c04">More...</a><br /></td></tr>
+<tr class="separator:a4523058888ebedd3b84f95f2e12e9c04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to execute deconvolution upsample on OpenCL. </p>
@@ -270,8 +270,8 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="afefc21cb9bbf278c5110778f28960b10"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afefc21cb9bbf278c5110778f28960b10">&#9670;&nbsp;</a></span>configure()</h2>
+<a id="a4bc1d8c0561d51c8dec8c3fcd0a3b63e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bc1d8c0561d51c8dec8c3fcd0a3b63e">&#9670;&nbsp;</a></span>configure()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -287,12 +287,6 @@ Static Public Member Functions</h2></td></tr>
           <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td>
           <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> &amp;&#160;</td>
-          <td class="paramname"><em>inner_border</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -313,24 +307,23 @@ Static Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. Data type supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: same as <code>input</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inner_border</td><td>The number of zeros added to right and top edges of the input. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">info</td><td>Contains padding and policies to be used in the deconvolution. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml#l00045">45</a> of file <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml">CLDeconvolutionLayerUpsample.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <a class="code" href="_validate_8h.xhtml#a921b705e9e3e0fe928928447869e62a5">ARM_COMPUTE_ERROR_ON_NULLPTR</a>(input, output);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    _output = output;</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    _memset.<a class="code" href="classarm__compute_1_1_c_l_memset_kernel.xhtml#a8842f3a8e50c91b74a0b0549ac8fa489">configure</a>(_output, PixelValue(0, _output-&gt;<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">data_type</a>(), _output-&gt;<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">quantization_info</a>()));</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    _upsample.<a class="code" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a6f53fcc87865ecf2868305b85ec7460b">configure</a>(input, _output, inner_border, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">info</a>);</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a7cfb31af63202568efef5214acfbf3ba"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">arm_compute::ITensorInfo::data_type</a></div><div class="ttdeci">virtual DataType data_type() const =0</div><div class="ttdoc">Data type used for each element of the tensor.</div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml#l00044">44</a> of file <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml">CLDeconvolutionLayerUpsample.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;{</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <a class="code" href="_validate_8h.xhtml#a921b705e9e3e0fe928928447869e62a5">ARM_COMPUTE_ERROR_ON_NULLPTR</a>(input, output);</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    _output = output;</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    _memset.<a class="code" href="classarm__compute_1_1_c_l_memset_kernel.xhtml#a8842f3a8e50c91b74a0b0549ac8fa489">configure</a>(_output, PixelValue(0, _output-&gt;<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">data_type</a>(), _output-&gt;<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">quantization_info</a>()));</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    _upsample.<a class="code" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a1f778724ffdeea38be4d9993ae77aa13">configure</a>(input, _output, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">info</a>);</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a7cfb31af63202568efef5214acfbf3ba"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">arm_compute::ITensorInfo::data_type</a></div><div class="ttdeci">virtual DataType data_type() const =0</div><div class="ttdoc">Data type used for each element of the tensor.</div></div>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a0e95dc1e53c361348314873b168ae237"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">arm_compute::ITensor::info</a></div><div class="ttdeci">virtual ITensorInfo * info() const =0</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor's metadata.</div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel_xhtml_a1f778724ffdeea38be4d9993ae77aa13"><div class="ttname"><a href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a1f778724ffdeea38be4d9993ae77aa13">arm_compute::CLDeconvolutionLayerUpsampleKernel::configure</a></div><div class="ttdeci">void configure(const ICLTensor *input, ICLTensor *output, const PadStrideInfo &amp;info)</div><div class="ttdoc">Initialise the kernel's input and output.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_deconvolution_layer_upsample_kernel_8cpp_source.xhtml#l00070">CLDeconvolutionLayerUpsampleKernel.cpp:70</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a3f3e1a3200223e6a304a533b1016e749"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">arm_compute::ITensorInfo::quantization_info</a></div><div class="ttdeci">virtual QuantizationInfo quantization_info() const =0</div><div class="ttdoc">Get the quantization settings (scale and offset) of the tensor.</div></div>
 <div class="ttc" id="_validate_8h_xhtml_a921b705e9e3e0fe928928447869e62a5"><div class="ttname"><a href="_validate_8h.xhtml#a921b705e9e3e0fe928928447869e62a5">ARM_COMPUTE_ERROR_ON_NULLPTR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_NULLPTR(...)</div><div class="ttdef"><b>Definition:</b> <a href="_validate_8h_source.xhtml#l00161">Validate.h:161</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel_xhtml_a6f53fcc87865ecf2868305b85ec7460b"><div class="ttname"><a href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a6f53fcc87865ecf2868305b85ec7460b">arm_compute::CLDeconvolutionLayerUpsampleKernel::configure</a></div><div class="ttdeci">void configure(const ICLTensor *input, ICLTensor *output, const BorderSize &amp;inner_border, const PadStrideInfo &amp;info)</div><div class="ttdoc">Initialise the kernel's input and output.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_deconvolution_layer_upsample_kernel_8cpp_source.xhtml#l00073">CLDeconvolutionLayerUpsampleKernel.cpp:73</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_c_l_memset_kernel_xhtml_a8842f3a8e50c91b74a0b0549ac8fa489"><div class="ttname"><a href="classarm__compute_1_1_c_l_memset_kernel.xhtml#a8842f3a8e50c91b74a0b0549ac8fa489">arm_compute::CLMemsetKernel::configure</a></div><div class="ttdeci">void configure(ICLTensor *tensor, const PixelValue &amp;constant_value, Window *window=nullptr)</div><div class="ttdoc">Initialise the kernel's tensor and filling value.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_memset_kernel_8cpp_source.xhtml#l00042">CLMemsetKernel.cpp:42</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a4f4125dba5283887b34f889b1c615c0c"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">arm_compute::test::validation::info</a></div><div class="ttdeci">info</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">ConvolutionLayer.cpp:174</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_validate_8h_source.xhtml#l00161">ARM_COMPUTE_ERROR_ON_NULLPTR</a>, <a class="el" href="_c_l_memset_kernel_8cpp_source.xhtml#l00042">CLMemsetKernel::configure()</a>, <a class="el" href="_c_l_deconvolution_layer_upsample_kernel_8cpp_source.xhtml#l00073">CLDeconvolutionLayerUpsampleKernel::configure()</a>, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">ITensorInfo::data_type()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>, <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">arm_compute::test::validation::info</a>, and <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">ITensorInfo::quantization_info()</a>.</p>
+<p class="reference">References <a class="el" href="_validate_8h_source.xhtml#l00161">ARM_COMPUTE_ERROR_ON_NULLPTR</a>, <a class="el" href="_c_l_deconvolution_layer_upsample_kernel_8cpp_source.xhtml#l00070">CLDeconvolutionLayerUpsampleKernel::configure()</a>, <a class="el" href="_c_l_memset_kernel_8cpp_source.xhtml#l00042">CLMemsetKernel::configure()</a>, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">ITensorInfo::data_type()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>, <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">arm_compute::test::validation::info</a>, and <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">ITensorInfo::quantization_info()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_direct_deconvolution_layer_8cpp_source.xhtml#l00108">CLDirectDeconvolutionLayer::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_direct_deconvolution_layer_8cpp_source.xhtml#l00107">CLDirectDeconvolutionLayer::configure()</a>.</p>
 
 </div>
 </div>
@@ -429,18 +422,18 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_function.xhtml#a18954417d3124a8095783ea13dc6d00b">IFunction</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml#l00055">55</a> of file <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml">CLDeconvolutionLayerUpsample.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;{</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">enqueue</a>(_memset, <span class="keyword">false</span>);</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">enqueue</a>(_upsample, <span class="keyword">true</span>);</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler.cpp:41</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml#l00053">53</a> of file <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml">CLDeconvolutionLayerUpsample.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;{</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">enqueue</a>(_memset, <span class="keyword">false</span>);</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">enqueue</a>(_upsample, <span class="keyword">true</span>);</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler.cpp:41</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_ae1a643e517f50bf0392fb6516dd7cf67"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">arm_compute::CLScheduler::enqueue</a></div><div class="ttdeci">void enqueue(ICLKernel &amp;kernel, bool flush=true)</div><div class="ttdoc">Schedule the execution of the passed kernel if possible.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00095">CLScheduler.cpp:95</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00095">CLScheduler::enqueue()</a>, and <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler::get()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_direct_deconvolution_layer_8cpp_source.xhtml#l00176">CLDirectDeconvolutionLayer::run()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_direct_deconvolution_layer_8cpp_source.xhtml#l00175">CLDirectDeconvolutionLayer::run()</a>.</p>
 
 </div>
 </div>
-<a id="a26af7a2cfde78819fefb83897e8e7e0a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26af7a2cfde78819fefb83897e8e7e0a">&#9670;&nbsp;</a></span>validate()</h2>
+<a id="a4523058888ebedd3b84f95f2e12e9c04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4523058888ebedd3b84f95f2e12e9c04">&#9670;&nbsp;</a></span>validate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -459,12 +452,6 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
           <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> &amp;&#160;</td>
-          <td class="paramname"><em>inner_border</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -490,7 +477,6 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data type supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data type supported: same as <code>input</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inner_border</td><td>The number of zeros added to right and top edges of the input. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">info</td><td>Contains padding and policies to be used in the deconvolution.</td></tr>
   </table>
   </dd>
@@ -498,7 +484,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml#l00039">39</a> of file <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml">CLDeconvolutionLayerUpsample.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a26af7a2cfde78819fefb83897e8e7e0a">CLDeconvolutionLayerUpsampleKernel::validate</a>(input, output, inner_border, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">info</a>);</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel_xhtml_a26af7a2cfde78819fefb83897e8e7e0a"><div class="ttname"><a href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a26af7a2cfde78819fefb83897e8e7e0a">arm_compute::CLDeconvolutionLayerUpsampleKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const BorderSize &amp;inner_border, const PadStrideInfo &amp;info)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLDeconvolutionLayerUpsa...</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_deconvolution_layer_upsample_kernel_8cpp_source.xhtml#l00042">CLDeconvolutionLayerUpsampleKernel.cpp:42</a></div></div>
+<div class="fragment"><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a4523058888ebedd3b84f95f2e12e9c04">CLDeconvolutionLayerUpsampleKernel::validate</a>(input, output, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">info</a>);</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel_xhtml_a4523058888ebedd3b84f95f2e12e9c04"><div class="ttname"><a href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a4523058888ebedd3b84f95f2e12e9c04">arm_compute::CLDeconvolutionLayerUpsampleKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PadStrideInfo &amp;info)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLDeconvolutionLayerUpsa...</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_deconvolution_layer_upsample_kernel_8cpp_source.xhtml#l00042">CLDeconvolutionLayerUpsampleKernel.cpp:42</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a4f4125dba5283887b34f889b1c615c0c"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">arm_compute::test::validation::info</a></div><div class="ttdeci">info</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">ConvolutionLayer.cpp:174</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">arm_compute::test::validation::info</a>, and <a class="el" href="_c_l_deconvolution_layer_upsample_kernel_8cpp_source.xhtml#l00042">CLDeconvolutionLayerUpsampleKernel::validate()</a>.</p>
@@ -517,7 +503,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml">CLDeconvolutionLayerUpsample</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:28 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

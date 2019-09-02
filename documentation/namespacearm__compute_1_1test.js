@@ -27,6 +27,7 @@ var namespacearm__compute_1_1test =
     [ "LutAccessor", "classarm__compute_1_1test_1_1_lut_accessor.xhtml", "classarm__compute_1_1test_1_1_lut_accessor" ],
     [ "NESynthetizeFunction", "classarm__compute_1_1test_1_1_n_e_synthetize_function.xhtml", "classarm__compute_1_1test_1_1_n_e_synthetize_function" ],
     [ "NESynthetizeFunctionWithZeroConstantBorder", "classarm__compute_1_1test_1_1_n_e_synthetize_function_with_zero_constant_border.xhtml", "classarm__compute_1_1test_1_1_n_e_synthetize_function_with_zero_constant_border" ],
+    [ "NESynthetizeFunctionWithZeroConstantKernelBorder", "classarm__compute_1_1test_1_1_n_e_synthetize_function_with_zero_constant_kernel_border.xhtml", "classarm__compute_1_1test_1_1_n_e_synthetize_function_with_zero_constant_kernel_border" ],
     [ "PaddingCalculator", "classarm__compute_1_1test_1_1_padding_calculator.xhtml", "classarm__compute_1_1test_1_1_padding_calculator" ],
     [ "RawLutAccessor", "classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml", "classarm__compute_1_1test_1_1_raw_lut_accessor" ],
     [ "RawTensor", "classarm__compute_1_1test_1_1_raw_tensor.xhtml", "classarm__compute_1_1test_1_1_raw_tensor" ],

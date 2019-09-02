@@ -10,6 +10,6 @@ var validation_2_c_l_2_pooling_layer_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a610deb6c83ce5c5f875a5a470faf326b", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a84820c52078c2b2d2f7e9157922184e6", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a5f87984f23a553203f204b73ce15eea4", null ],
-    [ "TEST_SUITE_END", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLPoolingLayerFixture< half >", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a563e036c5c2976f911c0f33d91f328ec", null ]
 ];

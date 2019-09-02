@@ -34,7 +34,9 @@ var dir_36bd1941057d7130e210a25993eacc69 =
     [ "pmin.h", "pmin_8h.xhtml", "pmin_8h" ],
     [ "pow.h", "pow_8h.xhtml", "pow_8h" ],
     [ "rev64.h", "rev64_8h.xhtml", "rev64_8h" ],
+    [ "round.h", "round_8h.xhtml", "round_8h" ],
     [ "setlane.h", "setlane_8h.xhtml", "setlane_8h" ],
+    [ "sin.h", "sin_8h.xhtml", "sin_8h" ],
     [ "store.h", "store_8h.xhtml", "store_8h" ],
     [ "sub.h", "sub_8h.xhtml", "sub_8h" ],
     [ "tanh.h", "tanh_8h.xhtml", "tanh_8h" ]

@@ -45,7 +45,7 @@ public:
     static constexpr unsigned int NUM_BUFFERS = 3;
 
     explicit BufferManagerMultipleThreads(unsigned int max_num_users)
-        : _max_num_users(max_num_users)
+        : _buffers(), _max_num_users(max_num_users)
     {
     }
     unsigned int num_buffers() const override
@@ -106,11 +106,15 @@ public:
         ARM_COMPUTE_ERROR_ON(buf.index != index); // Should have blocked in lock_to_reshape_if_needed()
         // Check if it's already ready to use:
         if(buf.state == State::IN_USE)
+        {
             return;
+        }
         std::unique_lock<std::mutex> lock(buf.mutex);
         //Double check it didn't change while we were acquiring the lock:
         if(buf.state == State::IN_USE)
+        {
             return;
+        }
         buf.sem.wait(lock);
     }
     /* Mark the buffer at the given index as not used by this thread anymore.
@@ -143,7 +147,8 @@ private:
         State                   state{ State::FREE };
         std::mutex              mutex{};
         std::condition_variable sem{};
-    } _buffers[NUM_BUFFERS];
+    };
+    std::array<struct Buffer, NUM_BUFFERS> _buffers;
     Buffer &get_buffer_from_index(unsigned int index)
     {
         return _buffers[index % NUM_BUFFERS];
@@ -161,6 +166,7 @@ public:
     }
     bool lock_to_reshape_if_needed(unsigned int index) override
     {
+        ARM_COMPUTE_UNUSED(index);
         return true;
     }
     void mark_as_reshaped(unsigned int index) override
@@ -231,10 +237,10 @@ void NEGEMMInterleavedWrapper::prepare()
                 {
                     //For each block of rows in "M"
                     auto workload_mm = this->_mm_workloads.begin();
-                    for(auto workload_a = this->_a_workloads.begin(); workload_a != this->_a_workloads.end(); workload_a++)
+                    for(auto &workload_a : this->_a_workloads)
                     {
                         // Transform one k_block from A:
-                        this->_transform_a->transform(*workload_a, info, this->_batch_window, start_offset, end_offset);
+                        this->_transform_a->transform(workload_a, info, this->_batch_window, start_offset, end_offset);
                         // Then perform the matrix multiplication for each x block along N:
                         for(unsigned int i = 0; i < num_x_blocks; i++)
                         {
@@ -243,7 +249,7 @@ void NEGEMMInterleavedWrapper::prepare()
                         }
                     }
                 };
-                _workloads.push_back(workload);
+                _workloads.emplace_back(workload);
             }
             else
             {
@@ -255,10 +261,10 @@ void NEGEMMInterleavedWrapper::prepare()
                     //If there is only one thread then only reshape the B blocks as you need them:
                     unsigned int workload_b_next = num_threads == 1 ? this->_b_workloads.size() : 1;
 
-                    for(auto workload_a = this->_a_workloads.begin(); workload_a != this->_a_workloads.end(); workload_a++)
+                    for(auto &workload_a : this->_a_workloads)
                     {
                         // Transform one k_block from A:
-                        this->_transform_a->transform(*workload_a, info, this->_batch_window, start_offset, end_offset);
+                        this->_transform_a->transform(workload_a, info, this->_batch_window, start_offset, end_offset);
                         // Then perform the matrix multiplication for each x block along N:
                         for(unsigned int i = 0; i < num_x_blocks; i++)
                         {
@@ -287,7 +293,7 @@ void NEGEMMInterleavedWrapper::prepare()
                         }
                     }
                 };
-                _workloads.push_back(workload);
+                _workloads.emplace_back(workload);
             }
         }
         if(!_pretranspose_b && num_windows > 1 && num_windows % num_threads != 0)
@@ -325,7 +331,7 @@ void NEGEMMInterleavedWrapper::prepare()
                         workload_b++;
                     }
                 };
-                _workloads.push_back(workload);
+                _workloads.emplace_back(workload);
             }
         }
 
@@ -333,19 +339,19 @@ void NEGEMMInterleavedWrapper::prepare()
     }
 }
 
-void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, bool pretranspose_b)
+void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, const GEMMInfo &gemm_info)
 {
-    _params         = INEGEMMWrapperKernel::extract_parameters(a, b, c);
+    _params         = INEGEMMWrapperKernel::extract_parameters(a, b, c, gemm_info);
     _a              = a;
     _b              = b;
     _c              = c;
-    _pretranspose_b = pretranspose_b;
+    _pretranspose_b = gemm_info.pretranpose_B();
 
     const DataType     input_type  = a->info()->data_type();
     const CPUInfo     &ci          = NEScheduler::get().cpu_info();
     const unsigned int num_threads = NEScheduler::get().num_threads();
 
-    const arm_gemm::KernelDescription gemm_kernel_info = get_gemm_info(input_type, ci, num_threads, _params, alpha, beta, pretranspose_b);
+    const arm_gemm::KernelDescription gemm_kernel_info = get_gemm_info(input_type, ci, num_threads, _params, alpha, beta, _pretranspose_b);
     ARM_COMPUTE_ERROR_ON(gemm_kernel_info.method != arm_gemm::GemmMethod::GEMM_INTERLEAVED);
 
     // Forcing 128-byte alignment (required by 32-bit kernels)
@@ -405,8 +411,8 @@ void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITe
     _memory_group.manage(&_transformed_a);
     _memory_group.manage(&_tmp_c);
 
-    _transform_a     = strategy->instantiate_transformA(_a, &_transformed_a, _block_walker, _params);
-    _matrix_multiply = strategy->instantiate_matrix_multiply(&_transformed_a, &_transformed_b, &_tmp_c, c, _block_walker, _block_sizes, _params, alpha, beta, pretranspose_b, num_threads);
+    _transform_a     = strategy->instantiate_transformA(_a, &_transformed_a, _block_walker, _params, gemm_info);
+    _matrix_multiply = strategy->instantiate_matrix_multiply(&_transformed_a, &_transformed_b, &_tmp_c, c, _block_walker, _block_sizes, _params, alpha, beta, gemm_info, num_threads);
     ARM_COMPUTE_ERROR_ON(_transform_a == nullptr);
     ARM_COMPUTE_ERROR_ON(_matrix_multiply == nullptr);
 

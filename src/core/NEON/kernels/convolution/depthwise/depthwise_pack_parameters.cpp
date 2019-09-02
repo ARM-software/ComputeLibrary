@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/impl_base.hpp"
+#include "impl_base.hpp"
 
 // TODO Move to common utilities somewhere
 template <size_t Size> struct DType { };
@@ -97,4 +97,6 @@ void PackParameters<KernelRows, KernelColumns, WeightSize, BiasSize>::execute(
 
 template struct PackParameters<3, 3, 2ul, 2ul>;
 template struct PackParameters<3, 3, 4ul, 4ul>;
+template struct PackParameters<5, 5, 2ul, 2ul>;
+template struct PackParameters<5, 5, 4ul, 4ul>;
 }  // namespace

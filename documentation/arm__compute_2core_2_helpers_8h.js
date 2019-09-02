@@ -22,7 +22,7 @@ var arm__compute_2core_2_helpers_8h =
     [ "create_configure_kernel", "arm__compute_2core_2_helpers_8h.xhtml#a6f698fa1629f7f800b3c8cd77a3d4b4a", null ],
     [ "create_kernel", "arm__compute_2core_2_helpers_8h.xhtml#abc72c95941485d8a068fa38372308574", null ],
     [ "delta_bilinear_c1", "arm__compute_2core_2_helpers_8h.xhtml#ad656a27ce8a507e31096ca45683ba9a5", null ],
-    [ "delta_bilinear_c1_quantized", "arm__compute_2core_2_helpers_8h.xhtml#ad863f23e0037a10bacad6c483ab4e663", null ],
+    [ "delta_bilinear_c1_quantized", "arm__compute_2core_2_helpers_8h.xhtml#aa8f4b622d28ff29e9e88a6d5dcd2bea2", null ],
     [ "delta_linear_c1_x", "arm__compute_2core_2_helpers_8h.xhtml#a6174495b626531de015ae2b810859287", null ],
     [ "delta_linear_c1_y", "arm__compute_2core_2_helpers_8h.xhtml#ad5fa8bacf824e9538014bfb0dcdaab52", null ],
     [ "execute_window_loop", "arm__compute_2core_2_helpers_8h.xhtml#a5002bf7ec46d52971f9526e94172cfee", null ],

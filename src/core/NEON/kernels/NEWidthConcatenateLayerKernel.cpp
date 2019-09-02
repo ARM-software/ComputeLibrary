@@ -61,7 +61,7 @@ Status validate_arguments(const ITensorInfo *input, unsigned int width_offset, c
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1,
                                                          DataType::U8, DataType::S8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16, DataType::F16,
-                                                         DataType::U32, DataType::F32);
+                                                         DataType::U32, DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) + width_offset > output->dimension(0));
 
@@ -93,6 +93,9 @@ void NEWidthConcatenateLayerKernel::configure(const ITensor *input, unsigned int
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     INEKernel::configure(std::get<1>(win_config));
+
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 }
 
 Status NEWidthConcatenateLayerKernel::validate(const ITensorInfo *input, unsigned int width_offset, const ITensorInfo *output)
@@ -112,11 +115,11 @@ void NEWidthConcatenateLayerKernel::run(const Window &window, const ThreadInfo &
     uint8_t *output_ptr = _output->buffer() + _output->info()->offset_first_element_in_bytes() + _width_offset * _output->info()->strides_in_bytes()[0];
 
     // Create iterators
-    Iterator                input(_input, window);
-    Iterator                output(_output, window);
-    const DataType          dt           = _input->info()->data_type();
-    const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
-    const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
+    Iterator                       input(_input, window);
+    Iterator                       output(_output, window);
+    const DataType                 dt           = _input->info()->data_type();
+    const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
     if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
         execute_window_loop(window, [&](const Coordinates &)

@@ -1,6 +1,6 @@
 var classarm__compute_1_1logging_1_1_printer =
 [
-    [ "Printer", "classarm__compute_1_1logging_1_1_printer.xhtml#af1eb8ac5e81b67bdb4dad929c58f4d00", null ],
+    [ "Printer", "classarm__compute_1_1logging_1_1_printer.xhtml#a83bd7dc8741862742ec63172493fecfc", null ],
     [ "Printer", "classarm__compute_1_1logging_1_1_printer.xhtml#ab1c9bd7e4bc60107ac6035125cf76024", null ],
     [ "Printer", "classarm__compute_1_1logging_1_1_printer.xhtml#a14d1a36fce0bc44e71df1dac8a96a37e", null ],
     [ "~Printer", "classarm__compute_1_1logging_1_1_printer.xhtml#aaa62e7eb81a5dcf350ab8b677ddd8f60", null ],

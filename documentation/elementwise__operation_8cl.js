@@ -6,6 +6,8 @@ var elementwise__operation_8cl =
     [ "MIN", "elementwise__operation_8cl.xhtml#a74e75242132eaabbc1c512488a135926", null ],
     [ "OP_FUN_NAME", "elementwise__operation_8cl.xhtml#afc658c67277583af4eaca9a340d4128c", null ],
     [ "OP_FUN_NAME_STR", "elementwise__operation_8cl.xhtml#a5e2243047d8466ea143cbb9e1f196a95", null ],
+    [ "POWER", "elementwise__operation_8cl.xhtml#a720998f8e544cdc6d3c4c3c8d7ac5377", null ],
+    [ "PRELU", "elementwise__operation_8cl.xhtml#a01b6a20d51e2db6f1704f2315ead62d3", null ],
     [ "SQUARED_DIFF", "elementwise__operation_8cl.xhtml#ab05bd244cb8823c69d6dce6a23a758fd", null ],
     [ "SUB", "elementwise__operation_8cl.xhtml#aafc2c4f262a0686c07f86c7d2e1d8d14", null ]
 ];

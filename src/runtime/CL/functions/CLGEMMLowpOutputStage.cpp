@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
@@ -72,4 +73,20 @@ Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::validate(const ITensorInf
 {
     return CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel::validate(input, bias, output, min, max);
 }
+
+void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                                    int result_fixedpoint_multiplier, int result_shift,
+                                                                    int min, int max)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
+    k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
+    _kernel = std::move(k);
+}
+
+Status CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
+                                                                     int min, int max)
+{
+    return CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::validate(input, bias, output, min, max);
+}
+
 } // namespace arm_compute

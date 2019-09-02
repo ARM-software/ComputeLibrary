@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,8 +58,15 @@ vec4[2] transform_nearest(vec2 coord, vec2 scale)
     vec4 in_x_coords = vec4(coord.x, 1.f + coord.x, 2.f + coord.x, 3.f + coord.x);
 
     vec4[2] t;
+#if defined(SAMPLING_POLICY_CENTER) /* SAMPLING_POLICY_CENTER */
     t[0] = (in_x_coords + (vec4(0.5f))) * scale.x;
     t[1] = vec4((coord.y + 0.5f) * scale.y);
+#elif defined(SAMPLING_POLICY_TOP_LEFT) /* SAMPLING_POLICY_TOP_LEFT */
+    t[0] = in_x_coords * scale.x;
+    t[1] = vec4(coord.y) * scale.y;
+#else                                   /* Unsupported sampling policy */
+#error Unsupported sampling policy
+#endif /* SAMPLING_POLICY */
 
     return t;
 }

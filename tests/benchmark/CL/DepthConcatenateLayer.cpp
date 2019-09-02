@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
-#include "arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h"
+#include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/benchmark/fixtures/DepthConcatenateLayerFixture.h"
 #include "tests/datasets/ShapeDatasets.h"
@@ -44,7 +44,7 @@ namespace
 const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
 } // namespace
 
-using CLDepthConcatenateLayerFixture = DepthConcatenateLayerFixture<CLTensor, ICLTensor, CLDepthConcatenateLayer, CLAccessor>;
+using CLDepthConcatenateLayerFixture = DepthConcatenateLayerFixture<CLTensor, ICLTensor, CLConcatenateLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 TEST_SUITE(DepthConcatenateLayer)

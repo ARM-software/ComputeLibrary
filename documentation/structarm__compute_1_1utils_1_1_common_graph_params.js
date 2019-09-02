@@ -3,6 +3,7 @@ var structarm__compute_1_1utils_1_1_common_graph_params =
     [ "data_layout", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#aa56f0562febf49bc0e29a4257551191b", null ],
     [ "data_path", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a30a81dbc66a8e9eeb693a75046b4655d", null ],
     [ "data_type", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a901f5f80dfec4ef700c14947ca8397c9", null ],
+    [ "enable_cl_cache", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#ab4170b9a9eb611db146c5a776dc191ef", null ],
     [ "enable_tuner", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#ad2e53638e2c19bbbe968b95f60256cee", null ],
     [ "fast_math_hint", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#acafd85ac6eb76b9037643104b48403e9", null ],
     [ "help", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a545363392790133c5dec1fd9e2cb279d", null ],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,4 +51,59 @@ Status CLExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::EXP);
 }
+
+void CLNegLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
+    k->configure(input, output, ElementWiseUnary::NEG);
+    _kernel = std::move(k);
+}
+Status CLNegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::NEG);
+}
+
+void CLSinLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
+    k->configure(input, output, ElementWiseUnary::SIN);
+    _kernel = std::move(k);
+}
+Status CLSinLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::SIN);
+}
+
+void CLAbsLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
+    k->configure(input, output, ElementWiseUnary::ABS);
+    _kernel = std::move(k);
+}
+Status CLAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::ABS);
+}
+void CLLogLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
+    k->configure(input, output, ElementWiseUnary::LOG);
+    _kernel = std::move(k);
+}
+Status CLLogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::LOG);
+}
+
+void CLRoundLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
+    k->configure(input, output, ElementWiseUnary::ROUND);
+    _kernel = std::move(k);
+}
+Status CLRoundLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::ROUND);
+}
+
 } // namespace arm_compute

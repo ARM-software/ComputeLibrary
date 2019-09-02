@@ -8,5 +8,7 @@ var dir_736b7cb5ae91601e9fac1dc1b70c4612 =
     [ "a64_merge_int32_12x8.hpp", "a64__merge__int32__12x8_8hpp.xhtml", null ],
     [ "list.hpp", "merges_2list_8hpp.xhtml", null ],
     [ "sve_merge_fp32_2VLx8.hpp", "sve__merge__fp32__2_v_lx8_8hpp.xhtml", null ],
-    [ "sve_merge_fp32_3VLx8.hpp", "sve__merge__fp32__3_v_lx8_8hpp.xhtml", null ]
+    [ "sve_merge_fp32_3VLx8.hpp", "sve__merge__fp32__3_v_lx8_8hpp.xhtml", null ],
+    [ "sve_merge_s32_3VLx8.hpp", "sve__merge__s32__3_v_lx8_8hpp.xhtml", null ],
+    [ "sve_merge_u32_3VLx8.hpp", "sve__merge__u32__3_v_lx8_8hpp.xhtml", null ]
 ];

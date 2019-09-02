@@ -9,6 +9,7 @@ var searchData=
   ['g71',['G71',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3a79515d904f73cf1711207de1b2aa6ac6',1,'arm_compute']]],
   ['g72',['G72',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3ab2ac2aea42c95ccc70260ceeb02ec4fc',1,'arm_compute']]],
   ['g76',['G76',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3aa46ce37da51477a1af33a8810e0ed04d',1,'arm_compute']]],
+  ['g77',['G77',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3a8e081b1cdec7bc064a67f31560ef7fe0',1,'arm_compute']]],
   ['gaussian',['GAUSSIAN',['../namespacearm__compute.xhtml#a201391f6e13e2a1ac203256a77792718a0fceff26ae86a047835cafbb6cadb1b9',1,'arm_compute']]],
   ['gc',['GC',['../namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35da7359c3eb5c57547295a76ac1bf775b29',1,'arm_compute::graph']]],
   ['gemm',['GEMM',['../namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3',1,'arm_compute::GEMM()'],['../namespacearm__compute.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada5174aac3927faa9ee34befb7fc87a9e3',1,'arm_compute::GEMM()'],['../namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3',1,'arm_compute::graph::GEMM()']]],

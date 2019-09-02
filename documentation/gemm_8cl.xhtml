@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -96,21 +96,88 @@ $(document).ready(function(){initNavTree('gemm_8cl.xhtml','');});
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#define-members">Macros</a>  </div>
   <div class="headertitle">
 <div class="title">gemm.cl File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="gemm__helpers_8h_source.xhtml">gemm_helpers.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="repeat_8h_source.xhtml">repeat.h</a>&quot;</code><br />
 </div>
 <p><a href="gemm_8cl_source.xhtml">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a2da39e3a865d4f0da99e21e37c2cef85"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gemm_8cl.xhtml#a2da39e3a865d4f0da99e21e37c2cef85">ACTIVATION_BLOCK</a>(N,  ACTIVATION_TYPE,  <a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>,  BASENAME,  A_VAL,  B_VAL)&#160;&#160;&#160;<a class="el" href="gemm__helpers_8h.xhtml#a7bbe15f149f5f2a31c613daa1afa860c">ACTIVATION_BLOCK_STR</a>(N, ACTIVATION_TYPE, <a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, BASENAME, A_VAL, B_VAL)</td></tr>
+<tr class="memdesc:a2da39e3a865d4f0da99e21e37c2cef85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply activation to the variables BASENAME##0...  <a href="#a2da39e3a865d4f0da99e21e37c2cef85">More...</a><br /></td></tr>
+<tr class="separator:a2da39e3a865d4f0da99e21e37c2cef85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="a2da39e3a865d4f0da99e21e37c2cef85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2da39e3a865d4f0da99e21e37c2cef85">&#9670;&nbsp;</a></span>ACTIVATION_BLOCK</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ACTIVATION_BLOCK</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">N, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">ACTIVATION_TYPE, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">BASENAME, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">A_VAL, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">B_VAL&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="gemm__helpers_8h.xhtml#a7bbe15f149f5f2a31c613daa1afa860c">ACTIVATION_BLOCK_STR</a>(N, ACTIVATION_TYPE, <a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, BASENAME, A_VAL, B_VAL)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Apply activation to the variables BASENAME##0... </p>
+<p>BASENAME##(n-1) Supported cases N=1,2,3..16, for variables BASENAME[0..N] </p>
+
+<p class="definition">Definition at line <a class="el" href="gemm__helpers_8h_source.xhtml#l00692">692</a> of file <a class="el" href="gemm__helpers_8h_source.xhtml">gemm_helpers.h</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="gemm_8cl.xhtml">gemm.cl</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

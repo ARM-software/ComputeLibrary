@@ -19,9 +19,6 @@ var dir_b2d75812ef27339cb07aa08923a4a042 =
       [ "GCConvolutionLayerReshapeWeights", "classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_g_c_convolution_layer_reshape_weights" ],
       [ "GCConvolutionLayer", "classarm__compute_1_1_g_c_convolution_layer.xhtml", "classarm__compute_1_1_g_c_convolution_layer" ]
     ] ],
-    [ "GCDepthConcatenateLayer.h", "_g_c_depth_concatenate_layer_8h.xhtml", [
-      [ "GCDepthConcatenateLayer", "classarm__compute_1_1_g_c_depth_concatenate_layer.xhtml", "classarm__compute_1_1_g_c_depth_concatenate_layer" ]
-    ] ],
     [ "GCDepthwiseConvolutionLayer.h", "_g_c_depthwise_convolution_layer_8h.xhtml", [
       [ "GCDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_g_c_depthwise_convolution_layer3x3.xhtml", "classarm__compute_1_1_g_c_depthwise_convolution_layer3x3" ]
     ] ],

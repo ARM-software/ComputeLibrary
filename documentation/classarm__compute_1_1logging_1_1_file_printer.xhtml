@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -120,9 +120,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a3d5886d2a5060e266219c43d06338350"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#a3d5886d2a5060e266219c43d06338350">More...</a><br /></td></tr>
 <tr class="separator:a3d5886d2a5060e266219c43d06338350"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1logging_1_1_printer"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1logging_1_1_printer')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml">Printer</a></td></tr>
-<tr class="memitem:af1eb8ac5e81b67bdb4dad929c58f4d00 inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml#af1eb8ac5e81b67bdb4dad929c58f4d00">Printer</a> ()</td></tr>
-<tr class="memdesc:af1eb8ac5e81b67bdb4dad929c58f4d00 inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="classarm__compute_1_1logging_1_1_printer.xhtml#af1eb8ac5e81b67bdb4dad929c58f4d00">More...</a><br /></td></tr>
-<tr class="separator:af1eb8ac5e81b67bdb4dad929c58f4d00 inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83bd7dc8741862742ec63172493fecfc inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml#a83bd7dc8741862742ec63172493fecfc">Printer</a> () noexcept</td></tr>
+<tr class="memdesc:a83bd7dc8741862742ec63172493fecfc inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="classarm__compute_1_1logging_1_1_printer.xhtml#a83bd7dc8741862742ec63172493fecfc">More...</a><br /></td></tr>
+<tr class="separator:a83bd7dc8741862742ec63172493fecfc inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1c9bd7e4bc60107ac6035125cf76024 inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml#ab1c9bd7e4bc60107ac6035125cf76024">Printer</a> (const <a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml">Printer</a> &amp;)=delete</td></tr>
 <tr class="memdesc:ab1c9bd7e4bc60107ac6035125cf76024 inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied.  <a href="classarm__compute_1_1logging_1_1_printer.xhtml#ab1c9bd7e4bc60107ac6035125cf76024">More...</a><br /></td></tr>
 <tr class="separator:ab1c9bd7e4bc60107ac6035125cf76024 inherit pub_methods_classarm__compute_1_1logging_1_1_printer"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -172,10 +172,10 @@ Public Member Functions</h2></td></tr>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_file_printer_8cpp_source.xhtml#l00028">28</a> of file <a class="el" href="_file_printer_8cpp_source.xhtml">FilePrinter.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    : _handler()</div><div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;{</div><div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    _handler.<a class="code" href="classarm__compute_1_1io_1_1_file_handler.xhtml#aa6d6ff37ab6cae622a54e37c16dd53b2">open</a>(filename, std::fstream::out | <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#ae04d407202e3d50ce6a4c79ac00a5d59">std::fstream::trunc</a>);</div><div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1support_1_1cpp11_xhtml_ae04d407202e3d50ce6a4c79ac00a5d59"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#ae04d407202e3d50ce6a4c79ac00a5d59">arm_compute::support::cpp11::trunc</a></div><div class="ttdeci">T trunc(T value)</div><div class="ttdoc">Truncate floating-point value.</div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00256">ToolchainSupport.h:256</a></div></div>
+<div class="fragment"><div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    : _handler()</div><div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;{</div><div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    _handler.<a class="code" href="classarm__compute_1_1io_1_1_file_handler.xhtml#aa6d6ff37ab6cae622a54e37c16dd53b2">open</a>(filename, std::fstream::out | <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#ae04d407202e3d50ce6a4c79ac00a5d59">std::fstream::trunc</a>);</div><div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1support_1_1cpp11_xhtml_ae04d407202e3d50ce6a4c79ac00a5d59"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#ae04d407202e3d50ce6a4c79ac00a5d59">arm_compute::support::cpp11::trunc</a></div><div class="ttdeci">T trunc(T value)</div><div class="ttdoc">Truncate floating-point value.</div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00303">ToolchainSupport.h:303</a></div></div>
 <div class="ttc" id="classarm__compute_1_1io_1_1_file_handler_xhtml_aa6d6ff37ab6cae622a54e37c16dd53b2"><div class="ttname"><a href="classarm__compute_1_1io_1_1_file_handler.xhtml#aa6d6ff37ab6cae622a54e37c16dd53b2">arm_compute::io::FileHandler::open</a></div><div class="ttdeci">void open(const std::string &amp;filename, std::ios_base::openmode mode)</div><div class="ttdoc">Opens file.</div><div class="ttdef"><b>Definition:</b> <a href="_file_handler_8cpp_source.xhtml#l00043">FileHandler.cpp:43</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_file_handler_8cpp_source.xhtml#l00043">FileHandler::open()</a>, and <a class="el" href="_toolchain_support_8h_source.xhtml#l00256">arm_compute::support::cpp11::trunc()</a>.</p>
+<p class="reference">References <a class="el" href="_file_handler_8cpp_source.xhtml#l00043">FileHandler::open()</a>, and <a class="el" href="_toolchain_support_8h_source.xhtml#l00303">arm_compute::support::cpp11::trunc()</a>.</p>
 
 </div>
 </div>
@@ -189,7 +189,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1logging.xhtml">logging</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1logging_1_1_file_printer.xhtml">FilePrinter</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:40 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

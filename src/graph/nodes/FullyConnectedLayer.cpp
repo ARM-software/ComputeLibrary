@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 namespace graph
 {
 FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, QuantizationInfo out_quant_info, FullyConnectedLayerInfo fc_info)
-    : _num_outputs(num_outputs), _out_quant_info(out_quant_info), _info(fc_info)
+    : _num_outputs(num_outputs), _out_quant_info(std::move(out_quant_info)), _info(fc_info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -41,7 +41,7 @@ FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, Quant
 TensorDescriptor FullyConnectedLayerNode::compute_weights_descriptor(const TensorDescriptor &input_descriptor,
                                                                      unsigned int            num_outputs,
                                                                      FullyConnectedLayerInfo fc_info,
-                                                                     QuantizationInfo        weights_quant_info)
+                                                                     const QuantizationInfo &weights_quant_info)
 {
     unsigned int num_weights    = 1;
     unsigned int num_dimensions = input_descriptor.shape.num_dimensions();
@@ -75,7 +75,7 @@ TensorDescriptor FullyConnectedLayerNode::compute_weights_descriptor(const Tenso
 
 TensorDescriptor FullyConnectedLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
                                                                     unsigned int            num_outputs,
-                                                                    QuantizationInfo        out_quant_info)
+                                                                    const QuantizationInfo &out_quant_info)
 {
     // Note: Only 1D batch space is supported at the moment
     unsigned int batches = input_descriptor.shape[1];

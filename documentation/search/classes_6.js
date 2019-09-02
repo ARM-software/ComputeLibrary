@@ -17,5 +17,7 @@ var searchData=
   ['fullyconnectedlayerinfo',['FullyConnectedLayerInfo',['../structarm__compute_1_1_fully_connected_layer_info.xhtml',1,'arm_compute']]],
   ['fullyconnectedlayernode',['FullyConnectedLayerNode',['../classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml',1,'arm_compute::graph']]],
   ['fusedconvolutionbatchnormalizationfunction',['FusedConvolutionBatchNormalizationFunction',['../classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml',1,'arm_compute::graph::backends']]],
-  ['fusedconvolutionbatchnormalizationnode',['FusedConvolutionBatchNormalizationNode',['../classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml',1,'arm_compute::graph']]]
+  ['fusedconvolutionbatchnormalizationnode',['FusedConvolutionBatchNormalizationNode',['../classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml',1,'arm_compute::graph']]],
+  ['fuseddepthwiseconvolutionbatchnormalizationfunction',['FusedDepthwiseConvolutionBatchNormalizationFunction',['../classarm__compute_1_1graph_1_1backends_1_1_fused_depthwise_convolution_batch_normalization_function.xhtml',1,'arm_compute::graph::backends']]],
+  ['fuseddepthwiseconvolutionbatchnormalizationnode',['FusedDepthwiseConvolutionBatchNormalizationNode',['../classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml',1,'arm_compute::graph']]]
 ];

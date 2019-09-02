@@ -55,6 +55,10 @@ public:
         // Asymmetric padding
         add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR), Size2D(2U, 2U));
         add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR), Size2D(2U, 2U));
+        // Dilation and padding 2
+        add_config(TensorShape(33U, 33U, 3U), Size2D(3U, 3U), PadStrideInfo(1, 1, 2, 2, 2, 2, DimensionRoundingType::FLOOR), Size2D(2U, 2U));
+        // Dilation and padding 4
+        add_config(TensorShape(33U, 33U, 3U), Size2D(3U, 3U), PadStrideInfo(1, 1, 4, 4, 4, 4, DimensionRoundingType::FLOOR), Size2D(4U, 4U));
     }
 };
 

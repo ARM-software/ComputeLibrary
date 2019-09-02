@@ -73,7 +73,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 
 #ifdef __ARM_FEATURE_SVE
-        // SVE smallk / native / hybrid methods
+// SVE smallk / native / hybrid methods
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_fp32_mla_1VLx4",
@@ -128,7 +128,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 
 #ifdef __ARM_FEATURE_SVE
-        {
+{
     GemmMethod::GEMM_INTERLEAVED,
     "interleaved_fp32_mla_3VLx8",
     [](const GemmArgs<float> &args) { return (args._Ksize>4); },
@@ -146,7 +146,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 #endif // __aarch64__
 
 #ifdef __arm__
-        {
+{
     GemmMethod::GEMM_INTERLEAVED,
     "sgemm_8x6",
     nullptr,
@@ -170,9 +170,8 @@ const GemmImplementation<float, float> *gemm_implementation_list<float, float>()
 }
 
 /* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<float, float> gemm<float, float>(const GemmArgs<float> &args);
-template KernelDescription get_gemm_method<float, float>(const GemmArgs<float> &args);
-template bool method_is_compatible<float, float>(GemmMethod method, const GemmArgs<float> &args);
-template std::vector<KernelDescription> get_compatible_kernels<float, float> (const GemmArgs<float> &args);
+template UniqueGemmCommon<float, float> gemm<float, float, Nothing>(const GemmArgs<float> &args, const Nothing &);
+template KernelDescription get_gemm_method<float, float, Nothing>(const GemmArgs<float> &args, const Nothing &);
+template std::vector<KernelDescription> get_compatible_kernels<float, float, Nothing> (const GemmArgs<float> &args, const Nothing &);
 
 } // namespace arm_gemm

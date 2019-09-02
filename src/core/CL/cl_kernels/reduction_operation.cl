@@ -23,6 +23,19 @@
  */
 #include "helpers.h"
 
+#if FLOAT_DATA_TYPE
+#define ISGREATER(x, y) isgreater(x, y)
+#define ISLESS(x, y) isless(x, y)
+#else // !FLOAT_DATA_TYPE
+#if defined(WIDTH)
+#define ISGREATER(x, y) (x > y) ? 1 : 0
+#define ISLESS(x, y) (x < y) ? 1 : 0
+#else // !defined(WIDTH)
+#define ISGREATER(x, y) select((int16)0, (int16)-1, x > y)
+#define ISLESS(x, y) select((int16)0, (int16)-1, x < y)
+#endif // defined(WIDTH)
+#endif // FLOAT_DATA_TYPE
+
 /** Calculate square sum of a vector
  *
  * @param[in] input Pointer to the first pixel.
@@ -124,9 +137,9 @@ __kernel void reduction_operation_x(
             {
 #if defined(PROD)
                 local_results[lid] *= local_results[lid + i];
-#else  //!defined(PROD)
+#else  // !defined(PROD)
                 local_results[lid] += local_results[lid + i];
-#endif //defined(PROD)
+#endif // defined(PROD)
             }
             barrier(CLK_LOCAL_MEM_FENCE);
         }
@@ -138,7 +151,7 @@ __kernel void reduction_operation_x(
             {
                 local_results[0] /= WIDTH;
             }
-#endif /* defined(MEAN) && defined(WIDTH) */
+#endif // defined(MEAN) && defined(WIDTH)
             ((__global DATA_TYPE *)offset(&partial_res, get_group_id(0), y))[0] = local_results[0];
         }
     }
@@ -153,7 +166,7 @@ __kernel void reduction_operation_x(
  * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
  * @note In case of ARG_MIN and ARG_MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
  *
- * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: F16/F32 and QASYMM8 for operation MEAN
+ * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: S32/F16/F32 and QASYMM8 for operation MEAN
  * @param[in] src_stride_x                         Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_offset_first_element_in_bytes    The offset of the first element in the source tensor
@@ -179,11 +192,15 @@ __kernel void reduction_operation_non_parallel_x(
     {
         DATA_TYPE_PROMOTED in = *((__global DATA_TYPE *)vector_offset(&src, x));
 #if defined(ARG_MAX)
-        indx = select(indx, x, isgreater(in, res));
-        res  = select(res, in, CONVERT(isgreater(in, res), COND_DATA_TYPE));
+        indx = select(indx, x, ISGREATER(in, res));
+        res  = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
 #elif defined(ARG_MIN)
-        indx = select(indx, x, isless(in, res));
-        res  = select(res, in, CONVERT(isless(in, res), COND_DATA_TYPE));
+        indx = select(indx, x, ISLESS(in, res));
+        res  = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
+#elif defined(MIN)
+        res = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
+#elif defined(MAX)
+        res = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
 #else  // !(defined(ARG_MAX) || defined(ARG_MIN))
         res += in;
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
@@ -196,10 +213,14 @@ __kernel void reduction_operation_non_parallel_x(
 #if defined(MEAN)
     res /= WIDTH;
 #endif // defined(MEAN)
+#if defined(MIN) || defined(MAX)
+    *((__global DATA_TYPE_PROMOTED *)output.ptr) = res;
+#else  // defined(MIN) || defined(MAX)
     *((__global uchar *)output.ptr) = convert_uchar(res);
+#endif // defined(MIN) || defined(MAX)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
-#endif /* defined(WIDTH) */
+#endif // defined(WIDTH)
 
 #if defined(HEIGHT)
 /** This kernel performs reduction on y-axis.
@@ -207,7 +228,7 @@ __kernel void reduction_operation_non_parallel_x(
  * @note The input data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The height size must be passed at compile time using -DHEIGHT e.g. -DHEIGHT=128
  *
- * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: QASYMM8/S32/F16/F32
  * @param[in] src_stride_x                         Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                         Stride of the source tensor in Y dimension (in bytes)
@@ -243,22 +264,26 @@ __kernel void reduction_operation_y(
         VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
         in = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, y)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 #if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(isgreater(in, res), uint16);
+        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
         indx             = select(indx, y, cond_conv);
-        res              = select(res, in, isgreater(in, res));
+        res              = select(res, in, ISGREATER(in, res));
 #elif defined(ARG_MIN)
-        uint16  cond_conv           = CONVERT(isless(in, res), uint16);
-        indx                        = select(indx, y, cond_conv);
-        res                         = select(res, in, isless(in, res));
+        uint16 cond_conv                         = CONVERT(ISLESS(in, res), uint16);
+        indx                                     = select(indx, y, cond_conv);
+        res                                      = select(res, in, ISLESS(in, res));
+#elif defined(MIN)
+        res = select(res, in, ISLESS(in, res));
+#elif defined(MAX)
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
 #if defined(PROD)
         res *= in;
-#else  //!defined(PROD)
+#else  // !defined(PROD)
         res += in;
-#endif //defined(PROD)
+#endif // defined(PROD)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
     }
 
@@ -272,7 +297,7 @@ __kernel void reduction_operation_y(
     vstore16(CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
-#endif /* defined(HEIGHT) */
+#endif // defined(HEIGHT)
 
 #if defined(DEPTH)
 /** This kernel performs reduction on z-axis.
@@ -280,7 +305,7 @@ __kernel void reduction_operation_y(
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The depth size must be passed at compile time using -DDEPTH e.g. -DDEPTH=128
  *
- * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/S32/F16/F32
  * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -330,13 +355,17 @@ __kernel void reduction_operation_z(
 #endif // defined(COMPLEX)
 
 #if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(isgreater(in, res), uint16);
+        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
         indx             = select(indx, z, cond_conv);
-        res              = select(res, in, isgreater(in, res));
+        res              = select(res, in, ISGREATER(in, res));
 #elif defined(ARG_MIN)
-        uint16 cond_conv = CONVERT(isless(in, res), uint16);
+        uint16 cond_conv = CONVERT(ISLESS(in, res), uint16);
         indx             = select(indx, z, cond_conv);
-        res              = select(res, in, isless(in, res));
+        res              = select(res, in, ISLESS(in, res));
+#elif defined(MIN)
+        res = select(res, in, ISLESS(in, res));
+#elif defined(MAX)
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
         in *= in;
@@ -374,7 +403,7 @@ __kernel void reduction_operation_z(
  * @note The batch size must be passed at compile time using -DBATCH e.g. -DBATCH=128
  * @note The depth size must be passed at compile time using -DBATCH e.g. -DDEPTH=128
  *
- * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/S32/F16/F32
  * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -419,13 +448,17 @@ __kernel void reduction_operation_w(
         in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, w)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 
 #if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(isgreater(in, res), uint16);
+        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
         indx             = select(indx, w, cond_conv);
-        res              = select(res, in, isgreater(in, res));
+        res              = select(res, in, ISGREATER(in, res));
 #elif defined(ARG_MIN)
-        uint16 cond_conv = CONVERT(isless(in, res), uint16);
+        uint16 cond_conv = CONVERT(ISLESS(in, res), uint16);
         indx             = select(indx, w, cond_conv);
-        res              = select(res, in, isless(in, res));
+        res              = select(res, in, ISLESS(in, res));
+#elif defined(MIN)
+        res = select(res, in, ISLESS(in, res));
+#elif defined(MAX)
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
         in *= in;

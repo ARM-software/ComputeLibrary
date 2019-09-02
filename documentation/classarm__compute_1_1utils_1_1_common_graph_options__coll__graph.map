@@ -1,18 +1,18 @@
 <map id="CommonGraphOptions" name="CommonGraphOptions">
-<area shape="rect" id="node1" title="Common command line options used to configure the graph examples." alt="" coords="1348,332,1517,359"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_toggle_option.xhtml" title="Implementation of an option that can be either true or false." alt="" coords="1047,129,1151,156"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="552,129,717,156"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1utils_1_1_option.xhtml" title="Abstract base class for a command line option." alt="" coords="5,285,69,312"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title="Implementation of an option that accepts a single value." alt="" coords="119,285,264,312"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="557,181,712,208"/>
-<area shape="rect" id="node8" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="528,586,741,627"/>
-<area shape="rect" id="node10" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title="Implementation of an option that accepts a single value." alt="" coords="119,547,264,573"/>
-<area shape="rect" id="node11" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="528,61,741,102"/>
-<area shape="rect" id="node13" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="528,421,741,462"/>
-<area shape="rect" id="node15" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="528,355,741,397"/>
-<area shape="rect" id="node16" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="559,278,710,319"/>
-<area shape="rect" id="node7" href="$classarm__compute_1_1utils_1_1_enum_option.xhtml" title=" " alt="" coords="996,542,1203,583"/>
-<area shape="rect" id="node9" href="$classarm__compute_1_1utils_1_1_enum_option.xhtml" title="Implementation of a simple option that accepts a value from a fixed set." alt="" coords="565,504,704,531"/>
-<area shape="rect" id="node12" href="$classarm__compute_1_1utils_1_1_enum_option.xhtml" title=" " alt="" coords="996,459,1203,501"/>
-<area shape="rect" id="node14" href="$classarm__compute_1_1utils_1_1_enum_option.xhtml" title=" " alt="" coords="996,394,1203,435"/>
+<area shape="rect" id="node1" title="Common command line options used to configure the graph examples." alt="" coords="1360,345,1529,372"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_toggle_option.xhtml" title="Implementation of an option that can be either true or false." alt="" coords="1047,143,1151,169"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="552,143,717,169"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1utils_1_1_option.xhtml" title="Abstract base class for a command line option." alt="" coords="5,320,69,347"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title="Implementation of an option that accepts a single value." alt="" coords="119,320,264,347"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="557,195,712,221"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="528,610,741,651"/>
+<area shape="rect" id="node10" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title="Implementation of an option that accepts a single value." alt="" coords="119,581,264,608"/>
+<area shape="rect" id="node11" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="528,65,741,106"/>
+<area shape="rect" id="node13" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="528,447,741,489"/>
+<area shape="rect" id="node15" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="528,382,741,423"/>
+<area shape="rect" id="node16" href="$classarm__compute_1_1utils_1_1_simple_option.xhtml" title=" " alt="" coords="559,313,710,354"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1utils_1_1_enum_option.xhtml" title=" " alt="" coords="996,566,1203,607"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1utils_1_1_enum_option.xhtml" title="Implementation of a simple option that accepts a value from a fixed set." alt="" coords="565,531,704,557"/>
+<area shape="rect" id="node12" href="$classarm__compute_1_1utils_1_1_enum_option.xhtml" title=" " alt="" coords="996,473,1203,514"/>
+<area shape="rect" id="node14" href="$classarm__compute_1_1utils_1_1_enum_option.xhtml" title=" " alt="" coords="996,407,1203,449"/>
 </map>

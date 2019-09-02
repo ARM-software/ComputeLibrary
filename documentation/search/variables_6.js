@@ -1,7 +1,7 @@
 var searchData=
 [
   ['f16',['f16',['../classarm__compute_1_1_pixel_value.xhtml#a4222b84bae684380152759cada8601c5',1,'arm_compute::PixelValue']]],
-  ['f32',['f32',['../classarm__compute_1_1_pixel_value.xhtml#a7d886905c667c4e8e91251b6a3a98f39',1,'arm_compute::PixelValue']]],
+  ['f32',['f32',['../classarm__compute_1_1_pixel_value.xhtml#a7d886905c667c4e8e91251b6a3a98f39',1,'arm_compute::PixelValue::f32()'],['../unionarm__compute_1_1helpers_1_1float__ops_1_1_raw_float.xhtml#a7d886905c667c4e8e91251b6a3a98f39',1,'arm_compute::helpers::float_ops::RawFloat::f32()']]],
   ['f64',['f64',['../classarm__compute_1_1_pixel_value.xhtml#a4a511caf994d6ffbbd9180293c53fd38',1,'arm_compute::PixelValue']]],
   ['fast_5fmath_5fhint',['fast_math_hint',['../structarm__compute_1_1graph_1_1frontend_1_1_stream_hints.xhtml#abdcfd0552ddabcb92a04396961fb6377',1,'arm_compute::graph::frontend::StreamHints::fast_math_hint()'],['../structarm__compute_1_1utils_1_1_common_graph_params.xhtml#acafd85ac6eb76b9037643104b48403e9',1,'arm_compute::utils::CommonGraphParams::fast_math_hint()'],['../classarm__compute_1_1utils_1_1_common_graph_options.xhtml#acb7fa90ec602efaaee1e7ab25ccbfa98',1,'arm_compute::utils::CommonGraphOptions::fast_math_hint()']]],
   ['fft2d',['fft2d',['../namespacearm__compute_1_1test_1_1validation.xhtml#a9da646786707a26209676075a106a439',1,'arm_compute::test::validation']]],

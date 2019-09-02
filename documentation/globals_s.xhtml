@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -105,11 +105,62 @@ $(document).ready(function(){initNavTree('globals_s.xhtml','');});
 <li>scale_bilinear_quantized_nchw()
 : <a class="el" href="scale__quantized_8cl.xhtml#a157d3c35f643dafe1c4bed09594f3bb5">scale_quantized.cl</a>
 </li>
+<li>SCALE_BLOCK
+: <a class="el" href="gemm__helpers_8h.xhtml#a4e4f47c0a33bb8a9ab20b355d7fa84ca">gemm_helpers.h</a>
+</li>
+<li>SCALE_BLOCK_STR
+: <a class="el" href="gemm__helpers_8h.xhtml#a8eea56ab5aebc4c42c5843931ea3531f">gemm_helpers.h</a>
+</li>
 <li>scale_nearest_neighbour_nchw()
 : <a class="el" href="scale_8cl.xhtml#ab0d36306b50e1c7961dfa9337d73ecbb">scale.cl</a>
 </li>
-<li>SCALE_OUT
-: <a class="el" href="activation__layer__qa8_8cl.xhtml#a814d8a020b304f2ad69204ca56d76e4f">activation_layer_qa8.cl</a>
+<li>SCALE_ROW_1
+: <a class="el" href="gemm__helpers_8h.xhtml#aac2efc3c4948cb7e9ba3377e84d6e102">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_10
+: <a class="el" href="gemm__helpers_8h.xhtml#a22a7a60238d5b50fff2a15f0b7227377">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_11
+: <a class="el" href="gemm__helpers_8h.xhtml#a5fef984324e4bda881b3d8cfe762acb7">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_12
+: <a class="el" href="gemm__helpers_8h.xhtml#a2cf3a7c05776df5e4e506ac4b013107e">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_13
+: <a class="el" href="gemm__helpers_8h.xhtml#af24d0d4d6fd271f2f06b926c5fde117f">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_14
+: <a class="el" href="gemm__helpers_8h.xhtml#a4679f2cbb8476b2daf761bd7c23aad13">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_15
+: <a class="el" href="gemm__helpers_8h.xhtml#a2fcb13728ffbc650ee2656875387551a">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_16
+: <a class="el" href="gemm__helpers_8h.xhtml#aecee5c3762ade793d2df3f1bdb6c2bf4">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_2
+: <a class="el" href="gemm__helpers_8h.xhtml#a2496863a39fb68aa705466449c70bdae">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_3
+: <a class="el" href="gemm__helpers_8h.xhtml#ac5068b1bb8e42e1a5267794ee5b634ff">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_4
+: <a class="el" href="gemm__helpers_8h.xhtml#ac283f229abc1d3104e6a07d22c3a8070">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_5
+: <a class="el" href="gemm__helpers_8h.xhtml#a95e48c8e88afb7e8b51e7dd85650d91f">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_6
+: <a class="el" href="gemm__helpers_8h.xhtml#acddce02f6c8d1b07ccb651122600f110">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_7
+: <a class="el" href="gemm__helpers_8h.xhtml#a4238aa33326487bed6c5b29d98d702a3">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_8
+: <a class="el" href="gemm__helpers_8h.xhtml#a91b9e33c8e3a2eceddbfc4db85ede8ac">gemm_helpers.h</a>
+</li>
+<li>SCALE_ROW_9
+: <a class="el" href="gemm__helpers_8h.xhtml#a89951f2e93db7980d3751978a70a5762">gemm_helpers.h</a>
 </li>
 <li>scharr3x3()
 : <a class="el" href="scharr__filter_8cl.xhtml#a7cc764a3a8a92f986344e05cfb1fe75a">scharr_filter.cl</a>
@@ -117,8 +168,8 @@ $(document).ready(function(){initNavTree('globals_s.xhtml','');});
 <li>SELECT_DATA_TYPE
 : <a class="el" href="softmax__layer_8cl.xhtml#af5b2e33e3c5fcaab3a213f26c2300170">softmax_layer.cl</a>
 </li>
-<li>SELECT_TYPE
-: <a class="el" href="activation__layer_8cl.xhtml#a5c9e2fb8fe562b69a0be48600a910d77">activation_layer.cl</a>
+<li>short1
+: <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a881bd536ec58fbb321d2fd3445f1acfd">helpers.h</a>
 </li>
 <li>SOBEL1x1_HOR
 : <a class="el" href="sobel__filter_8cl.xhtml#ad40297671e8a51899c6114386492006b">sobel_filter.cl</a>
@@ -181,18 +232,81 @@ $(document).ready(function(){initNavTree('globals_s.xhtml','');});
 <li>SQRT_OP
 : <a class="el" href="pooling__layer_8cl.xhtml#ac9af19bec38fe50b4b9585c0e5c0ccca">pooling_layer.cl</a>
 </li>
+<li>sqrt_op
+: <a class="el" href="activation__float__helpers_8h.xhtml#a43bf6bb78e61889b6a1f3f60b36d52a8">activation_float_helpers.h</a>
+</li>
+<li>square_op
+: <a class="el" href="activation__float__helpers_8h.xhtml#a3fbe1c283cc8c5e8bd79623c760b498d">activation_float_helpers.h</a>
+</li>
 <li>square_sum()
 : <a class="el" href="reduction__operation_8cl.xhtml#a48cc0583beba45dfba6d94fb6dc3c59a">reduction_operation.cl</a>
 </li>
 <li>SQUARED_DIFF
-: <a class="el" href="elementwise__operation__quantized_8cl.xhtml#ab05bd244cb8823c69d6dce6a23a758fd">elementwise_operation_quantized.cl</a>
-, <a class="el" href="elementwise__operation_8cl.xhtml#ab05bd244cb8823c69d6dce6a23a758fd">elementwise_operation.cl</a>
+: <a class="el" href="elementwise__operation_8cl.xhtml#ab05bd244cb8823c69d6dce6a23a758fd">elementwise_operation.cl</a>
+, <a class="el" href="elementwise__operation__quantized_8cl.xhtml#ab05bd244cb8823c69d6dce6a23a758fd">elementwise_operation_quantized.cl</a>
+</li>
+<li>srelu_op
+: <a class="el" href="activation__float__helpers_8h.xhtml#a7ac4f206b54438676f70075b6d9e4a1a">activation_float_helpers.h</a>
 </li>
 <li>STB_IMAGE_IMPLEMENTATION
 : <a class="el" href="utils_2_utils_8cpp.xhtml#a18372412ad2fc3ce1e3240b3cf0efe78">Utils.cpp</a>
 </li>
+<li>STORE_BLOCK
+: <a class="el" href="gemm__helpers_8h.xhtml#ab6d2df39dc14930b9865d6309913dc4d">gemm_helpers.h</a>
+</li>
+<li>STORE_BLOCK_STR
+: <a class="el" href="gemm__helpers_8h.xhtml#a7249d30c01773ebe7a7c15899550967f">gemm_helpers.h</a>
+</li>
 <li>STORE_OP
 : <a class="el" href="normalization__layer_8cl.xhtml#ac59caf44b60378c02032aab994ad5ac1">normalization_layer.cl</a>
+</li>
+<li>STORE_ROW_1
+: <a class="el" href="gemm__helpers_8h.xhtml#a42775a26a1afa49fa6daf22199bfb283">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_10
+: <a class="el" href="gemm__helpers_8h.xhtml#a9444374f91effec8941ac8151dbbd7b6">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_11
+: <a class="el" href="gemm__helpers_8h.xhtml#ac116aeace921fc2ed18537b7c115c3cb">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_12
+: <a class="el" href="gemm__helpers_8h.xhtml#ae07d54f575d6a2f3139e03aacbb7ba65">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_13
+: <a class="el" href="gemm__helpers_8h.xhtml#aaef65e04adc0477068c7713626b9519d">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_14
+: <a class="el" href="gemm__helpers_8h.xhtml#aa470c872334170ec0b9e0a1e6327aa18">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_15
+: <a class="el" href="gemm__helpers_8h.xhtml#ac5bb6f26a4982d7e74ed332b90afa9ee">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_16
+: <a class="el" href="gemm__helpers_8h.xhtml#a7148578cb34f2dc761f273e78e564fb4">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_2
+: <a class="el" href="gemm__helpers_8h.xhtml#abfd02cf3b334c8d64b47b05499129c7d">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_3
+: <a class="el" href="gemm__helpers_8h.xhtml#ae9cd4eda11385d9c58f4e029d5ca523c">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_4
+: <a class="el" href="gemm__helpers_8h.xhtml#adea0e5628fb45b01a63b5195421f0548">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_5
+: <a class="el" href="gemm__helpers_8h.xhtml#a6e2883a7dd0151a0c04cac5a9f03c0d4">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_6
+: <a class="el" href="gemm__helpers_8h.xhtml#a6c137549a648443ebf108dae08697ea7">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_7
+: <a class="el" href="gemm__helpers_8h.xhtml#a1bcd88f16608529139b6b6a0c42be962">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_8
+: <a class="el" href="gemm__helpers_8h.xhtml#a388039f02de6b40465f4623ba27eb0df">gemm_helpers.h</a>
+</li>
+<li>STORE_ROW_9
+: <a class="el" href="gemm__helpers_8h.xhtml#aced5eba2ce0f7efa377a1d4e87d58a74">gemm_helpers.h</a>
 </li>
 <li>strided_slice()
 : <a class="el" href="slice__ops_8cl.xhtml#a1ff147e576a6f86e0ff50c91716f42ac">slice_ops.cl</a>
@@ -202,8 +316,8 @@ $(document).ready(function(){initNavTree('globals_s.xhtml','');});
 , <a class="el" href="elementwise__operation_8cl.xhtml#aafc2c4f262a0686c07f86c7d2e1d8d14">elementwise_operation.cl</a>
 </li>
 <li>SUB_OP
-: <a class="el" href="softmax__layer_8cl.xhtml#ac3af2d18008cbbf7247ae48fcd6e0c4e">softmax_layer.cl</a>
-, <a class="el" href="batchnormalization__layer_8cl.xhtml#ad778425e4131c4731f17d7e6e3499a07">batchnormalization_layer.cl</a>
+: <a class="el" href="batchnormalization__layer_8cl.xhtml#ad778425e4131c4731f17d7e6e3499a07">batchnormalization_layer.cl</a>
+, <a class="el" href="softmax__layer_8cl.xhtml#ac3af2d18008cbbf7247ae48fcd6e0c4e">softmax_layer.cl</a>
 </li>
 <li>sum()
 : <a class="el" href="reduction__operation_8cl.xhtml#ab0df00f5333da51860deb93deb44a782">reduction_operation.cl</a>
@@ -226,7 +340,7 @@ $(document).ready(function(){initNavTree('globals_s.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:39 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -116,33 +116,37 @@ Macros</h2></td></tr>
 <tr class="separator:a603cb7f45efd81606e51686da9aeebd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c274ed8a1a31eb195191c849ae4ff6f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a6c274ed8a1a31eb195191c849ae4ff6f">CONCAT</a>(ARG0,  ARG1)&#160;&#160;&#160;ARG0##ARG1</td></tr>
 <tr class="separator:a6c274ed8a1a31eb195191c849ae4ff6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1667c2513ea4d07e8c042cb7d703b03e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a1667c2513ea4d07e8c042cb7d703b03e">VARIADIC_SIZE_IMPL</a>(e0,  e1,  e2,  e3,  e4,  e5,  e6,  e7,  e8,  e9,  e10,  size, ...)&#160;&#160;&#160;size</td></tr>
-<tr class="separator:a1667c2513ea4d07e8c042cb7d703b03e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a69f74358d42fc010bd8807d07436d7b5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a69f74358d42fc010bd8807d07436d7b5">VARIADIC_SIZE</a>(...)&#160;&#160;&#160;<a class="el" href="tests_2framework_2_macros_8h.xhtml#a1667c2513ea4d07e8c042cb7d703b03e">VARIADIC_SIZE_IMPL</a>(__VA_ARGS__, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)</td></tr>
+<tr class="memitem:a472d2291914c67882a7c8a209b64d0b6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a472d2291914c67882a7c8a209b64d0b6">VARIADIC_SIZE_IMPL</a>(e0,  e1,  e2,  e3,  e4,  e5,  e6,  e7,  e8,  e9,  e10,  e11,  e12,  size, ...)&#160;&#160;&#160;size</td></tr>
+<tr class="separator:a472d2291914c67882a7c8a209b64d0b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69f74358d42fc010bd8807d07436d7b5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a69f74358d42fc010bd8807d07436d7b5">VARIADIC_SIZE</a>(...)&#160;&#160;&#160;<a class="el" href="tests_2framework_2_macros_8h.xhtml#a472d2291914c67882a7c8a209b64d0b6">VARIADIC_SIZE_IMPL</a>(__VA_ARGS__, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)</td></tr>
 <tr class="separator:a69f74358d42fc010bd8807d07436d7b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acdd2ac75560db81371f4053e6465a0eb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#acdd2ac75560db81371f4053e6465a0eb">JOIN_PARAM1</a>(OP,  param)&#160;&#160;&#160;OP(0, param)</td></tr>
+<tr class="memitem:acdd2ac75560db81371f4053e6465a0eb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#acdd2ac75560db81371f4053e6465a0eb">JOIN_PARAM1</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param)&#160;&#160;&#160;<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(0, param)</td></tr>
 <tr class="separator:acdd2ac75560db81371f4053e6465a0eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35d1497660f569a76fe4de6bebf67c9a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a35d1497660f569a76fe4de6bebf67c9a">JOIN_PARAM2</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:a35d1497660f569a76fe4de6bebf67c9a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a35d1497660f569a76fe4de6bebf67c9a">JOIN_PARAM2</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:a35d1497660f569a76fe4de6bebf67c9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afedfb2831ec629f6445b1d4d5ed30154"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#afedfb2831ec629f6445b1d4d5ed30154">JOIN_PARAM3</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:afedfb2831ec629f6445b1d4d5ed30154"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#afedfb2831ec629f6445b1d4d5ed30154">JOIN_PARAM3</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:afedfb2831ec629f6445b1d4d5ed30154"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43ee597995dd64cfabd52d2342342855"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a43ee597995dd64cfabd52d2342342855">JOIN_PARAM4</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:a43ee597995dd64cfabd52d2342342855"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a43ee597995dd64cfabd52d2342342855">JOIN_PARAM4</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:a43ee597995dd64cfabd52d2342342855"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97a58dd462df2048aefa8446a841d7a4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a97a58dd462df2048aefa8446a841d7a4">JOIN_PARAM5</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:a97a58dd462df2048aefa8446a841d7a4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a97a58dd462df2048aefa8446a841d7a4">JOIN_PARAM5</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:a97a58dd462df2048aefa8446a841d7a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afd783b31f55f3b403a82e2b9e3770e1a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#afd783b31f55f3b403a82e2b9e3770e1a">JOIN_PARAM6</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:afd783b31f55f3b403a82e2b9e3770e1a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#afd783b31f55f3b403a82e2b9e3770e1a">JOIN_PARAM6</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:afd783b31f55f3b403a82e2b9e3770e1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29cc9415a23ee73a5f0872a0433c5637"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a29cc9415a23ee73a5f0872a0433c5637">JOIN_PARAM7</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:a29cc9415a23ee73a5f0872a0433c5637"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a29cc9415a23ee73a5f0872a0433c5637">JOIN_PARAM7</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:a29cc9415a23ee73a5f0872a0433c5637"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad05271218a1dc0111d1b07ecd8f94904"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#ad05271218a1dc0111d1b07ecd8f94904">JOIN_PARAM8</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:ad05271218a1dc0111d1b07ecd8f94904"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#ad05271218a1dc0111d1b07ecd8f94904">JOIN_PARAM8</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:ad05271218a1dc0111d1b07ecd8f94904"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a450d225a223a3f1db8bdc093885d48c0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a450d225a223a3f1db8bdc093885d48c0">JOIN_PARAM9</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:a450d225a223a3f1db8bdc093885d48c0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a450d225a223a3f1db8bdc093885d48c0">JOIN_PARAM9</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:a450d225a223a3f1db8bdc093885d48c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d997912b340aca63b12b84330f8a4bc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a4d997912b340aca63b12b84330f8a4bc">JOIN_PARAM10</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:a4d997912b340aca63b12b84330f8a4bc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a4d997912b340aca63b12b84330f8a4bc">JOIN_PARAM10</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:a4d997912b340aca63b12b84330f8a4bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09c3797bb57c8135de9f9e9557e66bab"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a09c3797bb57c8135de9f9e9557e66bab">JOIN_PARAM11</a>(OP,  param, ...)</td></tr>
+<tr class="memitem:a09c3797bb57c8135de9f9e9557e66bab"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a09c3797bb57c8135de9f9e9557e66bab">JOIN_PARAM11</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
 <tr class="separator:a09c3797bb57c8135de9f9e9557e66bab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbfdccc4c864135d8020801232d54bd1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#adbfdccc4c864135d8020801232d54bd1">JOIN_PARAM</a>(OP,  NUM, ...)</td></tr>
+<tr class="memitem:a3334463e7c06213b391406820661e466"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a3334463e7c06213b391406820661e466">JOIN_PARAM12</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
+<tr class="separator:a3334463e7c06213b391406820661e466"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97483cb055a3f7a1286339223d48d003"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a97483cb055a3f7a1286339223d48d003">JOIN_PARAM13</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  param, ...)</td></tr>
+<tr class="separator:a97483cb055a3f7a1286339223d48d003"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbfdccc4c864135d8020801232d54bd1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#adbfdccc4c864135d8020801232d54bd1">JOIN_PARAM</a>(<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>,  NUM, ...)</td></tr>
 <tr class="separator:adbfdccc4c864135d8020801232d54bd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aced260163b84b2bd95927003e7d69bfc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#aced260163b84b2bd95927003e7d69bfc">MAKE_TYPE_PARAM</a>(i,  name)&#160;&#160;&#160;typename T##i</td></tr>
 <tr class="separator:aced260163b84b2bd95927003e7d69bfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -288,7 +292,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00178">178</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00184">184</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -318,7 +322,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> D&gt;                                                \</div><div class="line">    explicit TEST_NAME(D &amp;&amp;data) : DataTestCase{ std::forward&lt;D&gt;(data) } \</div><div class="line">    {                                                                    \</div><div class="line">    }</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00100">100</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00106">106</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -365,12 +369,13 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a>&lt;decltype(DATASET)::type&gt; \</div><div class="line">    {                                                                                                               \</div><div class="line">    public:                                                                                                     \</div><div class="line">        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                              \</div><div class="line">        void do_run() override                                                                                      \</div><div class="line">        {                                                                                                           <a class="code" href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">\</a></div><div class="line"><a class="code" href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">            arm_compute::test::framework::apply</a>(<span class="keyword">this</span>, &amp;TEST_NAME::run&lt;As...&gt;, _data);                               \</div><div class="line">        }                                                                                                           \</div><div class="line">        template &lt;<a class="code" href="tests_2framework_2_macros_8h.xhtml#a2c9e3879e1ad83c6a47f4630c6ca22ee">MAKE_TYPE_PARAMS</a>(__VA_ARGS__)&gt;                                                                    \</div><div class="line">        void run(<a class="code" href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a>(__VA_ARGS__));                                                                     \</div><div class="line">    };                                                                                                              \</div><div class="line">    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                          \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                       \</div><div class="line">    template &lt;<a class="code" href="tests_2framework_2_macros_8h.xhtml#a2c9e3879e1ad83c6a47f4630c6ca22ee">MAKE_TYPE_PARAMS</a>(__VA_ARGS__)&gt;                                                                        \</div><div class="line">    void TEST_NAME&lt;std::tuple&lt;As...&gt;&gt;::run(<a class="code" href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a>(__VA_ARGS__))</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a0c93732f08a32d6e390c3fae98325931"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a></div><div class="ttdeci">#define MAKE_ARG_PARAMS(...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00093">Macros.h:93</a></div></div>
-<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a2c9e3879e1ad83c6a47f4630c6ca22ee"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a2c9e3879e1ad83c6a47f4630c6ca22ee">MAKE_TYPE_PARAMS</a></div><div class="ttdeci">#define MAKE_TYPE_PARAMS(...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00092">Macros.h:92</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a>&lt;decltype(DATASET)::type&gt; \</div><div class="line">    {                                                                                                               \</div><div class="line">    public:                                                                                                     \</div><div class="line">        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                              \</div><div class="line">        void do_run() override                                                                                      \</div><div class="line">        {                                                                                                           <a class="code" href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">\</a></div><div class="line"><a class="code" href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">            arm_compute::test::framework::apply</a>(<span class="keyword">this</span>, &amp;TEST_NAME::run&lt;As...&gt;, _data);                               \</div><div class="line">        }                                                                                                           \</div><div class="line">        template &lt;<a class="code" href="tests_2framework_2_macros_8h.xhtml#a2c9e3879e1ad83c6a47f4630c6ca22ee">MAKE_TYPE_PARAMS</a>(__VA_ARGS__)&gt;                                                                    \</div><div class="line">        void <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#aae8f98973dd49e5afd7309bb34d4e3c3">run</a>(<a class="code" href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a>(__VA_ARGS__));                                                                     \</div><div class="line">    };                                                                                                              \</div><div class="line">    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                          \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                       \</div><div class="line">    template &lt;<a class="code" href="tests_2framework_2_macros_8h.xhtml#a2c9e3879e1ad83c6a47f4630c6ca22ee">MAKE_TYPE_PARAMS</a>(__VA_ARGS__)&gt;                                                                        \</div><div class="line">    void TEST_NAME&lt;std::tuple&lt;As...&gt;&gt;<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#aae8f98973dd49e5afd7309bb34d4e3c3">::run</a>(<a class="code" href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a>(__VA_ARGS__))</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_aae8f98973dd49e5afd7309bb34d4e3c3"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#aae8f98973dd49e5afd7309bb34d4e3c3">arm_compute::test::validation::run</a></div><div class="ttdeci">im2col_func run()</div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a0c93732f08a32d6e390c3fae98325931"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a></div><div class="ttdeci">#define MAKE_ARG_PARAMS(...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00099">Macros.h:99</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a2c9e3879e1ad83c6a47f4630c6ca22ee"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a2c9e3879e1ad83c6a47f4630c6ca22ee">MAKE_TYPE_PARAMS</a></div><div class="ttdeci">#define MAKE_TYPE_PARAMS(...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00098">Macros.h:98</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_xhtml_ab3a61953b0f41e932f8a2ce8918e7aec"><div class="ttname"><a href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">arm_compute::test::apply</a></div><div class="ttdeci">void apply(O *obj, F &amp;&amp;func, const std::tuple&lt; As... &gt; &amp;args)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_utils_8h_source.xhtml#l00079">Utils.h:79</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdoc">Data test case class.</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00063">TestCase.h:63</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00158">158</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00164">164</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -413,7 +418,7 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">static</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar.xhtml">arm_compute::test::framework::detail::TestCaseRegistrar</a>&lt;TEST_NAME&lt;decltype(DATASET)::type&gt;&gt; TEST_NAME##_reg \</div><div class="line">    {                                                                                                                  \</div><div class="line"><span class="preprocessor">        #TEST_NAME, MODE, STATUS, DATASET                                                                              \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar.xhtml">arm_compute::test::framework::detail::TestCaseRegistrar</a></div><div class="ttdoc">Helper class to statically register a test case.</div><div class="ttdef"><b>Definition:</b> <a href="_registrars_8h_source.xhtml#l00043">Registrars.h:43</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00135">135</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00141">141</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -455,7 +460,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00182">182</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00188">188</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -497,7 +502,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00224">224</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00230">230</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -533,7 +538,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00201">201</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00207">207</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -575,7 +580,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00265">265</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00271">271</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -611,7 +616,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00243">243</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00249">249</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -641,7 +646,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00155">155</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00161">161</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -683,7 +688,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00180">180</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00186">186</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -725,7 +730,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00222">222</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00228">228</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -761,7 +766,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00199">199</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00205">205</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -803,7 +808,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00263">263</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00269">269</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -839,7 +844,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00241">241</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00247">247</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -869,7 +874,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00153">153</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00159">159</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -889,7 +894,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">void</span> do_setup() override                        \</div><div class="line">    {                                               \</div><div class="line">        apply(<span class="keyword">this</span>, &amp;FIXTURE::setup&lt;As...&gt;, _data); \</div><div class="line">    }</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00110">110</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00116">116</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -931,7 +936,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00220">220</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00226">226</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -980,7 +985,7 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a>&lt;decltype(DATASET)::type&gt;, public FIXTURE \</div><div class="line">    {                                                                                                                               \</div><div class="line">    public:                                                                                                                     \</div><div class="line">        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                                              \</div><div class="line">        FIXTURE_DATA_SETUP(FIXTURE)                                                                                                 \</div><div class="line">        void do_run() <span class="keyword">override</span>;                                                                                                     \</div><div class="line">        FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \</div><div class="line">    };                                                                                                                              \</div><div class="line">    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                                          \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    void TEST_NAME&lt;std::tuple&lt;As...&gt;&gt;::do_run()</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdoc">Data test case class.</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00063">TestCase.h:63</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00204">204</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00210">210</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -999,8 +1004,9 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">void</span> do_run() override   \</div><div class="line">    {                        \</div><div class="line">        FIXTURE::run();      \</div><div class="line">    }</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00115">115</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">void</span> do_run() override   \</div><div class="line">    {                        <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#aae8f98973dd49e5afd7309bb34d4e3c3">\</a></div><div class="line"><a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#aae8f98973dd49e5afd7309bb34d4e3c3">        FIXTURE::run</a>();      \</div><div class="line">    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_aae8f98973dd49e5afd7309bb34d4e3c3"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#aae8f98973dd49e5afd7309bb34d4e3c3">arm_compute::test::validation::run</a></div><div class="ttdeci">im2col_func run()</div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00121">121</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1020,7 +1026,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">void</span> do_setup() override   \</div><div class="line">    {                          \</div><div class="line">        FIXTURE::setup();      \</div><div class="line">    }</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00105">105</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00111">111</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1040,7 +1046,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">void</span> do_sync() override   \</div><div class="line">    {                         \</div><div class="line">        FIXTURE::sync();      \</div><div class="line">    }</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00120">120</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00126">126</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1060,7 +1066,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">void</span> do_teardown() override   \</div><div class="line">    {                             \</div><div class="line">        FIXTURE::teardown();      \</div><div class="line">    }</div></div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00125">125</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00131">131</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1096,7 +1102,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00197">197</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00203">203</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1140,7 +1146,7 @@ Macros</h2></td></tr>
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">class </span>TEST_NAME : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                               \</div><div class="line">    public:                                                                     \</div><div class="line">        TEST_CASE_CONSTRUCTOR(TEST_NAME)                                            \</div><div class="line">        FIXTURE_SETUP(FIXTURE)                                                      \</div><div class="line">        void <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">do_run</a>() <span class="keyword">override</span>;                                                     \</div><div class="line">        FIXTURE_TEARDOWN(FIXTURE)                                                   \</div><div class="line">    };                                                                              \</div><div class="line">    TEST_REGISTRAR(TEST_NAME, MODE, STATUS);                                        \</div><div class="line">    void TEST_NAME::do_run()</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a></div><div class="ttdoc">Abstract test case class.</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00040">TestCase.h:40</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml_a90b4bc2c4bae857bc3536f4a18e29772"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">arm_compute::test::framework::TestCase::do_run</a></div><div class="ttdeci">virtual void do_run()</div><div class="ttdoc">Run the test.</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00046">TestCase.h:46</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00185">185</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00191">191</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1154,7 +1160,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1175,10 +1181,11 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a6c274ed8a1a31eb195191c849ae4ff6f">CONCAT</a>(<a class="code" href="tests_2framework_2_macros_8h.xhtml#adbfdccc4c864135d8020801232d54bd1">JOIN_PARAM</a>, NUM)      \</div><div class="line">    (OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_adbfdccc4c864135d8020801232d54bd1"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#adbfdccc4c864135d8020801232d54bd1">JOIN_PARAM</a></div><div class="ttdeci">#define JOIN_PARAM(OP, NUM,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00086">Macros.h:86</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a6c274ed8a1a31eb195191c849ae4ff6f">CONCAT</a>(<a class="code" href="tests_2framework_2_macros_8h.xhtml#adbfdccc4c864135d8020801232d54bd1">JOIN_PARAM</a>, NUM)      \</div><div class="line">    (<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_adbfdccc4c864135d8020801232d54bd1"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#adbfdccc4c864135d8020801232d54bd1">JOIN_PARAM</a></div><div class="ttdeci">#define JOIN_PARAM(OP, NUM,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00092">Macros.h:92</a></div></div>
+<div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a6c274ed8a1a31eb195191c849ae4ff6f"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a6c274ed8a1a31eb195191c849ae4ff6f">CONCAT</a></div><div class="ttdeci">#define CONCAT(ARG0, ARG1)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00050">Macros.h:50</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00086">86</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00092">92</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1192,7 +1199,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM1</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1203,7 +1210,7 @@ Macros</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;OP(0, param)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(0, param)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1222,7 +1229,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM10</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1243,7 +1250,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(9, param)                     \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a450d225a223a3f1db8bdc093885d48c0">JOIN_PARAM9</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a450d225a223a3f1db8bdc093885d48c0"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a450d225a223a3f1db8bdc093885d48c0">JOIN_PARAM9</a></div><div class="ttdeci">#define JOIN_PARAM9(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00077">Macros.h:77</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(9, param)                     \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a450d225a223a3f1db8bdc093885d48c0">JOIN_PARAM9</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a450d225a223a3f1db8bdc093885d48c0"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a450d225a223a3f1db8bdc093885d48c0">JOIN_PARAM9</a></div><div class="ttdeci">#define JOIN_PARAM9(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00077">Macros.h:77</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00080">80</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1259,7 +1267,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM11</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1280,9 +1288,86 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(10, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a4d997912b340aca63b12b84330f8a4bc">JOIN_PARAM10</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a4d997912b340aca63b12b84330f8a4bc"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a4d997912b340aca63b12b84330f8a4bc">JOIN_PARAM10</a></div><div class="ttdeci">#define JOIN_PARAM10(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00080">Macros.h:80</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(10, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a4d997912b340aca63b12b84330f8a4bc">JOIN_PARAM10</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a4d997912b340aca63b12b84330f8a4bc"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a4d997912b340aca63b12b84330f8a4bc">JOIN_PARAM10</a></div><div class="ttdeci">#define JOIN_PARAM10(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00080">Macros.h:80</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00083">83</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+
+</div>
+</div>
+<a id="a3334463e7c06213b391406820661e466"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3334463e7c06213b391406820661e466">&#9670;&nbsp;</a></span>JOIN_PARAM12</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define JOIN_PARAM12</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">param, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(11, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a09c3797bb57c8135de9f9e9557e66bab">JOIN_PARAM11</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a09c3797bb57c8135de9f9e9557e66bab"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a09c3797bb57c8135de9f9e9557e66bab">JOIN_PARAM11</a></div><div class="ttdeci">#define JOIN_PARAM11(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00083">Macros.h:83</a></div></div>
+<div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00086">86</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+
+</div>
+</div>
+<a id="a97483cb055a3f7a1286339223d48d003"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97483cb055a3f7a1286339223d48d003">&#9670;&nbsp;</a></span>JOIN_PARAM13</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define JOIN_PARAM13</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">param, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>...</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(12, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a3334463e7c06213b391406820661e466">JOIN_PARAM12</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a3334463e7c06213b391406820661e466"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a3334463e7c06213b391406820661e466">JOIN_PARAM12</a></div><div class="ttdeci">#define JOIN_PARAM12(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00086">Macros.h:86</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00089">89</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1296,7 +1381,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM2</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1317,7 +1402,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(1, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#acdd2ac75560db81371f4053e6465a0eb">JOIN_PARAM1</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_acdd2ac75560db81371f4053e6465a0eb"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#acdd2ac75560db81371f4053e6465a0eb">JOIN_PARAM1</a></div><div class="ttdeci">#define JOIN_PARAM1(OP, param)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00055">Macros.h:55</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(1, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#acdd2ac75560db81371f4053e6465a0eb">JOIN_PARAM1</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_acdd2ac75560db81371f4053e6465a0eb"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#acdd2ac75560db81371f4053e6465a0eb">JOIN_PARAM1</a></div><div class="ttdeci">#define JOIN_PARAM1(OP, param)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00055">Macros.h:55</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00056">56</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1333,7 +1419,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM3</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1354,7 +1440,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(2, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a35d1497660f569a76fe4de6bebf67c9a">JOIN_PARAM2</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a35d1497660f569a76fe4de6bebf67c9a"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a35d1497660f569a76fe4de6bebf67c9a">JOIN_PARAM2</a></div><div class="ttdeci">#define JOIN_PARAM2(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00056">Macros.h:56</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(2, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a35d1497660f569a76fe4de6bebf67c9a">JOIN_PARAM2</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a35d1497660f569a76fe4de6bebf67c9a"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a35d1497660f569a76fe4de6bebf67c9a">JOIN_PARAM2</a></div><div class="ttdeci">#define JOIN_PARAM2(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00056">Macros.h:56</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00059">59</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1370,7 +1457,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM4</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1391,7 +1478,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(3, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#afedfb2831ec629f6445b1d4d5ed30154">JOIN_PARAM3</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_afedfb2831ec629f6445b1d4d5ed30154"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#afedfb2831ec629f6445b1d4d5ed30154">JOIN_PARAM3</a></div><div class="ttdeci">#define JOIN_PARAM3(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00059">Macros.h:59</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(3, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#afedfb2831ec629f6445b1d4d5ed30154">JOIN_PARAM3</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_afedfb2831ec629f6445b1d4d5ed30154"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#afedfb2831ec629f6445b1d4d5ed30154">JOIN_PARAM3</a></div><div class="ttdeci">#define JOIN_PARAM3(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00059">Macros.h:59</a></div></div>
+<div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00062">62</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1407,7 +1495,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM5</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1428,7 +1516,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(4, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a43ee597995dd64cfabd52d2342342855">JOIN_PARAM4</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a43ee597995dd64cfabd52d2342342855"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a43ee597995dd64cfabd52d2342342855">JOIN_PARAM4</a></div><div class="ttdeci">#define JOIN_PARAM4(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00062">Macros.h:62</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(4, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a43ee597995dd64cfabd52d2342342855">JOIN_PARAM4</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a43ee597995dd64cfabd52d2342342855"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a43ee597995dd64cfabd52d2342342855">JOIN_PARAM4</a></div><div class="ttdeci">#define JOIN_PARAM4(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00062">Macros.h:62</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00065">65</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1444,7 +1533,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM6</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1465,7 +1554,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(5, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a97a58dd462df2048aefa8446a841d7a4">JOIN_PARAM5</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a97a58dd462df2048aefa8446a841d7a4"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a97a58dd462df2048aefa8446a841d7a4">JOIN_PARAM5</a></div><div class="ttdeci">#define JOIN_PARAM5(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00065">Macros.h:65</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(5, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a97a58dd462df2048aefa8446a841d7a4">JOIN_PARAM5</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a97a58dd462df2048aefa8446a841d7a4"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a97a58dd462df2048aefa8446a841d7a4">JOIN_PARAM5</a></div><div class="ttdeci">#define JOIN_PARAM5(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00065">Macros.h:65</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00068">68</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1481,7 +1571,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM7</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1502,7 +1592,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(6, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#afd783b31f55f3b403a82e2b9e3770e1a">JOIN_PARAM6</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_afd783b31f55f3b403a82e2b9e3770e1a"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#afd783b31f55f3b403a82e2b9e3770e1a">JOIN_PARAM6</a></div><div class="ttdeci">#define JOIN_PARAM6(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00068">Macros.h:68</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(6, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#afd783b31f55f3b403a82e2b9e3770e1a">JOIN_PARAM6</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_afd783b31f55f3b403a82e2b9e3770e1a"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#afd783b31f55f3b403a82e2b9e3770e1a">JOIN_PARAM6</a></div><div class="ttdeci">#define JOIN_PARAM6(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00068">Macros.h:68</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00071">71</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1518,7 +1609,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM8</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1539,7 +1630,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(7, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a29cc9415a23ee73a5f0872a0433c5637">JOIN_PARAM7</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a29cc9415a23ee73a5f0872a0433c5637"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a29cc9415a23ee73a5f0872a0433c5637">JOIN_PARAM7</a></div><div class="ttdeci">#define JOIN_PARAM7(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00071">Macros.h:71</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(7, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#a29cc9415a23ee73a5f0872a0433c5637">JOIN_PARAM7</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a29cc9415a23ee73a5f0872a0433c5637"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a29cc9415a23ee73a5f0872a0433c5637">JOIN_PARAM7</a></div><div class="ttdeci">#define JOIN_PARAM7(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00071">Macros.h:71</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00074">74</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1555,7 +1647,7 @@ Macros</h2></td></tr>
           <td class="memname">#define JOIN_PARAM9</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">OP, </td>
+          <td class="paramname"><a class="el" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1576,7 +1668,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">OP(8, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#ad05271218a1dc0111d1b07ecd8f94904">JOIN_PARAM8</a>(OP, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ad05271218a1dc0111d1b07ecd8f94904"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ad05271218a1dc0111d1b07ecd8f94904">JOIN_PARAM8</a></div><div class="ttdeci">#define JOIN_PARAM8(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00074">Macros.h:74</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>(8, param)                    \</div><div class="line">    , <a class="code" href="tests_2framework_2_macros_8h.xhtml#ad05271218a1dc0111d1b07ecd8f94904">JOIN_PARAM8</a>(<a class="code" href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a>, __VA_ARGS__)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ad05271218a1dc0111d1b07ecd8f94904"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ad05271218a1dc0111d1b07ecd8f94904">JOIN_PARAM8</a></div><div class="ttdeci">#define JOIN_PARAM8(OP, param,...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00074">Macros.h:74</a></div></div>
+<div class="ttc" id="activation__float__helpers_8h_xhtml_a3e07fff4ac8593d886877dd6ac323e41"><div class="ttname"><a href="activation__float__helpers_8h.xhtml#a3e07fff4ac8593d886877dd6ac323e41">OP</a></div><div class="ttdeci">#define OP(op, DATA_TYPE, x, A_VAL, B_VAL)</div><div class="ttdef"><b>Definition:</b> <a href="activation__float__helpers_8h_source.xhtml#l00068">activation_float_helpers.h:68</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00077">77</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
@@ -1608,7 +1701,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00091">91</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00097">97</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1628,7 +1721,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00093">93</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00099">99</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1658,7 +1751,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00090">90</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00096">96</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1678,7 +1771,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00092">92</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00098">98</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1720,7 +1813,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00261">261</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00267">267</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1769,7 +1862,7 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a>&lt;decltype(DATASET)::type&gt;, public FIXTURE \</div><div class="line">    {                                                                                                                               \</div><div class="line">    public:                                                                                                                     \</div><div class="line">        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                                              \</div><div class="line">        FIXTURE_DATA_SETUP(FIXTURE)                                                                                                 \</div><div class="line">        FIXTURE_RUN(FIXTURE)                                                                                                        \</div><div class="line">        FIXTURE_SYNC(FIXTURE)                                                                                                       \</div><div class="line">        FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \</div><div class="line">    };                                                                                                                              \</div><div class="line">    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdoc">Data test case class.</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00063">TestCase.h:63</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00246">246</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00252">252</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1805,7 +1898,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00239">239</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00245">245</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1848,7 +1941,7 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">class </span>TEST_NAME : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                               \</div><div class="line">    public:                                                                     \</div><div class="line">        TEST_CASE_CONSTRUCTOR(TEST_NAME)                                            \</div><div class="line">        FIXTURE_SETUP(FIXTURE)                                                      \</div><div class="line">        FIXTURE_RUN(FIXTURE)                                                        \</div><div class="line">        FIXTURE_SYNC(FIXTURE)                                                       \</div><div class="line">        FIXTURE_TEARDOWN(FIXTURE)                                                   \</div><div class="line">    };                                                                              \</div><div class="line">    TEST_REGISTRAR(TEST_NAME, MODE, STATUS)</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a></div><div class="ttdoc">Abstract test case class.</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00040">TestCase.h:40</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00227">227</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00233">233</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1878,7 +1971,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00151">151</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00157">157</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1898,7 +1991,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00098">98</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00104">104</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1936,7 +2029,7 @@ Macros</h2></td></tr>
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">class </span>TEST_NAME : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a> \</div><div class="line">    {                                                               \</div><div class="line">    public:                                                     \</div><div class="line">        TEST_CASE_CONSTRUCTOR(TEST_NAME)                            \</div><div class="line">        void <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">do_run</a>() <span class="keyword">override</span>;                                     \</div><div class="line">    };                                                              \</div><div class="line">    TEST_REGISTRAR(TEST_NAME, MODE, STATUS);                        \</div><div class="line">    void TEST_NAME::do_run()</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a></div><div class="ttdoc">Abstract test case class.</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00040">TestCase.h:40</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml_a90b4bc2c4bae857bc3536f4a18e29772"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">arm_compute::test::framework::TestCase::do_run</a></div><div class="ttdeci">virtual void do_run()</div><div class="ttdoc">Run the test.</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00046">TestCase.h:46</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00141">141</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00147">147</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1973,7 +2066,7 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">static</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar.xhtml">arm_compute::test::framework::detail::TestCaseRegistrar&lt;TEST_NAME&gt;</a> TEST_NAME##_reg \</div><div class="line">    {                                                                                         \</div><div class="line"><span class="preprocessor">        #TEST_NAME, MODE, STATUS                                                              \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar.xhtml">arm_compute::test::framework::detail::TestCaseRegistrar</a></div><div class="ttdoc">Helper class to statically register a test case.</div><div class="ttdef"><b>Definition:</b> <a href="_registrars_8h_source.xhtml#l00043">Registrars.h:43</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00130">130</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00136">136</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -2029,7 +2122,7 @@ Macros</h2></td></tr>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname"><em>...</em></td><td>)</td>
-          <td>&#160;&#160;&#160;<a class="el" href="tests_2framework_2_macros_8h.xhtml#a1667c2513ea4d07e8c042cb7d703b03e">VARIADIC_SIZE_IMPL</a>(__VA_ARGS__, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)</td>
+          <td>&#160;&#160;&#160;<a class="el" href="tests_2framework_2_macros_8h.xhtml#a472d2291914c67882a7c8a209b64d0b6">VARIADIC_SIZE_IMPL</a>(__VA_ARGS__, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2038,8 +2131,8 @@ Macros</h2></td></tr>
 
 </div>
 </div>
-<a id="a1667c2513ea4d07e8c042cb7d703b03e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1667c2513ea4d07e8c042cb7d703b03e">&#9670;&nbsp;</a></span>VARIADIC_SIZE_IMPL</h2>
+<a id="a472d2291914c67882a7c8a209b64d0b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a472d2291914c67882a7c8a209b64d0b6">&#9670;&nbsp;</a></span>VARIADIC_SIZE_IMPL</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2114,6 +2207,18 @@ Macros</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
+          <td class="paramname">e11, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">e12, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
           <td class="paramname">size, </td>
         </tr>
         <tr>
@@ -2140,7 +2245,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_9e71e2da941d3cafc4d98a9f6ae3de4f.xhtml">framework</a></li><li class="navelem"><a class="el" href="tests_2framework_2_macros_8h.xhtml">Macros.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

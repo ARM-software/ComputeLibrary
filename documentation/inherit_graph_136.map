@@ -1,6 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_multi_image.xhtml" title="Interface for multi&#45;planar images." alt="" coords="5,31,100,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_multi_image.xhtml" title="Interface for OpenCL multi&#45;planar images." alt="" coords="148,5,259,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_multi_image.xhtml" title="Basic implementation of the multi&#45;planar image interface." alt="" coords="157,56,249,83"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_multi_image.xhtml" title="Basic implementation of the CL multi&#45;planar image interface." alt="" coords="307,5,415,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_memory.xhtml" title="Memory interface." alt="" coords="5,56,83,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_memory.xhtml" title="OpenCL implementation of memory object." alt="" coords="132,5,223,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_g_c_memory.xhtml" title="GLES implementation of memory object." alt="" coords="131,56,224,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_memory.xhtml" title="CPU implementation of memory object." alt="" coords="140,107,215,133"/>
 </map>

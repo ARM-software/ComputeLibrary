@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -148,12 +148,17 @@ Functions</h2></td></tr>
 <tr class="separator:a48da7c37c06cd54b77ecb022a3aa04b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cbddfe65d4cf806d066eb3a38248cdf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3cbddfe65d4cf806d066eb3a38248cdf">FIXTURE_DATA_TEST_CASE</a> (Large, CLSpaceToBatchLayerFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })))</td></tr>
 <tr class="separator:a3cbddfe65d4cf806d066eb3a38248cdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae">TEST_SUITE_END</a> () <a class="el" href="_window_iterator_8cpp.xhtml#a73168adf798e300ad06a0341c1c9bd59">DATA_TEST_CASE</a>(Configuration = ActivationValidationQuantizedFixture&lt;CLTensor, CLAccessor, CLActivationLayer, T&gt;</td></tr>
-<tr class="separator:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2ed31007ae463a3cec24a581f3651f6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ed31007ae463a3cec24a581f3651f6">TEST_SUITE_END</a> () const auto Int16QuantizedActivationFunctionsDataset = ActivationValidationQuantizedFixture&lt;CLTensor, CLAccessor, CLActivationLayer, T&gt;</td></tr>
+<tr class="memdesc:ac2ed31007ae463a3cec24a581f3651f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input data sets.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ed31007ae463a3cec24a581f3651f6">More...</a><br /></td></tr>
+<tr class="separator:ac2ed31007ae463a3cec24a581f3651f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15747e0144f83c22d286d66ab688043a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a15747e0144f83c22d286d66ab688043a">combine</a> (combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })))</td></tr>
 <tr class="separator:a15747e0144f83c22d286d66ab688043a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c4738de69048aebf8954d231f66a4d0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2c4738de69048aebf8954d231f66a4d0">FIXTURE_DATA_TEST_CASE</a> (Large, CLSpaceToBatchLayerFixture&lt; half &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })))</td></tr>
 <tr class="separator:a2c4738de69048aebf8954d231f66a4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d6b51063a483a91daafad2bb1ada027"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3d6b51063a483a91daafad2bb1ada027">FIXTURE_DATA_TEST_CASE</a> (Small, CLSpaceToBatchLayerQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })), framework::dataset::make(&quot;QuantizationInfo&quot;, { 1.f/255.f, 9.f })))</td></tr>
+<tr class="separator:a3d6b51063a483a91daafad2bb1ada027"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6372243231d6bf529a6c826550fed04b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6372243231d6bf529a6c826550fed04b">FIXTURE_DATA_TEST_CASE</a> (Large, CLSpaceToBatchLayerQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })), framework::dataset::make(&quot;QuantizationInfo&quot;, { 1.f/255.f, 9.f })))</td></tr>
+<tr class="separator:a6372243231d6bf529a6c826550fed04b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -166,7 +171,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_2_space_to_batch_layer_8cpp.xhtml">SpaceToBatchLayer.cpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:27 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

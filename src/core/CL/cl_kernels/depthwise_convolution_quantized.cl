@@ -26,16 +26,16 @@
 
 #if defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && ((defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)) || defined(REAL_MULTIPLIER))
 
-#if defined(FUSED_ACTIVATION)
+#if defined(ACTIVATION_TYPE) && defined(CONST_0)
 #define DATA_TYPE uchar
 #ifndef VEC_SIZE
 #define VEC_SIZE 8
 #endif /* VEC_SIZE */
-#include "activation_layer_qa8.cl"
-#define ACTIVATION_FUNC(x) PERFORM_ACTIVATION_QA8(FUSED_ACTIVATION, x)
-#else /* defined(FUSED_ACTIVATION) */
+#include "activation_layer_quant.cl"
+#define ACTIVATION_FUNC(x) PERFORM_ACTIVATION_QUANT(ACTIVATION_TYPE, x)
+#else /* defined(ACTIVATION_TYPE) && defined(CONST_0) */
 #define ACTIVATION_FUNC(x) (x)
-#endif /* defined(FUSED_ACTIVATION) */
+#endif /* defined(ACTIVATION_TYPE) && defined(CONST_0) */
 
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)

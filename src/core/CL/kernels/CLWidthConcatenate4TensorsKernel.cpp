@@ -84,7 +84,7 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, input3, input4, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::F16, DataType::U32,
-                                                         DataType::F32);
+                                                         DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2, input3, input4, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input1->dimension(0) + input2->dimension(0) + input3->dimension(0) + input4->dimension(0) > output->dimension(0));
 
@@ -138,16 +138,22 @@ void CLWidthConcatenate4TensorsKernel::configure(const ICLTensor *input1, const 
     const bool have_different_qinfo = helpers::tensor_info::tensors_have_different_quantization_info(output->info(), input1->info(), input2->info(), input3->info(), input4->info());
     if(is_data_type_quantized_asymmetric(input1->info()->data_type()) && have_different_qinfo)
     {
-        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().scale));
-        build_opts.add_option("-DOFFSET_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().scale));
-        build_opts.add_option("-DOFFSET_IN3=" + float_to_string_with_full_precision(input3->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN3=" + float_to_string_with_full_precision(input3->info()->quantization_info().scale));
-        build_opts.add_option("-DOFFSET_IN4=" + float_to_string_with_full_precision(input4->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN4=" + float_to_string_with_full_precision(input4->info()->quantization_info().scale));
-        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
+        const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq3_info = input3->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq4_info = input4->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info  = output->info()->quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iq1_info.offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iq1_info.scale));
+        build_opts.add_option("-DOFFSET_IN2=" + float_to_string_with_full_precision(iq2_info.offset));
+        build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(iq2_info.scale));
+        build_opts.add_option("-DOFFSET_IN3=" + float_to_string_with_full_precision(iq3_info.offset));
+        build_opts.add_option("-DSCALE_IN3=" + float_to_string_with_full_precision(iq3_info.scale));
+        build_opts.add_option("-DOFFSET_IN4=" + float_to_string_with_full_precision(iq4_info.offset));
+        build_opts.add_option("-DSCALE_IN4=" + float_to_string_with_full_precision(iq4_info.scale));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oq_info.offset));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oq_info.scale));
     }
 
     // Create kernel
@@ -158,6 +164,9 @@ void CLWidthConcatenate4TensorsKernel::configure(const ICLTensor *input1, const 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     ICLKernel::configure_internal(std::get<1>(win_config));
+
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     // Pass paddings as arguments to the kernel
     const unsigned int input1_width = input1->info()->dimension(0);

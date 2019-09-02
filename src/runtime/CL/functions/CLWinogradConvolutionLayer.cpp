@@ -158,6 +158,9 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     const Size2D kernel_size = Size2D(weights->tensor_shape()[idx_width], weights->tensor_shape()[idx_height]);
     const Size2D output_tile = winograd_output_tile(input_dims, kernel_size, input->data_layout());
 
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((conv_info.pad_left() > (kernel_size.x() / 2u)) || (conv_info.pad_right() > (kernel_size.x() / 2u))), "Winograd only supports padding up to half kernel size");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((conv_info.pad_top() > (kernel_size.y() / 2u)) || (conv_info.pad_bottom() > (kernel_size.y() / 2u))), "Winograd only supports padding up to half kernel size");
+
     // Check if the Winograd configuration requires fast math
     if(!enable_fast_math)
     {
@@ -189,13 +192,7 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
                                                                                                                      GEMMLowpOutputStageInfo(), (input->data_type() == DataType::F16))));
 
     // Configure output transform
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, winograd_info));
-
-    // Validate Activation Layer
-    if(act_info.enabled())
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output, nullptr, act_info));
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, winograd_info, act_info));
 
     return Status{};
 }

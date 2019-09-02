@@ -41,14 +41,13 @@ public:
      * @param[in] num_groups       (Optional) Number of groups (Defaults to 1)
      * @param[in] method           (Optional) Convolution method to use
      * @param[in] fast_math_hint   (Optional) Fast math hint
-     * @param[in] out_quant_info   (Optional) Output quantization info
      * @param[in] fused_activation (Optional) Fused activation layer. Disabled if not specified
      */
     FusedConvolutionBatchNormalizationNode(float epsilon, PadStrideInfo info,
                                            unsigned int      num_groups     = 1,
                                            ConvolutionMethod method         = ConvolutionMethod::Default,
                                            FastMathHint      fast_math_hint = FastMathHint::Disabled,
-                                           QuantizationInfo out_quant_info = QuantizationInfo(), ActivationLayerInfo fused_activation = ActivationLayerInfo());
+                                           ActivationLayerInfo fused_activation = ActivationLayerInfo());
 
     /** Epsilon parameter accessor
      *
@@ -135,7 +134,6 @@ private:
     unsigned int        _num_groups;
     ConvolutionMethod   _method;
     FastMathHint        _fast_math_hint;
-    QuantizationInfo    _out_quant_info;
     ActivationLayerInfo _fused_activation;
 };
 

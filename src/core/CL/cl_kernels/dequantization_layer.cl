@@ -23,16 +23,17 @@
  */
 #include "helpers.h"
 
-#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(SCALE) && defined(OFFSET)
+#if defined(VEC_SIZE) && defined(DATA_TYPE_SRC) && defined(DATA_TYPE_DST) && defined(SCALE) && defined(OFFSET)
 
 /** This performs the dequantization of 8-bit unsigned integers to floating point.
  *
- * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
+ * @note Source datatype should be given as a preprocessor argument using -DDATA_TYPE_SRC=type. e.g. -DDATA_TYPE_SRC=char
+ * @note Destination datatype should be given as a preprocessor argument using -DDATA_TYPE_DST=type. e.g. -DDATA_TYPE_DST=float
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  * @note Quantization scale of input tensor is passed in with -DSCALE=scale.
  * @note Quantization offset of input tensor is passed in with -DOFFSET=offset.
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/QSYMM8
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -57,7 +58,7 @@ __kernel void dequantization_layer(
     Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 
-#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+#if defined(LAST_ACCESSED_X)
     // Check if access on width gets out of bounds
     // If it does shift access vector to access elements within bounds
     const int xi = (int)(get_global_id(0) * VEC_SIZE);
@@ -66,7 +67,7 @@ __kernel void dequantization_layer(
 
     // Load data
     VEC_DATA_TYPE(int, VEC_SIZE)
-    val = CONVERT(VLOAD(VEC_SIZE)(0, (__global uchar *)input.ptr), VEC_DATA_TYPE(int, VEC_SIZE));
+    val = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_SRC *)input.ptr), VEC_DATA_TYPE(int, VEC_SIZE));
 
     // Create scale and offset vectors
     const VEC_DATA_TYPE(float, VEC_SIZE)
@@ -81,10 +82,10 @@ __kernel void dequantization_layer(
 
     // Store result
     VSTORE(VEC_SIZE)
-    (CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)), 0, (__global DATA_TYPE *)output.ptr);
-#else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
-    *((__global DATA_TYPE *)(output.ptr)) = (DATA_TYPE)((float)((int)(*((__global uchar *)(input.ptr))) - (int)(OFFSET)) * (float)(SCALE));
-#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+    (CONVERT(res, VEC_DATA_TYPE(DATA_TYPE_DST, VEC_SIZE)), 0, (__global DATA_TYPE_DST *)output.ptr);
+#else  // !defined(LAST_ACCESSED_X)
+    *((__global DATA_TYPE_DST *)(output.ptr)) = (DATA_TYPE_DST)((float)((int)(*((__global DATA_TYPE_SRC *)(input.ptr))) - (int)(OFFSET)) * (float)(SCALE));
+#endif // defined(LAST_ACCESSED_X)
 }
 
-#endif // defined(VEC_SIZE) && defined(DATA_TYPE) && defined(SCALE) && defined(OFFSET)
+#endif // defined(VEC_SIZE) && defined(DATA_TYPE_SRC) && defined(DATA_TYPE_DST) && defined(SCALE) && defined(OFFSET)

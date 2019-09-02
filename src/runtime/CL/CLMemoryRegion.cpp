@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,9 +105,15 @@ ICLSVMMemoryRegion::~ICLSVMMemoryRegion()
 {
     if(_ptr != nullptr)
     {
-        clFinish(CLScheduler::get().queue().get());
-        _mem = cl::Buffer();
-        clSVMFree(_ctx.get(), _ptr);
+        try
+        {
+            clFinish(CLScheduler::get().queue().get());
+            _mem = cl::Buffer();
+            clSVMFree(_ctx.get(), _ptr);
+        }
+        catch(...)
+        {
+        }
     }
 }
 

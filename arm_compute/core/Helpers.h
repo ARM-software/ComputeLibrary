@@ -158,24 +158,24 @@ inline T delta_bilinear_c1(const T *pixel_ptr, size_t stride, float dx, float dy
  *
  * @return The bilinear interpolated pixel value
  */
-inline uint8_t delta_bilinear_c1_quantized(const uint8_t *pixel_ptr, size_t stride, float dx, float dy, QuantizationInfo iq_info, QuantizationInfo oq_info)
+inline uint8_t delta_bilinear_c1_quantized(const uint8_t *pixel_ptr, size_t stride, float dx, float dy, UniformQuantizationInfo iq_info, UniformQuantizationInfo oq_info)
 {
     ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
 
     const float dx1 = 1.0f - dx;
     const float dy1 = 1.0f - dy;
 
-    const float a00 = iq_info.dequantize(*pixel_ptr);
-    const float a01 = iq_info.dequantize(*(pixel_ptr + 1));
-    const float a10 = iq_info.dequantize(*(pixel_ptr + stride));
-    const float a11 = iq_info.dequantize(*(pixel_ptr + stride + 1));
+    const float a00 = dequantize_qasymm8(*pixel_ptr, iq_info);
+    const float a01 = dequantize_qasymm8(*(pixel_ptr + 1), iq_info);
+    const float a10 = dequantize_qasymm8(*(pixel_ptr + stride), iq_info);
+    const float a11 = dequantize_qasymm8(*(pixel_ptr + stride + 1), iq_info);
 
     const float w1  = dx1 * dy1;
     const float w2  = dx * dy1;
     const float w3  = dx1 * dy;
     const float w4  = dx * dy;
     float       res = a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4;
-    return static_cast<uint8_t>(oq_info.quantize(res, RoundingPolicy::TO_NEAREST_UP));
+    return static_cast<uint8_t>(quantize_qasymm8(res, oq_info));
 }
 
 /** Computes linear interpolation using the pointer to the top pixel and the pixel's distance between

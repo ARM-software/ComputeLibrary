@@ -194,6 +194,25 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src);
  */
 SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
 
+/** Convert quantized simple tensor into float using tensor quantization information.
+ *
+ * @param[in] src Quantized tensor.
+ *
+ * @return Float tensor.
+ */
+template <typename T>
+SimpleTensor<float> convert_from_symmetric(const SimpleTensor<T> &src);
+
+/** Convert float simple tensor into quantized using specified quantization information.
+ *
+ * @param[in] src               Float tensor.
+ * @param[in] quantization_info Quantification information.
+ *
+ * @return Quantized tensor.
+ */
+template <typename T>
+SimpleTensor<T> convert_to_symmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
+
 /** Matrix multiply between 2 float simple tensors
  *
  * @param[in]  a   Input tensor A

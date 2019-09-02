@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,8 @@ void CLIntegralImageHorKernel::configure(const ICLTensor *input, ICLTensor *outp
     _output = output;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("integral_horizontal"));
+    const std::string kernel_name = std::string("integral_horizontal");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure kernel window
     const unsigned int num_elems_processed_per_iteration = input->info()->dimension(0);
@@ -61,6 +62,19 @@ void CLIntegralImageHorKernel::configure(const ICLTensor *input, ICLTensor *outp
     output_access.set_valid_region(win, input->info()->valid_region());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 CLIntegralImageVertKernel::CLIntegralImageVertKernel()
@@ -75,7 +89,8 @@ void CLIntegralImageVertKernel::configure(ICLTensor *in_out)
     _in_out = in_out;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("integral_vertical"));
+    const std::string kernel_name = std::string("integral_vertical");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration_x = 8;
@@ -90,6 +105,15 @@ void CLIntegralImageVertKernel::configure(ICLTensor *in_out)
     in_out_access.set_valid_region(win, in_out->info()->valid_region());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(in_out->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(in_out->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(in_out->info()->dimension(1));
 }
 
 void CLIntegralImageVertKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -106,7 +130,7 @@ void CLIntegralImageVertKernel::run(const Window &window, cl::CommandQueue &queu
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _in_out, slice);
         _kernel.setArg<cl_uint>(idx++, height);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

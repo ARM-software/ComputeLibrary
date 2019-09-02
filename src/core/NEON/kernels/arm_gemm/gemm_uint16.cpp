@@ -55,10 +55,9 @@ const GemmImplementation<uint16_t, uint32_t> *gemm_implementation_list<uint16_t,
 }
 
 /* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t>(const GemmArgs<uint32_t> &args);
-template KernelDescription get_gemm_method<uint16_t, uint32_t>(const GemmArgs<uint32_t> &args);
-template bool method_is_compatible<uint16_t, uint32_t>(GemmMethod method, const GemmArgs<uint32_t> &args);
-template std::vector<KernelDescription> get_compatible_kernels<uint16_t, uint32_t> (const GemmArgs<uint32_t> &args);
+template UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t, Nothing>(const GemmArgs<uint32_t> &args, const Nothing &);
+template KernelDescription get_gemm_method<uint16_t, uint32_t, Nothing>(const GemmArgs<uint32_t> &args, const Nothing &);
+template std::vector<KernelDescription> get_compatible_kernels<uint16_t, uint32_t, Nothing>(const GemmArgs<uint32_t> &args, const Nothing &);
 
 } // namespace arm_gemm
 

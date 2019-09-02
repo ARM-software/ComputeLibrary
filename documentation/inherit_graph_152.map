@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="5,31,131,57"/>
-<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1validation_1_1is__floating__point.xhtml" title=" " alt="" coords="179,5,341,32"/>
-<area shape="rect" id="node3" href="$structarm__compute_1_1utils_1_1traits_1_1is__floating__point.xhtml" title=" " alt="" coords="179,56,341,83"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml" title="Preprocessor interface." alt="" coords="5,31,115,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph__utils_1_1_caffe_preproccessor.xhtml" title="Caffe preproccessor." alt="" coords="163,5,309,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1graph__utils_1_1_t_f_preproccessor.xhtml" title="TF preproccessor." alt="" coords="173,56,299,83"/>
 </map>

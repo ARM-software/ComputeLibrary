@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,8 @@
 #define MIN(x, y) min(x, y)
 #define SQUARED_DIFF(x, y) (x - y) * (x - y)
 #define DIV(x, y) (x / y)
+#define POWER(x, y) pow(x, y)
+#define PRELU(x, y) (select(y * x, x, x > (DATA_TYPE_OUT)0))
 
 #define OP_FUN_NAME_STR(op) elementwise_operation_##op
 #define OP_FUN_NAME(op) OP_FUN_NAME_STR(op)

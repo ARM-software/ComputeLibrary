@@ -54,14 +54,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != weights->dimension(height_idx), "Weights should have same width and height");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 1 && weights->dimension(width_idx) != 3 && weights->dimension(width_idx) != 5,
-                                    "Kernel sizes other than 1x1, 3x3 or 5x5 are not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 1 && weights->dimension(width_idx) != 3 && weights->dimension(width_idx) != 5 && weights->dimension(width_idx) != 9,
+                                    "Kernel sizes other than 1x1, 3x3, 5x5 or 9x9 are not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != input->dimension(channel_idx),
                                     "Weights feature map dimension should match the respective input's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 4, "Weights can be at most 4 dimensional");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 3 || weights->dimension(width_idx) == 5) && std::get<0>(conv_info.stride()) > 2,
                                     "Strides larger than 2 not supported for 3x3 convolution.");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 9) && data_layout == DataLayout::NCHW, "Only NHWC layout is supported for 9x9 convolution.");
 
     if(biases != nullptr)
     {
@@ -101,6 +102,19 @@ inline bool can_run_optimized_kernel_for_bifrost(GPUTarget gpu_target, unsigned 
            && (conv_stride_x == 1) && (conv_stride_y == 1)
            && (data_type == DataType::F32)
            && (data_layout == DataLayout::NCHW);
+}
+
+inline bool can_run_optimized_kernel_for_bifrost_nhwc(GPUTarget gpu_target, unsigned int conv_stride_x, unsigned int conv_stride_y, unsigned int kernel_size,
+                                                      DataType data_type, DataLayout data_layout)
+{
+    return gpu_target_is_in(gpu_target,
+                            GPUTarget::G71, GPUTarget::G72, GPUTarget::G76,
+                            GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT,
+                            GPUTarget::G52, GPUTarget::G52LIT)
+           && (kernel_size == 9)
+           && (conv_stride_x == 1) && (conv_stride_y == 1)
+           && (data_type == DataType::F32)
+           && (data_layout == DataLayout::NHWC);
 }
 
 inline void setup_num_elems(unsigned int &num_elems_read_per_iteration_x, unsigned int &num_elems_read_per_iteration_y,
@@ -149,7 +163,7 @@ inline void setup_num_elems(unsigned int &num_elems_read_per_iteration_x, unsign
             }
         }
     }
-    else
+    else if(data_layout == DataLayout::NCHW)
     {
         num_elems_read_per_iteration_y    = kernel_size;
         num_elems_written_per_iteration_x = 8;
@@ -215,11 +229,21 @@ inline void setup_num_elems(unsigned int &num_elems_read_per_iteration_x, unsign
                 ARM_COMPUTE_ERROR("Invalid direct convolution size");
         }
     }
-
-    if(data_layout == DataLayout::NHWC)
+    else // data_layout == NHWC
     {
+        const bool run_optimized_bifrost_nhwc = can_run_optimized_kernel_for_bifrost_nhwc(target, conv_stride_x, conv_stride_y, kernel_size, data_type, data_layout);
+
         num_elems_written_per_iteration_x = 1;
-        num_elems_read_per_iteration_x    = 1;
+
+        if(run_optimized_bifrost_nhwc)
+        {
+            num_elems_read_per_iteration_x = 4;
+        }
+        else
+        {
+            num_elems_read_per_iteration_x = 1;
+        }
+
         switch(kernel_size)
         {
             case 1:
@@ -261,6 +285,21 @@ inline void setup_num_elems(unsigned int &num_elems_read_per_iteration_x, unsign
                         break;
                     case 2:
                         num_elems_read_per_iteration_y    = 20;
+                        num_elems_written_per_iteration_y = 8;
+                        break;
+                    default:
+                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
+                }
+                break;
+            case 9:
+                switch(conv_stride_x)
+                {
+                    case 1:
+                        num_elems_read_per_iteration_y    = 16;
+                        num_elems_written_per_iteration_y = 8;
+                        break;
+                    case 2:
+                        num_elems_read_per_iteration_y    = 24;
                         num_elems_written_per_iteration_y = 8;
                         break;
                     default:
@@ -311,7 +350,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     if(data_layout == DataLayout::NHWC)
     {
         AccessWindowStatic input_access(input, 0, -conv_pad_left,
-                                        num_elems_read_per_iteration_x,
+                                        ceil_to_multiple(input->dimension(0), num_elems_read_per_iteration_x),
                                         ceil_to_multiple(input->dimension(1) + conv_info.pad_right(), num_elems_read_per_iteration_y));
         AccessWindowStatic    weights_access(weights, 0, 0, weights->dimension(0), weights->dimension(1));
         AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
@@ -429,6 +468,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         build_options.add_option(std::string("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x)));
         if(data_layout == DataLayout::NHWC)
         {
+            const bool run_optimized_for_bifrost_nhwc = can_run_optimized_kernel_for_bifrost_nhwc(gpu_target, _conv_stride_x, _conv_stride_y, kernel_size, data_type, data_layout);
             build_options.add_option(std::string("-DDATA_LAYOUT_NHWC=1"));
             build_options.add_option(std::string("-DDST_HEIGHT=" + support::cpp11::to_string(_output->info()->dimension(height_idx))));
             build_options.add_option(std::string("-DDST_WIDTH=" + support::cpp11::to_string(_output->info()->dimension(width_idx))));
@@ -437,6 +477,12 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
             build_options.add_option(std::string("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left())));
             build_options.add_option(std::string("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top())));
             build_options.add_option(std::string("-DSTRIDE_Y=" + support::cpp11::to_string(_conv_stride_y)));
+            if(run_optimized_for_bifrost_nhwc)
+            {
+                const unsigned int num_elems_read_per_iteration_x = 4;
+                _border_size.right                                = num_elems_read_per_iteration_x;
+                build_options.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_read_per_iteration_x));
+            }
         }
         build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(data_type)));
         // Create kernel
@@ -452,16 +498,20 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     // Set static kernel arguments
     if(is_data_type_quantized_asymmetric(data_type))
     {
+        const UniformQuantizationInfo iqinfo = _input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wqinfo = _weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oqinfo = _output->info()->quantization_info().uniform();
+
         int output_multiplier = 0;
         int output_shift      = 0;
 
-        float multiplier = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        float multiplier = iqinfo.scale * wqinfo.scale / oqinfo.scale;
         ARM_COMPUTE_THROW_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
 
         unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0) + 1;
-        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
-        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
-        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
+        _kernel.setArg(idx++, -iqinfo.offset);
+        _kernel.setArg(idx++, -wqinfo.offset);
+        _kernel.setArg(idx++, oqinfo.offset);
         _kernel.setArg(idx++, output_multiplier);
         _kernel.setArg(idx++, output_shift);
     }

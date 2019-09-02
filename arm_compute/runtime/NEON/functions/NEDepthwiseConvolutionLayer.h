@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__
 
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.h"
+#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseVectorToTensorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseWeightsReshapeKernel.h"
@@ -32,6 +33,7 @@
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/Macros.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -42,6 +44,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Basic function to execute a depthwise convolution for kernel size 3x3xC. This function calls the following NEON kernels:
@@ -75,6 +78,7 @@ public:
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
      * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(19.08, NEDepthwiseConvolutionLayerOptimized)
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
                    unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
@@ -157,8 +161,130 @@ private:
     bool                                      _is_prepared;
 };
 
+/** Basic function to execute optimized depthwise convolution routines. This function calls the following NEON kernels:
+ *
+ * @note At the moment 3x3 and 5x5 convolution of stride 1, 2 are supported
+ *
+ * -# @ref NEFillBorderKernel (if pad_x or pad_y > 0) and no assembly kernel implementation is present
+ * -# @ref NEDepthwiseConvolutionLayer3x3Kernel if 3x3 and no assembly kernel implementation is present
+ * -# @ref NEDepthwiseConvolutionAssemblyDispatch if assembly kernel implementation is present
+ * -# @ref NEDirectConvolutionLayerOutputStageKernel if re-quantization of output is required
+ * -# @ref NEActivationLayer if fused activation is required
+ *
+ */
+class NEDepthwiseConvolutionLayerOptimized : public IFunction
+{
+public:
+    /** Default constructor */
+    NEDepthwiseConvolutionLayerOptimized(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEDepthwiseConvolutionLayerOptimized(const NEDepthwiseConvolutionLayerOptimized &) = delete;
+    /** Default move constructor */
+    NEDepthwiseConvolutionLayerOptimized(NEDepthwiseConvolutionLayerOptimized &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEDepthwiseConvolutionLayerOptimized &operator=(const NEDepthwiseConvolutionLayerOptimized &) = delete;
+    /** Default move assignment operator */
+    NEDepthwiseConvolutionLayerOptimized &operator=(NEDepthwiseConvolutionLayerOptimized &&) = default;
+    /** Initialize the function's source, destination, kernels and border_size.
+     *
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+     * @param[in]      weights          Weights tensor. These are 3D tensors with shape [W, H, IFM]. Data type supported: Same as @p input.
+     * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     *                                  Data type supported: Same as @p input.
+     * @param[out]     output           Destination tensor. Data type supported: same as @p input.
+     * @param[in]      conv_info        Padding and stride information to use for the convolution.
+     * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     */
+    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer3x3
+     *
+     * @param[in] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+     * @param[in] weights          Weights tensor. These are 3D tensors with shape [W, H, IFM]. Data type supported: Same as @p input.
+     * @param[in] biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     *                             Data type supported: Same as @p input.
+     * @param[in] output           Destination tensor. Data type supported: same as @p input.
+     * @param[in] conv_info        Padding and stride information to use for the convolution.
+     * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
+
+    // Inherited methods overriden:
+    void run() override;
+    void prepare() override;
+
+private:
+    /** Configure the kernels/functions for the generic pipeline.
+     *
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+     * @param[in]      weights          Weights tensor. These are 3D tensors with shape [W, H, IFM]. Data type supported: Same as @p input.
+     * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     *                                  Data type supported: Same as @p input.
+     * @param[out]     output           Destination tensor. Data type supported: same as @p input.
+     * @param[in]      conv_info        Padding and stride information to use for the convolution.
+     * @param[in]      depth_multiplier Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]      act_info         Activation layer information in case of a fused activation.
+     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     *
+     */
+    void configure_generic(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+                           unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation = Size2D(1U, 1U));
+    /** Configure the kernels/functions for the optimized pipeline.
+     *
+     * @param[in]  input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+     * @param[in]  weights          Weights tensor. These are 3D tensors with shape [W, H, IFM]. Data type supported: Same as @p input.
+     * @param[in]  biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     *                              Data type supported: Same as @p input.
+     * @param[out] output           Destination tensor. Data type supported: same as @p input.
+     * @param[in]  conv_info        Padding and stride information to use for the convolution.
+     * @param[in]  depth_multiplier Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]  act_info         Activation layer information in case of a fused activation.
+     */
+    void configure_optimized(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+                             unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation = Size2D(1U, 1U));
+    /** Run generic kernel */
+    void run_generic();
+    /** Run optimized function */
+    void run_optimized();
+
+private:
+    MemoryGroup                               _memory_group;
+    NEDepthwiseConvolutionLayer3x3Kernel      _dwc_kernel;
+    NEDepthwiseConvolutionAssemblyDispatch    _dwc_optimized_func;
+    NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    NEFillBorderKernel                        _border_handler;
+    NEPermute                                 _permute_input;
+    NEPermute                                 _permute_weights;
+    NEPermute                                 _permute_output;
+    NEActivationLayer                         _activationlayer_function;
+    Tensor                                    _accumulator;
+    Tensor                                    _permuted_input;
+    Tensor                                    _permuted_weights;
+    Tensor                                    _permuted_output;
+    const ITensor                            *_original_weights;
+    bool                                      _has_bias;
+    bool                                      _is_quantized;
+    bool                                      _is_optimized;
+    bool                                      _is_nchw;
+    bool                                      _permute;
+    bool                                      _is_activationlayer_enabled;
+    bool                                      _is_prepared;
+};
+
 /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:
  *
+ * If data type is F32 and data layout is NHWC:
+ * -# @ref NEDepthwiseConvolutionLayerNativeKernel
+ *
+ * Otherwise:
  * -# @ref NEDepthwiseIm2ColKernel
  * -# @ref NEDepthwiseWeightsReshapeKernel
  * -# @ref NEGEMMMatrixVectorMultiplyKernel
@@ -218,8 +344,10 @@ private:
     NEDepthwiseIm2ColKernel                   _im2col_kernel;
     NEDepthwiseWeightsReshapeKernel           _weights_reshape_kernel;
     NEGEMMMatrixVectorMultiplyKernel          _v2mm_kernel;
+    NEDepthwiseConvolutionLayerNativeKernel   _depthwise_conv_kernel;
     NEDepthwiseVectorToTensorKernel           _vector_to_tensor_kernel;
     NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    NEFillBorderKernel                        _fill_border;
     NEFillBorderKernel                        _v2mm_input_fill_border;
     NEFillBorderKernel                        _v2mm_weights_fill_border;
     NEPermute                                 _permute_input;
@@ -237,6 +365,7 @@ private:
     bool                                      _is_quantized;
     bool                                      _is_nhwc;
     bool                                      _is_activationlayer_enabled;
+    bool                                      _is_optimized;
     const ITensor                            *_original_weights;
 };
 } // namespace arm_compute

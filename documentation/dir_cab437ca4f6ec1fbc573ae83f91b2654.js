@@ -9,6 +9,10 @@ var dir_cab437ca4f6ec1fbc573ae83f91b2654 =
     ] ],
     [ "InfoHelpers.h", "_info_helpers_8h.xhtml", "_info_helpers_8h" ],
     [ "Iterable.h", "_iterable_8h.xhtml", "_iterable_8h" ],
+    [ "Macros.h", "arm__compute_2core_2utils_2misc_2_macros_8h.xhtml", "arm__compute_2core_2utils_2misc_2_macros_8h" ],
+    [ "MMappedFile.h", "_m_mapped_file_8h.xhtml", [
+      [ "MMappedFile", "classarm__compute_1_1utils_1_1mmap__io_1_1_m_mapped_file.xhtml", "classarm__compute_1_1utils_1_1mmap__io_1_1_m_mapped_file" ]
+    ] ],
     [ "Random.h", "_random_8h.xhtml", [
       [ "RangedUniformDistribution", "classarm__compute_1_1utils_1_1random_1_1_ranged_uniform_distribution.xhtml", "classarm__compute_1_1utils_1_1random_1_1_ranged_uniform_distribution" ]
     ] ],

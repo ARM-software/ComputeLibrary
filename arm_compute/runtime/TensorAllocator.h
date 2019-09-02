@@ -72,7 +72,7 @@ public:
      * @param[in] coords    The starting coordinates of the new tensor inside the parent tensor.
      * @param[in] sub_info  The new tensor information (e.g. shape etc)
      */
-    void init(const TensorAllocator &allocator, const Coordinates &coords, TensorInfo sub_info);
+    void init(const TensorAllocator &allocator, const Coordinates &coords, TensorInfo &sub_info);
 
     /** Returns the pointer to the allocated data.
      *
@@ -98,6 +98,8 @@ public:
      * @warning size is expected to be compliant with total_size reported by ITensorInfo.
      * @warning ownership of memory is not transferred.
      * @warning tensor shouldn't be memory managed.
+     * @warning padding should be accounted by the client code.
+     * @warning memory must be writable in case of in-place operations
      * @note buffer alignment will be checked to be compliant with alignment reported by ITensorInfo.
      *
      * @param[in] memory Raw memory pointer to be used as backing memory

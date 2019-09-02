@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #define MAX(x, y) max((x), (y))
 #define MIN(x, y) min((x), (y))
 #define SQUARED_DIFF(x, y) (x - y) * (x - y)
+#define PRELU(x, y) (select(y * x, x, x > (DATA_TYPE_OUT)0))
 #define DIV(x, y) (x / y)
 
 #define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
@@ -36,11 +37,11 @@
 #define OP_FUN_NAME_STR(op) elementwise_operation_##op##_quantized
 #define OP_FUN_NAME(op) OP_FUN_NAME_STR(op)
 
-#if defined(OP) && defined(VEC_SIZE) && defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT)
+#if defined(OP) && defined(VEC_SIZE) && defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT)
 
 #define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
 #define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
-#define VEC_UCHAR VEC_DATA_TYPE(uchar, VEC_SIZE)
+#define VEC_TYPE VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
 
 /** This function executes an element-wise operation among two tensors.
  *
@@ -53,8 +54,10 @@
  * @attention To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  * @attention The element-wise operation to be executed has to be passed at compile time using -DOP (e.g., -DOP=ADD)
+ * @attention For QSYMM16 operations OFFSET_IN1, OFFSET_IN2 and OFFSET_OUT must be set to zero
+ * @attention The data type must be passed at compile time using -DDATA_TYPE_OUT, i.e. -DDATA_TYPE_OUT=uchar
  *
- * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/QSYMM16
  * @param[in]  in1_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -89,8 +92,8 @@ __kernel void OP_FUN_NAME(OP)(
     Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
-    VEC_INT in_a = CONVERT(VLOAD(VEC_SIZE)(0, (__global uchar *)in1.ptr), VEC_INT);
-    VEC_INT in_b = CONVERT(VLOAD(VEC_SIZE)(0, (__global uchar *)in2.ptr), VEC_INT);
+    VEC_INT in_a = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_OUT *)in1.ptr), VEC_INT);
+    VEC_INT in_b = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_OUT *)in2.ptr), VEC_INT);
 
     in_a = SUB(in_a, (VEC_INT)((int)OFFSET_IN1));
     in_b = SUB(in_b, (VEC_INT)((int)OFFSET_IN2));
@@ -98,10 +101,10 @@ __kernel void OP_FUN_NAME(OP)(
     const VEC_FLOAT in1f32  = CONVERT(in_a, VEC_FLOAT) * (VEC_FLOAT)((float)SCALE_IN1);
     const VEC_FLOAT in2f32  = CONVERT(in_b, VEC_FLOAT) * (VEC_FLOAT)((float)SCALE_IN2);
     const VEC_FLOAT qresf32 = OP(in1f32, in2f32) / ((VEC_FLOAT)(float)SCALE_OUT) + ((VEC_FLOAT)((float)OFFSET_OUT));
-    const VEC_UCHAR res     = CONVERT_SAT(CONVERT_DOWN(qresf32, VEC_INT), VEC_UCHAR);
+    const VEC_TYPE  res     = CONVERT_SAT(CONVERT_DOWN(qresf32, VEC_INT), VEC_TYPE);
 
     // Store result
     VSTORE(VEC_SIZE)
-    (res, 0, (__global uchar *)out.ptr);
+    (res, 0, (__global DATA_TYPE_OUT *)out.ptr);
 }
-#endif /* defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) */
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT) && defined(DATA_TYPE_OUT) */

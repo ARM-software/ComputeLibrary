@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -243,18 +243,10 @@ void CLGEMMLowpOffsetContributionKernel::run(const Window &window, cl::CommandQu
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _mm_result, slice);
-        if(_vector_sum_col != nullptr)
-        {
-            add_2D_tensor_argument(idx, _vector_sum_col, win_vector_sum_col);
-        }
-        if(_vector_sum_row != nullptr)
-        {
-            add_2D_tensor_argument(idx, _vector_sum_row, win_vector_sum_row);
-        }
-        if(_bias != nullptr)
-        {
-            add_1D_tensor_argument(idx, _bias, biases_slice);
-        }
+        add_2D_tensor_argument_if((_vector_sum_col != nullptr), idx, _vector_sum_col, win_vector_sum_col);
+        add_2D_tensor_argument_if((_vector_sum_row != nullptr), idx, _vector_sum_row, win_vector_sum_row);
+        add_1D_tensor_argument_if((_bias != nullptr), idx, _bias, biases_slice);
+
         enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice));

@@ -7,6 +7,6 @@ var _c_l_2_strided_slice_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_strided_slice_8cpp.xhtml#ae18996148e9556f6d0fc055a0cb1278a", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_strided_slice_8cpp.xhtml#ad34a264e3969b40641fb964dae86b518", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_strided_slice_8cpp.xhtml#aa2d04e51e7e0c14c5717bff4bee04538", null ],
-    [ "TEST_SUITE_END", "_c_l_2_strided_slice_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_c_l_2_strided_slice_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLStridedSliceFixture< float >", "_c_l_2_strided_slice_8cpp.xhtml#aa8401bdf61d9bd8456755257d82d45ed", null ]
 ];

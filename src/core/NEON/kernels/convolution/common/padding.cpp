@@ -24,8 +24,8 @@
 #include <cstring>
 #include <cstdint>
 
-#include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/common/padding.hpp"
+#include "arm.hpp"
+#include "padding.hpp"
 
 namespace padding
 {

@@ -28,6 +28,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
+#include "arm_compute/core/NEON/NESymm.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -42,7 +43,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QSYMM8, DataType::QSYMM16);
 
     if(output->tensor_shape().total_size() > 0)
     {
@@ -95,9 +96,32 @@ inline void store_result<float16_t>(float16_t *ptr, const float32x4x4_t &v)
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 template <typename T>
-void run_dequantization(const ITensor *input, ITensor *output, const Window &window)
+inline void store_result(T *ptr, const float32x4x2_t &v)
 {
-    const QuantizationInfo &qinfo = input->info()->quantization_info();
+    ARM_COMPUTE_UNUSED(ptr, v);
+}
+
+template <>
+inline void store_result<float>(float *ptr, const float32x4x2_t &v)
+{
+    wrapper::vstore(ptr, v.val[0]);
+    wrapper::vstore(ptr + 4, v.val[1]);
+}
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template <>
+inline void store_result<float16_t>(float16_t *ptr, const float32x4x2_t &v)
+{
+    wrapper::vstore(ptr, vcombine_f16(vcvt_f16_f32(v.val[0]), vcvt_f16_f32(v.val[1])));
+}
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
+template <typename T>
+void run_dequantization_qasymm8(const ITensor *input, ITensor *output, const Window &window)
+{
+    const UniformQuantizationInfo &qinfo  = input->info()->quantization_info().uniform();
+    const float                    scale  = qinfo.scale;
+    const int32_t                  offset = qinfo.offset;
 
     const int  window_step_x  = 16;
     const auto window_start_x = static_cast<int>(window.x().start());
@@ -120,7 +144,7 @@ void run_dequantization(const ITensor *input, ITensor *output, const Window &win
         for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
             const auto vin  = wrapper::vloadq(in_ptr + x);
-            const auto vdeq = vdequantize(vin, qinfo);
+            const auto vdeq = vdequantize(vin, scale, offset);
 
             store_result<T>(reinterpret_cast<T *>(out_ptr + x), vdeq);
         }
@@ -129,10 +153,113 @@ void run_dequantization(const ITensor *input, ITensor *output, const Window &win
         for(; x < window_end_x; ++x)
         {
             uint8_t val    = *(in_ptr + x);
-            *(out_ptr + x) = static_cast<T>(qinfo.dequantize(val));
+            *(out_ptr + x) = static_cast<T>(dequantize(val, scale, offset));
         }
     },
     in, out);
+}
+
+template <typename T>
+void run_dequantization_qsymm8(const ITensor *input, ITensor *output, const Window &window)
+{
+    const UniformQuantizationInfo &qinfo = input->info()->quantization_info().uniform();
+    const float                    scale = qinfo.scale;
+
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    // Collapse window and reset first dimension to handle tail calculations manually
+    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    // Create iterators
+    Iterator in(input, win_collapsed);
+    Iterator out(output, win_collapsed);
+
+    execute_window_loop(win_collapsed, [&](const Coordinates &)
+    {
+        const auto in_ptr  = reinterpret_cast<const int8_t *>(in.ptr());
+        const auto out_ptr = reinterpret_cast<T *>(out.ptr());
+
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const auto vin  = wrapper::vloadq(in_ptr + x);
+            const auto vdeq = vdequantize(vin, scale);
+
+            store_result<T>(reinterpret_cast<T *>(out_ptr + x), vdeq);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            int8_t val     = *(in_ptr + x);
+            *(out_ptr + x) = static_cast<T>(dequantize(val, scale));
+        }
+    },
+    in, out);
+}
+
+template <typename T>
+void run_dequantization_qsymm16(const ITensor *input, ITensor *output, const Window &window)
+{
+    const UniformQuantizationInfo &qinfo = input->info()->quantization_info().uniform();
+    const float                    scale = qinfo.scale;
+
+    const int  window_step_x  = 8;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    // Collapse window and reset first dimension to handle tail calculations manually
+    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    // Create iterators
+    Iterator in(input, win_collapsed);
+    Iterator out(output, win_collapsed);
+
+    execute_window_loop(win_collapsed, [&](const Coordinates &)
+    {
+        const auto in_ptr  = reinterpret_cast<const int16_t *>(in.ptr());
+        const auto out_ptr = reinterpret_cast<T *>(out.ptr());
+
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const auto vin  = wrapper::vloadq(in_ptr + x);
+            const auto vdeq = vdequantize_int16(vin, scale);
+
+            store_result<T>(reinterpret_cast<T *>(out_ptr + x), vdeq);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            int16_t val    = *(in_ptr + x);
+            *(out_ptr + x) = static_cast<T>(dequantize_qsymm16(val, scale));
+        }
+    },
+    in, out);
+}
+
+template <typename T>
+void run_dequantization_core(const ITensor *input, ITensor *output, const Window &window)
+{
+    switch(input->info()->data_type())
+    {
+        case DataType::QASYMM8:
+            run_dequantization_qasymm8<T>(input, output, window);
+            break;
+        case DataType::QSYMM8:
+            run_dequantization_qsymm8<T>(input, output, window);
+            break;
+        case DataType::QSYMM16:
+            run_dequantization_qsymm16<T>(input, output, window);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type.");
+    }
 }
 } // namespace
 
@@ -173,11 +300,11 @@ void NEDequantizationLayerKernel::run(const Window &window, const ThreadInfo &in
     switch(_output->info()->data_type())
     {
         case DataType::F32:
-            run_dequantization<float>(_input, _output, window);
+            run_dequantization_core<float>(_input, _output, window);
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            run_dequantization<float16_t>(_input, _output, window);
+            run_dequantization_core<float16_t>(_input, _output, window);
             break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:

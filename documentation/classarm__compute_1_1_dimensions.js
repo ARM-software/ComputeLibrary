@@ -16,6 +16,7 @@ var classarm__compute_1_1_dimensions =
     [ "operator=", "classarm__compute_1_1_dimensions.xhtml#a80565e11a35c48747bcc2cba06931e20", null ],
     [ "operator[]", "classarm__compute_1_1_dimensions.xhtml#a08834d57877df4172a35bccc6719ab3a", null ],
     [ "operator[]", "classarm__compute_1_1_dimensions.xhtml#ac88390e0a6503d5d09c65d204980beb1", null ],
+    [ "remove", "classarm__compute_1_1_dimensions.xhtml#a3e0f41c0e7278cadd08bf9216623ada3", null ],
     [ "set", "classarm__compute_1_1_dimensions.xhtml#a982730e6f0da5f9490f59bc5f6bb3f27", null ],
     [ "set_num_dimensions", "classarm__compute_1_1_dimensions.xhtml#a810a78f0b7cc0270f38d4136e023ea3b", null ],
     [ "x", "classarm__compute_1_1_dimensions.xhtml#aa87f8fc26981b0f3228a78c83b95b802", null ],

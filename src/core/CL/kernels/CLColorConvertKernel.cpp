@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -125,6 +125,15 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
     output_access.set_valid_region(win, input->info()->valid_region());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name.str();
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
 void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *output)
@@ -195,6 +204,21 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *outpu
     output_access.set_valid_region(win, ValidRegion(intersect_region.anchor, output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name.str();
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->plane(0)->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->plane(0)->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->plane(0)->info()->dimension(1));
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->plane(1)->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->plane(1)->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->plane(1)->info()->dimension(1));
 }
 
 void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *output)
@@ -293,6 +317,15 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
     output_plane2_access.set_valid_region(win, ValidRegion(input_region.anchor, output->plane(2)->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name.str();
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
 void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *output)
@@ -379,6 +412,21 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *
     output_plane2_access.set_valid_region(win, ValidRegion(intersect_region.anchor, output->plane(2)->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name.str();
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->plane(0)->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->plane(0)->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->plane(0)->info()->dimension(1));
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->plane(1)->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->plane(1)->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->plane(1)->info()->dimension(1));
 }
 
 void CLColorConvertKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -395,7 +443,7 @@ void CLColorConvertKernel::run(const Window &window, cl::CommandQueue &queue)
             unsigned int idx = 0;
             add_2D_tensor_argument(idx, _input, slice);
             add_2D_tensor_argument(idx, _output, slice);
-            enqueue(queue, *this, slice);
+            enqueue(queue, *this, slice, lws_hint());
         }
         while(window.slide_window_slice_2D(slice));
     }
@@ -418,7 +466,7 @@ void CLColorConvertKernel::run(const Window &window, cl::CommandQueue &queue)
             {
                 add_2D_tensor_argument(idx, _multi_output->cl_plane(i), win_uv);
             }
-            enqueue(queue, *this, slice);
+            enqueue(queue, *this, slice, lws_hint());
         }
         while(window.slide_window_slice_2D(slice));
     }
@@ -443,7 +491,7 @@ void CLColorConvertKernel::run(const Window &window, cl::CommandQueue &queue)
                 add_2D_tensor_argument(idx, _multi_input->cl_plane(i), win_uv);
             }
             add_2D_tensor_argument(idx, _output, slice);
-            enqueue(queue, *this, slice);
+            enqueue(queue, *this, slice, lws_hint());
         }
         while(window.slide_window_slice_2D(slice));
     }
@@ -480,7 +528,7 @@ void CLColorConvertKernel::run(const Window &window, cl::CommandQueue &queue)
             {
                 add_2D_tensor_argument(idx, _multi_output->cl_plane(i), win_out_uv);
             }
-            enqueue(queue, *this, slice);
+            enqueue(queue, *this, slice, lws_hint());
         }
         while(window.slide_window_slice_2D(slice));
     }

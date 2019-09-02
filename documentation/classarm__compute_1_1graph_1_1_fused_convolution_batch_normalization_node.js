@@ -1,6 +1,6 @@
 var classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node =
 [
-    [ "FusedConvolutionBatchNormalizationNode", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a6be43ddbddb0082e893ad225cbc28a10", null ],
+    [ "FusedConvolutionBatchNormalizationNode", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a25b36616fe5fb2e3eaa7f2483594c441", null ],
     [ "accept", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f", null ],
     [ "configure_output", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a3f18a7449b9d7fc9e5fec212b8e61710", null ],
     [ "convolution_info", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#ad087f1f9aa1e444236911adf6c57df04", null ],

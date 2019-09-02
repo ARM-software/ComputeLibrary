@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,6 @@
     ".error \"Bad operand \\opm\"\n"\
     ".exitm\n"\
     ".endif\n"\
-    ".int	 0x6f80e000 | vd | (vn << 5) | (vm << 16) | (l << 21) | (h << 11)\n"\
+    ".inst	 0x6f80e000 | vd | (vn << 5) | (vm << 16) | (l << 21) | (h << 11)\n"\
     ".endm\n"\
 

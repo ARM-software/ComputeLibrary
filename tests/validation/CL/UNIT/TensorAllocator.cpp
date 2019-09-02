@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 
+#include "arm_compute/core/utils/misc/MMappedFile.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -65,6 +66,7 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(TensorAllocator)
 
+/** Validates import memory interface when importing cl buffer objects */
 TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
 {
     // Init tensor info
@@ -105,6 +107,7 @@ TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(t4.cl_buffer().get() != buf.get(), framework::LogLevel::ERRORS);
 }
 
+/** Validates import memory interface when importing malloced memory */
 TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
 {
     // Check if import extension is supported
@@ -164,6 +167,114 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
         tensor.allocator()->free();
         ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
     }
+}
+
+#if !defined(BARE_METAL)
+/** Validates import memory interface when importing memory mapped objects */
+TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
+{
+    // Check if import extension is supported
+    if(!device_supports_extension(CLKernelLibrary::get().get_device(), "cl_arm_import_memory_host"))
+    {
+        return;
+    }
+    else
+    {
+        const ActivationLayerInfo act_info(ActivationLayerInfo::ActivationFunction::RELU);
+        const TensorShape         shape     = TensorShape(24U, 16U, 3U);
+        const DataType            data_type = DataType::F32;
+
+        // Create tensor
+        const TensorInfo info(shape, 1, data_type);
+        CLTensor         tensor;
+        tensor.allocator()->init(info);
+
+        // Create and configure activation function
+        CLActivationLayer act_func;
+        act_func.configure(&tensor, nullptr, act_info);
+
+        // Get number of elements
+        const size_t total_size_in_elems = tensor.info()->tensor_shape().total_size();
+        const size_t total_size_in_bytes = tensor.info()->total_size();
+
+        // Create file
+        std::ofstream output_file("test_mmap_import.bin", std::ios::binary | std::ios::out);
+        output_file.seekp(total_size_in_bytes - 1);
+        output_file.write("", 1);
+        output_file.close();
+
+        // Map file
+        utils::mmap_io::MMappedFile mmapped_file("test_mmap_import.bin", 0 /** Whole file */, 0);
+        ARM_COMPUTE_EXPECT(mmapped_file.is_mapped(), framework::LogLevel::ERRORS);
+        unsigned char *data = mmapped_file.data();
+
+        cl::Buffer wrapped_buffer(import_malloc_memory_helper(data, total_size_in_bytes));
+        ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(wrapped_buffer)), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensor
+        std::uniform_real_distribution<float> distribution(-5.f, 5.f);
+        std::mt19937                          gen(library->seed());
+        auto                                 *typed_ptr = reinterpret_cast<float *>(data);
+        for(unsigned int i = 0; i < total_size_in_elems; ++i)
+        {
+            typed_ptr[i] = distribution(gen);
+        }
+
+        // Execute function and sync
+        act_func.run();
+        CLScheduler::get().sync();
+
+        // Validate result by checking that the input has no negative values
+        for(unsigned int i = 0; i < total_size_in_elems; ++i)
+        {
+            ARM_COMPUTE_EXPECT(typed_ptr[i] >= 0, framework::LogLevel::ERRORS);
+        }
+
+        // Release resources
+        tensor.allocator()->free();
+        ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+    }
+}
+#endif // !defined(BARE_METAL)
+
+/** Validates symmetric per channel quantization */
+TEST_CASE(Symm8PerChannelQuantizationInfo, framework::DatasetMode::ALL)
+{
+    // Create tensor
+    CLTensor                 tensor;
+    const std::vector<float> scale = { 0.25f, 1.4f, 3.2f, 2.3f, 4.7f };
+    const TensorInfo         info(TensorShape(32U, 16U), 1, DataType::QSYMM8_PER_CHANNEL, QuantizationInfo(scale));
+    tensor.allocator()->init(info);
+
+    // Check quantization information
+    ARM_COMPUTE_EXPECT(!tensor.info()->quantization_info().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!tensor.info()->quantization_info().scale().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(tensor.info()->quantization_info().scale().size() == scale.size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(tensor.info()->quantization_info().offset().empty(), framework::LogLevel::ERRORS);
+
+    CLQuantization quantization = tensor.quantization();
+    ARM_COMPUTE_ASSERT(quantization.scale != nullptr);
+    ARM_COMPUTE_ASSERT(quantization.offset != nullptr);
+
+    // Check OpenCL quantization arrays before allocating
+    ARM_COMPUTE_EXPECT(quantization.scale->max_num_values() == 0, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(quantization.offset->max_num_values() == 0, framework::LogLevel::ERRORS);
+
+    // Check OpenCL quantization arrays after allocating
+    tensor.allocator()->allocate();
+    ARM_COMPUTE_EXPECT(quantization.scale->max_num_values() == scale.size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(quantization.offset->max_num_values() == 0, framework::LogLevel::ERRORS);
+
+    // Validate that the scale values are the same
+    auto  cl_scale_buffer = quantization.scale->cl_buffer();
+    void *mapped_ptr      = CLScheduler::get().queue().enqueueMapBuffer(cl_scale_buffer, CL_TRUE, CL_MAP_READ, 0, scale.size());
+    auto  cl_scale_ptr    = static_cast<float *>(mapped_ptr);
+    for(unsigned int i = 0; i < scale.size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(cl_scale_ptr[i] == scale[i], framework::LogLevel::ERRORS);
+    }
+    CLScheduler::get().queue().enqueueUnmapMemObject(cl_scale_buffer, mapped_ptr);
 }
 
 TEST_SUITE_END() // TensorAllocator

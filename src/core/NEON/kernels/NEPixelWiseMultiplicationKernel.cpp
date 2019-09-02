@@ -30,6 +30,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
+#include "arm_compute/core/NEON/NESymm.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -63,21 +64,30 @@ inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *i
     ARM_COMPUTE_UNUSED(rounding_policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::U8 && (input1->data_type() != DataType::U8 || input2->data_type() != DataType::U8),
                                     "Output can only be U8 if both inputs are U8");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() == DataType::QASYMM8 && input2->data_type() != DataType::QASYMM8,
-                                    "Input2 must be QASYMM8 if both input1 is QASYMM8");
+                                    "Input2 must be QASYMM8 if input1 is QASYMM8");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() == DataType::QASYMM8 && input2->data_type() == DataType::QASYMM8 && overflow_policy == ConvertPolicy::WRAP,
-                                    "ConvertPolicy cannot be WRAP if datatype is QASYMM8");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() != DataType::QASYMM8 && input2->data_type() == DataType::QASYMM8,
+                                    "Input1 must be QASYMM8 if input2 is QASYMM8");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() == DataType::QSYMM16 && input2->data_type() != DataType::QSYMM16,
+                                    "Input2 must be QSYMM16 if input1 is QSYMM16");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() != DataType::QSYMM16 && input2->data_type() == DataType::QSYMM16,
+                                    "Input1 must be QSYMM16 if input2 is QSYMM16");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(input1->data_type()) && overflow_policy == ConvertPolicy::WRAP,
+                                    "ConvertPolicy cannot be WRAP if datatype is quantized");
 
     if(output->total_size() > 0)
     {
-        if(output->data_type() == DataType::QASYMM8)
+        if(is_data_type_quantized(output->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2, output);
         }
@@ -114,7 +124,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
 
     // Auto initialize output if not initialized
     {
-        set_shape_if_empty(*output, input1->tensor_shape());
+        ARM_COMPUTE_UNUSED(set_shape_if_empty(*output, input1->tensor_shape()));
 
         if(input1->data_type() == DataType::S16 || input2->data_type() == DataType::S16)
         {
@@ -127,6 +137,14 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         else if(input1->data_type() == DataType::F16 || input2->data_type() == DataType::F16)
         {
             set_format_if_unknown(*output, Format::F16);
+        }
+        else if(input1->data_type() == DataType::QASYMM8)
+        {
+            set_data_type_if_unknown(*output, DataType::QASYMM8);
+        }
+        else if(input1->data_type() == DataType::QSYMM16)
+        {
+            set_data_type_if_unknown(*output, DataType::QSYMM16);
         }
     }
 
@@ -173,8 +191,8 @@ inline uint16x8_t scale255_U16_U16(uint16x8_t in)
     return vreinterpretq_u16_s16(vcombine_s16(vmovn_s32(tmp_s2), vmovn_s32(tmp_s1)));
 }
 
-void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
-                                            const QuantizationInfo &input1_qua_info, const QuantizationInfo &input2_qua_info, const QuantizationInfo &output_qua_info)
+inline void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
+                                                       float32x4_t input1_vscale, int32x4_t input1_voffset, float32x4_t input2_vscale, int32x4_t input2_voffset, float32x4_t output_voffset, float32x4_t vinvscale)
 {
     const auto input1 = static_cast<const qasymm8_t *__restrict>(input1_ptr);
     const auto input2 = static_cast<const qasymm8_t *__restrict>(input2_ptr);
@@ -184,21 +202,68 @@ void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n(const void *__restrict input1_ptr, c
     const qasymm8x16_t input2_q = vld1q_u8(input2);
 
     // Dequantitize inputs
+    float32x4x4_t in1_f32x4x4;
+    float32x4x4_t in2_f32x4x4;
+    in1_f32x4x4.val[0] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(input1_q))))), input1_voffset)), input1_vscale);
+    in1_f32x4x4.val[1] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(input1_q))))), input1_voffset)), input1_vscale);
+    in1_f32x4x4.val[2] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(input1_q))))), input1_voffset)), input1_vscale);
+    in1_f32x4x4.val[3] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(input1_q))))), input1_voffset)), input1_vscale);
+
+    in2_f32x4x4.val[0] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(input2_q))))), input2_voffset)), input2_vscale);
+    in2_f32x4x4.val[1] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(input2_q))))), input2_voffset)), input2_vscale);
+    in2_f32x4x4.val[2] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(input2_q))))), input2_voffset)), input2_vscale);
+    in2_f32x4x4.val[3] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(input2_q))))), input2_voffset)), input2_vscale);
+
+    float32x4x4_t out_f32x4x4;
+    out_f32x4x4.val[0] = vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]);
+    out_f32x4x4.val[1] = vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]);
+    out_f32x4x4.val[2] = vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]);
+    out_f32x4x4.val[3] = vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]);
+
+    int32x4x4_t rf;
+#ifdef __aarch64__
+    rf.val[0] = vcvtnq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[0], vinvscale));
+    rf.val[1] = vcvtnq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[1], vinvscale));
+    rf.val[2] = vcvtnq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[2], vinvscale));
+    rf.val[3] = vcvtnq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[3], vinvscale));
+#else  //__aarch64__
+    rf.val[0] = vcvtq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[0], vinvscale));
+    rf.val[1] = vcvtq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[1], vinvscale));
+    rf.val[2] = vcvtq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[2], vinvscale));
+    rf.val[3] = vcvtq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[3], vinvscale));
+#endif //__aarch64__
+    const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+    const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
+
+    vst1q_u8(output, vcombine_u8(pa, pb));
+}
+
+void mul_saturate_QSYMM16_QSYMM16_QSYMM16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
+                                            const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info, const UniformQuantizationInfo &output_qua_info)
+{
+    const auto input1 = static_cast<const qsymm16_t *__restrict>(input1_ptr);
+    const auto input2 = static_cast<const qsymm16_t *__restrict>(input2_ptr);
+    const auto output = static_cast<qsymm16_t *__restrict>(output_ptr);
+
+    const qsymm16x8x2_t input1_q = vld2q_s16(input1);
+    const qsymm16x8x2_t input2_q = vld2q_s16(input2);
+
+    // Dequantitize inputs
     const float32x4x4_t in1_f32x4x4 = vdequantize(input1_q, input1_qua_info);
     const float32x4x4_t in2_f32x4x4 = vdequantize(input2_q, input2_qua_info);
 
-    const QuantizationInfo tmp_qua_info = QuantizationInfo(output_qua_info.scale / scale, output_qua_info.offset);
+    const UniformQuantizationInfo tmp_qua_info = { output_qua_info.scale / scale, output_qua_info.offset };
 
     const float32x4x4_t out_f32x4x4 =
     {
         vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
         vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
         vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
-        vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3])
+        vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
     };
 
-    const uint8x16_t result = vquantize(out_f32x4x4, tmp_qua_info);
-    vst1q_u8(output, result);
+    const qsymm16x8x2_t result = vquantize_qsymm16(out_f32x4x4, tmp_qua_info);
+    vst2q_s16(output, result);
 }
 
 template <bool is_scale255, bool is_sat>
@@ -488,7 +553,7 @@ void mul_U8_S16_S16_n(const void *__restrict input1_ptr, const void *__restrict 
 } // namespace
 
 NEPixelWiseMultiplicationKernel::NEPixelWiseMultiplicationKernel()
-    : _func_float(nullptr), _func_int(nullptr), _func_qasymm8(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _scale{ 0 }, _scale_exponent{ 0 }
+    : _func_float(nullptr), _func_int(nullptr), _func_quantized(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _scale{ 0 }, _scale_exponent{ 0 }, _run_optimized_qasymm8(false)
 {
 }
 
@@ -503,14 +568,15 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
     auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
-    _input1         = input1;
-    _input2         = input2;
-    _output         = output;
-    _scale          = scale;
-    _scale_exponent = 0;
-    _func_qasymm8   = nullptr;
-    _func_int       = nullptr;
-    _func_float     = nullptr;
+    _input1                = input1;
+    _input2                = input2;
+    _output                = output;
+    _scale                 = scale;
+    _scale_exponent        = 0;
+    _func_quantized        = nullptr;
+    _func_int              = nullptr;
+    _func_float            = nullptr;
+    _run_optimized_qasymm8 = false;
 
     bool is_scale_255 = false;
     // Check and validate scaling factor
@@ -536,7 +602,11 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
 
     if(dt_input1 == DataType::QASYMM8 && dt_input2 == DataType::QASYMM8)
     {
-        _func_qasymm8 = &mul_saturate_QASYMM8_QASYMM8_QASYMM8_n;
+        _run_optimized_qasymm8 = true;
+    }
+    else if(dt_input1 == DataType::QSYMM16 && dt_input2 == DataType::QSYMM16)
+    {
+        _func_quantized = &mul_saturate_QSYMM16_QSYMM16_QSYMM16_n;
     }
     else if(DataType::U8 == dt_input1 && DataType::U8 == dt_input2 && DataType::U8 == dt_output)
     {
@@ -655,24 +725,46 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
     Iterator input2(_input2, slice_input2);
     Iterator output(_output, slice);
 
-    if(_func_qasymm8 != nullptr)
+    if(is_data_type_quantized(_input1->info()->data_type()))
     {
-        execute_window_loop(collapsed, [&](const Coordinates &)
+        if(_run_optimized_qasymm8)
         {
-            (*_func_qasymm8)(input1.ptr(), input2.ptr(), output.ptr(), _scale,
-                             _input1->info()->quantization_info(), _input2->info()->quantization_info(), _output->info()->quantization_info());
-            collapsed.slide_window_slice_3D(slice_input1);
-            collapsed.slide_window_slice_3D(slice_input2);
-        },
-        input1, input2, output);
+            const int32x4_t   input1_voffset = vdupq_n_s32(_input1->info()->quantization_info().uniform().offset);
+            const float32x4_t input1_vscale  = vdupq_n_f32(_input1->info()->quantization_info().uniform().scale);
+            const int32x4_t   input2_voffset = vdupq_n_s32(_input2->info()->quantization_info().uniform().offset);
+            const float32x4_t input2_vscale  = vdupq_n_f32(_input2->info()->quantization_info().uniform().scale);
+            const float32x4_t output_voffset = vdupq_n_f32(static_cast<float>(_output->info()->quantization_info().uniform().offset));
+            const float       output_scale   = _output->info()->quantization_info().uniform().scale;
+            const float32x4_t vinvscale      = vdupq_n_f32(1.f / (output_scale / _scale));
+
+            execute_window_loop(collapsed, [&](const Coordinates &)
+            {
+                mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(input1.ptr(), input2.ptr(), output.ptr(), _scale,
+                                                           input1_vscale, input1_voffset, input2_vscale, input2_voffset, output_voffset, vinvscale);
+                ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
+                ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
+            },
+            input1, input2, output);
+        }
+        else
+        {
+            execute_window_loop(collapsed, [&](const Coordinates &)
+            {
+                (*_func_quantized)(input1.ptr(), input2.ptr(), output.ptr(), _scale,
+                                   _input1->info()->quantization_info().uniform(), _input2->info()->quantization_info().uniform(), _output->info()->quantization_info().uniform());
+                ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
+                ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
+            },
+            input1, input2, output);
+        }
     }
     else if(_func_int != nullptr)
     {
         execute_window_loop(collapsed, [&](const Coordinates &)
         {
             (*_func_int)(input1.ptr(), input2.ptr(), output.ptr(), _scale_exponent);
-            collapsed.slide_window_slice_3D(slice_input1);
-            collapsed.slide_window_slice_3D(slice_input2);
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
         },
         input1, input2, output);
     }
@@ -682,8 +774,8 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
         execute_window_loop(collapsed, [&](const Coordinates &)
         {
             (*_func_float)(input1.ptr(), input2.ptr(), output.ptr(), _scale);
-            collapsed.slide_window_slice_3D(slice_input1);
-            collapsed.slide_window_slice_3D(slice_input2);
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
         },
         input1, input2, output);
     }

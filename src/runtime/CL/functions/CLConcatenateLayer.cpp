@@ -23,11 +23,14 @@
  */
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 
+#include "arm_compute/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
+#include "arm_compute/core/CL/kernels/CLWidthConcatenate4TensorsKernel.h"
+#include "arm_compute/core/CL/kernels/CLWidthConcatenateLayerKernel.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h"
-#include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
@@ -44,14 +47,35 @@ CLConcatenateLayer::CLConcatenateLayer()
 {
 }
 
-void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+void CLConcatenateLayer::configure(std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+{
+    configure_internal(std::move(inputs_vector), output, axis);
+}
+
+void CLConcatenateLayer::configure(std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+{
+    configure_internal(std::move(inputs_vector), output, axis);
+}
+
+Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+{
+    return validate_internal(inputs_vector, output, axis);
+}
+
+Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+{
+    return validate_internal(inputs_vector, output, axis);
+}
+
+template <typename TensorType>
+void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_vector, ICLTensor *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
     _axis       = axis;
     _num_inputs = inputs_vector.size();
 
     std::vector<ITensorInfo *> inputs_vector_info(inputs_vector.size());
-    std::transform(inputs_vector.begin(), inputs_vector.end(), inputs_vector_info.begin(), [](ICLTensor * t)
+    std::transform(inputs_vector.begin(), inputs_vector.end(), inputs_vector_info.begin(), [](TensorType * t)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(t);
         return t->info();
@@ -122,12 +146,24 @@ void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector
             }
             break;
         }
+        case 3:
+        {
+            for(unsigned int i = 0; i < _num_inputs; ++i)
+            {
+                auto kernel = support::cpp14::make_unique<CLBatchConcatenateLayerKernel>();
+                kernel->configure(inputs_vector.at(i), offset, output);
+                offset += inputs_vector.at(i)->info()->dimension(_axis);
+                _concat_kernels.emplace_back(std::move(kernel));
+            }
+            break;
+        }
         default:
             ARM_COMPUTE_ERROR("Axis not supported");
     }
 }
 
-Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+template <typename TensorInfoType>
+Status CLConcatenateLayer::validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(output == nullptr);
     const unsigned int num_inputs = inputs_vector.size();
@@ -178,6 +214,15 @@ Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vec
             for(const auto &input : inputs_vector)
             {
                 ARM_COMPUTE_RETURN_ON_ERROR(CLDepthConcatenateLayerKernel::validate(input, offset, output));
+                offset += input->dimension(axis);
+            }
+            break;
+        }
+        case 3:
+        {
+            for(const auto &input : inputs_vector)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(CLBatchConcatenateLayerKernel::validate(input, offset, output));
                 offset += input->dimension(axis);
             }
             break;

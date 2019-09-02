@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ public:
         unsigned int multis{ 0 };  /**< Number of "multi" GEMMs (unique A, B and C). */
     };
 
-    static Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *c);
+    static Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *c, const GEMMInfo &gemm_info);
 
     /** Constructor */
     INEGEMMWrapperKernel();
@@ -61,13 +61,14 @@ public:
      *
      * @note The input and output tensor must have the same dimensions
      *
-     * @param[in]  a     Input tensor (Matrix A)
-     * @param[in]  b     Input tensor (Matrix B)
-     * @param[out] c     Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
-     * @param[in]  alpha Scalar multiplier to apply to AB matrix product.
-     * @param[in]  beta  Scalar multiplier to apply to input C matrix before adding product.
+     * @param[in]  a         Input tensor (Matrix A)
+     * @param[in]  b         Input tensor (Matrix B)
+     * @param[out] c         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in]  alpha     Scalar multiplier to apply to AB matrix product.
+     * @param[in]  beta      Scalar multiplier to apply to input C matrix before adding product.
+     * @param[in]  gemm_info GEMM meta-data
      */
-    void configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta);
+    void configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, const GEMMInfo &gemm_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -95,6 +96,7 @@ protected:
     const ITensor *_b;
     ITensor       *_c;
     Params         _params;
+    GEMMInfo       _gemm_info;
 
 private:
     Window      _window3d;

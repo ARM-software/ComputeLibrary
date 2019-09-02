@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,12 +40,9 @@
 #include <cstdint>
 #include <tuple>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
 class Coordinates;
-} // namespace arm_compute
 
 namespace
 {
@@ -317,7 +314,7 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
 
 std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
 {
-    const unsigned int num_elems_processed_per_iteration_x = 16;
+    constexpr unsigned int num_elems_processed_per_iteration_x = 16;
 
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x));
 
@@ -389,3 +386,4 @@ void NELocallyConnectedMatrixMultiplyKernel::run(const Window &window, const Thr
         }
     }
 }
+} // namespace arm_compute

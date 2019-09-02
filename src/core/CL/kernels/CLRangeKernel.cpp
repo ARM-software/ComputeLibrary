@@ -116,8 +116,9 @@ void CLRangeKernel::configure(ICLTensor *output, const float start, const float 
     build_opts.add_option("-DSTEP=" + support::cpp11::to_string(step));
     if(is_data_type_quantized_asymmetric(output->info()->data_type()))
     {
-        build_opts.add_option("-DOFFSET_OUT=" + support::cpp11::to_string(output->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
+        const UniformQuantizationInfo qinfo = output->info()->quantization_info().uniform();
+        build_opts.add_option("-DOFFSET_OUT=" + support::cpp11::to_string(qinfo.offset));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(qinfo.scale));
         kernel_name += "_quantized";
     }
     // Create kernel

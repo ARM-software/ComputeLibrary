@@ -76,6 +76,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(DetectionOutputLayerNode &n) = 0;
+    /** Visit DetectionPostProcessLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(DetectionPostProcessLayerNode &n) = 0;
     /** Visit EltwiseLayerNode.
      *
      * @param[in] n Node to visit.
@@ -96,6 +101,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(FusedConvolutionBatchNormalizationNode &n) = 0;
+    /** Visit FusedDepthwiseConvolutionBatchNormalizationNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) = 0;
     /** Visit InputNode.
      *
      * @param[in] n Node to visit.
@@ -126,6 +136,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(PriorBoxLayerNode &n) = 0;
+    /** Visit QuantizationLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(QuantizationLayerNode &n) = 0;
     /** Visit ReshapeLayerNode.
      *
      * @param[in] n Node to visit.
@@ -189,6 +204,10 @@ public:
     {
         default_visit();
     }
+    virtual void visit(DetectionPostProcessLayerNode &n) override
+    {
+        default_visit();
+    }
     virtual void visit(DepthwiseConvolutionLayerNode &n) override
     {
         default_visit();
@@ -206,6 +225,10 @@ public:
         default_visit();
     }
     virtual void visit(FusedConvolutionBatchNormalizationNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override
     {
         default_visit();
     }
@@ -230,6 +253,10 @@ public:
         default_visit();
     }
     virtual void visit(PriorBoxLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(QuantizationLayerNode &n) override
     {
         default_visit();
     }

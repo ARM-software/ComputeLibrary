@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['tanh_5fop',['tanh_op',['../activation__float__helpers_8h.xhtml#a0bd249f46d4fb9dc5cfcb062761c55bb',1,'activation_float_helpers.h']]],
   ['tensor3d_5fdeclaration',['TENSOR3D_DECLARATION',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a6b83038822d1ae7ab619b684ed3b7fc0',1,'helpers.h']]],
   ['tensor4d_5fdeclaration',['TENSOR4D_DECLARATION',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a481bdc6d61b3df9dcdbdb244f0f97790',1,'helpers.h']]],
   ['test_5fcase',['TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a846b2e70d2ba2180ccb81045c88b8409',1,'Macros.h']]],
@@ -10,7 +11,14 @@ var searchData=
   ['test_5fsuite_5fend',['TEST_SUITE_END',['../tests_2framework_2_macros_8h.xhtml#a603cb7f45efd81606e51686da9aeebd9',1,'Macros.h']]],
   ['transpose_5f16x16',['TRANSPOSE_16x16',['../transpose_8cl.xhtml#ae6c2b1bad97366395ba7a9a688533ff4',1,'transpose.cl']]],
   ['transpose_5f4x4',['TRANSPOSE_4x4',['../transpose_8cl.xhtml#a093adbe8897f56bc8d0998f5cad57c8a',1,'transpose.cl']]],
-  ['transpose_5f8x8',['TRANSPOSE_8x8',['../transpose_8cl.xhtml#ad037a4e8ddc84de9c0512a2d4ee693bf',1,'TRANSPOSE_8x8():&#160;transpose.cl'],['../_g_c_transpose_kernel_8cpp.xhtml#a2438fdfd446c570d9115fddd9d9fc37b',1,'TRANSPOSE_8X8():&#160;GCTransposeKernel.cpp']]],
+  ['transpose_5f8x8',['TRANSPOSE_8X8',['../_g_c_transpose_kernel_8cpp.xhtml#a2438fdfd446c570d9115fddd9d9fc37b',1,'TRANSPOSE_8X8():&#160;GCTransposeKernel.cpp'],['../transpose_8cl.xhtml#ad037a4e8ddc84de9c0512a2d4ee693bf',1,'TRANSPOSE_8x8():&#160;transpose.cl']]],
+  ['transpose_5fk0x1',['TRANSPOSE_K0X1',['../gemm__helpers_8h.xhtml#a3331788b9b76de48804ede36995f2b65',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x16',['TRANSPOSE_K0X16',['../gemm__helpers_8h.xhtml#ab7f7711d7dd26714ebee9d07b8ce58a3',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x2',['TRANSPOSE_K0X2',['../gemm__helpers_8h.xhtml#a6b46fdbc87c7084bdc63a2f9520ddb83',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x3',['TRANSPOSE_K0X3',['../gemm__helpers_8h.xhtml#a08e69d6b2e06e2ef4bc9ba21488ddf8f',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x4',['TRANSPOSE_K0X4',['../gemm__helpers_8h.xhtml#a5044f846186656923b4b6a6018dd1d42',1,'gemm_helpers.h']]],
+  ['transpose_5fk0x8',['TRANSPOSE_K0X8',['../gemm__helpers_8h.xhtml#a221e4dab7bfbca55e7d79174f140a754',1,'gemm_helpers.h']]],
+  ['transpose_5fk0xn0',['TRANSPOSE_K0XN0',['../gemm__helpers_8h.xhtml#af83fba9e0a00fc38a71258f0052b9c24',1,'gemm_helpers.h']]],
   ['twiddle_5ffactor_5fmultiplication',['TWIDDLE_FACTOR_MULTIPLICATION',['../fft_8cl.xhtml#ad4dcc4a8b94f263cd19c59fdc2cec3d2',1,'fft.cl']]],
-  ['type',['TYPE',['../activation__layer_8cl.xhtml#a5a392548f2df67370cb15d2a5d75cd7b',1,'TYPE():&#160;activation_layer.cl'],['../activation__layer__qa8_8cl.xhtml#a5a392548f2df67370cb15d2a5d75cd7b',1,'TYPE():&#160;activation_layer_qa8.cl']]]
+  ['type',['TYPE',['../activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b',1,'activation_quant_helpers.h']]]
 ];

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,7 @@ Collaboration diagram for ActivationLayer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a782c91273f38cdd9e5740282368c197a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_activation_layer.xhtml#a782c91273f38cdd9e5740282368c197a">ActivationLayer</a> (ActivationLayerInfo act_info, const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
+<tr class="memitem:a782c91273f38cdd9e5740282368c197a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_activation_layer.xhtml#a782c91273f38cdd9e5740282368c197a">ActivationLayer</a> (ActivationLayerInfo act_info, const <a class="el" href="classarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="classarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
 <tr class="memdesc:a782c91273f38cdd9e5740282368c197a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an activation layer.  <a href="#a782c91273f38cdd9e5740282368c197a">More...</a><br /></td></tr>
 <tr class="separator:a782c91273f38cdd9e5740282368c197a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a225fb162b43cbef27d5a1dbd7a51c60d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_activation_layer.xhtml#a225fb162b43cbef27d5a1dbd7a51c60d">create_layer</a> (<a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml">IStream</a> &amp;s) override</td></tr>
@@ -156,8 +156,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
-          <td class="paramname"><em>out_quant_info</em> = <code><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramname"><em>out_quant_info</em> = <code><a class="el" href="classarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -223,7 +223,7 @@ Public Member Functions</h2></td></tr>
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l00111">111</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    {</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a52efb0643281f6d6ca0e8f6cf25998b9">GraphBuilder::add_activation_node</a>(s.graph(), common_params, input, _act_info, std::move(_out_quant_info));</div><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a52efb0643281f6d6ca0e8f6cf25998b9"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a52efb0643281f6d6ca0e8f6cf25998b9">arm_compute::graph::GraphBuilder::add_activation_node</a></div><div class="ttdeci">static NodeID add_activation_node(Graph &amp;g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info, const QuantizationInfo out_quant_info=QuantizationInfo())</div><div class="ttdoc">Adds an activation layer node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00136">GraphBuilder.cpp:136</a></div></div>
+<div class="fragment"><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    {</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a5cd4c7258f59e2c5d03ed8ae5849a650">GraphBuilder::add_activation_node</a>(s.graph(), common_params, input, _act_info, std::move(_out_quant_info));</div><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a5cd4c7258f59e2c5d03ed8ae5849a650"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a5cd4c7258f59e2c5d03ed8ae5849a650">arm_compute::graph::GraphBuilder::add_activation_node</a></div><div class="ttdeci">static NodeID add_activation_node(Graph &amp;g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info, const QuantizationInfo &amp;out_quant_info=QuantizationInfo())</div><div class="ttdoc">Adds an activation layer node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00136">GraphBuilder.cpp:136</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_ad8227ba86a01f26e4f173cd5e219d5d1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const</div><div class="ttdoc">Layer name accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00136">GraphBuilder::add_activation_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
@@ -239,7 +239,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_activation_layer.xhtml">ActivationLayer</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

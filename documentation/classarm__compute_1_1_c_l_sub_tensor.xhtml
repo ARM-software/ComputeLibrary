@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -155,6 +155,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a53c338c0d76f41c472cdbf66fafdfe91"><td class="memItemLeft" align="right" valign="top">const cl::Buffer &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a53c338c0d76f41c472cdbf66fafdfe91">cl_buffer</a> () const override</td></tr>
 <tr class="memdesc:a53c338c0d76f41c472cdbf66fafdfe91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to return a reference to the OpenCL buffer containing the image's data.  <a href="#a53c338c0d76f41c472cdbf66fafdfe91">More...</a><br /></td></tr>
 <tr class="separator:a53c338c0d76f41c472cdbf66fafdfe91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d614dfaa0606b7fef13f3e26d745b48"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_c_l_quantization.xhtml">CLQuantization</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a6d614dfaa0606b7fef13f3e26d745b48">quantization</a> () const override</td></tr>
+<tr class="memdesc:a6d614dfaa0606b7fef13f3e26d745b48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to return the wrapped quantization info data.  <a href="#a6d614dfaa0606b7fef13f3e26d745b48">More...</a><br /></td></tr>
+<tr class="separator:a6d614dfaa0606b7fef13f3e26d745b48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0abc7a5c0d172947f0e6a0c0dde3df0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">map</a> (cl::CommandQueue &amp;q, bool blocking=true)</td></tr>
 <tr class="memdesc:ac0abc7a5c0d172947f0e6a0c0dde3df0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enqueue a map operation of the allocated buffer on the given queue.  <a href="#ac0abc7a5c0d172947f0e6a0c0dde3df0">More...</a><br /></td></tr>
 <tr class="separator:ac0abc7a5c0d172947f0e6a0c0dde3df0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -291,9 +294,9 @@ Public Member Functions</h2></td></tr>
 <div class="fragment"><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    : _parent(<span class="keyword">nullptr</span>), _info()</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(<a class="code" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#ae06581a05b08fb202d499444ae791e15">parent</a> == <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    _info   = <a class="code" href="classarm__compute_1_1_sub_tensor_info.xhtml">SubTensorInfo</a>(<a class="code" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#ae06581a05b08fb202d499444ae791e15">parent</a>-&gt;<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">info</a>(), tensor_shape, coords, extend_parent);</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    _parent = <a class="code" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#ae06581a05b08fb202d499444ae791e15">parent</a>;</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_sub_tensor_info_xhtml"><div class="ttname"><a href="classarm__compute_1_1_sub_tensor_info.xhtml">arm_compute::SubTensorInfo</a></div><div class="ttdoc">Store the sub tensor's metadata.</div><div class="ttdef"><b>Definition:</b> <a href="_sub_tensor_info_8h_source.xhtml#l00042">SubTensorInfo.h:42</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a0e95dc1e53c361348314873b168ae237"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">arm_compute::ITensor::info</a></div><div class="ttdeci">virtual ITensorInfo * info() const =0</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor's metadata.</div></div>
-<div class="ttc" id="classarm__compute_1_1_c_l_sub_tensor_xhtml_ae06581a05b08fb202d499444ae791e15"><div class="ttname"><a href="classarm__compute_1_1_c_l_sub_tensor.xhtml#ae06581a05b08fb202d499444ae791e15">arm_compute::CLSubTensor::parent</a></div><div class="ttdeci">ICLTensor * parent()</div><div class="ttdoc">Return the parent tensor of the subtensor.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_sub_tensor_8cpp_source.xhtml#l00061">CLSubTensor.cpp:61</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_sub_tensor_xhtml_ae06581a05b08fb202d499444ae791e15"><div class="ttname"><a href="classarm__compute_1_1_c_l_sub_tensor.xhtml#ae06581a05b08fb202d499444ae791e15">arm_compute::CLSubTensor::parent</a></div><div class="ttdeci">ICLTensor * parent()</div><div class="ttdoc">Return the parent tensor of the subtensor.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_sub_tensor_8cpp_source.xhtml#l00066">CLSubTensor.cpp:66</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>, and <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00061">CLSubTensor::parent()</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>, and <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00066">CLSubTensor::parent()</a>.</p>
 
 </div>
 </div>
@@ -506,8 +509,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00066">66</a> of file <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml">CLSubTensor.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;{</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <a class="code" href="classarm__compute_1_1_i_c_l_tensor.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">ICLTensor::map</a>(<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().queue(), blocking);</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_c_l_tensor_xhtml_ac0abc7a5c0d172947f0e6a0c0dde3df0"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_tensor.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">arm_compute::ICLTensor::map</a></div><div class="ttdeci">void map(cl::CommandQueue &amp;q, bool blocking=true)</div><div class="ttdoc">Enqueue a map operation of the allocated buffer on the given queue.</div><div class="ttdef"><b>Definition:</b> <a href="_i_c_l_tensor_8cpp_source.xhtml#l00035">ICLTensor.cpp:35</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00071">71</a> of file <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml">CLSubTensor.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;{</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <a class="code" href="classarm__compute_1_1_i_c_l_tensor.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">ICLTensor::map</a>(<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().queue(), blocking);</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_c_l_tensor_xhtml_ac0abc7a5c0d172947f0e6a0c0dde3df0"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_tensor.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">arm_compute::ICLTensor::map</a></div><div class="ttdeci">void map(cl::CommandQueue &amp;q, bool blocking=true)</div><div class="ttdoc">Enqueue a map operation of the allocated buffer on the given queue.</div><div class="ttdef"><b>Definition:</b> <a href="_i_c_l_tensor_8cpp_source.xhtml#l00035">ICLTensor.cpp:35</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler.cpp:41</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler::get()</a>, and <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00035">ICLTensor::map()</a>.</p>
@@ -616,9 +619,44 @@ Public Member Functions</h2></td></tr>
 <p>Return the parent tensor of the subtensor. </p>
 <dl class="section return"><dt>Returns</dt><dd>Parent tensor </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00061">61</a> of file <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml">CLSubTensor.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;{</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keywordflow">return</span> _parent;</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00066">66</a> of file <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml">CLSubTensor.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;{</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keywordflow">return</span> _parent;</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}</div></div><!-- fragment -->
 <p class="reference">Referenced by <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00037">CLSubTensor::CLSubTensor()</a>.</p>
+
+</div>
+</div>
+<a id="a6d614dfaa0606b7fef13f3e26d745b48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d614dfaa0606b7fef13f3e26d745b48">&#9670;&nbsp;</a></span>quantization()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structarm__compute_1_1_c_l_quantization.xhtml">CLQuantization</a> quantization </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Interface to be implemented by the child class to return the wrapped quantization info data. </p>
+<dl class="section return"><dt>Returns</dt><dd>A wrapped quantization info object. </dd></dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#aff9433a5bb38873d6af3d45e6f638281">ICLTensor</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00061">61</a> of file <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml">CLSubTensor.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;{</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keywordflow">return</span> _parent-&gt;<a class="code" href="classarm__compute_1_1_i_c_l_tensor.xhtml#aff9433a5bb38873d6af3d45e6f638281">quantization</a>();</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_c_l_tensor_xhtml_aff9433a5bb38873d6af3d45e6f638281"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_tensor.xhtml#aff9433a5bb38873d6af3d45e6f638281">arm_compute::ICLTensor::quantization</a></div><div class="ttdeci">virtual CLQuantization quantization() const =0</div><div class="ttdoc">Interface to be implemented by the child class to return the wrapped quantization info data.</div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#aff9433a5bb38873d6af3d45e6f638281">ICLTensor::quantization()</a>.</p>
 
 </div>
 </div>
@@ -642,8 +680,8 @@ Public Member Functions</h2></td></tr>
 <dd>
 This method simply enqueues the unmap operation, it is the caller's responsibility to flush the queue and make sure the unmap is finished before the memory is accessed by the device. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00071">71</a> of file <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml">CLSubTensor.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;{</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <a class="code" href="classarm__compute_1_1_i_c_l_tensor.xhtml#af974a2360069c2ef8df4496d00e4f6cc">ICLTensor::unmap</a>(<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().queue());</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler.cpp:41</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00076">76</a> of file <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml">CLSubTensor.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;{</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <a class="code" href="classarm__compute_1_1_i_c_l_tensor.xhtml#af974a2360069c2ef8df4496d00e4f6cc">ICLTensor::unmap</a>(<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().queue());</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler.cpp:41</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_c_l_tensor_xhtml_af974a2360069c2ef8df4496d00e4f6cc"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_tensor.xhtml#af974a2360069c2ef8df4496d00e4f6cc">arm_compute::ICLTensor::unmap</a></div><div class="ttdeci">void unmap(cl::CommandQueue &amp;q)</div><div class="ttdoc">Enqueue an unmap operation of the allocated and mapped buffer on the given queue.</div><div class="ttdef"><b>Definition:</b> <a href="_i_c_l_tensor_8cpp_source.xhtml#l00040">ICLTensor.cpp:40</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler::get()</a>, and <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00040">ICLTensor::unmap()</a>.</p>
@@ -687,7 +725,7 @@ This method simply enqueues the unmap operation, it is the caller's responsibili
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml">CLSubTensor</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:31 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

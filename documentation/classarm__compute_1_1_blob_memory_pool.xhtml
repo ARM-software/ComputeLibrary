@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -193,9 +193,10 @@ Public Member Functions</h2></td></tr>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_blob_memory_pool_8cpp_source.xhtml#l00036">36</a> of file <a class="el" href="_blob_memory_pool_8cpp_source.xhtml">BlobMemoryPool.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    : _allocator(allocator), _blobs(), _blob_info(std::move(blob_info))</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;{</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(!allocator);</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    allocate_blobs(_blob_info);</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
+<div class="fragment"><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    : _allocator(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a817d7768d04140a832d2cb27f83edb12">allocator</a>), _blobs(), _blob_info(std::move(blob_info))</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;{</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(!<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a817d7768d04140a832d2cb27f83edb12">allocator</a>);</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    allocate_blobs(_blob_info);</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a817d7768d04140a832d2cb27f83edb12"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a817d7768d04140a832d2cb27f83edb12">arm_compute::test::validation::allocator</a></div><div class="ttdeci">src_target allocator() -&gt; allocate()</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>.</p>
+<p class="reference">References <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a817d7768d04140a832d2cb27f83edb12">arm_compute::test::validation::allocator()</a>, and <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>.</p>
 
 </div>
 </div>
@@ -498,7 +499,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_blob_memory_pool.xhtml">BlobMemoryPool</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:28 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:31 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

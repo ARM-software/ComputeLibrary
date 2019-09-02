@@ -10,6 +10,9 @@ var dir_9b109a3838d873f4037ee21889a49db8 =
     [ "CPPFlipWeightsKernel.h", "_c_p_p_flip_weights_kernel_8h.xhtml", [
       [ "CPPFlipWeightsKernel", "classarm__compute_1_1_c_p_p_flip_weights_kernel.xhtml", "classarm__compute_1_1_c_p_p_flip_weights_kernel" ]
     ] ],
+    [ "CPPNonMaximumSuppressionKernel.h", "_c_p_p_non_maximum_suppression_kernel_8h.xhtml", [
+      [ "CPPNonMaximumSuppressionKernel", "classarm__compute_1_1_c_p_p_non_maximum_suppression_kernel.xhtml", "classarm__compute_1_1_c_p_p_non_maximum_suppression_kernel" ]
+    ] ],
     [ "CPPPermuteKernel.h", "_c_p_p_permute_kernel_8h.xhtml", [
       [ "CPPPermuteKernel", "classarm__compute_1_1_c_p_p_permute_kernel.xhtml", "classarm__compute_1_1_c_p_p_permute_kernel" ]
     ] ],

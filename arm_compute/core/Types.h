@@ -25,8 +25,7 @@
 #define __ARM_COMPUTE_TYPES_H__
 
 #include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/QAsymm8.h"
-#include "arm_compute/core/Rounding.h"
+#include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
@@ -35,6 +34,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <map>
 #include <string>
 #include <utility>
 
@@ -73,20 +73,23 @@ enum class Format
 /** Available data types */
 enum class DataType
 {
-    UNKNOWN, /**< Unknown data type */
-    U8,      /**< unsigned 8-bit number */
-    S8,      /**< signed 8-bit number */
-    QASYMM8, /**< quantized, asymmetric fixed-point 8-bit number */
-    U16,     /**< unsigned 16-bit number */
-    S16,     /**< signed 16-bit number */
-    U32,     /**< unsigned 32-bit number */
-    S32,     /**< signed 32-bit number */
-    U64,     /**< unsigned 64-bit number */
-    S64,     /**< signed 64-bit number */
-    F16,     /**< 16-bit floating-point number */
-    F32,     /**< 32-bit floating-point number */
-    F64,     /**< 64-bit floating-point number */
-    SIZET    /**< size_t */
+    UNKNOWN,            /**< Unknown data type */
+    U8,                 /**< unsigned 8-bit number */
+    S8,                 /**< signed 8-bit number */
+    QSYMM8,             /**< quantized, symmetric fixed-point 8-bit number */
+    QASYMM8,            /**< quantized, asymmetric fixed-point 8-bit number */
+    QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
+    U16,                /**< unsigned 16-bit number */
+    S16,                /**< signed 16-bit number */
+    QSYMM16,            /**< quantized, symmetric fixed-point 16-bit number */
+    U32,                /**< unsigned 32-bit number */
+    S32,                /**< signed 32-bit number */
+    U64,                /**< unsigned 64-bit number */
+    S64,                /**< signed 64-bit number */
+    F16,                /**< 16-bit floating-point number */
+    F32,                /**< 32-bit floating-point number */
+    F64,                /**< 64-bit floating-point number */
+    SIZET               /**< size_t */
 };
 
 /** Available Sampling Policies */
@@ -141,6 +144,13 @@ enum class DeconvolutionMethod
     DIRECT, /**< Direct deconvolution */
 };
 
+/** Available FuseBatchNormalizationType*/
+enum class FuseBatchNormalizationType
+{
+    CONVOLUTION,         /**< For Convolution weights */
+    DEPTHWISECONVOLUTION /**< For Depthwise Convolution weights*/
+};
+
 /** Padding mode to use for PadLayer */
 enum class PaddingMode
 {
@@ -158,86 +168,6 @@ enum class ComparisonOperation
     GreaterEqual, /**< Greater equal comparison ( \f$ x >= y \f$ ) */
     Less,         /**< Less comparison ( \f$ x < y \f$ ) */
     LessEqual     /**< Less equal comparison ( \f$ x <= y \f$ ) */
-};
-
-/** Quantization settings (used for QASYMM8 data type) */
-struct QuantizationInfo
-{
-    /** Default constructor */
-    QuantizationInfo() noexcept
-        : scale(0.0f),
-          offset(0)
-    {
-    }
-
-    /** Construct quantization info.
-     *
-     * @param[in] scale  Scale.
-     * @param[in] offset Offset.
-     */
-    QuantizationInfo(float scale, int offset)
-        : scale(scale), offset(offset)
-    {
-    }
-
-    /** Check whether equal to a given quantization info.
-     *
-     * @param[in] other Other quantization info.
-     *
-     * @return True if the given quantization info is the same.
-     */
-    bool operator==(const QuantizationInfo &other) const
-    {
-        return scale == other.scale && offset == other.offset;
-    }
-
-    /** Check whether not equal to a given quantization info.
-     *
-     * @param[in] other Other quantization info.
-     *
-     * @return True if the given quantization info is not the same.
-     */
-    bool operator!=(const QuantizationInfo &other) const
-    {
-        return !(*this == other);
-    }
-
-    float scale;  /**< scale */
-    int   offset; /**< offset */
-
-    /** Quantizes a value using the scale/offset in this QuantizationInfo
-     *
-     * @param[in] value           Value to quantize.
-     * @param[in] rounding_policy Policy to use when rounding.
-     *
-     * @return the quantized value.
-     */
-    qasymm8_t quantize(float value, RoundingPolicy rounding_policy) const
-    {
-        ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::quantize: scale == 0");
-        return sqcvt_qasymm8_f32(value, scale, offset, rounding_policy);
-    }
-
-    /** Dequantizes a value using the scale/offset in this QuantizationInfo
-     *
-     * @param[in] value Value to dequantize.
-     *
-     * @return the original value before quantization.
-     */
-    float dequantize(qasymm8_t value) const
-    {
-        ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::dequantize: scale == 0");
-        return scvt_f32_qasymm8(value, scale, offset);
-    }
-
-    /** Indicates whether this QuantizationInfo has valid settings or not
-     *
-     * @return True if the this has invalid settings.
-     */
-    bool empty() const
-    {
-        return scale == 0;
-    }
 };
 
 /** Container for valid region of a window */
@@ -559,7 +489,9 @@ enum class ReductionOperation
     MEAN_SUM,    /**< Mean of sum */
     PROD,        /**< Product */
     SUM_SQUARE,  /**< Sum of squares */
-    SUM          /**< Sum */
+    SUM,         /**< Sum */
+    MIN,         /**< Min */
+    MAX,         /**< Max */
 };
 
 /** Available element-wise operations */
@@ -571,6 +503,8 @@ enum class ArithmeticOperation
     MIN,          /**< Min(x, y) */
     MAX,          /**< Max(x, y) */
     SQUARED_DIFF, /**< (x - y)^2 */
+    POWER,        /**< x ^ y */
+    PRELU,        /**< y*x if x < 0, x otherwise */
 };
 
 /** Available element wise unary operations */
@@ -578,6 +512,11 @@ enum class ElementWiseUnary
 {
     RSQRT, /**< Reverse square root */
     EXP,   /**< Exponential */
+    NEG,   /**< Negate */
+    LOG,   /**< Natural Logarithm */
+    ABS,   /**< Absolute value */
+    SIN,   /**< Sine */
+    ROUND, /**< Round */
 };
 
 /** The normalization type used for the normalization layer */
@@ -1005,6 +944,11 @@ private:
     std::array<float, 2> _steps;
 };
 
+// Bounding Box [xmin, ymin, xmax, ymax]
+using BBox = std::array<float, 4>;
+// LabelBBox used for map label and bounding box
+using LabelBBox = std::map<int, std::vector<BBox>>;
+
 /** Available Detection Output code types */
 enum class DetectionOutputLayerCodeType
 {
@@ -1131,6 +1075,116 @@ private:
     bool                         _variance_encoded_in_target;
     float                        _eta;
     int                          _num_loc_classes;
+};
+
+/** Detection Output layer info */
+class DetectionPostProcessLayerInfo final
+{
+public:
+    /** Default Constructor */
+    DetectionPostProcessLayerInfo()
+        : _max_detections(),
+          _max_classes_per_detection(),
+          _nms_score_threshold(),
+          _iou_threshold(),
+          _num_classes(),
+          _scales_values(),
+          _use_regular_nms(),
+          _detection_per_class()
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] max_detections            Number of total detection.
+     * @param[in] max_classes_per_detection Number of total classes to be kept after NMS step. Used in the Fast Non-Max-Suppression
+     * @param[in] nms_score_threshold       Threshold to be used in NMS
+     * @param[in] iou_threshold             Threshold to be used during the intersection over union.
+     * @param[in] num_classes               Number of classes.
+     * @param[in] scales_values             Scales values used for decode center size boxes.
+     * @param[in] use_regular_nms           (Optional) Boolean to determinate if use regular or fast nms.
+     * @param[in] detection_per_class       (Optional) Number of detection per class. Used in the Regular Non-Max-Suppression
+     */
+    DetectionPostProcessLayerInfo(unsigned int max_detections, unsigned int max_classes_per_detection, float nms_score_threshold, float iou_threshold, unsigned int num_classes,
+                                  std::array<float, 4> scales_values, bool use_regular_nms = false, unsigned int detection_per_class = 100)
+        : _max_detections(max_detections),
+          _max_classes_per_detection(max_classes_per_detection),
+          _nms_score_threshold(nms_score_threshold),
+          _iou_threshold(iou_threshold),
+          _num_classes(num_classes),
+          _scales_values(scales_values),
+          _use_regular_nms(use_regular_nms),
+          _detection_per_class(detection_per_class)
+    {
+    }
+    /** Get max detections. */
+    unsigned int max_detections() const
+    {
+        return _max_detections;
+    }
+    /** Get max_classes per detection. Used in the Fast Non-Max-Suppression.*/
+    unsigned int max_classes_per_detection() const
+    {
+        return _max_classes_per_detection;
+    }
+    /** Get detection per class. Used in the Regular Non-Max-Suppression */
+    unsigned int detection_per_class() const
+    {
+        return _detection_per_class;
+    }
+    /** Get nms threshold. */
+    float nms_score_threshold() const
+    {
+        return _nms_score_threshold;
+    }
+    /** Get intersection over union threshold. */
+    float iou_threshold() const
+    {
+        return _iou_threshold;
+    }
+    /** Get num classes. */
+    unsigned int num_classes() const
+    {
+        return _num_classes;
+    }
+    /** Get if use regular nms. */
+    bool use_regular_nms() const
+    {
+        return _use_regular_nms;
+    }
+    /** Get y scale value. */
+    float scale_value_y() const
+    {
+        // Saved as [y,x,h,w]
+        return _scales_values[0];
+    }
+    /** Get x scale value. */
+    float scale_value_x() const
+    {
+        // Saved as [y,x,h,w]
+        return _scales_values[1];
+    }
+    /** Get h scale value. */
+    float scale_value_h() const
+    {
+        // Saved as [y,x,h,w]
+        return _scales_values[2];
+    }
+    /** Get w scale value. */
+    float scale_value_w() const
+    {
+        // Saved as [y,x,h,w]
+        return _scales_values[3];
+    }
+
+private:
+    unsigned int _max_detections;
+    unsigned int _max_classes_per_detection;
+    float        _nms_score_threshold;
+    float        _iou_threshold;
+    unsigned int _num_classes;
+    std::array<float, 4> _scales_values;
+    bool         _use_regular_nms;
+    unsigned int _detection_per_class;
 };
 
 /** Pooling Layer Information class */
@@ -1476,7 +1530,8 @@ public:
         ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
         SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
         SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
-        LINEAR           /**< Linear ( \f$ f(x)= ax + b \f$ ) */
+        LINEAR,          /**< Linear ( \f$ f(x)= ax + b \f$ ) */
+        IDENTITY         /**< Identity ( \f$ f(x)= x \f$ ) */
     };
 
     ActivationLayerInfo() = default;
@@ -1513,7 +1568,7 @@ public:
     }
 
 private:
-    ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::LOGISTIC };
+    ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::IDENTITY };
     float              _a       = {};
     float              _b       = {};
     bool               _enabled = { false };
@@ -1659,8 +1714,8 @@ private:
 
 /** GEMM reshape information class. This class stores the necessary information about matrix A and matrix B reshape.
  *
- * The matrix A can only be reshaped through @ref CLGEMMInterleave4x4Kernel or  @ref NEGEMMInterleave4x4Kernel or  @ref GCGEMMInterleave4x4Kernel
- * Note: Optionally just for @ref CLGEMMInterleave4x4Kernel is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block
+ * The matrix A can only be reshaped through @ref CLGEMMReshapeLHSMatrixKernel or  @ref NEGEMMInterleave4x4Kernel or  @ref GCGEMMInterleave4x4Kernel
+ * Note: Optionally just for @ref CLGEMMReshapeLHSMatrixKernel is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block
  *
  * The matrix B can only be reshaped through @ref CLGEMMReshapeRHSMatrixKernel or  @ref NEGEMMTranspose1xWKernel or  @ref GCGEMMTranspose1xWKernel
  * Note: Optionally just for @ref CLGEMMReshapeRHSMatrixKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
@@ -1671,7 +1726,7 @@ class GEMMReshapeInfo final
 public:
     /** Default constructor */
     GEMMReshapeInfo()
-        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false)
+        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _broadcast_bias(false)
     {
     }
     /** Constructor
@@ -1684,11 +1739,12 @@ public:
      * @param[in] depth_output_gemm3d       (Optional) Depth (third dimension) of the output tensor to be used with the GEMM3D kernel.
      *                                      If 0 the output will not be reinterpreted as 3D. Default 0
      * @param[in] reinterpret_input_as_3d   (Optional) Reinterpret the input as 3D tensor. (i.e. this flag should be set to true when GEMM is used
-     *                                                 to perform 1x1 convolutions with the NHWC data layout)
+     *                                      to perform 1x1 convolutions with the NHWC data layout)
+     * @param[in] broadcast_bias            (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      */
-    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false)
+    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool broadcast_bias = false)
         : _m(m), _n(n), _k(k), _mult_transpose1xW_width(mult_transpose1xW_width), _mult_interleave4x4_height(mult_interleave4x4_height), _depth_output_gemm3d(depth_output_gemm3d),
-          _reinterpret_input_as_3d(reinterpret_input_as_3d)
+          _reinterpret_input_as_3d(reinterpret_input_as_3d), _broadcast_bias(broadcast_bias)
     {
     }
     /** Number of matrix A rows
@@ -1750,6 +1806,14 @@ public:
     {
         return _reinterpret_input_as_3d;
     };
+    /** Flag which specifies whether to broadcast the shape of the bias tensor.
+     *
+     * @return True if the shape of the bias tensor is to be broadcasted.
+     */
+    bool broadcast_bias() const
+    {
+        return _broadcast_bias;
+    };
 
 private:
     const int  _m;
@@ -1759,6 +1823,7 @@ private:
     const int  _mult_interleave4x4_height;
     const int  _depth_output_gemm3d;
     const bool _reinterpret_input_as_3d;
+    const bool _broadcast_bias;
 };
 
 struct DepthwiseConvolutionReshapeInfo
@@ -1816,9 +1881,18 @@ class GEMMInfo
 {
 public:
     /** Default constructor */
-    GEMMInfo()
-        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(true), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false), _gemmlowp_output_stage(),
-          _fp_mixed_precision(false)
+    GEMMInfo() noexcept
+        : _is_a_reshaped(false),
+          _is_b_reshaped(false),
+          _reshape_b_only_on_first_run(true),
+          _depth_output_gemm3d(0),
+          _reinterpret_input_as_3d(false),
+          _retain_internal_weights(false),
+          _gemmlowp_output_stage(),
+          _fp_mixed_precision(false),
+          _broadcast_bias(false),
+          _pretranpose_B(true),
+          _activation_info()
     {
     }
     /** Constructor
@@ -1833,12 +1907,23 @@ public:
      * @param[in] retain_internal_weights     (Optional) Retain the weights tensor from previous run
      * @param[in] gemmlowp_output_stage       (Optional) GEMMLowp Output stage info
      * @param[in] fp_mixed_precision          (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
-     *
+     * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
+     * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
-             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false)
-        : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run), _depth_output_gemm3d(depth_output_gemm3d),
-          _reinterpret_input_as_3d(reinterpret_input_as_3d), _retain_internal_weights(retain_internal_weights), _gemmlowp_output_stage(gemmlowp_output_stage), _fp_mixed_precision(fp_mixed_precision)
+             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool broadcast_bias = false,
+             const ActivationLayerInfo &activation_info = ActivationLayerInfo()) noexcept
+        : _is_a_reshaped(is_a_reshaped),
+          _is_b_reshaped(is_b_reshaped),
+          _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
+          _depth_output_gemm3d(depth_output_gemm3d),
+          _reinterpret_input_as_3d(reinterpret_input_as_3d),
+          _retain_internal_weights(retain_internal_weights),
+          _gemmlowp_output_stage(gemmlowp_output_stage),
+          _fp_mixed_precision(fp_mixed_precision),
+          _broadcast_bias(broadcast_bias),
+          _pretranpose_B(reshape_b_only_on_first_run),
+          _activation_info(activation_info)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -1907,16 +1992,51 @@ public:
     {
         return _fp_mixed_precision;
     };
+    /** Flag which specifies whether to broadcast the shape of the bias tensor.
+     *
+     * @return True if the shape of the bias tensor is to be broadcasted.
+     */
+    bool broadcast_bias() const
+    {
+        return _broadcast_bias;
+    };
+    /** Flag which specifies whether b should be pre-transposed if supported.
+     *
+     * @return True if b should be pre-transposed else false.
+     */
+    bool pretranpose_B() const
+    {
+        return _pretranpose_B;
+    };
+    /** Set pre-transpose b flag
+     *
+     * @param[in] flag Flag to set
+     */
+    void set_pretranpose_B(bool flag)
+    {
+        _pretranpose_B = flag;
+    }
+    /** Activation layer to apply after the matrix multiplication
+     *
+     * @return ActivationLayerInfo object
+     */
+    ActivationLayerInfo activation_info() const
+    {
+        return _activation_info;
+    }
 
 private:
-    const bool                    _is_a_reshaped;
-    const bool                    _is_b_reshaped;
-    const bool                    _reshape_b_only_on_first_run;
-    const int                     _depth_output_gemm3d;
-    const bool                    _reinterpret_input_as_3d;
-    const bool                    _retain_internal_weights;
-    const GEMMLowpOutputStageInfo _gemmlowp_output_stage;
-    const bool                    _fp_mixed_precision;
+    bool                    _is_a_reshaped;
+    bool                    _is_b_reshaped;
+    bool                    _reshape_b_only_on_first_run;
+    int                     _depth_output_gemm3d;
+    bool                    _reinterpret_input_as_3d;
+    bool                    _retain_internal_weights;
+    GEMMLowpOutputStageInfo _gemmlowp_output_stage;
+    bool                    _fp_mixed_precision;
+    bool                    _broadcast_bias;
+    bool                    _pretranpose_B;
+    ActivationLayerInfo     _activation_info;
 };
 
 /** Winograd information */

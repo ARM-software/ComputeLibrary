@@ -50,7 +50,7 @@ namespace reference
  */
 template <typename T, typename TB>
 SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
-                                      unsigned int depth_multiplier, const Size2D &dilation, QuantizationInfo out_quant_info)
+                                      unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
 {
     ARM_COMPUTE_UNUSED(out_quant_info);
 
@@ -126,26 +126,23 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
 
 template <>
 SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
-                                            const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, QuantizationInfo out_quant_info)
+                                            const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
 {
     // if no explicit quantization has been set you the same as src
-    if(out_quant_info == QuantizationInfo(0.0f, 0))
-    {
-        out_quant_info = src.quantization_info();
-    }
-    SimpleTensor<uint8_t> dst{ dst_shape, src.data_type(), 1, out_quant_info };
+    const QuantizationInfo &dst_qinfo = out_quant_info.uniform().empty() ? src.quantization_info() : out_quant_info;
+    SimpleTensor<uint8_t>   dst{ dst_shape, src.data_type(), 1, dst_qinfo };
 
     // Create reference
-    const int   input_offset   = -src.quantization_info().offset;
-    const float input_scale    = src.quantization_info().scale;
-    const int   weights_offset = -weights.quantization_info().offset;
-    const float weights_scale  = weights.quantization_info().scale;
-    const int   output_offset  = dst.quantization_info().offset;
-    const float output_scale   = dst.quantization_info().scale;
+    const int   input_offset   = -src.quantization_info().uniform().offset;
+    const float input_scale    = src.quantization_info().uniform().scale;
+    const int   weights_offset = -weights.quantization_info().uniform().offset;
+    const float weights_scale  = weights.quantization_info().uniform().scale;
+    const int   output_offset  = dst_qinfo.uniform().offset;
+    const float output_scale   = dst_qinfo.uniform().scale;
 
-    int         output_multiplier;
-    int         output_shift;
-    const float multiplier = input_scale * weights_scale / output_scale;
+    int         output_multiplier = 0;
+    int         output_shift      = 0;
+    const float multiplier        = input_scale * weights_scale / output_scale;
     arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
     // Compute reference
@@ -224,10 +221,10 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
 }
 
 template SimpleTensor<float> depthwise_convolution(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &biases, const TensorShape &dst_shape,
-                                                   const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, QuantizationInfo out_quant_info);
+                                                   const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info);
 
 template SimpleTensor<half> depthwise_convolution(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &biases, const TensorShape &dst_shape,
-                                                  const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, QuantizationInfo out_quant_info);
+                                                  const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -2,6 +2,7 @@ var searchData=
 [
   ['nchw',['NCHW',['../namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f',1,'arm_compute']]],
   ['nearest_5fneighbor',['NEAREST_NEIGHBOR',['../namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9a7f5ccbc3d30c2cd3fd04d567946cbde2',1,'arm_compute']]],
+  ['neg',['NEG',['../namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da5dd68b1a7db42a1cce4dce09dbaa179e',1,'arm_compute']]],
   ['neon',['NEON',['../namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35dacaf162e9233294cadf62d2a71a14ca09',1,'arm_compute::graph']]],
   ['nhwc',['NHWC',['../namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0ad066db54b89b0912e7e7c6da51e2da51',1,'arm_compute']]],
   ['nightly',['NIGHTLY',['../namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfad791cd54143e331164a2b216451a5dd3',1,'arm_compute::test::framework']]],

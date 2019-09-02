@@ -86,43 +86,12 @@ public:
     NEDeconvolutionLayer &operator=(NEDeconvolutionLayer &&) = default;
     /** Default destructor */
     virtual ~NEDeconvolutionLayer() = default;
-    /** Set the input, weights, biases and output tensors.
-     *
-     * @note This method will be deprecated in the next release.
-     *
-     * @param[in,out] input              Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/QASYMM8.
-     * @param[in]     weights            The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
-     * @param[in]     bias               Optional, ignored if NULL. The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8 input, F32 for F32 input.
-     * @param[out]    output             Output tensor. The output has the same number of dimensions as the @p input.
-     * @param[in]     info               Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
-     * @param[in]     inner_border_right The number of zeros added to right edge of the input.
-     * @param[in]     inner_border_top   The number of zeros added to top edge of the input.
-     *
-     */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info,
-                   unsigned int inner_border_right, unsigned int inner_border_top);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEDeconvolutionLayer
-     *
-     * @note This method will be deprecated in the next release.
-     *
-     * @param[in] input              Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/QASYMM8.
-     * @param[in] weights            The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
-     * @param[in] bias               (Optional) The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8 input, F32 for F32 input.
-     * @param[in] output             Output tensor info. The output has the same number of dimensions as the @p input.
-     * @param[in] info               Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
-     * @param[in] inner_border_right The number of zeros added to right edge of the input.
-     * @param[in] inner_border_top   The number of zeros added to top edge of the input.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info,
-                           unsigned int inner_border_right, unsigned int inner_border_top);
 
     /** Set the input, weights, biases and output tensors.
      *
-     * @param[in,out] input   Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/QASYMM8.
+     * @param[in,out] input   Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/F16/QASYMM8.
      * @param[in]     weights The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
-     * @param[in]     bias    Optional, ignored if NULL. The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8 input, F32 for F32 input.
+     * @param[in]     bias    Optional, ignored if NULL. The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8 input, F32 for F32 input, F16 for F16 input.
      * @param[out]    output  Output tensor. The output has the same number of dimensions as the @p input.
      * @param[in]     info    Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
      *
@@ -130,9 +99,9 @@ public:
     void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEDeconvolutionLayer
      *
-     * @param[in] input   Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/QASYMM8.
+     * @param[in] input   Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32/F16/QASYMM8.
      * @param[in] weights The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
-     * @param[in] bias    (Optional) The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8 input, F32 for F32 input.
+     * @param[in] bias    (Optional) The biases have one dimension. Data type supported: Data types supported: S32 for QASYMM8 input, F32 for F32 input, F16 for F16 input.
      * @param[in] output  Output tensor info. The output has the same number of dimensions as the @p input.
      * @param[in] info    Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
      *
@@ -149,13 +118,19 @@ private:
     NEConvolutionLayer   _conv_f;
     CPPUpsample          _upsample_f;
     CPPFlipWeightsKernel _flip_weights;
+    NEPermute            _permute_input;
+    NEPermute            _permute_weights;
+    NEPermute            _permute_output;
     Tensor               _scaled_output;
     Tensor               _weights_flipped;
+    Tensor               _permuted_input;
+    Tensor               _permuted_weights;
+    Tensor               _permuted_output;
+    bool                 _is_nchw;
     const ITensor       *_original_weights;
     ITensor             *_input;
     PadStrideInfo        _info;
-    std::pair<unsigned int, unsigned int> _inner_border;
-    bool _is_prepared;
+    bool                 _is_prepared;
 };
 } // arm_compute
 #endif /* __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__ */

@@ -7,6 +7,6 @@ var validation_2_c_l_2_quantization_layer_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_quantization_layer_8cpp.xhtml#a74803ed1f37d3e567247f758eeae9594", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_quantization_layer_8cpp.xhtml#a1d6bc123c9b3e17b9e7c70255061d303", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_quantization_layer_8cpp.xhtml#aac0b71c51be4cfefd8cabcd6039b2fc1", null ],
-    [ "TEST_SUITE_END", "validation_2_c_l_2_quantization_layer_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "validation_2_c_l_2_quantization_layer_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLQuantizationLayerFixture< half >", "validation_2_c_l_2_quantization_layer_8cpp.xhtml#a2059305e61bbc7aa4bea5ca0cb463fec", null ]
 ];

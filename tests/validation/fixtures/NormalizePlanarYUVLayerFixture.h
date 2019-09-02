@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,7 +71,7 @@ protected:
             const QuantizationInfo quant_info = src_tensor.quantization_info();
             std::pair<int, int> bounds = get_quantized_bounds(quant_info, -1.f, 1.0f);
             std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
-            std::uniform_int_distribution<> distribution_std(quant_info.quantize(0.1f, RoundingPolicy::TO_NEAREST_UP), bounds.second);
+            std::uniform_int_distribution<> distribution_std(quantize_qasymm8(0.1f, quant_info.uniform()), bounds.second);
             library->fill(src_tensor, distribution, 0);
             library->fill(mean_tensor, distribution, 1);
             library->fill(std_tensor, distribution_std, 2);

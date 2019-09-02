@@ -1,10 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor." alt="" coords="5,132,72,159"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor." alt="" coords="124,56,204,83"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_i_g_c_tensor.xhtml" title="Interface for GLES Compute tensor." alt="" coords="121,107,207,133"/>
-<area shape="rect" id="node7" href="$classarm__compute_1_1_sub_tensor.xhtml" title="Basic implementation of the sub&#45;tensor interface." alt="" coords="120,157,208,184"/>
-<area shape="rect" id="node8" href="$classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface." alt="" coords="133,208,195,235"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_sub_tensor.xhtml" title="Basic implementation of the OpenCL sub&#45;tensor interface." alt="" coords="256,5,360,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_c_l_tensor.xhtml" title="Basic implementation of the OpenCL tensor interface." alt="" coords="269,56,347,83"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1_g_c_tensor.xhtml" title="Interface for OpenGL ES tensor." alt="" coords="267,107,349,133"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,111,88,138"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1framework_1_1dataset_1_1is__container_3_01std_1_1vector_3_01_v_00_01_a_01_4_01_4.xhtml" title="Vector is considered a container." alt="" coords="141,5,283,47"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1test_1_1validation_1_1is__floating__point_3_01half_01_4.xhtml" title=" " alt="" coords="144,71,280,112"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_01_t_00_01_ts_8_8_8_01_4_01_4.xhtml" title=" " alt="" coords="136,136,288,177"/>
+<area shape="rect" id="node5" href="$structarm__compute_1_1utils_1_1traits_1_1is__floating__point_3_01half_01_4.xhtml" title=" " alt="" coords="144,201,280,243"/>
 </map>

@@ -7,6 +7,6 @@ var _n_e_o_n_2_channel_shuffle_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_shuffle_8cpp.xhtml#a8f965edc12ee1e8ab401ae2c99dd3c23", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_shuffle_8cpp.xhtml#a40befd968da005b967469fc65babe6fc", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_shuffle_8cpp.xhtml#a49c2362218cb60276847790af183f1a9", null ],
-    [ "TEST_SUITE_END", "_n_e_o_n_2_channel_shuffle_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_channel_shuffle_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "NEChannelShuffleLayerFixture< float >", "_n_e_o_n_2_channel_shuffle_8cpp.xhtml#a18a72bd2910ec073faa933a35a344ffe", null ]
 ];

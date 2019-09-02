@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,17 +64,18 @@ private:
 
     /** If supported create the ACL function corresponding to the GemmMethod provided to process the other passed parameters
      *
-     * @param[in]  method             GemmMethod to use to perform the matrix multiplication.
-     * @param[in]  a                  Input tensor (Matrix A).
-     * @param[in]  b                  Input tensor (Matrix B).
-     * @param[out] d                  Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
-     * @param[in]  alpha              Scalar multiplier to apply to AB matrix product.
-     * @param[in]  beta               Scalar multiplier to apply to input D matrix before adding product.
-     * @param[in]  pretransposed_hint Can the B tensor can be pretransposed (ie shared across invocations)?
+     * @param[in]  method    GemmMethod to use to perform the matrix multiplication.
+     * @param[in]  a         Input tensor (Matrix A).
+     * @param[in]  b         Input tensor (Matrix B).
+     * @param[in]  c         Input tensor (Matrix C) used to pass the bias for quantized calculations
+     * @param[out] d         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in]  alpha     Scalar multiplier to apply to AB matrix product.
+     * @param[in]  beta      Scalar multiplier to apply to input D matrix before adding product.
+     * @param[in]  gemm_info GEMM meta-data
      *
      * @return True if the method is supported and the function was successfully created, false otherwise.
      */
-    bool create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint);
+    bool create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info);
 
     /** Interface for the arm_gemm fallback */
     std::unique_ptr<IFallback>      _arm_gemm;
@@ -83,27 +84,29 @@ private:
 public:
     /** If supported create an ACL function else fallback to the arm_gemm function.
      *
-     * @param[in]  a                 Input tensor (Matrix A)
-     * @param[in]  b                 Input tensor (Matrix B)
-     * @param[out] d                 Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
-     * @param[in]  alpha             Scalar multiplier to apply to AB matrix product.
-     * @param[in]  beta              Scalar multiplier to apply to input D matrix before adding product.
-     * @param[in]  pretranspose_hint Can the B tensor can be pretransposed (ie shared across invocations)?
+     * @param[in]  a         Input tensor (Matrix A)
+     * @param[in]  b         Input tensor (Matrix B)
+     * @param[in]  c         Input tensor (Matrix C) used to pass the bias for quantized calculations
+     * @param[out] d         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in]  alpha     Scalar multiplier to apply to AB matrix product.
+     * @param[in]  beta      Scalar multiplier to apply to input D matrix before adding product.
+     * @param[in]  gemm_info GEMM meta-data
      */
-    void configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint);
+    void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info);
 
     /** Indicates whether or not this function can be used to process the given parameters.
      *
-     * @param[in] a                 Input tensor (Matrix A)
-     * @param[in] b                 Input tensor (Matrix B)
-     * @param[in] d                 Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
-     * @param[in] alpha             Scalar multiplier to apply to AB matrix product.
-     * @param[in] beta              Scalar multiplier to apply to input D matrix before adding product.
-     * @param[in] pretranspose_hint Can the B tensor can be pretransposed (ie shared across invocations)?
+     * @param[in] a         Input tensor info (Matrix A)
+     * @param[in] b         Input tensor info (Matrix B)
+     * @param[in] c         Input tensor info (Matrix C) used to pass the bias for quantized calculations
+     * @param[in] d         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in] alpha     Scalar multiplier to apply to AB matrix product.
+     * @param[in] beta      Scalar multiplier to apply to input D matrix before adding product.
+     * @param[in] gemm_info GEMM meta-data
      *
      * @return a status.
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *d, float alpha, float beta, bool pretranspose_hint);
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, float alpha, float beta, const GEMMInfo &gemm_info);
     /** Was the function successfully configured ?
      *
      * @return True if the function is configured and ready to run

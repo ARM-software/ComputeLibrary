@@ -34,7 +34,7 @@ namespace graph
 {
 DepthwiseConvolutionLayerNode::DepthwiseConvolutionLayerNode(PadStrideInfo info, int depth_multiplier, DepthwiseConvolutionMethod method,
                                                              QuantizationInfo out_quant_info)
-    : _info(std::move(info)), _depth_multiplier(depth_multiplier), _method(method), _out_quant_info(out_quant_info), _fused_activation()
+    : _info(std::move(info)), _depth_multiplier(depth_multiplier), _method(method), _out_quant_info(std::move(out_quant_info)), _fused_activation()
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);

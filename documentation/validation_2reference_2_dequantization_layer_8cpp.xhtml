@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -104,6 +104,7 @@ $(document).ready(function(){initNavTree('validation_2reference_2_dequantization
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_dequantization_layer_8h_source.xhtml">DequantizationLayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_permute_8h_source.xhtml">Permute.h</a>&quot;</code><br />
 </div>
 <p><a href="validation_2reference_2_dequantization_layer_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -121,9 +122,15 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a17fcd1207902add1be5b60ade5de84b4"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a17fcd1207902add1be5b60ade5de84b4"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a17fcd1207902add1be5b60ade5de84b4">dequantization_layer</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src)</td></tr>
-<tr class="separator:a17fcd1207902add1be5b60ade5de84b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd43030e06efec1c26997107b7bd184d"><td class="memTemplParams" colspan="2">template&lt;typename TOut , typename TIn &gt; </td></tr>
+<tr class="memitem:abd43030e06efec1c26997107b7bd184d"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; TOut &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#abd43030e06efec1c26997107b7bd184d">dequantization_layer</a> (const SimpleTensor&lt; TIn &gt; &amp;src)</td></tr>
+<tr class="separator:abd43030e06efec1c26997107b7bd184d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b5c98302ac3ac376c23302a1f3beef2"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a9b5c98302ac3ac376c23302a1f3beef2">dequantization_layer</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src)</td></tr>
+<tr class="separator:a9b5c98302ac3ac376c23302a1f3beef2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abede2427030c71627ea72c8eaee16fff"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#abede2427030c71627ea72c8eaee16fff">dequantization_layer</a> (const SimpleTensor&lt; int8_t &gt; &amp;src)</td></tr>
+<tr class="separator:abede2427030c71627ea72c8eaee16fff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb55c366bbc0df5025d95b736ac14ff4"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#afb55c366bbc0df5025d95b736ac14ff4">dequantization_layer</a> (const SimpleTensor&lt; int16_t &gt; &amp;src)</td></tr>
+<tr class="separator:afb55c366bbc0df5025d95b736ac14ff4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -131,7 +138,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="validation_2reference_2_dequantization_layer_8cpp.xhtml">DequantizationLayer.cpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

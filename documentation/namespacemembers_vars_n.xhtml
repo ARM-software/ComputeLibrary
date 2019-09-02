@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -99,6 +99,12 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_n.xhtml','');});
 &#160;
 
 <h3><a id="index_n"></a>- n -</h3><ul>
+<li>NEAbsLayerFixture&lt; int32_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aea3176d6dc33ae86e7f6d16c03571069">arm_compute::test::validation</a>
+</li>
+<li>NEArgMinMaxValidationFixture&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad37ba92ac65259309165545aa89b199e">arm_compute::test::validation</a>
+</li>
 <li>NEChannelCombineFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4a9059cbc39b738c5394cb497e76e4e5">arm_compute::test::validation</a>
 </li>
@@ -147,17 +153,20 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_n.xhtml','');});
 <li>NEDeconvolutionLayerQuantizedFixture3x3&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae07c9291b99dd132b86e6d38a7b8aff0">arm_compute::test::validation</a>
 </li>
-<li>NEDepthwiseConvolutionLayerFixture3x3&lt; float &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a79d5d5d061932dcc3bc29df86843c9e5">arm_compute::test::validation</a>
+<li>NEDepthwiseConvolutionLayerFixtureOptimized&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a65395db56b0b4a213472d0c94e8bc972">arm_compute::test::validation</a>
 </li>
-<li>NEDepthwiseConvolutionLayerQuantizedFixture3x3&lt; uint8_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a30a4b4eb2af5a1ae686267ddbe13a7ef">arm_compute::test::validation</a>
+<li>NEDepthwiseConvolutionLayerQuantizedFixtureOptimized&lt; uint8_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4a0f4ec292bf880f794c03841f2bb458">arm_compute::test::validation</a>
 </li>
 <li>NEElementwiseMaxFixture&lt; int16_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aed0110369a7707068f54a52e3da9a821">arm_compute::test::validation</a>
 </li>
 <li>NEElementwiseMinFixture&lt; int16_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ace64c392f8bed8e5753727cc847bf7cc">arm_compute::test::validation</a>
+</li>
+<li>NEFuseBatchNormalizationDWCFixture&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a73819605dfc4c22382951c782ad42363">arm_compute::test::validation</a>
 </li>
 <li>NEGatherFixture&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3df7654d8059039b30405f2420fb88e7">arm_compute::test::validation</a>
@@ -173,6 +182,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_n.xhtml','');});
 </li>
 <li>NEIm2ColFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6062474009d94732afa8d9ed57ab4097">arm_compute::test::validation</a>
+</li>
+<li>NENegLayerFixture&lt; int32_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#acb3abfdaf30b79d090a8e89e4a4e6199">arm_compute::test::validation</a>
 </li>
 <li>NEPaddingFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aad64ac2e6cc0572ed02599ef9d934c7b">arm_compute::test::validation</a>
@@ -207,6 +219,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_n.xhtml','');});
 <li>NESpaceToBatchLayerFixture&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad4d4a60619a10fd4fe9657ad30b0a8a6">arm_compute::test::validation</a>
 </li>
+<li>NESpaceToDepthLayerFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a71ddbd15dc4aebc44197af9a75ba0566">arm_compute::test::validation</a>
+</li>
 <li>NEStackLayerFixture&lt; char &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa1d96b063d119ef4bb0fddeddd329935">arm_compute::test::validation</a>
 </li>
@@ -222,8 +237,8 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_n.xhtml','');});
 <li>NETileFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#abbd7a6addf17e979b28101fbfc066ff8">arm_compute::test::validation</a>
 </li>
-<li>NEUpsampleLayerFixture&lt; uint8_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa7581d5d020ff63835e56c303bbebf88">arm_compute::test::validation</a>
+<li>NEUpsampleLayerQuantizedFixture&lt; uint8_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab3ce43dc6b5eef342ed8d81a51af16c2">arm_compute::test::validation</a>
 </li>
 <li>NEWinogradConvolutionLayerFixture&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a123fca581853db28cc4d78255ab19c31">arm_compute::test::validation</a>
@@ -233,6 +248,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_n.xhtml','');});
 </li>
 <li>NullTensorID
 : <a class="el" href="namespacearm__compute_1_1graph.xhtml#aa94938a3eb11fda4724c362c53c28f24">arm_compute::graph</a>
+</li>
+<li>num_groups
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2270b3e1d20651d2d8341c858c890830">arm_compute::test::validation</a>
 </li>
 <li>num_num_elems_processed_per_iteration
 : <a class="el" href="namespacearm__compute.xhtml#a13d15bf68bbaf481be9ba3988b1cf779">arm_compute</a>
@@ -246,7 +264,7 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_n.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

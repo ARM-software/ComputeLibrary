@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -188,10 +188,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a301d0b7bfd70f73fc1924f4281938d08"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utils.xhtml#a301d0b7bfd70f73fc1924f4281938d08">save_to_ppm</a> (T &amp;tensor, const std::string &amp;ppm_filename)</td></tr>
 <tr class="memdesc:a301d0b7bfd70f73fc1924f4281938d08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template helper function to save a tensor image to a PPM file.  <a href="namespacearm__compute_1_1utils.xhtml#a301d0b7bfd70f73fc1924f4281938d08">More...</a><br /></td></tr>
 <tr class="separator:a301d0b7bfd70f73fc1924f4281938d08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f8c80e5ec379049ad0a9ba1d8ad5547"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a3f8c80e5ec379049ad0a9ba1d8ad5547"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utils.xhtml#a3f8c80e5ec379049ad0a9ba1d8ad5547">save_to_npy</a> (T &amp;tensor, const std::string &amp;npy_filename, bool fortran_order)</td></tr>
-<tr class="memdesc:a3f8c80e5ec379049ad0a9ba1d8ad5547"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template helper function to save a tensor image to a NPY file.  <a href="namespacearm__compute_1_1utils.xhtml#a3f8c80e5ec379049ad0a9ba1d8ad5547">More...</a><br /></td></tr>
-<tr class="separator:a3f8c80e5ec379049ad0a9ba1d8ad5547"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48c0efb64637ab6e965b32d7c683efe9"><td class="memTemplParams" colspan="2">template&lt;typename T , typename U  = float&gt; </td></tr>
+<tr class="memitem:a48c0efb64637ab6e965b32d7c683efe9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utils.xhtml#a48c0efb64637ab6e965b32d7c683efe9">save_to_npy</a> (T &amp;tensor, const std::string &amp;npy_filename, bool fortran_order)</td></tr>
+<tr class="memdesc:a48c0efb64637ab6e965b32d7c683efe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template helper function to save a tensor image to a NPY file.  <a href="namespacearm__compute_1_1utils.xhtml#a48c0efb64637ab6e965b32d7c683efe9">More...</a><br /></td></tr>
+<tr class="separator:a48c0efb64637ab6e965b32d7c683efe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af214346f90d640ac468dd90fa2a275cc"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:af214346f90d640ac468dd90fa2a275cc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utils.xhtml#af214346f90d640ac468dd90fa2a275cc">load_trained_data</a> (T &amp;tensor, const std::string &amp;filename)</td></tr>
 <tr class="memdesc:af214346f90d640ac468dd90fa2a275cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load the tensor with pre-trained data from a binary file.  <a href="namespacearm__compute_1_1utils.xhtml#af214346f90d640ac468dd90fa2a275cc">More...</a><br /></td></tr>
@@ -209,6 +209,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a4894358ea9a576be19615608a6b8b152"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utils.xhtml#a4894358ea9a576be19615608a6b8b152">compare_tensor</a> (ITensor &amp;tensor1, ITensor &amp;tensor2, T tolerance)</td></tr>
 <tr class="memdesc:a4894358ea9a576be19615608a6b8b152"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare two tensors.  <a href="namespacearm__compute_1_1utils.xhtml#a4894358ea9a576be19615608a6b8b152">More...</a><br /></td></tr>
 <tr class="separator:a4894358ea9a576be19615608a6b8b152"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a667b4012e6d9b8c07876c7ff5da9f68d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utils.xhtml#a667b4012e6d9b8c07876c7ff5da9f68d">save_program_cache_to_file</a> (const std::string &amp;filename)</td></tr>
+<tr class="memdesc:a667b4012e6d9b8c07876c7ff5da9f68d"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function saves opencl kernels library to a file.  <a href="namespacearm__compute_1_1utils.xhtml#a667b4012e6d9b8c07876c7ff5da9f68d">More...</a><br /></td></tr>
+<tr class="separator:a667b4012e6d9b8c07876c7ff5da9f68d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a394a7513744bff536de8290ce870fd85"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utils.xhtml#a394a7513744bff536de8290ce870fd85">restore_program_cache_from_file</a> (const std::string &amp;filename)</td></tr>
+<tr class="memdesc:a394a7513744bff536de8290ce870fd85"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function loads prebuilt opencl kernels from a file.  <a href="namespacearm__compute_1_1utils.xhtml#a394a7513744bff536de8290ce870fd85">More...</a><br /></td></tr>
+<tr class="separator:a394a7513744bff536de8290ce870fd85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -216,7 +222,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_cbdb8362360e11eafe2fa3bc74cf0ffd.xhtml">utils</a></li><li class="navelem"><a class="el" href="utils_2_utils_8h.xhtml">Utils.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

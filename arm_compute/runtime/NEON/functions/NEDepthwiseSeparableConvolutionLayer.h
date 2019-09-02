@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,8 @@ class ITensor;
  *
  * -# @ref NEDepthwiseConvolutionLayer
  * -# @ref NEDirectConvolutionLayer
+ *
+ * @deprecated This function is deprecated and will be removed in release 19.11
  *
  */
 class NEDepthwiseSeparableConvolutionLayer : public IFunction

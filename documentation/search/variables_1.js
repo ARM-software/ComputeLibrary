@@ -7,6 +7,7 @@ var searchData=
   ['accum_5fsquare',['accum_square',['../namespacearm__compute_1_1test_1_1validation.xhtml#a15a5f52bac449d7f04e57c59f331e085',1,'arm_compute::test::validation']]],
   ['accum_5fweight',['accum_weight',['../namespacearm__compute_1_1test_1_1validation.xhtml#ad70dd3678501cef96cadd2251870d924',1,'arm_compute::test::validation']]],
   ['act_5finfo',['act_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1f8aca235c095df227e7444f6b237eb1',1,'arm_compute::test::validation']]],
+  ['activation_5finfo',['activation_info',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#ad5f55d98fbe268b4eb6225aca14a2403',1,'arm_compute::GEMMKernelInfo']]],
   ['add',['add',['../namespacearm__compute_1_1test_1_1validation.xhtml#acb58b6d1d2220b217478eb206de180c8',1,'arm_compute::test::validation']]],
   ['align_5fcolumns',['align_columns',['../structarm__compute_1_1_i_o_format_info.xhtml#a1d81fe110d5dcac79dd73a532015bb94',1,'arm_compute::IOFormatInfo']]],
   ['alignment',['alignment',['../structarm__compute_1_1_blob_info.xhtml#a3afda29223eeda35afd21a6c5e121ba2',1,'arm_compute::BlobInfo']]],

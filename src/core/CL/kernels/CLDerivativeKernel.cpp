@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,7 +83,8 @@ void CLDerivativeKernel::configure(const ICLTensor *input, ICLTensor *output_x, 
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("derivative", build_opts));
+    const std::string kernel_name = std::string("derivative");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;
@@ -118,6 +119,17 @@ void CLDerivativeKernel::configure(const ICLTensor *input, ICLTensor *output_x, 
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(border_undefined);
 }
 
 void CLDerivativeKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -130,18 +142,10 @@ void CLDerivativeKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
+        add_2D_tensor_argument_if((_run_derivative_x), idx, _output_x, slice);
+        add_2D_tensor_argument_if((_run_derivative_y), idx, _output_y, slice);
 
-        if(_run_derivative_x)
-        {
-            add_2D_tensor_argument(idx, _output_x, slice);
-        }
-
-        if(_run_derivative_y)
-        {
-            add_2D_tensor_argument(idx, _output_y, slice);
-        }
-
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

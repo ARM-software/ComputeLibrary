@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,31 +36,32 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class SpaceToBatchLayerValidationFixture : public framework::Fixture
+class SpaceToBatchLayerValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape, DataType data_type, DataLayout data_layout)
+    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
+               DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
     {
-        _target    = compute_target(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout);
-        _reference = compute_reference(input_shape, block_shape_shape, paddings_shape, output_shape, data_type);
+        _target    = compute_target(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout, quantization_info);
+        _reference = compute_reference(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, quantization_info);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-        library->fill(tensor, distribution, i);
+        library->fill_tensor_uniform(tensor, i);
     }
+
     template <typename U>
-    void fill_pad(U &&tensor, int i)
+    void fill_pad(U &&tensor)
     {
-        std::uniform_int_distribution<> distribution(0, 0);
-        library->fill(tensor, distribution, i);
+        library->fill_tensor_value(tensor, 0);
     }
+
     TensorType compute_target(TensorShape input_shape, const TensorShape &block_shape_shape, const TensorShape &paddings_shape, TensorShape output_shape,
-                              DataType data_type, DataLayout data_layout)
+                              DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
     {
         if(data_layout == DataLayout::NHWC)
         {
@@ -69,10 +70,10 @@ protected:
         }
 
         // Create tensors
-        TensorType input       = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType input       = create_tensor<TensorType>(input_shape, data_type, 1, quantization_info, data_layout);
         TensorType block_shape = create_tensor<TensorType>(block_shape_shape, DataType::S32);
         TensorType paddings    = create_tensor<TensorType>(paddings_shape, DataType::S32);
-        TensorType output      = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType output      = create_tensor<TensorType>(output_shape, data_type, 1, quantization_info, data_layout);
 
         // Create and configure function
         FunctionType space_to_batch;
@@ -96,7 +97,7 @@ protected:
 
         // Fill tensors
         fill(AccessorType(input), 0);
-        fill_pad(AccessorType(paddings), 0);
+        fill_pad(AccessorType(paddings));
         {
             auto      block_shape_data = AccessorType(block_shape);
             const int idx_width        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -112,16 +113,16 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &block_shape_shape, const TensorShape &paddings_shape,
-                                      const TensorShape &output_shape, DataType data_type)
+                                      const TensorShape &output_shape, DataType data_type, QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T>       input{ input_shape, data_type };
+        SimpleTensor<T>       input{ input_shape, data_type, 1, quantization_info };
         SimpleTensor<int32_t> block_shape{ block_shape_shape, DataType::S32 };
         SimpleTensor<int32_t> paddings{ paddings_shape, DataType::S32 };
 
         // Fill reference
         fill(input, 0);
-        fill_pad(paddings, 0);
+        fill_pad(paddings);
         for(unsigned int i = 0; i < block_shape_shape.x(); ++i)
         {
             block_shape[i] = input_shape[i] / output_shape[i];
@@ -133,6 +134,30 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class SpaceToBatchLayerValidationFixture : public SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
+               DataType data_type, DataLayout data_layout)
+    {
+        SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class SpaceToBatchLayerValidationQuantizedFixture : public SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
+               DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
+    {
+        SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout, quantization_info);
+    }
 };
 } // namespace validation
 } // namespace test

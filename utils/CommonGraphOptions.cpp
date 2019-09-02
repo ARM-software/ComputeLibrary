@@ -83,6 +83,7 @@ namespace utils
     os << "Data type : " << common_params.data_type << std::endl;
     os << "Data layout : " << common_params.data_layout << std::endl;
     os << "Tuner enabled? : " << (common_params.enable_tuner ? true_str : false_str) << std::endl;
+    os << "Cache enabled? : " << (common_params.enable_cl_cache ? true_str : false_str) << std::endl;
     os << "Tuner mode : " << common_params.tuner_mode << std::endl;
     os << "Tuner file : " << common_params.tuner_file << std::endl;
     os << "Fast math enabled? : " << (common_params.fast_math_hint == FastMathHint::Enabled ? true_str : false_str) << std::endl;
@@ -118,6 +119,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
       data_type(),
       data_layout(),
       enable_tuner(parser.add_option<ToggleOption>("enable-tuner")),
+      enable_cl_cache(parser.add_option<ToggleOption>("enable-cl-cache")),
       tuner_mode(),
       fast_math_hint(parser.add_option<ToggleOption>("fast-math")),
       data_path(parser.add_option<SimpleOption<std::string>>("data")),
@@ -166,6 +168,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     data_type->set_help("Data type to use");
     data_layout->set_help("Data layout to use");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
+    enable_cl_cache->set_help("Enable OpenCL program caches");
     tuner_mode->set_help("Configures the time taken by the tuner to tune. Slow tuner produces the most performant LWS configuration");
     fast_math_hint->set_help("Enable fast math");
     data_path->set_help("Path where graph parameters reside");
@@ -192,6 +195,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
         common_params.data_layout = options.data_layout->value();
     }
     common_params.enable_tuner           = options.enable_tuner->is_set() ? options.enable_tuner->value() : false;
+    common_params.enable_cl_cache        = common_params.target == arm_compute::graph::Target::CL ? (options.enable_cl_cache->is_set() ? options.enable_cl_cache->value() : true) : false;
     common_params.tuner_mode             = options.tuner_mode->value();
     common_params.fast_math_hint         = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::Disabled;
     common_params.data_path              = options.data_path->value();

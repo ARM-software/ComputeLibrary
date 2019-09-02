@@ -116,7 +116,7 @@ void CLYOLOLayerKernel::configure(ICLTensor *input, ICLTensor *output, const Act
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DACT=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
     build_opts.add_option("-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(dt));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));

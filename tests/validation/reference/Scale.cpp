@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,28 +71,25 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
         float       x_src = 0;
         float       y_src = 0;
 
-        switch(sampling_policy)
-        {
-            case SamplingPolicy::TOP_LEFT:
-                x_src = idx * wr;
-                y_src = idy * hr;
-                break;
-            case SamplingPolicy::CENTER:
-                x_src = (idx + 0.5f) * wr - 0.5f;
-                y_src = (idy + 0.5f) * hr - 0.5f;
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Unsupported sampling policy.");
-                break;
-        }
-
         switch(policy)
         {
             case InterpolationPolicy::NEAREST_NEIGHBOR:
             {
-                //Calculate the source coords without -0.5f is equivalent to round the x_scr/y_src coords
-                x_src = (idx + 0.5f) * wr;
-                y_src = (idy + 0.5f) * hr;
+                switch(sampling_policy)
+                {
+                    case SamplingPolicy::TOP_LEFT:
+                        x_src = std::floor(idx * wr);
+                        y_src = std::floor(idy * hr);
+                        break;
+                    case SamplingPolicy::CENTER:
+                        //Calculate the source coords without -0.5f is equivalent to round the x_scr/y_src coords
+                        x_src = (idx + 0.5f) * wr;
+                        y_src = (idy + 0.5f) * hr;
+                        break;
+                    default:
+                        ARM_COMPUTE_ERROR("Unsupported sampling policy.");
+                }
+
                 id.set(0, x_src);
                 id.set(1, y_src);
 
@@ -105,6 +102,20 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
             }
             case InterpolationPolicy::BILINEAR:
             {
+                switch(sampling_policy)
+                {
+                    case SamplingPolicy::TOP_LEFT:
+                        x_src = idx * wr;
+                        y_src = idy * hr;
+                        break;
+                    case SamplingPolicy::CENTER:
+                        x_src = (idx + 0.5f) * wr - 0.5f;
+                        y_src = (idy + 0.5f) * hr - 0.5f;
+                        break;
+                    default:
+                        ARM_COMPUTE_ERROR("Unsupported sampling policy.");
+                }
+
                 id.set(0, std::floor(x_src));
                 id.set(1, std::floor(y_src));
                 if(is_valid_pixel_index(x_src, y_src, width, height, border_size))
@@ -180,10 +191,10 @@ SimpleTensor<uint8_t> scale(const SimpleTensor<uint8_t> &src, float scale_x, flo
                             SamplingPolicy sampling_policy, bool ceil_policy_scale)
 {
     SimpleTensor<uint8_t> dst;
-    if(src.quantization_info().scale != 0.f)
+    if(src.quantization_info().uniform().scale != 0.f)
     {
         SimpleTensor<float> src_tmp                 = convert_from_asymmetric(src);
-        float               constant_border_value_f = scvt_f32_qasymm8(constant_border_value, src.quantization_info().scale, src.quantization_info().offset);
+        float               constant_border_value_f = dequantize_qasymm8(constant_border_value, src.quantization_info());
         SimpleTensor<float> dst_tmp                 = scale_core<float>(src_tmp, scale_x, scale_y, policy, border_mode, constant_border_value_f, sampling_policy, ceil_policy_scale);
         dst                                         = convert_to_asymmetric(dst_tmp, src.quantization_info());
     }

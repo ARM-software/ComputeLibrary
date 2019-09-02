@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,7 @@ inline void TransposeInterleaveCommon<12, __fp16, float>::moveblock_1x2(const __
         "FCVTL	v3.4s, v3.4h\n"
         "STP    q2, q3, [%[out], #32]\n"
         ASM_PREFETCH("[%[in1], #192]")
-        "LDR	d5, [%[in1]], #16\n"
+        "LDR	d5, [%[in1]], #8\n"
         "FCVTL	v5.4s, v5.4h\n"
         "STP    q4, q5, [%[out], #64]\n"
     : [in0] "+r" (in0), [in1] "+r" (in1), [out] "+r" (out)

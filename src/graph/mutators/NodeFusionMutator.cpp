@@ -64,7 +64,6 @@ void fuse_convolution_with_batch_normalization(Graph &g, const Edge *output_edge
         // Extract conv inputs
         const auto   conv_input_id   = conv_node->input_edge(0)->producer_id();
         const auto   conv_weights_id = conv_node->input_edge(1)->producer_id();
-        const auto   out_quant_info  = conv_node->output(0)->desc().quant_info;
         const auto   conv_info       = conv_node->convolution_info();
         const auto   conv_method     = conv_node->convolution_method();
         const auto   num_groups      = conv_node->num_groups();
@@ -79,7 +78,7 @@ void fuse_convolution_with_batch_normalization(Graph &g, const Edge *output_edge
         const auto epsilon     = bn_node->epsilon();
 
         // Create the fused node
-        const NodeID fused_id = g.add_node<FusedConvolutionBatchNormalizationNode>(epsilon, conv_info, num_groups, conv_method, fast_math_hint, out_quant_info, act_info);
+        const NodeID fused_id = g.add_node<FusedConvolutionBatchNormalizationNode>(epsilon, conv_info, num_groups, conv_method, fast_math_hint, act_info);
 
         if(conv_node->input_edge(2) != nullptr)
         {
@@ -122,6 +121,83 @@ void fuse_convolution_with_batch_normalization(Graph &g, const Edge *output_edge
     else
     {
         ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of convolution with batch normalization due to the presence of an output accessor\n");
+    }
+}
+
+void fuse_depthwise_convolution_with_batch_normalization(Graph &g, const Edge *output_edge)
+{
+    ARM_COMPUTE_ERROR_ON(output_edge == nullptr);
+
+    auto *depth_conv_node = arm_compute::utils::cast::polymorphic_downcast<DepthwiseConvolutionLayerNode *>(output_edge->producer());
+    auto *bn_node         = arm_compute::utils::cast::polymorphic_downcast<BatchNormalizationLayerNode *>(output_edge->consumer());
+
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Fusing depthwise convolution node with ID : " << output_edge->producer_id()
+                                  << " with BatchNormalization Layer node with ID : " << output_edge->consumer_id() << std::endl);
+
+    // Prevent fusion if fused node has an output accessor
+    if(depth_conv_node->output(0)->accessor() == nullptr)
+    {
+        const Target assigned_target = depth_conv_node->assigned_target();
+
+        // Extract conv inputs
+        const auto depth_conv_input_id = depth_conv_node->input_edge(0)->producer_id();
+        const auto conv_weights_id     = depth_conv_node->input_edge(1)->producer_id();
+        const auto conv_info           = depth_conv_node->convolution_info();
+        const auto depth_conv_method   = depth_conv_node->depthwise_convolution_method();
+        const auto depth_multiplier    = depth_conv_node->depth_multiplier();
+        const auto act_info            = bn_node->fused_activation();
+
+        // Extract bn inputs
+        const auto bn_mean_id  = bn_node->input_edge(1)->producer_id();
+        const auto bn_var_id   = bn_node->input_edge(2)->producer_id();
+        const auto bn_beta_id  = bn_node->input_edge(3)->producer_id();
+        const auto bn_gamma_id = bn_node->input_edge(4)->producer_id();
+        const auto epsilon     = bn_node->epsilon();
+
+        // Create the fused node
+        const NodeID fused_id = g.add_node<FusedDepthwiseConvolutionBatchNormalizationNode>(epsilon, conv_info, depth_multiplier, depth_conv_method, act_info);
+
+        if(depth_conv_node->input_edge(2) != nullptr)
+        {
+            const auto conv_bias_id = depth_conv_node->input_edge(2)->producer_id();
+            g.add_connection(conv_bias_id, 0, fused_id, 2);
+        }
+
+        // Add connections from the conv/batch_norm inputs to the fused node
+        g.add_connection(depth_conv_input_id, 0, fused_id, 0);
+        g.add_connection(conv_weights_id, 0, fused_id, 1);
+        g.add_connection(bn_mean_id, 0, fused_id, 3);
+        g.add_connection(bn_var_id, 0, fused_id, 4);
+        g.add_connection(bn_beta_id, 0, fused_id, 5);
+        g.add_connection(bn_gamma_id, 0, fused_id, 6);
+
+        auto                     fused_node       = g.node(fused_id);
+        std::vector<NodeIdxPair> bn_driving_nodes = get_driving_nodes(*bn_node);
+
+        // Extract batch normalization node accessor if any
+        auto bn_node_accessor = bn_node->output(0)->extract_accessor();
+        auto bn_node_name     = bn_node->name();
+
+        // Remove batch normalization node
+        g.remove_node(bn_node->id());
+
+        // Get driving nodes of batch normalization node
+        for(auto &driving_node : bn_driving_nodes)
+        {
+            g.add_connection(fused_id, 0, driving_node.node_id, driving_node.index);
+            configure_tensor(fused_node->output(0));
+        }
+        // Update fused node outputs
+        fused_node->output(0)->set_accessor(std::move(bn_node_accessor));
+        fused_node->set_assigned_target(assigned_target);
+        fused_node->set_common_node_parameters(NodeParams{ depth_conv_node->name() + "+" + bn_node_name, assigned_target });
+
+        // Remove convolution node
+        g.remove_node(depth_conv_node->id());
+    }
+    else
+    {
+        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented fusion of depthwise convolution with batch normalization due to the presence of an output accessor\n");
     }
 }
 
@@ -224,13 +300,22 @@ void NodeFusionMutator::mutate(Graph &g)
         return (output_qasymm8 && same_qinfo) || !output_qasymm8;
     };
 
+    Target target = g.nodes()[0].get()->output(0)->desc().target;
+
     // Fusion mutations
     detail::fuse_layer<BatchNormalizationLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<BatchNormalizationLayerNode>, supported_fused_activations);
     detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations);
 
-    // TODO (COMPMID-2055): re-enable once we fuse bias and activations to convolution
-    // detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
+    // Currently fuse batch normalization brings performance uplift only on OpenCL with FP32 data type
+    // TODO (COMPMID-2524): Fuse batch normalization with convolution and depthwise convolution at graph level for NEON - FP32
+    // TODO (COMPMID-2581): Fuse batch normalization with convolution and depthwise convolution at graph level for OpenCL - FP16
+    if(target == Target::CL && (g.nodes()[0].get()->output(0)->desc().data_type == DataType::F32))
+    {
+        //Depthwise Convolution and Batch Normalization Fusion active only for CL
+        detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
+        detail::fuse_layer<DepthwiseConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_depthwise_convolution_with_batch_normalization);
+    }
 }
 } // namespace graph
 } // namespace arm_compute

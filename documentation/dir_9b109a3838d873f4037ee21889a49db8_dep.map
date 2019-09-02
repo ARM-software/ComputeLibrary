@@ -1,9 +1,13 @@
 <map id="arm_compute/core/CPP/kernels" name="arm_compute/core/CPP/kernels">
-<area shape="rect" id="node1" href="dir_9b109a3838d873f4037ee21889a49db8.xhtml" title="kernels" alt="" coords="41,52,113,100"/>
-<area shape="rect" id="node2" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml" title="NEON" alt="" coords="5,148,77,196"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000010_000021.xhtml" title="3" alt="" coords="60,127,69,141"/>
-<area shape="rect" id="node3" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml" title="support" alt="" coords="41,244,113,292"/>
-<area shape="rect" id="edge2-headlabel" href="dir_000010_000141.xhtml" title="1" alt="" coords="89,220,98,235"/>
-<area shape="rect" id="edge3-headlabel" href="dir_000021_000141.xhtml" title="5" alt="" coords="65,217,75,231"/>
-<area shape="rect" id="clust1" href="dir_7484b841a86f2d7fdd057c9b24fbf230.xhtml" title="CPP" alt="" coords="31,16,124,111"/>
+<area shape="rect" id="node1" href="dir_9b109a3838d873f4037ee21889a49db8.xhtml" title="kernels" alt="" coords="68,52,140,100"/>
+<area shape="rect" id="node2" href="dir_8bc26130589aa16388b5a02f17abf2c2.xhtml" title="runtime" alt="" coords="68,148,140,196"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000011_000003.xhtml" title="1" alt="" coords="108,122,117,137"/>
+<area shape="rect" id="node3" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml" title="NEON" alt="" coords="5,244,77,292"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000011_000022.xhtml" title="3" alt="" coords="45,218,55,233"/>
+<area shape="rect" id="node4" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml" title="support" alt="" coords="79,340,151,388"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000011_000150.xhtml" title="1" alt="" coords="136,319,145,334"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000003_000022.xhtml" title="119" alt="" coords="61,226,86,241"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000003_000150.xhtml" title="5" alt="" coords="116,314,125,329"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000022_000150.xhtml" title="5" alt="" coords="88,313,97,328"/>
+<area shape="rect" id="clust1" href="dir_7484b841a86f2d7fdd057c9b24fbf230.xhtml" title="CPP" alt="" coords="57,16,151,111"/>
 </map>

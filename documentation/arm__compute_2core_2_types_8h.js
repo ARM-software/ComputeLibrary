@@ -1,6 +1,5 @@
 var arm__compute_2core_2_types_8h =
 [
-    [ "QuantizationInfo", "structarm__compute_1_1_quantization_info.xhtml", "structarm__compute_1_1_quantization_info" ],
     [ "ValidRegion", "structarm__compute_1_1_valid_region.xhtml", "structarm__compute_1_1_valid_region" ],
     [ "BorderSize", "structarm__compute_1_1_border_size.xhtml", "structarm__compute_1_1_border_size" ],
     [ "KeyPoint", "structarm__compute_1_1_key_point.xhtml", "structarm__compute_1_1_key_point" ],
@@ -13,6 +12,7 @@ var arm__compute_2core_2_types_8h =
     [ "FullyConnectedLayerInfo", "structarm__compute_1_1_fully_connected_layer_info.xhtml", "structarm__compute_1_1_fully_connected_layer_info" ],
     [ "PriorBoxLayerInfo", "classarm__compute_1_1_prior_box_layer_info.xhtml", "classarm__compute_1_1_prior_box_layer_info" ],
     [ "DetectionOutputLayerInfo", "classarm__compute_1_1_detection_output_layer_info.xhtml", "classarm__compute_1_1_detection_output_layer_info" ],
+    [ "DetectionPostProcessLayerInfo", "classarm__compute_1_1_detection_post_process_layer_info.xhtml", "classarm__compute_1_1_detection_post_process_layer_info" ],
     [ "PoolingLayerInfo", "classarm__compute_1_1_pooling_layer_info.xhtml", "classarm__compute_1_1_pooling_layer_info" ],
     [ "ROIPoolingLayerInfo", "classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml", "classarm__compute_1_1_r_o_i_pooling_layer_info" ],
     [ "GenerateProposalsInfo", "classarm__compute_1_1_generate_proposals_info.xhtml", "classarm__compute_1_1_generate_proposals_info" ],
@@ -29,9 +29,11 @@ var arm__compute_2core_2_types_8h =
     [ "GEMMInfo", "classarm__compute_1_1_g_e_m_m_info.xhtml", "classarm__compute_1_1_g_e_m_m_info" ],
     [ "WinogradInfo", "structarm__compute_1_1_winograd_info.xhtml", "structarm__compute_1_1_winograd_info" ],
     [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", "structarm__compute_1_1_i_o_format_info" ],
+    [ "BBox", "arm__compute_2core_2_types_8h.xhtml#aa2b075b5da72ec6bb14f90c202443eb0", null ],
     [ "BiStrides", "arm__compute_2core_2_types_8h.xhtml#a11916d4148a39a67794050373f54825a", null ],
     [ "half", "arm__compute_2core_2_types_8h.xhtml#a73e2825fd61d349c5ca2f5313e3c8ea1", null ],
     [ "InternalKeypoint", "arm__compute_2core_2_types_8h.xhtml#a2ab89a5d0959531aac270879cdd3ed78", null ],
+    [ "LabelBBox", "arm__compute_2core_2_types_8h.xhtml#ae6550ea34c33d2e943476386d6ba8bed", null ],
     [ "Multiples", "arm__compute_2core_2_types_8h.xhtml#afe9e10e5fdfd1e2665ac17c75c0cacd8", null ],
     [ "PaddingInfo", "arm__compute_2core_2_types_8h.xhtml#a669b5d3c5994f9ae3be31df9a1014297", null ],
     [ "PaddingList", "arm__compute_2core_2_types_8h.xhtml#ac1a1b012674e0f1de071a611391828ad", null ],
@@ -43,7 +45,9 @@ var arm__compute_2core_2_types_8h =
       [ "DIV", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea29bbf66f7f8529ec47e394fb5a36c646", null ],
       [ "MIN", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aeace31e2a082d17e038fcc6e3006166653", null ],
       [ "MAX", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea26a4b44a837bf97b972628509912b4a5", null ],
-      [ "SQUARED_DIFF", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea46ea186b87dc545033d86ba8d6e63916", null ]
+      [ "SQUARED_DIFF", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea46ea186b87dc545033d86ba8d6e63916", null ],
+      [ "POWER", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aeac9c9c146c630ca5ef9197c73c032f4a6", null ],
+      [ "PRELU", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f", null ]
     ] ],
     [ "BilinearInterpolation", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202", [
       [ "BILINEAR_OLD_NEW", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202a856d68c521c4c85363f54d95a33b7532", null ],
@@ -101,9 +105,12 @@ var arm__compute_2core_2_types_8h =
       [ "UNKNOWN", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a696b031073e74bf2cb98e5ef201d4aa3", null ],
       [ "U8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a6669348b484e3008dca2bfa8e85e40b5", null ],
       [ "S8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aafb0fced528eaac5fe170b763cda5975", null ],
+      [ "QSYMM8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a5f007421a4becd11c0666c2058b0b36c", null ],
       [ "QASYMM8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6af14462d71aa842202c3e4b272c7ec924", null ],
+      [ "QSYMM8_PER_CHANNEL", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a34f500e941c4df30b870126ec868ebd5", null ],
       [ "U16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aef9ef3ebca4d2b64b6ec83808bafa5f2", null ],
       [ "S16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a6e0b0886efb94aec797f6b830329b72c", null ],
+      [ "QSYMM16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a3ca8a4ea8f992df3b462bc7b24d097c6", null ],
       [ "U32", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6ac8bd5bedff8ef192d39a962afc0e19ee", null ],
       [ "S32", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aa1e28eee0339658d39a8b4d325b56e9c", null ],
       [ "U64", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a31d65cccd6593e4101db93fb878abcaa", null ],
@@ -129,7 +136,12 @@ var arm__compute_2core_2_types_8h =
     ] ],
     [ "ElementWiseUnary", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936d", [
       [ "RSQRT", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da66bac724670f51e77f3688d33ca0d781", null ],
-      [ "EXP", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da8c670f8c37b95e1ed14a0ce414b049c7", null ]
+      [ "EXP", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da8c670f8c37b95e1ed14a0ce414b049c7", null ],
+      [ "NEG", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da5dd68b1a7db42a1cce4dce09dbaa179e", null ],
+      [ "LOG", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da4b5ffcdaf38ce4d463171f5c977c5ab3", null ],
+      [ "ABS", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da7d8a220d2262f9d6c658d549ee12cf2c", null ],
+      [ "SIN", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da5b001d63db54e7383587771eeb2018a1", null ],
+      [ "ROUND", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da2ea77cf582892014b30e6fa7e558350d", null ]
     ] ],
     [ "Format", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58", [
       [ "UNKNOWN", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a696b031073e74bf2cb98e5ef201d4aa3", null ],
@@ -149,6 +161,10 @@ var arm__compute_2core_2_types_8h =
       [ "NV21", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a8e9f6aa1af7e0abbc7e64521e6ffe1b4", null ],
       [ "IYUV", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58ab08f0cb36474118c5bbc03b3a172a778", null ],
       [ "UYVY422", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58af557448a61ad2927194f63442e131dfa", null ]
+    ] ],
+    [ "FuseBatchNormalizationType", "arm__compute_2core_2_types_8h.xhtml#afb7e3dd8a833840aaaf618bd43ead0ca", [
+      [ "CONVOLUTION", "arm__compute_2core_2_types_8h.xhtml#afb7e3dd8a833840aaaf618bd43ead0caaf7fb587bad912d390b57a5d6e7ccc55d", null ],
+      [ "DEPTHWISECONVOLUTION", "arm__compute_2core_2_types_8h.xhtml#afb7e3dd8a833840aaaf618bd43ead0caa481bc07ed7c792045e8b277c0c88f8d4", null ]
     ] ],
     [ "GEMMLowpOutputStageType", "arm__compute_2core_2_types_8h.xhtml#a5558e2cc22f7f4771653d992c8ad8864", [
       [ "NONE", "arm__compute_2core_2_types_8h.xhtml#a5558e2cc22f7f4771653d992c8ad8864ab50339a10e1de285ac99d4c3990b8693", null ],
@@ -211,7 +227,9 @@ var arm__compute_2core_2_types_8h =
       [ "MEAN_SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45bafc54513dae613e117ffc4169e48bfce5", null ],
       [ "PROD", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45bac8074bb318fb85693233e64acc64c1ed", null ],
       [ "SUM_SQUARE", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba2ce6e134b828b72fad160fa17c8d1b64", null ],
-      [ "SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a", null ]
+      [ "SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a", null ],
+      [ "MIN", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45bace31e2a082d17e038fcc6e3006166653", null ],
+      [ "MAX", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba26a4b44a837bf97b972628509912b4a5", null ]
     ] ],
     [ "SamplingPolicy", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7b", [
       [ "CENTER", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e", null ],

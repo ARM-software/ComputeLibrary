@@ -35,6 +35,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <set>
@@ -60,28 +61,37 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 3, "The number of dimensions for the matrix B must be <= 3");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_interleaved_transposed && reshape_info.reinterpret_input_as_3d(), "The input tensor cannot be reinterpreted as 3D if is_interleaved_transposed is true");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 2 && reshape_info.reinterpret_input_as_3d(), "The input1 tensor cannot have more than 2 dimensions if input0 has to be reinterpreted as 3D");
-
-    const bool is_beta_one = std::abs(1.0f - beta) < 0.00001f;
-    const bool has_vec_c   = input2 != nullptr && beta != 0.f;
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(has_vec_c && !is_beta_one, "Adding input2 is only supported for beta equal to 1");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((reshape_info.reinterpret_input_as_3d() || reshape_info.depth_output_gemm3d() != 0) && (input2 != nullptr)
+                                    && (!reshape_info.broadcast_bias()), "Bias addition only supported with broadcast mode in case the input or output has to be reinterpreted as 3D");
 
     if(!is_interleaved_transposed)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != input1->dimension(1));
 
-        if(has_vec_c)
+        if(input2 != nullptr && !(helpers::float_ops::is_zero(beta)))
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input2);
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input2->num_dimensions() > 1, "input2 must be a 1D tensor");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input2->dimension(0) != input1->dimension(0), "Length of Vector C must match the number of columns of matrix B");
+            const unsigned int m           = reshape_info.reinterpret_input_as_3d() ? input0->dimension(1) * input0->dimension(2) : input0->dimension(1);
+            const unsigned int n           = input1->dimension(0);
+            const unsigned int input2_dim0 = input2->dimension(0);
+            const unsigned int input2_dim1 = input2->dimension(1);
+
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input2, input1);
+            if(reshape_info.broadcast_bias())
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG((input2_dim1 != 1 || input2_dim0 != n), "Incorrect dimension of bias matrix which is to be broadcasted");
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG((input2_dim0 != n || input2_dim1 != m), "Incorrect dimension of bias matrix");
+            }
         }
     }
     else
     {
         GEMMRHSMatrixInfo rhs_info;
         GEMMLHSMatrixInfo lhs_info;
-        const int         m                         = reshape_info.m();
-        const int         n                         = reshape_info.n();
+        const auto        m                         = static_cast<unsigned int>(reshape_info.m());
+        const auto        n                         = static_cast<unsigned int>(reshape_info.n());
         const int         k                         = reshape_info.k();
         const int         mult_transpose1xW_width   = reshape_info.mult_transpose1xW_width();
         const int         mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
@@ -113,10 +123,20 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input0, &tensor_info_reshaped0);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, &tensor_info_reshaped1);
 
-        if(has_vec_c)
+        if(input2 != nullptr && !(helpers::float_ops::is_zero(beta)))
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input2);
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input2->num_dimensions() > 1, "input2 must be a 1D tensor");
+            const unsigned int input2_dim0 = input2->dimension(0);
+            const unsigned int input2_dim1 = input2->dimension(1);
+
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input2, input1);
+            if(reshape_info.broadcast_bias())
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG((input2_dim1 != 1 || input2_dim0 != n), "Incorrect dimension of bias matrix which is to be broadcasted");
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG((input2_dim0 != n || input2_dim1 != m), "Incorrect dimension of bias matrix");
+            }
         }
     }
 
@@ -144,7 +164,6 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
     unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
     bool           reinterpret_input_as_3d             = reshape_info.reinterpret_input_as_3d();
     bool           reinterpret_output_as_3d            = (reshape_info.depth_output_gemm3d() != 0);
-    const bool     has_vec_c                           = input2 != nullptr && beta != 0.f;
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -193,12 +212,23 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
                                          ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
                                          output->dimension(1) + bottom_pad);
 
-        window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
-                         update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
-        if(has_vec_c)
+        if(input2 != nullptr)
         {
-            AccessWindowHorizontal input2_access(input2, 0, num_elems_processed_per_iteration_x);
-            window_changed = window_changed || update_window_and_padding(win, input2_access);
+            const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
+
+            const int bias_processed_per_iteration_y = reshape_info.broadcast_bias() ? 1 : num_elems_processed_per_iteration_y;
+
+            AccessWindowStatic input2_access(input2, 0, 0,
+                                             ceil_to_multiple(input2->dimension(0), bias_processed_per_iteration_x),
+                                             ceil_to_multiple(input2->dimension(1), bias_processed_per_iteration_y));
+
+            window_changed = update_window_and_padding(win, input0_access, input1_access, input2_access) || // window used by the execute_window_loop
+                             update_window_and_padding(win_out, output_access);                             // window used to update the padding requirements of output tensor
+        }
+        else
+        {
+            window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
+                             update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
         }
 
         output_access.set_valid_region(win_out, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
@@ -231,12 +261,23 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
                                          ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
                                          output->dimension(1) + bottom_pad);
 
-        window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
-                         update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
-        if(has_vec_c)
+        if(input2 != nullptr)
         {
-            AccessWindowHorizontal input2_access(input2, 0, num_elems_processed_per_iteration_x);
-            window_changed = window_changed || update_window_and_padding(win, input2_access);
+            const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
+
+            const int bias_processed_per_iteration_y = reshape_info.broadcast_bias() ? 1 : num_elems_processed_per_iteration_y;
+
+            AccessWindowStatic input2_access(input2, 0, 0,
+                                             ceil_to_multiple(input2->dimension(0), bias_processed_per_iteration_x),
+                                             ceil_to_multiple(input2->dimension(1), bias_processed_per_iteration_y));
+
+            window_changed = update_window_and_padding(win, input0_access, input1_access, input2_access) || // window used by the execute_window_loop
+                             update_window_and_padding(win_out, output_access);                             // window used to update the padding requirements of output tensor
+        }
+        else
+        {
+            window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
+                             update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
         }
 
         Coordinates coord;
@@ -256,12 +297,13 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
 } // namespace
 
 CLGEMMMatrixMultiplyKernel::CLGEMMMatrixMultiplyKernel()
-    : _input0(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_input_as_3d(false), _reinterpret_output_as_3d(false), _has_vec_c(false)
+    : _input0(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_input_as_3d(false), _reinterpret_output_as_3d(false), _add_bias(false),
+      _broadcast_bias(false)
 {
 }
 
 void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
-                                           bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, bool fp_mixed_precision)
+                                           bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, bool fp_mixed_precision, const ActivationLayerInfo &activation_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
@@ -271,10 +313,12 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 
     _input0                   = input0;
     _input1                   = input1;
-    _input2                   = input2;
+    _input2                   = helpers::float_ops::is_zero(beta) ? nullptr : input2;
     _output                   = output;
     _reinterpret_input_as_3d  = reshape_info.reinterpret_input_as_3d();
     _reinterpret_output_as_3d = (reshape_info.depth_output_gemm3d() != 0);
+    _add_bias                 = _input2 != nullptr;
+    _broadcast_bias           = reshape_info.broadcast_bias();
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -305,22 +349,20 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     // Create build options
     CLBuildOptions build_opts;
 
-    // Only define ALPHA when alpha is not 1.0f. This avoids performing unnecessary multiplications.
-    if(std::abs(1.0f - alpha) > 0.00001f)
-    {
-        build_opts.add_option("-DALPHA=" + float_to_string_with_full_precision(alpha));
-    }
+    build_opts.add_option_if(!(helpers::float_ops::is_one(alpha)), "-DALPHA=" + float_to_string_with_full_precision(alpha));
+    build_opts.add_option_if(_input2 != nullptr, "-DBETA=" + float_to_string_with_full_precision(beta));
+    build_opts.add_option_if(helpers::float_ops::is_one(beta), "-DUNIT_BETA");
+    build_opts.add_option_if(reshape_info.broadcast_bias(), "-DBROADCAST_BIAS");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DREINTERPRET_OUTPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(1)));
     build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(2)));
-
-    // Do not slide matrix B if _slide_matrix_b = false
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
+    build_opts.add_option_if(activation_info.enabled(), "-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(activation_info.activation())));
+    build_opts.add_option_if(activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(activation_info.a()));
+    build_opts.add_option_if(activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(activation_info.b()));
 
     const bool is_bifrost = get_arch_from_target(gpu_target) == GPUTarget::BIFROST;
-
-    _has_vec_c = input2 != nullptr && beta != 0.f;
 
     std::string kernel_name;
     if(is_interleaved_transposed)
@@ -385,15 +427,14 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_X=" + support::cpp11::to_string(num_elements_processed.x()));
     }
 
-    // Configure matrix C addition if necessary
-    build_opts.add_option_if(_has_vec_c, "-DADD_VEC_C");
-
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Set config_id for enabling LWS tuning
     _config_id = "gemm_";
     _config_id += (is_interleaved_transposed ? "reshaped_" : "");
+    _config_id += (_add_bias ? "add_bias_" : "");
+    _config_id += (_broadcast_bias ? "broadcast_bias_" : "");
     _config_id += (fp_mixed_precision ? "fp_mixed_" : "");
     _config_id += (_reinterpret_input_as_3d ? "3di_" : "");
     _config_id += (_reinterpret_output_as_3d ? "3do_" : "");
@@ -411,11 +452,12 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 }
 
 Status CLGEMMMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float alpha, float beta,
-                                            bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, GPUTarget gpu_target, bool fp_mixed_precision)
+                                            bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, GPUTarget gpu_target, bool fp_mixed_precision, const ActivationLayerInfo &activation_info)
 {
     // Note: num_elements_processed will be set in validate_and_configure_window()
     ElementsProcessed num_elements_processed{};
     ARM_COMPUTE_UNUSED(alpha);
+    ARM_COMPUTE_UNUSED(activation_info);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, input2, output, beta, is_interleaved_transposed, reshape_info, fp_mixed_precision));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(),
                                                               input1->clone().get(),
@@ -448,12 +490,12 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
     slice_matrix_b.set(Window::DimX, Window::Dimension(0, 1, 1));
     slice_matrix_b.set(Window::DimY, Window::Dimension(0, 1, 1));
 
-    const unsigned int num_arguments_vec_c = (_has_vec_c) ? num_arguments_per_1D_tensor() : 0;
+    const unsigned int num_arguments_bias = _add_bias ? num_arguments_per_2D_tensor() + 1 : 0;
 
     if(_reinterpret_input_as_3d)
     {
         // Pass bottom paddings to the kernel if the input has to be reinterpreted as 3D tensor
-        const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3 + num_arguments_vec_c;
+        const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3 + num_arguments_bias;
         const unsigned int total_cross_plane_pad = _input0->info()->padding().top + _input0->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));
     }
@@ -461,7 +503,7 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
     if(_reinterpret_output_as_3d)
     {
         // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
-        const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3 + (_reinterpret_input_as_3d ? 1 : 0) + num_arguments_vec_c;
+        const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3 + (_reinterpret_input_as_3d ? 1 : 0) + num_arguments_bias;
         const unsigned int total_cross_plane_pad = _output->info()->padding().top + _output->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));
     }
@@ -479,13 +521,17 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input0, slice);
         add_2D_tensor_argument(idx, _input1, slice_b);
-        if(_has_vec_c)
+        if(_add_bias)
         {
-            add_1D_tensor_argument(idx, _input2, slice);
+            add_2D_tensor_argument(idx, _input2, slice);
         }
         add_2D_tensor_argument(idx, _output, slice);
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input1->info()->strides_in_bytes()[2]));
+        if(_add_bias)
+        {
+            _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input2->info()->strides_in_bytes()[2]));
+        }
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
         enqueue(queue, *this, slice, lws_hint());
     }

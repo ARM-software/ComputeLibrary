@@ -16,6 +16,6 @@ var searchData=
   ['to_5fnearest_5feven',['TO_NEAREST_EVEN',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea02ff1fff1812f84c89547fcd6c176150',1,'arm_compute']]],
   ['to_5fnearest_5fup',['TO_NEAREST_UP',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea8c0084566b290fa9e5e429f4ae241f95',1,'arm_compute']]],
   ['to_5fzero',['TO_ZERO',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea5631ad8e27788edfca7e13535d862c06',1,'arm_compute::TO_ZERO()'],['../namespacearm__compute_1_1utils_1_1rounding.xhtml#a5959c934b204c7bcb6766cfaea8ae101a5631ad8e27788edfca7e13535d862c06',1,'arm_compute::utils::rounding::TO_ZERO()']]],
-  ['top_5fleft',['TOP_LEFT',['../namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7ba747385047b85ae751f83adb36435a3c1',1,'arm_compute']]],
-  ['ttrx',['TTRX',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3ab39f7e42574174cf9ee7da726bdb13b4',1,'arm_compute']]]
+  ['todx',['TODX',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3a6903f06b87f56a4cd0df268ee94dbd6f',1,'arm_compute']]],
+  ['top_5fleft',['TOP_LEFT',['../namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7ba747385047b85ae751f83adb36435a3c1',1,'arm_compute']]]
 ];

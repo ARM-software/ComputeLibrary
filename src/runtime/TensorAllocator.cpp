@@ -105,7 +105,7 @@ TensorAllocator &TensorAllocator::operator=(TensorAllocator &&o) noexcept
     return *this;
 }
 
-void TensorAllocator::init(const TensorAllocator &allocator, const Coordinates &coords, TensorInfo sub_info)
+void TensorAllocator::init(const TensorAllocator &allocator, const Coordinates &coords, TensorInfo &sub_info)
 {
     // Get parent info
     const TensorInfo parent_info = allocator.info();

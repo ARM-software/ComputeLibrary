@@ -58,6 +58,7 @@ struct Kernel<float, float>
 template <typename To, typename Tr>
 Window NEGEMMNativeWrapperKernel<To, Tr>::configure_internal(float alpha, float beta)
 {
+    ARM_COMPUTE_UNUSED(alpha);
     using strategy = typename Kernel<To, Tr>::strategy;
 
     _beta = beta;
@@ -80,12 +81,20 @@ void NEGEMMNativeWrapperKernel<To, Tr>::run_internal(const Window &window, const
     TensorAccessor<To> b(*_b);
     TensorAccessor<Tr> c(*_c);
 
-    if(_a->info()->data_layout() == DataLayout::NHWC)
+    // Handle 3d input re-interpretation
+    if(_gemm_info.reinterpret_input_as_3d())
     {
-        // In the case of NHWC we want to interpret the output shape as 3D. Thus, the batch stride for A is
-        // the relevant multiple of the row stride.
-        const size_t nhwc_batch_stride = _a->info()->strides_in_bytes().y() * _c->info()->dimension(1);
-        a.set_stride(2, nhwc_batch_stride);
+        Strides a_strides_as_3d = _a->info()->strides_in_bytes();
+        a_strides_as_3d.remove(Window::DimZ);
+        a.set_strides(a_strides_as_3d);
+    }
+
+    // Handle 3d output re-interpretation
+    if(_gemm_info.depth_output_gemm3d() != 0)
+    {
+        Strides c_strides_as_3d = _c->info()->strides_in_bytes();
+        c_strides_as_3d.remove(Window::DimZ);
+        c.set_strides(c_strides_as_3d);
     }
 
     unsigned int m_end = 0;
@@ -107,6 +116,7 @@ void NEGEMMNativeWrapperKernel<To, Tr>::run_internal(const Window &window, const
 
     auto on_new_row_size = [&](unsigned int start, unsigned int end)
     {
+        ARM_COMPUTE_UNUSED(start);
         m_end = std::min(end, _params.M);
     };
 

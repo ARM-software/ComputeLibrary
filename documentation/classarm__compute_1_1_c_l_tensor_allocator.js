@@ -11,6 +11,7 @@ var classarm__compute_1_1_c_l_tensor_allocator =
     [ "map", "classarm__compute_1_1_c_l_tensor_allocator.xhtml#a15eaecea13a8a49c8d259fddefcbd7ac", null ],
     [ "operator=", "classarm__compute_1_1_c_l_tensor_allocator.xhtml#a74c9c61e0615334fdeb176f21828a98f", null ],
     [ "operator=", "classarm__compute_1_1_c_l_tensor_allocator.xhtml#aba115eb9c458f9e99b8c3fa3975a74a3", null ],
+    [ "quantization", "classarm__compute_1_1_c_l_tensor_allocator.xhtml#a5c27e81a1ad958e4de947c1da77f4cf1", null ],
     [ "set_associated_memory_group", "classarm__compute_1_1_c_l_tensor_allocator.xhtml#ae1746928cddc235a148f11132f0fa8f2", null ],
     [ "unmap", "classarm__compute_1_1_c_l_tensor_allocator.xhtml#a34b854d640d247bd7422f60ca2f3a05c", null ]
 ];

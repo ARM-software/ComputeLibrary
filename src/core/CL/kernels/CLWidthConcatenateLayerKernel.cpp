@@ -40,13 +40,14 @@
 
 #include <map>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 namespace
 {
+constexpr unsigned int num_elems_processed_per_iteration = 16;
+
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int width_offset, ITensorInfo *output)
 {
-    const unsigned int num_elems_processed_per_iteration = 16;
-
     // The window needs to be based on input as we copy all the widths of input
     Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
@@ -98,8 +99,6 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     _output       = output;
     _width_offset = width_offset;
 
-    const unsigned int num_elems_processed_per_iteration = 16;
-
     // Add build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(input->info()->data_type()));
@@ -109,10 +108,13 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
 
     if(is_data_type_quantized_asymmetric(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info())
     {
-        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(input->info()->quantization_info().offset));
-        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input->info()->quantization_info().scale));
-        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
+        const UniformQuantizationInfo iqinfo = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oqinfo = output->info()->quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iqinfo.offset));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oqinfo.offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iqinfo.scale));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oqinfo.scale));
     }
 
     // Create kernel
@@ -122,6 +124,9 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     ICLKernel::configure_internal(std::get<1>(win_config));
+
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 }
 
 void CLWidthConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -134,3 +139,4 @@ void CLWidthConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &
     add_4D_tensor_argument(idx, _output, window);
     enqueue(queue, *this, window);
 }
+} // namespace arm_compute

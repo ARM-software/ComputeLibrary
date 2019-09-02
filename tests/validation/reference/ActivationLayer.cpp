@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,10 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info)
+SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
 {
+    ARM_COMPUTE_UNUSED(oq_info);
+
     // Create reference
     SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
 
@@ -53,16 +55,29 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
 }
 
 template <>
-SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src, ActivationLayerInfo info)
+SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
 {
+    const QuantizationInfo dst_qinfo = oq_info.empty() ? src.quantization_info() : oq_info;
+
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float>   dst_tmp = activation_layer<float>(src_tmp, info);
-    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, src.quantization_info());
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, dst_qinfo);
     return dst;
 }
 
-template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info);
-template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info);
+template <>
+SimpleTensor<int16_t> activation_layer<int16_t>(const SimpleTensor<int16_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
+{
+    const QuantizationInfo dst_qinfo = oq_info.empty() ? src.quantization_info() : oq_info;
+
+    SimpleTensor<float>   src_tmp = convert_from_symmetric(src);
+    SimpleTensor<float>   dst_tmp = activation_layer<float>(src_tmp, info);
+    SimpleTensor<int16_t> dst     = convert_to_symmetric<int16_t>(dst_tmp, dst_qinfo);
+    return dst;
+}
+
+template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
+template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

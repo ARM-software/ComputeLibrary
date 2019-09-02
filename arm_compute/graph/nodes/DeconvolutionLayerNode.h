@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,20 +36,14 @@ class DeconvolutionLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] info         DeConvolution layer attributes
-     * @param[in] inner_border Inner border (right, top)
+     * @param[in] info DeConvolution layer attributes
      */
-    DeconvolutionLayerNode(PadStrideInfo info, Size2D inner_border);
+    DeconvolutionLayerNode(PadStrideInfo info);
     /** Deconvolution metadata accessor
      *
      * @return Deconvolution information
      */
     PadStrideInfo deconvolution_info() const;
-    /** Deconvolution inner border accessor
-     *
-     * @return Inner border(top, right)
-     */
-    Size2D inner_border() const;
     /** Computes deconvolution output descriptor
      *
      * @param[in] input_descriptor   Input descriptor
@@ -70,7 +64,6 @@ public:
 
 private:
     PadStrideInfo _info;
-    Size2D        _inner_border;
 };
 } // namespace graph
 } // namespace arm_compute

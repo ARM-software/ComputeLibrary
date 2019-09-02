@@ -18,6 +18,7 @@ var searchData=
   ['config',['CONFIG',['../namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9a73e99d350a4aa6f1a5af04ec29173f73',1,'arm_compute::test::framework']]],
   ['const',['Const',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a79ceee9f8e3c1f0cc74223e05d2448bf',1,'arm_compute::graph']]],
   ['constant',['CONSTANT',['../namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a8d6b5cada83510220f59e00ce86d4d92',1,'arm_compute::CONSTANT()'],['../namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92',1,'arm_compute::CONSTANT()']]],
+  ['convolution',['CONVOLUTION',['../namespacearm__compute.xhtml#afb7e3dd8a833840aaaf618bd43ead0caaf7fb587bad912d390b57a5d6e7ccc55d',1,'arm_compute']]],
   ['convolutionlayer',['ConvolutionLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16aa252659b59a03bc61e5ec827ab4448b7',1,'arm_compute::graph']]],
   ['corner',['CORNER',['../namespacearm__compute.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830ac411afd31d32cec664d372acc12f404a',1,'arm_compute']]],
   ['corner_5fsize',['CORNER_SIZE',['../namespacearm__compute.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830afbc6c35854fe02eb9e792f897399c42a',1,'arm_compute']]],
@@ -25,5 +26,5 @@ var searchData=
   ['crashed',['CRASHED',['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba9c51674930e03c276344d19f9e4398fb',1,'arm_compute::test::framework::TestResult']]],
   ['cross',['CROSS',['../namespacearm__compute.xhtml#afdda916edc7502967bbec17ea3c06c02a04dd53a8e6c2306e9bbf944c1d6047f2',1,'arm_compute']]],
   ['cross_5fmap',['CROSS_MAP',['../namespacearm__compute.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caa980fef040549733973683b1a868f96e5',1,'arm_compute']]],
-  ['custom',['CUSTOM',['../classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7a72baef04098f035e8a320b03ad197818',1,'arm_compute::Scheduler::CUSTOM()'],['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6a90589c47f06eb971d548591f23c285af',1,'arm_compute::IOFormatInfo::Custom()']]]
+  ['custom',['Custom',['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6a90589c47f06eb971d548591f23c285af',1,'arm_compute::IOFormatInfo::Custom()'],['../classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7a72baef04098f035e8a320b03ad197818',1,'arm_compute::Scheduler::CUSTOM()']]]
 ];

@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['identity',['IDENTITY',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaad8156d3c6735d75d8a1b8dedd0e79c8b',1,'arm_compute::ActivationLayerInfo']]],
   ['idle',['IDLE',['../namespacearm__gemm.xhtml#a32006a302bde841f2cf4cc8bb131856baa5daf7f2ebbba4975d61dab1c40188c7',1,'arm_gemm']]],
   ['in_5fmap_5f1d',['IN_MAP_1D',['../namespacearm__compute.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caaca2475ab7883ebb9f125241141896190',1,'arm_compute']]],
   ['in_5fmap_5f2d',['IN_MAP_2D',['../namespacearm__compute.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caa6ff8bd96743aae9fd283cd822b84278e',1,'arm_compute']]],

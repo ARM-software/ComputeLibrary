@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -128,6 +128,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a28c80440058d5c9b0bc1e1a4622c734a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml">LSTMParams</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a28c80440058d5c9b0bc1e1a4622c734a">set_peephole_params</a> (const T *<a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a477486a9c5189cff8af1cdd9d7e8d573">cell_to_forget_weights</a>, const T *<a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a934af5defc72f38841ce8955e2151473">cell_to_output_weights</a>)</td></tr>
 <tr class="memdesc:a28c80440058d5c9b0bc1e1a4622c734a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set peephole tensor parameters.  <a href="#a28c80440058d5c9b0bc1e1a4622c734a">More...</a><br /></td></tr>
 <tr class="separator:a28c80440058d5c9b0bc1e1a4622c734a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1c18c245c7b01f45fe8f911201c273a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml">LSTMParams</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#ae1c18c245c7b01f45fe8f911201c273a">set_layer_normalization_params</a> (const T *<a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a23361ca1393c0dc196fbf4e627e07119">input_layer_norm_weights</a>, const T *<a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a213908108c07594027bc2b829fe7ee4a">forget_layer_norm_weights</a>, const T *<a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#abd478bedc7c65b72ead0d05cbd16d437">cell_layer_norm_weights</a>, const T *<a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a208874b46a667263fa309537c5355318">output_layer_norm_weights</a>)</td></tr>
+<tr class="memdesc:ae1c18c245c7b01f45fe8f911201c273a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set layer normalization tensor parameters.  <a href="#ae1c18c245c7b01f45fe8f911201c273a">More...</a><br /></td></tr>
+<tr class="separator:ae1c18c245c7b01f45fe8f911201c273a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa54d4a35e697cb14a38359616709681"><td class="memItemLeft" align="right" valign="top">const T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#afa54d4a35e697cb14a38359616709681">input_to_input_weights</a> () const</td></tr>
 <tr class="separator:afa54d4a35e697cb14a38359616709681"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35e4b6311397e1f9532fb37560aa9996"><td class="memItemLeft" align="right" valign="top">const T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a35e4b6311397e1f9532fb37560aa9996">recurrent_to_input_weights</a> () const</td></tr>
@@ -144,12 +147,22 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab1b3d5364f11bca8cacef026c8038dba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad676992a90d193409fa6a28a001af6c8"><td class="memItemLeft" align="right" valign="top">const T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#ad676992a90d193409fa6a28a001af6c8">projection_bias</a> () const</td></tr>
 <tr class="separator:ad676992a90d193409fa6a28a001af6c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23361ca1393c0dc196fbf4e627e07119"><td class="memItemLeft" align="right" valign="top">const T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a23361ca1393c0dc196fbf4e627e07119">input_layer_norm_weights</a> () const</td></tr>
+<tr class="separator:a23361ca1393c0dc196fbf4e627e07119"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a213908108c07594027bc2b829fe7ee4a"><td class="memItemLeft" align="right" valign="top">const T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a213908108c07594027bc2b829fe7ee4a">forget_layer_norm_weights</a> () const</td></tr>
+<tr class="separator:a213908108c07594027bc2b829fe7ee4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd478bedc7c65b72ead0d05cbd16d437"><td class="memItemLeft" align="right" valign="top">const T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#abd478bedc7c65b72ead0d05cbd16d437">cell_layer_norm_weights</a> () const</td></tr>
+<tr class="separator:abd478bedc7c65b72ead0d05cbd16d437"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a208874b46a667263fa309537c5355318"><td class="memItemLeft" align="right" valign="top">const T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a208874b46a667263fa309537c5355318">output_layer_norm_weights</a> () const</td></tr>
+<tr class="separator:a208874b46a667263fa309537c5355318"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23be92a19e0d7c174ed444e709518afd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a23be92a19e0d7c174ed444e709518afd">has_peephole_opt</a> () const</td></tr>
 <tr class="separator:a23be92a19e0d7c174ed444e709518afd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a127009377712009a84cd0c48aa7e1edd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a127009377712009a84cd0c48aa7e1edd">has_projection</a> () const</td></tr>
 <tr class="separator:a127009377712009a84cd0c48aa7e1edd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae040c52316d86a4df2c7cdf179049bf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#aae040c52316d86a4df2c7cdf179049bf">has_cifg_opt</a> () const</td></tr>
 <tr class="separator:aae040c52316d86a4df2c7cdf179049bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d615f651270885a1b996046e9902a3c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a2d615f651270885a1b996046e9902a3c">use_layer_norm</a> () const</td></tr>
+<tr class="separator:a2d615f651270885a1b996046e9902a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename T&gt;<br />
@@ -184,7 +197,7 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 <p>Constructor. </p>
 
 <p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00042">42</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        : _input_to_input_weights(<span class="keyword">nullptr</span>), _recurrent_to_input_weights(<span class="keyword">nullptr</span>), _cell_to_input_weights(<span class="keyword">nullptr</span>), _input_gate_bias(<span class="keyword">nullptr</span>), _cell_to_forget_weights(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;          _cell_to_output_weights(<span class="keyword">nullptr</span>), _projection_weights(<span class="keyword">nullptr</span>), _projection_bias(<span class="keyword">nullptr</span>), _has_peephole_opt(<span class="keyword">false</span>), _has_projection(<span class="keyword">false</span>), _has_cifg_opt(<span class="keyword">true</span>)</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    {</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    }</div></div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        : _input_to_input_weights(<span class="keyword">nullptr</span>), _recurrent_to_input_weights(<span class="keyword">nullptr</span>), _cell_to_input_weights(<span class="keyword">nullptr</span>), _input_gate_bias(<span class="keyword">nullptr</span>), _cell_to_forget_weights(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;          _cell_to_output_weights(<span class="keyword">nullptr</span>), _projection_weights(<span class="keyword">nullptr</span>), _projection_bias(<span class="keyword">nullptr</span>), _input_layer_norm_weights(<span class="keyword">nullptr</span>), _forget_layer_norm_weights(<span class="keyword">nullptr</span>), _cell_layer_norm_weights(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;          _output_layer_norm_weights(<span class="keyword">nullptr</span>), _has_peephole_opt(<span class="keyword">false</span>), _has_projection(<span class="keyword">false</span>), _has_cifg_opt(<span class="keyword">true</span>), _use_layer_norm(<span class="keyword">false</span>)</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    {</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="addc401e45b660bdd3c8e27828b88d036"></a>
@@ -243,6 +256,35 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="abd478bedc7c65b72ead0d05cbd16d437"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd478bedc7c65b72ead0d05cbd16d437">&#9670;&nbsp;</a></span>cell_layer_norm_weights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const T* cell_layer_norm_weights </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00170">170</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    {</div><div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;        <span class="keywordflow">return</span> _cell_layer_norm_weights;</div><div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00109">LSTMParams&lt; T &gt;::set_layer_normalization_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
+
+</div>
+</div>
 <a id="a477486a9c5189cff8af1cdd9d7e8d573"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a477486a9c5189cff8af1cdd9d7e8d573">&#9670;&nbsp;</a></span>cell_to_forget_weights()</h2>
 
@@ -266,9 +308,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00120">120</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    {</div><div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        <span class="keywordflow">return</span> _cell_to_forget_weights;</div><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00092">LSTMParams&lt; T &gt;::set_peephole_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00140">140</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    {</div><div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        <span class="keywordflow">return</span> _cell_to_forget_weights;</div><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00093">LSTMParams&lt; T &gt;::set_peephole_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -295,9 +337,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00110">110</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    {</div><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        <span class="keywordflow">return</span> _cell_to_input_weights;</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00062">LSTMParams&lt; T &gt;::set_cifg_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00130">130</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    {</div><div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;        <span class="keywordflow">return</span> _cell_to_input_weights;</div><div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00063">LSTMParams&lt; T &gt;::set_cifg_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -324,9 +366,38 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00125">125</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    {</div><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        <span class="keywordflow">return</span> _cell_to_output_weights;</div><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00092">LSTMParams&lt; T &gt;::set_peephole_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00145">145</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    {</div><div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;        <span class="keywordflow">return</span> _cell_to_output_weights;</div><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00093">LSTMParams&lt; T &gt;::set_peephole_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
+
+</div>
+</div>
+<a id="a213908108c07594027bc2b829fe7ee4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a213908108c07594027bc2b829fe7ee4a">&#9670;&nbsp;</a></span>forget_layer_norm_weights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const T* forget_layer_norm_weights </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00165">165</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    {</div><div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        <span class="keywordflow">return</span> _forget_layer_norm_weights;</div><div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00109">LSTMParams&lt; T &gt;::set_layer_normalization_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -353,9 +424,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00150">150</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    {</div><div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="keywordflow">return</span> _has_cifg_opt;</div><div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00190">190</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    {</div><div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        <span class="keywordflow">return</span> _has_cifg_opt;</div><div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -382,9 +453,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00140">140</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    {</div><div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        <span class="keywordflow">return</span> _has_peephole_opt;</div><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00180">180</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    {</div><div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        <span class="keywordflow">return</span> _has_peephole_opt;</div><div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -411,9 +482,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00145">145</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    {</div><div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;        <span class="keywordflow">return</span> _has_projection;</div><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00185">185</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    {</div><div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;        <span class="keywordflow">return</span> _has_projection;</div><div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -440,9 +511,38 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00115">115</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    {</div><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="keywordflow">return</span> _input_gate_bias;</div><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00062">LSTMParams&lt; T &gt;::set_cifg_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00135">135</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    {</div><div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        <span class="keywordflow">return</span> _input_gate_bias;</div><div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00063">LSTMParams&lt; T &gt;::set_cifg_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
+
+</div>
+</div>
+<a id="a23361ca1393c0dc196fbf4e627e07119"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23361ca1393c0dc196fbf4e627e07119">&#9670;&nbsp;</a></span>input_layer_norm_weights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const T* input_layer_norm_weights </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00160">160</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    {</div><div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;        <span class="keywordflow">return</span> _input_layer_norm_weights;</div><div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00109">LSTMParams&lt; T &gt;::set_layer_normalization_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -469,9 +569,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00100">100</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    {</div><div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keywordflow">return</span> _input_to_input_weights;</div><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00062">LSTMParams&lt; T &gt;::set_cifg_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00120">120</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    {</div><div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        <span class="keywordflow">return</span> _input_to_input_weights;</div><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00063">LSTMParams&lt; T &gt;::set_cifg_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -503,6 +603,35 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 
 </div>
 </div>
+<a id="a208874b46a667263fa309537c5355318"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a208874b46a667263fa309537c5355318">&#9670;&nbsp;</a></span>output_layer_norm_weights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const T* output_layer_norm_weights </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00175">175</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    {</div><div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        <span class="keywordflow">return</span> _output_layer_norm_weights;</div><div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00109">LSTMParams&lt; T &gt;::set_layer_normalization_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
+
+</div>
+</div>
 <a id="ad676992a90d193409fa6a28a001af6c8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad676992a90d193409fa6a28a001af6c8">&#9670;&nbsp;</a></span>projection_bias()</h2>
 
@@ -526,9 +655,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00135">135</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    {</div><div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        <span class="keywordflow">return</span> _projection_bias;</div><div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00078">LSTMParams&lt; T &gt;::set_projection_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00155">155</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    {</div><div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;        <span class="keywordflow">return</span> _projection_bias;</div><div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00079">LSTMParams&lt; T &gt;::set_projection_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -555,9 +684,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00130">130</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    {</div><div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;        <span class="keywordflow">return</span> _projection_weights;</div><div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00078">LSTMParams&lt; T &gt;::set_projection_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00150">150</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    {</div><div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="keywordflow">return</span> _projection_weights;</div><div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00079">LSTMParams&lt; T &gt;::set_projection_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -584,9 +713,9 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00105">105</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    {</div><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        <span class="keywordflow">return</span> _recurrent_to_input_weights;</div><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00062">LSTMParams&lt; T &gt;::set_cifg_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00326">CLLSTMLayer::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00125">125</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    {</div><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        <span class="keywordflow">return</span> _recurrent_to_input_weights;</div><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00063">LSTMParams&lt; T &gt;::set_cifg_params()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -648,15 +777,83 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Reference to this <a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml">LSTMParams</a> object </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00062">62</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    {</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        _input_to_input_weights     = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#afa54d4a35e697cb14a38359616709681">input_to_input_weights</a>;</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        _recurrent_to_input_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a35e4b6311397e1f9532fb37560aa9996">recurrent_to_input_weights</a>;</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        _cell_to_input_weights      = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#aafb05bcc27f0879701152cd664c632ce">cell_to_input_weights</a>;</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        _input_gate_bias            = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a29a7a1636c6a8fd9e423d55c36e991a0">input_gate_bias</a>;</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        _has_cifg_opt               = <span class="keyword">false</span>;</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_afa54d4a35e697cb14a38359616709681"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#afa54d4a35e697cb14a38359616709681">arm_compute::LSTMParams::input_to_input_weights</a></div><div class="ttdeci">const T * input_to_input_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00100">LSTMParams.h:100</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_aafb05bcc27f0879701152cd664c632ce"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#aafb05bcc27f0879701152cd664c632ce">arm_compute::LSTMParams::cell_to_input_weights</a></div><div class="ttdeci">const T * cell_to_input_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00110">LSTMParams.h:110</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a35e4b6311397e1f9532fb37560aa9996"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a35e4b6311397e1f9532fb37560aa9996">arm_compute::LSTMParams::recurrent_to_input_weights</a></div><div class="ttdeci">const T * recurrent_to_input_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00105">LSTMParams.h:105</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a29a7a1636c6a8fd9e423d55c36e991a0"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a29a7a1636c6a8fd9e423d55c36e991a0">arm_compute::LSTMParams::input_gate_bias</a></div><div class="ttdeci">const T * input_gate_bias() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00115">LSTMParams.h:115</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00063">63</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    {</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        _input_to_input_weights     = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#afa54d4a35e697cb14a38359616709681">input_to_input_weights</a>;</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        _recurrent_to_input_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a35e4b6311397e1f9532fb37560aa9996">recurrent_to_input_weights</a>;</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        _cell_to_input_weights      = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#aafb05bcc27f0879701152cd664c632ce">cell_to_input_weights</a>;</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        _input_gate_bias            = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a29a7a1636c6a8fd9e423d55c36e991a0">input_gate_bias</a>;</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        _has_cifg_opt               = <span class="keyword">false</span>;</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_afa54d4a35e697cb14a38359616709681"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#afa54d4a35e697cb14a38359616709681">arm_compute::LSTMParams::input_to_input_weights</a></div><div class="ttdeci">const T * input_to_input_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00120">LSTMParams.h:120</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_aafb05bcc27f0879701152cd664c632ce"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#aafb05bcc27f0879701152cd664c632ce">arm_compute::LSTMParams::cell_to_input_weights</a></div><div class="ttdeci">const T * cell_to_input_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00130">LSTMParams.h:130</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a35e4b6311397e1f9532fb37560aa9996"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a35e4b6311397e1f9532fb37560aa9996">arm_compute::LSTMParams::recurrent_to_input_weights</a></div><div class="ttdeci">const T * recurrent_to_input_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00125">LSTMParams.h:125</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a29a7a1636c6a8fd9e423d55c36e991a0"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a29a7a1636c6a8fd9e423d55c36e991a0">arm_compute::LSTMParams::input_gate_bias</a></div><div class="ttdeci">const T * input_gate_bias() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00135">LSTMParams.h:135</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00110">LSTMParams&lt; T &gt;::cell_to_input_weights()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00115">LSTMParams&lt; T &gt;::input_gate_bias()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00100">LSTMParams&lt; T &gt;::input_to_input_weights()</a>, and <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00105">LSTMParams&lt; T &gt;::recurrent_to_input_weights()</a>.</p>
+<p class="reference">References <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00130">LSTMParams&lt; T &gt;::cell_to_input_weights()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00135">LSTMParams&lt; T &gt;::input_gate_bias()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00120">LSTMParams&lt; T &gt;::input_to_input_weights()</a>, and <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00125">LSTMParams&lt; T &gt;::recurrent_to_input_weights()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>.</p>
+
+</div>
+</div>
+<a id="ae1c18c245c7b01f45fe8f911201c273a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1c18c245c7b01f45fe8f911201c273a">&#9670;&nbsp;</a></span>set_layer_normalization_params()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml">LSTMParams</a>&amp; set_layer_normalization_params </td>
+          <td>(</td>
+          <td class="paramtype">const T *&#160;</td>
+          <td class="paramname"><em>input_layer_norm_weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T *&#160;</td>
+          <td class="paramname"><em>forget_layer_norm_weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T *&#160;</td>
+          <td class="paramname"><em>cell_layer_norm_weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T *&#160;</td>
+          <td class="paramname"><em>output_layer_norm_weights</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set layer normalization tensor parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input_layer_norm_weights</td><td>1D weights tensor with dimensions [num_units]. Data type supported: Data types supported: F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">forget_layer_norm_weights</td><td>1D weights tensor with dimensions [num_units]. Data type supported: Same as <code>input_layer_norm_weights</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cell_layer_norm_weights</td><td>1D weights tensor with dimensions [num_units]. Data type supported: Same as <code>input_layer_norm_weights</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output_layer_norm_weights</td><td>1D weights tensor with dimensions [num_units]. Data type supported: Same as <code>input_layer_norm_weights</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Reference to this <a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml">LSTMParams</a> object </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00109">109</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    {</div><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        _input_layer_norm_weights  = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a23361ca1393c0dc196fbf4e627e07119">input_layer_norm_weights</a>;</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        _forget_layer_norm_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a213908108c07594027bc2b829fe7ee4a">forget_layer_norm_weights</a>;</div><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        _cell_layer_norm_weights   = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#abd478bedc7c65b72ead0d05cbd16d437">cell_layer_norm_weights</a>;</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        _output_layer_norm_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a208874b46a667263fa309537c5355318">output_layer_norm_weights</a>;</div><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        _use_layer_norm            = <span class="keyword">true</span>;</div><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_abd478bedc7c65b72ead0d05cbd16d437"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#abd478bedc7c65b72ead0d05cbd16d437">arm_compute::LSTMParams::cell_layer_norm_weights</a></div><div class="ttdeci">const T * cell_layer_norm_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00170">LSTMParams.h:170</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a23361ca1393c0dc196fbf4e627e07119"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a23361ca1393c0dc196fbf4e627e07119">arm_compute::LSTMParams::input_layer_norm_weights</a></div><div class="ttdeci">const T * input_layer_norm_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00160">LSTMParams.h:160</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a208874b46a667263fa309537c5355318"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a208874b46a667263fa309537c5355318">arm_compute::LSTMParams::output_layer_norm_weights</a></div><div class="ttdeci">const T * output_layer_norm_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00175">LSTMParams.h:175</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a213908108c07594027bc2b829fe7ee4a"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a213908108c07594027bc2b829fe7ee4a">arm_compute::LSTMParams::forget_layer_norm_weights</a></div><div class="ttdeci">const T * forget_layer_norm_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00165">LSTMParams.h:165</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00170">LSTMParams&lt; T &gt;::cell_layer_norm_weights()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00165">LSTMParams&lt; T &gt;::forget_layer_norm_weights()</a>, <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00160">LSTMParams&lt; T &gt;::input_layer_norm_weights()</a>, and <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00175">LSTMParams&lt; T &gt;::output_layer_norm_weights()</a>.</p>
 
 </div>
 </div>
@@ -704,13 +901,13 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Reference to this <a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml">LSTMParams</a> object </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00092">92</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    {</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        _cell_to_forget_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a477486a9c5189cff8af1cdd9d7e8d573">cell_to_forget_weights</a>;</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        _cell_to_output_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a934af5defc72f38841ce8955e2151473">cell_to_output_weights</a>;</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        _has_peephole_opt       = <span class="keyword">true</span>;</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a934af5defc72f38841ce8955e2151473"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a934af5defc72f38841ce8955e2151473">arm_compute::LSTMParams::cell_to_output_weights</a></div><div class="ttdeci">const T * cell_to_output_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00125">LSTMParams.h:125</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a477486a9c5189cff8af1cdd9d7e8d573"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a477486a9c5189cff8af1cdd9d7e8d573">arm_compute::LSTMParams::cell_to_forget_weights</a></div><div class="ttdeci">const T * cell_to_forget_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00120">LSTMParams.h:120</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    {</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        _cell_to_forget_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a477486a9c5189cff8af1cdd9d7e8d573">cell_to_forget_weights</a>;</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        _cell_to_output_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#a934af5defc72f38841ce8955e2151473">cell_to_output_weights</a>;</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        _has_peephole_opt       = <span class="keyword">true</span>;</div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a934af5defc72f38841ce8955e2151473"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a934af5defc72f38841ce8955e2151473">arm_compute::LSTMParams::cell_to_output_weights</a></div><div class="ttdeci">const T * cell_to_output_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00145">LSTMParams.h:145</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_a477486a9c5189cff8af1cdd9d7e8d573"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#a477486a9c5189cff8af1cdd9d7e8d573">arm_compute::LSTMParams::cell_to_forget_weights</a></div><div class="ttdeci">const T * cell_to_forget_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00140">LSTMParams.h:140</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00120">LSTMParams&lt; T &gt;::cell_to_forget_weights()</a>, and <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00125">LSTMParams&lt; T &gt;::cell_to_output_weights()</a>.</p>
+<p class="reference">References <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00140">LSTMParams&lt; T &gt;::cell_to_forget_weights()</a>, and <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00145">LSTMParams&lt; T &gt;::cell_to_output_weights()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>.</p>
 
 </div>
 </div>
@@ -758,13 +955,42 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Reference to this <a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml">LSTMParams</a> object </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00078">78</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    {</div><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        _projection_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#ab1b3d5364f11bca8cacef026c8038dba">projection_weights</a>;</div><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        _projection_bias    = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#ad676992a90d193409fa6a28a001af6c8">projection_bias</a>;</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        _has_projection     = <span class="keyword">true</span>;</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_ab1b3d5364f11bca8cacef026c8038dba"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#ab1b3d5364f11bca8cacef026c8038dba">arm_compute::LSTMParams::projection_weights</a></div><div class="ttdeci">const T * projection_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00130">LSTMParams.h:130</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_ad676992a90d193409fa6a28a001af6c8"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#ad676992a90d193409fa6a28a001af6c8">arm_compute::LSTMParams::projection_bias</a></div><div class="ttdeci">const T * projection_bias() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00135">LSTMParams.h:135</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00079">79</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    {</div><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        _projection_weights = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#ab1b3d5364f11bca8cacef026c8038dba">projection_weights</a>;</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        _projection_bias    = <a class="code" href="classarm__compute_1_1_l_s_t_m_params.xhtml#ad676992a90d193409fa6a28a001af6c8">projection_bias</a>;</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        _has_projection     = <span class="keyword">true</span>;</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_ab1b3d5364f11bca8cacef026c8038dba"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#ab1b3d5364f11bca8cacef026c8038dba">arm_compute::LSTMParams::projection_weights</a></div><div class="ttdeci">const T * projection_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00150">LSTMParams.h:150</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_l_s_t_m_params_xhtml_ad676992a90d193409fa6a28a001af6c8"><div class="ttname"><a href="classarm__compute_1_1_l_s_t_m_params.xhtml#ad676992a90d193409fa6a28a001af6c8">arm_compute::LSTMParams::projection_bias</a></div><div class="ttdeci">const T * projection_bias() const</div><div class="ttdef"><b>Definition:</b> <a href="_l_s_t_m_params_8h_source.xhtml#l00155">LSTMParams.h:155</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00135">LSTMParams&lt; T &gt;::projection_bias()</a>, and <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00130">LSTMParams&lt; T &gt;::projection_weights()</a>.</p>
+<p class="reference">References <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00155">LSTMParams&lt; T &gt;::projection_bias()</a>, and <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00150">LSTMParams&lt; T &gt;::projection_weights()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00054">CLLSTMLayer::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>.</p>
+
+</div>
+</div>
+<a id="a2d615f651270885a1b996046e9902a3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d615f651270885a1b996046e9902a3c">&#9670;&nbsp;</a></span>use_layer_norm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool use_layer_norm </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_l_s_t_m_params_8h_source.xhtml#l00195">195</a> of file <a class="el" href="_l_s_t_m_params_8h_source.xhtml">LSTMParams.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;    {</div><div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;        <span class="keywordflow">return</span> _use_layer_norm;</div><div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    }</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00056">NELSTMLayer::configure()</a>, <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00056">CLLSTMLayer::configure()</a>, <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00381">NELSTMLayer::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -777,7 +1003,7 @@ class arm_compute::LSTMParams&lt; T &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml">LSTMParams</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:32 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

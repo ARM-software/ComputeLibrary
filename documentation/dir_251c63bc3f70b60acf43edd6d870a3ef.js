@@ -82,11 +82,11 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLDeconvolutionLayerUpsample.h", "_c_l_deconvolution_layer_upsample_8h.xhtml", [
       [ "CLDeconvolutionLayerUpsample", "classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml", "classarm__compute_1_1_c_l_deconvolution_layer_upsample" ]
     ] ],
-    [ "CLDepthConcatenateLayer.h", "_c_l_depth_concatenate_layer_8h.xhtml", [
-      [ "CLDepthConcatenateLayer", "classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml", "classarm__compute_1_1_c_l_depth_concatenate_layer" ]
-    ] ],
     [ "CLDepthConvertLayer.h", "_c_l_depth_convert_layer_8h.xhtml", [
       [ "CLDepthConvertLayer", "classarm__compute_1_1_c_l_depth_convert_layer.xhtml", "classarm__compute_1_1_c_l_depth_convert_layer" ]
+    ] ],
+    [ "CLDepthToSpaceLayer.h", "_c_l_depth_to_space_layer_8h.xhtml", [
+      [ "CLDepthToSpaceLayer", "classarm__compute_1_1_c_l_depth_to_space_layer.xhtml", "classarm__compute_1_1_c_l_depth_to_space_layer" ]
     ] ],
     [ "CLDepthwiseConvolutionLayer.h", "_c_l_depthwise_convolution_layer_8h.xhtml", [
       [ "CLDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3" ],
@@ -116,11 +116,17 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLArithmeticDivision", "classarm__compute_1_1_c_l_arithmetic_division.xhtml", "classarm__compute_1_1_c_l_arithmetic_division" ],
       [ "CLElementwiseMax", "classarm__compute_1_1_c_l_elementwise_max.xhtml", "classarm__compute_1_1_c_l_elementwise_max" ],
       [ "CLElementwiseMin", "classarm__compute_1_1_c_l_elementwise_min.xhtml", "classarm__compute_1_1_c_l_elementwise_min" ],
-      [ "CLElementwiseSquaredDiff", "classarm__compute_1_1_c_l_elementwise_squared_diff.xhtml", "classarm__compute_1_1_c_l_elementwise_squared_diff" ]
+      [ "CLElementwiseSquaredDiff", "classarm__compute_1_1_c_l_elementwise_squared_diff.xhtml", "classarm__compute_1_1_c_l_elementwise_squared_diff" ],
+      [ "CLElementwisePower", "classarm__compute_1_1_c_l_elementwise_power.xhtml", "classarm__compute_1_1_c_l_elementwise_power" ]
     ] ],
     [ "CLElementWiseUnaryLayer.h", "_c_l_element_wise_unary_layer_8h.xhtml", [
       [ "CLRsqrtLayer", "classarm__compute_1_1_c_l_rsqrt_layer.xhtml", "classarm__compute_1_1_c_l_rsqrt_layer" ],
-      [ "CLExpLayer", "classarm__compute_1_1_c_l_exp_layer.xhtml", "classarm__compute_1_1_c_l_exp_layer" ]
+      [ "CLExpLayer", "classarm__compute_1_1_c_l_exp_layer.xhtml", "classarm__compute_1_1_c_l_exp_layer" ],
+      [ "CLNegLayer", "classarm__compute_1_1_c_l_neg_layer.xhtml", "classarm__compute_1_1_c_l_neg_layer" ],
+      [ "CLSinLayer", "classarm__compute_1_1_c_l_sin_layer.xhtml", "classarm__compute_1_1_c_l_sin_layer" ],
+      [ "CLLogLayer", "classarm__compute_1_1_c_l_log_layer.xhtml", "classarm__compute_1_1_c_l_log_layer" ],
+      [ "CLAbsLayer", "classarm__compute_1_1_c_l_abs_layer.xhtml", "classarm__compute_1_1_c_l_abs_layer" ],
+      [ "CLRoundLayer", "classarm__compute_1_1_c_l_round_layer.xhtml", "classarm__compute_1_1_c_l_round_layer" ]
     ] ],
     [ "CLEqualizeHistogram.h", "_c_l_equalize_histogram_8h.xhtml", [
       [ "CLEqualizeHistogram", "classarm__compute_1_1_c_l_equalize_histogram.xhtml", "classarm__compute_1_1_c_l_equalize_histogram" ]
@@ -180,19 +186,14 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLGEMMDeconvolutionLayer.h", "_c_l_g_e_m_m_deconvolution_layer_8h.xhtml", [
       [ "CLGEMMDeconvolutionLayer", "classarm__compute_1_1_c_l_g_e_m_m_deconvolution_layer.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_deconvolution_layer" ]
     ] ],
-    [ "CLGEMMInterleave4x4.h", "_c_l_g_e_m_m_interleave4x4_8h.xhtml", [
-      [ "CLGEMMInterleave4x4", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4" ]
-    ] ],
     [ "CLGEMMLowpMatrixMultiplyCore.h", "_c_l_g_e_m_m_lowp_matrix_multiply_core_8h.xhtml", [
       [ "CLGEMMLowpMatrixMultiplyCore", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_core.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_core" ]
     ] ],
     [ "CLGEMMLowpOutputStage.h", "_c_l_g_e_m_m_lowp_output_stage_8h.xhtml", [
       [ "CLGEMMLowpQuantizeDownInt32ToUint8Scale", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale" ],
       [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point" ],
-      [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float" ]
-    ] ],
-    [ "CLGEMMTranspose1xW.h", "_c_l_g_e_m_m_transpose1x_w_8h.xhtml", [
-      [ "CLGEMMTranspose1xW", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w" ]
+      [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float" ],
+      [ "CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point" ]
     ] ],
     [ "CLGenerateProposalsLayer.h", "_c_l_generate_proposals_layer_8h.xhtml", [
       [ "CLGenerateProposalsLayer", "classarm__compute_1_1_c_l_generate_proposals_layer.xhtml", "classarm__compute_1_1_c_l_generate_proposals_layer" ]
@@ -233,11 +234,17 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLLSTMLayer.h", "_c_l_l_s_t_m_layer_8h.xhtml", [
       [ "CLLSTMLayer", "classarm__compute_1_1_c_l_l_s_t_m_layer.xhtml", "classarm__compute_1_1_c_l_l_s_t_m_layer" ]
     ] ],
+    [ "CLLSTMLayerQuantized.h", "_c_l_l_s_t_m_layer_quantized_8h.xhtml", [
+      [ "CLLSTMLayerQuantized", "classarm__compute_1_1_c_l_l_s_t_m_layer_quantized.xhtml", "classarm__compute_1_1_c_l_l_s_t_m_layer_quantized" ]
+    ] ],
     [ "CLMagnitude.h", "_c_l_magnitude_8h.xhtml", [
       [ "CLMagnitude", "classarm__compute_1_1_c_l_magnitude.xhtml", "classarm__compute_1_1_c_l_magnitude" ]
     ] ],
     [ "CLMeanStdDev.h", "_c_l_mean_std_dev_8h.xhtml", [
       [ "CLMeanStdDev", "classarm__compute_1_1_c_l_mean_std_dev.xhtml", "classarm__compute_1_1_c_l_mean_std_dev" ]
+    ] ],
+    [ "CLMeanStdDevNormalizationLayer.h", "_c_l_mean_std_dev_normalization_layer_8h.xhtml", [
+      [ "CLMeanStdDevNormalizationLayer", "classarm__compute_1_1_c_l_mean_std_dev_normalization_layer.xhtml", "classarm__compute_1_1_c_l_mean_std_dev_normalization_layer" ]
     ] ],
     [ "CLMedian3x3.h", "_c_l_median3x3_8h.xhtml", [
       [ "CLMedian3x3", "classarm__compute_1_1_c_l_median3x3.xhtml", "classarm__compute_1_1_c_l_median3x3" ]
@@ -273,6 +280,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLPoolingLayer.h", "_c_l_pooling_layer_8h.xhtml", [
       [ "CLPoolingLayer", "classarm__compute_1_1_c_l_pooling_layer.xhtml", "classarm__compute_1_1_c_l_pooling_layer" ]
+    ] ],
+    [ "CLPReluLayer.h", "_c_l_p_relu_layer_8h.xhtml", [
+      [ "CLPReluLayer", "classarm__compute_1_1_c_l_p_relu_layer.xhtml", "classarm__compute_1_1_c_l_p_relu_layer" ]
     ] ],
     [ "CLPriorBoxLayer.h", "_c_l_prior_box_layer_8h.xhtml", [
       [ "CLPriorBoxLayer", "classarm__compute_1_1_c_l_prior_box_layer.xhtml", "classarm__compute_1_1_c_l_prior_box_layer" ]
@@ -337,6 +347,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLSpaceToBatchLayer.h", "_c_l_space_to_batch_layer_8h.xhtml", [
       [ "CLSpaceToBatchLayer", "classarm__compute_1_1_c_l_space_to_batch_layer.xhtml", "classarm__compute_1_1_c_l_space_to_batch_layer" ]
     ] ],
+    [ "CLSpaceToDepthLayer.h", "_c_l_space_to_depth_layer_8h.xhtml", [
+      [ "CLSpaceToDepthLayer", "classarm__compute_1_1_c_l_space_to_depth_layer.xhtml", "classarm__compute_1_1_c_l_space_to_depth_layer" ]
+    ] ],
     [ "CLSplit.h", "_c_l_split_8h.xhtml", [
       [ "CLSplit", "classarm__compute_1_1_c_l_split.xhtml", "classarm__compute_1_1_c_l_split" ]
     ] ],
@@ -369,9 +382,6 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLWarpPerspective.h", "_c_l_warp_perspective_8h.xhtml", [
       [ "CLWarpPerspective", "classarm__compute_1_1_c_l_warp_perspective.xhtml", "classarm__compute_1_1_c_l_warp_perspective" ]
-    ] ],
-    [ "CLWidthConcatenateLayer.h", "_c_l_width_concatenate_layer_8h.xhtml", [
-      [ "CLWidthConcatenateLayer", "classarm__compute_1_1_c_l_width_concatenate_layer.xhtml", "classarm__compute_1_1_c_l_width_concatenate_layer" ]
     ] ],
     [ "CLWinogradConvolutionLayer.h", "_c_l_winograd_convolution_layer_8h.xhtml", [
       [ "CLWinogradConvolutionLayer", "classarm__compute_1_1_c_l_winograd_convolution_layer.xhtml", "classarm__compute_1_1_c_l_winograd_convolution_layer" ]

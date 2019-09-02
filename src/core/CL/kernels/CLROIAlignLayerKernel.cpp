@@ -72,8 +72,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     output->set_data_layout(input->data_layout());
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 1;
-    Window             win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+    Window                 win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal input_access(input, input->valid_region().start(0), num_elems_processed_per_iteration);

@@ -7,6 +7,8 @@ var _n_e_o_n_2_space_to_batch_layer_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_space_to_batch_layer_8cpp.xhtml#a57082b95862b91b40c133cf973c47938", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_space_to_batch_layer_8cpp.xhtml#ab03997043c014a647d7d15a4f5a1afdc", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_space_to_batch_layer_8cpp.xhtml#aab5524a31f22d59089d4387bb2d0c3c1", null ],
-    [ "TEST_SUITE_END", "_n_e_o_n_2_space_to_batch_layer_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_space_to_batch_layer_8cpp.xhtml#a4ffde1c509ae4086d997a7b37acddcbe", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_space_to_batch_layer_8cpp.xhtml#a7beddb15956d68530c75cd81f9cf8995", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_space_to_batch_layer_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "NESpaceToBatchLayerFixture< half >", "_n_e_o_n_2_space_to_batch_layer_8cpp.xhtml#ad4d4a60619a10fd4fe9657ad30b0a8a6", null ]
 ];

@@ -34,6 +34,14 @@ const cl::Buffer CLTensorAllocator::_empty_buffer = cl::Buffer();
 
 namespace
 {
+/** Helper function used to allocate the backing memory of a tensor
+ *
+ * @param[in] context   OpenCL context to use
+ * @param[in] size      Size of the allocation
+ * @param[in] alignment Alignment of the allocation
+ *
+ * @return A wrapped memory region
+ */
 std::unique_ptr<ICLMemoryRegion> allocate_region(const cl::Context &context, size_t size, cl_uint alignment)
 {
     // Try fine-grain SVM
@@ -54,11 +62,48 @@ std::unique_ptr<ICLMemoryRegion> allocate_region(const cl::Context &context, siz
     }
     return region;
 }
+/** Clears quantization arrays
+ *
+ * @param[in, out] scale  Quantization scale array
+ * @param[in, out] offset Quantization offset array
+ */
+void clear_quantization_arrays(CLFloatArray &scale, CLInt32Array &offset)
+{
+    // Clear arrays
+    scale  = CLFloatArray();
+    offset = CLInt32Array();
+}
+/** Helper function used to create quantization data arrays
+ *
+ * @param[in, out] scale    Quantization scale array
+ * @param[in, out] offset   Quantization offset array
+ * @param[in]      qinfo    Quantization info
+ * @param[in]      pad_size Pad size to use in case array needs to be padded for computation purposes
+ *
+ * @return A pair (scale, offset) containing the respective allocated and filled arrays
+ */
+void populate_quantization_info(CLFloatArray &scale, CLInt32Array &offset, const QuantizationInfo &qinfo, size_t pad_size)
+{
+    clear_quantization_arrays(scale, offset);
+
+    // Create scale array
+    const std::vector<float> &qscale       = qinfo.scale();
+    const size_t              num_elements = qscale.size();
+    const size_t              element_size = sizeof(std::remove_reference<decltype(qscale)>::type::value_type);
+    scale                                  = CLFloatArray(num_elements + pad_size);
+    scale.resize(num_elements);
+    CLScheduler::get().queue().enqueueWriteBuffer(scale.cl_buffer(), CL_TRUE, 0, num_elements * element_size, qinfo.scale().data());
+}
 } // namespace
 
 CLTensorAllocator::CLTensorAllocator(CLTensor *owner)
-    : _associated_memory_group(nullptr), _memory(), _mapping(nullptr), _owner(owner)
+    : _associated_memory_group(nullptr), _memory(), _mapping(nullptr), _owner(owner), _scale(), _offset()
 {
+}
+
+CLQuantization CLTensorAllocator::quantization() const
+{
+    return { &_scale, &_offset };
 }
 
 uint8_t *CLTensorAllocator::data()
@@ -73,6 +118,7 @@ const cl::Buffer &CLTensorAllocator::cl_data() const
 
 void CLTensorAllocator::allocate()
 {
+    // Allocate tensor backing memory
     if(_associated_memory_group == nullptr)
     {
         if(_memory.region() != nullptr && _memory.cl_region()->cl_data().get() != nullptr)
@@ -91,6 +137,15 @@ void CLTensorAllocator::allocate()
     {
         _associated_memory_group->finalize_memory(_owner, _memory, info().total_size());
     }
+
+    // Allocate and fill the quantization parameter arrays
+    if(info().data_type() == DataType::QSYMM8_PER_CHANNEL)
+    {
+        const size_t pad_size = 0;
+        populate_quantization_info(_scale, _offset, info().quantization_info(), pad_size);
+    }
+
+    // Lock allocator
     info().set_is_resizable(false);
 }
 
@@ -98,6 +153,7 @@ void CLTensorAllocator::free()
 {
     _mapping = nullptr;
     _memory.set_region(nullptr);
+    clear_quantization_arrays(_scale, _offset);
     info().set_is_resizable(true);
 }
 

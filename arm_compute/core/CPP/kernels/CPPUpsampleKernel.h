@@ -55,13 +55,11 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input              The input tensor to upsample. Data types supported: F32/QASYMM8
-     * @param[out] output             The output tensor. Data types supported: Same as @p input
-     * @param[in]  info               Padding info.
-     * @param[in]  inner_border_right The number of zeros added to right edge of the input.
-     * @param[in]  inner_border_top   The number of zeros added to top edge of the input.
+     * @param[in]  input  The input tensor to upsample. Data types supported: F32/F16/QASYMM8
+     * @param[out] output The output tensor. Data types supported: Same as @p input
+     * @param[in]  info   Padding info.
      */
-    void configure(const ITensor *input, ITensor *output, const PadStrideInfo &info, unsigned int inner_border_right, unsigned int inner_border_top);
+    void configure(const ITensor *input, ITensor *output, const PadStrideInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -71,7 +69,6 @@ private:
     const ITensor *_input;
     ITensor       *_output;
     PadStrideInfo  _info;
-    std::pair<unsigned int, unsigned int> _inner_border;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CPPUPSAMPLEKERNEL_H__ */

@@ -122,7 +122,8 @@ private:
     int32_t                                       _a_offset;
     int32_t                                       _b_offset;
     bool                                          _run_vector_matrix_multiplication;
-    bool                                          _dot_product_path;
+    bool                                          _assembly_path;
+    bool                                          _fused_assembly_path;
     bool                                          _reshape_b_only_on_first_run;
     bool                                          _is_prepared;
     bool                                          _fuse_output_stage;

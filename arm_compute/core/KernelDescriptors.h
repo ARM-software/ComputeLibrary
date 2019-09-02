@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__
 #define __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__
 
+#include "arm_compute/core/Types.h"
+
 namespace arm_compute
 {
 /** Descriptor for FFT scale kernels */
@@ -47,6 +49,18 @@ struct FFTRadixStageKernelInfo
     unsigned int radix{ 0 };              /**< Radix to use. */
     unsigned int Nx{ 0 };                 /**< Nx coefficient. */
     bool         is_first_stage{ false }; /**< Flags if the FFT kernels is the first stage of a decomposed FFT. */
+};
+
+/** Descriptor used by the GEMM kernels */
+struct GEMMKernelInfo
+{
+    unsigned int        m{ 0 };                           /**< Number of LHS rows*/
+    unsigned int        n{ 0 };                           /**< Number of RHS columns*/
+    unsigned int        k{ 0 };                           /**< Number of LHS columns or RHS rows */
+    unsigned int        depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
+    bool                reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
+    bool                broadcast_bias{ false };          /**< Flag used to broadcase the bias addition */
+    ActivationLayerInfo activation_info{};                /**< Activation function to perform after the matrix multiplication */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__ */

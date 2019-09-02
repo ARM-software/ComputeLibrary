@@ -56,12 +56,12 @@ public:
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in]  input1          An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
-     * @param[in]  input2          An input tensor. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
-     * @param[out] output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
+     * @param[in]  input1          An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32
+     * @param[in]  input2          An input tensor. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     * @param[out] output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
      * @param[in]  scale           Scale to apply after multiplication.
      *                             Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
-     * @param[in]  overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8.
+     * @param[in]  overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8 or QSYMM16.
      * @param[in]  rounding_policy Rounding policy.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
@@ -70,12 +70,12 @@ public:
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
      *
-     * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/S16/F16/F32
-     * @param[in] input2          An input tensor info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
-     * @param[in] output          Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
+     * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/QSYMM16/S16/F16/F32
+     * @param[in] input2          An input tensor info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     * @param[in] output          Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
      * @param[in] scale           Scale to apply after multiplication.
      *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
-     * @param[in] overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8.
+     * @param[in] overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8 or QSYMM16.
      * @param[in] rounding_policy Rounding policy.
      *
      * @return a status
@@ -114,12 +114,12 @@ private:
      * @param[in]  output_qua_info Quantization Info of tensor output.
      *
      */
-    using MulFunctionQASYMM8 = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
-                                    const QuantizationInfo &input1_qua_info, const QuantizationInfo &input2_qua_info, const QuantizationInfo &output_qua_info);
+    using MulFunctionQuantized = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
+                                      const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info, const UniformQuantizationInfo &output_qua_info);
 
-    MulFunctionFloat   *_func_float;
-    MulFunctionInt     *_func_int;
-    MulFunctionQASYMM8 *_func_qasymm8;
+    MulFunctionFloat     *_func_float;
+    MulFunctionInt       *_func_int;
+    MulFunctionQuantized *_func_quantized;
 
 private:
     const ITensor *_input1;
@@ -127,6 +127,7 @@ private:
     ITensor       *_output;
     float          _scale;
     int            _scale_exponent;
+    bool           _run_optimized_qasymm8;
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */

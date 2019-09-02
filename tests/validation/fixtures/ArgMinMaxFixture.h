@@ -56,17 +56,31 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(!is_data_type_quantized(tensor.data_type()))
+        switch(tensor.data_type())
         {
-            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-            library->fill(tensor, distribution, 0);
-        }
-        else
-        {
-            std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-            std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+            case DataType::F32:
+            case DataType::F16:
+            {
+                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                library->fill(tensor, distribution, 0);
+                break;
+            }
+            case DataType::S32:
+            {
+                std::uniform_int_distribution<int32_t> distribution(-100, 100);
+                library->fill(tensor, distribution, 0);
+                break;
+            }
+            case DataType::QASYMM8:
+            {
+                std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
 
-            library->fill(tensor, distribution, 0);
+                library->fill(tensor, distribution, 0);
+                break;
+            }
+            default:
+                ARM_COMPUTE_ERROR("DataType for Elementwise Negation Not implemented");
         }
     }
 

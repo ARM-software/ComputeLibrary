@@ -1,15 +1,18 @@
 var searchData=
 [
-  ['fixture_5fdata_5fsetup',['FIXTURE_DATA_SETUP',['../tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961',1,'Macros.h']]],
-  ['fixture_5fdata_5ftest_5fcase',['FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a42699a26fbdddf91da4aa58a610bb8a8',1,'Macros.h']]],
-  ['fixture_5fdata_5ftest_5fcase_5fimpl',['FIXTURE_DATA_TEST_CASE_IMPL',['../tests_2framework_2_macros_8h.xhtml#a9c14b58feb41d3702ce3ed63822ac2a8',1,'Macros.h']]],
-  ['fixture_5frun',['FIXTURE_RUN',['../tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde',1,'Macros.h']]],
-  ['fixture_5fsetup',['FIXTURE_SETUP',['../tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e',1,'Macros.h']]],
-  ['fixture_5fsync',['FIXTURE_SYNC',['../tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b',1,'Macros.h']]],
-  ['fixture_5fteardown',['FIXTURE_TEARDOWN',['../tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b',1,'Macros.h']]],
-  ['fixture_5ftest_5fcase',['FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a926fbae618fcbb44111e683b8a1e2f99',1,'Macros.h']]],
-  ['fixture_5ftest_5fcase_5fimpl',['FIXTURE_TEST_CASE_IMPL',['../tests_2framework_2_macros_8h.xhtml#a2ff966da00c382c25e5b064b019d870c',1,'Macros.h']]],
-  ['float1',['float1',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a08069d303d2082bb5db214244a634c0c',1,'helpers.h']]],
-  ['flt_5fscale',['FLT_SCALE',['../optical__flow__pyramid__lk_8cl.xhtml#a1852457538f524c42f96b66882bd9b35',1,'optical_flow_pyramid_lk.cl']]],
-  ['forward_5fdeclare_5fvget_5flane_5ffor_5ftype',['FORWARD_DECLARE_VGET_LANE_FOR_TYPE',['../_n_e_softmax_layer_kernel_8cpp.xhtml#a343c67edf168094b802af154b23df92a',1,'NESoftmaxLayerKernel.cpp']]]
+  ['edge',['EDGE',['../canny_8cl.xhtml#ac243bfa96aa2c28014159ff098bd2324',1,'canny.cl']]],
+  ['egl_5fentry',['EGL_ENTRY',['../_open_g_l_e_s_8cpp.xhtml#aa3518d2943000be78d58e9d433cc4eaa',1,'EGL_ENTRY():&#160;OpenGLES.cpp'],['../_open_g_l_e_s_8cpp.xhtml#aa3518d2943000be78d58e9d433cc4eaa',1,'EGL_ENTRY():&#160;OpenGLES.cpp'],['../_open_g_l_e_s_8cpp.xhtml#aa3518d2943000be78d58e9d433cc4eaa',1,'EGL_ENTRY():&#160;OpenGLES.cpp']]],
+  ['eigenvalue_5fthr',['EIGENVALUE_THR',['../optical__flow__pyramid__lk_8cl.xhtml#a3955a0fbedb5b3eae9a38801fb01bac5',1,'optical_flow_pyramid_lk.cl']]],
+  ['eps_5fgrid',['EPS_GRID',['../roi__align__layer_8cl.xhtml#adb4f942cbd5a43867c692b026c975faa',1,'roi_align_layer.cl']]],
+  ['equal',['EQUAL',['../comparisons_8cl.xhtml#a11e1e42f5f3d4770afe593a344b8fc69',1,'comparisons.cl']]],
+  ['exp_5fbarrel_5fshifter',['EXP_BARREL_SHIFTER',['../helpers__asymm_8h.xhtml#ace9ecff421cf885ad2c2d72d87c492cb',1,'helpers_asymm.h']]],
+  ['exp_5fbarrel_5fshifter_5fimpl',['EXP_BARREL_SHIFTER_IMPL',['../helpers__asymm_8h.xhtml#aa12ca21cb9a54d2e4c26d57303fe44a7',1,'helpers_asymm.h']]],
+  ['exp_5fop',['EXP_OP',['../softmax__layer_8cl.xhtml#a93cf800667317d96574477b9f0a75234',1,'softmax_layer.cl']]],
+  ['expand',['EXPAND',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ae4b532a93c757194ec73b6790a3e6b1f',1,'helpers.h']]],
+  ['expected_5ffailure_5fdata_5ftest_5fcase',['EXPECTED_FAILURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a5948998e4f7badeca767900ba91334ac',1,'Macros.h']]],
+  ['expected_5ffailure_5ffixture_5fdata_5ftest_5fcase',['EXPECTED_FAILURE_FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a9cb601d80bbd293aa96800cfdd983404',1,'Macros.h']]],
+  ['expected_5ffailure_5ffixture_5ftest_5fcase',['EXPECTED_FAILURE_FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a1410f2afeafb8e6afe4c3b6208d8fec7',1,'Macros.h']]],
+  ['expected_5ffailure_5fregister_5ffixture_5fdata_5ftest_5fcase',['EXPECTED_FAILURE_REGISTER_FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#ab6166845bcdb8aab8d7b349a8b442ccf',1,'Macros.h']]],
+  ['expected_5ffailure_5fregister_5ffixture_5ftest_5fcase',['EXPECTED_FAILURE_REGISTER_FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a8b3c06c9e7676202a34f711b1a7625fc',1,'Macros.h']]],
+  ['expected_5ffailure_5ftest_5fcase',['EXPECTED_FAILURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#ab2f6de5ffb4b88069f9c0a148b364e25',1,'Macros.h']]]
 ];

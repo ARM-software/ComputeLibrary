@@ -28,25 +28,31 @@
 
 namespace arm_compute
 {
+namespace
+{
+constexpr int max_input_tensor_dim = 3;
+} // namespace
+
 NEL2NormalizeLayer::NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _reduce_func(), _normalize_kernel(), _sumsq()
 {
 }
 
-void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, unsigned int axis, float epsilon)
+void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, int axis, float epsilon)
 {
     // Manage intermediate buffers
     _memory_group.manage(&_sumsq);
 
     // Configure Kernels
-    _reduce_func.configure(input, &_sumsq, axis, ReductionOperation::SUM_SQUARE);
+    const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
+    _reduce_func.configure(input, &_sumsq, actual_axis, ReductionOperation::SUM_SQUARE);
     _normalize_kernel.configure(input, &_sumsq, output, axis, epsilon);
 
     // Allocate intermediate tensors
     _sumsq.allocator()->allocate();
 }
 
-Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, float epsilon)
+Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int axis, float epsilon)
 {
     TensorShape shape(input->tensor_shape());
 
@@ -55,10 +61,11 @@ Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo 
     sum_sq.set_data_type(input->data_type());
     sum_sq.set_tensor_shape(shape);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEReductionOperation::validate(input, &sum_sq, axis, ReductionOperation::SUM_SQUARE));
+    const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEReductionOperation::validate(input, &sum_sq, actual_axis, ReductionOperation::SUM_SQUARE));
 
     // Reduce shape on axis
-    shape.set(axis, 1);
+    shape.set(actual_axis, 1);
     sum_sq.set_tensor_shape(shape);
 
     ARM_COMPUTE_RETURN_ON_ERROR(NEL2NormalizeLayerKernel::validate(input, &sum_sq, output, axis, epsilon));

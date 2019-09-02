@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -105,9 +105,7 @@ $(document).ready(function(){initNavTree('validation_2_c_l_2_g_e_m_m_8cpp.xhtml'
 <div class="title">GEMM.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="_c_l_g_e_m_m_interleave4x4_kernel_8h_source.xhtml">arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_c_l_g_e_m_m_transpose1x_w_kernel_8h_source.xhtml">arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_tensor_8h_source.xhtml">arm_compute/runtime/CL/CLTensor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_tensor_allocator_8h_source.xhtml">arm_compute/runtime/CL/CLTensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_g_e_m_m_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMM.h</a>&quot;</code><br />
@@ -122,8 +120,6 @@ $(document).ready(function(){initNavTree('validation_2_c_l_2_g_e_m_m_8cpp.xhtml'
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_validation_8h_source.xhtml">tests/validation/Validation.h</a>&quot;</code><br />
 <code>#include &quot;tests/validation/fixtures/GEMMFixture.h&quot;</code><br />
-<code>#include &quot;tests/validation/fixtures/GEMMInterleave4x4Fixture.h&quot;</code><br />
-<code>#include &quot;tests/validation/fixtures/GEMMTranspose1xWFixture.h&quot;</code><br />
 </div>
 <p><a href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -139,27 +135,20 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a2ba36b2bb455fe3e2c73534ed8b5bee7"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2ba36b2bb455fe3e2c73534ed8b5bee7">CLGEMMInterleave4x4</a> = CLSynthetizeFunctionWithZeroConstantBorder&lt; CLGEMMInterleave4x4Kernel, 4 &gt;</td></tr>
-<tr class="separator:a2ba36b2bb455fe3e2c73534ed8b5bee7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afdc32f67ae6cdc84f731b3715c8589c6"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#afdc32f67ae6cdc84f731b3715c8589c6">CLGEMMInterleave4x4Fixture</a> = GEMMInterleave4x4ValidationFixture&lt; CLTensor, CLAccessor, CLGEMMInterleave4x4, float &gt;</td></tr>
-<tr class="separator:afdc32f67ae6cdc84f731b3715c8589c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02a82a5e8cc3d3a54da7fd340f9bc81b"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a02a82a5e8cc3d3a54da7fd340f9bc81b"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a02a82a5e8cc3d3a54da7fd340f9bc81b">CLGEMMFixture</a> = GEMMValidationFixture&lt; CLTensor, CLAccessor, CLGEMM, T &gt;</td></tr>
+<tr class="separator:a02a82a5e8cc3d3a54da7fd340f9bc81b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af493d098e0b392ecf7fd8eab4fa97342"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:af493d098e0b392ecf7fd8eab4fa97342"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af493d098e0b392ecf7fd8eab4fa97342">CLGEMMOutput3DFixture</a> = GEMMValidationFixture&lt; CLTensor, CLAccessor, CLGEMM, T, false, false, true &gt;</td></tr>
 <tr class="separator:af493d098e0b392ecf7fd8eab4fa97342"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e33e708dcd8f877cd5b8a9e9bb68017"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a8e33e708dcd8f877cd5b8a9e9bb68017"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8e33e708dcd8f877cd5b8a9e9bb68017">CLGEMMInputOutput3DFixture</a> = GEMMValidationFixture&lt; CLTensor, CLAccessor, CLGEMM, T, false, true, true &gt;</td></tr>
 <tr class="separator:a8e33e708dcd8f877cd5b8a9e9bb68017"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c12b8c19f4e7f45756d4a4dcb4c3156"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8c12b8c19f4e7f45756d4a4dcb4c3156">CLGEMMTranspose1xW</a> = CLSynthetizeFunctionWithZeroConstantBorder&lt; CLGEMMTranspose1xWKernel, 4 &gt;</td></tr>
-<tr class="separator:a8c12b8c19f4e7f45756d4a4dcb4c3156"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af378f9e131ac6da2262ac5cc56a6d796"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af378f9e131ac6da2262ac5cc56a6d796">CLGEMMTranspose1xWFixture</a> = GEMMTranspose1xWValidationFixture&lt; CLTensor, CLAccessor, CLGEMMTranspose1xW, float &gt;</td></tr>
-<tr class="separator:af378f9e131ac6da2262ac5cc56a6d796"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae">TEST_SUITE_END</a> () <a class="el" href="_window_iterator_8cpp.xhtml#a73168adf798e300ad06a0341c1c9bd59">DATA_TEST_CASE</a>(Configuration = ActivationValidationQuantizedFixture&lt;CLTensor, CLAccessor, CLActivationLayer, T&gt;</td></tr>
-<tr class="separator:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab51aa22b4ba65c2b52a3cdd169462174"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab51aa22b4ba65c2b52a3cdd169462174">combine</a> (combine(datasets::SmallGEMMDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true, false })), framework::dataset::make(&quot;DataType&quot;, DataType::F16)))</td></tr>
-<tr class="separator:ab51aa22b4ba65c2b52a3cdd169462174"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1a243570061fb39c31dc59168c22372"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad1a243570061fb39c31dc59168c22372">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLGEMMFixture&lt; half &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true, false })), framework::dataset::make(&quot;DataType&quot;, DataType::F16)))</td></tr>
+<tr class="separator:ad1a243570061fb39c31dc59168c22372"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af112106bb5915291340b1df7aa829efa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af112106bb5915291340b1df7aa829efa">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLGEMMFixture&lt; half &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true })), framework::dataset::make(&quot;DataType&quot;, DataType::F16)))</td></tr>
 <tr class="separator:af112106bb5915291340b1df7aa829efa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af22bab8701f16b33b342f7a8cbaad975"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af22bab8701f16b33b342f7a8cbaad975">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLGEMMFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true, false })), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
@@ -170,6 +159,9 @@ Functions</h2></td></tr>
 <tr class="separator:a5c0210fb352b7d0b459b8fa06cd0f72d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74b69b379300aa8228e74445e18faba4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a74b69b379300aa8228e74445e18faba4">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLGEMMInputOutput3DFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMInputOutput3DDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true, false })), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
 <tr class="separator:a74b69b379300aa8228e74445e18faba4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2ed31007ae463a3cec24a581f3651f6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ed31007ae463a3cec24a581f3651f6">TEST_SUITE_END</a> () const auto Int16QuantizedActivationFunctionsDataset = ActivationValidationQuantizedFixture&lt;CLTensor, CLAccessor, CLActivationLayer, T&gt;</td></tr>
+<tr class="memdesc:ac2ed31007ae463a3cec24a581f3651f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input data sets.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ed31007ae463a3cec24a581f3651f6">More...</a><br /></td></tr>
+<tr class="separator:ac2ed31007ae463a3cec24a581f3651f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24dc581f43efae1164a8d0f26ba91479"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a24dc581f43efae1164a8d0f26ba91479">combine</a> (combine(datasets::SmallGEMMInputOutput3DDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true, false })), framework::dataset::make(&quot;DataType&quot;, DataType::F16)))</td></tr>
 <tr class="separator:a24dc581f43efae1164a8d0f26ba91479"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74a9c45574fb389cce1e0c6ed54969ed"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a74a9c45574fb389cce1e0c6ed54969ed">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLGEMMInputOutput3DFixture&lt; half &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMInputOutput3DDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true, false })), framework::dataset::make(&quot;DataType&quot;, DataType::F16)))</td></tr>
@@ -187,8 +179,6 @@ Functions</h2></td></tr>
 Variables</h2></td></tr>
 <tr class="memitem:a21c746108f9b5d95496012a42de374cd"><td class="memItemLeft" align="right" valign="top">const auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a21c746108f9b5d95496012a42de374cd">data_transpose</a> = framework::dataset::make(&quot;M&quot;, 8, 14) * framework::dataset::make(&quot;N&quot;, 7, 14)</td></tr>
 <tr class="separator:a21c746108f9b5d95496012a42de374cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ab157e439f3926f37c01f323ea8715e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7ab157e439f3926f37c01f323ea8715e">CLGEMMFixture&lt; half &gt;</a></td></tr>
-<tr class="separator:a7ab157e439f3926f37c01f323ea8715e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af37f99d9d7c03d65a5d57545b30f254e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af37f99d9d7c03d65a5d57545b30f254e">CLGEMMInputOutput3DFixture&lt; half &gt;</a></td></tr>
 <tr class="separator:af37f99d9d7c03d65a5d57545b30f254e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f88e4be563eecf18673c5a3d2022983"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f88e4be563eecf18673c5a3d2022983">CLGEMMOutput3DFixture&lt; float &gt;</a></td></tr>
@@ -202,7 +192,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp.xhtml">GEMM.cpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

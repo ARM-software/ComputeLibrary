@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,12 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+namespace
+{
+constexpr unsigned int num_elems_processed_per_iteration = 16;
+} // namespace
 
 void CLAccumulateKernel::configure(const ICLTensor *input, ICLTensor *accum)
 {
@@ -42,7 +47,6 @@ void CLAccumulateKernel::configure(const ICLTensor *input, ICLTensor *accum)
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("accumulate"));
 
     // Make sure _kernel is initialized before calling the parent's configure
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
     ICLSimple2DKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
@@ -60,7 +64,6 @@ void CLAccumulateWeightedKernel::configure(const ICLTensor *input, float alpha, 
     _kernel.setArg(idx++, alpha);
 
     // Configure kernel window
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
     ICLSimple2DKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
 
@@ -78,6 +81,6 @@ void CLAccumulateSquaredKernel::configure(const ICLTensor *input, uint32_t shift
     _kernel.setArg(idx++, shift);
 
     // Configure kernel window
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
     ICLSimple2DKernel::configure(input, accum, num_elems_processed_per_iteration);
 }
+} // namespace arm_compute

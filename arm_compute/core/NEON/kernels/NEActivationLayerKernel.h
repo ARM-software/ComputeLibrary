@@ -25,7 +25,6 @@
 #define __ARM_COMPUTE_NEACTIVATIONLAYERKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/QAsymm8.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -59,7 +58,7 @@ public:
      * @note If the output tensor is a nullptr, the activation function will be performed in-place
      *
      * @param[in, out] input           Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
-     *                                 of the activation function. Data types supported: QASYMM8/F16/F32.
+     *                                 of the activation function. Data types supported: QASYMM8/QSYMM16/F16/F32.
      * @param[out]     output          Destination tensor. Data type supported: same as @p input
      * @param[in]      activation_info Activation layer information.
      */
@@ -67,7 +66,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEActivationLayerKernel
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result
-     *                     of the activation function. Data types supported: QASYMM8/F16/F32.
+     *                     of the activation function. Data types supported: QASYMM8/QSYMM16/F16/F32.
      * @param[in] output   Destination tensor info. Data type supported: same as @p input
      * @param[in] act_info Activation layer information.
      *
@@ -98,6 +97,12 @@ private:
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
     typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type activation(const Window &window);
+    /** Function to apply an activation function on a tensor.
+     *
+     * @param[in] window Region on which to execute the kernel
+     */
+    template <ActivationLayerInfo::ActivationFunction F, typename T>
+    typename std::enable_if<std::is_same<T, qsymm16_t>::value, void>::type activation(const Window &window);
 
 private:
     ITensor                      *_input;

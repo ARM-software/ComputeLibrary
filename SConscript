@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v19.05"
-SONAME_VERSION="15.0.0"
+VERSION = "v19.08"
+SONAME_VERSION="16.0.0"
 
 Import('env')
 Import('vars')
@@ -164,6 +164,7 @@ core_files += Glob('src/core/CPP/kernels/*.cpp')
 core_files += Glob('src/core/utils/helpers/*.cpp')
 core_files += Glob('src/core/utils/io/*.cpp')
 core_files += Glob('src/core/utils/quantization/*.cpp')
+core_files += Glob('src/core/utils/misc/*.cpp')
 if env["logging"]:
     core_files += Glob('src/core/utils/logging/*.cpp')
 
@@ -187,6 +188,7 @@ if env['opencl']:
     core_files += Glob('src/core/CL/*.cpp')
     core_files += Glob('src/core/CL/kernels/*.cpp')
     core_files += Glob('src/core/CL/gemm/*.cpp')
+    core_files += Glob('src/core/CL/gemm/native/*.cpp')
     core_files += Glob('src/core/CL/gemm/reshaped/*.cpp')
     core_files += Glob('src/core/CL/gemm/reshaped_only_rhs/*.cpp')
 
@@ -204,10 +206,13 @@ if env['neon']:
 
     core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
 
-    # build winograd sources for either v7a / v8a
+    # build winograd/depthwise sources for either v7a / v8a
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
     core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
-    arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/convolution/winograd/","arm_compute/core/NEON/kernels/convolution/common/" , "arm_compute/core/NEON/kernels/assembly/"])
+    arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/convolution/common/",
+                                      "arm_compute/core/NEON/kernels/convolution/winograd/",
+                                      "arm_compute/core/NEON/kernels/convolution/depthwise/",
+                                      "arm_compute/core/NEON/kernels/assembly/"])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
 

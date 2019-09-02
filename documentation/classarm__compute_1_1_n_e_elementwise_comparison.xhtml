@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -147,7 +147,7 @@ Static Public Member Functions</h2></td></tr>
 <dd>
 The function performs a comparison operation between two tensors. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operations_8h_source.xhtml#l00143">143</a> of file <a class="el" href="_n_e_elementwise_operations_8h_source.xhtml">NEElementwiseOperations.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operations_8h_source.xhtml#l00170">170</a> of file <a class="el" href="_n_e_elementwise_operations_8h_source.xhtml">NEElementwiseOperations.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="ace1b1f04b180068d7c3f183038a66134"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ace1b1f04b180068d7c3f183038a66134">&#9670;&nbsp;</a></span>configure()</h2>
@@ -198,8 +198,8 @@ The function performs a comparison operation between two tensors. </dd></dl>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml#l00096">96</a> of file <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml">NEElementwiseOperators.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;{</div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NEComparisonOperationKernel&gt;();</div><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    k-&gt;configure(op, input1, input2, output);</div><div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml#l00108">108</a> of file <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml">NEElementwiseOperators.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;{</div><div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NEComparisonOperationKernel&gt;();</div><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    k-&gt;configure(op, input1, input2, output);</div><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a3c6c21badfd0002fd036410be5b1dcb1"></a>
@@ -260,10 +260,10 @@ The function performs a comparison operation between two tensors. </dd></dl>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml#l00103">103</a> of file <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml">NEElementwiseOperators.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;{</div><div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_comparison_operation_kernel.xhtml#aa4dc6e8191da7608f894b446ee19b6b3">NEComparisonOperationKernel::validate</a>(op, input1, input2, output);</div><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_comparison_operation_kernel_xhtml_aa4dc6e8191da7608f894b446ee19b6b3"><div class="ttname"><a href="classarm__compute_1_1_n_e_comparison_operation_kernel.xhtml#aa4dc6e8191da7608f894b446ee19b6b3">arm_compute::NEComparisonOperationKernel::validate</a></div><div class="ttdeci">static Status validate(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEComparisonOperationKer...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_elementwise_operation_kernel_8cpp_source.xhtml#l00923">NEElementwiseOperationKernel.cpp:923</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml#l00115">115</a> of file <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml">NEElementwiseOperators.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;{</div><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_comparison_operation_kernel.xhtml#aa4dc6e8191da7608f894b446ee19b6b3">NEComparisonOperationKernel::validate</a>(op, input1, input2, output);</div><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_comparison_operation_kernel_xhtml_aa4dc6e8191da7608f894b446ee19b6b3"><div class="ttname"><a href="classarm__compute_1_1_n_e_comparison_operation_kernel.xhtml#aa4dc6e8191da7608f894b446ee19b6b3">arm_compute::NEComparisonOperationKernel::validate</a></div><div class="ttdeci">static Status validate(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEComparisonOperationKer...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_elementwise_operation_kernel_8cpp_source.xhtml#l00987">NEElementwiseOperationKernel.cpp:987</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_n_e_elementwise_operation_kernel_8cpp_source.xhtml#l00923">NEComparisonOperationKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="_n_e_elementwise_operation_kernel_8cpp_source.xhtml#l00987">NEComparisonOperationKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -277,7 +277,7 @@ The function performs a comparison operation between two tensors. </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_elementwise_comparison.xhtml">NEElementwiseComparison</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:33 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

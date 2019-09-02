@@ -15,7 +15,7 @@ var _c_l_2_g_e_m_m_reshape_r_h_s_matrix_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_g_e_m_m_reshape_r_h_s_matrix_8cpp.xhtml#ac4fffe66bc316bb6753fe1e23537f2a3", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_g_e_m_m_reshape_r_h_s_matrix_8cpp.xhtml#a3ade3eb8615128c931acc9cc70b42e7a", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_g_e_m_m_reshape_r_h_s_matrix_8cpp.xhtml#a9996dc3041480c737df9c4f18001632f", null ],
-    [ "TEST_SUITE_END", "_c_l_2_g_e_m_m_reshape_r_h_s_matrix_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "TEST_SUITE_END", "_c_l_2_g_e_m_m_reshape_r_h_s_matrix_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLGEMMReshapeRHSMatrixFixture< char >", "_c_l_2_g_e_m_m_reshape_r_h_s_matrix_8cpp.xhtml#a6168c2c476de177e3f43be2e6efb8757", null ],
     [ "CLGEMMReshapeRHSMatrixFixture< short >", "_c_l_2_g_e_m_m_reshape_r_h_s_matrix_8cpp.xhtml#a072c9343d5a95a8cf0ab1c44cb8d4940", null ]
 ];

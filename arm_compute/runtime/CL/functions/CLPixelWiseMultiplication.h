@@ -38,7 +38,7 @@ class CLPixelWiseMultiplication : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and convertion policy.
      *
-     * @param[in, out] input1          An input tensor. Data types supported: U8/S16/F16/F32.
+     * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[in, out] input2          An input tensor. Data types supported: same as @p input1.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
@@ -52,7 +52,7 @@ public:
                    ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPixelWiseMultiplication
      *
-     * @param[in] input1          An input tensor info. Data types supported: U8/S16/F16/F32.
+     * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
      * @param[in] input2          An input tensor info. Data types supported: same as @p input1.
      * @param[in] output          The output tensor info, Data types supported: same as @p input1. Note: U8 requires both inputs to be U8.
      * @param[in] scale           Scale to apply after multiplication.

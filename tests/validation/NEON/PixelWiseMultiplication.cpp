@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Rounding.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
@@ -42,8 +43,28 @@ const float scale_unity = 1.f;
 const float scale_255   = 1.f / 255.f;
 const float scale_other = 1.f / 32768.f;
 
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit quantized asymmetric data types */
+constexpr AbsoluteTolerance<float> tolerance_qsymm16(1); /**< Tolerance value for comparing reference's output against implementation's output for 16-bit quantized symmetric data types */
+
+const auto PixelWiseMultiplicationQSYMM16QuantDataset = combine(combine(
+                                                                    framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0) }),
+                                                                    framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) })),
+                                                                framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) }));
+
+const auto PixelWiseMultiplicationQASYMM8QuantDataset = combine(combine(
+                                                                    framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 32768.f, 0) }),
+                                                                    framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) })),
+                                                                framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 32768.f, 0) }));
+
+const auto PixelWiseMultiplicationPolicySTNUDataset = combine(
+                                                          framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                          framework::dataset::make("RoundingPolicy", { RoundingPolicy::TO_NEAREST_UP }));
+
+const auto PixelWiseMultiplicationPolicySTZDataset = combine(
+                                                         framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE }),
+                                                         framework::dataset::make("RoundingPolicy", { RoundingPolicy::TO_ZERO }));
+
 #define DEFAULT_VALIDATE validate(Accessor(_target), _reference);
-#define QASYMM8_VALIDATE validate(Accessor(_target), _reference, AbsoluteTolerance<uint8_t>(1), 0.f);
 #define VALIDATE(TYPE, TOLERANCE) validate(Accessor(_target), _reference, AbsoluteTolerance<TYPE>(TOLERANCE), 0.f);
 #define WRAP_VALIDATE(TYPE, TOLERANCE) validate_wrap(Accessor(_target), _reference, AbsoluteTolerance<TYPE>(TOLERANCE), 0.f);
 
@@ -76,23 +97,6 @@ const float scale_other = 1.f / 32768.f;
         VALIDATE                                                                                                          \
     }
 
-#define PIXEL_WISE_MULTIPLICATION_FIXTURE_QASYMM8_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, SHAPES, DT1, DT2, SCALE, RP, VALIDATE) \
-    FIXTURE_DATA_TEST_CASE(TEST_NAME, NEPixelWiseMultiplication##FIXTURE, framework::DatasetMode::MODE,                           \
-                           combine(combine(combine(combine(combine(combine(combine(combine(                                       \
-                           datasets::SHAPES,                                                                                      \
-                           framework::dataset::make("DataType1", DataType::DT1)),                                                 \
-                           framework::dataset::make("DataType2", DataType::DT2)),                                                 \
-                           framework::dataset::make("Scale", std::move(SCALE))),                                                  \
-                           framework::dataset::make("ConvertPolicy", ConvertPolicy::SATURATE)),                                                                          \
-                           framework::dataset::make("RoundingPolicy", RoundingPolicy::RP)),                                       \
-                           framework::dataset::make("QuantizationInfoIn1", QuantizationInfo(1.0 , 0))),                           \
-                           framework::dataset::make("QuantizationInfoIn2", QuantizationInfo(1.0 , 0))),                           \
-                           framework::dataset::make("QuantizationInfoOut", QuantizationInfo(100.0, 10))))                         \
-    {                                                                                                                             \
-        VALIDATE                                                                                                                  \
-    }
-
-
 // *INDENT-ON*
 // clang-format on
 
@@ -124,7 +128,8 @@ void validate_configuration(TensorShape shape, DataType dt1, DataType dt2, float
 }
 } // namespace
 
-using NEPixelWiseMultiplicationToQASYMM8Fixture = PixelWiseMultiplicationQuatizedValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t>;
+using NEPixelWiseMultiplicationQASYMM8Fixture = PixelWiseMultiplicationValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t>;
+using NEPixelWiseMultiplicationQSYMM16Fixture = PixelWiseMultiplicationValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, int16_t, int16_t>;
 template <typename T>
 using NEPixelWiseMultiplicationToU8Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, uint8_t>;
 template <typename T>
@@ -179,24 +184,132 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-TEST_SUITE(QASYMM8toQASYMM8)
-
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
 TEST_SUITE(Scale255)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_QASYMM8_DATA_TEST_CASE(RunSmall, ToQASYMM8Fixture, PRECOMMIT, SmallShapes(), QASYMM8, QASYMM8, scale_255, TO_NEAREST_UP, WRAP_VALIDATE(uint8_t, 1))
-PIXEL_WISE_MULTIPLICATION_FIXTURE_QASYMM8_DATA_TEST_CASE(RunLarge, ToQASYMM8Fixture, NIGHTLY, LargeShapes(), QASYMM8, QASYMM8, scale_255, TO_NEAREST_UP, WRAP_VALIDATE(uint8_t, 1))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                     framework::dataset::make("Scale", { scale_255 })),
+                                                                                                                     PixelWiseMultiplicationPolicySTNUDataset),
+                                                                                                                     PixelWiseMultiplicationQASYMM8QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                   framework::dataset::make("Scale", { scale_255 })),
+                                                                                                                   PixelWiseMultiplicationPolicySTNUDataset),
+                                                                                                                   PixelWiseMultiplicationQASYMM8QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
 TEST_SUITE_END() // Scale255
-
 TEST_SUITE(ScaleUnity)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_QASYMM8_DATA_TEST_CASE(RunSmall, ToQASYMM8Fixture, PRECOMMIT, SmallShapes(), QASYMM8, QASYMM8, scale_unity, TO_ZERO, QASYMM8_VALIDATE)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_QASYMM8_DATA_TEST_CASE(RunLarge, ToQASYMM8Fixture, NIGHTLY, LargeShapes(), QASYMM8, QASYMM8, scale_unity, TO_ZERO, QASYMM8_VALIDATE)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                     framework::dataset::make("Scale", { scale_unity })),
+                                                                                                                     PixelWiseMultiplicationPolicySTZDataset),
+                                                                                                                     PixelWiseMultiplicationQASYMM8QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                   framework::dataset::make("Scale", { scale_unity })),
+                                                                                                                   PixelWiseMultiplicationPolicySTZDataset),
+                                                                                                                   PixelWiseMultiplicationQASYMM8QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
 TEST_SUITE_END() // ScaleUnity
-
 TEST_SUITE(ScaleOther)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_QASYMM8_DATA_TEST_CASE(RunSmall, ToQASYMM8Fixture, PRECOMMIT, SmallShapes(), QASYMM8, QASYMM8, scale_other, TO_ZERO, QASYMM8_VALIDATE)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_QASYMM8_DATA_TEST_CASE(RunLarge, ToQASYMM8Fixture, NIGHTLY, LargeShapes(), QASYMM8, QASYMM8, scale_other, TO_ZERO, QASYMM8_VALIDATE)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                     framework::dataset::make("Scale", { scale_other })),
+                                                                                                                     PixelWiseMultiplicationPolicySTZDataset),
+                                                                                                                     PixelWiseMultiplicationQASYMM8QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                   framework::dataset::make("Scale", { scale_other })),
+                                                                                                                   PixelWiseMultiplicationPolicySTZDataset),
+                                                                                                                   PixelWiseMultiplicationQASYMM8QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
 TEST_SUITE_END() // ScaleOther
-
-TEST_SUITE_END() // QASYMM8toQASYMM8
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QSYMM16)
+TEST_SUITE(Scale255)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QSYMM16)),
+                                                                                                                     framework::dataset::make("Scale", { scale_255 })),
+                                                                                                                     PixelWiseMultiplicationPolicySTNUDataset),
+                                                                                                                     PixelWiseMultiplicationQSYMM16QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QSYMM16)),
+                                                                                                                   framework::dataset::make("Scale", { scale_255 })),
+                                                                                                                   PixelWiseMultiplicationPolicySTNUDataset),
+                                                                                                                   PixelWiseMultiplicationQSYMM16QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END() // Scale255
+TEST_SUITE(ScaleUnity)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QSYMM16)),
+                                                                                                                     framework::dataset::make("Scale", { scale_unity })),
+                                                                                                                     PixelWiseMultiplicationPolicySTZDataset),
+                                                                                                                     PixelWiseMultiplicationQSYMM16QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QSYMM16)),
+                                                                                                                   framework::dataset::make("Scale", { scale_unity })),
+                                                                                                                   PixelWiseMultiplicationPolicySTZDataset),
+                                                                                                                   PixelWiseMultiplicationQSYMM16QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END() // ScaleUnity
+TEST_SUITE(ScaleOther)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QSYMM16)),
+                                                                                                                     framework::dataset::make("Scale", { scale_other })),
+                                                                                                                     PixelWiseMultiplicationPolicySTZDataset),
+                                                                                                                     PixelWiseMultiplicationQSYMM16QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QSYMM16)),
+                                                                                                                   framework::dataset::make("Scale", { scale_other })),
+                                                                                                                   PixelWiseMultiplicationPolicySTZDataset),
+                                                                                                                   PixelWiseMultiplicationQSYMM16QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END() // ScaleOther
+TEST_SUITE_END() // QSYMM16
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE(U8toU8)
 

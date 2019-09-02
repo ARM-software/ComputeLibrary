@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -139,6 +139,9 @@ Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml">NumPyAccessor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">NumPy accessor class.  <a href="classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_save_num_py_accessor.xhtml">SaveNumPyAccessor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">SaveNumPy accessor class.  <a href="classarm__compute_1_1graph__utils_1_1_save_num_py_accessor.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_image_accessor.xhtml">ImageAccessor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_image.xhtml" title="Structure to hold Image information.">Image</a> accessor class.  <a href="classarm__compute_1_1graph__utils_1_1_image_accessor.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,9 +189,12 @@ Functions</h2></td></tr>
 <tr class="memitem:aff280480ba1a9075fed13fbb15ca0063"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#aff280480ba1a9075fed13fbb15ca0063">get_detection_output_accessor</a> (const <a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml">arm_compute::utils::CommonGraphParams</a> &amp;graph_parameters, std::vector&lt; TensorShape &gt; tensor_shapes, bool is_validation=false, std::ostream &amp;output_stream=std::cout)</td></tr>
 <tr class="memdesc:aff280480ba1a9075fed13fbb15ca0063"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate output accessor according to the specified graph parameters.  <a href="namespacearm__compute_1_1graph__utils.xhtml#aff280480ba1a9075fed13fbb15ca0063">More...</a><br /></td></tr>
 <tr class="separator:aff280480ba1a9075fed13fbb15ca0063"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2347ca9557fd9e841d5f2104b1687996"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a2347ca9557fd9e841d5f2104b1687996">get_npy_output_accessor</a> (const std::string &amp;npy_path, TensorShape shape, DataType data_type, std::ostream &amp;output_stream=std::cout)</td></tr>
-<tr class="memdesc:a2347ca9557fd9e841d5f2104b1687996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate npy output accessor according to the specified npy_path.  <a href="namespacearm__compute_1_1graph__utils.xhtml#a2347ca9557fd9e841d5f2104b1687996">More...</a><br /></td></tr>
-<tr class="separator:a2347ca9557fd9e841d5f2104b1687996"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10e9c53263d766cbd37e4e37f5e8091e"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a10e9c53263d766cbd37e4e37f5e8091e">get_npy_output_accessor</a> (const std::string &amp;npy_path, TensorShape shape, DataType data_type, DataLayout data_layout=DataLayout::NCHW, std::ostream &amp;output_stream=std::cout)</td></tr>
+<tr class="memdesc:a10e9c53263d766cbd37e4e37f5e8091e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate npy output accessor according to the specified npy_path.  <a href="namespacearm__compute_1_1graph__utils.xhtml#a10e9c53263d766cbd37e4e37f5e8091e">More...</a><br /></td></tr>
+<tr class="separator:a10e9c53263d766cbd37e4e37f5e8091e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6207a1b742579b07b8f4b14e542a7b3a"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a6207a1b742579b07b8f4b14e542a7b3a">get_save_npy_output_accessor</a> (const std::string &amp;npy_name, const bool is_fortran=false)</td></tr>
+<tr class="memdesc:a6207a1b742579b07b8f4b14e542a7b3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate npy output accessor according to the specified npy_path.  <a href="namespacearm__compute_1_1graph__utils.xhtml#a6207a1b742579b07b8f4b14e542a7b3a">More...</a><br /></td></tr>
+<tr class="separator:a6207a1b742579b07b8f4b14e542a7b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3a897163a7fe23208f1d9c618062ee2"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ab3a897163a7fe23208f1d9c618062ee2">permute_shape</a> (TensorShape tensor_shape, DataLayout in_data_layout, DataLayout out_data_layout)</td></tr>
 <tr class="memdesc:ab3a897163a7fe23208f1d9c618062ee2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Permutes a given tensor shape given the input and output data layout.  <a href="namespacearm__compute_1_1graph__utils.xhtml#ab3a897163a7fe23208f1d9c618062ee2">More...</a><br /></td></tr>
 <tr class="separator:ab3a897163a7fe23208f1d9c618062ee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -202,7 +208,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_cbdb8362360e11eafe2fa3bc74cf0ffd.xhtml">utils</a></li><li class="navelem"><a class="el" href="_graph_utils_8h.xhtml">GraphUtils.h</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:27 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

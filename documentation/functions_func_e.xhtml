@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -130,7 +130,8 @@ $(document).ready(function(){initNavTree('functions_func_e.xhtml','');});
 </li>
 <li>empty()
 : <a class="el" href="structarm__compute_1_1_border_size.xhtml#afaafdfc441c2433c70959e3dfe46fd97">BorderSize</a>
-, <a class="el" href="structarm__compute_1_1_quantization_info.xhtml#a644718bb2fb240de962dc3c9a1fdf0dc">QuantizationInfo</a>
+, <a class="el" href="classarm__compute_1_1_quantization_info.xhtml#a644718bb2fb240de962dc3c9a1fdf0dc">QuantizationInfo</a>
+, <a class="el" href="structarm__compute_1_1_uniform_quantization_info.xhtml#a644718bb2fb240de962dc3c9a1fdf0dc">UniformQuantizationInfo</a>
 </li>
 <li>enabled()
 : <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml#af5a8385102f8f8dd6c5957eac08b04c2">ActivationLayerInfo</a>
@@ -158,7 +159,7 @@ $(document).ready(function(){initNavTree('functions_func_e.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml#a6096d26e8e29e1a7f01b0f083fb7e33f">CLScheduler</a>
 </li>
 <li>EnumListOption()
-: <a class="el" href="classarm__compute_1_1utils_1_1_enum_list_option.xhtml#ad0b0c01efde8d3e0b2cbd352bd71ea82">EnumListOption&lt; T &gt;</a>
+: <a class="el" href="classarm__compute_1_1utils_1_1_enum_list_option.xhtml#ac51fea12ffc5712ecd3a860f54dc71cc">EnumListOption&lt; T &gt;</a>
 </li>
 <li>EnumOption()
 : <a class="el" href="classarm__compute_1_1utils_1_1_enum_option.xhtml#a4acdb5a6b659c4041bc8cc6581c72e60">EnumOption&lt; T &gt;</a>
@@ -166,6 +167,7 @@ $(document).ready(function(){initNavTree('functions_func_e.xhtml','');});
 <li>epsilon()
 : <a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml#acd39aa81617eab4d3482fa904d5dee87">BatchNormalizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#acd39aa81617eab4d3482fa904d5dee87">FusedConvolutionBatchNormalizationNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml#acd39aa81617eab4d3482fa904d5dee87">FusedDepthwiseConvolutionBatchNormalizationNode</a>
 </li>
 <li>error_code()
 : <a class="el" href="classarm__compute_1_1_status.xhtml#ae6f5cee53304ea1903bdd1a3a9283f33">Status</a>
@@ -184,17 +186,22 @@ $(document).ready(function(){initNavTree('functions_func_e.xhtml','');});
 </li>
 <li>execute()
 : <a class="el" href="classarm__gemm_1_1_gemm_hybrid.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">GemmHybrid&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">GemmHybridQuantized&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_interleaved.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">GemmInterleaved&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemm_native.xhtml#a514bdec015ee0ca587b6444e9defc190">GemmNative&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_batched.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">GemvBatched&lt; To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_native_transposed.xhtml#a514bdec015ee0ca587b6444e9defc190">GemvNativeTransposed&lt; strategy, To, Tr &gt;</a>
 , <a class="el" href="classarm__gemm_1_1_gemv_pretransposed.xhtml#a514bdec015ee0ca587b6444e9defc190">GemvPretransposed&lt; strategy, To, Tr &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_quantize_wrapper.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560">QuantizeWrapper&lt; To, Tr, Tgemm &gt;</a>
 </li>
 <li>execute_graph()
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph_manager.xhtml#a4e179588488fda9085167dd70c29ff70">GraphManager</a>
 </li>
 <li>ExecutionTask()
-: <a class="el" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#aa7d6290d4ca3fe3eb67c41f5ebc9fc3e">ExecutionTask</a>
+: <a class="el" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#afb25be12a4800fe31bf8bad6807cb09a">ExecutionTask</a>
+</li>
+<li>exponent()
+: <a class="el" href="unionarm__compute_1_1helpers_1_1float__ops_1_1_raw_float.xhtml#a3fda27eb4e4896945317480496290159">RawFloat</a>
 </li>
 <li>extend_padding()
 : <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a0cd5aea514f03afb48ebe22581ea4c66">ITensorInfo</a>
@@ -216,7 +223,7 @@ $(document).ready(function(){initNavTree('functions_func_e.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

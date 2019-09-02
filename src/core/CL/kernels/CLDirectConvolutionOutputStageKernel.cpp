@@ -34,8 +34,8 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output)
@@ -87,8 +87,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
 {
-    bool         window_changed                    = false;
-    unsigned int num_elems_processed_per_iteration = 16 / element_size_from_data_type(input->data_type());
+    bool               window_changed                    = false;
+    const unsigned int num_elems_processed_per_iteration = 16 / element_size_from_data_type(input->data_type());
 
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
@@ -206,3 +206,4 @@ void CLDirectConvolutionLayerOutputStageKernel::run(const Window &window, cl::Co
     }
     while(window.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

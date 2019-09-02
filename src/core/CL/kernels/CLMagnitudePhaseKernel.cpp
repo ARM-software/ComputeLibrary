@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,7 +116,8 @@ void CLMagnitudePhaseKernel::configure(const ICLTensor *gx, const ICLTensor *gy,
     build_opts.insert("-DDATA_TYPE=" + get_cl_type_from_data_type(gx->info()->data_type()));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("magnitude_phase", build_opts));
+    const std::string kernel_name = std::string("magnitude_phase");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;
@@ -138,6 +139,15 @@ void CLMagnitudePhaseKernel::configure(const ICLTensor *gx, const ICLTensor *gy,
     output_phase_access.set_valid_region(win, valid_region);
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(gx->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(gx->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(gx->info()->dimension(1));
 }
 
 void CLMagnitudePhaseKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -151,18 +161,10 @@ void CLMagnitudePhaseKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _gx, slice);
         add_2D_tensor_argument(idx, _gy, slice);
+        add_2D_tensor_argument_if((_run_mag), idx, _magnitude, slice);
+        add_2D_tensor_argument_if((_run_phase), idx, _phase, slice);
 
-        if(_run_mag)
-        {
-            add_2D_tensor_argument(idx, _magnitude, slice);
-        }
-
-        if(_run_phase)
-        {
-            add_2D_tensor_argument(idx, _phase, slice);
-        }
-
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

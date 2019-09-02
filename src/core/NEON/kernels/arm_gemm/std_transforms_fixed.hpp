@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 #pragma once
+
+#include "mergeresults.hpp"
+#include "transform.hpp"
 
 namespace arm_gemm {
 

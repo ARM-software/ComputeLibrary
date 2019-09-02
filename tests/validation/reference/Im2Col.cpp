@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ void im2col_nchw(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D 
     const int src_channels  = src.shape().z();
     const int batches       = src.shape().total_size_upper(3);
     const int dst_height    = dst.shape().y();
-    const int pad_val       = is_data_type_quantized_asymmetric(src.data_type()) ? src.quantization_info().offset : 0;
+    const int pad_val       = is_data_type_quantized_asymmetric(src.data_type()) ? src.quantization_info().uniform().offset : 0;
     int       dst_idx       = 0;
 
     // Compute width and height of the convolved tensors
@@ -105,7 +105,7 @@ void im2col_nhwc(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D 
     const int batches       = src.shape().total_size_upper(3);
     const int dst_width     = has_bias ? dst.shape().x() - 1 : dst.shape().x();
     const int dst_height    = dst.shape().y();
-    const int pad_val       = is_data_type_quantized_asymmetric(src.data_type()) ? src.quantization_info().offset : 0;
+    const int pad_val       = is_data_type_quantized_asymmetric(src.data_type()) ? src.quantization_info().uniform().offset : 0;
 
     // Compute width and height of the convolved tensors
     std::pair<unsigned int, unsigned int> convolved_dims = scaled_dimensions(src_width, src_height, kernel_dims.width, kernel_dims.height, conv_info);
@@ -139,7 +139,7 @@ void im2col_nhwc(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D 
 }
 
 template <typename T>
-void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const unsigned int num_groups)
+void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups)
 {
     switch(src.data_layout())
     {

@@ -1,9 +1,10 @@
 <map id="arm_compute/graph/backends/GLES" name="arm_compute/graph/backends/GLES">
 <area shape="rect" id="node1" href="dir_154b7715c8b805d6c07751152e8bda26.xhtml" title="GLES" alt="" coords="41,52,113,100"/>
 <area shape="rect" id="node2" href="dir_8bc26130589aa16388b5a02f17abf2c2.xhtml" title="runtime" alt="" coords="5,148,77,196"/>
-<area shape="rect" id="edge2-headlabel" href="dir_000041_000003.xhtml" title="3" alt="" coords="60,127,69,141"/>
-<area shape="rect" id="node3" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml" title="core" alt="" coords="41,244,113,292"/>
-<area shape="rect" id="edge3-headlabel" href="dir_000041_000001.xhtml" title="1" alt="" coords="89,220,98,235"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000003_000001.xhtml" title="581" alt="" coords="57,217,83,231"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000042_000003.xhtml" title="3" alt="" coords="60,127,69,141"/>
+<area shape="rect" id="node3" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml" title="core" alt="" coords="5,244,77,292"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000042_000001.xhtml" title="1" alt="" coords="75,227,84,242"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000003_000001.xhtml" title="582" alt="" coords="28,218,53,233"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000001_000003.xhtml" title="1" alt="" coords="37,208,47,222"/>
 <area shape="rect" id="clust1" href="dir_59b2231210c554f4cc243709030bf1f8.xhtml" title="backends" alt="" coords="31,16,124,111"/>
 </map>

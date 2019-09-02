@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -121,6 +121,10 @@ Macros</h2></td></tr>
 <tr class="separator:ab05bd244cb8823c69d6dce6a23a758fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a49f6fecffd852cda3b0ece53dcbb2b87"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="elementwise__operation_8cl.xhtml#a49f6fecffd852cda3b0ece53dcbb2b87">DIV</a>(x,  y)&#160;&#160;&#160;(x / y)</td></tr>
 <tr class="separator:a49f6fecffd852cda3b0ece53dcbb2b87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a720998f8e544cdc6d3c4c3c8d7ac5377"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="elementwise__operation_8cl.xhtml#a720998f8e544cdc6d3c4c3c8d7ac5377">POWER</a>(x,  y)&#160;&#160;&#160;pow(x, y)</td></tr>
+<tr class="separator:a720998f8e544cdc6d3c4c3c8d7ac5377"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01b6a20d51e2db6f1704f2315ead62d3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="elementwise__operation_8cl.xhtml#a01b6a20d51e2db6f1704f2315ead62d3">PRELU</a>(x,  y)&#160;&#160;&#160;(select(y * x, x, x &gt; (<a class="el" href="convolution9x9_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e">DATA_TYPE_OUT</a>)0))</td></tr>
+<tr class="separator:a01b6a20d51e2db6f1704f2315ead62d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e2243047d8466ea143cbb9e1f196a95"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="elementwise__operation_8cl.xhtml#a5e2243047d8466ea143cbb9e1f196a95">OP_FUN_NAME_STR</a>(op)&#160;&#160;&#160;elementwise_operation_##op</td></tr>
 <tr class="separator:a5e2243047d8466ea143cbb9e1f196a95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc658c67277583af4eaca9a340d4128c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="elementwise__operation_8cl.xhtml#afc658c67277583af4eaca9a340d4128c">OP_FUN_NAME</a>(op)&#160;&#160;&#160;<a class="el" href="elementwise__operation__quantized_8cl.xhtml#a5e2243047d8466ea143cbb9e1f196a95">OP_FUN_NAME_STR</a>(op)</td></tr>
@@ -266,7 +270,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="elementwise__operation_8cl_source.xhtml#l00042">42</a> of file <a class="el" href="elementwise__operation_8cl_source.xhtml">elementwise_operation.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="elementwise__operation_8cl_source.xhtml#l00044">44</a> of file <a class="el" href="elementwise__operation_8cl_source.xhtml">elementwise_operation.cl</a>.</p>
 
 </div>
 </div>
@@ -282,6 +286,66 @@ Macros</h2></td></tr>
           <td class="paramtype">&#160;</td>
           <td class="paramname">op</td><td>)</td>
           <td>&#160;&#160;&#160;elementwise_operation_##op</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="elementwise__operation_8cl_source.xhtml#l00043">43</a> of file <a class="el" href="elementwise__operation_8cl_source.xhtml">elementwise_operation.cl</a>.</p>
+
+</div>
+</div>
+<a id="a720998f8e544cdc6d3c4c3c8d7ac5377"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a720998f8e544cdc6d3c4c3c8d7ac5377">&#9670;&nbsp;</a></span>POWER</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define POWER</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">y&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;pow(x, y)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="elementwise__operation_8cl_source.xhtml#l00040">40</a> of file <a class="el" href="elementwise__operation_8cl_source.xhtml">elementwise_operation.cl</a>.</p>
+
+</div>
+</div>
+<a id="a01b6a20d51e2db6f1704f2315ead62d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01b6a20d51e2db6f1704f2315ead62d3">&#9670;&nbsp;</a></span>PRELU</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PRELU</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">y&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;(select(y * x, x, x &gt; (<a class="el" href="convolution9x9_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e">DATA_TYPE_OUT</a>)0))</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -356,7 +420,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="elementwise__operation_8cl.xhtml">elementwise_operation.cl</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

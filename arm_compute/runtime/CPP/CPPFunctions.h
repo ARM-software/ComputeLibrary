@@ -27,6 +27,8 @@
 /* Header regrouping all the CPP functions */
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 #include "arm_compute/runtime/CPP/functions/CPPDetectionOutputLayer.h"
+#include "arm_compute/runtime/CPP/functions/CPPDetectionPostProcessLayer.h"
+#include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"

@@ -145,9 +145,10 @@ public:
      * @param[in]  npy_path      Path to npy file.
      * @param[in]  shape         Shape of the numpy tensor data.
      * @param[in]  data_type     DataType of the numpy tensor data.
+     * @param[in]  data_layout   (Optional) DataLayout of the numpy tensor data.
      * @param[out] output_stream (Optional) Output stream
      */
-    NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream = std::cout);
+    NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, DataLayout data_layout = DataLayout::NCHW, std::ostream &output_stream = std::cout);
     /** Allow instances of this class to be move constructed */
     NumPyAccessor(NumPyAccessor &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -165,6 +166,31 @@ private:
     Tensor            _npy_tensor;
     const std::string _filename;
     std::ostream     &_output_stream;
+};
+
+/** SaveNumPy accessor class */
+class SaveNumPyAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[in] npy_name   Npy file name.
+     * @param[in] is_fortran (Optional) If true, save tensor in fortran order.
+     */
+    SaveNumPyAccessor(const std::string npy_name, const bool is_fortran = false);
+    /** Allow instances of this class to be move constructed */
+    SaveNumPyAccessor(SaveNumPyAccessor &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    SaveNumPyAccessor(const SaveNumPyAccessor &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    SaveNumPyAccessor &operator=(const SaveNumPyAccessor &) = delete;
+
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
+private:
+    const std::string _npy_name;
+    const bool        _is_fortran;
 };
 
 /** Image accessor class */
@@ -542,11 +568,13 @@ inline std::unique_ptr<graph::ITensorAccessor> get_detection_output_accessor(con
  * @param[in]  npy_path      Path to npy file.
  * @param[in]  shape         Shape of the numpy tensor data.
  * @param[in]  data_type     DataType of the numpy tensor data.
+ * @param[in]  data_layout   DataLayout of the numpy tensor data.
  * @param[out] output_stream (Optional) Output stream
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std::string &npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream = std::cout)
+inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std::string &npy_path, TensorShape shape, DataType data_type, DataLayout data_layout = DataLayout::NCHW,
+                                                                       std::ostream &output_stream = std::cout)
 {
     if(npy_path.empty())
     {
@@ -554,7 +582,28 @@ inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std
     }
     else
     {
-        return arm_compute::support::cpp14::make_unique<NumPyAccessor>(npy_path, shape, data_type, output_stream);
+        return arm_compute::support::cpp14::make_unique<NumPyAccessor>(npy_path, shape, data_type, data_layout, output_stream);
+    }
+}
+
+/** Generates appropriate npy output accessor according to the specified npy_path
+ *
+ * @note If npy_path is empty will generate a DummyAccessor else will generate a SaveNpyAccessor
+ *
+ * @param[in] npy_name   Npy filename.
+ * @param[in] is_fortran (Optional) If true, save tensor in fortran order.
+ *
+ * @return An appropriate tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_save_npy_output_accessor(const std::string &npy_name, const bool is_fortran = false)
+{
+    if(npy_name.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>(0);
+    }
+    else
+    {
+        return arm_compute::support::cpp14::make_unique<SaveNumPyAccessor>(npy_name, is_fortran);
     }
 }
 

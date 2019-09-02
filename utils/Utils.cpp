@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,10 @@
  * SOFTWARE.
  */
 #include "Utils.h"
+
+#ifdef ARM_COMPUTE_CL
+#include "arm_compute/runtime/CL/CLScheduler.h"
+#endif /* ARM_COMPUTE_CL */
 
 #include <cctype>
 #include <cerrno>
@@ -266,6 +270,84 @@ uint64_t get_mem_free_from_meminfo()
     }
     // Nothing found or an error during opening the file
     return 0;
+}
+
+/** This function loads prebuilt opencl kernels from a file
+ *
+ * @param[in] filename Name of the file to be used to load the kernels
+ */
+void restore_program_cache_from_file(const std::string &filename)
+{
+#ifdef ARM_COMPUTE_CL
+    std::ifstream cache_file(filename, std::ios::binary);
+    if(cache_file.is_open())
+    {
+        if(!CLScheduler::get().is_initialised())
+        {
+            arm_compute::CLScheduler::get().default_init();
+        }
+
+        while(!cache_file.eof())
+        {
+            size_t name_len   = 0;
+            size_t binary_len = 0;
+            cache_file.read(reinterpret_cast<char *>(&name_len), sizeof(size_t));
+            cache_file.read(reinterpret_cast<char *>(&binary_len), sizeof(size_t));
+            if(name_len == 0 || binary_len == 0)
+            {
+                break;
+            }
+            std::vector<char>          tmp(name_len);
+            std::vector<unsigned char> binary(binary_len);
+            std::string                name;
+            cache_file.read(tmp.data(), name_len);
+            name.assign(tmp.data(), name_len);
+            tmp.resize(binary_len);
+            cache_file.read(reinterpret_cast<char *>(binary.data()), binary_len);
+            cl::Context             context = arm_compute::CLScheduler::get().context();
+            cl::Program::Binaries   binaries{ binary };
+            std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+            cl::Program             program(context, devices, binaries);
+            program.build();
+            CLKernelLibrary::get().add_built_program(name, program);
+        }
+        cache_file.close();
+    }
+#endif /* ARM_COMPUTE_CL */
+}
+
+/** This function saves opencl kernels library to a file
+ *
+ * @param[in] filename Name of the file to be used to save the library
+ */
+void save_program_cache_to_file(const std::string &filename)
+{
+#ifdef ARM_COMPUTE_CL
+    if(CLScheduler::get().is_initialised())
+    {
+        std::ofstream cache_file(filename, std::ios::binary);
+        if(cache_file.is_open())
+        {
+            for(const auto &it : CLKernelLibrary::get().get_built_programs())
+            {
+                std::vector<std::vector<unsigned char>> binaries = it.second.getInfo<CL_PROGRAM_BINARIES>();
+                ARM_COMPUTE_ERROR_ON(binaries.size() != 1);
+                const std::string kernel_name      = it.first;
+                size_t            kernel_name_size = kernel_name.length();
+                size_t            binary_size      = binaries[0].size();
+                cache_file.write(reinterpret_cast<char *>(&kernel_name_size), sizeof(size_t));
+                cache_file.write(reinterpret_cast<char *>(&binary_size), sizeof(size_t));
+                cache_file.write(kernel_name.c_str(), kernel_name_size);
+                cache_file.write(reinterpret_cast<const char *>(binaries[0].data()), binaries[0].size());
+            }
+            cache_file.close();
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR("Cannot open cache file");
+        }
+    }
+#endif /* ARM_COMPUTE_CL */
 }
 } // namespace utils
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,6 +107,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         window_changed = update_window_and_padding(win, input_access);
     }
 
+    // Mean, var, gamma and beta get parallelized for the NHWC case as they follow the channel dimension, which is along the first axis
     if(input->data_layout() == DataLayout::NHWC)
     {
         AccessWindowHorizontal mean_access(mean, 0, num_elems_processed_per_iteration);
@@ -159,9 +160,8 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.add_option("-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option_if(act_info.enabled(), "-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
     build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
     build_opts.add_option_if(_run_in_place, "-DIN_PLACE");

@@ -43,6 +43,32 @@ class ITensor;
  * -# @ref NEWinogradConvolutionLayer (executed only in case Winograd is required for the operation)
  * -# @ref NEDirectConvolutionLayer   (executed only in case Direct Convolution is required for the operation)
  * -# @ref NEFFTConvolutionLayer      (executed only in case FFT is required for the operation)
+ *
+ *
+ * The function selects one of the algorithms mentioned above based on:
+ *      - The size of the kernel
+ *      - Number of input/output feature maps
+ *      - Amount of memory needed
+ *
+ * Generally GEMM-based convolution is executed when neither Winograd nor FFT nor Direct convolution can be performed.
+ *
+ * FP32 Algorithm| Filter Size                                        |   Input/Output feature maps               |
+ * --------------|----------------------------------------------------|-------------------------------------------|
+ * Winograd      | 3x3 1x3 3x1 5x1 1x5 5x5(fast maths) 7x1 1x7        |  Input channels is greater than 3         |
+ * FFT           | Squared kernels and greater than 9x9               |  Input feature maps > Output feature maps |
+ * DirectConv    | 9x9                                                |                                           |
+ * GEMM          | Any size                                           |                                           |
+ *
+ * Winograd 5x5 requires fast maths enabled.
+ *
+ * FP16 Algorithm| Filter Size      |
+ * --------------|------------------|
+ * Winograd      | Not supported    |
+ * FFT           | Not supported    |
+ * DirectConv    | 9x9              |
+ * GEMM          | Any size         |
+ *
+ *
  */
 class NEConvolutionLayer : public IFunction
 {

@@ -133,7 +133,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 
     // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
     // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-    const int m          = gemm_info.m();
+    const int m          = reinterpret_output_as_3d ? gemm_info.m() : input0->dimension(1);
     const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
 
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
@@ -228,6 +228,8 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *i
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += dot8_supported(CLKernelLibrary::get().get_device()) ? "_dot8" : "";
     _config_id += "_";
     _config_id += (_reinterpret_input_as_3d ? "3di_" : "");
     _config_id += (_reinterpret_output_as_3d ? "3do_" : "");

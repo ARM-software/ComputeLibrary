@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -103,11 +103,14 @@ $(document).ready(function(){initNavTree('_c_l_concatenate_layer_8cpp.xhtml','')
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_c_l_concatenate_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLConcatenateLayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_batch_concatenate_layer_kernel_8h_source.xhtml">arm_compute/core/CL/kernels/CLBatchConcatenateLayerKernel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_depth_concatenate_layer_kernel_8h_source.xhtml">arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_height_concatenate_layer_kernel_8h_source.xhtml">arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_width_concatenate2_tensors_kernel_8h_source.xhtml">arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_width_concatenate4_tensors_kernel_8h_source.xhtml">arm_compute/core/CL/kernels/CLWidthConcatenate4TensorsKernel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_width_concatenate_layer_kernel_8h_source.xhtml">arm_compute/core/CL/kernels/CLWidthConcatenateLayerKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_shape_calculator_8h_source.xhtml">arm_compute/core/utils/misc/ShapeCalculator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_scheduler_8h_source.xhtml">arm_compute/runtime/CL/CLScheduler.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_c_l_depth_concatenate_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_c_l_width_concatenate_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_i_c_l_tensor_8h_source.xhtml">arm_compute/core/CL/ICLTensor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_tensor_info_8h_source.xhtml">arm_compute/core/TensorInfo.h</a>&quot;</code><br />
@@ -128,7 +131,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_bf9f26469d00835ba20ff8d80ee5a804.xhtml">runtime</a></li><li class="navelem"><a class="el" href="dir_43c3fdbf778d1fd99e2e38f09fddd920.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_0304d3529340c629ae0050036d07056a.xhtml">functions</a></li><li class="navelem"><a class="el" href="_c_l_concatenate_layer_8cpp.xhtml">CLConcatenateLayer.cpp</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

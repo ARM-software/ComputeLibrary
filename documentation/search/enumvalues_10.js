@@ -12,6 +12,7 @@ var searchData=
   ['rgb888',['RGB888',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a30ff380a3be74628024063a99fba10f0',1,'arm_compute']]],
   ['rgba8888',['RGBA8888',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a165f06116e7b8d9b2481dfc805db4619',1,'arm_compute']]],
   ['roialignlayer',['ROIAlignLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a9724a5f06f63ab3de9e8af69d20069fb',1,'arm_compute::graph']]],
+  ['round',['ROUND',['../namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da2ea77cf582892014b30e6fa7e558350d',1,'arm_compute']]],
   ['rsqrt',['RSQRT',['../namespacearm__compute.xhtml#a5dad01b7eab116403241313417e0936da66bac724670f51e77f3688d33ca0d781',1,'arm_compute']]],
   ['runtime_5ferror',['RUNTIME_ERROR',['../namespacearm__compute.xhtml#a59e56af19e754a6aa26a612ebf91d05fa62be47fdd89da032cf78dfce82239579',1,'arm_compute']]]
 ];

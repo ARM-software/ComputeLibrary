@@ -165,25 +165,26 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
     const auto window_end_x          = static_cast<int>(window.x().end());
     const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
 
-    const float output_scale  = out->info()->quantization_info().scale;
-    const int   output_offset = out->info()->quantization_info().offset;
+    const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
 
-    const float32x4_t vscale1    = vdupq_n_f32(in1->info()->quantization_info().scale);
-    const float32x4_t vscale2    = vdupq_n_f32(in2->info()->quantization_info().scale);
-    const float32x4_t invvscaleo = vdupq_n_f32(1.f / output_scale);
-    const int32x4_t   voffset1   = vdupq_n_s32(in1->info()->quantization_info().offset);
-    const int32x4_t   voffset2   = vdupq_n_s32(in2->info()->quantization_info().offset);
-    const float32x4_t voffseto   = vdupq_n_f32(output_offset);
+    const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
+    const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
+    const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
+    const int32x4_t   voffset1   = vdupq_n_s32(iq1_info.offset);
+    const int32x4_t   voffset2   = vdupq_n_s32(iq2_info.offset);
+    const float32x4_t voffseto   = vdupq_n_f32(oq_info.offset);
 
     if(is_broadcast_across_x)
     {
-        const bool             is_broadcast_input_2 = input2_win.x().step() == 0;
-        Window                 broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
-        Window                 non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
-        const ITensor         *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
-        const ITensor         *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
-        const QuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info();
-        const QuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info();
+        const bool                    is_broadcast_input_2 = input2_win.x().step() == 0;
+        Window                        broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
+        Window                        non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
+        const ITensor                *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
+        const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
+        const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
+        const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -252,7 +253,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
             for(; x < window_end_x; ++x)
             {
                 const float afs   = static_cast<int32_t>(*(non_broadcast_input_ptr + x) - non_broadcast_qinfo.offset) * non_broadcast_qinfo.scale;
-                *(output_ptr + x) = out->info()->quantization_info().quantize((afs + bfs), RoundingPolicy::TO_NEAREST_UP);
+                *(output_ptr + x) = quantize_qasymm8((afs + bfs), oq_info);
             }
         },
         broadcast_input, non_broadcast_input, output);
@@ -262,9 +263,6 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
         // Clear X Dimension on execution window as we handle manually
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-        const QuantizationInfo input1_qinfo = in1->info()->quantization_info();
-        const QuantizationInfo input2_qinfo = in2->info()->quantization_info();
 
         Iterator input1(in1, input1_win);
         Iterator input2(in2, input2_win);
@@ -328,9 +326,175 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                const float afs   = static_cast<int32_t>((*(input1_ptr + x)) - input1_qinfo.offset) * input1_qinfo.scale;
-                const float bfs   = static_cast<int32_t>((*(input2_ptr + x)) - input2_qinfo.offset) * input2_qinfo.scale;
-                *(output_ptr + x) = out->info()->quantization_info().quantize((afs + bfs), RoundingPolicy::TO_NEAREST_UP);
+                const float afs   = static_cast<int32_t>((*(input1_ptr + x)) - iq1_info.offset) * iq1_info.scale;
+                const float bfs   = static_cast<int32_t>((*(input2_ptr + x)) - iq2_info.offset) * iq2_info.scale;
+                *(output_ptr + x) = quantize_qasymm8((afs + bfs), out->info()->quantization_info());
+            }
+        },
+        input1, input2, output);
+    }
+}
+
+void add_QSYMM16_QSYMM16_QSYMM16(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolicy policy, const Window &window)
+{
+    ARM_COMPUTE_UNUSED(policy);
+
+    // Create input windows
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+
+    // Clear X Dimension on execution window as we handle manually
+    Window win = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    const int  window_step_x         = 8;
+    const auto window_start_x        = static_cast<int>(window.x().start());
+    const auto window_end_x          = static_cast<int>(window.x().end());
+    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+
+    const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
+
+    const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
+    const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
+    const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
+
+    if(is_broadcast_across_x)
+    {
+        const bool                    is_broadcast_input_2 = input2_win.x().step() == 0;
+        Window                        broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
+        Window                        non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
+        const ITensor                *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
+        const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
+        const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
+        const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
+
+        // Clear X Dimension on execution window as we handle manually
+        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator broadcast_input(broadcast_tensor, broadcast_win);
+        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto non_broadcast_input_ptr = reinterpret_cast<const int16_t *>(non_broadcast_input.ptr());
+            const auto output_ptr              = reinterpret_cast<int16_t *>(output.ptr());
+
+            const int16_t   broadcast_value     = *reinterpret_cast<const int16_t *>(broadcast_input.ptr());
+            const int16x8_t broadcast_value_vec = vdupq_n_s16(broadcast_value);
+
+            const float32x4x2_t bf =
+            {
+                {
+                    vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(broadcast_value_vec))), vscale2),
+                    vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(broadcast_value_vec))), vscale2),
+                }
+            };
+            const float bfs = static_cast<int32_t>(broadcast_value) * broadcast_qinfo.scale;
+
+            // Compute S elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const int16x8_t     a = vld1q_s16(non_broadcast_input_ptr + x);
+                const float32x4x2_t af =
+                {
+                    {
+                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(a))), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(a))), vscale1),
+                    }
+                };
+
+                const int32x4x4_t rf =
+                {
+                    {
+#ifdef __aarch64__
+                        vcvtnq_s32_f32(vmulq_f32(vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtnq_s32_f32(vmulq_f32(vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+#else  //__aarch64__
+                        vcvtq_s32_f32(vmulq_f32(vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtq_s32_f32(vmulq_f32(vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+#endif //__aarch64__
+                    }
+                };
+
+                const int16x8_t pa = vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1]));
+                vst1q_s16(output_ptr + x, pa);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                const float afs   = static_cast<int32_t>(*(non_broadcast_input_ptr + x)) * non_broadcast_qinfo.scale;
+                *(output_ptr + x) = quantize_qsymm16((afs + bfs), oq_info);
+            }
+        },
+        broadcast_input, non_broadcast_input, output);
+    }
+    else
+    {
+        // Clear X Dimension on execution window as we handle manually
+        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input1(in1, input1_win);
+        Iterator input2(in2, input2_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto input1_ptr = reinterpret_cast<const int16_t *>(input1.ptr());
+            const auto input2_ptr = reinterpret_cast<const int16_t *>(input2.ptr());
+            const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
+
+            // Compute S elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const int16x8_t a = vld1q_s16(input1_ptr + x);
+                const int16x8_t b = vld1q_s16(input2_ptr + x);
+
+                const float32x4x2_t af =
+                {
+                    {
+                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(a))), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(a))), vscale1),
+                    }
+                };
+
+                const float32x4x2_t bf =
+                {
+                    {
+                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(b))), vscale2),
+                        vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(b))), vscale2),
+                    }
+                };
+
+                const int32x4x2_t rf =
+                {
+                    {
+#ifdef __aarch64__
+                        vcvtnq_s32_f32(vmulq_f32(vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtnq_s32_f32(vmulq_f32(vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+#else  //__aarch64__
+                        vcvtq_s32_f32(vmulq_f32(vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtq_s32_f32(vmulq_f32(vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+#endif //__aarch64__
+                    }
+                };
+
+                const int16x8_t pa = vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1]));
+                vst1q_s16(output_ptr + x, pa);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                const float afs   = static_cast<int32_t>((*(input1_ptr + x))) * iq1_info.scale;
+                const float bfs   = static_cast<int32_t>((*(input2_ptr + x))) * iq2_info.scale;
+                *(output_ptr + x) = quantize_qsymm16((afs + bfs), out->info()->quantization_info());
             }
         },
         input1, input2, output);
@@ -477,8 +641,8 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
     ARM_COMPUTE_UNUSED(policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
 
@@ -498,7 +662,8 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32 && output.data_type() == DataType::F32)
             && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16 && output.data_type() == DataType::F16)
-            && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8),
+            && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8)
+            && !(input1.data_type() == DataType::QSYMM16 && input2.data_type() == DataType::QSYMM16 && output.data_type() == DataType::QSYMM16),
             "You called addition with the wrong image formats");
 
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),
@@ -530,9 +695,13 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
         {
             set_format_if_unknown(output, Format::F32);
         }
-        else if(input1.data_type() == DataType::QASYMM8 || input2.data_type() == DataType::QASYMM8)
+        else if(input1.data_type() == DataType::QASYMM8)
         {
             set_data_type_if_unknown(output, DataType::QASYMM8);
+        }
+        else if(input1.data_type() == DataType::QSYMM16)
+        {
+            set_data_type_if_unknown(output, DataType::QSYMM16);
         }
     }
 
@@ -542,9 +711,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
     Coordinates coord;
     coord.set_num_dimensions(output.num_dimensions());
     output.set_valid_region(valid_region);
-
     return std::make_pair(Status{}, win);
-    ;
 }
 } // namespace
 
@@ -566,6 +733,8 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
     {
         { "add_wrap_QASYMM8_QASYMM8_QASYMM8", &add_QASYMM8_QASYMM8_QASYMM8 },
         { "add_saturate_QASYMM8_QASYMM8_QASYMM8", &add_QASYMM8_QASYMM8_QASYMM8 },
+        { "add_wrap_QSYMM16_QSYMM16_QSYMM16", &add_QSYMM16_QSYMM16_QSYMM16 },
+        { "add_saturate_QSYMM16_QSYMM16_QSYMM16", &add_QSYMM16_QSYMM16_QSYMM16 },
         { "add_wrap_U8_U8_U8", &add_same<uint8_t, false> },
         { "add_saturate_U8_U8_U8", &add_same<uint8_t, true> },
         { "add_wrap_S16_U8_S16", &add_S16_U8_S16 },

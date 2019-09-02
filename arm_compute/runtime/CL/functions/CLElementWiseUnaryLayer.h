@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,6 +61,106 @@ public:
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLExpLayer
+     *
+     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
+
+/** Basic function to negate an input tensor. */
+class CLNegLayer : public ICLSimpleFunction
+{
+public:
+    /** Initialize the function
+     *
+     * @param[in]  input  Input tensor. Data types supported: F16/F32.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLNegLayer
+     *
+     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
+
+/** Basic function to calculate sine of an input tensor. */
+class CLSinLayer : public ICLSimpleFunction
+{
+public:
+    /** Initialize the function
+     *
+     * @param[in]  input  Input tensor. Data types supported: F16/F32.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLSinLayer
+     *
+     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
+
+/** Basic function to perform elementwise log on an input tensor. */
+class CLLogLayer : public ICLSimpleFunction
+{
+public:
+    /** Initialize the function
+     *
+     * @param[in]  input  Input tensor. Data types supported: F16/F32.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLLogLayer
+     *
+     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
+
+/** Basic function to get the absolute value of an input tensor. */
+class CLAbsLayer : public ICLSimpleFunction
+{
+public:
+    /** Initialize the function
+     *
+     * @param[in]  input  Input tensor. Data types supported: F16/F32.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLAbsLayer
+     *
+     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
+
+/** Basic function to get the round (to the nearest even) value of an input tensor. */
+class CLRoundLayer : public ICLSimpleFunction
+{
+public:
+    /** Initialize the function
+     *
+     * @param[in]  input  Input tensor. Data types supported: F16/F32.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLRoundLayer
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.
      * @param[in] output Output tensor info. Data types supported: Same as @p input.

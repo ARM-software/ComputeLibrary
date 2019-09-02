@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.05</span>
+   &#160;<span id="projectnumber">19.08</span>
    </div>
   </td>
  </tr>
@@ -122,7 +122,7 @@ Public Member Functions</h2></td></tr>
 class arm_gemm::StdTransformsFixed&lt; TOperand, TResult, height, width, block &gt;</h3>
 
 
-<p class="definition">Definition at line <a class="el" href="std__transforms__fixed_8hpp_source.xhtml#l00040">40</a> of file <a class="el" href="std__transforms__fixed_8hpp_source.xhtml">std_transforms_fixed.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="std__transforms__fixed_8hpp_source.xhtml#l00043">43</a> of file <a class="el" href="std__transforms__fixed_8hpp_source.xhtml">std_transforms_fixed.hpp</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="aaecd166dc5d1163768d1553a013c30f8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaecd166dc5d1163768d1553a013c30f8">&#9670;&nbsp;</a></span>Merge()</h2>
@@ -200,8 +200,8 @@ class arm_gemm::StdTransformsFixed&lt; TOperand, TResult, height, width, block &
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="std__transforms__fixed_8hpp_source.xhtml#l00064">64</a> of file <a class="el" href="std__transforms__fixed_8hpp_source.xhtml">std_transforms_fixed.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                                                                                                                                {</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        MergeResults&lt;width, height&gt;(out, in, stride, y0, ymax, x0, xmax, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">alpha</a>, beta);</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a3161c2c93c655dd30953372064ec627b"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">arm_compute::test::validation::alpha</a></div><div class="ttdeci">const float alpha</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00103">Accumulate.cpp:103</a></div></div>
+<p class="definition">Definition at line <a class="el" href="std__transforms__fixed_8hpp_source.xhtml#l00067">67</a> of file <a class="el" href="std__transforms__fixed_8hpp_source.xhtml">std_transforms_fixed.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                                                                                                                                {</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        MergeResults&lt;width, height&gt;(out, in, stride, y0, ymax, x0, xmax, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">alpha</a>, beta);</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a3161c2c93c655dd30953372064ec627b"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">arm_compute::test::validation::alpha</a></div><div class="ttdeci">const float alpha</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00103">Accumulate.cpp:103</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00103">arm_compute::test::validation::alpha</a>.</p>
 
@@ -277,8 +277,8 @@ class arm_gemm::StdTransformsFixed&lt; TOperand, TResult, height, width, block &
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="std__transforms__fixed_8hpp_source.xhtml#l00044">44</a> of file <a class="el" href="std__transforms__fixed_8hpp_source.xhtml">std_transforms_fixed.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                                                                                 {</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keywordflow">if</span> (transposed) {</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            Transform&lt;height, block,  true&gt;(out, in, stride, y0, ymax, k0, kmax);</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        } <span class="keywordflow">else</span> {</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            Transform&lt;height, block, false&gt;(out, in, stride, y0, ymax, k0, kmax);</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        }</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="std__transforms__fixed_8hpp_source.xhtml#l00047">47</a> of file <a class="el" href="std__transforms__fixed_8hpp_source.xhtml">std_transforms_fixed.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                                                                                 {</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keywordflow">if</span> (transposed) {</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;            Transform&lt;height, block,  true&gt;(out, in, stride, y0, ymax, k0, kmax);</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        } <span class="keywordflow">else</span> {</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            Transform&lt;height, block, false&gt;(out, in, stride, y0, ymax, k0, kmax);</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        }</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="aedba4df70219eb533eb0149b60ab182e"></a>
@@ -351,8 +351,8 @@ class arm_gemm::StdTransformsFixed&lt; TOperand, TResult, height, width, block &
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="std__transforms__fixed_8hpp_source.xhtml#l00054">54</a> of file <a class="el" href="std__transforms__fixed_8hpp_source.xhtml">std_transforms_fixed.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                                                                                 {</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keywordflow">if</span> (transposed) {</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            Transform&lt;width, block, false&gt;(out, in, stride, x0, xmax, k0, kmax);</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        } <span class="keywordflow">else</span> {</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            Transform&lt;width, block,  true&gt;(out, in, stride, x0, xmax, k0, kmax);</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        }</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="std__transforms__fixed_8hpp_source.xhtml#l00057">57</a> of file <a class="el" href="std__transforms__fixed_8hpp_source.xhtml">std_transforms_fixed.hpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                                                                                 {</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keywordflow">if</span> (transposed) {</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            Transform&lt;width, block, false&gt;(out, in, stride, x0, xmax, k0, kmax);</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        } <span class="keywordflow">else</span> {</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            Transform&lt;width, block,  true&gt;(out, in, stride, x0, xmax, k0, kmax);</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        }</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -364,7 +364,7 @@ class arm_gemm::StdTransformsFixed&lt; TOperand, TResult, height, width, block &
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__gemm.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="classarm__gemm_1_1_std_transforms_fixed.xhtml">StdTransformsFixed</a></li>
-    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
+    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

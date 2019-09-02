@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
             PixelValue zero_value(0.f);
             if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding())
             {
-                zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+                zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().uniform().offset));
             }
             _border_handler.configure(input, _pooling_layer_kernel.border_size(), border_mode, zero_value);
             break;

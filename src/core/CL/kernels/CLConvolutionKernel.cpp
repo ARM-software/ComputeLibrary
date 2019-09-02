@@ -154,7 +154,8 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
     build_opts.insert("-DDATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution_separable1x" + support::cpp11::to_string(matrix_size) + "_static", build_opts));
+    const std::string kernel_name = "convolution_separable1x" + support::cpp11::to_string(matrix_size) + "_static";
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -171,6 +172,21 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(border_undefined);
 }
 
 template <unsigned int matrix_size>
@@ -212,7 +228,8 @@ void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *i
     build_opts.insert(out_type.str());
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution_separable" + support::cpp11::to_string(matrix_size) + "x1_static", build_opts));
+    const std::string kernel_name = "convolution_separable" + support::cpp11::to_string(matrix_size) + "x1_static";
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -230,6 +247,21 @@ void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *i
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(data_type));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(border_undefined);
 }
 
 /****************************************************************************************\
@@ -316,7 +348,7 @@ void CLConvolutionRectangleKernel::run(const Window &window, cl::CommandQueue &q
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
         add_2D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,8 +50,10 @@ TEST_CASE(GetGPUTargetFromName, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G52") == GPUTarget::G52, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G52LIT") == GPUTarget::G52LIT, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G76") == GPUTarget::G76, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-TTRX") == GPUTarget::TTRX, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G76 r0p0") == GPUTarget::G76, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G77") == GPUTarget::G77, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-TBOX") == GPUTarget::TBOX, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-TODX") == GPUTarget::TODX, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-T000") == GPUTarget::MIDGARD, framework::LogLevel::ERRORS);
 }
 

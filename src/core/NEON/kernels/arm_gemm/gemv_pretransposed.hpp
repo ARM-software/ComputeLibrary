@@ -69,8 +69,8 @@ public:
     GemvPretransposed & operator= (GemvPretransposed &) = delete;
 
     GemvPretransposed(const GemmArgs<Tr> &args)
-            : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _trB(args._trB), _beta(args._beta), _ci(args._ci),
-              _buffer_per_multi(_Ksize * iceildiv(_Nsize, strategy::A_interleave()) * strategy::A_interleave()) {
+                      : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _trB(args._trB), _beta(args._beta), _ci(args._ci),
+                        _buffer_per_multi(_Ksize * iceildiv(_Nsize, strategy::A_interleave()) * strategy::A_interleave()) {
         /* For now don't do any blocking. TODO: figure out if we should. */
         if (args._cfg && args._cfg->inner_block_size) {
             m_block = args._cfg->inner_block_size;

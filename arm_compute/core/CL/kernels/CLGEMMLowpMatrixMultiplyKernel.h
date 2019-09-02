@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,9 @@ class ICLTensor;
 
 /** OpenCL kernel to multiply matrices
  *
- * @note @ref CLGEMMLowpMatrixMultiplyKernel low precision matrix product kernel
- *  This kernel performs the following computation:
+ * @note This kernel should be used ONLY for Midgard architectures
+ *
+ * This kernel performs the following computation:
  *
  *  -# Convert a values from int8 to int32
  *  -# Convert b values from int8 to int32
@@ -55,24 +56,24 @@ public:
     CLGEMMLowpMatrixMultiplyKernel &operator=(CLGEMMLowpMatrixMultiplyKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input0                    Input tensor containing the interleaved Matrix A. Data type supported: QASYMM8
-     * @param[in]  input1                    Input tensor containing the transposed1xW Matrix B. Data type supported: same as @p input0
-     * @param[out] output                    Output tensor to store the result of matrix multiplication. Data type supported: S32
-     * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMReshapeRHSMatrixKernel
-     * @param[in]  reshape_info              (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
+     * @note This kernel should be used ONLY for Midgard architectures
+     *
+     * @param[in]  input0    Input tensor containing the LHS matrix. Data type supported: QASYMM8
+     * @param[in]  input1    Input tensor containing the RHS matrix. Data type supported: same as @p input0
+     * @param[out] output    Output tensor to store the result of matrix multiplication. Data type supported: S32
+     * @param[in]  gemm_info (Optional) GEMM information used to retrieve the original dimensions of the input matrices
      */
-    void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, bool is_interleaved_transposed = true, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
+    void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMReshapeInfo &gemm_info = GEMMReshapeInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyKernel
      *
-     * @param[in] input0                    Input tensor info containing the interleaved Matrix A. Data type supported: QASYMM8
-     * @param[in] input1                    Input tensor info containing the transposed Matrix B. Data type supported: same as @p input0
-     * @param[in] output                    Output tensor info to store the result of matrix multiplication. Data type supported: S32
-     * @param[in] is_interleaved_transposed True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMReshapeRHSMatrixKernel
-     * @param[in] reshape_info              GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
+     * @param[in] input0    Input tensor containing the LHS matrix. Data type supported: QASYMM8
+     * @param[in] input1    Input tensor containing the RHS matrix. Data type supported: same as @p input0
+     * @param[in] output    Output tensor to store the result of matrix multiplication. Data type supported: S32
+     * @param[in] gemm_info (Optional) GEMM information used to retrieve the original dimensions of the input matrices
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info);
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, const GEMMReshapeInfo &gemm_info = GEMMReshapeInfo());
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

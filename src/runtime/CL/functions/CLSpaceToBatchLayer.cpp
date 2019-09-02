@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ void CLSpaceToBatchLayer::configure(const ICLTensor *input, const ICLTensor *blo
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
-        _memset_kernel.configure(output, PixelValue());
+        _memset_kernel.configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
     _space_to_batch_kernel.configure(input, block_shape, paddings, output);
 }
@@ -56,14 +56,14 @@ void CLSpaceToBatchLayer::configure(const ICLTensor *input, const int block_shap
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
-        _memset_kernel.configure(output, PixelValue());
+        _memset_kernel.configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
     _space_to_batch_kernel.configure(input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 }
 
 Status CLSpaceToBatchLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(output, PixelValue()));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(output, PixelValue(0, input->data_type(), input->quantization_info())));
     ARM_COMPUTE_RETURN_ON_ERROR(CLSpaceToBatchLayerKernel::validate(input, block_shape, paddings, output));
 
     return Status{};
@@ -72,7 +72,7 @@ Status CLSpaceToBatchLayer::validate(const ITensorInfo *input, const ITensorInfo
 Status CLSpaceToBatchLayer::validate(const ITensorInfo *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right,
                                      const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(output, PixelValue()));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(output, PixelValue(0, input->data_type(), input->quantization_info())));
     ARM_COMPUTE_RETURN_ON_ERROR(CLSpaceToBatchLayerKernel::validate(input, block_shape_x, block_shape_y, padding_left, padding_right, output));
 
     return Status{};

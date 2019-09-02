@@ -34,24 +34,25 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src, const QuantizationInfo quantization_info)
+SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src, const QuantizationInfo &quantization_info)
 {
     // Create reference
     SimpleTensor<uint8_t> dst{ src.shape(), DataType::QASYMM8, 1, quantization_info };
 
+    const UniformQuantizationInfo qinfo = quantization_info.uniform();
     for(int i = 0; i < src.num_elements(); ++i)
     {
 #ifdef __aarch64__
-        dst[i] = quantization_info.quantize((src[i]), RoundingPolicy::TO_NEAREST_EVEN);
+        dst[i] = quantize_qasymm8((src[i]), qinfo, RoundingPolicy::TO_NEAREST_EVEN);
 #else  // __aarch64__
-        dst[i] = quantization_info.quantize((src[i]), RoundingPolicy::TO_ZERO);
+        dst[i] = quantize_qasymm8((src[i]), qinfo, RoundingPolicy::TO_ZERO);
 #endif // __aarch64__
     }
     return dst;
 }
 
-template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src, const QuantizationInfo quantization_info);
-template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src, const QuantizationInfo quantization_info);
+template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src, const QuantizationInfo &quantization_info);
+template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
