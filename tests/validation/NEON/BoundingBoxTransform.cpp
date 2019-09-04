@@ -50,6 +50,8 @@ RelativeTolerance<half>  relative_tolerance_f16(half(0.2));
 AbsoluteTolerance<float> absolute_tolerance_f16(half(0.02f));
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
+constexpr AbsoluteTolerance<uint16_t> tolerance_qasymm16(1);
+
 // *INDENT-OFF*
 // clang-format off
 const auto BboxInfoDataset = framework::dataset::make("BboxInfo", { BoundingBoxTransformInfo(20U, 20U, 2U, true),
@@ -134,6 +136,21 @@ TEST_SUITE_END() // FP16
 #endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM16)
+template <typename T>
+using NEBoundingBoxTransformQuantizedFixture = BoundingBoxTransformQuantizedFixture<Tensor, Accessor, NEBoundingBoxTransform, T>;
+
+FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformQuantizedFixture<uint16_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::QASYMM16 })),
+                               framework::dataset::make("DeltasQuantInfo", { QuantizationInfo(0.125f, 0) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm16);
+}
+TEST_SUITE_END() // QASYMM16
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // BBoxTransform
 TEST_SUITE_END() // NEON

@@ -59,6 +59,10 @@ Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxe
         ARM_COMPUTE_RETURN_ERROR_ON(boxes_qinfo.offset != 0);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(deltas, DataType::QASYMM8);
     }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(boxes, deltas);
+    }
 
     if(pred_boxes->total_size() > 0)
     {

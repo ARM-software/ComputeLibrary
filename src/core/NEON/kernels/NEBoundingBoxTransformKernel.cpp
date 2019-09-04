@@ -40,21 +40,40 @@ Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxe
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(boxes);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(boxes, DataType::F32, DataType::F16);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(deltas, DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(boxes, DataType::QASYMM16, DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(deltas, DataType::QASYMM8, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON(deltas->tensor_shape()[1] != boxes->tensor_shape()[1]);
     ARM_COMPUTE_RETURN_ERROR_ON(deltas->tensor_shape()[0] % 4 != 0);
     ARM_COMPUTE_RETURN_ERROR_ON(boxes->tensor_shape()[0] != 4);
     ARM_COMPUTE_RETURN_ERROR_ON(deltas->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(boxes->num_dimensions() > 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(info.scale() <= 0);
+
+    if(boxes->data_type() == DataType::QASYMM16)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(deltas, 1, DataType::QASYMM8);
+        const UniformQuantizationInfo deltas_qinfo = deltas->quantization_info().uniform();
+        ARM_COMPUTE_RETURN_ERROR_ON(deltas_qinfo.scale != 0.125f);
+        ARM_COMPUTE_RETURN_ERROR_ON(deltas_qinfo.offset != 0);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(boxes, deltas);
+    }
 
     if(pred_boxes->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(pred_boxes->tensor_shape(), deltas->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(pred_boxes, deltas);
         ARM_COMPUTE_RETURN_ERROR_ON(pred_boxes->num_dimensions() > 2);
+        if(pred_boxes->data_type() == DataType::QASYMM16)
+        {
+            const UniformQuantizationInfo pred_qinfo = pred_boxes->quantization_info().uniform();
+            ARM_COMPUTE_RETURN_ERROR_ON(pred_qinfo.scale != 0.125f);
+            ARM_COMPUTE_RETURN_ERROR_ON(pred_qinfo.offset != 0);
+        }
     }
-    ARM_COMPUTE_RETURN_ERROR_ON(info.scale() <= 0);
+
     return Status{};
 }
 
@@ -62,7 +81,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *boxes, ITen
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(boxes, pred_boxes);
 
-    auto_init_if_empty(*pred_boxes, *deltas);
+    auto_init_if_empty(*pred_boxes, deltas->clone()->set_data_type(boxes->data_type()).set_quantization_info(boxes->quantization_info()));
 
     const unsigned int num_boxes = boxes->dimension(1);
 
@@ -110,13 +129,70 @@ Status NEBoundingBoxTransformKernel::validate(const ITensorInfo *boxes, const IT
     return Status{};
 }
 
+template <>
+void NEBoundingBoxTransformKernel::internal_run<uint16_t>(const Window &window, const ThreadInfo &info)
+{
+    const size_t num_classes  = _deltas->info()->tensor_shape()[0] >> 2;
+    const size_t deltas_width = _deltas->info()->tensor_shape()[0];
+    const int    img_h        = std::floor(_bbinfo.img_height() / _bbinfo.scale() + 0.5f);
+    const int    img_w        = std::floor(_bbinfo.img_width() / _bbinfo.scale() + 0.5f);
+
+    const auto scale_after  = (_bbinfo.apply_scale() ? _bbinfo.scale() : 1.f);
+    const auto scale_before = _bbinfo.scale();
+    const auto offset       = (_bbinfo.correct_transform_coords() ? 1.f : 0.f);
+
+    auto pred_ptr  = reinterpret_cast<uint16_t *>(_pred_boxes->buffer() + _pred_boxes->info()->offset_first_element_in_bytes());
+    auto delta_ptr = reinterpret_cast<uint8_t *>(_deltas->buffer() + _deltas->info()->offset_first_element_in_bytes());
+
+    const auto boxes_qinfo  = _boxes->info()->quantization_info().uniform();
+    const auto deltas_qinfo = _deltas->info()->quantization_info().uniform();
+    const auto pred_qinfo   = _pred_boxes->info()->quantization_info().uniform();
+
+    Iterator box_it(_boxes, window);
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const auto  ptr    = reinterpret_cast<uint16_t *>(box_it.ptr());
+        const auto  b0     = dequantize_qasymm16(*ptr, boxes_qinfo);
+        const auto  b1     = dequantize_qasymm16(*(ptr + 1), boxes_qinfo);
+        const auto  b2     = dequantize_qasymm16(*(ptr + 2), boxes_qinfo);
+        const auto  b3     = dequantize_qasymm16(*(ptr + 3), boxes_qinfo);
+        const float width  = (b2 / scale_before) - (b0 / scale_before) + 1.f;
+        const float height = (b3 / scale_before) - (b1 / scale_before) + 1.f;
+        const float ctr_x  = (b0 / scale_before) + 0.5f * width;
+        const float ctr_y  = (b1 / scale_before) + 0.5f * height;
+        for(size_t j = 0; j < num_classes; ++j)
+        {
+            // Extract deltas
+            const size_t delta_id = id.y() * deltas_width + 4u * j;
+            const float  dx       = dequantize_qasymm8(delta_ptr[delta_id], deltas_qinfo) / _bbinfo.weights()[0];
+            const float  dy       = dequantize_qasymm8(delta_ptr[delta_id + 1], deltas_qinfo) / _bbinfo.weights()[1];
+            float        dw       = dequantize_qasymm8(delta_ptr[delta_id + 2], deltas_qinfo) / _bbinfo.weights()[2];
+            float        dh       = dequantize_qasymm8(delta_ptr[delta_id + 3], deltas_qinfo) / _bbinfo.weights()[3];
+            // Clip dw and dh
+            dw = std::min(dw, _bbinfo.bbox_xform_clip());
+            dh = std::min(dh, _bbinfo.bbox_xform_clip());
+            // Determine the predictions
+            const float pred_ctr_x = dx * width + ctr_x;
+            const float pred_ctr_y = dy * height + ctr_y;
+            const float pred_w     = std::exp(dw) * width;
+            const float pred_h     = std::exp(dh) * height;
+            // Store the prediction into the output tensor
+            pred_ptr[delta_id]     = quantize_qasymm16(scale_after * utility::clamp<float>(pred_ctr_x - 0.5f * pred_w, 0.f, img_w - 1.f), pred_qinfo);
+            pred_ptr[delta_id + 1] = quantize_qasymm16(scale_after * utility::clamp<float>(pred_ctr_y - 0.5f * pred_h, 0.f, img_h - 1.f), pred_qinfo);
+            pred_ptr[delta_id + 2] = quantize_qasymm16(scale_after * utility::clamp<float>(pred_ctr_x + 0.5f * pred_w - offset, 0.f, img_w - 1.f), pred_qinfo);
+            pred_ptr[delta_id + 3] = quantize_qasymm16(scale_after * utility::clamp<float>(pred_ctr_y + 0.5f * pred_h - offset, 0.f, img_h - 1.f), pred_qinfo);
+        }
+    },
+    box_it);
+}
+
 template <typename T>
 void NEBoundingBoxTransformKernel::internal_run(const Window &window, const ThreadInfo &info)
 {
     const size_t num_classes  = _deltas->info()->tensor_shape()[0] >> 2;
     const size_t deltas_width = _deltas->info()->tensor_shape()[0];
-    const int    img_h        = floor(_bbinfo.img_height() / _bbinfo.scale() + 0.5f);
-    const int    img_w        = floor(_bbinfo.img_width() / _bbinfo.scale() + 0.5f);
+    const int    img_h        = std::floor(_bbinfo.img_height() / _bbinfo.scale() + 0.5f);
+    const int    img_w        = std::floor(_bbinfo.img_width() / _bbinfo.scale() + 0.5f);
 
     const auto scale_after  = (_bbinfo.apply_scale() ? T(_bbinfo.scale()) : T(1));
     const auto scale_before = T(_bbinfo.scale());
@@ -152,8 +228,8 @@ void NEBoundingBoxTransformKernel::internal_run(const Window &window, const Thre
             // Determine the predictions
             const T pred_ctr_x = dx * width + ctr_x;
             const T pred_ctr_y = dy * height + ctr_y;
-            const T pred_w     = T(std::exp(dw)) * width;
-            const T pred_h     = T(std::exp(dh)) * height;
+            const T pred_w     = std::exp(dw) * width;
+            const T pred_h     = std::exp(dh) * height;
             // Store the prediction into the output tensor
             pred_ptr[delta_id]     = scale_after * utility::clamp<T>(pred_ctr_x - T(0.5f) * pred_w, T(0), T(img_w - 1));
             pred_ptr[delta_id + 1] = scale_after * utility::clamp<T>(pred_ctr_y - T(0.5f) * pred_h, T(0), T(img_h - 1));
@@ -173,6 +249,11 @@ void NEBoundingBoxTransformKernel::run(const Window &window, const ThreadInfo &i
         case DataType::F32:
         {
             internal_run<float>(window, info);
+            break;
+        }
+        case DataType::QASYMM16:
+        {
+            internal_run<uint16_t>(window, info);
             break;
         }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
