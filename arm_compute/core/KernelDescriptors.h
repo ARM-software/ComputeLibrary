@@ -62,5 +62,17 @@ struct GEMMKernelInfo
     bool                broadcast_bias{ false };          /**< Flag used to broadcase the bias addition */
     ActivationLayerInfo activation_info{};                /**< Activation function to perform after the matrix multiplication */
 };
+
+/** Descriptor used by the depthwise convolution kernels */
+struct DWCKernelInfo
+{
+    ActivationLayerInfo activation_info{}; /**< Activation function to perform after the depthwise convolution */
+};
+
+/** Descriptor used by the depthwise convolution kernels to retrieve the number of output elements processed by each thread */
+struct DWCWeightsKernelInfo
+{
+    unsigned int n0{ 0 }; /**< Number of columns processed by each thread */
+};
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__ */

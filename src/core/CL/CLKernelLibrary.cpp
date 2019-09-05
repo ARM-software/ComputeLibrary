@@ -221,6 +221,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_nhwc", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_nhwc_stride1", "depthwise_convolution.cl" },
+    { "dwc_MxN_native_fp_nhwc", "depthwise_convolution.cl" },
     { "dwc_3x3_native_qasymm8_nchw", "depthwise_convolution_quantized.cl" },
     { "dwc_3x3_native_qasymm8_dot8_nchw", "depthwise_convolution_quantized.cl" },
     { "dwc_3x3_reshaped_qasymm8_nhwc", "depthwise_convolution_quantized.cl" },

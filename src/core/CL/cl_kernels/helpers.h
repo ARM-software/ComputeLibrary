@@ -68,6 +68,7 @@
 #define double1 double
 
 #define vload1(OFFSET, PTR) *(OFFSET + PTR)
+#define vstore1(DATA, OFFSET, PTR) *(OFFSET + PTR) = DATA
 
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
