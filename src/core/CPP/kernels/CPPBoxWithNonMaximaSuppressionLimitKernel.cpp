@@ -360,6 +360,7 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::configure(const ITensor *scores_
 
     ARM_COMPUTE_ERROR_ON(scores_out->info()->dimension(0) != boxes_out->info()->dimension(1));
     ARM_COMPUTE_ERROR_ON(boxes_out->info()->dimension(0) != 4);
+    ARM_COMPUTE_ERROR_ON(scores_out->info()->dimension(0) != classes->info()->dimension(0));
     if(keeps != nullptr)
     {
         ARM_COMPUTE_ERROR_ON_MSG(keeps_size == nullptr, "keeps_size cannot be nullptr if keeps has to be provided as output");

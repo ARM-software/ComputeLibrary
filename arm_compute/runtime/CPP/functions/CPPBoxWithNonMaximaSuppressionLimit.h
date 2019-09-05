@@ -100,7 +100,6 @@ private:
     ITensor       *_classes;
     ITensor       *_batch_splits_out;
     ITensor       *_keeps;
-    ITensor       *_keeps_size;
 
     Tensor _scores_in_f32;
     Tensor _boxes_in_f32;
@@ -110,7 +109,6 @@ private:
     Tensor _classes_f32;
     Tensor _batch_splits_out_f32;
     Tensor _keeps_f32;
-    Tensor _keeps_size_f32;
 
     bool _is_qasymm8;
 };

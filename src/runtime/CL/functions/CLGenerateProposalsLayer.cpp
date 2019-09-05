@@ -30,7 +30,7 @@
 namespace arm_compute
 {
 CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)),
+    : _memory_group(memory_manager),
       _permute_deltas_kernel(),
       _flatten_deltas_kernel(),
       _permute_scores_kernel(),
@@ -38,17 +38,25 @@ CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManage
       _compute_anchors_kernel(),
       _bounding_box_kernel(),
       _pad_kernel(),
-      _cpp_nms_kernel(),
+      _dequantize_anchors(),
+      _dequantize_deltas(),
+      _quantize_all_proposals(),
+      _cpp_nms(memory_manager),
       _is_nhwc(false),
+      _is_qasymm8(false),
       _deltas_permuted(),
       _deltas_flattened(),
+      _deltas_flattened_f32(),
       _scores_permuted(),
       _scores_flattened(),
       _all_anchors(),
+      _all_anchors_f32(),
       _all_proposals(),
+      _all_proposals_quantized(),
       _keeps_nms_unused(),
       _classes_nms_unused(),
       _proposals_4_roi_values(),
+      _all_proposals_to_use(nullptr),
       _num_valid_proposals(nullptr),
       _scores_out(nullptr)
 {
@@ -60,63 +68,93 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
     ARM_COMPUTE_ERROR_THROW_ON(CLGenerateProposalsLayer::validate(scores->info(), deltas->info(), anchors->info(), proposals->info(), scores_out->info(), num_valid_proposals->info(), info));
 
-    _is_nhwc                         = scores->info()->data_layout() == DataLayout::NHWC;
-    const DataType data_type         = deltas->info()->data_type();
-    const int      num_anchors       = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::CHANNEL));
-    const int      feat_width        = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::WIDTH));
-    const int      feat_height       = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::HEIGHT));
-    const int      total_num_anchors = num_anchors * feat_width * feat_height;
-    const int      pre_nms_topN      = info.pre_nms_topN();
-    const int      post_nms_topN     = info.post_nms_topN();
-    const size_t   values_per_roi    = info.values_per_roi();
+    _is_nhwc                        = scores->info()->data_layout() == DataLayout::NHWC;
+    const DataType scores_data_type = scores->info()->data_type();
+    _is_qasymm8                     = scores_data_type == DataType::QASYMM8;
+    const int    num_anchors        = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::CHANNEL));
+    const int    feat_width         = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::WIDTH));
+    const int    feat_height        = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::HEIGHT));
+    const int    total_num_anchors  = num_anchors * feat_width * feat_height;
+    const int    pre_nms_topN       = info.pre_nms_topN();
+    const int    post_nms_topN      = info.post_nms_topN();
+    const size_t values_per_roi     = info.values_per_roi();
+
+    const QuantizationInfo scores_qinfo   = scores->info()->quantization_info();
+    const DataType         rois_data_type = (_is_qasymm8) ? DataType::QASYMM16 : scores_data_type;
+    const QuantizationInfo rois_qinfo     = (_is_qasymm8) ? QuantizationInfo(0.125f, 0) : scores->info()->quantization_info();
 
     // Compute all the anchors
     _memory_group.manage(&_all_anchors);
     _compute_anchors_kernel.configure(anchors, &_all_anchors, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale()));
 
     const TensorShape flatten_shape_deltas(values_per_roi, total_num_anchors);
-    _deltas_flattened.allocator()->init(TensorInfo(flatten_shape_deltas, 1, data_type));
+    _deltas_flattened.allocator()->init(TensorInfo(flatten_shape_deltas, 1, scores_data_type, deltas->info()->quantization_info()));
 
     // Permute and reshape deltas
+    _memory_group.manage(&_deltas_flattened);
     if(!_is_nhwc)
     {
         _memory_group.manage(&_deltas_permuted);
-        _memory_group.manage(&_deltas_flattened);
         _permute_deltas_kernel.configure(deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
         _flatten_deltas_kernel.configure(&_deltas_permuted, &_deltas_flattened);
         _deltas_permuted.allocator()->allocate();
     }
     else
     {
-        _memory_group.manage(&_deltas_flattened);
         _flatten_deltas_kernel.configure(deltas, &_deltas_flattened);
     }
 
     const TensorShape flatten_shape_scores(1, total_num_anchors);
-    _scores_flattened.allocator()->init(TensorInfo(flatten_shape_scores, 1, data_type));
+    _scores_flattened.allocator()->init(TensorInfo(flatten_shape_scores, 1, scores_data_type, scores_qinfo));
 
     // Permute and reshape scores
+    _memory_group.manage(&_scores_flattened);
     if(!_is_nhwc)
     {
         _memory_group.manage(&_scores_permuted);
-        _memory_group.manage(&_scores_flattened);
         _permute_scores_kernel.configure(scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
         _flatten_scores_kernel.configure(&_scores_permuted, &_scores_flattened);
         _scores_permuted.allocator()->allocate();
     }
     else
     {
-        _memory_group.manage(&_scores_flattened);
         _flatten_scores_kernel.configure(scores, &_scores_flattened);
     }
 
+    CLTensor *anchors_to_use = &_all_anchors;
+    CLTensor *deltas_to_use  = &_deltas_flattened;
+    if(_is_qasymm8)
+    {
+        _all_anchors_f32.allocator()->init(TensorInfo(_all_anchors.info()->tensor_shape(), 1, DataType::F32));
+        _deltas_flattened_f32.allocator()->init(TensorInfo(_deltas_flattened.info()->tensor_shape(), 1, DataType::F32));
+        _memory_group.manage(&_all_anchors_f32);
+        _memory_group.manage(&_deltas_flattened_f32);
+        // Dequantize anchors to float
+        _dequantize_anchors.configure(&_all_anchors, &_all_anchors_f32);
+        _all_anchors.allocator()->allocate();
+        anchors_to_use = &_all_anchors_f32;
+        // Dequantize deltas to float
+        _dequantize_deltas.configure(&_deltas_flattened, &_deltas_flattened_f32);
+        _deltas_flattened.allocator()->allocate();
+        deltas_to_use = &_deltas_flattened_f32;
+    }
     // Bounding box transform
     _memory_group.manage(&_all_proposals);
     BoundingBoxTransformInfo bbox_info(info.im_width(), info.im_height(), 1.f);
-    _bounding_box_kernel.configure(&_all_anchors, &_all_proposals, &_deltas_flattened, bbox_info);
-    _deltas_flattened.allocator()->allocate();
-    _all_anchors.allocator()->allocate();
+    _bounding_box_kernel.configure(anchors_to_use, &_all_proposals, deltas_to_use, bbox_info);
+    deltas_to_use->allocator()->allocate();
+    anchors_to_use->allocator()->allocate();
 
+    _all_proposals_to_use = &_all_proposals;
+    if(_is_qasymm8)
+    {
+        _memory_group.manage(&_all_proposals_quantized);
+        // Requantize all_proposals to QASYMM16 with 0.125 scale and 0 offset
+        _all_proposals_quantized.allocator()->init(TensorInfo(_all_proposals.info()->tensor_shape(), 1, DataType::QASYMM16, QuantizationInfo(0.125f, 0)));
+        _quantize_all_proposals.configure(&_all_proposals, &_all_proposals_quantized);
+        _all_proposals.allocator()->allocate();
+        _all_proposals_to_use = &_all_proposals_quantized;
+    }
     // The original layer implementation first selects the best pre_nms_topN anchors (thus having a lightweight sort)
     // that are then transformed by bbox_transform. The boxes generated are then fed into a non-sorting NMS operation.
     // Since we are reusing the NMS layer and we don't implement any CL/sort, we let NMS do the sorting (of all the input)
@@ -127,12 +165,12 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     _memory_group.manage(&_keeps_nms_unused);
 
     // Note that NMS needs outputs preinitialized.
-    auto_init_if_empty(*scores_out->info(), TensorShape(scores_nms_size), 1, data_type);
-    auto_init_if_empty(*_proposals_4_roi_values.info(), TensorShape(values_per_roi, scores_nms_size), 1, data_type);
+    auto_init_if_empty(*scores_out->info(), TensorShape(scores_nms_size), 1, scores_data_type, scores_qinfo);
+    auto_init_if_empty(*_proposals_4_roi_values.info(), TensorShape(values_per_roi, scores_nms_size), 1, rois_data_type, rois_qinfo);
     auto_init_if_empty(*num_valid_proposals->info(), TensorShape(1), 1, DataType::U32);
 
     // Initialize temporaries (unused) outputs
-    _classes_nms_unused.allocator()->init(TensorInfo(TensorShape(1, 1), 1, data_type));
+    _classes_nms_unused.allocator()->init(TensorInfo(TensorShape(scores_nms_size), 1, scores_data_type, scores_qinfo));
     _keeps_nms_unused.allocator()->init(*scores_out->info());
 
     // Save the output (to map and unmap them at run)
@@ -140,11 +178,11 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     _num_valid_proposals = num_valid_proposals;
 
     _memory_group.manage(&_proposals_4_roi_values);
-    _cpp_nms_kernel.configure(&_scores_flattened, &_all_proposals, nullptr, scores_out, &_proposals_4_roi_values, &_classes_nms_unused, nullptr, &_keeps_nms_unused, num_valid_proposals,
-                              BoxNMSLimitInfo(0.0f, info.nms_thres(), scores_nms_size, false, NMSType::LINEAR, 0.5f, 0.001f, true, min_size_scaled, info.im_width(), info.im_height()));
+    _cpp_nms.configure(&_scores_flattened, _all_proposals_to_use, nullptr, scores_out, &_proposals_4_roi_values, &_classes_nms_unused, nullptr, &_keeps_nms_unused, num_valid_proposals,
+                       BoxNMSLimitInfo(0.0f, info.nms_thres(), scores_nms_size, false, NMSType::LINEAR, 0.5f, 0.001f, true, min_size_scaled, info.im_width(), info.im_height()));
     _keeps_nms_unused.allocator()->allocate();
     _classes_nms_unused.allocator()->allocate();
-    _all_proposals.allocator()->allocate();
+    _all_proposals_to_use->allocator()->allocate();
     _scores_flattened.allocator()->allocate();
 
     // Add the first column that represents the batch id. This will be all zeros, as we don't support multiple images
@@ -156,8 +194,10 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
                                           const ITensorInfo *num_valid_proposals, const GenerateProposalsInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(scores, DataLayout::NCHW, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(scores, deltas);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(scores, deltas);
 
     const int num_anchors       = scores->dimension(get_data_layout_dimension_index(scores->data_layout(), DataLayoutDimension::CHANNEL));
     const int feat_width        = scores->dimension(get_data_layout_dimension_index(scores->data_layout(), DataLayoutDimension::WIDTH));
@@ -166,7 +206,16 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     const int total_num_anchors = num_anchors * feat_width * feat_height;
     const int values_per_roi    = info.values_per_roi();
 
+    const bool is_qasymm8 = scores->data_type() == DataType::QASYMM8;
+
     ARM_COMPUTE_RETURN_ERROR_ON(num_images > 1);
+
+    if(is_qasymm8)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(anchors, 1, DataType::QSYMM16);
+        const UniformQuantizationInfo anchors_qinfo = anchors->quantization_info().uniform();
+        ARM_COMPUTE_RETURN_ERROR_ON(anchors_qinfo.scale != 0.125f);
+    }
 
     TensorInfo all_anchors_info(anchors->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
     ARM_COMPUTE_RETURN_ON_ERROR(CLComputeAllAnchorsKernel::validate(anchors, &all_anchors_info, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale())));
@@ -187,14 +236,36 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     TensorInfo deltas_flattened_info(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
     ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(&deltas_permuted_info, &deltas_flattened_info));
 
-    TensorInfo scores_flattened_info(deltas->clone()->set_tensor_shape(TensorShape(1, total_num_anchors)).set_is_resizable(true));
+    TensorInfo scores_flattened_info(scores->clone()->set_tensor_shape(TensorShape(1, total_num_anchors)).set_is_resizable(true));
     TensorInfo proposals_4_roi_values(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(&scores_permuted_info, &scores_flattened_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLBoundingBoxTransformKernel::validate(&all_anchors_info, &proposals_4_roi_values, &deltas_flattened_info, BoundingBoxTransformInfo(info.im_width(), info.im_height(),
-                                                                       1.f)));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPadLayerKernel::validate(&proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } }));
+    TensorInfo *proposals_4_roi_values_to_use = &proposals_4_roi_values;
+    TensorInfo  proposals_4_roi_values_quantized(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
+    proposals_4_roi_values_quantized.set_data_type(DataType::QASYMM16).set_quantization_info(QuantizationInfo(0.125f, 0));
+    if(is_qasymm8)
+    {
+        TensorInfo all_anchors_f32_info(anchors->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true).set_data_type(DataType::F32));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDequantizationLayerKernel::validate(&all_anchors_info, &all_anchors_f32_info));
+
+        TensorInfo deltas_flattened_f32_info(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true).set_data_type(DataType::F32));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDequantizationLayerKernel::validate(&deltas_flattened_info, &deltas_flattened_f32_info));
+
+        TensorInfo proposals_4_roi_values_f32(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true).set_data_type(DataType::F32));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLBoundingBoxTransformKernel::validate(&all_anchors_f32_info, &proposals_4_roi_values_f32, &deltas_flattened_f32_info,
+                                                                           BoundingBoxTransformInfo(info.im_width(), info.im_height(), 1.f)));
+
+        ARM_COMPUTE_RETURN_ON_ERROR(CLQuantizationLayerKernel::validate(&proposals_4_roi_values_f32, &proposals_4_roi_values_quantized));
+        proposals_4_roi_values_to_use = &proposals_4_roi_values_quantized;
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLBoundingBoxTransformKernel::validate(&all_anchors_info, &proposals_4_roi_values, &deltas_flattened_info,
+                                                                           BoundingBoxTransformInfo(info.im_width(), info.im_height(), 1.f)));
+    }
+
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPadLayerKernel::validate(proposals_4_roi_values_to_use, proposals, PaddingList{ { 1, 0 } }));
 
     if(num_valid_proposals->total_size() > 0)
     {
@@ -208,7 +279,17 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
         ARM_COMPUTE_RETURN_ERROR_ON(proposals->num_dimensions() > 2);
         ARM_COMPUTE_RETURN_ERROR_ON(proposals->dimension(0) != size_t(values_per_roi) + 1);
         ARM_COMPUTE_RETURN_ERROR_ON(proposals->dimension(1) != size_t(total_num_anchors));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(proposals, deltas);
+        if(is_qasymm8)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(proposals, 1, DataType::QASYMM16);
+            const UniformQuantizationInfo proposals_qinfo = proposals->quantization_info().uniform();
+            ARM_COMPUTE_RETURN_ERROR_ON(proposals_qinfo.scale != 0.125f);
+            ARM_COMPUTE_RETURN_ERROR_ON(proposals_qinfo.offset != 0);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(proposals, scores);
+        }
     }
 
     if(scores_out->total_size() > 0)
@@ -225,7 +306,7 @@ void CLGenerateProposalsLayer::run_cpp_nms_kernel()
 {
     // Map inputs
     _scores_flattened.map(true);
-    _all_proposals.map(true);
+    _all_proposals_to_use->map(true);
 
     // Map outputs
     _scores_out->map(CLScheduler::get().queue(), true);
@@ -235,7 +316,7 @@ void CLGenerateProposalsLayer::run_cpp_nms_kernel()
     _classes_nms_unused.map(true);
 
     // Run nms
-    CPPScheduler::get().schedule(&_cpp_nms_kernel, Window::DimX);
+    _cpp_nms.run();
 
     // Unmap outputs
     _keeps_nms_unused.unmap();
@@ -246,7 +327,7 @@ void CLGenerateProposalsLayer::run_cpp_nms_kernel()
 
     // Unmap inputs
     _scores_flattened.unmap();
-    _all_proposals.unmap();
+    _all_proposals_to_use->unmap();
 }
 
 void CLGenerateProposalsLayer::run()
@@ -266,8 +347,20 @@ void CLGenerateProposalsLayer::run()
     CLScheduler::get().enqueue(_flatten_deltas_kernel, false);
     CLScheduler::get().enqueue(_flatten_scores_kernel, false);
 
+    if(_is_qasymm8)
+    {
+        CLScheduler::get().enqueue(_dequantize_anchors, false);
+        CLScheduler::get().enqueue(_dequantize_deltas, false);
+    }
+
     // Build the boxes
     CLScheduler::get().enqueue(_bounding_box_kernel, false);
+
+    if(_is_qasymm8)
+    {
+        CLScheduler::get().enqueue(_quantize_all_proposals, false);
+    }
+
     // Non maxima suppression
     run_cpp_nms_kernel();
     // Add dummy batch indexes

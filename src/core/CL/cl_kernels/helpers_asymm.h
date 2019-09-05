@@ -375,9 +375,11 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
 
 QUANTIZE_IMPL(uchar, 4)
 QUANTIZE_IMPL(ushort, 4)
+QUANTIZE_IMPL(short, 4)
 
 DEQUANTIZE_IMPL(uchar, 4)
 DEQUANTIZE_IMPL(ushort, 4)
+DEQUANTIZE_IMPL(short, 4)
 
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(2)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(4)

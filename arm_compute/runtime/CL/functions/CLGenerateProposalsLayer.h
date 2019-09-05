@@ -24,16 +24,17 @@
 #ifndef __ARM_COMPUTE_CLGENERATEPROPOSALSLAYER_H__
 #define __ARM_COMPUTE_CLGENERATEPROPOSALSLAYER_H__
 #include "arm_compute/core/CL/kernels/CLBoundingBoxTransformKernel.h"
+#include "arm_compute/core/CL/kernels/CLDequantizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
+#include "arm_compute/core/CL/kernels/CLQuantizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
@@ -47,10 +48,11 @@ class ICLTensor;
  * -# @ref CLComputeAllAnchors
  * -# @ref CLPermute x 2
  * -# @ref CLReshapeLayer x 2
- * -# @ref CLStridedSlice x 3
  * -# @ref CLBoundingBoxTransform
  * -# @ref CLPadLayerKernel
- * And the following CPP kernels:
+ * -# @ref CLDequantizationLayerKernel
+ * -# @ref CLQuantizationLayerKernel
+ * And the following CPP functions:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit
  */
 class CLGenerateProposalsLayer : public IFunction
@@ -72,11 +74,13 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  scores              Scores from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors. Data types supported: F16/F32
+     * @param[in]  scores              Scores from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors.
+     *                                 Data types supported: QASYMM8/F16/F32
      * @param[in]  deltas              Bounding box deltas from convolution layer of size (W, H, 4*A). Data types supported: Same as @p scores
-     * @param[in]  anchors             Anchors tensor of size (4, A). Data types supported: Same as @p input
-     * @param[out] proposals           Box proposals output tensor of size (5, W*H*A). Data types supported: Same as @p input
-     * @param[out] scores_out          Box scores output tensor of size (W*H*A). Data types supported: Same as @p input
+     * @param[in]  anchors             Anchors tensor of size (4, A). Data types supported: QSYMM16 with scale of 0.125 if @p scores is QASYMM8, otherwise same as @p scores
+     * @param[out] proposals           Box proposals output tensor of size (5, W*H*A).
+     *                                 Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p scores is QASYMM8, otherwise same as @p scores
+     * @param[out] scores_out          Box scores output tensor of size (W*H*A). Data types supported: Same as @p scores
      * @param[out] num_valid_proposals Scalar output tensor which says which of the first proposals are valid. Data types supported: U32
      * @param[in]  info                Contains GenerateProposals operation information described in @ref GenerateProposalsInfo
      *
@@ -88,12 +92,14 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLGenerateProposalsLayer
      *
-     * @param[in] scores              Scores info from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors. Data types supported: F16/F32
+     * @param[in] scores              Scores info from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors.
+     *                                Data types supported: QASYMM8/F16/F32
      * @param[in] deltas              Bounding box deltas info from convolution layer of size (W, H, 4*A). Data types supported: Same as @p scores
-     * @param[in] anchors             Anchors tensor info of size (4, A). Data types supported: Same as @p input
-     * @param[in] proposals           Box proposals info  output tensor of size (5, W*H*A). Data types supported: Data types supported: U32
-     * @param[in] scores_out          Box scores output tensor info of size (W*H*A). Data types supported: Same as @p input
-     * @param[in] num_valid_proposals Scalar output tensor info which says which of the first proposals are valid. Data types supported: Same as @p input
+     * @param[in] anchors             Anchors tensor of size (4, A). Data types supported: QSYMM16 with scale of 0.125 if @p scores is QASYMM8, otherwise same as @p scores
+     * @param[in] proposals           Box proposals info  output tensor of size (5, W*H*A).
+     *                                Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p scores is QASYMM8, otherwise same as @p scores
+     * @param[in] scores_out          Box scores output tensor info of size (W*H*A). Data types supported: Same as @p scores
+     * @param[in] num_valid_proposals Scalar output tensor info which says which of the first proposals are valid. Data types supported: U32
      * @param[in] info                Contains GenerateProposals operation information described in @ref GenerateProposalsInfo
      *
      * @return a Status
@@ -117,22 +123,32 @@ private:
     CLComputeAllAnchorsKernel    _compute_anchors_kernel;
     CLBoundingBoxTransformKernel _bounding_box_kernel;
     CLPadLayerKernel             _pad_kernel;
+    CLDequantizationLayerKernel  _dequantize_anchors;
+    CLDequantizationLayerKernel  _dequantize_deltas;
+    CLQuantizationLayerKernel    _quantize_all_proposals;
 
-    // CPP kernels
-    CPPBoxWithNonMaximaSuppressionLimitKernel _cpp_nms_kernel;
+    // CPP functions
+    CPPBoxWithNonMaximaSuppressionLimit _cpp_nms;
 
     bool _is_nhwc;
+    bool _is_qasymm8;
 
     // Temporary tensors
     CLTensor _deltas_permuted;
     CLTensor _deltas_flattened;
+    CLTensor _deltas_flattened_f32;
     CLTensor _scores_permuted;
     CLTensor _scores_flattened;
     CLTensor _all_anchors;
+    CLTensor _all_anchors_f32;
     CLTensor _all_proposals;
+    CLTensor _all_proposals_quantized;
     CLTensor _keeps_nms_unused;
     CLTensor _classes_nms_unused;
     CLTensor _proposals_4_roi_values;
+
+    // Temporary tensor pointers
+    CLTensor *_all_proposals_to_use;
 
     // Output tensor pointers
     ICLTensor *_num_valid_proposals;

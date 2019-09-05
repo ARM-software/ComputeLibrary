@@ -73,6 +73,15 @@ SimpleTensor<T> compute_all_anchors(const SimpleTensor<T> &anchors, const Comput
 }
 template SimpleTensor<float> compute_all_anchors(const SimpleTensor<float> &anchors, const ComputeAnchorsInfo &info);
 template SimpleTensor<half> compute_all_anchors(const SimpleTensor<half> &anchors, const ComputeAnchorsInfo &info);
+
+template <>
+SimpleTensor<int16_t> compute_all_anchors(const SimpleTensor<int16_t> &anchors, const ComputeAnchorsInfo &info)
+{
+    SimpleTensor<float>   anchors_tmp     = convert_from_symmetric(anchors);
+    SimpleTensor<float>   all_anchors_tmp = compute_all_anchors(anchors_tmp, info);
+    SimpleTensor<int16_t> all_anchors     = convert_to_symmetric<int16_t>(all_anchors_tmp, anchors.quantization_info());
+    return all_anchors;
+}
 } // namespace reference
 } // namespace validation
 } // namespace test
