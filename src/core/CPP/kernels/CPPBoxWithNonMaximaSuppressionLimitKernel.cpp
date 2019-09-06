@@ -351,6 +351,7 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::configure(const ITensor *scores_
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores_in, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(scores_in, boxes_in, scores_out);
     const unsigned int num_classes = scores_in->info()->dimension(0);
 
     ARM_COMPUTE_UNUSED(num_classes);
