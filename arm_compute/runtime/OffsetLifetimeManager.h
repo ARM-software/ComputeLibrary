@@ -41,6 +41,9 @@ class IMemoryPool;
 class OffsetLifetimeManager : public ISimpleLifetimeManager
 {
 public:
+    using info_type = BlobInfo;
+
+public:
     /** Constructor */
     OffsetLifetimeManager();
     /** Prevent instances of this class to be copy constructed */
@@ -51,6 +54,11 @@ public:
     OffsetLifetimeManager(OffsetLifetimeManager &&) = default;
     /** Allow instances of this class to be moved */
     OffsetLifetimeManager &operator=(OffsetLifetimeManager &&) = default;
+    /** Accessor to the pool internal configuration meta-data
+     *
+     * @return Pool internal configuration meta-data
+     */
+    const info_type &info() const;
 
     // Inherited methods overridden:
     std::unique_ptr<IMemoryPool> create_pool(IAllocator *allocator) override;

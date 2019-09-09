@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,7 +100,7 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t
     occupied_blob_it->id            = nullptr;
     _free_blobs.splice(std::begin(_free_blobs), _occupied_blobs, occupied_blob_it);
 
-    // Check if all object are finalized and reset active group
+    // Check if all objects are finalized and reset active group
     if(are_all_finalized())
     {
         ARM_COMPUTE_ERROR_ON(!_occupied_blobs.empty());

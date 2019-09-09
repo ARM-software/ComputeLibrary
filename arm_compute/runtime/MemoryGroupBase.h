@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,7 +101,7 @@ inline MemoryGroupBase<TensorType>::MemoryGroupBase(std::shared_ptr<IMemoryManag
 template <typename TensorType>
 inline void MemoryGroupBase<TensorType>::manage(TensorType *obj)
 {
-    if(_memory_manager && _mappings.empty())
+    if(_memory_manager)
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
 
@@ -119,11 +119,7 @@ inline void MemoryGroupBase<TensorType>::manage(TensorType *obj)
 template <typename TensorType>
 inline void MemoryGroupBase<TensorType>::finalize_memory(TensorType *obj, IMemory &obj_memory, size_t size, size_t alignment)
 {
-    // TODO (geopin01) : Check size (track size in MemoryMappings)
-    // Check if existing mapping is valid
-    ARM_COMPUTE_ERROR_ON(!_mappings.empty() && (_mappings.find(&obj_memory) == std::end(_mappings)));
-
-    if(_memory_manager && _mappings.empty())
+    if(_memory_manager)
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
         _memory_manager->lifetime_manager()->end_lifetime(obj, obj_memory, size, alignment);

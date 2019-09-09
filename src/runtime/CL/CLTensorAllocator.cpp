@@ -181,7 +181,7 @@ Status CLTensorAllocator::import_memory(cl::Buffer buffer)
 void CLTensorAllocator::set_associated_memory_group(CLMemoryGroup *associated_memory_group)
 {
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
-    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr);
+    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr && _associated_memory_group != associated_memory_group);
     ARM_COMPUTE_ERROR_ON(_memory.region() != nullptr && _memory.cl_region()->cl_data().get() != nullptr);
 
     _associated_memory_group = associated_memory_group;

@@ -58,6 +58,11 @@ public:
     OffsetMemoryPool(OffsetMemoryPool &&) = default;
     /** Allow instances of this class to be move assigned */
     OffsetMemoryPool &operator=(OffsetMemoryPool &&) = default;
+    /** Accessor to the pool internal configuration meta-data
+     *
+     * @return Pool internal configuration meta-data
+     */
+    const BlobInfo &info() const;
 
     // Inherited methods overridden:
     void acquire(MemoryMappings &handles) override;

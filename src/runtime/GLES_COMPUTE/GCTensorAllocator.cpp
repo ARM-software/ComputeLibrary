@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ void GCTensorAllocator::free()
 void GCTensorAllocator::set_associated_memory_group(GCMemoryGroup *associated_memory_group)
 {
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
-    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr);
+    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr && _associated_memory_group != associated_memory_group);
     ARM_COMPUTE_ERROR_ON(_memory.region() != nullptr && _memory.gc_region()->gc_ssbo_name() != 0);
 
     _associated_memory_group = associated_memory_group;

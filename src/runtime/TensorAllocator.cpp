@@ -164,7 +164,7 @@ Status TensorAllocator::import_memory(void *memory)
 void TensorAllocator::set_associated_memory_group(MemoryGroup *associated_memory_group)
 {
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
-    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr);
+    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr && _associated_memory_group != associated_memory_group);
     ARM_COMPUTE_ERROR_ON(_memory.region() != nullptr && _memory.region()->buffer() != nullptr);
 
     _associated_memory_group = associated_memory_group;
