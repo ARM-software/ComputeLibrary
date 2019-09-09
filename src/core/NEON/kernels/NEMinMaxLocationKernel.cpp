@@ -117,7 +117,7 @@ void NEMinMaxKernel::reset()
 template <typename T>
 void NEMinMaxKernel::update_min_max(const T min, const T max)
 {
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
 
     using type = typename std::conditional<std::is_same<T, float>::value, float, int32_t>::type;
 

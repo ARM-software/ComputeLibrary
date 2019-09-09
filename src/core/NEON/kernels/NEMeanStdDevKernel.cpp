@@ -142,7 +142,7 @@ void NEMeanStdDevKernel::run(const Window &window, const ThreadInfo &info)
     const float num_pixels = _input->info()->dimension(0) * _input->info()->dimension(1);
 
     // Merge sum and calculate mean and stddev
-    std::unique_lock<arm_compute::Mutex> lock(_mtx);
+    arm_compute::unique_lock<arm_compute::Mutex> lock(_mtx);
 
     *_global_sum += vget_lane_u64(local_sum, 0);
 

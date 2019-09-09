@@ -55,7 +55,7 @@ public:
      */
     inline void print(const std::string &msg)
     {
-        std::lock_guard<arm_compute::Mutex> lock(_mtx);
+        arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
         print_internal(msg);
     }
 

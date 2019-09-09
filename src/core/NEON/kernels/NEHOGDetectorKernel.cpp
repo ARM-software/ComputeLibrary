@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -177,7 +177,7 @@ void NEHOGDetectorKernel::run(const Window &window, const ThreadInfo &info)
                 win.idx_class = _idx_class;
                 win.score     = score;
 
-                std::unique_lock<arm_compute::Mutex> lock(_mutex);
+                arm_compute::unique_lock<arm_compute::Mutex> lock(_mutex);
                 _detection_windows->push_back(win);
                 lock.unlock();
             }

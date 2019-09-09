@@ -41,7 +41,7 @@ class Coordinates;
 
 inline void NEHistogramKernel::merge_histogram(uint32_t *global_hist, const uint32_t *local_hist, size_t bins)
 {
-    std::lock_guard<arm_compute::Mutex> lock(_hist_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_hist_mtx);
 
     const unsigned int v_end = (bins / 4) * 4;
 

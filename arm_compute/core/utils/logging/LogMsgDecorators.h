@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,9 @@
 #include <chrono>
 #include <ctime>
 #include <string>
+#ifndef NO_MULTI_THREADING
 #include <thread>
+#endif /* NO_MULTI_THREADING */
 
 namespace arm_compute
 {

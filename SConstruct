@@ -146,6 +146,8 @@ if env['os'] == 'android' and ( 'clang++' not in cpp_compiler or 'clang' not in 
 
 if 'clang++' in cpp_compiler:
     env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
+elif 'armclang' in cpp_compiler:
+    pass
 else:
     env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel', '-Wno-redundant-move'])
 
@@ -161,6 +163,7 @@ if env['openmp']:
     env.Append(CXXFLAGS = ['-fopenmp'])
     env.Append(LINKFLAGS = ['-fopenmp'])
 
+# Add architecture specific flags
 prefix = ""
 if env['arch'] == 'armv7a':
     env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
@@ -207,6 +210,10 @@ elif env['arch'] == 'x86_64':
     env.Append(CCFLAGS = ['-m64'])
     env.Append(LINKFLAGS = ['-m64'])
 
+# Rework flags depending on compiler version
+if 'armclang' in cpp_compiler:
+    if 'NO_DOT_IN_TOOLCHAIN' in env['CPPDEFINES']: env['CPPDEFINES'].remove('NO_DOT_IN_TOOLCHAIN')
+
 if env['build'] == 'native':
     prefix = ""
 
@@ -227,7 +234,9 @@ if not GetOption("help"):
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
 
-    if 'clang++' not in cpp_compiler:
+    if 'armclang' in cpp_compiler:
+        pass
+    elif 'clang++' not in cpp_compiler:
         if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
             print("GCC 6.2.1 or newer is required to compile armv8.2-a code")
             Exit(1)

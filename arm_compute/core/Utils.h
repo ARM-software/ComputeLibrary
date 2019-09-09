@@ -1128,7 +1128,10 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
     switch(dt)
     {
         case DataType::U8:
-            return ((static_cast<uint8_t>(val) == val) && val >= std::numeric_limits<uint8_t>::lowest() && val <= std::numeric_limits<uint8_t>::max());
+        {
+            const auto val_u8 = static_cast<uint8_t>(val);
+            return ((val_u8 == val) && val_u8 >= std::numeric_limits<uint8_t>::lowest() && val_u8 <= std::numeric_limits<uint8_t>::max());
+        }
         case DataType::QASYMM8:
         {
             double min = static_cast<double>(dequantize_qasymm8(0, qinfo));
@@ -1136,27 +1139,34 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
             return ((double)val >= min && (double)val <= max);
         }
         case DataType::S8:
-            return ((static_cast<int8_t>(val) == val) && val >= std::numeric_limits<int8_t>::lowest() && val <= std::numeric_limits<int8_t>::max());
+        {
+            const auto val_s8 = static_cast<int8_t>(val);
+            return ((val_s8 == val) && val_s8 >= std::numeric_limits<int8_t>::lowest() && val_s8 <= std::numeric_limits<int8_t>::max());
+        }
         case DataType::U16:
-            return ((static_cast<uint16_t>(val) == val) && val >= std::numeric_limits<uint16_t>::lowest() && val <= std::numeric_limits<uint16_t>::max());
+        {
+            const auto val_u16 = static_cast<uint16_t>(val);
+            return ((val_u16 == val) && val_u16 >= std::numeric_limits<uint16_t>::lowest() && val_u16 <= std::numeric_limits<uint16_t>::max());
+        }
         case DataType::S16:
-            return ((static_cast<int16_t>(val) == val) && val >= std::numeric_limits<int16_t>::lowest() && val <= std::numeric_limits<int16_t>::max());
+        {
+            const auto val_s16 = static_cast<int16_t>(val);
+            return ((val_s16 == val) && val_s16 >= std::numeric_limits<int16_t>::lowest() && val_s16 <= std::numeric_limits<int16_t>::max());
+        }
         case DataType::U32:
-            return ((static_cast<uint32_t>(val) == val) && val >= std::numeric_limits<uint32_t>::lowest() && val <= std::numeric_limits<uint32_t>::max());
+        {
+            const auto val_u32 = static_cast<uint32_t>(val);
+            return ((val_u32 == val) && val_u32 >= std::numeric_limits<uint32_t>::lowest() && val_u32 <= std::numeric_limits<uint32_t>::max());
+        }
         case DataType::S32:
-            return ((static_cast<int32_t>(val) == val) && val >= std::numeric_limits<int32_t>::lowest() && val <= std::numeric_limits<int32_t>::max());
-        case DataType::U64:
-            return (val >= std::numeric_limits<uint64_t>::lowest() && val <= std::numeric_limits<uint64_t>::max());
-        case DataType::S64:
-            return (val >= std::numeric_limits<int64_t>::lowest() && val <= std::numeric_limits<int64_t>::max());
+        {
+            const auto val_s32 = static_cast<int32_t>(val);
+            return ((val_s32 == val) && val_s32 >= std::numeric_limits<int32_t>::lowest() && val_s32 <= std::numeric_limits<int32_t>::max());
+        }
         case DataType::F16:
             return (val >= std::numeric_limits<half>::lowest() && val <= std::numeric_limits<half>::max());
         case DataType::F32:
             return (val >= std::numeric_limits<float>::lowest() && val <= std::numeric_limits<float>::max());
-        case DataType::F64:
-            return (val >= std::numeric_limits<double>::lowest() && val <= std::numeric_limits<double>::max());
-        case DataType::SIZET:
-            return ((static_cast<size_t>(val) == val) && val >= std::numeric_limits<size_t>::lowest() && val <= std::numeric_limits<size_t>::max());
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
             return false;
