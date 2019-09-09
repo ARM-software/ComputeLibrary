@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,8 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCNormalizationLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPixelWiseMultiplicationKernel.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include "arm_compute/core/Types.h"
 
@@ -63,7 +63,7 @@ public:
     void run() override;
 
 private:
-    GCMemoryGroup                   _memory_group;
+    MemoryGroup                     _memory_group;
     GCTensor                        _squared_input;   /**< The intermediate buffer which stores results of squaring input*/
     GCNormalizationLayerKernel      _norm_kernel;     /**< Normalization layer kernel to run */
     GCPixelWiseMultiplicationKernel _multiply_kernel; /**< Pixel multiplication kernel to run */

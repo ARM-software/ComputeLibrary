@@ -29,10 +29,10 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -123,7 +123,7 @@ private:
     static Status validate_reshaped_v2(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
     static Status validate_reshaped_only_rhs(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
 
-    CLMemoryGroup                             _memory_group;
+    MemoryGroup                               _memory_group;
     CLGEMMMatrixMultiplyKernel                _mm_kernel;
     CLGEMMReshapeLHSMatrixKernel              _reshape_lhs_kernel;
     CLGEMMReshapeRHSMatrixKernel              _reshape_rhs_kernel;

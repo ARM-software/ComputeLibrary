@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/Tensor.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 Tensor::Tensor()
     : _allocator(this)
 {
@@ -49,3 +49,9 @@ TensorAllocator *Tensor::allocator()
 {
     return &_allocator;
 }
+
+void Tensor::associate_memory_group(IMemoryGroup *memory_group)
+{
+    _allocator.set_associated_memory_group(memory_group);
+}
+} // namespace arm_compute

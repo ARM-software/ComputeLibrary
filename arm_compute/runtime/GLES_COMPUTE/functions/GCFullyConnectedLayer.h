@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,9 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCIm2ColKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -92,7 +92,7 @@ private:
     void configure_fc_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
     void configure_conv_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
 
-    GCMemoryGroup                       _memory_group;
+    MemoryGroup                         _memory_group;
     GCIm2ColKernel                      _im2col_kernel;
     GCFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
     GCGEMMMatrixMultiplyKernel          _mm_kernel;

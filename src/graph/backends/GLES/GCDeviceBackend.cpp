@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,8 +36,8 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCBufferAllocator.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
 
@@ -85,7 +85,7 @@ void GCDeviceBackend::setup_backend_context(GraphContext &ctx)
         mm_ctx.target      = Target::GC;
         mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
         mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
-        mm_ctx.cross_group = std::make_shared<GCMemoryGroup>(mm_ctx.cross_mm);
+        mm_ctx.cross_group = std::make_shared<MemoryGroup>(mm_ctx.cross_mm);
         mm_ctx.allocator   = &_allocator;
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));

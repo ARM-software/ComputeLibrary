@@ -24,22 +24,58 @@
 #ifndef __ARM_COMPUTE_IMEMORYGROUP_H__
 #define __ARM_COMPUTE_IMEMORYGROUP_H__
 
+#include "arm_compute/runtime/IMemory.h"
 #include "arm_compute/runtime/Types.h"
 
 namespace arm_compute
 {
+// Forward declarations
+class IMemoryGroup;
+class IMemoryManageable;
+
 /** Memory group interface */
 class IMemoryGroup
 {
 public:
     /** Default virtual destructor */
     virtual ~IMemoryGroup() = default;
+    /** Sets a object to be managed by the given memory group
+     *
+     * @note Manager must not be finalized
+     *
+     * @param[in] obj Object to be managed
+     */
+    virtual void manage(IMemoryManageable *obj) = 0;
+    /** Finalizes memory for a given object
+     *
+     * @note Manager must not be finalized
+     *
+     * @param[in, out] obj        Object to request memory for
+     * @param[in, out] obj_memory Object's memory handling interface which can be used to alter the underlying memory
+     *                            that is used by the object.
+     * @param[in]      size       Size of memory to allocate
+     * @param[in]      alignment  (Optional) Alignment to use
+     */
+    virtual void finalize_memory(IMemoryManageable *obj, IMemory &obj_memory, size_t size, size_t alignment) = 0;
     /** Acquires backing memory for the whole group */
     virtual void acquire() = 0;
     /** Releases backing memory of the whole group */
     virtual void release() = 0;
     /** Gets the memory mapping of the group */
     virtual MemoryMappings &mappings() = 0;
+};
+
+/** Interface of an object than can be memory managed */
+class IMemoryManageable
+{
+public:
+    /** Default virtual destructor */
+    virtual ~IMemoryManageable() = default;
+    /** Associates a memory managable object with the memory group that manages it
+     *
+     * @param[in] memory_group Memory group that manages the object.
+     */
+    virtual void associate_memory_group(IMemoryGroup *memory_group) = 0;
 };
 
 /** Memory group resources scope handling class */

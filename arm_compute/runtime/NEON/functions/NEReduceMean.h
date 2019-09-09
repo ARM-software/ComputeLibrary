@@ -31,11 +31,10 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
+#include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
 {
-class ITensor;
-
 /** Basic function to perform reduce operation */
 class NEReduceMean : public IFunction
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,9 @@
 #define __ARM_COMPUTE_GCSOFTMAXLAYER_H__
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCSoftmaxLayerKernel.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -65,7 +65,7 @@ public:
     void run() override;
 
 private:
-    GCMemoryGroup               _memory_group;
+    MemoryGroup                 _memory_group;
     GCLogits1DMaxKernel         _max_kernel;
     GCLogits1DShiftExpSumKernel _shift_exp_sum_kernel;
     GCLogits1DNormKernel        _norm_kernel;
@@ -73,5 +73,5 @@ private:
     GCTensor                    _sum;
     GCTensor                    _tmp;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCSOFTMAXLAYER_H__ */

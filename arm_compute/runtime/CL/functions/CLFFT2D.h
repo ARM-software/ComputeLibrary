@@ -26,10 +26,10 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLFFT1D.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -67,10 +67,10 @@ public:
     void run() override;
 
 protected:
-    CLMemoryGroup _memory_group;
-    CLFFT1D       _first_pass_func;
-    CLFFT1D       _second_pass_func;
-    CLTensor      _first_pass_tensor;
+    MemoryGroup _memory_group;
+    CLFFT1D     _first_pass_func;
+    CLFFT1D     _second_pass_func;
+    CLTensor    _first_pass_tensor;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLFFT2D_H__ */

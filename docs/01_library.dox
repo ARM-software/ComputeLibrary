@@ -349,10 +349,6 @@ MemoryGroup binds a number of objects to a bucket of memory requirements that ne
 
 Requesting backing memory for a specific group can be done using @ref IMemoryGroup::acquire and releasing the memory back using @ref IMemoryGroup::release.
 
-@note Two types of memory groups are currently implemented:
-- @ref MemoryGroup that manages @ref Tensor objects
-- @ref CLMemoryGroup that manages @ref CLTensor objects.
-
 @subsubsection S4_7_1_2_memory_pool MemoryPool
 
 @ref IMemoryPool defines a pool of memory that can be used to provide backing memory to a memory group.

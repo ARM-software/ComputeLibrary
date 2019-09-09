@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,11 +29,11 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/CL/CLArray.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <cstdint>
 #include <memory>
@@ -75,7 +75,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup             _memory_group;
+    MemoryGroup               _memory_group;
     CLFastCornersKernel       _fast_corners_kernel;
     CLNonMaximaSuppression3x3 _suppr_func;
     CLCopyToArrayKernel       _copy_array_kernel;

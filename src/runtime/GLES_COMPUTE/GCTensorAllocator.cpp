@@ -32,8 +32,8 @@
 
 using namespace arm_compute;
 
-GCTensorAllocator::GCTensorAllocator(GCTensor *owner)
-    : _associated_memory_group(nullptr), _memory(), _mapping(nullptr), _owner(owner)
+GCTensorAllocator::GCTensorAllocator(IMemoryManageable *owner)
+    : _owner(owner), _associated_memory_group(nullptr), _memory(), _mapping(nullptr)
 {
 }
 
@@ -50,7 +50,7 @@ void GCTensorAllocator::allocate()
     }
     else
     {
-        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size());
+        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size(), alignment());
     }
     info().set_is_resizable(false);
 }
@@ -62,7 +62,7 @@ void GCTensorAllocator::free()
     info().set_is_resizable(true);
 }
 
-void GCTensorAllocator::set_associated_memory_group(GCMemoryGroup *associated_memory_group)
+void GCTensorAllocator::set_associated_memory_group(IMemoryGroup *associated_memory_group)
 {
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
     ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr && _associated_memory_group != associated_memory_group);

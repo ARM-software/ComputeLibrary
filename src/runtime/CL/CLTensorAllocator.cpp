@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 namespace arm_compute
@@ -104,8 +103,8 @@ void populate_quantization_info(CLFloatArray &scale, CLInt32Array &offset, const
 }
 } // namespace
 
-CLTensorAllocator::CLTensorAllocator(CLTensor *owner)
-    : _associated_memory_group(nullptr), _memory(), _mapping(nullptr), _owner(owner), _scale(), _offset()
+CLTensorAllocator::CLTensorAllocator(IMemoryManageable *owner)
+    : _owner(owner), _associated_memory_group(nullptr), _memory(), _mapping(nullptr), _scale(), _offset()
 {
 }
 
@@ -143,7 +142,7 @@ void CLTensorAllocator::allocate()
     }
     else
     {
-        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size());
+        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size(), alignment());
     }
 
     // Allocate and fill the quantization parameter arrays
@@ -178,7 +177,7 @@ Status CLTensorAllocator::import_memory(cl::Buffer buffer)
     return Status{};
 }
 
-void CLTensorAllocator::set_associated_memory_group(CLMemoryGroup *associated_memory_group)
+void CLTensorAllocator::set_associated_memory_group(IMemoryGroup *associated_memory_group)
 {
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
     ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr && _associated_memory_group != associated_memory_group);

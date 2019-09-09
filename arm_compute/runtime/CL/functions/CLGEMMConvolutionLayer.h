@@ -32,7 +32,6 @@
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
@@ -40,6 +39,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -186,7 +186,7 @@ private:
                               int gemm_3d_depth, bool skip_im2col, const ActivationLayerInfo &act_info);
 
 private:
-    CLMemoryGroup                    _memory_group;
+    MemoryGroup                      _memory_group;
     CLConvolutionLayerReshapeWeights _reshape_weights;
     CLIm2ColKernel                   _im2col_kernel;
     CLGEMM                           _mm_gemm;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLSobel7x7Kernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <cstdint>
 #include <memory>
@@ -70,7 +70,7 @@ public:
     void run() override;
 
 protected:
-    CLMemoryGroup        _memory_group;   /**< Function's memory group */
+    MemoryGroup          _memory_group;   /**< Function's memory group */
     CLSobel7x7HorKernel  _sobel_hor;      /**< Sobel Horizontal 7x7 kernel */
     CLSobel7x7VertKernel _sobel_vert;     /**< Sobel Vertical 7x7 kernel */
     CLFillBorderKernel   _border_handler; /**< Kernel to handle image borders */

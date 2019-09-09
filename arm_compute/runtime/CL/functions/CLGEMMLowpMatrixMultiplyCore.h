@@ -31,9 +31,9 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -100,7 +100,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup                                 _memory_group;
+    MemoryGroup                                   _memory_group;
     CLGEMMLowpMatrixMultiplyKernel                _mm_midgard_kernel;
     CLGEMMLowpMatrixMultiplyNativeKernel          _mm_native_kernel;
     CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel _mm_reshaped_only_rhs_kernel;

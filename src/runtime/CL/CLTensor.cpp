@@ -25,8 +25,8 @@
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLTensor::CLTensor()
     : _allocator(this)
 {
@@ -76,3 +76,9 @@ void CLTensor::do_unmap(cl::CommandQueue &q)
 {
     _allocator.unmap(q, buffer());
 }
+
+void CLTensor::associate_memory_group(arm_compute::IMemoryGroup *memory_group)
+{
+    _allocator.set_associated_memory_group(memory_group);
+}
+} // namespace arm_compute

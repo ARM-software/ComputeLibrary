@@ -25,7 +25,6 @@
 #define __ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H__
 
 #include "arm_compute/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
@@ -34,6 +33,7 @@
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -114,7 +114,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup _memory_group;
+    MemoryGroup _memory_group;
 
     CLGEMM                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;

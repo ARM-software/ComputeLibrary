@@ -33,7 +33,6 @@
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
@@ -41,6 +40,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 
 #include <memory>
@@ -154,7 +154,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup                        _memory_group;
+    MemoryGroup                          _memory_group;
     CLFullyConnectedLayer                _fully_connected_input_gate;
     CLArithmeticAddition                 _accum_input_gate1;
     CLSaturatedArithmeticOperationKernel _subtract_input_gate;

@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
 
 namespace arm_compute
 {

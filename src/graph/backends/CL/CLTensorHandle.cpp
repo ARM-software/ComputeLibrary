@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,7 @@
  */
 #include "arm_compute/graph/backends/CL/CLTensorHandle.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
+#include "arm_compute/runtime/IMemoryGroup.h"
 
 namespace arm_compute
 {
@@ -52,8 +51,7 @@ void CLTensorHandle::manage(IMemoryGroup *mg)
 {
     if(mg != nullptr)
     {
-        auto *cl_mg = arm_compute::utils::cast::polymorphic_downcast<CLMemoryGroup *>(mg);
-        cl_mg->manage(&_tensor);
+        mg->manage(&_tensor);
     }
 }
 

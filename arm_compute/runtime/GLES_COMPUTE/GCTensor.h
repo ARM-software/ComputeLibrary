@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ class ITensorAllocator;
 class ITensorInfo;
 
 /** Interface for OpenGL ES tensor */
-class GCTensor : public IGCTensor
+class GCTensor : public IGCTensor, public IMemoryManageable
 {
 public:
     /** Default constructor */
@@ -84,6 +84,7 @@ public:
     TensorInfo *info() override;
     uint8_t    *buffer() const override;
     GLuint      gc_buffer() const override;
+    void associate_memory_group(IMemoryGroup *memory_group) override;
 
 protected:
     // Inherited methods overridden:
@@ -96,6 +97,5 @@ private:
 
 /** OpenGL ES Image */
 using GCImage = GCTensor;
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_GCTENSOR_H__ */

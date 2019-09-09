@@ -37,8 +37,8 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
 
@@ -132,7 +132,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
         mm_ctx.target      = Target::CL;
         mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
         mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
-        mm_ctx.cross_group = std::make_shared<CLMemoryGroup>(mm_ctx.cross_mm);
+        mm_ctx.cross_group = std::make_shared<MemoryGroup>(mm_ctx.cross_mm);
         mm_ctx.allocator   = _allocator.get();
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));

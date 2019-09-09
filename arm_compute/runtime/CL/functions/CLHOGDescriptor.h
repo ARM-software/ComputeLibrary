@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,11 @@
 
 #include "arm_compute/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLHOGGradient.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -64,7 +64,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                 _memory_group;
+    MemoryGroup                   _memory_group;
     CLHOGGradient                 _gradient;
     CLHOGOrientationBinningKernel _orient_bin;
     CLHOGBlockNormalizationKernel _block_norm;

@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <cstdint>
 #include <memory>
@@ -75,7 +75,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                           _memory_group;
+    MemoryGroup                             _memory_group;
     std::vector<CLTensor>                   _results_vector;
     std::vector<CLReductionOperationKernel> _reduction_kernels_vector;
     std::vector<CLFillBorderKernel>         _border_handlers_vector;

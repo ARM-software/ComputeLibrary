@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,9 +31,9 @@
 #include "arm_compute/core/CL/kernels/CLLocallyConnectedMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -93,7 +93,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup                          _memory_group;
+    MemoryGroup                            _memory_group;
     CLIm2ColKernel                         _input_im2col_kernel;
     CLWeightsReshapeKernel                 _weights_reshape_kernel;
     CLLocallyConnectedMatrixMultiplyKernel _mm_kernel;

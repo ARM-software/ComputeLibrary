@@ -29,9 +29,9 @@
 #include "arm_compute/core/CL/kernels/CLFFTDigitReverseKernel.h"
 #include "arm_compute/core/CL/kernels/CLFFTRadixStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLFFTScaleKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -70,7 +70,7 @@ public:
     void run() override;
 
 protected:
-    CLMemoryGroup                      _memory_group;
+    MemoryGroup                        _memory_group;
     CLFFTDigitReverseKernel            _digit_reverse_kernel;
     std::vector<CLFFTRadixStageKernel> _fft_kernels;
     CLFFTScaleKernel                   _scale_kernel;

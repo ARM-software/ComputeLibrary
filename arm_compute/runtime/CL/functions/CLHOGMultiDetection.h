@@ -28,12 +28,12 @@
 #include "arm_compute/core/CL/ICLMultiHOG.h"
 #include "arm_compute/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLHOGDetector.h"
 #include "arm_compute/runtime/CL/functions/CLHOGGradient.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -89,7 +89,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                                _memory_group;
+    MemoryGroup                                  _memory_group;
     CLHOGGradient                                _gradient_kernel;
     std::vector<CLHOGOrientationBinningKernel>   _orient_bin_kernel;
     std::vector<CLHOGBlockNormalizationKernel>   _block_norm_kernel;

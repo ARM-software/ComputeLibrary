@@ -35,11 +35,11 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -103,7 +103,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup                                          _memory_group;
+    MemoryGroup                                            _memory_group;
     std::unique_ptr<ICLDepthwiseConvolutionLayer3x3Kernel> _kernel;
     CLFillBorderKernel                                     _border_handler;
     CLPermute                                              _permute_input_to_nchw;

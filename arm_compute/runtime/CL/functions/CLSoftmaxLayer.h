@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -94,7 +94,7 @@ private:
      */
     void configure_reshape_input_kernel(const ICLTensor *input, const ICLTensor *output, size_t axis);
 
-    CLMemoryGroup                  _memory_group;
+    MemoryGroup                    _memory_group;
     CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;
     CLLogits1DNormKernel           _norm_kernel;
     std::unique_ptr<ICLKernel>     _flatten_kernel_ptr;

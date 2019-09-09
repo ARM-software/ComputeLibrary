@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/CL/CLArray.h"
 #include "arm_compute/runtime/CL/CLMemory.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -36,10 +37,6 @@
 namespace arm_compute
 {
 class CLTensor;
-template <typename>
-class MemoryGroupBase;
-/** Memory Group in OpenCL */
-using CLMemoryGroup = MemoryGroupBase<CLTensor>;
 
 /** Basic implementation of a CL memory tensor allocator. */
 class CLTensorAllocator : public ITensorAllocator
@@ -49,7 +46,7 @@ public:
      *
      * @param[in] owner (Optional) Owner of the allocator.
      */
-    CLTensorAllocator(CLTensor *owner = nullptr);
+    CLTensorAllocator(IMemoryManageable *owner = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLTensorAllocator(const CLTensorAllocator &) = delete;
     /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
@@ -127,7 +124,7 @@ public:
      *
      * @param[in] associated_memory_group Memory group to associate the tensor with
      */
-    void set_associated_memory_group(CLMemoryGroup *associated_memory_group);
+    void set_associated_memory_group(IMemoryGroup *associated_memory_group);
 
 protected:
     /** Call map() on the OpenCL buffer.
@@ -142,12 +139,12 @@ private:
     static const cl::Buffer _empty_buffer;
 
 private:
-    CLMemoryGroup *_associated_memory_group; /**< Registered memory manager */
-    CLMemory       _memory;                  /**< OpenCL memory */
-    uint8_t       *_mapping;                 /**< Pointer to the CPU mapping of the OpenCL buffer. */
-    CLTensor      *_owner;                   /**< Owner of the allocator */
-    CLFloatArray   _scale;                   /**< Scales array in case of quantized per channel data type */
-    CLInt32Array   _offset;                  /**< Offsets array in case of quantized per channel data type */
+    IMemoryManageable *_owner;                   /**< Memory manageable object that owns the allocator */
+    IMemoryGroup      *_associated_memory_group; /**< Registered memory manager */
+    CLMemory           _memory;                  /**< OpenCL memory */
+    uint8_t           *_mapping;                 /**< Pointer to the CPU mapping of the OpenCL buffer. */
+    CLFloatArray       _scale;                   /**< Scales array in case of quantized per channel data type */
+    CLInt32Array       _offset;                  /**< Offsets array in case of quantized per channel data type */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLTENSORALLOCATOR_H__ */

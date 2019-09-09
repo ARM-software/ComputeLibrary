@@ -28,13 +28,13 @@
 
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -129,7 +129,7 @@ private:
     void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
     void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
 
-    CLMemoryGroup                                       _memory_group;
+    MemoryGroup                                         _memory_group;
     CLConvertFullyConnectedWeights                      _convert_weights;
     CLFlattenLayer                                      _flatten_layer;
     CLFullyConnectedLayerReshapeWeights                 _reshape_weights_kernel;
@@ -149,5 +149,5 @@ private:
     bool                                                _is_prepared;
     const ICLTensor                                    *_original_weights;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__ */

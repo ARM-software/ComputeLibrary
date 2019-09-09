@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,9 @@
 
 #include "arm_compute/core/CL/kernels/CLCannyEdgeKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -74,7 +74,7 @@ public:
     virtual void run() override;
 
 private:
-    CLMemoryGroup                 _memory_group;                                    /**< Function's memory group */
+    MemoryGroup                   _memory_group;                                    /**< Function's memory group */
     std::unique_ptr<IFunction>    _sobel;                                           /**< Pointer to Sobel kernel. */
     CLGradientKernel              _gradient;                                        /**< Gradient kernel. */
     CLFillBorderKernel            _border_mag_gradient;                             /**< Fill border on magnitude tensor kernel */

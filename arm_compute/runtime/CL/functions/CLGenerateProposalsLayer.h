@@ -32,11 +32,11 @@
 #include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -109,7 +109,7 @@ public:
 
 private:
     // Memory group manager
-    CLMemoryGroup _memory_group;
+    MemoryGroup _memory_group;
 
     // OpenCL kernels
     CLPermuteKernel              _permute_deltas_kernel;

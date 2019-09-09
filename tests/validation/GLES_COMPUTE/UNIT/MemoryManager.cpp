@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/GLES_COMPUTE/GCBufferAllocator.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensorAllocator.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCFullyConnectedLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCSoftmaxLayer.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/GLES_COMPUTE/GCAccessor.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,7 +72,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup                        _memory_group;
+    MemoryGroup                          _memory_group;
     CLGEMM                               _gemm_state_f;
     CLSaturatedArithmeticOperationKernel _add_kernel;
     CLActivationLayerKernel              _activation_kernel;

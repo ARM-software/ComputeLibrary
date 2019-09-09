@@ -37,7 +37,7 @@ class ITensorAllocator;
 class ITensorInfo;
 
 /** Basic implementation of the OpenCL tensor interface */
-class CLTensor : public ICLTensor
+class CLTensor : public ICLTensor, public IMemoryManageable
 {
 public:
     /** Constructor */
@@ -68,6 +68,7 @@ public:
     TensorInfo       *info() override;
     const cl::Buffer &cl_buffer() const override;
     CLQuantization    quantization() const override;
+    void associate_memory_group(IMemoryGroup *memory_group) override;
 
 protected:
     // Inherited methods overridden:
@@ -80,5 +81,5 @@ private:
 
 /** OpenCL Image */
 using CLImage = CLTensor;
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLTENSOR_H__ */
