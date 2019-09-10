@@ -37,6 +37,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/Allocator.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/OffsetLifetimeManager.h"
@@ -89,6 +90,16 @@ void NEDeviceBackend::setup_backend_context(GraphContext &ctx)
         mm_ctx.allocator   = &_allocator;
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));
+    }
+
+    // Create function level weights manager
+    if(ctx.weights_management_ctx(Target::NEON) == nullptr)
+    {
+        WeightsManagerContext wm_ctx;
+        wm_ctx.target = Target::NEON;
+        wm_ctx.wm     = create_weights_manager();
+
+        ctx.insert_weights_management_ctx(std::move(wm_ctx));
     }
 }
 
@@ -158,6 +169,12 @@ std::shared_ptr<arm_compute::IMemoryManager> NEDeviceBackend::create_memory_mana
     auto mm       = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
 
     return mm;
+}
+
+std::shared_ptr<arm_compute::IWeightsManager> NEDeviceBackend::create_weights_manager()
+{
+    auto weights_mgr = std::make_shared<IWeightsManager>();
+    return weights_mgr;
 }
 } // namespace backends
 } // namespace graph

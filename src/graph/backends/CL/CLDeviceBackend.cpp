@@ -204,6 +204,11 @@ std::shared_ptr<arm_compute::IMemoryManager> CLDeviceBackend::create_memory_mana
 
     return mm;
 }
+
+std::shared_ptr<arm_compute::IWeightsManager> CLDeviceBackend::create_weights_manager()
+{
+    return nullptr;
+}
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute

@@ -67,6 +67,7 @@ public:
     std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
     Status validate_node(INode &node) override;
     std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
+    std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() override;
 
 private:
     int                                _context_count; /**< Counts how many contexts are currently using the backend */

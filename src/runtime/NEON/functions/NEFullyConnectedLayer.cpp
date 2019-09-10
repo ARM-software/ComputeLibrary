@@ -74,10 +74,11 @@ Status NEFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, c
     return NETransposeKernel::validate(input, output);
 }
 
-NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _flatten_kernel(), _convert_weights(), _reshape_weights_function(), _mm_gemm(), _mm_gemmlowp(), _gemmlowp_output_stage(), _accumulate_biases_kernel(),
-      _flatten_output(), _gemmlowp_output(), _converted_weights_output(), _reshape_weights_output(), _original_weights(nullptr), _are_weights_converted(true), _are_weights_reshaped(false),
-      _is_fc_after_conv(false), _accumulate_biases(false), _is_quantized(false), _is_prepared(false)
+NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
+    : _memory_group(std::move(memory_manager)), _weights_manager(weights_manager), _flatten_kernel(), _convert_weights(), _convert_weights_managed(), _reshape_weights_function(),
+      _reshape_weights_managed_function(), _mm_gemm(nullptr, weights_manager), _mm_gemmlowp(), _gemmlowp_output_stage(), _accumulate_biases_kernel(), _flatten_output(), _gemmlowp_output(),
+      _converted_weights_output(), _reshape_weights_output(), _original_weights(nullptr), _are_weights_converted(true), _are_weights_reshaped(false), _is_fc_after_conv(false), _accumulate_biases(false),
+      _is_quantized(false), _is_prepared(false)
 {
 }
 
@@ -155,6 +156,11 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     _is_quantized          = is_data_type_quantized_asymmetric(input->info()->data_type());
     _original_weights      = weights;
 
+    if(_weights_manager)
+    {
+        _weights_manager->manage(weights);
+    }
+
     // Configure gemmlowp output
     if(_is_quantized)
     {
@@ -194,21 +200,39 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     // Reshape weights if needed
     if(!_are_weights_reshaped)
     {
-        // Reshape the weights
-        _reshape_weights_function.configure(weights, &_reshape_weights_output);
-        weights_to_use = &_reshape_weights_output;
+        if(_weights_manager && _weights_manager->are_weights_managed(weights))
+        {
+            _reshape_weights_managed_function.configure(weights);
+            weights_to_use = _weights_manager->acquire(weights, &_reshape_weights_managed_function);
+        }
+        else
+        {
+            // Reshape the weights
+            _reshape_weights_function.configure(weights, &_reshape_weights_output);
+            weights_to_use = &_reshape_weights_output;
+        }
     }
 
     // Convert weights if needed
     if(_is_fc_after_conv && (input->info()->data_layout() != fc_info.weights_trained_layout))
     {
-        // Convert weights
-        _convert_weights.configure(weights_to_use,
-                                   &_converted_weights_output,
-                                   input->info()->tensor_shape(),
-                                   fc_info.weights_trained_layout);
+        if(_weights_manager && _weights_manager->are_weights_managed(weights_to_use))
+        {
+            _convert_weights_managed.configure(weights_to_use,
+                                               input->info()->tensor_shape(),
+                                               fc_info.weights_trained_layout);
+            weights_to_use = _weights_manager->acquire(weights, &_convert_weights_managed);
+        }
+        else
+        {
+            // Convert weights
+            _convert_weights.configure(weights_to_use,
+                                       &_converted_weights_output,
+                                       input->info()->tensor_shape(),
+                                       fc_info.weights_trained_layout);
 
-        weights_to_use         = &_converted_weights_output;
+            weights_to_use = &_converted_weights_output;
+        }
         _are_weights_converted = false;
     }
 
@@ -381,7 +405,10 @@ void NEFullyConnectedLayer::prepare()
 {
     if(!_is_prepared)
     {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+        if(!_weights_manager)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+        }
 
         auto release_unused = [](Tensor * w)
         {
@@ -397,20 +424,38 @@ void NEFullyConnectedLayer::prepare()
         // Reshape of the weights (happens only once)
         if(!_are_weights_reshaped)
         {
-            // Run reshape weights kernel and mark weights as unused
-            _reshape_weights_output.allocator()->allocate();
-            _reshape_weights_function.run();
-
-            cur_weights->mark_as_unused();
-            cur_weights           = &_reshape_weights_output;
+            if(_weights_manager && _weights_manager->are_weights_managed(_original_weights))
+            {
+                cur_weights->mark_as_unused();
+                cur_weights = _weights_manager->run(cur_weights, &_reshape_weights_managed_function);
+            }
+            else
+            {
+                // Reshape of the weights (happens only once)
+                if(!_are_weights_reshaped)
+                {
+                    // Run reshape weights kernel and mark weights as unused
+                    _reshape_weights_output.allocator()->allocate();
+                    _reshape_weights_function.run();
+                }
+                cur_weights->mark_as_unused();
+                cur_weights = &_reshape_weights_output;
+            }
             _are_weights_reshaped = true;
         }
 
         // Convert weights if needed (happens only once)
         if(!_are_weights_converted)
         {
-            _converted_weights_output.allocator()->allocate();
-            _convert_weights.run();
+            if(_weights_manager && _weights_manager->are_weights_managed(cur_weights))
+            {
+                _weights_manager->run(cur_weights, &_convert_weights_managed);
+            }
+            else
+            {
+                _converted_weights_output.allocator()->allocate();
+                _convert_weights.run();
+            }
 
             cur_weights->mark_as_unused();
             _are_weights_converted = true;

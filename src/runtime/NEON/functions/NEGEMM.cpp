@@ -42,9 +42,9 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace arm_compute
 {
-NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(memory_manager), _ma_kernel(), _tmp_a(), _tmp_b(), _original_b(nullptr),
-      _run_vector_matrix_multiplication(false), _run_addition(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
+NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(memory_manager, weights_manager), _ma_kernel(), _tmp_a(),
+      _tmp_b(), _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_addition(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
 
@@ -276,13 +276,19 @@ void NEGEMM::prepare()
     {
         if(_asm_glue.is_configured())
         {
-            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+            if(!_weights_manager || !_weights_manager->are_weights_managed(_original_b))
+            {
+                ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+            }
 
             _asm_glue.prepare();
         }
         else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue.is_configured())
         {
-            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+            if(!_weights_manager || !_weights_manager->are_weights_managed(_original_b))
+            {
+                ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+            }
 
             _tmp_b.allocator()->allocate();
             NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);

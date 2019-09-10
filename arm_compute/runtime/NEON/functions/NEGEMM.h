@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -51,7 +52,7 @@ class NEGEMM : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMM(const NEGEMM &) = delete;
     /** Default move constructor */
@@ -96,6 +97,7 @@ public:
 
 private:
     MemoryGroup                _memory_group;
+    IWeightsManager           *_weights_manager;
     NEGEMMInterleave4x4Kernel  _interleave_kernel;
     NEGEMMTranspose1xWKernel   _transpose_kernel;
     NEGEMMMatrixMultiplyKernel _mm_kernel;

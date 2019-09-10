@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,8 @@ public:
      * @param[out] output               The converted weights tensor. Shape and Data Type: Same as @p input.
      * @param[in]  original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in]  data_layout          The data layout the weights have been trained in.
+     *
+     * @return A status
      */
     void configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape, DataLayout data_layout);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvertFullyConnectedWeights

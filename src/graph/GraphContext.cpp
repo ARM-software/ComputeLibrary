@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,13 +32,14 @@ namespace arm_compute
 namespace graph
 {
 GraphContext::GraphContext()
-    : _config(), _memory_managers()
+    : _config(), _memory_managers(), _weights_managers()
 {
 }
 
 GraphContext::~GraphContext()
 {
     _memory_managers.clear();
+    _weights_managers.clear();
     release_default_graph_context(*this);
 }
 
@@ -72,6 +73,30 @@ MemoryManagerContext *GraphContext::memory_management_ctx(Target target)
 std::map<Target, MemoryManagerContext> &GraphContext::memory_managers()
 {
     return _memory_managers;
+}
+
+bool GraphContext::insert_weights_management_ctx(WeightsManagerContext &&weights_managers)
+{
+    Target target = weights_managers.target;
+
+    if(target != Target::NEON || _weights_managers.find(target) != std::end(_weights_managers))
+    {
+        return false;
+    }
+
+    _weights_managers[target] = std::move(weights_managers);
+
+    return true;
+}
+
+WeightsManagerContext *GraphContext::weights_management_ctx(Target target)
+{
+    return (_weights_managers.find(target) != std::end(_weights_managers)) ? &_weights_managers[target] : nullptr;
+}
+
+std::map<Target, WeightsManagerContext> &GraphContext::weights_managers()
+{
+    return _weights_managers;
 }
 
 void GraphContext::finalize()

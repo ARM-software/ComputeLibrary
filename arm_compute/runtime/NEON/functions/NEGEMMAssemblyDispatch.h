@@ -27,6 +27,7 @@
 #include "arm_compute/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -38,9 +39,8 @@ namespace arm_compute
 class NEGEMMAssemblyDispatch : public IFunction
 {
 public:
-    /** Default constructor */
-    NEGEMMAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-
+    /** Constructor */
+    NEGEMMAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copy constructed */
     NEGEMMAssemblyDispatch(const NEGEMMAssemblyDispatch &) = delete;
     /** Prevent instances of this class from being copied */
@@ -79,8 +79,9 @@ private:
 
     /** Interface for the arm_gemm fallback */
     std::unique_ptr<IFallback>      _arm_gemm;
-    MemoryGroup                     _memory_group;   /**< Function memory group */
-    std::shared_ptr<IMemoryManager> _memory_manager; /**< Copy of the memory manager used to create the memory group to be used when instantiating new functions */
+    MemoryGroup                     _memory_group;    /**< Function memory group */
+    std::shared_ptr<IMemoryManager> _memory_manager;  /**< Copy of the memory manager used to create the memory group to be used when instantiating new functions */
+    IWeightsManager                *_weights_manager; /**< Pointer to the weights manager */
 public:
     /** If supported create an ACL function else fallback to the arm_gemm function.
      *
@@ -117,6 +118,5 @@ public:
     void prepare() override;
     void run() override;
 };
-
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEGEMMASSEMBLYDISPATCH_H__ */

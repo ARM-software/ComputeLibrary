@@ -34,6 +34,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
@@ -76,7 +77,7 @@ class CLFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLFullyConnectedLayer(const CLFullyConnectedLayer &) = delete;
     /** Default move constructor */

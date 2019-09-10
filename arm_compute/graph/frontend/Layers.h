@@ -66,6 +66,31 @@ private:
     ITensorAccessorUPtr _accessor;
 };
 
+/** Constant Layer */
+class ConstantLayer final : public ILayer
+{
+public:
+    /** Construct a constant layer.
+     *
+     * @param[in] desc     Description of input tensor.
+     * @param[in] accessor Accessor to get input tensor data from.
+     */
+    ConstantLayer(TensorDescriptor desc, ITensorAccessorUPtr accessor)
+        : _desc(desc), _accessor(std::move(accessor))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams common_params = { name(), s.hints().target_hint };
+        return GraphBuilder::add_const_node(s.graph(), common_params, _desc, std::move(_accessor));
+    }
+
+private:
+    TensorDescriptor    _desc;
+    ITensorAccessorUPtr _accessor;
+};
+
 /** Output Layer */
 class OutputLayer final : public ILayer
 {
@@ -635,8 +660,8 @@ public:
      * @param[in] out_quant_info     (Optional) Output quantization info
      */
     FullyConnectedLayer(unsigned int                  num_outputs,
-                        SubStream                   &&sub_stream_weights,
-                        SubStream                   &&sub_stream_bias,
+                        SubStream                     sub_stream_weights,
+                        SubStream                     sub_stream_bias,
                         const FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
                         const QuantizationInfo        weights_quant_info = QuantizationInfo(),
                         const QuantizationInfo        out_quant_info     = QuantizationInfo())

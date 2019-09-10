@@ -30,6 +30,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
@@ -64,7 +65,7 @@ class GCFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCFullyConnectedLayer(const GCFullyConnectedLayer &) = delete;
     /** Default move constructor */

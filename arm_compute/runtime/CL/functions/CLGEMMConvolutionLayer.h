@@ -94,7 +94,7 @@ private:
 class CLGEMMConvolutionLayer : public IFunction
 {
 public:
-    /** Default constructor
+    /** Constructor
      *
      * @param[in] memory_manager (Optional) Memory manager.
      */

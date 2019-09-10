@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,7 @@ public:
     std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
     Status validate_node(INode &node) override;
     std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
+    std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() override;
 
 private:
     bool              _initialized; /**< Flag that specifies if the backend has been default initialized */

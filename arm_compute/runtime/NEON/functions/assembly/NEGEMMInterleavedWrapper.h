@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IScheduler.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -94,8 +95,8 @@ public:
 class NEGEMMInterleavedWrapper : public IFunction
 {
 public:
-    NEGEMMInterleavedWrapper(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-    ~NEGEMMInterleavedWrapper()                                             = default;
+    NEGEMMInterleavedWrapper(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
+    ~NEGEMMInterleavedWrapper() = default;
 
     NEGEMMInterleavedWrapper(const NEGEMMInterleavedWrapper &) = delete;
     NEGEMMInterleavedWrapper &operator=(const NEGEMMInterleavedWrapper &) = delete;

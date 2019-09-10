@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NEConvertFullyConnectedWeights::NEConvertFullyConnectedWeights()
     : _kernel()
 {
@@ -46,3 +46,4 @@ void NEConvertFullyConnectedWeights::run()
 {
     NEScheduler::get().schedule(&_kernel, Window::DimZ);
 }
+} // namespace arm_compute

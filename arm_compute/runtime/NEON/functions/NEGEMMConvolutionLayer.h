@@ -32,6 +32,7 @@
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
@@ -54,6 +55,14 @@ class NEConvolutionLayerReshapeWeights : public IFunction
 public:
     /** Constructor */
     NEConvolutionLayerReshapeWeights();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionLayerReshapeWeights(const NEConvolutionLayerReshapeWeights &) = delete;
+    /** Default move constructor */
+    NEConvolutionLayerReshapeWeights(NEConvolutionLayerReshapeWeights &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEConvolutionLayerReshapeWeights &operator=(const NEConvolutionLayerReshapeWeights &) = delete;
+    /** Default move assignment operator */
+    NEConvolutionLayerReshapeWeights &operator=(NEConvolutionLayerReshapeWeights &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/F16/F32.
@@ -78,6 +87,52 @@ private:
     NEWeightsReshapeKernel _weights_reshape_kernel;
 };
 
+namespace weights_transformations
+{
+/** Basic function to manage the reshape weights generated from @ref NEConvolutionLayerReshapeWeights */
+class NEConvolutionLayerReshapeWeightsTransform : public ITransformWeights
+{
+public:
+    void configure(const ITensor *input, const ITensor *biases)
+    {
+        _bias_bit = (biases != nullptr) ? 1 : 0;
+        _func.configure(input, biases, &_output);
+    }
+
+    void run() override
+    {
+        _output.allocator()->allocate();
+        _func.run();
+        _reshape_run = true;
+    }
+
+    ITensor *get_weights() override
+    {
+        return &_output;
+    }
+
+    void release() override
+    {
+        _output.allocator()->free();
+    }
+
+    uint32_t uid() override
+    {
+        return ((0x8) | (_bias_bit << 7));
+    }
+
+    bool is_reshape_run()
+    {
+        return _reshape_run;
+    }
+
+private:
+    Tensor                           _output{};
+    NEConvolutionLayerReshapeWeights _func{};
+    int32_t                          _bias_bit{ 0 };
+};
+} // namespace weights_transformations
+
 /** Basic function to compute the convolution layer. This function calls the following NEON kernels/functions:
  *
  * -# @ref NEIm2ColKernel
@@ -92,7 +147,7 @@ class NEGEMMConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
+    NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMConvolutionLayer(const NEGEMMConvolutionLayer &) = delete;
     /** Default move constructor */
@@ -187,15 +242,17 @@ private:
     static Status validate_gemm3d(const ITensorInfo *input_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col);
 
 private:
-    MemoryGroup                      _memory_group;
-    NEConvolutionLayerReshapeWeights _reshape_weights;
-    NEIm2ColKernel                   _im2col_kernel;
-    NEGEMM                           _mm_gemm;
-    NEGEMMLowpMatrixMultiplyCore     _mm_gemmlowp;
-    NECol2ImKernel                   _col2im_kernel;
-    NEActivationLayer                _activationlayer_function;
-    NEArithmeticAdditionKernel       _add_bias_kernel;
-    NEReshapeLayer                   _reshape_layer;
+    MemoryGroup                                                        _memory_group;
+    IWeightsManager                                                   *_weights_manager;
+    NEConvolutionLayerReshapeWeights                                   _reshape_weights;
+    weights_transformations::NEConvolutionLayerReshapeWeightsTransform _reshape_weights_managed;
+    NEIm2ColKernel                                                     _im2col_kernel;
+    NEGEMM                                                             _mm_gemm;
+    NEGEMMLowpMatrixMultiplyCore                                       _mm_gemmlowp;
+    NECol2ImKernel                                                     _col2im_kernel;
+    NEActivationLayer                                                  _activationlayer_function;
+    NEArithmeticAdditionKernel                                         _add_bias_kernel;
+    NEReshapeLayer                                                     _reshape_layer;
 
     const ITensor *_original_weights;
 

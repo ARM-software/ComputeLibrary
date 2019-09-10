@@ -827,7 +827,9 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<FullyConnectedLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    auto wm   = get_weights_manager(ctx, TargetInfo::TargetType);
+    auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
+    auto func = support::cpp14::make_unique<FullyConnectedLayerFunction>(mm, wm.get());
     func->configure(input, weights, biases, output, fc_info);
 
     const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());

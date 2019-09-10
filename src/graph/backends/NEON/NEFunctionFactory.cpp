@@ -115,6 +115,7 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
     std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, Target::NEON);
     std::unique_ptr<IFunction>      func;
     std::string                     func_name;
+
     if(conv_algorithm == ConvolutionMethod::Direct)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEDirectConvolutionLayer>(

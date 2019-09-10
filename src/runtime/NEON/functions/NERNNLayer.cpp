@@ -34,8 +34,8 @@
 namespace arm_compute
 {
 NERNNLayer::NERNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation_kernel(), _fully_connected_kernel(), _copy_kernel(), _fully_connected_out(), _gemm_output(), _add_output(),
-      _is_prepared(false)
+    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation_kernel(), _fully_connected(memory_manager), _copy_kernel(), _fully_connected_out(), _gemm_output(),
+      _add_output(), _is_prepared(false)
 {
 }
 
@@ -81,7 +81,7 @@ void NERNNLayer::configure(const ITensor *input, const ITensor *weights, const I
 
     // Manage intermediate buffers and configure
     _memory_group.manage(&_fully_connected_out);
-    _fully_connected_kernel.configure(input, weights, bias, &_fully_connected_out);
+    _fully_connected.configure(input, weights, bias, &_fully_connected_out);
 
     _memory_group.manage(&_gemm_output);
     _gemm_state_f.configure(hidden_state, recurrent_weights, nullptr, &_gemm_output, 1.f, 0.f);
@@ -106,7 +106,7 @@ void NERNNLayer::run()
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    _fully_connected_kernel.run();
+    _fully_connected.run();
 
     _gemm_state_f.run();
 
@@ -121,7 +121,7 @@ void NERNNLayer::prepare()
 {
     if(!_is_prepared)
     {
-        _fully_connected_kernel.prepare();
+        _fully_connected.prepare();
         _gemm_state_f.prepare();
 
         _is_prepared = true;

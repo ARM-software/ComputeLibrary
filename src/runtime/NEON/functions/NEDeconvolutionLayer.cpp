@@ -91,10 +91,10 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(Window::DimZ) != output_shape.z(), "Output's depth is invalid.");
     }
 
-    unsigned int        deconv_pad_x = 0;
-    unsigned int        deconv_pad_y = 0;
-    const unsigned int  stride_x = info.stride().first;
-    const unsigned int  stride_y = info.stride().second;
+    unsigned int        deconv_pad_x    = 0;
+    unsigned int        deconv_pad_y    = 0;
+    const unsigned int  stride_x        = info.stride().first;
+    const unsigned int  stride_y        = info.stride().second;
     const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, out_dims, deconv_pad_x, deconv_pad_y);
     TensorInfo          scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape));
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
@@ -127,8 +127,8 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     const unsigned int pad_right  = info.pad_right();
     const unsigned int pad_top    = info.pad_top();
     const unsigned int pad_bottom = info.pad_bottom();
-    const unsigned int stride_x = info.stride().first;
-    const unsigned int stride_y = info.stride().second;
+    const unsigned int stride_x   = info.stride().first;
+    const unsigned int stride_y   = info.stride().second;
 
     const unsigned int width_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -166,14 +166,14 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
         unsigned int deconv_pad_right = pad_left > pad_right ? pad_left - pad_right : 0;
         deconv_pad_x -= deconv_pad_left + deconv_pad_right;
         ARM_COMPUTE_ERROR_ON((deconv_pad_x % 2) != 0);
-        deconv_pad_left  += deconv_pad_x / 2;
+        deconv_pad_left += deconv_pad_x / 2;
         deconv_pad_right += deconv_pad_x / 2;
 
         unsigned int deconv_pad_top    = pad_bottom > pad_top ? pad_bottom - pad_top : 0;
         unsigned int deconv_pad_bottom = pad_top > pad_bottom ? pad_top - pad_bottom : 0;
         deconv_pad_y -= deconv_pad_top + deconv_pad_bottom;
         ARM_COMPUTE_ERROR_ON((deconv_pad_y % 2) != 0);
-        deconv_pad_top    += deconv_pad_y / 2;
+        deconv_pad_top += deconv_pad_y / 2;
         deconv_pad_bottom += deconv_pad_y / 2;
 
         TensorInfo scale_out_info(scale_out_shape, 1, _permuted_input.info()->data_type(), _permuted_input.info()->quantization_info());
@@ -212,14 +212,14 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
         unsigned int deconv_pad_right = pad_left > pad_right ? pad_left - pad_right : 0;
         deconv_pad_x -= deconv_pad_left + deconv_pad_right;
         ARM_COMPUTE_ERROR_ON((deconv_pad_x % 2) != 0);
-        deconv_pad_left  += deconv_pad_x / 2;
+        deconv_pad_left += deconv_pad_x / 2;
         deconv_pad_right += deconv_pad_x / 2;
 
         unsigned int deconv_pad_top    = pad_bottom > pad_top ? pad_bottom - pad_top : 0;
         unsigned int deconv_pad_bottom = pad_top > pad_bottom ? pad_top - pad_bottom : 0;
         deconv_pad_y -= deconv_pad_top + deconv_pad_bottom;
         ARM_COMPUTE_ERROR_ON((deconv_pad_y % 2) != 0);
-        deconv_pad_top    += deconv_pad_y / 2;
+        deconv_pad_top += deconv_pad_y / 2;
         deconv_pad_bottom += deconv_pad_y / 2;
 
         TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->quantization_info());

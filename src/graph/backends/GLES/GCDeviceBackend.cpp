@@ -154,6 +154,11 @@ std::shared_ptr<arm_compute::IMemoryManager> GCDeviceBackend::create_memory_mana
 
     return mm;
 }
+
+std::shared_ptr<arm_compute::IWeightsManager> GCDeviceBackend::create_weights_manager()
+{
+    return nullptr;
+}
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute
