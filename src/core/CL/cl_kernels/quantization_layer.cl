@@ -27,9 +27,17 @@
 #define CONVERT_RTE_VEC_STR(x, type, size) (convert_##type##size##_rte((x)))
 #define CONVERT_RTE_VEC(x, type, size) CONVERT_RTE_VEC_STR(x, type, size)
 
-#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(SCALE) && defined(OFFSET)
+#if defined(VEC_SIZE) && defined(DATA_TYPE_IN) && defined(DATA_TYPE_OUT) && defined(SCALE) && defined(OFFSET) && defined(MIN_QUANT_VAL) && defined(MAX_QUANT_VAL)
 
 /** This performs the quantization of floating point inputs to 8-bit unsigned integers.
+ *
+ * @note Input data type should be given as a preprocessor argument using -DDATA_TYPE_IN=type. e.g. -DDATA_TYPE=short
+ * @note Output data type should be given as a preprocessor argument using -DDATA_TYPE_OUT=type. e.g. -DDATA_TYPE=short
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
+ * @note Quantization scale should be given as a preprocessor argument using -DSCALE=scale. e.g. -DSCALE=0.125
+ * @note Quantization offset should be given as a preprocessor argument using -DOFFSET=offset. e.g. -DOFFSET=125
+ * @note Minimum value for quantized type should be given as a preprocessor argument using -DMIN_QUANT_VAL=value. e.g. -DMIN_QUANT_VAL=0
+ * @note Maximum value for quantized type should be given as a preprocessor argument using -DMAX_QUANT_VAL=value. e.g. -DMAXIN_QUANT_VAL=255
  *
  * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: F32
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
@@ -64,22 +72,22 @@ __kernel void quantization_layer(
     output.ptr -= max(xi - (int)LAST_ACCESSED_X, 0) * output_stride_x;
 
     // Load data
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    val = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
+    VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)
+    val = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)input.ptr);
 
     // Create scale and offset vectors
-    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) vscale = SCALE;
-    const VEC_DATA_TYPE(int, VEC_SIZE) voffset      = OFFSET;
+    const VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE) vscale = SCALE;
+    const VEC_DATA_TYPE(int, VEC_SIZE) voffset         = OFFSET;
 
     // Quantize
     VEC_DATA_TYPE(int, VEC_SIZE)
-    res = CLAMP(CONVERT_RTE_VEC(val / vscale, int, VEC_SIZE) + voffset, 0, 255);
+    res = CLAMP(CONVERT_RTE_VEC(val / vscale, int, VEC_SIZE) + voffset, MIN_QUANT_VAL, MAX_QUANT_VAL);
 
-    //Store result
+    // Store result
     VSTORE(VEC_SIZE)
-    (CONVERT(res, VEC_DATA_TYPE(uchar, VEC_SIZE)), 0, (__global uchar *)output.ptr);
+    (CONVERT(res, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), 0, (__global DATA_TYPE_OUT *)output.ptr);
 #else  //!defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
-    *((__global uchar *)(output.ptr)) = (uchar)CLAMP(CONVERT_RTE(((float) * (__global DATA_TYPE *)input.ptr) / ((float)SCALE), int) + (int)OFFSET, 0, 255);
+    *((__global DATA_TYPE_OUT *)(output.ptr)) = (DATA_TYPE_OUT)CLAMP(CONVERT_RTE(((float) * (__global DATA_TYPE_IN *)input.ptr) / ((float)SCALE), int) + (int)OFFSET, MIN_QUANT_VAL, MAX_QUANT_VAL);
 #endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
 }
-#endif //defined(VEC_SIZE) && defined(DATA_TYPE) && defined(SCALE) && defined(OFFSET)
+#endif //defined(VEC_SIZE) && defined(DATA_TYPE_IN) && defined(DATA_TYPE_OUT) && defined(SCALE) && defined(OFFSET) && defined(MIN_QUANT_VAL) && defined(MAX_QUANT_VAL)

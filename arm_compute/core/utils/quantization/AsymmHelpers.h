@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_QUANTIZATION_ASYMM_HELPERS_H__
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
@@ -48,6 +49,11 @@ arm_compute::Status calculate_quantized_multiplier_less_than_one(float multiplie
  * @return a status
  */
 arm_compute::Status calculate_quantized_multiplier_greater_than_one(float multiplier, int *quantized_multiplier, int *left_shift);
+/** Get minimum and maximum values for the input quantized data type
+ *
+ * @ return min and max values for the quantized data type
+ */
+std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_type);
 } // namespace quantization
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_IO_FILE_HANDLER_H__ */

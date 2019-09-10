@@ -33,26 +33,45 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src, const QuantizationInfo &quantization_info)
+template <typename Tin, typename Tout>
+SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
 {
     // Create reference
-    SimpleTensor<uint8_t> dst{ src.shape(), DataType::QASYMM8, 1, quantization_info };
+    SimpleTensor<Tout> dst{ src.shape(), output_data_type, 1, quantization_info };
 
     const UniformQuantizationInfo qinfo = quantization_info.uniform();
-    for(int i = 0; i < src.num_elements(); ++i)
+    switch(output_data_type)
     {
+        case DataType::QASYMM8:
+            for(int i = 0; i < src.num_elements(); ++i)
+            {
 #ifdef __aarch64__
-        dst[i] = quantize_qasymm8((src[i]), qinfo, RoundingPolicy::TO_NEAREST_EVEN);
+                dst[i] = quantize_qasymm8((src[i]), qinfo, RoundingPolicy::TO_NEAREST_EVEN);
 #else  // __aarch64__
-        dst[i] = quantize_qasymm8((src[i]), qinfo, RoundingPolicy::TO_ZERO);
+                dst[i] = quantize_qasymm8((src[i]), qinfo, RoundingPolicy::TO_ZERO);
 #endif // __aarch64__
+            }
+            break;
+        case DataType::QASYMM16:
+            for(int i = 0; i < src.num_elements(); ++i)
+            {
+#ifdef __aarch64__
+                dst[i] = quantize_qasymm16((src[i]), qinfo, RoundingPolicy::TO_NEAREST_EVEN);
+#else  // __aarch64__
+                dst[i] = quantize_qasymm16((src[i]), qinfo, RoundingPolicy::TO_ZERO);
+#endif // __aarch64__
+            }
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported output data type");
     }
     return dst;
 }
 
-template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src, const QuantizationInfo &quantization_info);
-template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
+template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
