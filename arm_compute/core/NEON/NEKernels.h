@@ -94,6 +94,7 @@
 #include "arm_compute/core/NEON/kernels/NEGaussian3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGaussian5x5Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGaussianPyramidKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHOGDescriptorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHOGDetectorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"

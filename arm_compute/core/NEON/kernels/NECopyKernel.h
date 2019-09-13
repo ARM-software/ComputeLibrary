@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,18 +51,20 @@ public:
     NECopyKernel &operator=(NECopyKernel &&) = default;
     /** Initialize the kernel's input, output.
      *
-     * @param[in]  input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
-     * @param[out] output Destination tensor. Data types supported: same as @p input.
+     * @param[in]  input   Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[out] output  Destination tensor. Data types supported: same as @p input.
+     * @param[in]  padding (Optional) Padding to be applied to the input tensor
      */
-    void configure(const ITensor *input, ITensor *output);
+    void configure(const ITensor *input, ITensor *output, const PaddingList &padding = PaddingList());
     /** Static function to check if given info will lead to a valid configuration of @ref NECopyKernel
      *
-     * @param[in] input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
-     * @param[in] output Destination tensor. Data types supported: same as @p input.
+     * @param[in] input   Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] output  Destination tensor. Data types supported: same as @p input.
+     * @param[in] padding (Optional) Padding to be applied to the input tensor
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding = PaddingList());
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -70,6 +72,7 @@ public:
 private:
     const ITensor *_input;
     ITensor       *_output;
+    PaddingList    _padding;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECOPYKERNEL_H__ */

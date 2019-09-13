@@ -78,7 +78,7 @@ protected:
         ARM_COMPUTE_EXPECT(!all_anchors.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(CLAccessor(anchors));
+        fill(AccessorType(anchors));
 
         // Compute function
         compute_all_anchors.run();
