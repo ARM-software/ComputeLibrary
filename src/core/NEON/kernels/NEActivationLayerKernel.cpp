@@ -228,6 +228,7 @@ NEActivationLayerKernel::activation(const Window &window)
     Iterator input(_input, win_collapsed);
     Iterator output(_output, win_collapsed);
 
+    const auto epsilon = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType{});
     const auto const_1 = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
     const auto const_0 = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
     const auto va      = wrapper::vdup_n(static_cast<T>(_act_info.a()), ExactTagType{});
@@ -277,7 +278,7 @@ NEActivationLayerKernel::activation(const Window &window)
                     tmp = wrapper::vbsl(wrapper::vcge(vin, const_0), vin, wrapper::vmul(va, wrapper::vsub(wrapper::vexpq(vin), const_1)));
                     break;
                 case ActivationFunction::SQRT:
-                    tmp = wrapper::vinv(wrapper::vinvsqrt(vin));
+                    tmp = wrapper::vinv(wrapper::vinvsqrt(vin + epsilon));
                     break;
                 case ActivationFunction::SQUARE:
                     tmp = wrapper::vmul(vin, vin);
