@@ -98,7 +98,7 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
 
     for(unsigned int n = 0; n < info->num_dimensions(); ++n)
     {
-        offset_first_element += window[n].start() * strides[n];
+        offset_first_element += (window.is_broadcasted(n) ? 0 : window[n].start()) * strides[n];
     }
 
     unsigned int idx_start = idx;
