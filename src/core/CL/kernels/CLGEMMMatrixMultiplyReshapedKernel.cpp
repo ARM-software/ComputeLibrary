@@ -72,7 +72,8 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((lhs_info.k0 & (lhs_info.k0 - 1)) && lhs_info.k0 != 3), "Only 2,3,4,8,16 are supported for k0");
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.m0 < 2 || lhs_info.m0 > 8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.n0 & (rhs_info.n0 - 1)) && rhs_info.n0 != 3), "Only 2,3,4,8,16 are supported for n0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((lhs_info.transpose) && ((lhs_info.m0 & (lhs_info.m0 - 1)) && lhs_info.m0 != 3), "Only 2,3,4,8,16 are supported for m0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.transpose) && ((rhs_info.n0 & (rhs_info.n0 - 1)) && rhs_info.n0 != 3), "Only 2,3,4,8,16 are supported for n0");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((gemm_info.reinterpret_input_as_3d || gemm_info.depth_output_gemm3d != 0) && (input2 != nullptr)
                                     && (!gemm_info.broadcast_bias),
                                     "Bias addition only supported with broadcast mode in case the input or output has to be reinterpreted as 3D");

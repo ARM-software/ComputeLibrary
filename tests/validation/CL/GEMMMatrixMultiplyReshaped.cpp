@@ -118,7 +118,7 @@ const auto v0_values_precommit = framework::dataset::make("V0", 1, 3);
 const auto h0_values_precommit = framework::dataset::make("H0", 1, 3);
 
 /** M0 values to test - Nightly */
-const auto m0_values_nightly = framework::dataset::make("M0", 2, 7);
+const auto m0_values_nightly = framework::dataset::make("M0", { 2, 3, 4, 8 });
 
 /** N0 values to test - Nightly */
 const auto n0_values_nightly = framework::dataset::make("N0", { 2, 3, 4, 8 });
