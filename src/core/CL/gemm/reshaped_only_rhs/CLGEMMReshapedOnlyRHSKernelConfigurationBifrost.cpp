@@ -48,6 +48,13 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
+    // Configurations for Mali-G51
+    static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G51 =
+    {
+        { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f32 },
+        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8 }
+    };
+
     // Configurations for Mali-G76
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G76 =
     {
@@ -66,6 +73,8 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     {
         case GPUTarget::G76:
             return (this->*gemm_configs_G76[data_type])(m, n, k, b);
+        case GPUTarget::G51:
+            return (this->*gemm_configs_G51[data_type])(m, n, k, b);
         default:
             return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
     }
@@ -104,6 +113,23 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     {
         const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
         return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, h0, false, true, false, true);
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 2, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(m == 1)
+    {
+        const unsigned int n0 = n < 1280? 2 : 4;
+        const unsigned int h0 = std::max(n / n0, static_cast<unsigned int>(1));
+        return configure_lhs_rhs_info(m, n, 1, n0, 4, 1, h0, false, true, false, true);
     }
     else
     {
@@ -157,6 +183,23 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     else
     {
         return configure_lhs_rhs_info(m, n, 4, 4, 16, 1, 2, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(m == 1)
+    {
+        const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
+        return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, h0, false, true, false, true);
+    }
+    else
+    {
+        const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
+        return configure_lhs_rhs_info(m, n, 4, 2, 16, 1, h0, false, true, false, true);
     }
 }
 } // namespace cl_gemm
