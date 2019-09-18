@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,13 @@ public:
      * @param[in] group The group id of the group
      */
     virtual void register_group(IMemoryGroup *group) = 0;
+    /** Unbound and release elements associated with a group
+     *
+     * @param[in] group Group to unbound its elements
+     *
+     * @return True if group was registered and released else false.
+     */
+    virtual bool release_group(IMemoryGroup *group) = 0;
     /** Registers and starts lifetime of an object
      *
      * @param[in] obj Object to register

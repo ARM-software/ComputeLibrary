@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,7 @@ public:
 
     // Inherited methods overridden:
     void register_group(IMemoryGroup *group) override;
+    bool release_group(IMemoryGroup *group) override;
     void start_lifetime(void *obj) override;
     void end_lifetime(void *obj, IMemory &obj_memory, size_t size, size_t alignment) override;
     bool are_all_finalized() const override;

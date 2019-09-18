@@ -35,8 +35,8 @@
 #include <map>
 #include <vector>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 ISimpleLifetimeManager::ISimpleLifetimeManager()
     : _active_group(nullptr), _active_elements(), _free_blobs(), _occupied_blobs(), _finalized_groups()
 {
@@ -49,6 +49,20 @@ void ISimpleLifetimeManager::register_group(IMemoryGroup *group)
         ARM_COMPUTE_ERROR_ON(group == nullptr);
         _active_group = group;
     }
+}
+
+bool ISimpleLifetimeManager::release_group(IMemoryGroup *group)
+{
+    if(group == nullptr)
+    {
+        return false;
+    }
+    const bool status = bool(_finalized_groups.erase(group));
+    if(status)
+    {
+        group->mappings().clear();
+    }
+    return status;
 }
 
 void ISimpleLifetimeManager::start_lifetime(void *obj)
@@ -109,7 +123,7 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t
         update_blobs_and_mappings();
 
         // Update finalized groups
-        _finalized_groups[_active_group] = std::move(_active_elements);
+        _finalized_groups[_active_group].insert(std::begin(_active_elements), std::end(_active_elements));
 
         // Reset state
         _active_elements.clear();
@@ -125,3 +139,4 @@ bool ISimpleLifetimeManager::are_all_finalized() const
         return !e.second.status;
     });
 }
+} // namespace arm_compute

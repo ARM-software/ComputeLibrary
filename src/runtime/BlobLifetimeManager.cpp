@@ -71,7 +71,7 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     std::vector<BlobInfo> group_sizes;
     std::transform(std::begin(_free_blobs), std::end(_free_blobs), std::back_inserter(group_sizes), [](const Blob & b)
     {
-        return BlobInfo{ b.max_size, b.max_alignment };
+        return BlobInfo{ b.max_size, b.max_alignment, b.bound_elements.size() };
     });
 
     // Update blob sizes
@@ -80,7 +80,7 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     group_sizes.resize(max_size);
     std::transform(std::begin(_blobs), std::end(_blobs), std::begin(group_sizes), std::begin(_blobs), [](BlobInfo lhs, BlobInfo rhs)
     {
-        return BlobInfo{ std::max(lhs.size, rhs.size), std::max(lhs.alignment, rhs.alignment) };
+        return BlobInfo{ std::max(lhs.size, rhs.size), std::max(lhs.alignment, rhs.alignment), std::max(lhs.owners, rhs.owners) };
     });
 
     // Calculate group mappings
