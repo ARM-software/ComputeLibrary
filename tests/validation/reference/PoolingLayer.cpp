@@ -37,8 +37,8 @@ namespace reference
 {
 using namespace arm_compute::misc::shape_calculator;
 
-template <typename T>
-SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
+template <typename T, typename ACC_T, typename std::enable_if<is_floating_point<T>::value, int>::type>
+SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
 {
     ARM_COMPUTE_UNUSED(output_qinfo); // requantization occurs in pooling_layer<uint8_t>
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));
@@ -79,12 +79,12 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
                     wstart     = std::max(wstart, 0);
                     hstart     = std::max(hstart, 0);
 
-                    T max_val = std::numeric_limits<T>::lowest();
+                    auto max_val = std::numeric_limits<ACC_T>::lowest();
                     for(int y = hstart; y < hend; ++y)
                     {
                         for(int x = wstart; x < wend; ++x)
                         {
-                            const T val = src[r * h_src * w_src + y * w_src + x];
+                            const auto val = static_cast<ACC_T>(src[r * h_src * w_src + y * w_src + x]);
                             if(val > max_val)
                             {
                                 max_val = val;
@@ -92,7 +92,7 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
                         }
                     }
 
-                    dst[r * h_dst * w_dst + h * w_dst + w] = max_val;
+                    dst[r * h_dst * w_dst + h * w_dst + w] = static_cast<T>(max_val);
                 }
             }
         }
@@ -105,16 +105,16 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
             {
                 for(int w = 0; w < w_dst; ++w)
                 {
-                    T   avg_val(0);
-                    int wstart = w * pool_stride_x - pad_left;
-                    int hstart = h * pool_stride_y - pad_top;
-                    int wend   = std::min(wstart + pool_size_x, w_src + pad_right);
-                    int hend   = std::min(hstart + pool_size_y, h_src + pad_bottom);
-                    int pool   = (hend - hstart) * (wend - wstart);
-                    wstart     = std::max(wstart, 0);
-                    hstart     = std::max(hstart, 0);
-                    wend       = std::min(wend, w_src);
-                    hend       = std::min(hend, h_src);
+                    ACC_T avg_val(0);
+                    int   wstart = w * pool_stride_x - pad_left;
+                    int   hstart = h * pool_stride_y - pad_top;
+                    int   wend   = std::min(wstart + pool_size_x, w_src + pad_right);
+                    int   hend   = std::min(hstart + pool_size_y, h_src + pad_bottom);
+                    int   pool   = (hend - hstart) * (wend - wstart);
+                    wstart       = std::max(wstart, 0);
+                    hstart       = std::max(hstart, 0);
+                    wend         = std::min(wend, w_src);
+                    hend         = std::min(hend, h_src);
                     // Exclude padding pixels from the average
                     if(exclude_padding)
                     {
@@ -127,7 +127,7 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
                         {
                             for(int x = wstart; x < wend; ++x)
                             {
-                                avg_val += src[r * h_src * w_src + y * w_src + x];
+                                avg_val += static_cast<ACC_T>(src[r * h_src * w_src + y * w_src + x]);
                             }
                         }
                         dst[r * h_dst * w_dst + h * w_dst + w] = avg_val / pool;
@@ -138,11 +138,11 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
                         {
                             for(int x = wstart; x < wend; ++x)
                             {
-                                const T val = src[r * h_src * w_src + y * w_src + x];
+                                const auto val = static_cast<ACC_T>(src[r * h_src * w_src + y * w_src + x]);
                                 avg_val += val * val;
                             }
                         }
-                        dst[r * h_dst * w_dst + h * w_dst + w] = std::sqrt(avg_val / pool);
+                        dst[r * h_dst * w_dst + h * w_dst + w] = static_cast<T>(std::sqrt(avg_val / pool));
                     }
                 }
             }
@@ -152,17 +152,37 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
     return dst;
 }
 
+template SimpleTensor<float> pooling_layer_internal<float>(const SimpleTensor<float> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
+template SimpleTensor<half> pooling_layer_internal<half>(const SimpleTensor<half> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
+template SimpleTensor<half> pooling_layer_internal<half, float>(const SimpleTensor<half> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
+
+template <typename T>
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
+{
+    return pooling_layer_internal<T, T>(src, info, output_qinfo);
+}
+
 template <>
 SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
 {
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float>   dst_tmp = pooling_layer<float>(src_tmp, info, output_qinfo);
+    SimpleTensor<float>   dst_tmp = pooling_layer_internal<float>(src_tmp, info, output_qinfo);
     SimpleTensor<uint8_t> dst     = convert_to_asymmetric<uint8_t>(dst_tmp, output_qinfo);
     return dst;
 }
 
+template <>
+SimpleTensor<half> pooling_layer(const SimpleTensor<half> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
+{
+    if(src.data_type() == DataType::F16 && info.fp_mixed_precision())
+    {
+        return pooling_layer_internal<half, float>(src, info, output_qinfo);
+    }
+
+    return pooling_layer_internal<half>(src, info, output_qinfo);
+}
+
 template SimpleTensor<float> pooling_layer(const SimpleTensor<float> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
-template SimpleTensor<half> pooling_layer(const SimpleTensor<half> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
 } // namespace reference
 } // namespace validation
 } // namespace test
