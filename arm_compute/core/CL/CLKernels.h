@@ -106,6 +106,7 @@
 #include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLHistogramKernel.h"
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
+#include "arm_compute/core/CL/kernels/CLInstanceNormalizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLIntegralImageKernel.h"
 #include "arm_compute/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLLKTrackerKernel.h"

@@ -90,6 +90,7 @@
 #include "arm_compute/runtime/CL/functions/CLHOGMultiDetection.h"
 #include "arm_compute/runtime/CL/functions/CLHarrisCorners.h"
 #include "arm_compute/runtime/CL/functions/CLHistogram.h"
+#include "arm_compute/runtime/CL/functions/CLInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLIntegralImage.h"
 #include "arm_compute/runtime/CL/functions/CLL2NormalizeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLLSTMLayer.h"

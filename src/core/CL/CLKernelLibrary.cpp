@@ -371,6 +371,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "init_level", "optical_flow_pyramid_lk.cl" },
     { "init_level_max", "optical_flow_pyramid_lk.cl" },
     { "init_level_max_initial_estimate", "optical_flow_pyramid_lk.cl" },
+    { "instance_normalization", "instance_normalization.cl" },
     { "integral_horizontal", "integral_image.cl" },
     { "integral_vertical", "integral_image.cl" },
     { "IYUV_to_NV12_bt709", "color_convert.cl" },
@@ -821,6 +822,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "im2col.cl",
 #include "./cl_kernels/im2col.clembed"
+    },
+    {
+        "instance_normalization.cl",
+#include "./cl_kernels/instance_normalization.clembed"
     },
     {
         "integral_image.cl",
