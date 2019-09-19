@@ -28,6 +28,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CPUUtils.h"
+#include "support/Mutex.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -91,9 +92,9 @@ void process_workloads(std::vector<IScheduler::Workload> &workloads, ThreadFeede
 
 } //namespace
 
-struct CPPScheduler::Impl
+struct CPPScheduler::Impl final
 {
-    Impl(unsigned int thread_hint)
+    explicit Impl(unsigned int thread_hint)
         : _num_threads(thread_hint), _threads(_num_threads - 1)
     {
     }
@@ -111,11 +112,12 @@ struct CPPScheduler::Impl
 
     class Thread;
 
-    unsigned int      _num_threads;
-    std::list<Thread> _threads;
+    unsigned int       _num_threads;
+    std::list<Thread>  _threads;
+    arm_compute::Mutex _run_workloads_mutex{};
 };
 
-class CPPScheduler::Impl::Thread
+class CPPScheduler::Impl::Thread final
 {
 public:
     /** Start a new thread. */
@@ -252,6 +254,8 @@ CPPScheduler::~CPPScheduler() = default;
 
 void CPPScheduler::set_num_threads(unsigned int num_threads)
 {
+    // No changes in the number of threads while current workloads are running
+    arm_compute::lock_guard<std::mutex> lock(_impl->_run_workloads_mutex);
     _impl->set_num_threads(num_threads, num_threads_hint());
 }
 
@@ -263,7 +267,12 @@ unsigned int CPPScheduler::num_threads() const
 #ifndef DOXYGEN_SKIP_THIS
 void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 {
-    const unsigned int num_threads = std::min(_impl->num_threads(), static_cast<unsigned int>(workloads.size()));
+    // Mutex to ensure other threads won't interfere with the setup of the current thread's workloads
+    // Other thread's workloads will be scheduled after the current thread's workloads have finished
+    // This is not great because different threads workloads won't run in parallel but at least they
+    // won't interfere each other and deadlock.
+    arm_compute::lock_guard<std::mutex> lock(_impl->_run_workloads_mutex);
+    const unsigned int                  num_threads = std::min(_impl->num_threads(), static_cast<unsigned int>(workloads.size()));
     if(num_threads < 1)
     {
         return;
