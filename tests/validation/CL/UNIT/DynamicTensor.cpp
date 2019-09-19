@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Allocator.h"
+#include "arm_compute/runtime/BlobLifetimeManager.h"
+#include "arm_compute/runtime/CL/CLBufferAllocator.h"
+#include "arm_compute/runtime/CL/functions/CLL2NormalizeLayer.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
-#include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
-#include "arm_compute/runtime/OffsetLifetimeManager.h"
 #include "arm_compute/runtime/PoolManager.h"
 #include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
+#include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"
-#include "tests/NEON/Accessor.h"
 #include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -45,17 +45,18 @@ namespace validation
 {
 namespace
 {
-using NENormLayerWrapper = SimpleFunctionWrapper<MemoryManagerOnDemand, NENormalizationLayer, ITensor>;
+using CLL2NormLayerWrapper = SimpleFunctionWrapper<MemoryManagerOnDemand, CLL2NormalizeLayer, ICLTensor>;
 template <>
-void NENormLayerWrapper::configure(arm_compute::ITensor *src, arm_compute::ITensor *dst)
+void CLL2NormLayerWrapper::configure(ICLTensor *src, ICLTensor *dst)
 {
-    _func.configure(src, dst, NormalizationLayerInfo(NormType::CROSS_MAP, 3));
+    _func.configure(src, dst, 0, 0.0001f);
 }
 } // namespace
-TEST_SUITE(NEON)
+TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(DynamicTensor)
-using NEDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<Tensor, Accessor, Allocator, OffsetLifetimeManager, PoolManager, MemoryManagerOnDemand, NENormLayerWrapper>;
+
+using CLDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<CLTensor, CLAccessor, CLBufferAllocator, BlobLifetimeManager, PoolManager, MemoryManagerOnDemand, CLL2NormLayerWrapper>;
 
 /** Tests the memory manager with dynamic input and output tensors.
  *
@@ -63,25 +64,42 @@ using NEDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<Tens
  *  change the input and output size requesting more memory and go through the manage/allocate process.
  *  The memory manager should be able to update the inner structures and allocate the requested memory
  * */
-FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, NEDynamicTensorType3SingleFunction, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, CLDynamicTensorType3SingleFunction, framework::DatasetMode::ALL,
                        framework::dataset::zip(framework::dataset::make("Level0Shape", { TensorShape(12U, 11U, 3U), TensorShape(256U, 8U, 12U) }),
                                                framework::dataset::make("Level1Shape", { TensorShape(67U, 31U, 15U), TensorShape(11U, 2U, 3U) })))
 {
+    ARM_COMPUTE_EXPECT(internal_l0.size() == internal_l1.size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(cross_l0.size() == cross_l1.size(), framework::LogLevel::ERRORS);
+
+    const unsigned int internal_size = internal_l0.size();
+    const unsigned int cross_size    = cross_l0.size();
     if(input_l0.total_size() < input_l1.total_size())
     {
-        ARM_COMPUTE_EXPECT(internal_l0.size < internal_l1.size, framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(cross_l0.size < cross_l1.size, framework::LogLevel::ERRORS);
+        for(unsigned int i = 0; i < internal_size; ++i)
+        {
+            ARM_COMPUTE_EXPECT(internal_l0[i].size < internal_l1[i].size, framework::LogLevel::ERRORS);
+        }
+        for(unsigned int i = 0; i < cross_size; ++i)
+        {
+            ARM_COMPUTE_EXPECT(cross_l0[i].size < cross_l1[i].size, framework::LogLevel::ERRORS);
+        }
     }
     else
     {
-        ARM_COMPUTE_EXPECT(internal_l0.size == internal_l1.size, framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(cross_l0.size == cross_l1.size, framework::LogLevel::ERRORS);
+        for(unsigned int i = 0; i < internal_size; ++i)
+        {
+            ARM_COMPUTE_EXPECT(internal_l0[i].size == internal_l1[i].size, framework::LogLevel::ERRORS);
+        }
+        for(unsigned int i = 0; i < cross_size; ++i)
+        {
+            ARM_COMPUTE_EXPECT(cross_l0[i].size == cross_l1[i].size, framework::LogLevel::ERRORS);
+        }
     }
 }
 
 TEST_SUITE_END() // DynamicTensor
 TEST_SUITE_END() // UNIT
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

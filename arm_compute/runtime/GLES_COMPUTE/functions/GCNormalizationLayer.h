@@ -36,6 +36,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class IGCTensor;
 
 /** Basic function to compute a normalization layer. This function calls the following OpenGL ES kernels:
@@ -43,7 +44,6 @@ class IGCTensor;
  * -# @ref GCPixelWiseMultiplicationKernel
  * -# @ref GCFillBorderKernel
  * -# @ref GCNormalizationLayerKernel
- *
  */
 class GCNormalizationLayer : public IFunction
 {
@@ -69,5 +69,5 @@ private:
     GCPixelWiseMultiplicationKernel _multiply_kernel; /**< Pixel multiplication kernel to run */
     GCFillBorderKernel              _border_handler;  /**< Kernel to handle  borders */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCNORMALIZATIONLAYER_H__ */

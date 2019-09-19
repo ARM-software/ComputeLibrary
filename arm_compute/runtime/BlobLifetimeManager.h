@@ -41,6 +41,9 @@ class IMemoryPool;
 class BlobLifetimeManager : public ISimpleLifetimeManager
 {
 public:
+    using info_type = std::vector<BlobInfo>;
+
+public:
     /** Constructor */
     BlobLifetimeManager();
     /** Prevent instances of this class to be copy constructed */
@@ -51,6 +54,11 @@ public:
     BlobLifetimeManager(BlobLifetimeManager &&) = default;
     /** Allow instances of this class to be moved */
     BlobLifetimeManager &operator=(BlobLifetimeManager &&) = default;
+    /** Accessor to the pool internal configuration meta-data
+     *
+     * @return Lifetime manager internal configuration meta-data
+     */
+    const info_type &info() const;
 
     // Inherited methods overridden:
     std::unique_ptr<IMemoryPool> create_pool(IAllocator *allocator) override;

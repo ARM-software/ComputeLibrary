@@ -128,17 +128,8 @@ void CLTensorAllocator::allocate()
     // Allocate tensor backing memory
     if(_associated_memory_group == nullptr)
     {
-        if(_memory.region() != nullptr && _memory.cl_region()->cl_data().get() != nullptr)
-        {
-            // Memory is already allocated. Reuse it if big enough, otherwise fire an assertion
-            ARM_COMPUTE_ERROR_ON_MSG(info().total_size() > _memory.region()->size(),
-                                     "Reallocation of a bigger memory region is not allowed!");
-        }
-        else
-        {
-            // Perform memory allocation
-            _memory.set_owned_region(allocate_region(CLScheduler::get().context(), info().total_size(), 0));
-        }
+        // Perform memory allocation
+        _memory.set_owned_region(allocate_region(CLScheduler::get().context(), info().total_size(), 0));
     }
     else
     {

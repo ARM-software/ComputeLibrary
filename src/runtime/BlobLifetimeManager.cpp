@@ -33,11 +33,16 @@
 #include <cmath>
 #include <map>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 BlobLifetimeManager::BlobLifetimeManager()
     : _blobs()
 {
+}
+
+const BlobLifetimeManager::info_type &BlobLifetimeManager::info() const
+{
+    return _blobs;
 }
 
 std::unique_ptr<IMemoryPool> BlobLifetimeManager::create_pool(IAllocator *allocator)
@@ -92,3 +97,4 @@ void BlobLifetimeManager::update_blobs_and_mappings()
         ++blob_idx;
     }
 }
+} // namespace arm_compute

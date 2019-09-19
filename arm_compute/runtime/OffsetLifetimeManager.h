@@ -56,7 +56,7 @@ public:
     OffsetLifetimeManager &operator=(OffsetLifetimeManager &&) = default;
     /** Accessor to the pool internal configuration meta-data
      *
-     * @return Pool internal configuration meta-data
+     * @return Lifetime manager internal configuration meta-data
      */
     const info_type &info() const;
 
