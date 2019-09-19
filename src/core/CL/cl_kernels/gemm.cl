@@ -2644,12 +2644,12 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
 #if K0 > 8
         RHS_VFMA_M0xN0(8, a, b8, c);
         RHS_VFMA_M0xN0(9, a, b9, c);
-        RHS_VFMA_M0xN0(A, a, b10, c);
-        RHS_VFMA_M0xN0(B, a, b11, c);
-        RHS_VFMA_M0xN0(C, a, b12, c);
-        RHS_VFMA_M0xN0(D, a, b13, c);
-        RHS_VFMA_M0xN0(E, a, b14, c);
-        RHS_VFMA_M0xN0(F, a, b15, c);
+        RHS_VFMA_M0xN0(A, a, bA, c);
+        RHS_VFMA_M0xN0(B, a, bB, c);
+        RHS_VFMA_M0xN0(C, a, bC, c);
+        RHS_VFMA_M0xN0(D, a, bD, c);
+        RHS_VFMA_M0xN0(E, a, bE, c);
+        RHS_VFMA_M0xN0(F, a, bF, c);
 #endif // K0 > 8
 
         lhs_offset += K0 * sizeof(DATA_TYPE);
