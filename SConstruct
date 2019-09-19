@@ -44,6 +44,7 @@ vars.AddVariables(
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
+    BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),

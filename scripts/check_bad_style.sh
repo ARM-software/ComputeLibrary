@@ -87,6 +87,7 @@ do
             "arm_compute_version.embed");;
             ".clang-format");;
             ".clang-tidy");;
+            "README.md");;
             #It's an error for other files to not contain the MIT header:
             *)
                 spdx_missing=1
