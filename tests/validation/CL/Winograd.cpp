@@ -61,7 +61,7 @@ const AbsoluteTolerance<half> tolerance_convolution_layer_f16(half(0.4f));
 RelativeTolerance<half_float::half> rel_tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for FP16 data types */
 constexpr float                     tolerance_num   = 0.05f;  /**< Tolerance number */
 constexpr float                     abs_tolerance_convolution_layer_f16   = 2.5f;  /**< Tolerance number */
-constexpr float                      tolerance_num_convolution_f16 = 0.15f;                 /**< Tolerance number */
+constexpr float                      tolerance_num_f16 = 0.15f;                 /**< Tolerance number */
 
 // Input transform
 const auto SmallWinogradInputTransformDatasetNCHW =
@@ -80,12 +80,12 @@ const auto SmallWinogradInputTransformDatasetNHWC = framework::dataset::concat(d
                                                     framework::dataset::concat(datasets::SmallWinogradInputTransformDataset1x4_1x3(),
                                                     framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_5x5(),
                                                     framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x1_5x1(),
-                                                                               datasets::SmallWinogradInputTransformDataset1x4_1x5())))));
+                                                    framework::dataset::concat(datasets::SmallWinogradInputTransformDataset1x4_1x5(),
+                                                    framework::dataset::concat(datasets::SmallWinogradInputTransformDataset2x1_7x1(),
+                                                                               datasets::SmallWinogradInputTransformDataset1x2_1x7())))))));
 
 const auto SmallWinogradInputTransformDatasetNHWC_FP32 = framework::dataset::concat(SmallWinogradInputTransformDatasetNHWC,
-                                                         framework::dataset::concat(datasets::SmallWinogradInputTransformDataset1x2_1x7(),
-                                                         framework::dataset::concat(datasets::SmallWinogradInputTransformDataset2x1_7x1(),
-                                                                                    datasets::SmallWinogradInputTransformDataset2x2_7x7())));
+                                                                                    datasets::SmallWinogradInputTransformDataset2x2_7x7());
 
 const auto LargeWinogradInputTransformDatasetNCHW =
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset2x2_3x3(),
@@ -96,7 +96,9 @@ const auto LargeWinogradInputTransformDatasetNCHW =
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x4_1x3(),
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_5x5(),
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x1_5x1(),
-                                      datasets::LargeWinogradInputTransformDataset1x4_1x5()))))))));
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x4_1x5(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x2_1x7(),
+                                      datasets::LargeWinogradInputTransformDataset2x1_7x1()))))))))));
 
 const auto LargeWinogradInputTransformDatasetNHWC =
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_3x3(),
@@ -106,9 +108,7 @@ const auto LargeWinogradInputTransformDatasetNHWC =
 
 const auto LargeWinogradInputTransformDatasetNHWC_FP32 =
            framework::dataset::concat(LargeWinogradInputTransformDatasetNHWC,
-           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x2_1x7(),
-           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset2x1_7x1(),
-                                     (datasets::LargeWinogradInputTransformDataset2x2_7x7()))));
+                                      (datasets::LargeWinogradInputTransformDataset2x2_7x7()));
 
 // Filter transform
 const auto SmallWinogradFilterTransformDatasetNCHW =
@@ -125,13 +125,13 @@ const auto SmallWinogradFilterTransformDatasetNHWC_F16 =
            framework::dataset::concat(combine(datasets::Small1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
            framework::dataset::concat(combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
            framework::dataset::concat(combine(datasets::Small5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
-                                     (combine(datasets::Small1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) }))))))));
+           framework::dataset::concat(combine(datasets::Small1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
+           framework::dataset::concat(combine(datasets::Small1x7Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 2U) })),
+                                      combine(datasets::Small7x1Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 1U) })))))))));
 
 const auto SmallWinogradFilterTransformDatasetNHWC_F32 =
            framework::dataset::concat(SmallWinogradFilterTransformDatasetNHWC_F16,
-           framework::dataset::concat(combine(datasets::Small7x7Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U) })),
-           framework::dataset::concat(combine(datasets::Small7x1Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 1U) })),
-                                      combine(datasets::Small1x7Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 2U) })))));
+                                      combine(datasets::Small7x7Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U) })));
 
 const auto LargeWinogradFilterTransformDatasetNCHW =
            framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
@@ -147,13 +147,13 @@ const auto LargeWinogradFilterTransformDatasetNHWC_F16 =
            framework::dataset::concat(combine(datasets::Large1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
            framework::dataset::concat(combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
            framework::dataset::concat(combine(datasets::Large5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
-                                      combine(datasets::Large1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
+           framework::dataset::concat(combine(datasets::Large1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large7x1Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 1U) })),
+                                      combine(datasets::Large1x7Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 2U) })))))))));
 
 const auto LargeWinogradFilterTransformDatasetNHWC_F32 =
            framework::dataset::concat(LargeWinogradFilterTransformDatasetNHWC_F16,
-           framework::dataset::concat(combine(datasets::Large7x7Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U) })),
-           framework::dataset::concat(combine(datasets::Large7x1Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 1U) })),
-                                      combine(datasets::Large1x7Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 2U) })))));
+                                      combine(datasets::Large7x7Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U) })));
 
 // Output transform
 const auto SmallWinogradOutputTransformDatasetNCHW = datasets::SmallWinogradOutputTransformDatasetNCHW();
@@ -269,14 +269,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixtureFP16, framework:
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                                                                                                      framework::dataset::make("DataType", { DataType::F16 })))
 {
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradInputTransformFixtureFP16, framework::DatasetMode::NIGHTLY, combine(combine(LargeWinogradInputTransformDatasetNHWC,
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                                                                                                    framework::dataset::make("DataType", { DataType::F16 })))
 {
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
@@ -385,7 +385,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixtureFP16, framework
                                        framework::dataset::make("DataType", { DataType::F16 })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixtureFP16, framework::DatasetMode::NIGHTLY,
@@ -394,7 +394,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixtureFP16, framework
                                        framework::dataset::make("DataType", { DataType::F16 })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
@@ -524,7 +524,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixtureFP16, framework
                                framework::dataset::make("ActivationInfo",{ ActivationLayerInfo() }) ))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradOutputTransformFixtureFP16, framework::DatasetMode::NIGHTLY,
@@ -533,7 +533,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradOutputTransformFixtureFP16, framework
                                framework::dataset::make("ActivationInfo",{ ActivationLayerInfo() }) ))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
@@ -754,7 +754,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, fr
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_convolution_f16);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
@@ -776,7 +776,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, fr
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_convolution_f16);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
@@ -798,7 +798,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, fr
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_convolution_f16);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
@@ -821,7 +821,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, fr
 
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_convolution_f16);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
@@ -845,7 +845,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, fr
 
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_convolution_f16);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
@@ -869,7 +869,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, fr
 
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_convolution_f16);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
@@ -883,6 +883,30 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, fr
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_convolution_layer_f16);
 }
 TEST_SUITE_END() // Conv1x5
+
+TEST_SUITE(Conv1x7)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x7Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F16 })),
+                                       ActivationFunctionsSmallDataset),
+                                               framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer1x7Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F16 })),
+                                               ActivationFunctionsDataset),
+                                               framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_convolution_layer_f16);
+}
+TEST_SUITE_END() // Conv1x7
 
 TEST_SUITE_END() // FP16
 
