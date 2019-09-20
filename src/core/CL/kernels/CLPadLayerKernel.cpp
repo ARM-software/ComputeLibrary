@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 namespace arm_compute
 {
@@ -41,6 +42,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
     ARM_COMPUTE_UNUSED(constant_value, mode);
+    // Output auto initialization if not yet initialized
+    const TensorShape expected_output_shape = arm_compute::misc::shape_calculator::compute_padded_shape(input->tensor_shape(), padding);
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(expected_output_shape));
+
     const unsigned int num_elems_processed_per_iteration = std::min(16U, 32U / static_cast<unsigned int>(element_size_from_data_type(input->data_type())));
 
     // Configure kernel window
@@ -67,10 +72,8 @@ CLPadLayerKernel::CLPadLayerKernel()
 
 void CLPadLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
+    // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output tensor auto initialisation if not yet initialized
-    auto_init_if_empty(*output->info(), *input->info()->clone());
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), padding, constant_value, mode));
 
     _input  = input;
@@ -134,9 +137,9 @@ void CLPadLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     win_in.adjust(Window::DimX, _input_start_x, true);
     win_in.adjust(Window::DimY, _input_start_y, true);
 
-    Window slice_out = window.first_slice_window_3D();
-    Window slice_in  = win_in.first_slice_window_3D();
-    unsigned int batch = 0;
+    Window       slice_out = window.first_slice_window_3D();
+    Window       slice_in  = win_in.first_slice_window_3D();
+    unsigned int batch     = 0;
     do
     {
         unsigned int idx = 0;

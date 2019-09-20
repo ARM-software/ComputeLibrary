@@ -37,8 +37,7 @@ CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManage
       _flatten_scores_kernel(),
       _compute_anchors_kernel(),
       _bounding_box_kernel(),
-      _memset_kernel(),
-      _padded_copy_kernel(),
+      _pad_kernel(),
       _cpp_nms_kernel(),
       _is_nhwc(false),
       _deltas_permuted(),
@@ -149,10 +148,8 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     _scores_flattened.allocator()->allocate();
 
     // Add the first column that represents the batch id. This will be all zeros, as we don't support multiple images
-    _padded_copy_kernel.configure(&_proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } });
+    _pad_kernel.configure(&_proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } });
     _proposals_4_roi_values.allocator()->allocate();
-
-    _memset_kernel.configure(proposals, PixelValue());
 }
 
 Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITensorInfo *deltas, const ITensorInfo *anchors, const ITensorInfo *proposals, const ITensorInfo *scores_out,
@@ -197,8 +194,7 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     ARM_COMPUTE_RETURN_ON_ERROR(CLBoundingBoxTransformKernel::validate(&all_anchors_info, &proposals_4_roi_values, &deltas_flattened_info, BoundingBoxTransformInfo(info.im_width(), info.im_height(),
                                                                        1.f)));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(&proposals_4_roi_values, proposals, PaddingList{ { 0, 1 } }));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(proposals, PixelValue()));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPadLayerKernel::validate(&proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } }));
 
     if(num_valid_proposals->total_size() > 0)
     {
@@ -275,7 +271,6 @@ void CLGenerateProposalsLayer::run()
     // Non maxima suppression
     run_cpp_nms_kernel();
     // Add dummy batch indexes
-    CLScheduler::get().enqueue(_memset_kernel, true);
-    CLScheduler::get().enqueue(_padded_copy_kernel, true);
+    CLScheduler::get().enqueue(_pad_kernel, true);
 }
 } // namespace arm_compute

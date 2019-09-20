@@ -25,9 +25,8 @@
 #define __ARM_COMPUTE_NEGENERATEPROPOSALSLAYER_H__
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
-#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEMemsetKernel.h"
+#include "arm_compute/core/NEON/kernels/NEPadLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
 #include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEStridedSliceKernel.h"
@@ -49,8 +48,7 @@ class ITensor;
  * -# @ref NEReshapeLayer x 2
  * -# @ref NEStridedSlice x 3
  * -# @ref NEBoundingBoxTransform
- * -# @ref NECopyKernel
- * -# @ref NEMemsetKernel
+ * -# @ref NEPadLayerKernel
  * And the following CPP kernels:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit
  */
@@ -117,8 +115,7 @@ private:
     NEReshapeLayerKernel         _flatten_scores_kernel;
     NEComputeAllAnchorsKernel    _compute_anchors_kernel;
     NEBoundingBoxTransformKernel _bounding_box_kernel;
-    NEMemsetKernel               _memset_kernel;
-    NECopyKernel                 _padded_copy_kernel;
+    NEPadLayerKernel             _pad_kernel;
 
     // CPP kernels
     CPPBoxWithNonMaximaSuppressionLimitKernel _cpp_nms_kernel;

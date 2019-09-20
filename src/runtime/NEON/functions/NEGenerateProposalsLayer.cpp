@@ -37,8 +37,7 @@ NEGenerateProposalsLayer::NEGenerateProposalsLayer(std::shared_ptr<IMemoryManage
       _flatten_scores_kernel(),
       _compute_anchors_kernel(),
       _bounding_box_kernel(),
-      _memset_kernel(),
-      _padded_copy_kernel(),
+      _pad_kernel(),
       _cpp_nms_kernel(),
       _is_nhwc(false),
       _deltas_permuted(),
@@ -130,7 +129,7 @@ void NEGenerateProposalsLayer::configure(const ITensor *scores, const ITensor *d
     auto_init_if_empty(*num_valid_proposals->info(), TensorShape(scores_nms_size), 1, DataType::U32);
 
     // Initialize temporaries (unused) outputs
-    _classes_nms_unused.allocator()->init(TensorInfo(TensorShape(8, 1), 1, data_type));
+    _classes_nms_unused.allocator()->init(TensorInfo(TensorShape(scores_nms_size), 1, data_type));
     _keeps_nms_unused.allocator()->init(*scores_out->info());
 
     // Save the output (to map and unmap them at run)
@@ -157,10 +156,8 @@ void NEGenerateProposalsLayer::configure(const ITensor *scores, const ITensor *d
     _scores_flattened.allocator()->allocate();
 
     // Add the first column that represents the batch id. This will be all zeros, as we don't support multiple images
-    _padded_copy_kernel.configure(&_proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } });
+    _pad_kernel.configure(&_proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } });
     _proposals_4_roi_values.allocator()->allocate();
-
-    _memset_kernel.configure(proposals, PixelValue());
 }
 
 Status NEGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITensorInfo *deltas, const ITensorInfo *anchors, const ITensorInfo *proposals, const ITensorInfo *scores_out,
@@ -205,7 +202,7 @@ Status NEGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     ARM_COMPUTE_RETURN_ON_ERROR(NEBoundingBoxTransformKernel::validate(&all_anchors_info, &proposals_4_roi_values, &deltas_flattened_info, BoundingBoxTransformInfo(info.im_width(), info.im_height(),
                                                                        1.f)));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NECopyKernel::validate(&proposals_4_roi_values, proposals, PaddingList{ { 0, 1 } }));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPadLayerKernel::validate(&proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } }));
 
     if(num_valid_proposals->total_size() > 0)
     {
@@ -257,8 +254,6 @@ void NEGenerateProposalsLayer::run()
     CPPScheduler::get().schedule(&_cpp_nms_kernel, Window::DimX);
 
     // Add dummy batch indexes
-
-    NEScheduler::get().schedule(&_memset_kernel, Window::DimY);
-    NEScheduler::get().schedule(&_padded_copy_kernel, Window::DimY);
+    NEScheduler::get().schedule(&_pad_kernel, Window::DimY);
 }
 } // namespace arm_compute

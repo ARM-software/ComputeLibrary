@@ -24,9 +24,8 @@
 #ifndef __ARM_COMPUTE_CLGENERATEPROPOSALSLAYER_H__
 #define __ARM_COMPUTE_CLGENERATEPROPOSALSLAYER_H__
 #include "arm_compute/core/CL/kernels/CLBoundingBoxTransformKernel.h"
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
+#include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
@@ -50,8 +49,7 @@ class ICLTensor;
  * -# @ref CLReshapeLayer x 2
  * -# @ref CLStridedSlice x 3
  * -# @ref CLBoundingBoxTransform
- * -# @ref CLCopyKernel
- * -# @ref CLMemsetKernel
+ * -# @ref CLPadLayerKernel
  * And the following CPP kernels:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit
  */
@@ -118,8 +116,7 @@ private:
     CLReshapeLayerKernel         _flatten_scores_kernel;
     CLComputeAllAnchorsKernel    _compute_anchors_kernel;
     CLBoundingBoxTransformKernel _bounding_box_kernel;
-    CLMemsetKernel               _memset_kernel;
-    CLCopyKernel                 _padded_copy_kernel;
+    CLPadLayerKernel             _pad_kernel;
 
     // CPP kernels
     CPPBoxWithNonMaximaSuppressionLimitKernel _cpp_nms_kernel;
