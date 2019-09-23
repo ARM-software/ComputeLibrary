@@ -36,8 +36,8 @@
 
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 // OpenCL kernel requires input width to be a power of 2 for x-axis.
@@ -65,7 +65,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
         if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8, "Not supported operation for QASYMM8");
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32, DataType::S32);
         }
         else
         {
@@ -376,3 +376,4 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
             ARM_COMPUTE_ERROR("Not supported");
     }
 }
+} // namespace arm_compute

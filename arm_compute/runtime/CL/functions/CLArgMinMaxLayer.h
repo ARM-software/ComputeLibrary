@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,13 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Function to calculate the index of the minimum or maximum values in a tensor based on an axis. */
+/** Function to calculate the index of the minimum or maximum values in a
+ *  tensor based on an axis.
+ *
+ * @note The indices are computed in unsigned 32-bit (U32). It is the user's
+ *       responsibility to check that the results do not overflow in case the
+ *       output data type is set to signed 32-bit integer (S32).
+ */
 class CLArgMinMaxLayer : public ICLSimpleFunction
 {
 public:
@@ -40,7 +46,7 @@ public:
      *
      * @param[in]  input  Input source tensor. Data types supported: F16/F32.
      * @param[in]  axis   Axis to find max/min index.
-     * @param[out] output Output source tensor. Data types supported: U32.
+     * @param[out] output Output source tensor. Data types supported: U32/S32.
      * @param[in]  op     Operation to perform: min or max
      */
     void configure(const ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op);
@@ -48,7 +54,7 @@ public:
      *
      * @param[in] input  Input source tensor info. Data types supported: F16/F32.
      * @param[in] axis   Axis to find max/min index.
-     * @param[in] output Output source tensor info. Data types supported: U32.
+     * @param[in] output Output source tensor info. Data types supported: U32/S32.
      * @param[in] op     Operation to perform: min or max
      *
      * @return a status

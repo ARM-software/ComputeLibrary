@@ -32,14 +32,19 @@
 
 namespace arm_compute
 {
-class IsTensor;
+class ITensor;
 
-/** Function to calculate the index of the minimum or maximum values in a tensor based on an axis.
+/** Function to calculate the index of the minimum or maximum values in a
+ *  tensor based on an axis.
+ *
  *  This function calls the following NEON kernels:
  *
  * -# @ref NEReductionOperationKernel
  * -# @ref NEFillBorderKernel
  *
+ * @note The indices are computed in unsigned 32-bit (U32). It is the user's
+ *       responsibility to check that the results do not overflow in case the
+ *       output data type is set to signed 32-bit integer (S32).
  */
 class NEArgMinMaxLayer : public IFunction
 {
@@ -50,7 +55,7 @@ public:
      *
      * @param[in]  input  Input source tensor. Data types supported: QASYMM8/S32/F16/F32.
      * @param[in]  axis   Axis to find max/min index.
-     * @param[out] output Output source tensor. Data types supported: U32.
+     * @param[out] output Output source tensor. Data types supported: U32/S32.
      * @param[in]  op     Operation to perform: min or max
      */
     void configure(ITensor *input, int axis, ITensor *output, const ReductionOperation &op);
@@ -58,7 +63,7 @@ public:
      *
      * @param[in] input  Input source tensor info. Data types supported: QASYMM8/S32/F16/F32.
      * @param[in] axis   Axis to find max/min index.
-     * @param[in] output Output source tensor info. Data types supported: U32.
+     * @param[in] output Output source tensor info. Data types supported: U32/S32.
      * @param[in] op     Operation to perform: min or max
      *
      * @return a status
