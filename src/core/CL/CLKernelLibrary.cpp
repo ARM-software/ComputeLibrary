@@ -1144,6 +1144,49 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     return Kernel(kernel_name, cl_program);
 }
 
+void CLKernelLibrary::init(std::string kernel_path, cl::Context context, cl::Device device)
+{
+    _kernel_path = std::move(kernel_path);
+    _context     = std::move(context);
+    _device      = std::move(device);
+}
+
+void CLKernelLibrary::set_kernel_path(const std::string &kernel_path)
+{
+    _kernel_path = kernel_path;
+}
+
+cl::Context &CLKernelLibrary::context()
+{
+    return _context;
+}
+
+cl::Device &CLKernelLibrary::get_device()
+{
+    return _device;
+}
+
+void CLKernelLibrary::set_device(cl::Device device)
+{
+    _device = std::move(device);
+}
+
+std::string CLKernelLibrary::get_kernel_path()
+{
+    return _kernel_path;
+}
+
+void CLKernelLibrary::clear_programs_cache()
+{
+    _programs_map.clear();
+    _built_programs_map.clear();
+}
+
+const std::map<std::string, cl::Program> &CLKernelLibrary::get_built_programs() const
+{
+    return _built_programs_map;
+}
+
 void CLKernelLibrary::add_built_program(const std::string &built_program_name, const cl::Program &program)
 {
     _built_programs_map.emplace(built_program_name, program);
@@ -1203,6 +1246,28 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
     const auto new_program = _programs_map.emplace(program_name, std::move(program));
 
     return new_program.first->second;
+}
+
+void CLKernelLibrary::set_context(cl::Context context)
+{
+    _context = std::move(context);
+    if(_context.get() == nullptr)
+    {
+        _device = cl::Device();
+    }
+    else
+    {
+        const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
+
+        if(cl_devices.empty())
+        {
+            _device = cl::Device();
+        }
+        else
+        {
+            _device = cl_devices[0];
+        }
+    }
 }
 
 std::string CLKernelLibrary::stringify_set(const StringSet &s) const

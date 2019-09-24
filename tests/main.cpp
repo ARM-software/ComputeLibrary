@@ -23,11 +23,11 @@
  */
 #include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
-#include "tests/ParametersLibrary.h"
 #include "tests/framework/DatasetModes.h"
 #include "tests/framework/Exceptions.h"
 #include "tests/framework/Framework.h"
 #include "tests/framework/Macros.h"
+#include "tests/framework/ParametersLibrary.h"
 #include "tests/framework/Profiler.h"
 #include "tests/framework/command_line/CommonOptions.h"
 #include "tests/framework/instruments/Instruments.h"
@@ -74,8 +74,8 @@ namespace arm_compute
 {
 namespace test
 {
-std::unique_ptr<AssetsLibrary>     library;
-std::unique_ptr<ParametersLibrary> parameters;
+std::unique_ptr<AssetsLibrary>            library;
+extern std::unique_ptr<ParametersLibrary> parameters;
 } // namespace test
 } // namespace arm_compute
 
@@ -92,17 +92,6 @@ bool file_exists(const std::string &filename)
 
 int main(int argc, char **argv)
 {
-#ifdef ARM_COMPUTE_CL
-    CLTuner cl_tuner(false);
-    if(opencl_is_available())
-    {
-        auto ctx_dev_err = create_opencl_context_and_device();
-        ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
-        CLScheduler::get()
-        .default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner);
-    }
-#endif /* ARM_COMPUTE_CL */
-
 #ifdef ARM_COMPUTE_GC
     GCScheduler::get().default_init();
 #endif /* ARM_COMPUTE_GC */
@@ -185,6 +174,20 @@ int main(int argc, char **argv)
         parameters->set_cpu_ctx(std::move(cpu_ctx));
 
 #ifdef ARM_COMPUTE_CL
+        CLTuner cl_tuner(false);
+        // Create GPU context
+        auto cl_ctx = support::cpp14::make_unique<CLRuntimeContext>();
+        assert(cl_ctx != nullptr);
+        CLScheduler *gpu_scheduler = cl_ctx->gpu_scheduler();
+        assert(gpu_scheduler != nullptr);
+        const auto device_version = cl_ctx->kernel_library().get_device_version();
+        {
+            // Legacy singletons API: This has been deprecated and the singletons will be removed
+            // Setup singleton for backward compatibility
+            CLScheduler::get().init(gpu_scheduler->context(), gpu_scheduler->queue(), cl_ctx->kernel_library().get_device(), &cl_tuner);
+        }
+        parameters->set_gpu_ctx(std::move(cl_ctx));
+
         if(enable_tuner->is_set())
         {
             cl_tuner.set_tune_new_kernels(enable_tuner->value());
@@ -222,7 +225,7 @@ int main(int argc, char **argv)
 #ifdef ARM_COMPUTE_CL
                 if(opencl_is_available())
                 {
-                    p->print_entry("CL_DEVICE_VERSION", CLKernelLibrary::get().get_device_version());
+                    p->print_entry("CL_DEVICE_VERSION", device_version);
                 }
                 else
                 {

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/ParametersLibrary.h"
+#include "tests/framework/ParametersLibrary.h"
 
 namespace arm_compute
 {
@@ -32,10 +32,23 @@ void ParametersLibrary::set_cpu_ctx(std::unique_ptr<IRuntimeContext> cpu_ctx)
     _cpu_ctx = std::move(cpu_ctx);
 }
 
+void ParametersLibrary::set_gpu_ctx(std::unique_ptr<IRuntimeContext> gpu_ctx)
+{
+    _gpu_ctx = std::move(gpu_ctx);
+}
+
 template <>
 typename ContextType<Tensor>::type *ParametersLibrary::get_ctx<Tensor>()
 {
     return _cpu_ctx.get();
 }
+
+#if ARM_COMPUTE_CL
+template <>
+typename ContextType<CLTensor>::type *ParametersLibrary::get_ctx<CLTensor>()
+{
+    return static_cast<typename ContextType<CLTensor>::type *>(_gpu_ctx.get());
+}
+#endif /* ARM_COMPUTE_CL */
 } // namespace test
 } // namespace arm_compute

@@ -26,6 +26,13 @@
 
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"
+#if ARM_COMPUTE_CL
+#include "arm_compute/runtime/CL/CLRuntimeContext.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#endif /* ARM_COMPUTE_CL */
+#ifdef ARM_COMPUTE_GC
+#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
+#endif /* ARM_COMPUTE_GC */
 
 #include <memory>
 
@@ -45,6 +52,22 @@ struct ContextType<Tensor>
     using type = IRuntimeContext;
 };
 
+#if ARM_COMPUTE_CL
+template <>
+struct ContextType<CLTensor>
+{
+    using type = CLRuntimeContext;
+};
+#endif /* ARM_COMPUTE_CL */
+
+#ifdef ARM_COMPUTE_GC
+template <>
+struct ContextType<GCTensor>
+{
+    using type = IRuntimeContext;
+};
+#endif /* ARM_COMPUTE_GC */
+
 /** Class that contains all the global parameters used by the tests */
 class ParametersLibrary final
 {
@@ -56,6 +79,11 @@ public:
      * @param[in] cpu_ctx CPU context to use
      */
     void set_cpu_ctx(std::unique_ptr<IRuntimeContext> cpu_ctx);
+    /** Set gpu context to be used by the tests
+     *
+     * @param[in] gpu_ctx GPU context to use
+     */
+    void set_gpu_ctx(std::unique_ptr<IRuntimeContext> gpu_ctx);
     /** Get context given a tensor type
      *
      * @tparam TensorType
@@ -70,6 +98,7 @@ public:
 
 private:
     std::unique_ptr<IRuntimeContext> _cpu_ctx{ nullptr };
+    std::unique_ptr<IRuntimeContext> _gpu_ctx{ nullptr };
 };
 } // namespace test
 } // namespace arm_compute

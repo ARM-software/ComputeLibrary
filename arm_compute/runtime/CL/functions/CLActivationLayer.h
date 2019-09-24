@@ -43,7 +43,7 @@ public:
      *
      * @param[in] ctx Runtime context to be used by the function
      */
-    CLActivationLayer(void *ctx = nullptr);
+    CLActivationLayer(CLRuntimeContext *ctx = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLActivationLayer(const CLActivationLayer &) = delete;
     /** Default move constructor */

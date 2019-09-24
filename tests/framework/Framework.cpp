@@ -25,8 +25,12 @@
 
 #include "arm_compute/runtime/Scheduler.h"
 #include "support/ToolchainSupport.h"
+#include "tests/framework/ParametersLibrary.h"
+
 #ifdef ARM_COMPUTE_CL
+#include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
 #endif /* ARM_COMPUTE_CL */
 
 #include <chrono>
@@ -38,6 +42,8 @@ namespace arm_compute
 {
 namespace test
 {
+std::unique_ptr<ParametersLibrary> parameters;
+
 namespace framework
 {
 std::unique_ptr<InstrumentsInfo> instruments_info;
@@ -558,17 +564,23 @@ bool Framework::run()
             // Every 100 tests, reset the OpenCL context to release the allocated memory
             if(opencl_is_available() && (id_run_test % 100) == 0)
             {
-                auto ctx_properties   = CLScheduler::get().context().getInfo<CL_CONTEXT_PROPERTIES>(nullptr);
-                auto queue_properties = CLScheduler::get().queue().getInfo<CL_QUEUE_PROPERTIES>(nullptr);
-
-                cl::Context      new_ctx   = cl::Context(CL_DEVICE_TYPE_DEFAULT, ctx_properties.data());
-                cl::CommandQueue new_queue = cl::CommandQueue(new_ctx, CLKernelLibrary::get().get_device(), queue_properties);
-
                 CLKernelLibrary::get().clear_programs_cache();
-                CLScheduler::get().set_context(new_ctx);
-                CLScheduler::get().set_queue(new_queue);
+                auto cl_ctx = support::cpp14::make_unique<CLRuntimeContext>();
+                assert(cl_ctx != nullptr);
+                CLScheduler *gpu_scheduler = cl_ctx->gpu_scheduler();
+                assert(gpu_scheduler != nullptr);
+                {
+                    // Legacy singletons API: This has been deprecated and the singletons will be removed
+                    // Setup singleton for backward compatibility
+                    CLScheduler::get().init(gpu_scheduler->context(), gpu_scheduler->queue(), cl_ctx->kernel_library().get_device());
+                }
+                if(parameters)
+                {
+                    parameters->set_gpu_ctx(std::move(cl_ctx));
+                }
             }
 #endif // ARM_COMPUTE_CL
+
             run_test(test_info, *test_factory);
 
             ++id_run_test;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,31 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
-
-#include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLRuntimeContext.h"
-#include "support/ToolchainSupport.h"
+#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 
 namespace arm_compute
 {
-CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
-    : ICLSimpleFunction(ctx)
+cl::Context CLCoreRuntimeContext::context()
+{
+    return _ctx;
+}
+
+cl::CommandQueue CLCoreRuntimeContext::queue()
+{
+    return _queue;
+}
+
+CLCoreRuntimeContext::CLCoreRuntimeContext()
+    : _kernel_lib(nullptr), _ctx(), _queue()
 {
 }
 
-void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+CLCoreRuntimeContext::CLCoreRuntimeContext(CLKernelLibrary *kernel_lib, cl::Context ctx, cl::CommandQueue queue)
+    : _kernel_lib(kernel_lib), _ctx(ctx), _queue(queue)
 {
-    auto core_ctx = _ctx ? _ctx->core_runtime_context() : /* Legacy */ nullptr;
-
-    auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>(core_ctx);
-    k->configure(input, output, act_info);
-    _kernel = std::move(k);
 }
 
-Status CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+CLKernelLibrary *CLCoreRuntimeContext::kernel_library() const
 {
-    return CLActivationLayerKernel::validate(input, output, act_info);
+    return _kernel_lib;
 }
 } // namespace arm_compute

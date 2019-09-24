@@ -26,7 +26,7 @@
 
 namespace arm_compute
 {
-GCTensor::GCTensor()
+GCTensor::GCTensor(IRuntimeContext *)
     : _allocator(this)
 {
 }

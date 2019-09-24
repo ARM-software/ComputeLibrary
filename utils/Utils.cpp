@@ -24,6 +24,7 @@
 #include "Utils.h"
 
 #ifdef ARM_COMPUTE_CL
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
 

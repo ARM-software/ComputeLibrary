@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
@@ -282,5 +284,19 @@ bool preferred_dummy_work_items_support(const cl::Device &device)
     ARM_COMPUTE_UNUSED(device);
     // TODO (COMPMID-2044)
     return true;
+}
+
+cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts)
+{
+    if(ctx && ctx->kernel_library())
+    {
+        //New api going through the core context
+        return static_cast<cl::Kernel>(ctx->kernel_library()->create_kernel(kernel_name, build_opts.options()));
+    }
+    else
+    {
+        //Legacy code through the singleton
+        return static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    }
 }
 } // namespace arm_compute

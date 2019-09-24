@@ -95,15 +95,18 @@ TEST_SUITE(ActivationLayer)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
                shape, data_type, in_place)
 {
+    // Create context
+    auto ctx = parameters->get_ctx<CLTensor>();
+
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1);
+    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, QuantizationInfo(), DataLayout::NCHW, ctx);
+    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, QuantizationInfo(), DataLayout::NCHW, ctx);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    CLActivationLayer act_layer;
+    CLActivationLayer act_layer(ctx);
 
     if(in_place)
     {

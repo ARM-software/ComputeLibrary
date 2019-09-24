@@ -34,6 +34,9 @@
 
 namespace arm_compute
 {
+class CLCoreRuntimeContext;
+class CLBuildOptions;
+
 enum class DataType;
 
 /** Max vector width of an OpenCL vector */
@@ -153,5 +156,15 @@ size_t preferred_vector_width(const cl::Device &device, DataType dt);
  * @return True if dummy work-items should be preferred to dispatch the NDRange
  */
 bool preferred_dummy_work_items_support(const cl::Device &device);
+
+/** Creates an opencl kernel
+ *
+ * @param[in] ctx         A context to be used to create the opencl kernel.
+ * @param[in] kernel_name The kernel name.
+ * @param[in] build_opts  The build options to be used for the opencl kernel compilation.
+ *
+ * @return An opencl kernel
+ */
+cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts);
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

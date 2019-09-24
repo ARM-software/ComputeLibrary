@@ -25,7 +25,7 @@
 #define __ARM_COMPUTE_TEST_GLOBALS_H__
 
 #include "tests/AssetsLibrary.h"
-#include "tests/ParametersLibrary.h"
+#include "tests/framework/ParametersLibrary.h"
 
 #include <memory>
 

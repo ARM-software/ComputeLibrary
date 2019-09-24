@@ -60,11 +60,10 @@ bool opencl_is_available();
 /** Class for loading OpenCL symbols. */
 class CLSymbols final
 {
-private:
+public:
     CLSymbols() = default;
     void load_symbols(void *handle);
 
-public:
     /** Get the static instance of CLSymbols.
      *
      * @return The static instance of CLSymbols.

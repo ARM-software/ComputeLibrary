@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/CL/CLRuntimeContext.h"
 
 namespace
 {
@@ -103,4 +104,19 @@ create_opencl_context_and_device()
     ARM_COMPUTE_ERROR_ON_MSG(err != CL_SUCCESS, "Failed to create OpenCL context");
     return std::make_tuple(cl_context, device, err);
 }
+
+void schedule_kernel_on_ctx(CLRuntimeContext *ctx, ICLKernel *kernel, bool flush)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(kernel);
+    if(ctx)
+    {
+        ARM_COMPUTE_ERROR_ON(ctx->gpu_scheduler() == nullptr);
+        ctx->gpu_scheduler()->enqueue(*kernel, flush);
+    }
+    else
+    {
+        CLScheduler::get().enqueue(*kernel, flush);
+    }
+}
+
 } // namespace arm_compute

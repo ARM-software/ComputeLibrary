@@ -34,7 +34,7 @@
 namespace arm_compute
 {
 /** Build options */
-class CLBuildOptions
+class CLBuildOptions final
 {
     using StringSet = std::set<std::string>;
 
@@ -80,7 +80,7 @@ private:
     StringSet _build_opts; /**< Build options set */
 };
 /** Program class */
-class Program
+class Program final
 {
 public:
     /** Default constructor. */
@@ -147,7 +147,7 @@ private:
 };
 
 /** Kernel class */
-class Kernel
+class Kernel final
 {
 public:
     /** Default Constructor. */
@@ -189,20 +189,19 @@ private:
 };
 
 /** CLKernelLibrary class */
-class CLKernelLibrary
+class CLKernelLibrary final
 {
     using StringSet = std::set<std::string>;
 
-private:
+public:
     /** Default Constructor. */
     CLKernelLibrary();
-
-public:
     /** Prevent instances of this class from being copied */
     CLKernelLibrary(const CLKernelLibrary &) = delete;
     /** Prevent instances of this class from being copied */
     const CLKernelLibrary &operator=(const CLKernelLibrary &) = delete;
     /** Access the KernelLibrary singleton.
+     * This method has been deprecated and will be removed in the next release.
      * @return The KernelLibrary instance.
      */
     static CLKernelLibrary &get();
@@ -212,26 +211,15 @@ public:
      * @param[in] context     CL context used to create programs.
      * @param[in] device      CL device for which the programs are created.
      */
-    void init(std::string kernel_path, cl::Context context, cl::Device device)
-    {
-        _kernel_path = std::move(kernel_path);
-        _context     = std::move(context);
-        _device      = std::move(device);
-    }
+    void init(std::string kernel_path, cl::Context context, cl::Device device);
     /** Sets the path that the kernels reside in.
      *
      * @param[in] kernel_path Path of the kernel.
      */
-    void set_kernel_path(const std::string &kernel_path)
-    {
-        _kernel_path = kernel_path;
-    };
+    void set_kernel_path(const std::string &kernel_path);
     /** Gets the path that the kernels reside in.
      */
-    std::string get_kernel_path()
-    {
-        return _kernel_path;
-    };
+    std::string get_kernel_path();
     /** Gets the source of the selected program.
      *
      * @param[in] program_name Program name.
@@ -246,51 +234,22 @@ public:
      *
      * @param[in] context A CL context.
      */
-    void set_context(cl::Context context)
-    {
-        _context = std::move(context);
-        if(_context.get() == nullptr)
-        {
-            _device = cl::Device();
-        }
-        else
-        {
-            const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
-
-            if(cl_devices.empty())
-            {
-                _device = cl::Device();
-            }
-            else
-            {
-                _device = cl_devices[0];
-            }
-        }
-    }
+    void set_context(cl::Context context);
 
     /** Accessor for the associated CL context.
      *
      * @return A CL context.
      */
-    cl::Context &context()
-    {
-        return _context;
-    }
+    cl::Context &context();
 
     /** Gets the CL device for which the programs are created. */
-    cl::Device &get_device()
-    {
-        return _device;
-    }
+    cl::Device &get_device();
 
     /** Sets the CL device for which the programs are created.
      *
      * @param[in] device A CL device.
      */
-    void set_device(cl::Device device)
-    {
-        _device = std::move(device);
-    }
+    void set_device(cl::Device device);
 
     /** Return the device version
      *
@@ -321,17 +280,10 @@ public:
 
     /** Clear the library's cache of binary programs
      */
-    void clear_programs_cache()
-    {
-        _programs_map.clear();
-        _built_programs_map.clear();
-    }
+    void clear_programs_cache();
 
     /** Access the cache of built OpenCL programs */
-    const std::map<std::string, cl::Program> &get_built_programs() const
-    {
-        return _built_programs_map;
-    }
+    const std::map<std::string, cl::Program> &get_built_programs() const;
 
     /** Add a new built program to the cache
      *

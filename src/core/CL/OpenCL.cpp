@@ -27,6 +27,8 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #pragma GCC diagnostic pop
 
+#include "arm_compute/core/Error.h"
+
 #include <dlfcn.h>
 #include <iostream>
 
@@ -54,6 +56,7 @@ bool CLSymbols::load_default()
     {
         if(load(lib))
         {
+            ARM_COMPUTE_ERROR_ON_MSG(this->clBuildProgram_ptr == nullptr, "Failed to load OpenCL symbols from shared library");
             return true;
         }
     }

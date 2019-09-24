@@ -32,13 +32,17 @@
 namespace arm_compute
 {
 class ITensorInfo;
-
+class IRuntimeContext;
 /** Basic implementation of the tensor interface */
 class Tensor : public ITensor, public IMemoryManageable
 {
 public:
-    /** Constructor */
-    Tensor();
+    /** Constructor
+     *
+     * @param[in] ctx (Optional) Pointer to the runtime context.
+     *
+     */
+    Tensor(IRuntimeContext *ctx = nullptr);
     /** Destructor: free the tensor's memory */
     ~Tensor() = default;
     /** Allow instances of this class to be move constructed */

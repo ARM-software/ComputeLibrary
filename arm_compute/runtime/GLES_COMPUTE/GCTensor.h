@@ -32,13 +32,18 @@ namespace arm_compute
 {
 class ITensorAllocator;
 class ITensorInfo;
+class IRuntimeContext;
 
 /** Interface for OpenGL ES tensor */
 class GCTensor : public IGCTensor, public IMemoryManageable
 {
 public:
-    /** Default constructor */
-    GCTensor();
+    /** Default constructor
+     *
+     * @param[in] ctx (Optional) Pointer to the runtime context.
+     *
+     */
+    GCTensor(IRuntimeContext *ctx = nullptr);
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCTensor(const GCTensor &) = delete;

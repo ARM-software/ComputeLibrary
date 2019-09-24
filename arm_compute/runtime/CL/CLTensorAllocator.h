@@ -37,7 +37,7 @@
 namespace arm_compute
 {
 class CLTensor;
-
+class CLRuntimeContext;
 /** Basic implementation of a CL memory tensor allocator. */
 class CLTensorAllocator : public ITensorAllocator
 {
@@ -45,8 +45,9 @@ public:
     /** Default constructor.
      *
      * @param[in] owner (Optional) Owner of the allocator.
+     * @param[in] ctx   (Optional) Runtime context.
      */
-    CLTensorAllocator(IMemoryManageable *owner = nullptr);
+    CLTensorAllocator(IMemoryManageable *owner = nullptr, CLRuntimeContext *ctx = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLTensorAllocator(const CLTensorAllocator &) = delete;
     /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
@@ -139,6 +140,7 @@ private:
     static const cl::Buffer _empty_buffer;
 
 private:
+    CLRuntimeContext *_ctx;
     IMemoryManageable *_owner;                   /**< Memory manageable object that owns the allocator */
     IMemoryGroup      *_associated_memory_group; /**< Registered memory manager */
     CLMemory           _memory;                  /**< OpenCL memory */

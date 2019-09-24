@@ -21,31 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CL_HELPERS_H__
-#define __ARM_COMPUTE_CL_HELPERS_H__
+#ifndef __ARM_COMPUTE_CLCORERUNTIME_CONTEXT_H__
+#define __ARM_COMPUTE_CLCORERUNTIME_CONTEXT_H__
 
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/IScheduler.h"
 
 namespace arm_compute
 {
-class CLRuntimeContext;
-class ICLKernel;
-/** This function creates an OpenCL context and a device.
- *
- * @note In debug builds, the function will automatically enable cl_arm_printf if the driver/device supports it.
- *
- * @return A std::tuple where the first element is the opencl context, the second element is the opencl device
- *         and the third one an error code. The error code will be CL_SUCCESS upon successful creation, otherwise
- *         a value telling why the function failed.
- */
-std::tuple<cl::Context, cl::Device, cl_int> create_opencl_context_and_device();
-/** Schedules a kernel using the context if not nullptr else uses the legacy scheduling flow.
- *
- * @param[in] ctx    Context to use.
- * @param[in] kernel Kernel to schedule.
- * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
- */
-void schedule_kernel_on_ctx(CLRuntimeContext *ctx, ICLKernel *kernel, bool flush = true);
+class CLKernelLibrary;
+/** Core runtime context */
+class CLCoreRuntimeContext final
+{
+public:
+    /** Legacy constructor */
+    CLCoreRuntimeContext();
+
+    /** Constructor */
+    CLCoreRuntimeContext(CLKernelLibrary *kernel_lib, cl::Context ctx, cl::CommandQueue queue);
+    /** Destructor */
+    ~CLCoreRuntimeContext() = default;
+    /** Default copy constructor */
+    CLCoreRuntimeContext(const CLCoreRuntimeContext &) = default;
+    /** Default move constructor */
+    CLCoreRuntimeContext(CLCoreRuntimeContext &&) = default;
+    /** Default copy assignment */
+    CLCoreRuntimeContext &operator=(const CLCoreRuntimeContext &) = default;
+    /** Default move assignment operator */
+    CLCoreRuntimeContext &operator=(CLCoreRuntimeContext &&) = default;
+    /** CPU Scheduler setter */
+
+    CLKernelLibrary *kernel_library() const;
+    cl::Context      context();
+    cl::CommandQueue queue();
+
+private:
+    CLKernelLibrary *_kernel_lib{ nullptr };
+    cl::Context      _ctx{};
+    cl::CommandQueue _queue{};
+};
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CL_HELPERS_H__ */
+#endif /*__ARM_COMPUTE_CLCORERUNTIME_CONTEXT_H__ */
