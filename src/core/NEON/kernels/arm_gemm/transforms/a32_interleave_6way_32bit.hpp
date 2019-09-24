@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@ template<typename T>
 inline void TransformImpl<6, 1, false, 4, 4, false>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
     uint32_t *outptr = reinterpret_cast<uint32_t *>(out);
     const uint32_t *inptr = reinterpret_cast<const uint32_t *>(in);
+    bool first = true;
 
     uint32_t zerobuff[16] = { 0 }; // 8 for asm loop plus up to 7 for overflow loop
 
@@ -53,8 +54,9 @@ inline void TransformImpl<6, 1, false, 4, 4, false>::Transform(T *out, const T *
         //prefetch_2x(inptr5);
 
         int x=(kmax-k0);
-        for (;x>7;x-=8) {
+        for (;(x>7) || first;x-=8) {
             /* Cope with ragged cases by copying from a buffer of zeroes instead */
+            /* 'first' forces this to always run at least once, needed if the total size is <=7. */
             if ((y + 5) >= ymax) {
                 switch ((y + 5) - ymax) {
                     /* Everything falls through in here */
@@ -79,6 +81,13 @@ inline void TransformImpl<6, 1, false, 4, 4, false>::Transform(T *out, const T *
                 }
             }
 
+            if (first) {
+                if (x<=7) {
+                    break;
+                }
+
+                first = false;
+            }
 
             __asm __volatile (
                 // Load up 8 elements (2 vectors) from each of 8 sources.

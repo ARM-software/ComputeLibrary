@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@ template<typename T>
 void TransformImpl<8, 1, false, 2, 2, false>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
     uint16_t *outptr = (uint16_t *)out;
     const uint16_t *inptr = (const uint16_t *)in;
+    bool first=true;
 
     uint16_t zerobuff[16] = { 0 }; // 8 for asm loop plus up to 7 for overflow loop
 
@@ -57,8 +58,9 @@ void TransformImpl<8, 1, false, 2, 2, false>::Transform(T *out, const T *in, int
         prefetch_2x(inptr7);
 
         int x=(kmax-k0);
-        for (;x>7;x-=8) {
+        for (;(x>7) || first;x-=8) {
             /* Cope with ragged cases by copying from a buffer of zeroes instead */
+            /* 'first' forces this to always run at least once, needed if the total size is <=7. */
             if ((y + 7) >= ymax) {
                 switch ((y + 7) - ymax) {
                     /* Everything falls through in here */
@@ -87,6 +89,14 @@ void TransformImpl<8, 1, false, 2, 2, false>::Transform(T *out, const T *in, int
                     default:
                         UNREACHABLE("Impossible.");
                 }
+            }
+
+            if (first) {
+                if (x <= 7) {
+                    break;
+                }
+
+                first = false;
             }
 
             int skippf = (x & 31);

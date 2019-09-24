@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@ template<>
 inline void TransformImpl<8, 1, false, 4, 2, false>::Transform(float *out, const __fp16 *in, int ldin, int y0, int ymax, int k0, int kmax) {
     float *outptr = out;
     const __fp16 *inptr = in;
+    bool first = true;
 
     __fp16 zerobuff[16] = { 0 }; // 8 for asm loop plus up to 7 for overflow loop
 
@@ -57,8 +58,9 @@ inline void TransformImpl<8, 1, false, 4, 2, false>::Transform(float *out, const
         prefetch_2x(inptr7);
 
         int x=(kmax-k0);
-        for (;x>7;x-=8) {
+        for (;(x>7) || first;x-=8) {
             /* Cope with ragged cases by copying from a buffer of zeroes instead */
+            /* 'first' forces this to always run at least once, needed if the total size is <=7. */
             if ((y + 7) >= ymax) {
                 switch ((y + 7) - ymax) {
                     /* Everything falls through in here */
@@ -87,6 +89,14 @@ inline void TransformImpl<8, 1, false, 4, 2, false>::Transform(float *out, const
                     default:
                         UNREACHABLE("Impossible.");
                 }
+            }
+
+            if (first) {
+                if (x<=7) {
+                    break;
+                }
+
+                first = false;
             }
 
             __asm __volatile (
