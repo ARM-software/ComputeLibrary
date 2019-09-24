@@ -225,11 +225,12 @@ if test_env['benchmark_examples']:
 
         if test_env['gemm_tuner'] and test_env['opencl']:
             gemm_tuner_examples = []
+            gemm_tuner_common_options = test_env.Object(source="../examples/gemm_tuner/CommonGemmExampleOptions.cpp", target="CommonGemmExampleOptions")
             files = Glob("%s/gemm_tuner/cl_*.cpp" % examples_folder)
             for file in files:
                 example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
                 example = os.path.join("gemm_tuner", example)
-                gemm_tuner_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples, LIBS = test_env["LIBS"]) ]
+                gemm_tuner_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example), gemm_tuner_common_options ] + files_benchmark_examples, LIBS = test_env["LIBS"]) ]
             arm_compute_benchmark_examples += gemm_tuner_examples
 
         # Graph examples
