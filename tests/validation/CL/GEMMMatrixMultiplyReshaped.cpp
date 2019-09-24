@@ -71,6 +71,9 @@ namespace
 RelativeTolerance<float> rel_tolerance_f32(0.001f);
 constexpr float          abs_tolerance_f32(0.0001f);
 
+RelativeTolerance<float> rel_tolerance_f16(0.001f);
+constexpr float          abs_tolerance_f16(0.01f);
+
 /** Alpha values to test - Precommit */
 const auto a_values = framework::dataset::make("alpha", {1.0f, -0.75f} );
 
@@ -103,7 +106,7 @@ const auto act_values = framework::dataset::make("Activation",
 });
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit = framework::dataset::make("M0", {4, 8});
+const auto m0_values_precommit = framework::dataset::make("M0", { 4 });
 
 /** N0 values to test - Precommit */
 const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
@@ -143,94 +146,12 @@ const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { 
 
 /** LHS transposed values */
 const auto lhs_transpose_values = framework::dataset::make("lhs_transpose", { false, true } );
-
-/** Configuration test */
-void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value, unsigned int m0_value, unsigned int n0_value, unsigned int k0_value, unsigned int v0_value, unsigned int h0_value, bool i_value_lhs, bool i_value_rhs, bool broadcast_bias, bool lhs_transpose, DataType data_type, const ActivationLayerInfo &act_info)
-{
-    const unsigned int M = m_value;
-    const unsigned int N = n_value;
-    const unsigned int K = k_value;
-
-    GEMMLHSMatrixInfo lhs_info;
-    lhs_info.m0         = m0_value;
-    lhs_info.k0         = k0_value;
-    lhs_info.v0         = v0_value;
-    lhs_info.interleave = i_value_lhs;
-    lhs_info.transpose  = lhs_transpose;
-
-    GEMMRHSMatrixInfo rhs_info;
-    rhs_info.n0         = n0_value;
-    rhs_info.k0         = k0_value;
-    rhs_info.h0         = h0_value;
-    rhs_info.interleave = i_value_rhs;
-    rhs_info.transpose  = !lhs_transpose;
-
-    GEMMKernelInfo kernel_info;
-    kernel_info.m                       = M;
-    kernel_info.n                       = N;
-    kernel_info.k                       = K;
-    kernel_info.depth_output_gemm3d     = 0;
-    kernel_info.reinterpret_input_as_3d = false;
-    kernel_info.broadcast_bias          = broadcast_bias;
-    kernel_info.activation_info         = act_info;
-
-    const TensorShape lhs_shape(K, M, b_value);
-    const TensorShape lhs_shape_reshaped = compute_lhs_reshaped_shape(TensorInfo(lhs_shape, 1, data_type),
-                                                                      lhs_info,
-                                                                      false);
-
-    const TensorShape rhs_shape(N, K, b_value);
-    const TensorShape rhs_shape_reshaped = compute_rhs_reshaped_shape(TensorInfo(rhs_shape, 1, data_type),
-                                                                      rhs_info);
-
-    const TensorShape dst_shape = compute_mm_shape(TensorInfo(lhs_shape_reshaped, 1, data_type),
-                                                   TensorInfo(rhs_shape_reshaped, 1, data_type),
-                                                   kernel_info);
-
-    const TensorShape bias_shape(N,
-                                 broadcast_bias? 1 : M,
-                                 broadcast_bias? 1 : b_value);
-
-    // Create tensors
-    CLTensor lhs_reshaped = create_tensor<CLTensor>(lhs_shape_reshaped, data_type);
-    CLTensor rhs_reshaped = create_tensor<CLTensor>(rhs_shape_reshaped, data_type);
-    CLTensor bias         = create_tensor<CLTensor>(bias_shape, data_type);
-    CLTensor dst          = create_tensor<CLTensor>(dst_shape, data_type);
-
-    ARM_COMPUTE_EXPECT(lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLGEMMMatrixMultiplyReshaped gemm;
-    gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, 1.0f, 1.0f, lhs_info, rhs_info, kernel_info);
-}
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMMMatrixMultiplyReshaped)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   framework::dataset::make("batch_size", 1)),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
-                                                                   act_values),
-m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, v0_value, h0_value, i_value_lhs, i_value_rhs, broadcast_bias, lhs_transpose, act_value)
-{
-    validate_configuration(m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, v0_value, h0_value, i_value_lhs, i_value_rhs, broadcast_bias, lhs_transpose, DataType::F32, act_value);
-}
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
@@ -328,6 +249,105 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 TEST_SUITE_END() // FP32
+
+TEST_SUITE(FP16)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::ALL,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   v0_values_precommit),
+                                                                   h0_values_precommit),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values),
+                                                                   lhs_transpose_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_values_nightly),
+                                                                   k0_values_nightly),
+                                                                   v0_values_nightly),
+                                                                   h0_values_nightly),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values),
+                                                                   lhs_transpose_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::ALL,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   v0_values_precommit),
+                                                                   h0_values_precommit),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   lhs_transpose_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_values_nightly),
+                                                                   k0_values_nightly),
+                                                                   v0_values_nightly),
+                                                                   h0_values_nightly),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   lhs_transpose_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+}
+TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // GEMMMatrixMultiplyReshaped
 TEST_SUITE_END() // CL
