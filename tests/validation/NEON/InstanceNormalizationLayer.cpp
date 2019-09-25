@@ -98,7 +98,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<float>, fra
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEInstanceNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunLarge, NEInstanceNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(datasets::Large4DShapes(),
                                                framework::dataset::make("DataType", DataType::F32)),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
