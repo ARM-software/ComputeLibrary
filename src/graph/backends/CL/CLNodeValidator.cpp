@@ -58,8 +58,7 @@ Status CLNodeValidator::validate(INode *node)
                    CLGEMMConvolutionLayer,
                    CLWinogradConvolutionLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
-            return detail::validate_depthwise_convolution_layer<CLDepthwiseConvolutionLayer,
-                   CLDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+            return detail::validate_depthwise_convolution_layer<CLDepthwiseConvolutionLayer>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
             return detail::validate_detection_output_layer<CPPDetectionOutputLayer>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::DetectionPostProcessLayer:

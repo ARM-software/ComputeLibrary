@@ -139,6 +139,13 @@ enum class ConvolutionMethod
     FFT       /**< Convolution using FFT */
 };
 
+/** Available DepthwiseConvolutionFunction*/
+enum class DepthwiseConvolutionFunction
+{
+    OPTIMIZED, /**< Optimized Depthwise Convolution */
+    GENERIC,   /**< Generic Depthwise Convolution */
+};
+
 /** Available DeconvolutionMethod*/
 enum class DeconvolutionMethod
 {

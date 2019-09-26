@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ namespace test
 namespace benchmark
 {
 const auto data_types                    = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QASYMM8 });
-using CLDepthwiseConvolutionLayerFixture = DepthwiseConvolutionLayerFixture<CLTensor, CLDepthwiseConvolutionLayer3x3, CLAccessor>;
+using CLDepthwiseConvolutionLayerFixture = DepthwiseConvolutionLayerFixture<CLTensor, CLDepthwiseConvolutionLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 

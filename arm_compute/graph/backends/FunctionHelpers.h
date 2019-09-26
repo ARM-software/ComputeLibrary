@@ -538,7 +538,7 @@ std::unique_ptr<IFunction> create_deconvolution_layer(DeconvolutionLayerNode &no
  *
  * @return Backend depth-wise convolution layer function
  */
-template <typename DepthwiseConvolutionLayerFunctions, typename TargetInfo>
+template <typename DepthwiseConvolutionLayer, typename TargetInfo>
 std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 {
     validate_node<TargetInfo>(node, 3 /* expected inputs */, 1 /* expected outputs */);
@@ -556,26 +556,17 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
         biases->info()->set_data_type(DataType::S32);
     }
 
-    const PadStrideInfo              conv_info        = node.convolution_info();
-    const DepthwiseConvolutionMethod dwc_algorithm    = node.depthwise_convolution_method();
-    const unsigned int               depth_multiplier = node.depth_multiplier();
-    const ActivationLayerInfo        fused_act        = node.fused_activation();
+    const PadStrideInfo       conv_info        = node.convolution_info();
+    const unsigned int        depth_multiplier = node.depth_multiplier();
+    const ActivationLayerInfo fused_act        = node.fused_activation();
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::unique_ptr<IFunction> func;
     std::string                func_name;
-    if(dwc_algorithm == DepthwiseConvolutionMethod::Optimized3x3)
-    {
-        std::tie(func, func_name) = create_named_function<typename DepthwiseConvolutionLayerFunctions::OptimizedDepthwiseConvolutionLayer>(
-                                        std::string("DepthwiseConvolutionLayer3x3"),
-                                        input, weights, biases, output, conv_info, depth_multiplier, fused_act);
-    }
-    else
-    {
-        std::tie(func, func_name) = create_named_function<typename DepthwiseConvolutionLayerFunctions::GenericDepthwiseConvolutionLayer>(
-                                        std::string("DepthwiseConvolutionLayer"),
-                                        input, weights, biases, output, conv_info, depth_multiplier, fused_act);
-    }
+
+    std::tie(func, func_name) = create_named_function<DepthwiseConvolutionLayer>(
+                                    std::string("DepthwiseConvolutionLayer"),
+                                    input, weights, biases, output, conv_info, depth_multiplier, fused_act);
 
     // Log info
     std::ostringstream qss;

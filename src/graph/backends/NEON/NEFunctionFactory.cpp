@@ -62,13 +62,6 @@ struct NEConvolutionLayerFunctions
     using WinogradConvolutionLayer = NEWinogradConvolutionLayer;
 };
 
-/** Collection of CL depthwise convolution functions */
-struct NEDepthwiseConvolutionLayerFunctions
-{
-    using GenericDepthwiseConvolutionLayer   = NEDepthwiseConvolutionLayer;
-    using OptimizedDepthwiseConvolutionLayer = NEDepthwiseConvolutionLayerOptimized;
-};
-
 /** Collection of CL element-wise functions */
 struct NEEltwiseFunctions
 {
@@ -213,7 +206,7 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
         case NodeType::ConcatenateLayer:
             return detail::create_concatenate_layer<NEConcatenateLayer, NETargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
-            return detail::create_depthwise_convolution_layer<NEDepthwiseConvolutionLayerFunctions, NETargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+            return detail::create_depthwise_convolution_layer<NEDepthwiseConvolutionLayer, NETargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
             return detail::create_detection_output_layer<CPPDetectionOutputLayer, NETargetInfo>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::DetectionPostProcessLayer:

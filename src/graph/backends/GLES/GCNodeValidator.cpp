@@ -58,7 +58,6 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     // TODO (geopin01) : Switch when validation is implemented
     // Validate function
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->tensor_shape().x() != 3 && weights->tensor_shape().y() != 3, "Unsupported depthwise convolution");
-    node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::Optimized3x3);
 
     return Status{};
 }

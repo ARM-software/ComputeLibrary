@@ -56,13 +56,6 @@ struct CLConvolutionLayerFunctions
     using WinogradConvolutionLayer = CLWinogradConvolutionLayer;
 };
 
-/** Collection of CL depthwise convolution functions */
-struct CLDepthwiseConvolutionLayerFunctions
-{
-    using GenericDepthwiseConvolutionLayer   = CLDepthwiseConvolutionLayer;
-    using OptimizedDepthwiseConvolutionLayer = CLDepthwiseConvolutionLayer;
-};
-
 /** Collection of CL element-wise functions */
 struct CLEltwiseFunctions
 {
@@ -249,7 +242,7 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
         case NodeType::ConcatenateLayer:
             return detail::create_concatenate_layer<CLConcatenateLayer, CLTargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
-            return detail::create_depthwise_convolution_layer<CLDepthwiseConvolutionLayerFunctions, CLTargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+            return detail::create_depthwise_convolution_layer<CLDepthwiseConvolutionLayer, CLTargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
             return detail::create_detection_output_layer<CPPDetectionOutputLayer, CLTargetInfo>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::DetectionPostProcessLayer:

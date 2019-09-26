@@ -251,9 +251,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DepthwiseConvolution
         case DepthwiseConvolutionMethod::Default:
             os << "DEFAULT";
             break;
-        case DepthwiseConvolutionMethod::GEMV:
-            os << "GEMV";
-            break;
         case DepthwiseConvolutionMethod::Optimized3x3:
             os << "Optimized3x3";
             break;

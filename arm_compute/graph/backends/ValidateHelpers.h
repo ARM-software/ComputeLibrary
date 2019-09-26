@@ -163,13 +163,12 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
 /** Validates a Depthwise Convolution layer node
  *
  * @tparam DepthwiseConvolutionLayer    Default Depthwise Convolution layer type
- * @tparam DepthwiseConvolutionLayer3x3 Optimized 3x3 Depthwise Convolution layer type
  *
  * @param[in] node Node to validate
  *
  * @return Status
  */
-template <typename DepthwiseConvolutionLayer, typename DepthwiseConvolutionLayer3x3>
+template <typename DepthwiseConvolutionLayer>
 Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 {
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DepthwiseConvolutionLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
@@ -191,11 +190,8 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     switch(dwc_algorithm)
     {
         case DepthwiseConvolutionMethod::Default:
-        case DepthwiseConvolutionMethod::GEMV:
-            status = DepthwiseConvolutionLayer::validate(input, weights, biases, output, conv_info, depth_multiplier);
-            break;
         case DepthwiseConvolutionMethod::Optimized3x3:
-            status = DepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info, depth_multiplier);
+            status = DepthwiseConvolutionLayer::validate(input, weights, biases, output, conv_info, depth_multiplier);
             break;
         default:
             ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported depthwise convolution method");

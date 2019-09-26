@@ -246,6 +246,7 @@ v19.11 Public major release
     - NEDepthwiseWeightsReshapeKernel
     - NEDepthwiseIm2ColKernel
     - NEDepthwiseVectorToTensorKernel
+    - NEDepthwiseConvolutionLayer3x3
 
 v19.08 Public major release
  - Various bug fixes.
@@ -301,7 +302,8 @@ v19.08 Public major release
  - Added an optimized depthwise convolution layer kernel for 5x5 filters (NEON only)
  - Added support to enable OpenCL kernel cache. Added example showing how to load the prebuilt OpenCL kernels from a binary cache file
  - Altered @ref QuantizationInfo interface to support per-channel quantization.
- - The @ref NEDepthwiseConvolutionLayer3x3 will be replaced by @ref NEDepthwiseConvolutionLayerOptimized to accommodate for future optimizations.
+ - The @ref CLDepthwiseConvolutionLayer3x3 will be included by @ref CLDepthwiseConvolutionLayer to accommodate for future optimizations.
+ - The @ref NEDepthwiseConvolutionLayerOptimized will be included by @ref NEDepthwiseConvolutionLayer to accommodate for future optimizations.
  - Removed inner_border_right and inner_border_top parameters from @ref CLDeconvolutionLayer interface
  - Removed inner_border_right and inner_border_top parameters from @ref NEDeconvolutionLayer interface
  - Optimized the NEON assembly kernel for GEMMLowp. The new implementation fuses the output stage and quantization with the matrix multiplication kernel
