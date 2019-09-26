@@ -29,9 +29,10 @@ set -u
 CMD=$( basename $0 )
 
 # All supported strategy options
-ALL_STRATEGY_OPTIONS=("reshaped_rhs_only" "reshaped")
+ALL_STRATEGY_OPTIONS=("native" "reshaped_rhs_only" "reshaped")
 
 # Names of example binary for each strategy
+EXAMPLE_BIN_NATIVE="benchmark_cl_gemm_native"
 EXAMPLE_BIN_RESHAPED_RHS_ONLY="benchmark_cl_gemm_reshaped_rhs_only"
 EXAMPLE_BIN_RESHAPED="benchmark_cl_gemm_reshaped"
 
@@ -67,6 +68,38 @@ Gemm shape file:
   An example gemm shape file looks like:
   100,100,30,1
   100,100,30,3
+  ...
+
+EOF
+}
+
+#######################################
+# Print gemm config file for native help message
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+function help_gemm_config_file_native() {
+  cat >&2 << EOF
+Gemm config file (Strategy native):
+  Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
+  around each field).
+  A gemm config is a list of 4 positive integers <m0, n0, k0, h0> and 2 boolean values interleave_rhs and transpose_rhs, with:
+  m0 - Number of rows processed by the matrix multiplication
+  n0 - Number of columns processed by the matrix multiplication
+  k0 - Number of partial accumulations performed by the matrix multiplication
+
+  Only the following configurations of M0, N0 and K0 are currently supported:
+  M0 = 1, 2, 3, 4, 5, 6, 7, 8
+  N0 = 2, 3, 4, 8, 16
+  K0 = 2, 3, 4, 8, 16
+
+  An example gemm config file looks like:
+  1,4,4
+  2,3,8
   ...
 
 EOF
@@ -195,6 +228,7 @@ Options:
 EOF
 # Print help messages about gemm shapes and various gemm configs
 $HELP && help_gemm_shape_file
+$HELP && ( [ "${STRATEGY_OPTION}" == "" ] || [ "${STRATEGY_OPTION}" == "native" ] ) && help_gemm_config_file_native
 $HELP && ( [ "${STRATEGY_OPTION}" == "" ] || [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] ) && help_gemm_config_file_reshaped_rhs_only
 $HELP && ( [ "${STRATEGY_OPTION}" == "" ] || [ "${STRATEGY_OPTION}" == "reshaped" ] ) && help_gemm_config_file_reshaped
 exit 1
@@ -360,6 +394,7 @@ arr_contains "${STRATEGY_OPTION}" "${ALL_STRATEGY_OPTIONS[@]}" ||
 mkdir ${OUT_DIR}
 
 # Run selected strategy with all configurations
+[ "${STRATEGY_OPTION}" == "native" ] && run $EXAMPLE_BIN_NATIVE
 [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] && run $EXAMPLE_BIN_RESHAPED_RHS_ONLY
 [ "${STRATEGY_OPTION}" == "reshaped" ] && run $EXAMPLE_BIN_RESHAPED
 # Main: Main script }}}
