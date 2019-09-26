@@ -29,19 +29,17 @@ set -u
 CMD=$( basename $0 )
 
 # All supported strategy options
-ALL_STRATEGY_OPTIONS="reshaped_rhs_only"
-
-# Default strategy option
-DEFAULT_STRATEGY_OPTION="reshaped_rhs_only"
+ALL_STRATEGY_OPTIONS=("reshaped_rhs_only" "reshaped")
 
 # Names of example binary for each strategy
 EXAMPLE_BIN_RESHAPED_RHS_ONLY="benchmark_cl_gemm_reshaped_rhs_only"
+EXAMPLE_BIN_RESHAPED="benchmark_cl_gemm_reshaped"
 
 # Default output directory
 DEFAULT_OUT_DIR="out"
 
 # Number of iterations for each benchmark run
-NUM_ITERATION=3
+NUM_ITERATION=5
 # Global }}}
 
 # Functions {{{
@@ -75,7 +73,7 @@ EOF
 }
 
 #######################################
-# Print gemm config file for reshaped_rhs_only
+# Print gemm config file for reshaped_rhs_only help message
 # Globals:
 #   None
 # Arguments:
@@ -94,7 +92,7 @@ Gemm config file (Strategy reshaped_rhs_only):
   k0 - Number of partial accumulations performed by the matrix multiplication
   h0 - Number of horizontal blocks of size (k0xn0) stored on the same output row
   interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
-  transpose_rhs - Interleave rhs matrix (1) / Do not transpose rhs matrix (0)
+  transpose_rhs - Transpose rhs matrix (1) / Do not transpose rhs matrix (0)
 
   Only the following configurations of M0, N0 and K0 are currently supported:
   M0 = 1, 2, 3, 4, 5, 6, 7, 8
@@ -103,8 +101,54 @@ Gemm config file (Strategy reshaped_rhs_only):
   H0 >= 1
 
   An example gemm config file looks like:
-  4,4,4,1
-  4,4,4,3
+  4,4,4,1,1,1
+  4,4,4,3,1,0
+  ...
+
+EOF
+}
+
+#######################################
+# Print gemm config file for reshaped help message
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+function help_gemm_config_file_reshaped() {
+  cat >&2 << EOF
+Gemm config file (Strategy reshaped):
+  Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
+  around each field).
+  A gemm config is a list of 5 positive integers <m0, n0, k0, v0, h0> and 3 boolean values interleave_lhs, interleave_rhs and transpose_rhs, with:
+  m0 - Number of rows processed by the matrix multiplication
+  n0 - Number of columns processed by the matrix multiplication
+  k0 - Number of partial accumulations performed by the matrix multiplication
+  v0 - Number of vertical blocks of size (m0xk0) stored on the same output row
+  h0 - Number of horizontal blocks of size (k0xn0) stored on the same output row
+  interleave_lhs - Interleave lhs matrix (1) / Do not interleave lhs matrix (0)
+  interleave_rhs - Interleave rhs matrix (1) / Do not interleave rhs matrix (0)
+  transpose_rhs - Transpose rhs matrix but not lhs matrix (1) / Do not transpose rhs matrix but do transpose lhs matrix (0)
+
+  If rhs matrix is transposed only the following configurations are currently supported:
+  M0 = 2, 3, 4, 5, 6, 7, 8
+  N0 = 2, 3, 4, 8, 16
+  K0 = 2, 3, 4, 8, 16
+  V0 >= 1
+  H0 >= 1
+
+  If lhs matrix is transposed only the following configurations are currently supported:
+  M0 = 2, 3, 4, 8
+  N0 = 2, 3, 4, 8, 16
+  K0 = 2, 3, 4, 8, 16
+  V0 >= 1
+  H0 >= 1
+
+  An example gemm config file looks like:
+  4,4,4,1,3,1,1,1
+  4,4,4,3,3,1,1,0
   ...
 
 EOF
@@ -124,11 +168,16 @@ function usage() {
 Run gemm examples of a selected strategy, over provided tunable configurationsa and gemm shapes.
 Save the benchmark results to json files in an output directory.
 
-Usage: ${CMD} [-h] -e <example_binary_dir> -g <gemm_shape_file> -c <gemm_config_file> [-s <strategy>, [-o <out_dir>]]
+Usage: ${CMD} [-h] -s <strategy> -e <example_binary_dir> -g <gemm_shape_file> -c <gemm_config_file> [-o <out_dir>]
 
 Options:
         -h
-        Print help messages for selected <strategy>, which is ${STRATEGY_OPTION}
+        Print help messages. If a strategy is specified with -s <strategy>, then only display messages relevant to that
+        strategy. Otherwise if no strategy is specified, display messages for all available strategies.
+
+        -s <strategy>
+        Strategy option.
+        Options: ${ALL_STRATEGY_OPTIONS[@]}.
 
         -e <example_binary_dir>
         Path to directory that holds all example binaries
@@ -139,10 +188,6 @@ Options:
         -c <gemm_config_file>
         Path to gemm config csv file
 
-        -s <strategy>
-        Strategy option.
-        Options: ${ALL_STRATEGY_OPTIONS}. Default: ${DEFAULT_STRATEGY_OPTION}
-
         -o <out_dir>
         Path to output directory that holds output json files
         Default: ${DEFAULT_OUT_DIR}
@@ -151,6 +196,7 @@ EOF
 # Print help messages about gemm shapes and various gemm configs
 $HELP && help_gemm_shape_file
 $HELP && ( [ "${STRATEGY_OPTION}" == "" ] || [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] ) && help_gemm_config_file_reshaped_rhs_only
+$HELP && ( [ "${STRATEGY_OPTION}" == "" ] || [ "${STRATEGY_OPTION}" == "reshaped" ] ) && help_gemm_config_file_reshaped
 exit 1
 }
 
@@ -197,6 +243,28 @@ function is_integer() {
 }
 
 #######################################
+# Test if a string is in an array of strings
+# Globals:
+#   None
+# Arguments:
+#   target  - String to test
+#   array   - Array of strings to search
+# Returns:
+#   true/false
+#######################################
+function arr_contains() {
+  local target=$1
+  shift
+  local array
+  array=("$@")
+  for s in "${array[@]}"
+  do
+    [ "$s" == "${target}" ] && return
+  done
+  false
+}
+
+#######################################
 # Run all tunable configurations and all input configurations
 # Globals:
 #   OUT_DIR
@@ -219,7 +287,7 @@ function run() {
     while read gemm_config
     do
       example_args="${gemm_shape},${gemm_config}"
-      ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${test_id}
+      ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${test_id} --instruments=OPENCL_TIMER_MS
       (( test_id++ ))
     done < "${GEMM_CONFIGS_FILE}"
   done < "${GEMM_SHAPES_FILE}"
@@ -236,18 +304,18 @@ EXAMPLE_BIN_DIR=""
 GEMM_SHAPES_FILE=""
 # Path to gemm configs file
 GEMM_CONFIGS_FILE=""
-STRATEGY_OPTION=${DEFAULT_STRATEGY_OPTION}
+STRATEGY_OPTION=""
 # Path to output directory
 OUT_DIR=${DEFAULT_OUT_DIR}
 # Toggle help
 HELP=false
 
 # Obtain options
-while getopts "he:s:g:c:o:" opt; do
+while getopts "hs:e:g:c:o:" opt; do
   case "$opt" in
-    h|\?) HELP=true ;;
-    e) EXAMPLE_BIN_DIR="${OPTARG}";;
+    h) HELP=true ;;
     s) STRATEGY_OPTION=$(to_lower "${OPTARG}");;
+    e) EXAMPLE_BIN_DIR="${OPTARG}";;
     g) GEMM_SHAPES_FILE="${OPTARG}";;
     c) GEMM_CONFIGS_FILE="${OPTARG}";;
     o) OUT_DIR="${OPTARG}";;
@@ -260,8 +328,8 @@ $HELP &&
   usage
 
 # Parse and validate options
-# Verify all arguments are passed in
-[ ${OPTIND} -ge 7 ] ||
+# Verify all compulsory arguments are passed in
+( [ ! -z "${STRATEGY_OPTION}" ] && [ ! -z "${EXAMPLE_BIN_DIR}" ] && [ ! -z "${GEMM_SHAPES_FILE}" ] && [ ! -z "${GEMM_CONFIGS_FILE}" ] ) ||
   usage
 
 # Verify example binaries directory exists
@@ -276,12 +344,12 @@ $HELP &&
 [ -f "${GEMM_SHAPES_FILE}" ] ||
   error_msg "Cannot find gemm shapes file ${GEMM_SHAPES_FILE}"
 
-# Verify Gemm shapes file exists
+# Verify Gemm configs file exists
 [ -f "${GEMM_CONFIGS_FILE}" ] ||
   error_msg "Cannot find gemm configs file ${GEMM_CONFIGS_FILE}"
 
 # Verify strategy option is valid
-[[ "${ALL_STRATEGY_OPTIONS}" == *"${STRATEGY_OPTION}"* ]] ||
+arr_contains "${STRATEGY_OPTION}" "${ALL_STRATEGY_OPTIONS[@]}" ||
   error_msg "Does not support strategy ${STRATEGY_OPTION}"
 
 # Make sure existing benchmark outputs are not overwritten
@@ -293,4 +361,5 @@ mkdir ${OUT_DIR}
 
 # Run selected strategy with all configurations
 [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] && run $EXAMPLE_BIN_RESHAPED_RHS_ONLY
+[ "${STRATEGY_OPTION}" == "reshaped" ] && run $EXAMPLE_BIN_RESHAPED
 # Main: Main script }}}
