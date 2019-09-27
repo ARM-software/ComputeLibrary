@@ -28,7 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "support/ToolchainSupport.h"
 
-#include <list>
+#include <algorithm>
 
 namespace arm_compute
 {
@@ -54,14 +54,12 @@ Status validate_arguments(const ITensorInfo *bboxes, const ITensorInfo *scores, 
 } // namespace
 
 CPPNonMaximumSuppressionKernel::CPPNonMaximumSuppressionKernel()
-    : _input_bboxes(nullptr), _input_scores(nullptr), _output_indices(nullptr), _max_output_size(0), _score_threshold(0.f), _iou_threshold(0.f), _num_boxes(0), _scores_above_thd_vector(),
-      _indices_above_thd_vector(), _visited(), _sorted_indices()
+    : _input_bboxes(nullptr), _input_scores(nullptr), _output_indices(nullptr), _max_output_size(0), _score_threshold(0.f), _iou_threshold(0.f), _num_boxes(0)
 {
 }
 
-void CPPNonMaximumSuppressionKernel::configure(
-    const ITensor *input_bboxes, const ITensor *input_scores, ITensor *output_indices, unsigned int max_output_size,
-    const float score_threshold, const float iou_threshold)
+void CPPNonMaximumSuppressionKernel::configure(const ITensor *input_bboxes, const ITensor *input_scores, ITensor *output_indices,
+                                               unsigned int max_output_size, const float score_threshold, const float iou_threshold)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input_bboxes, input_scores, output_indices);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input_bboxes->info(), input_scores->info(), output_indices->info(), max_output_size, score_threshold, iou_threshold));
@@ -76,14 +74,6 @@ void CPPNonMaximumSuppressionKernel::configure(
     _max_output_size = max_output_size;
     _num_boxes       = input_scores->info()->dimension(0);
 
-    _scores_above_thd_vector.reserve(_num_boxes);
-    _indices_above_thd_vector.reserve(_num_boxes);
-
-    // Visited and sorted_indices are preallocated as num_boxes size, which is the maximum size possible
-    // Will be used only N elements where N is the number of score above the threshold
-    _visited.reserve(_num_boxes);
-    _sorted_indices.reserve(_num_boxes);
-
     // Configure kernel window
     Window win = calculate_max_window(*output_indices->info(), Steps());
 
@@ -91,9 +81,8 @@ void CPPNonMaximumSuppressionKernel::configure(
     ICPPKernel::configure(win);
 }
 
-Status CPPNonMaximumSuppressionKernel::validate(
-    const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *output_indices, unsigned int max_output_size,
-    const float score_threshold, const float iou_threshold)
+Status CPPNonMaximumSuppressionKernel::validate(const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *output_indices,
+                                                unsigned int max_output_size, const float score_threshold, const float iou_threshold)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(bboxes, scores, output_indices, max_output_size, score_threshold, iou_threshold));
     return Status{};
@@ -106,33 +95,37 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
 
-    unsigned int num_above_thd = 0;
+    // Auxiliary tensors
+    std::vector<int>   indices_above_thd;
+    std::vector<float> scores_above_thd;
     for(unsigned int i = 0; i < _num_boxes; ++i)
     {
         const float score_i = *(reinterpret_cast<float *>(_input_scores->ptr_to_element(Coordinates(i))));
         if(score_i >= _score_threshold)
         {
-            _indices_above_thd_vector.emplace_back(i);
-            _scores_above_thd_vector.emplace_back(score_i);
-            // Initialize respective index and visited
-            _sorted_indices.emplace_back(num_above_thd);
-            _visited.push_back(false);
-            ++num_above_thd;
+            scores_above_thd.emplace_back(score_i);
+            indices_above_thd.emplace_back(i);
         }
     }
 
     // Sort selected indices based on scores
-    std::sort(_sorted_indices.begin(),
-              _sorted_indices.end(),
+    const unsigned int        num_above_thd = indices_above_thd.size();
+    std::vector<unsigned int> sorted_indices;
+    sorted_indices.resize(num_above_thd);
+    std::iota(sorted_indices.data(), sorted_indices.data() + num_above_thd, 0);
+    std::sort(std::begin(sorted_indices),
+              std::end(sorted_indices),
               [&](unsigned int first, unsigned int second)
     {
-        return _scores_above_thd_vector[first] > _scores_above_thd_vector[second];
+        return scores_above_thd[first] > scores_above_thd[second];
     });
 
     // Number of output is the minimum between max_detection and the scores above the threshold
     const unsigned int num_output = std::min(_max_output_size, num_above_thd);
     unsigned int       output_idx = 0;
+    std::vector<bool>  visited(num_above_thd, false);
 
+    // Keep only boxes with small IoU
     for(unsigned int i = 0; i < num_above_thd; ++i)
     {
         // Check if the output is full
@@ -142,9 +135,10 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
         }
 
         // Check if it was already visited, if not add it to the output and update the indices counter
-        if(!_visited[_sorted_indices[i]])
+        if(!visited[sorted_indices[i]])
         {
-            *(reinterpret_cast<int *>(_output_indices->ptr_to_element(Coordinates(output_idx)))) = _indices_above_thd_vector[_sorted_indices[i]];
+            *(reinterpret_cast<int *>(_output_indices->ptr_to_element(Coordinates(output_idx)))) = indices_above_thd[sorted_indices[i]];
+            visited[sorted_indices[i]]                                                           = true;
             ++output_idx;
         }
         else
@@ -155,11 +149,11 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
         // Once added one element at the output check if the next ones overlap and can be skipped
         for(unsigned int j = i + 1; j < num_above_thd; ++j)
         {
-            if(!_visited[_sorted_indices[j]])
+            if(!visited[sorted_indices[j]])
             {
                 // Calculate IoU
-                const unsigned int i_index = _indices_above_thd_vector[_sorted_indices[i]];
-                const unsigned int j_index = _indices_above_thd_vector[_sorted_indices[j]];
+                const unsigned int i_index = indices_above_thd[sorted_indices[i]];
+                const unsigned int j_index = indices_above_thd[sorted_indices[j]];
                 // Box-corner format: xmin, ymin, xmax, ymax
                 const auto box_i_xmin = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(0, i_index))));
                 const auto box_i_ymin = *(reinterpret_cast<float *>(_input_bboxes->ptr_to_element(Coordinates(1, i_index))));
@@ -190,7 +184,7 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
 
                 if(overlap > _iou_threshold)
                 {
-                    _visited[_sorted_indices[j]] = true;
+                    visited[sorted_indices[j]] = true;
                 }
             }
         }

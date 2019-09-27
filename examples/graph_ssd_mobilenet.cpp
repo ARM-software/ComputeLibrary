@@ -519,7 +519,6 @@ private:
 
         // Quantization info taken from the TfLite SSD MobileNet example
         const QuantizationInfo in_quant_info = QuantizationInfo(0.0078125f, 128);
-
         // Create core graph
         graph << InputLayer(input_descriptor.set_quantization_info(in_quant_info),
                             get_weights_accessor(data_path, common_params.image, DataLayout::NHWC));

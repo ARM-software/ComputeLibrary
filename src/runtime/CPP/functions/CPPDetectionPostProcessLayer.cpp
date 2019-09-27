@@ -156,7 +156,7 @@ void SaveOutputs(const Tensor *decoded_boxes, const std::vector<int> &result_idx
                  std::vector<unsigned int> &sorted_indices, const unsigned int num_output, const unsigned int max_detections, ITensor *output_boxes, ITensor *output_classes, ITensor *output_scores,
                  ITensor *num_detection)
 {
-    // ymin,xmin,ymax,xmax -> xmin,ymin,xmax,ymax
+    // xmin,ymin,xmax,ymax -> ymin,xmin,ymax,xmax
     unsigned int i = 0;
     for(; i < num_output; ++i)
     {
@@ -184,7 +184,7 @@ void SaveOutputs(const Tensor *decoded_boxes, const std::vector<int> &result_idx
 CPPDetectionPostProcessLayer::CPPDetectionPostProcessLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _nms(), _input_box_encoding(nullptr), _input_scores(nullptr), _input_anchors(nullptr), _output_boxes(nullptr), _output_classes(nullptr),
       _output_scores(nullptr), _num_detection(nullptr), _info(), _num_boxes(), _num_classes_with_background(), _num_max_detected_boxes(), _decoded_boxes(), _decoded_scores(), _selected_indices(),
-      _class_scores(), _input_scores_to_use(nullptr), _result_idx_boxes_after_nms(), _result_classes_after_nms(), _result_scores_after_nms(), _sorted_indices(), _box_scores()
+      _class_scores(), _input_scores_to_use(nullptr)
 {
 }
 
@@ -217,8 +217,7 @@ void CPPDetectionPostProcessLayer::configure(const ITensor *input_box_encoding, 
 
     auto_init_if_empty(*_decoded_boxes.info(), TensorInfo(TensorShape(_kNumCoordBox, _input_box_encoding->info()->dimension(1), _kBatchSize), 1, DataType::F32));
     auto_init_if_empty(*_decoded_scores.info(), TensorInfo(TensorShape(_input_scores->info()->dimension(0), _input_scores->info()->dimension(1), _kBatchSize), 1, DataType::F32));
-    auto_init_if_empty(*_selected_indices.info(), TensorInfo(TensorShape(info.max_detections()), 1, DataType::S32));
-
+    auto_init_if_empty(*_selected_indices.info(), TensorInfo(TensorShape(info.use_regular_nms() ? info.detection_per_class() : info.max_detections()), 1, DataType::S32));
     const unsigned int num_classes_per_box = std::min(info.max_classes_per_detection(), info.num_classes());
     auto_init_if_empty(*_class_scores.info(), TensorInfo(info.use_regular_nms() ? TensorShape(_num_boxes) : TensorShape(_num_boxes * num_classes_per_box), 1, DataType::F32));
 
@@ -236,21 +235,6 @@ void CPPDetectionPostProcessLayer::configure(const ITensor *input_box_encoding, 
     _decoded_scores.allocator()->allocate();
     _selected_indices.allocator()->allocate();
     _class_scores.allocator()->allocate();
-
-    if(info.use_regular_nms())
-    {
-        _result_idx_boxes_after_nms.reserve(_info.detection_per_class() * _info.num_classes());
-        _result_classes_after_nms.reserve(_info.detection_per_class() * _info.num_classes());
-        _result_scores_after_nms.reserve(_info.detection_per_class() * _info.num_classes());
-    }
-    else
-    {
-        _result_scores_after_nms.reserve(num_classes_per_box * _num_boxes);
-        _result_classes_after_nms.reserve(num_classes_per_box * _num_boxes);
-        _result_scores_after_nms.reserve(num_classes_per_box * _num_boxes);
-        _box_scores.reserve(_num_boxes);
-    }
-    _sorted_indices.resize(info.use_regular_nms() ? info.max_detections() : info.num_classes());
 }
 
 Status CPPDetectionPostProcessLayer::validate(const ITensorInfo *input_box_encoding, const ITensorInfo *input_class_score, const ITensorInfo *input_anchors,
@@ -288,9 +272,15 @@ void CPPDetectionPostProcessLayer::run()
             }
         }
     }
+
     // Regular NMS
     if(_info.use_regular_nms())
     {
+        std::vector<int>          result_idx_boxes_after_nms;
+        std::vector<int>          result_classes_after_nms;
+        std::vector<float>        result_scores_after_nms;
+        std::vector<unsigned int> sorted_indices;
+
         for(unsigned int c = 0; c < num_classes; ++c)
         {
             // For each boxes get scores of the boxes for the class c
@@ -299,6 +289,8 @@ void CPPDetectionPostProcessLayer::run()
                 *(reinterpret_cast<float *>(_class_scores.ptr_to_element(Coordinates(i)))) =
                     *(reinterpret_cast<float *>(_input_scores_to_use->ptr_to_element(Coordinates(c + 1, i)))); // i * _num_classes_with_background + c + 1
             }
+
+            // Run Non-maxima Suppression
             _nms.run();
 
             for(unsigned int i = 0; i < _info.detection_per_class(); ++i)
@@ -307,67 +299,74 @@ void CPPDetectionPostProcessLayer::run()
                 if(selected_index == -1)
                 {
                     // Nms will return -1 for all the last M-elements not valid
-                    continue;
+                    break;
                 }
-                _result_idx_boxes_after_nms.emplace_back(selected_index);
-                _result_scores_after_nms.emplace_back((reinterpret_cast<float *>(_class_scores.buffer()))[selected_index]);
-                _result_classes_after_nms.emplace_back(c);
+                result_idx_boxes_after_nms.emplace_back(selected_index);
+                result_scores_after_nms.emplace_back((reinterpret_cast<float *>(_class_scores.buffer()))[selected_index]);
+                result_classes_after_nms.emplace_back(c);
             }
         }
 
         // We select the max detection numbers of the highest score of all classes
-        const auto num_selected = _result_idx_boxes_after_nms.size();
+        const auto num_selected = result_scores_after_nms.size();
         const auto num_output   = std::min<unsigned int>(max_detections, num_selected);
 
         // Sort selected indices based on result scores
-        std::iota(_sorted_indices.begin(), _sorted_indices.end(), 0);
-        std::partial_sort(_sorted_indices.data(),
-                          _sorted_indices.data() + num_output,
-                          _sorted_indices.data() + num_selected,
+        sorted_indices.resize(num_selected);
+        std::iota(sorted_indices.begin(), sorted_indices.end(), 0);
+        std::partial_sort(sorted_indices.data(),
+                          sorted_indices.data() + num_output,
+                          sorted_indices.data() + num_selected,
                           [&](unsigned int first, unsigned int second)
         {
 
-            return _result_scores_after_nms[first] > _result_scores_after_nms[second];
+            return result_scores_after_nms[first] > result_scores_after_nms[second];
         });
 
-        SaveOutputs(&_decoded_boxes, _result_idx_boxes_after_nms, _result_scores_after_nms, _result_classes_after_nms,
-                    _sorted_indices, num_output, max_detections, _output_boxes, _output_classes, _output_scores, _num_detection);
+        SaveOutputs(&_decoded_boxes, result_idx_boxes_after_nms, result_scores_after_nms, result_classes_after_nms, sorted_indices,
+                    num_output, max_detections, _output_boxes, _output_classes, _output_scores, _num_detection);
     }
     // Fast NMS
     else
     {
         const unsigned int num_classes_per_box = std::min<unsigned int>(_info.max_classes_per_detection(), _info.num_classes());
-        for(unsigned int b = 0, index = 0; b < _num_boxes; ++b)
+        std::vector<float> max_scores;
+        std::vector<int>   box_indices;
+        std::vector<int>   max_score_classes;
+
+        for(unsigned int b = 0; b < _num_boxes; ++b)
         {
-            _box_scores.clear();
-            _sorted_indices.clear();
+            std::vector<float> box_scores;
             for(unsigned int c = 0; c < num_classes; ++c)
             {
-                _box_scores.emplace_back(*(reinterpret_cast<float *>(_input_scores_to_use->ptr_to_element(Coordinates(c + 1, b)))));
-                _sorted_indices.push_back(c);
+                box_scores.emplace_back(*(reinterpret_cast<float *>(_input_scores_to_use->ptr_to_element(Coordinates(c + 1, b)))));
             }
-            std::partial_sort(_sorted_indices.data(),
-                              _sorted_indices.data() + num_classes_per_box,
-                              _sorted_indices.data() + num_classes,
+
+            std::vector<unsigned int> max_score_indices;
+            max_score_indices.resize(_info.num_classes());
+            std::iota(max_score_indices.data(), max_score_indices.data() + _info.num_classes(), 0);
+            std::partial_sort(max_score_indices.data(),
+                              max_score_indices.data() + num_classes_per_box,
+                              max_score_indices.data() + num_classes,
                               [&](unsigned int first, unsigned int second)
             {
-                return _box_scores[first] > _box_scores[second];
+                return box_scores[first] > box_scores[second];
             });
 
-            for(unsigned int i = 0; i < num_classes_per_box; ++i, ++index)
+            for(unsigned int i = 0; i < num_classes_per_box; ++i)
             {
-                const float score_to_add                                                       = _box_scores[_sorted_indices[i]];
-                *(reinterpret_cast<float *>(_class_scores.ptr_to_element(Coordinates(index)))) = score_to_add;
-                _result_scores_after_nms.emplace_back(score_to_add);
-                _result_idx_boxes_after_nms.emplace_back(b);
-                _result_classes_after_nms.emplace_back(_sorted_indices[i]);
+                const float score_to_add                                                                             = box_scores[max_score_indices[i]];
+                *(reinterpret_cast<float *>(_class_scores.ptr_to_element(Coordinates(b * num_classes_per_box + i)))) = score_to_add;
+                max_scores.emplace_back(score_to_add);
+                box_indices.emplace_back(b);
+                max_score_classes.emplace_back(max_score_indices[i]);
             }
         }
 
-        // Run NMS
+        // Run Non-maxima Suppression
         _nms.run();
 
-        _sorted_indices.clear();
+        std::vector<unsigned int> selected_indices;
         for(unsigned int i = 0; i < max_detections; ++i)
         {
             // NMS returns M valid indices, the not valid tail is filled with -1
@@ -376,13 +375,13 @@ void CPPDetectionPostProcessLayer::run()
                 // Nms will return -1 for all the last M-elements not valid
                 break;
             }
-            _sorted_indices.emplace_back(*(reinterpret_cast<int *>(_selected_indices.ptr_to_element(Coordinates(i)))));
+            selected_indices.emplace_back(*(reinterpret_cast<int *>(_selected_indices.ptr_to_element(Coordinates(i)))));
         }
         // We select the max detection numbers of the highest score of all classes
-        const auto num_output = std::min<unsigned int>(_info.max_detections(), _sorted_indices.size());
+        const auto num_output = std::min<unsigned int>(_info.max_detections(), selected_indices.size());
 
-        SaveOutputs(&_decoded_boxes, _result_idx_boxes_after_nms, _result_scores_after_nms, _result_classes_after_nms,
-                    _sorted_indices, num_output, max_detections, _output_boxes, _output_classes, _output_scores, _num_detection);
+        SaveOutputs(&_decoded_boxes, box_indices, max_scores, max_score_classes, selected_indices,
+                    num_output, max_detections, _output_boxes, _output_classes, _output_scores, _num_detection);
     }
 }
 } // namespace arm_compute
