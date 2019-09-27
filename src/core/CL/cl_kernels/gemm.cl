@@ -1676,8 +1676,66 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 }
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(M) && defined(N) && defined(K)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(DATA_TYPE) && defined(M) && defined(N)
+#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(DATA_TYPE) && defined(DATA_TYPE_ACCUMULATOR) && defined(M) && defined(N)
 
+#if defined(MIXED_PRECISION)
+#if K0 == 2
+#define ARM_DOT_K0(a, b, c) \
+    ({                      \
+        c += a.s0 * b.s0;   \
+        c += a.s1 * b.s1;   \
+    })
+#elif K0 == 3 // K0 == 3
+#define ARM_DOT_K0(a, b, c) \
+    ({                      \
+        c += a.s0 * b.s0;   \
+        c += a.s1 * b.s1;   \
+        c += a.s2 * b.s2;   \
+    })
+#elif K0 == 4 // K0 == 4
+#define ARM_DOT_K0(a, b, c) \
+    ({                      \
+        c += a.s0 * b.s0;   \
+        c += a.s1 * b.s1;   \
+        c += a.s2 * b.s2;   \
+        c += a.s3 * b.s3;   \
+    })
+#elif K0 == 8 // K0 == 8
+#define ARM_DOT_K0(a, b, c) \
+    ({                      \
+        c += a.s0 * b.s0;   \
+        c += a.s1 * b.s1;   \
+        c += a.s2 * b.s2;   \
+        c += a.s3 * b.s3;   \
+        c += a.s4 * b.s4;   \
+        c += a.s5 * b.s5;   \
+        c += a.s6 * b.s6;   \
+        c += a.s7 * b.s7;   \
+    })
+#elif K0 == 16 // K0 == 16
+#define ARM_DOT_K0(a, b, c) \
+    ({                      \
+        c += a.s0 * b.s0;   \
+        c += a.s1 * b.s1;   \
+        c += a.s2 * b.s2;   \
+        c += a.s3 * b.s3;   \
+        c += a.s4 * b.s4;   \
+        c += a.s5 * b.s5;   \
+        c += a.s6 * b.s6;   \
+        c += a.s7 * b.s7;   \
+        c += a.s8 * b.s8;   \
+        c += a.s9 * b.s9;   \
+        c += a.sA * b.sA;   \
+        c += a.sB * b.sB;   \
+        c += a.sC * b.sC;   \
+        c += a.sD * b.sD;   \
+        c += a.sE * b.sE;   \
+        c += a.sF * b.sF;   \
+    })
+#else // K0 not supported
+#error "K0 value not supported"
+#endif // K0 conditions
+#else  // defined(MIXED_PRECISION)
 #if K0 == 2
 #define ARM_DOT_K0(a, b, c)     \
     ({                          \
@@ -1734,6 +1792,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #else // K0 not supported
 #error "K0 value not supported"
 #endif // K0 conditions
+#endif // defined(MIXED_PRECISION)
 
 #if N0 == 2
 #define ARM_DOT_K0XN0(a, b, c)           \
@@ -1796,6 +1855,9 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
  *
+ * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
+ * @note The data type used for the accumulators must be passed at compile time using -DDATA_TYPE_ACCUMULATOR (e.g. -DDATA_TYPE_ACCUMULATOR=float)
+ * @note The F16 computation also supports mixed precision through the option -DMIXED_PRECISION passed at compile time. If enabled, DATA_TYPE_ACCUMULATOR should be set to float
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
  * @note The GEMM's dimensions M and N must be passed at compile time using -DM and -DN (e.g. -DM=52 and -DN=90).
  * @note The block's dimensions used for reshaping the LHS matrix and the RHS matrix (M0, N0 and K0) must be passed at compile time using -DM0, -DN0 and -DK0 (e.g. -DM0=4, -DN0=8, -DK0=4).
@@ -1917,7 +1979,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(MATRIX_B_DEPTH)
 
     // Initialize the accumulators
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, N0), c, 0);
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zlhs, 0); //uint zlhs0=0,zlhs1=0,zlhs2=0,... zlhs7=0;
     REPEAT_VAR_INIT_TO_CONST(16, uint, zero, 0);
@@ -2003,7 +2065,12 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // UNIT_BIAS
 
     // c = c + bias[broadcasted]
+#if defined(MIXED_PRECISION)
+    CONVERT_BLOCK(1, N0, DATA_TYPE_ACCUMULATOR, bias, bias_hp);
+    ADD_BLOCK_BROADCAST(M0, c, bias_hp0);
+#else  // defined(MIXED_PRECISION)
     ADD_BLOCK_BROADCAST(M0, c, bias0);
+#endif // defined(MIXED_PRECISION)
 
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
@@ -2016,17 +2083,26 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // UNIT_BIAS
 
     // c = c + bias
+#if defined(MIXED_PRECISION)
+    CONVERT_BLOCK(M0, N0, DATA_TYPE_ACCUMULATOR, bias, bias_hp);
+    ADD_BLOCK(M0, c, bias_hp);
+#else  // defined(MIXED_PRECISION)
     ADD_BLOCK(M0, c, bias);
+#endif // defined(MIXED_PRECISION)
 
 #endif // defined(BROADCAST_BIAS)
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
-    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
+#if defined(MIXED_PRECISION)
+    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+#else  // defined(MIXED_PRECISION)
     STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+#endif // defined(MIXED_PRECISION)
 
 #undef LHS_BLOCK_SIZE
 #undef LHS_OFFSET_X
@@ -2040,38 +2116,50 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 
 #define VTYPE(TYPE, SIZE) VEC_DATA_TYPE(TYPE, SIZE)
 
-#if GPU_ARCH == GPU_ARCH_MIDGARD
-#define ARM_VFMA(a, b, c) c += (a) * (b);
+#if defined(MIXED_PRECISION)
+
+#if(GPU_ARCH == GPU_ARCH_MIDGARD)
+#define ARM_VFMA(N0, a, b, c) c += (CONVERT(a, VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, N0))) * (CONVERT(b, VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, N0)));
 #else // GPU_ARCH == GPU_ARCH_MIDGARD
-#define ARM_VFMA(a, b, c) c = fma((a), (b), (c));
+#define ARM_VFMA(N0, a, b, c) c = fma((CONVERT(a, VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, N0))), (CONVERT(b, VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, N0))), (c));
 #endif // GPU_ARCH == GPU_ARCH_MIDGARD
 
-#define ARM_VVM_T_NT_1xN0x1(N0, TYPE, a, b, C)     \
-    ({                                             \
-        ARM_VFMA((VTYPE(TYPE, N0))(a), b, (C##0)); \
+#else // defined(MIXED_PRECISION
+
+#if(GPU_ARCH == GPU_ARCH_MIDGARD)
+#define ARM_VFMA(N0, a, b, c) c += (a) * (b);
+#else // GPU_ARCH == GPU_ARCH_MIDGARD
+#define ARM_VFMA(N0, a, b, c) c = fma((a), (b), (c));
+#endif // GPU_ARCH == GPU_ARCH_MIDGARD
+
+#endif // defined(MIXED_PRECISION)
+
+#define ARM_VVM_T_NT_1xN0x1(N0, TYPE, a, b, C)         \
+    ({                                                 \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a), b, (C##0)); \
     })
-#define ARM_VVM_T_NT_2xN0x1(N0, TYPE, a, b, C)        \
-    ({                                                \
-        ARM_VFMA((VTYPE(TYPE, N0))(a.s0), b, (C##0)); \
-        ARM_VFMA((VTYPE(TYPE, N0))(a.s1), b, (C##1)); \
+#define ARM_VVM_T_NT_2xN0x1(N0, TYPE, a, b, C)            \
+    ({                                                    \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a.s0), b, (C##0)); \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a.s1), b, (C##1)); \
     })
-#define ARM_VVM_T_NT_3xN0x1(N0, TYPE, a, b, C)        \
-    ({                                                \
-        ARM_VVM_T_NT_2xN0x1(N0, TYPE, a, b, C);       \
-        ARM_VFMA((VTYPE(TYPE, N0))(a.s2), b, (C##2)); \
+#define ARM_VVM_T_NT_3xN0x1(N0, TYPE, a, b, C)            \
+    ({                                                    \
+        ARM_VVM_T_NT_2xN0x1(N0, TYPE, a, b, C);           \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a.s2), b, (C##2)); \
     })
-#define ARM_VVM_T_NT_4xN0x1(N0, TYPE, a, b, C)        \
-    ({                                                \
-        ARM_VVM_T_NT_3xN0x1(N0, TYPE, a, b, C);       \
-        ARM_VFMA((VTYPE(TYPE, N0))(a.s3), b, (C##3)); \
+#define ARM_VVM_T_NT_4xN0x1(N0, TYPE, a, b, C)            \
+    ({                                                    \
+        ARM_VVM_T_NT_3xN0x1(N0, TYPE, a, b, C);           \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a.s3), b, (C##3)); \
     })
-#define ARM_VVM_T_NT_8xN0x1(N0, TYPE, a, b, C)        \
-    ({                                                \
-        ARM_VVM_T_NT_4xN0x1(N0, TYPE, a, b, C);       \
-        ARM_VFMA((VTYPE(TYPE, N0))(a.s4), b, (C##4)); \
-        ARM_VFMA((VTYPE(TYPE, N0))(a.s5), b, (C##5)); \
-        ARM_VFMA((VTYPE(TYPE, N0))(a.s6), b, (C##6)); \
-        ARM_VFMA((VTYPE(TYPE, N0))(a.s7), b, (C##7)); \
+#define ARM_VVM_T_NT_8xN0x1(N0, TYPE, a, b, C)            \
+    ({                                                    \
+        ARM_VVM_T_NT_4xN0x1(N0, TYPE, a, b, C);           \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a.s4), b, (C##4)); \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a.s5), b, (C##5)); \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a.s6), b, (C##6)); \
+        ARM_VFMA(N0, (VTYPE(TYPE, N0))(a.s7), b, (C##7)); \
     })
 
 // Factory macro for the column-vector (transposed) by row-vector (not transposed) multiplication. K0 = 1
@@ -2261,7 +2349,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(MATRIX_B_DEPTH)
 
     // Initialize the accumulators
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, N0), c, 0);
 
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zero, 0);
 
@@ -2455,7 +2543,12 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // UNIT_BIAS
 
     // c = c + bias[broadcasted]
+#if defined(MIXED_PRECISION)
+    CONVERT_BLOCK(1, N0, DATA_TYPE_ACCUMULATOR, bias, bias_hp);
+    ADD_BLOCK_BROADCAST(M0, c, bias_hp0);
+#else  // defined(MIXED_PRECISION)
     ADD_BLOCK_BROADCAST(M0, c, bias0);
+#endif // defined(MIXED_PRECISION)
 
 #else // defined(BROADCAST_BIAS)
     __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (y * (uint)M0 * bias_stride_y) + z * bias_stride_z;
@@ -2466,8 +2559,12 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
     SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
 #endif // UNIT_BIAS
 
-    // c = c + bias
+#if defined(MIXED_PRECISION)
+    CONVERT_BLOCK(M0, N0, DATA_TYPE_ACCUMULATOR, bias, bias_hp);
+    ADD_BLOCK(M0, c, bias_hp);
+#else  // defined(MIXED_PRECISION)
     ADD_BLOCK(M0, c, bias);
+#endif // defined(MIXED_PRECISION)
 
 #endif // defined(BROADCAST_BIAS)
 #endif // defined(BETA)
@@ -2477,7 +2574,11 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
+#if defined(MIXED_PRECISION)
+    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+#else  // defined(MIXED_PRECISION)
     STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+#endif // defined(MIXED_PRECISION)
 
 #undef LHS_BLOCK_SIZE
 #undef LHS_OFFSET_X

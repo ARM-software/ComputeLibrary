@@ -51,6 +51,10 @@ public:
     CLGEMMMatrixMultiplyReshapedKernel &operator=(CLGEMMMatrixMultiplyReshapedKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
+     * @note The F16 computation also supports mixed precision through the gemm_info.fp_mixed_precision flag.
+     *       Mixed precision combines different floating precisions during the computation, in particular, F32 for the accumulations and F16 for the
+     *       multiplications. i.e. float c = (half)a * (half)b
+     *
      * @param[in]  input0    Input tensor containing the LHS reshaped matrix. Data type supported: F16/F32. The number of dimensions for the LHS matrix must be less or equal than 4
      * @param[in]  input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3
      * @param[in]  input2    Input tensor containing the bias matrix. Data type supported: same as @p input0.

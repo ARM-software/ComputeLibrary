@@ -42,8 +42,6 @@ CLGEMMReshapedKernelConfigurationBifrost::CLGEMMReshapedKernelConfigurationBifro
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    ARM_COMPUTE_ERROR_ON(data_type != DataType::F32 && data_type != DataType::F16 && data_type != DataType::QASYMM8);
-
     using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMReshapedKernelConfigurationBifrost::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 
     // Configurations for Mali-G76
@@ -65,9 +63,23 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     switch(_target)
     {
         case GPUTarget::G76:
-            return (this->*gemm_configs_G76[data_type])(m, n, k, b);
+            if (gemm_configs_G76.find(data_type) != gemm_configs_G76.end())
+            {
+                return (this->*gemm_configs_G76[data_type])(m, n, k, b);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Not supported data type");
+            }
         default:
-            return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
+            if (gemm_configs_G7x.find(data_type) != gemm_configs_G7x.end())
+            {
+                return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Not supported data type");
+            }
     }
 }
 

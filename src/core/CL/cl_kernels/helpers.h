@@ -70,6 +70,23 @@
 #define vload1(OFFSET, PTR) *(OFFSET + PTR)
 #define vstore1(DATA, OFFSET, PTR) *(OFFSET + PTR) = DATA
 
+// Convert built-in functions with _sat modifier are not supported in floating point so we create defines
+// without _sat to overcome this issue
+#define convert_float_sat convert_float
+#define convert_float1_sat convert_float
+#define convert_float2_sat convert_float2
+#define convert_float3_sat convert_float3
+#define convert_float4_sat convert_float4
+#define convert_float8_sat convert_float8
+#define convert_float16_sat convert_float16
+#define convert_half_sat convert_float
+#define convert_half1_sat convert_half
+#define convert_half2_sat convert_half2
+#define convert_half3_sat convert_half3
+#define convert_half4_sat convert_half4
+#define convert_half8_sat convert_half8
+#define convert_half16_sat convert_half16
+
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
 
