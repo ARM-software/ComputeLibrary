@@ -38,6 +38,7 @@
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
@@ -137,6 +138,16 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));
     }
+
+    // Create function level weights manager
+    if(ctx.weights_management_ctx(Target::CL) == nullptr)
+    {
+        WeightsManagerContext wm_ctx;
+        wm_ctx.target = Target::CL;
+        wm_ctx.wm     = create_weights_manager();
+
+        ctx.insert_weights_management_ctx(std::move(wm_ctx));
+    }
 }
 
 bool CLDeviceBackend::is_backend_supported()
@@ -207,7 +218,8 @@ std::shared_ptr<arm_compute::IMemoryManager> CLDeviceBackend::create_memory_mana
 
 std::shared_ptr<arm_compute::IWeightsManager> CLDeviceBackend::create_weights_manager()
 {
-    return nullptr;
+    auto weights_mgr = std::make_shared<IWeightsManager>();
+    return weights_mgr;
 }
 } // namespace backends
 } // namespace graph

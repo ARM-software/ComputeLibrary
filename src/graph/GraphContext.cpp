@@ -79,7 +79,7 @@ bool GraphContext::insert_weights_management_ctx(WeightsManagerContext &&weights
 {
     Target target = weights_managers.target;
 
-    if(target != Target::NEON || _weights_managers.find(target) != std::end(_weights_managers))
+    if(_weights_managers.find(target) != std::end(_weights_managers))
     {
         return false;
     }
