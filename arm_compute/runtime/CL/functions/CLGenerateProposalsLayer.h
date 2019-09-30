@@ -50,7 +50,7 @@ class ICLTensor;
  * -# @ref CLReshapeLayer x 2
  * -# @ref CLBoundingBoxTransform
  * -# @ref CLPadLayerKernel
- * -# @ref CLDequantizationLayerKernel
+ * -# @ref CLDequantizationLayerKernel x 2
  * -# @ref CLQuantizationLayerKernel
  * And the following CPP functions:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit

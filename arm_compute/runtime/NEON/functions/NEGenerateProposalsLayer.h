@@ -23,15 +23,16 @@
  */
 #ifndef __ARM_COMPUTE_NEGENERATEPROPOSALSLAYER_H__
 #define __ARM_COMPUTE_NEGENERATEPROPOSALSLAYER_H__
-#include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
+#include "arm_compute/core/NEON/kernels/NEDequantizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPadLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
+#include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEStridedSliceKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -46,9 +47,10 @@ class ITensor;
  * -# @ref NEComputeAllAnchors
  * -# @ref NEPermute x 2
  * -# @ref NEReshapeLayer x 2
- * -# @ref NEStridedSlice x 3
  * -# @ref NEBoundingBoxTransform
  * -# @ref NEPadLayerKernel
+ * -# @ref NEDequantizationLayerKernel x 2
+ * -# @ref NEQuantizationLayerKernel
  * And the following CPP kernels:
  * -# @ref CPPBoxWithNonMaximaSuppressionLimit
  */
@@ -71,10 +73,12 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  scores              Scores from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors. Data types supported: F16/F32
+     * @param[in]  scores              Scores from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors.
+     *                                 Data types supported: QASYMM8/F16/F32
      * @param[in]  deltas              Bounding box deltas from convolution layer of size (W, H, 4*A). Data types supported: Same as @p scores
-     * @param[in]  anchors             Anchors tensor of size (4, A). Data types supported: Same as @p input
-     * @param[out] proposals           Box proposals output tensor of size (5, W*H*A). Data types supported: Same as @p input
+     * @param[in]  anchors             Anchors tensor of size (4, A). Data types supported: QSYMM16 with scale of 0.125 if @p scores is QASYMM8, otherwise same as @p scores
+     * @param[out] proposals           Box proposals output tensor of size (5, W*H*A).
+     *                                 Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p scores is QASYMM8, otherwise same as @p scores
      * @param[out] scores_out          Box scores output tensor of size (W*H*A). Data types supported: Same as @p input
      * @param[out] num_valid_proposals Scalar output tensor which says which of the first proposals are valid. Data types supported: U32
      * @param[in]  info                Contains GenerateProposals operation information described in @ref GenerateProposalsInfo
@@ -87,12 +91,14 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEGenerateProposalsLayer
      *
-     * @param[in] scores              Scores info from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors. Data types supported: F16/F32
+     * @param[in] scores              Scores info from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors.
+     *                                Data types supported: QASYMM8/F16/F32
      * @param[in] deltas              Bounding box deltas info from convolution layer of size (W, H, 4*A). Data types supported: Same as @p scores
-     * @param[in] anchors             Anchors tensor info of size (4, A). Data types supported: Same as @p input
-     * @param[in] proposals           Box proposals info  output tensor of size (5, W*H*A). Data types supported: Data types supported: U32
+     * @param[in] anchors             Anchors tensor info of size (4, A). Data types supported: QSYMM16 with scale of 0.125 if @p scores is QASYMM8, otherwise same as @p scores
+     * @param[in] proposals           Box proposals info  output tensor of size (5, W*H*A).
+     *                                Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p scores is QASYMM8, otherwise same as @p scores
      * @param[in] scores_out          Box scores output tensor info of size (W*H*A). Data types supported: Same as @p input
-     * @param[in] num_valid_proposals Scalar output tensor info which says which of the first proposals are valid. Data types supported: Same as @p input
+     * @param[in] num_valid_proposals Scalar output tensor info which says which of the first proposals are valid. Data types supported: U32
      * @param[in] info                Contains GenerateProposals operation information described in @ref GenerateProposalsInfo
      *
      * @return a Status
@@ -116,29 +122,36 @@ private:
     NEComputeAllAnchorsKernel    _compute_anchors_kernel;
     NEBoundingBoxTransformKernel _bounding_box_kernel;
     NEPadLayerKernel             _pad_kernel;
+    NEDequantizationLayerKernel  _dequantize_anchors;
+    NEDequantizationLayerKernel  _dequantize_deltas;
+    NEQuantizationLayerKernel    _quantize_all_proposals;
 
-    // CPP kernels
-    CPPBoxWithNonMaximaSuppressionLimitKernel _cpp_nms_kernel;
+    // CPP functions
+    CPPBoxWithNonMaximaSuppressionLimit _cpp_nms;
 
     bool _is_nhwc;
+    bool _is_qasymm8;
 
     // Temporary tensors
     Tensor _deltas_permuted;
     Tensor _deltas_flattened;
+    Tensor _deltas_flattened_f32;
     Tensor _scores_permuted;
     Tensor _scores_flattened;
     Tensor _all_anchors;
+    Tensor _all_anchors_f32;
     Tensor _all_proposals;
+    Tensor _all_proposals_quantized;
     Tensor _keeps_nms_unused;
     Tensor _classes_nms_unused;
     Tensor _proposals_4_roi_values;
 
+    // Temporary tensor pointers
+    Tensor *_all_proposals_to_use;
+
     // Output tensor pointers
     ITensor *_num_valid_proposals;
     ITensor *_scores_out;
-
-    /** Internal function to run the CPP BoxWithNMS kernel */
-    void run_cpp_nms_kernel();
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEGENERATEPROPOSALSLAYER_H__ */
