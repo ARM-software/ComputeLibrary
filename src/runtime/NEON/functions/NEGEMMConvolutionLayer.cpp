@@ -611,8 +611,6 @@ void NEGEMMConvolutionLayer::prepare()
 {
     if(!_is_prepared)
     {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
         if(_weights_manager && _weights_manager->are_weights_managed(_original_weights))
         {
             _weights_manager->run(_original_weights, &_reshape_weights_managed);

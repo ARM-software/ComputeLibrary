@@ -601,8 +601,6 @@ void CLGEMMConvolutionLayer::prepare()
 {
     if(!_is_prepared)
     {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
         // Run weights reshaping and mark original weights tensor as unused
         _weights_reshaped.allocator()->allocate();
         _reshape_weights.run();

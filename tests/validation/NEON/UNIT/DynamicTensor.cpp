@@ -22,19 +22,18 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/Allocator.h"
-#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
+#include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
 #include "arm_compute/runtime/OffsetLifetimeManager.h"
 #include "arm_compute/runtime/PoolManager.h"
 #include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"
-#include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/UNIT/DynamicTensorFixture.h"
 
 namespace arm_compute
@@ -45,6 +44,10 @@ namespace validation
 {
 namespace
 {
+constexpr AbsoluteTolerance<float> absolute_tolerance_float(0.0001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<float>           tolerance_f32(0.1f);               /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr float                    tolerance_num = 0.07f;             /**< Tolerance number */
+
 using NENormLayerWrapper = SimpleFunctionWrapper<MemoryManagerOnDemand, NENormalizationLayer, ITensor>;
 template <>
 void NENormLayerWrapper::configure(arm_compute::ITensor *src, arm_compute::ITensor *dst)
@@ -55,7 +58,9 @@ void NENormLayerWrapper::configure(arm_compute::ITensor *src, arm_compute::ITens
 TEST_SUITE(NEON)
 TEST_SUITE(UNIT)
 TEST_SUITE(DynamicTensor)
-using NEDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<Tensor, Accessor, Allocator, OffsetLifetimeManager, PoolManager, MemoryManagerOnDemand, NENormLayerWrapper>;
+
+using OffsetMemoryManagementService      = MemoryManagementService<Allocator, OffsetLifetimeManager, PoolManager, MemoryManagerOnDemand>;
+using NEDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<Tensor, Accessor, OffsetMemoryManagementService, NENormLayerWrapper>;
 
 /** Tests the memory manager with dynamic input and output tensors.
  *
@@ -76,6 +81,28 @@ FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, NEDynamicTensorType3SingleFunct
     {
         ARM_COMPUTE_EXPECT(internal_l0.size == internal_l1.size, framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(cross_l0.size == cross_l1.size, framework::LogLevel::ERRORS);
+    }
+}
+
+using NEDynamicTensorType3ComplexFunction = DynamicTensorType3ComplexFunction<Tensor, Accessor, OffsetMemoryManagementService, NEConvolutionLayer>;
+/** Tests the memory manager with dynamic input and output tensors.
+ *
+ *  Create and manage the tensors needed to run a complex function. After the function is executed,
+ *  change the input and output size requesting more memory and go through the manage/allocate process.
+ *  The memory manager should be able to update the inner structures and allocate the requested memory
+ * */
+FIXTURE_DATA_TEST_CASE(DynamicTensorType3Complex, NEDynamicTensorType3ComplexFunction, framework::DatasetMode::ALL,
+                       framework::dataset::zip(framework::dataset::zip(framework::dataset::zip(framework::dataset::zip(
+                                                                                                   framework::dataset::make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }),
+                                                                                                   framework::dataset::make("WeightsManager", { TensorShape(3U, 3U, 6U, 3U) })),
+                                                                                               framework::dataset::make("BiasShape", { TensorShape(3U) })),
+                                                                       framework::dataset::make("OutputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 3U), TensorShape(128U, 128U, 3U) } })),
+                                               framework::dataset::make("PadStrideInfo", { PadStrideInfo(1U, 1U, 1U, 1U) })))
+{
+    for(unsigned int i = 0; i < num_iterations; ++i)
+    {
+        run_iteration(i);
+        validate(Accessor(dst_target), dst_ref, tolerance_f32, tolerance_num, absolute_tolerance_float);
     }
 }
 

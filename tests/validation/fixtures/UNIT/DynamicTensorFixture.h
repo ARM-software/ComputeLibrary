@@ -32,6 +32,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/NormalizationLayer.h"
 
 namespace arm_compute
@@ -48,6 +49,9 @@ template <typename AllocatorType,
           typename MemoryMgrType>
 struct MemoryManagementService
 {
+public:
+    using LftMgrType = LifetimeMgrType;
+
 public:
     MemoryManagementService()
         : allocator(), lifetime_mgr(nullptr), pool_mgr(nullptr), mm(nullptr), mg(), num_pools(0)
@@ -118,15 +122,11 @@ private:
  */
 template <typename TensorType,
           typename AccessorType,
-          typename AllocatorType,
-          typename LifetimeMgrType,
-          typename PoolMgrType,
-          typename MemoryManagerType,
+          typename MemoryManagementServiceType,
           typename SimpleFunctionWrapperType>
 class DynamicTensorType3SingleFunction : public framework::Fixture
 {
-    using T                           = float;
-    using MemoryManagementServiceType = MemoryManagementService<AllocatorType, LifetimeMgrType, PoolMgrType, MemoryManagerType>;
+    using T = float;
 
 public:
     template <typename...>
@@ -234,9 +234,148 @@ protected:
     }
 
 public:
-    TensorShape                         input_l0{}, input_l1{};
-    typename LifetimeMgrType::info_type internal_l0{}, internal_l1{};
-    typename LifetimeMgrType::info_type cross_l0{}, cross_l1{};
+    TensorShape                                                 input_l0{}, input_l1{};
+    typename MemoryManagementServiceType::LftMgrType::info_type internal_l0{}, internal_l1{};
+    typename MemoryManagementServiceType::LftMgrType::info_type cross_l0{}, cross_l1{};
+};
+
+/** Simple test case to run a single function with different shapes twice.
+ *
+ * Runs a specified function twice, where the second time the size of the input/output is different
+ * Internal memory of the function and input/output are managed by different services
+ */
+template <typename TensorType,
+          typename AccessorType,
+          typename MemoryManagementServiceType,
+          typename ComplexFunctionType>
+class DynamicTensorType3ComplexFunction : public framework::Fixture
+{
+    using T = float;
+
+public:
+    template <typename...>
+    void setup(std::vector<TensorShape> input_shapes, TensorShape weights_shape, TensorShape bias_shape, std::vector<TensorShape> output_shapes, PadStrideInfo info)
+    {
+        num_iterations = input_shapes.size();
+        _data_type     = DataType::F32;
+        _data_layout   = DataLayout::NHWC;
+        _input_shapes  = input_shapes;
+        _output_shapes = output_shapes;
+        _weights_shape = weights_shape;
+        _bias_shape    = bias_shape;
+        _info          = info;
+
+        // Create function
+        _f_target = support::cpp14::make_unique<ComplexFunctionType>(_ms.mm);
+    }
+
+    void run_iteration(unsigned int idx)
+    {
+        auto input_shape  = _input_shapes[idx];
+        auto output_shape = _output_shapes[idx];
+
+        dst_ref    = run_reference(input_shape, _weights_shape, _bias_shape, output_shape, _info);
+        dst_target = run_target(input_shape, _weights_shape, _bias_shape, output_shape, _info, WeightsInfo());
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        switch(tensor.data_type())
+        {
+            case DataType::F32:
+            {
+                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            default:
+                library->fill_tensor_uniform(tensor, i);
+        }
+    }
+
+    TensorType run_target(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape,
+                          PadStrideInfo info, WeightsInfo weights_info)
+    {
+        if(_data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
+        }
+
+        _weights_target = create_tensor<TensorType>(weights_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        _bias_target    = create_tensor<TensorType>(bias_shape, _data_type, 1);
+
+        // Create tensors
+        TensorType src = create_tensor<TensorType>(input_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, _data_type, 1, QuantizationInfo(), _data_layout);
+
+        // Create and configure function
+        _f_target->configure(&src, &_weights_target, &_bias_target, &dst, info, weights_info);
+
+        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        dst.allocator()->allocate();
+        _weights_target.allocator()->allocate();
+        _bias_target.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(src), 0);
+        fill(AccessorType(_weights_target), 1);
+        fill(AccessorType(_bias_target), 2);
+
+        // Populate and validate memory manager
+        _ms.clear();
+        _ms.populate(1);
+        _ms.mg.acquire();
+
+        // Compute NEConvolutionLayer function
+        _f_target->run();
+        _ms.mg.release();
+
+        return dst;
+    }
+
+    SimpleTensor<T> run_reference(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info)
+    {
+        // Create reference
+        SimpleTensor<T> src{ input_shape, _data_type, 1 };
+        SimpleTensor<T> weights{ weights_shape, _data_type, 1 };
+        SimpleTensor<T> bias{ bias_shape, _data_type, 1 };
+
+        // Fill reference
+        fill(src, 0);
+        fill(weights, 1);
+        fill(bias, 2);
+
+        return reference::convolution_layer<T>(src, weights, bias, output_shape, info);
+    }
+
+public:
+    unsigned int    num_iterations{ 0 };
+    SimpleTensor<T> dst_ref{};
+    TensorType      dst_target{};
+
+private:
+    DataType                             _data_type{ DataType::UNKNOWN };
+    DataLayout                           _data_layout{ DataLayout::UNKNOWN };
+    PadStrideInfo                        _info{};
+    std::vector<TensorShape>             _input_shapes{};
+    std::vector<TensorShape>             _output_shapes{};
+    TensorShape                          _weights_shape{};
+    TensorShape                          _bias_shape{};
+    MemoryManagementServiceType          _ms{};
+    TensorType                           _weights_target{};
+    TensorType                           _bias_target{};
+    std::unique_ptr<ComplexFunctionType> _f_target{};
 };
 } // namespace validation
 } // namespace test

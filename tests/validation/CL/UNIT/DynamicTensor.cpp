@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
+#include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLL2NormalizeLayer.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
@@ -35,6 +36,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/UNIT/DynamicTensorFixture.h"
 
 namespace arm_compute
@@ -45,6 +47,10 @@ namespace validation
 {
 namespace
 {
+constexpr AbsoluteTolerance<float> absolute_tolerance_float(0.0001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<float>           tolerance_f32(0.1f);               /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr float                    tolerance_num = 0.07f;             /**< Tolerance number */
+
 using CLL2NormLayerWrapper = SimpleFunctionWrapper<MemoryManagerOnDemand, CLL2NormalizeLayer, ICLTensor>;
 template <>
 void CLL2NormLayerWrapper::configure(ICLTensor *src, ICLTensor *dst)
@@ -56,7 +62,8 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(DynamicTensor)
 
-using CLDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<CLTensor, CLAccessor, CLBufferAllocator, BlobLifetimeManager, PoolManager, MemoryManagerOnDemand, CLL2NormLayerWrapper>;
+using BlobMemoryManagementService        = MemoryManagementService<CLBufferAllocator, BlobLifetimeManager, PoolManager, MemoryManagerOnDemand>;
+using CLDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLL2NormLayerWrapper>;
 
 /** Tests the memory manager with dynamic input and output tensors.
  *
@@ -94,6 +101,28 @@ FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, CLDynamicTensorType3SingleFunct
         {
             ARM_COMPUTE_EXPECT(cross_l0[i].size == cross_l1[i].size, framework::LogLevel::ERRORS);
         }
+    }
+}
+
+using CLDynamicTensorType3ComplexFunction = DynamicTensorType3ComplexFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLConvolutionLayer>;
+/** Tests the memory manager with dynamic input and output tensors.
+ *
+ *  Create and manage the tensors needed to run a complex function. After the function is executed,
+ *  change the input and output size requesting more memory and go through the manage/allocate process.
+ *  The memory manager should be able to update the inner structures and allocate the requested memory
+ * */
+FIXTURE_DATA_TEST_CASE(DynamicTensorType3Complex, CLDynamicTensorType3ComplexFunction, framework::DatasetMode::ALL,
+                       framework::dataset::zip(framework::dataset::zip(framework::dataset::zip(framework::dataset::zip(
+                                                                                                   framework::dataset::make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 16U), TensorShape(64U, 64U, 16U) } }),
+                                                                                                   framework::dataset::make("WeightsManager", { TensorShape(3U, 3U, 16U, 5U) })),
+                                                                                               framework::dataset::make("BiasShape", { TensorShape(5U) })),
+                                                                       framework::dataset::make("OutputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 5U), TensorShape(64U, 64U, 5U) } })),
+                                               framework::dataset::make("PadStrideInfo", { PadStrideInfo(1U, 1U, 1U, 1U) })))
+{
+    for(unsigned int i = 0; i < num_iterations; ++i)
+    {
+        run_iteration(i);
+        validate(CLAccessor(dst_target), dst_ref, tolerance_f32, tolerance_num, absolute_tolerance_float);
     }
 }
 

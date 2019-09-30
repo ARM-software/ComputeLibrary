@@ -56,7 +56,8 @@ TEST_SUITE(GC)
 TEST_SUITE(UNIT)
 TEST_SUITE(DynamicTensor)
 
-using GCDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<GCTensor, GCAccessor, GCBufferAllocator, BlobLifetimeManager, PoolManager, MemoryManagerOnDemand, GCNormLayerWrapper>;
+using BlobMemoryManagementService        = MemoryManagementService<GCBufferAllocator, BlobLifetimeManager, PoolManager, MemoryManagerOnDemand>;
+using GCDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<GCTensor, GCAccessor, BlobMemoryManagementService, GCNormLayerWrapper>;
 
 /** Tests the memory manager with dynamic input and output tensors.
  *
