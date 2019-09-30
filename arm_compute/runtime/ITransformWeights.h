@@ -65,9 +65,20 @@ public:
     /** Prevent instances of this class to be copied */
     ITransformWeights &operator=(const ITransformWeights &) = delete;
     /** Allow instances of this class to be move constructed */
-    ITransformWeights(ITransformWeights &&) = default;
+    ITransformWeights(ITransformWeights &&other)
+    {
+        *this = std::move(other);
+    }
     /** Allow instances of this class to be moved */
-    ITransformWeights &operator=(ITransformWeights &&) = default;
+    ITransformWeights &operator=(ITransformWeights &&other)
+    {
+        if(this != &other)
+        {
+            _num_refcount = other._num_refcount.load();
+            _reshape_run  = other._reshape_run;
+        }
+        return *this;
+    }
 
     /** Get a pointer to the transformed weights
      *
@@ -111,7 +122,6 @@ protected:
     std::atomic<int32_t> _num_refcount{ 0 };
     bool                 _reshape_run{ false };
 };
-
 } // arm_compute
 
 #endif /*__ARM_COMPUTE_ITRANSFORMWEIGHTS_H__ */

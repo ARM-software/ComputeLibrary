@@ -68,7 +68,7 @@ bool Graph::remove_node(NodeID nid)
 
 EdgeID Graph::add_connection(NodeID source, size_t source_idx, NodeID sink, size_t sink_idx)
 {
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
 
     // Check if node index is valid, if node exists and finally if the connection index is valid
     ARM_COMPUTE_ERROR_ON((source >= _nodes.size()) || (_nodes[source] == nullptr) || (source_idx >= _nodes[source]->num_outputs()));

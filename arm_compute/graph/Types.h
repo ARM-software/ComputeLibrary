@@ -73,7 +73,7 @@ constexpr NodeID EmptyNodeID = std::numeric_limits<NodeID>::max();
 constexpr EdgeID EmptyEdgeID = std::numeric_limits<EdgeID>::max();
 
 // Forward declarations
-class TensorDescriptor;
+struct TensorDescriptor;
 /** Graph configuration structure */
 struct GraphConfig
 {

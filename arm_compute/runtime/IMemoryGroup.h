@@ -91,14 +91,6 @@ public:
     {
         _memory_group.acquire();
     }
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    MemoryGroupResourceScope(const MemoryGroupResourceScope &) = delete;
-    /** Default move constructor */
-    MemoryGroupResourceScope(MemoryGroupResourceScope &&) = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    MemoryGroupResourceScope &operator=(const MemoryGroupResourceScope &) = delete;
-    /** Default move assignment operator */
-    MemoryGroupResourceScope &operator=(MemoryGroupResourceScope &&) = default;
     /** Destructor */
     ~MemoryGroupResourceScope()
     {

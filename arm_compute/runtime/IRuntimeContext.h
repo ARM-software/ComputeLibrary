@@ -29,7 +29,7 @@ namespace arm_compute
 // Forward declarations
 class IScheduler;
 class IAssetManager;
-class DeviceProperties;
+struct DeviceProperties;
 
 /** Context interface */
 class IRuntimeContext

@@ -35,9 +35,12 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <thread>
 #include <utility>
 #include <vector>
+
+#ifndef BARE_METAL
+#include <thread>
+#endif /* BARE_METAL */
 
 namespace arm_compute
 {
@@ -231,7 +234,7 @@ private:
 template <typename NT, typename... Ts>
 inline NodeID Graph::add_node(Ts &&... args)
 {
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
 
     // Create node
     NodeID nid  = _nodes.size();
