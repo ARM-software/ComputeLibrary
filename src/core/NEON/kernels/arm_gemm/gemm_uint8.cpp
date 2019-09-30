@@ -98,7 +98,7 @@ static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
 {
     GemmMethod::GEMM_INTERLEAVED,
     "gemm_u8_12x8",
-    [](const GemmArgs<uint32_t> &args) { return args._ci->has_dotprod(); },
+    [](const GemmArgs<uint32_t> &args) { return args._ci->has_dotprod() && args._alpha==1 && (args._beta==0 || args._beta==1); },
     nullptr,
     [](const GemmArgs<uint32_t> &args) { return new GemmInterleaved<gemm_u8_12x8, uint8_t, uint32_t>(args); }
 },

@@ -221,7 +221,6 @@ public:
                     compute_row_sums(_qp, _Ksize, (m_end - m_start),
                                      this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda), this->_lda,
                                      local_row_sums);
-//                                     row_bias + (multi * _nbatches * _Msize) + (batch * _Msize) + m_start);
                 }
 
                 {
@@ -231,7 +230,6 @@ public:
 
                     requantize_block_32(_qp, (nmax - n0), (m_end - m_start), result_buffer, (nmax - n0),
                                         this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
-//                                        row_bias + (multi * _nbatches * _Msize) + (batch * _Msize) + m_start, col_bias);
                                         local_row_sums, col_bias + (multi * _Nsize) + n0);
                 }
             } while (p.next_dim0());

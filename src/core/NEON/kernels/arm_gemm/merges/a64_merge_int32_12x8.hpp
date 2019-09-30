@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,9 +30,6 @@ inline void MergeResults<12, 8, false>(int32_t *out, const int32_t *in, const in
     const int32_t *inptr = in;
     prefetch_6x(inptr);
     prefetch_6x(inptr + 96);
-
-    int32x4_t alpha_value = vdupq_n_s32(alpha);
-    int32x4_t beta_value = vdupq_n_s32(beta);
 
     for (int y=y0; y<ymax; y+=8) {
         int32_t *outptr0 = out + (y * ldout) + x0;
@@ -92,185 +89,250 @@ inline void MergeResults<12, 8, false>(int32_t *out, const int32_t *in, const in
             if ((i+11) >= xmax) {
                 for (int xi=0; xi<12; xi++) {
                     if ((i+xi) < xmax) {
-                        *outptr0 = (alpha * inptr[xi]) + (*outptr0 * beta);
+                        *outptr0 = (inptr[xi]) + (*outptr0 * beta);
                         outptr0++;
-                        *outptr1 = (alpha * inptr[xi + 12]) + (*outptr1 * beta);
+                        *outptr1 = (inptr[xi + 12]) + (*outptr1 * beta);
                         outptr1++;
-                        *outptr2 = (alpha * inptr[xi + 24]) + (*outptr2 * beta);
+                        *outptr2 = (inptr[xi + 24]) + (*outptr2 * beta);
                         outptr2++;
-                        *outptr3 = (alpha * inptr[xi + 36]) + (*outptr3 * beta);
+                        *outptr3 = (inptr[xi + 36]) + (*outptr3 * beta);
                         outptr3++;
-                        *outptr4 = (alpha * inptr[xi + 48]) + (*outptr4 * beta);
+                        *outptr4 = (inptr[xi + 48]) + (*outptr4 * beta);
                         outptr4++;
-                        *outptr5 = (alpha * inptr[xi + 60]) + (*outptr5 * beta);
+                        *outptr5 = (inptr[xi + 60]) + (*outptr5 * beta);
                         outptr5++;
-                        *outptr6 = (alpha * inptr[xi + 72]) + (*outptr6 * beta);
+                        *outptr6 = (inptr[xi + 72]) + (*outptr6 * beta);
                         outptr6++;
-                        *outptr7 = (alpha * inptr[xi + 84]) + (*outptr7 * beta);
+                        *outptr7 = (inptr[xi + 84]) + (*outptr7 * beta);
                         outptr7++;
                     }
                 }
                 inptr += 96;
             } else {
-                /* Optimized routine to copy an entire block */
-              __asm __volatile (
-                  // Row 0
-                  ASM_PREFETCH("[%x[outptr1], #192]")
-                  "ldr q3, [%x[outptr0]]\n"
-                  "ldr q4, [%x[outptr0], #0x10]\n"
-                  "ldr q5, [%x[outptr0], #0x20]\n"
-                  "mul v3.4s, v3.4s, %[beta_value].4s\n"
-                  "ldr q6, [%x[inptr]]\n"
-                  "mul v4.4s, v4.4s, %[beta_value].4s\n"
-                  "ldr q7, [%x[inptr], #0x10]\n"
-                  "mul v5.4s, v5.4s, %[beta_value].4s\n"
-                  "ldr q8, [%x[inptr], #0x20]\n"
-                  "mla v3.4s, v6.4s, %[alpha_value].4s\n"
-                  "ldr q0, [%x[outptr1]]\n"
-                  "mla v4.4s, v7.4s, %[alpha_value].4s\n"
-                  "ldr q1, [%x[outptr1], #0x10]\n"
-                  "mla v5.4s, v8.4s, %[alpha_value].4s\n"
-                  "ldr q2, [%x[outptr1], #0x20]\n"
+                if (beta == 0u) {
+                    /* Optimized routine to copy an entire block */
+                    __asm __volatile (
+                        // Row 0
+                        ASM_PREFETCH("[%x[outptr1], #192]")
+                        "ldr q0, [%x[inptr]]\n"
+                        "ldr q1, [%x[inptr], #0x10]\n"
+                        "ldr q2, [%x[inptr], #0x20]\n"
 
-                  // Row 1
-                  ASM_PREFETCH("[%x[outptr2], #192]")
-                  "mul v0.4s, v0.4s, %[beta_value].4s\n"
-                  "ldr q6, [%x[inptr], #0x30]\n"
-                  "str q3, [%x[outptr0]], #0x10\n"
-                  "mul v1.4s, v1.4s, %[beta_value].4s\n"
-                  "ldr q7, [%x[inptr], #0x40]\n"
-                  "str q4, [%x[outptr0]], #0x10\n"
-                  "mul v2.4s, v2.4s, %[beta_value].4s\n"
-                  "ldr q8, [%x[inptr], #0x50]\n"
-                  "str q5, [%x[outptr0]], #0x10\n"
-                  "mla v0.4s, v6.4s, %[alpha_value].4s\n"
-                  "ldr q3, [%x[outptr2]]\n"
-                  "mla v1.4s, v7.4s, %[alpha_value].4s\n"
-                  "ldr q4, [%x[outptr2], #0x10]\n"
-                  "mla v2.4s, v8.4s, %[alpha_value].4s\n"
-                  "ldr q5, [%x[outptr2], #0x20]\n"
+                        // Row 1
+                        ASM_PREFETCH("[%x[outptr2], #192]")
+                        "ldr q3, [%x[inptr], #0x30]\n"
+                        "str q0, [%x[outptr0]], #0x10\n"
+                        "ldr q4, [%x[inptr], #0x40]\n"
+                        "str q1, [%x[outptr0]], #0x10\n"
+                        "ldr q5, [%x[inptr], #0x50]\n"
+                        "str q2, [%x[outptr0]], #0x10\n"
 
-                  // Row 2
-                  ASM_PREFETCH("[%x[outptr3], #192]")
-                  "mul v3.4s, v3.4s, %[beta_value].4s\n"
-                  "ldr q6, [%x[inptr], #0x60]\n"
-                  "str q0, [%x[outptr1]], #0x10\n"
-                  "mul v4.4s, v4.4s, %[beta_value].4s\n"
-                  "ldr q7, [%x[inptr], #0x70]\n"
-                  "str q1, [%x[outptr1]], #0x10\n"
-                  "mul v5.4s, v5.4s, %[beta_value].4s\n"
-                  "ldr q8, [%x[inptr], #0x80]\n"
-                  "str q2, [%x[outptr1]], #0x10\n"
-                  "mla v3.4s, v6.4s, %[alpha_value].4s\n"
-                  "ldr q0, [%x[outptr3]]\n"
-                  "mla v4.4s, v7.4s, %[alpha_value].4s\n"
-                  "ldr q1, [%x[outptr3], #0x10]\n"
-                  "mla v5.4s, v8.4s, %[alpha_value].4s\n"
-                  "ldr q2, [%x[outptr3], #0x20]\n"
+                        // Row 2
+                        ASM_PREFETCH("[%x[outptr3], #192]")
+                        "ldr q0, [%x[inptr], #0x60]\n"
+                        "str q3, [%x[outptr1]], #0x10\n"
+                        "ldr q1, [%x[inptr], #0x70]\n"
+                        "str q4, [%x[outptr1]], #0x10\n"
+                        "ldr q2, [%x[inptr], #0x80]\n"
+                        "str q5, [%x[outptr1]], #0x10\n"
 
-                  // Row 3
-                  ASM_PREFETCH("[%x[outptr4], #192]")
-                  "mul v0.4s, v0.4s, %[beta_value].4s\n"
-                  "ldr q6, [%x[inptr], #0x90]\n"
-                  "str q3, [%x[outptr2]], #0x10\n"
-                  "mul v1.4s, v1.4s, %[beta_value].4s\n"
-                  "ldr q7, [%x[inptr], #0xa0]\n"
-                  "str q4, [%x[outptr2]], #0x10\n"
-                  "mul v2.4s, v2.4s, %[beta_value].4s\n"
-                  "ldr q8, [%x[inptr], #0xb0]\n"
-                  "str q5, [%x[outptr2]], #0x10\n"
-                  "mla v0.4s, v6.4s, %[alpha_value].4s\n"
-                  "ldr q3, [%x[outptr4]]\n"
-                  "mla v1.4s, v7.4s, %[alpha_value].4s\n"
-                  "ldr q4, [%x[outptr4], #0x10]\n"
-                  "mla v2.4s, v8.4s, %[alpha_value].4s\n"
-                  "ldr q5, [%x[outptr4], #0x20]\n"
+                        // Row 3
+                        ASM_PREFETCH("[%x[outptr4], #192]")
+                        "ldr q3, [%x[inptr], #0x90]\n"
+                        "str q0, [%x[outptr2]], #0x10\n"
+                        "ldr q4, [%x[inptr], #0xa0]\n"
+                        "str q1, [%x[outptr2]], #0x10\n"
+                        "ldr q5, [%x[inptr], #0xb0]\n"
+                        "str q2, [%x[outptr2]], #0x10\n"
 
-                  // Row 4
-                  ASM_PREFETCH("[%x[outptr5], #192]")
-                  "mul v3.4s, v3.4s, %[beta_value].4s\n"
-                  "ldr q6, [%x[inptr], #0xc0]\n"
-                  "str q0, [%x[outptr3]], #0x10\n"
-                  "mul v4.4s, v4.4s, %[beta_value].4s\n"
-                  "ldr q7, [%x[inptr], #0xd0]\n"
-                  "str q1, [%x[outptr3]], #0x10\n"
-                  "mul v5.4s, v5.4s, %[beta_value].4s\n"
-                  "ldr q8, [%x[inptr], #0xe0]\n"
-                  "str q2, [%x[outptr3]], #0x10\n"
-                  "mla v3.4s, v6.4s, %[alpha_value].4s\n"
-                  "ldr q0, [%x[outptr5]]\n"
-                  "mla v4.4s, v7.4s, %[alpha_value].4s\n"
-                  "ldr q1, [%x[outptr5], #0x10]\n"
-                  "mla v5.4s, v8.4s, %[alpha_value].4s\n"
-                  "ldr q2, [%x[outptr5], #0x20]\n"
+                        // Row 4
+                        ASM_PREFETCH("[%x[outptr5], #192]")
+                        "ldr q0, [%x[inptr], #0xc0]\n"
+                        "str q3, [%x[outptr3]], #0x10\n"
+                        "ldr q1, [%x[inptr], #0xd0]\n"
+                        "str q4, [%x[outptr3]], #0x10\n"
+                        "ldr q2, [%x[inptr], #0xe0]\n"
+                        "str q5, [%x[outptr3]], #0x10\n"
 
-                  // Row 5
-                  ASM_PREFETCH("[%x[outptr6], #192]")
-                  "mul v0.4s, v0.4s, %[beta_value].4s\n"
-                  "ldr q6, [%x[inptr], #0xf0]\n"
-                  "str q3, [%x[outptr4]], #0x10\n"
-                  "mul v1.4s, v1.4s, %[beta_value].4s\n"
-                  "ldr q7, [%x[inptr], #0x100]\n"
-                  "str q4, [%x[outptr4]], #0x10\n"
-                  "mul v2.4s, v2.4s, %[beta_value].4s\n"
-                  "ldr q8, [%x[inptr], #0x110]\n"
-                  "str q5, [%x[outptr4]], #0x10\n"
-                  "mla v0.4s, v6.4s, %[alpha_value].4s\n"
-                  "ldr q3, [%x[outptr6]]\n"
-                  "mla v1.4s, v7.4s, %[alpha_value].4s\n"
-                  "ldr q4, [%x[outptr6], #0x10]\n"
-                  "mla v2.4s, v8.4s, %[alpha_value].4s\n"
-                  "ldr q5, [%x[outptr6], #0x20]\n"
+                        // Row 5
+                        ASM_PREFETCH("[%x[outptr6], #192]")
+                        "ldr q3, [%x[inptr], #0xf0]\n"
+                        "str q0, [%x[outptr4]], #0x10\n"
+                        "ldr q4, [%x[inptr], #0x100]\n"
+                        "str q1, [%x[outptr4]], #0x10\n"
+                        "ldr q5, [%x[inptr], #0x110]\n"
+                        "str q2, [%x[outptr4]], #0x10\n"
 
-                  // Row 6
-                  ASM_PREFETCH("[%x[outptr7], #192]")
-                  "mul v3.4s, v3.4s, %[beta_value].4s\n"
-                  "ldr q6, [%x[inptr], #0x120]\n"
-                  "str q0, [%x[outptr5]], #0x10\n"
-                  "mul v4.4s, v4.4s, %[beta_value].4s\n"
-                  "ldr q7, [%x[inptr], #0x130]\n"
-                  "str q1, [%x[outptr5]], #0x10\n"
-                  "mul v5.4s, v5.4s, %[beta_value].4s\n"
-                  "ldr q8, [%x[inptr], #0x140]\n"
-                  "str q2, [%x[outptr5]], #0x10\n"
-                  "mla v3.4s, v6.4s, %[alpha_value].4s\n"
-                  "ldr q0, [%x[outptr7]]\n"
-                  "mla v4.4s, v7.4s, %[alpha_value].4s\n"
-                  "ldr q1, [%x[outptr7], #0x10]\n"
-                  "mla v5.4s, v8.4s, %[alpha_value].4s\n"
-                  "ldr q2, [%x[outptr7], #0x20]\n"
+                        // Row 6
+                        ASM_PREFETCH("[%x[outptr7], #192]")
+                        "ldr q0, [%x[inptr], #0x120]\n"
+                        "str q3, [%x[outptr5]], #0x10\n"
+                        "ldr q1, [%x[inptr], #0x130]\n"
+                        "str q4, [%x[outptr5]], #0x10\n"
+                        "ldr q2, [%x[inptr], #0x140]\n"
+                        "str q5, [%x[outptr5]], #0x10\n"
 
-                  // Row 7
-                  "mul v0.4s, v0.4s, %[beta_value].4s\n"
-                  "ldr q6, [%x[inptr], #0x150]\n"
-                  "str q3, [%x[outptr6]], #0x10\n"
-                  "mul v1.4s, v1.4s, %[beta_value].4s\n"
-                  "ldr q7, [%x[inptr], #0x160]\n"
-                  "str q4, [%x[outptr6]], #0x10\n"
-                  "mul v2.4s, v2.4s, %[beta_value].4s\n"
-                  "ldr q8, [%x[inptr], #0x170]\n"
-                  "str q5, [%x[outptr6]], #0x10\n"
-                  "mla v0.4s, v6.4s, %[alpha_value].4s\n"
-                  "mla v1.4s, v7.4s, %[alpha_value].4s\n"
-                  "mla v2.4s, v8.4s, %[alpha_value].4s\n"
-                  "str q0, [%x[outptr7]], #0x10\n"
-                  "str q1, [%x[outptr7]], #0x10\n"
-                  "str q2, [%x[outptr7]], #0x10\n"
+                        // Row 7
+                        "ldr q3, [%x[inptr], #0x150]\n"
+                        "str q0, [%x[outptr6]], #0x10\n"
+                        "ldr q4, [%x[inptr], #0x160]\n"
+                        "str q1, [%x[outptr6]], #0x10\n"
+                        "ldr q5, [%x[inptr], #0x170]\n"
+                        "str q2, [%x[outptr6]], #0x10\n"
+                        "str q3, [%x[outptr7]], #0x10\n"
+                        "str q4, [%x[outptr7]], #0x10\n"
+                        "str q5, [%x[outptr7]], #0x10\n"
 
-                  "add %x[inptr], %x[inptr], #0x180\n"
-                  : [outptr0] "+r" (outptr0),
-                    [outptr1] "+r" (outptr1),
-                    [outptr2] "+r" (outptr2),
-                    [outptr3] "+r" (outptr3),
-                    [outptr4] "+r" (outptr4),
-                    [outptr5] "+r" (outptr5),
-                    [outptr6] "+r" (outptr6),
-                    [outptr7] "+r" (outptr7),
-                    [inptr] "+r" (inptr)
-                  : [alpha_value] "w" (alpha_value),
-                    [beta_value] "w" (beta_value)
-                  : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8"
-              );
+                        "add %x[inptr], %x[inptr], #0x180\n"
+                        : [outptr0] "+r" (outptr0),
+                          [outptr1] "+r" (outptr1),
+                          [outptr2] "+r" (outptr2),
+                          [outptr3] "+r" (outptr3),
+                          [outptr4] "+r" (outptr4),
+                          [outptr5] "+r" (outptr5),
+                          [outptr6] "+r" (outptr6),
+                          [outptr7] "+r" (outptr7),
+                          [inptr] "+r" (inptr)
+                        :
+                        : "v0", "v1", "v2", "v3", "v4", "v5", "v6"
+                    );
+                } else {
+                    /* Optimized routine to copy an entire block */
+                    __asm __volatile (
+                        // Row 0
+                        ASM_PREFETCH("[%x[outptr1], #192]")
+                        "ldr q3, [%x[outptr0]]\n"
+                        "ldr q4, [%x[outptr0], #0x10]\n"
+                        "ldr q5, [%x[outptr0], #0x20]\n"
+                        "ldr q6, [%x[inptr]]\n"
+                        "ldr q7, [%x[inptr], #0x10]\n"
+                        "ldr q8, [%x[inptr], #0x20]\n"
+                        "add v3.4s, v3.4s, v6.4s\n"
+                        "ldr q0, [%x[outptr1]]\n"
+                        "add v4.4s, v4.4s, v7.4s\n"
+                        "ldr q1, [%x[outptr1], #0x10]\n"
+                        "add v5.4s, v5.4s, v8.4s\n"
+                        "ldr q2, [%x[outptr1], #0x20]\n"
+
+                        // Row 1
+                        ASM_PREFETCH("[%x[outptr2], #192]")
+                        "ldr q6, [%x[inptr], #0x30]\n"
+                        "str q3, [%x[outptr0]], #0x10\n"
+                        "ldr q7, [%x[inptr], #0x40]\n"
+                        "str q4, [%x[outptr0]], #0x10\n"
+                        "ldr q8, [%x[inptr], #0x50]\n"
+                        "str q5, [%x[outptr0]], #0x10\n"
+                        "add v0.4s, v0.4s, v6.4s\n"
+                        "ldr q3, [%x[outptr2]]\n"
+                        "add v1.4s, v1.4s, v7.4s\n"
+                        "ldr q4, [%x[outptr2], #0x10]\n"
+                        "add v2.4s, v2.4s, v8.4s\n"
+                        "ldr q5, [%x[outptr2], #0x20]\n"
+
+                        // Row 2
+                        ASM_PREFETCH("[%x[outptr3], #192]")
+                        "ldr q6, [%x[inptr], #0x60]\n"
+                        "str q0, [%x[outptr1]], #0x10\n"
+                        "ldr q7, [%x[inptr], #0x70]\n"
+                        "str q1, [%x[outptr1]], #0x10\n"
+                        "ldr q8, [%x[inptr], #0x80]\n"
+                        "str q2, [%x[outptr1]], #0x10\n"
+                        "add v3.4s, v3.4s, v6.4s\n"
+                        "ldr q0, [%x[outptr3]]\n"
+                        "add v4.4s, v4.4s, v7.4s\n"
+                        "ldr q1, [%x[outptr3], #0x10]\n"
+                        "add v5.4s, v5.4s, v8.4s\n"
+                        "ldr q2, [%x[outptr3], #0x20]\n"
+
+                        // Row 3
+                        ASM_PREFETCH("[%x[outptr4], #192]")
+                        "ldr q6, [%x[inptr], #0x90]\n"
+                        "str q3, [%x[outptr2]], #0x10\n"
+                        "ldr q7, [%x[inptr], #0xa0]\n"
+                        "str q4, [%x[outptr2]], #0x10\n"
+                        "ldr q8, [%x[inptr], #0xb0]\n"
+                        "str q5, [%x[outptr2]], #0x10\n"
+                        "add v0.4s, v0.4s, v6.4s\n"
+                        "ldr q3, [%x[outptr4]]\n"
+                        "add v1.4s, v1.4s, v7.4s\n"
+                        "ldr q4, [%x[outptr4], #0x10]\n"
+                        "add v2.4s, v2.4s, v8.4s\n"
+                        "ldr q5, [%x[outptr4], #0x20]\n"
+
+                        // Row 4
+                        ASM_PREFETCH("[%x[outptr5], #192]")
+                        "ldr q6, [%x[inptr], #0xc0]\n"
+                        "str q0, [%x[outptr3]], #0x10\n"
+                        "ldr q7, [%x[inptr], #0xd0]\n"
+                        "str q1, [%x[outptr3]], #0x10\n"
+                        "ldr q8, [%x[inptr], #0xe0]\n"
+                        "str q2, [%x[outptr3]], #0x10\n"
+                        "add v3.4s, v3.4s, v6.4s\n"
+                        "ldr q0, [%x[outptr5]]\n"
+                        "add v4.4s, v4.4s, v7.4s\n"
+                        "ldr q1, [%x[outptr5], #0x10]\n"
+                        "add v5.4s, v5.4s, v8.4s\n"
+                        "ldr q2, [%x[outptr5], #0x20]\n"
+
+                        // Row 5
+                        ASM_PREFETCH("[%x[outptr6], #192]")
+                        "ldr q6, [%x[inptr], #0xf0]\n"
+                        "str q3, [%x[outptr4]], #0x10\n"
+                        "ldr q7, [%x[inptr], #0x100]\n"
+                        "str q4, [%x[outptr4]], #0x10\n"
+                        "ldr q8, [%x[inptr], #0x110]\n"
+                        "str q5, [%x[outptr4]], #0x10\n"
+                        "add v0.4s, v0.4s, v6.4s\n"
+                        "ldr q3, [%x[outptr6]]\n"
+                        "add v1.4s, v1.4s, v7.4s\n"
+                        "ldr q4, [%x[outptr6], #0x10]\n"
+                        "add v2.4s, v2.4s, v8.4s\n"
+                        "ldr q5, [%x[outptr6], #0x20]\n"
+
+                        // Row 6
+                        ASM_PREFETCH("[%x[outptr7], #192]")
+                        "ldr q6, [%x[inptr], #0x120]\n"
+                        "str q0, [%x[outptr5]], #0x10\n"
+                        "ldr q7, [%x[inptr], #0x130]\n"
+                        "str q1, [%x[outptr5]], #0x10\n"
+                        "ldr q8, [%x[inptr], #0x140]\n"
+                        "str q2, [%x[outptr5]], #0x10\n"
+                        "add v3.4s, v3.4s, v6.4s\n"
+                        "ldr q0, [%x[outptr7]]\n"
+                        "add v4.4s, v4.4s, v7.4s\n"
+                        "ldr q1, [%x[outptr7], #0x10]\n"
+                        "add v5.4s, v5.4s, v8.4s\n"
+                        "ldr q2, [%x[outptr7], #0x20]\n"
+
+                        // Row 7
+                        "ldr q6, [%x[inptr], #0x150]\n"
+                        "str q3, [%x[outptr6]], #0x10\n"
+                        "ldr q7, [%x[inptr], #0x160]\n"
+                        "str q4, [%x[outptr6]], #0x10\n"
+                        "ldr q8, [%x[inptr], #0x170]\n"
+                        "str q5, [%x[outptr6]], #0x10\n"
+                        "add v0.4s, v0.4s, v6.4s\n"
+                        "add v1.4s, v1.4s, v7.4s\n"
+                        "add v2.4s, v2.4s, v8.4s\n"
+                        "str q0, [%x[outptr7]], #0x10\n"
+                        "str q1, [%x[outptr7]], #0x10\n"
+                        "str q2, [%x[outptr7]], #0x10\n"
+
+                        "add %x[inptr], %x[inptr], #0x180\n"
+                        : [outptr0] "+r" (outptr0),
+                          [outptr1] "+r" (outptr1),
+                          [outptr2] "+r" (outptr2),
+                          [outptr3] "+r" (outptr3),
+                          [outptr4] "+r" (outptr4),
+                          [outptr5] "+r" (outptr5),
+                          [outptr6] "+r" (outptr6),
+                          [outptr7] "+r" (outptr7),
+                          [inptr] "+r" (inptr)
+                        :
+                        : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8"
+                    );
+
+                }
             }
         }
     }
@@ -279,7 +341,7 @@ inline void MergeResults<12, 8, false>(int32_t *out, const int32_t *in, const in
 template<>
 inline void MergeResults<12, 8>(uint32_t *out, const uint32_t *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const uint32_t alpha, const uint32_t beta) {
   // Since the above code uses only MUL and MLA instructions discard the "unsignedness" and proceed safely.
-  MergeResults<12, 8>(reinterpret_cast<int32_t*>(out), reinterpret_cast<const int32_t*>(in), ldout, y0, ymax, x0, xmax, static_cast<int32_t>(alpha), static_cast<int32_t>(beta));
+  MergeResults<12, 8>(reinterpret_cast<int32_t*>(out), reinterpret_cast<const int32_t*>(in), ldout, y0, ymax, x0, xmax, static_cast<const int32_t>(alpha), static_cast<const int32_t>(beta));
 }
 
 #endif // __aarch64__
