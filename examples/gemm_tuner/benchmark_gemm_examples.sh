@@ -299,9 +299,10 @@ function arr_contains() {
 }
 
 #######################################
-# Run all tunable configurations and all input configurations
+# Run a single example with all tunable gemm configurations on all gemm parameters
 # Globals:
 #   OUT_DIR
+#   OUT_EXTENSION
 #   EXAMPLE_BIN_DIR
 #   NUM_ITERATION
 #   GEMM_CONFIGS_FILE
@@ -315,18 +316,71 @@ function run() {
   local example_bin=$1
   echo "Running all configs for ${example_bin}" 1>&2
   local example_args
-  local test_id=1
+  local expr_count=1
+  # Total number of experiment runs scheduled for this session
+  local total_num_experiment
+  local num_params
+  local num_configs
+  num_params=$( wc -l ${GEMM_SHAPES_FILE} | cut -d " " -f 1)
+  num_configs=$( wc -l ${GEMM_CONFIGS_FILE} | cut -d " " -f 1 )
+  (( total_num_experiment=${num_params} * ${num_configs} ))
+  # Time elapsed since the beginning in seconds
+  local time_elapsed_s
+  # Time estimated to finish in seconds
+  local time_est_s
+  echo "Running a total number of ${total_num_experiment} experiments" 1>&2
+
   while read gemm_shape
   do
     while read gemm_config
     do
+      echo "Running..." 1>&2
       example_args="${gemm_shape},${gemm_config}"
-      ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${test_id} --instruments=OPENCL_TIMER_MS
-      (( test_id++ ))
+      # Run experiment
+      ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${expr_count}.${OUT_EXTENSION} --instruments=OPENCL_TIMER_MS
+      # Print progress
+      print_progress ${expr_count} ${total_num_experiment}
+      # Print time statistics
+      time_elapsed_s=$SECONDS
+      echo "Time elapsed since beginning: $(( $time_elapsed_s / 60 ))m $(( $time_elapsed_s % 60 ))s" 1>&2
+      (( time_est_s=(${total_num_experiment} - ${expr_count}) * ${time_elapsed_s} / ${expr_count} ))
+      echo "Time estimated to finish: $(( $time_est_s / 60 ))m $(( $time_est_s % 60 ))s" 1>&2
+      (( expr_count++ ))
+      echo "Done." 1>&2
     done < "${GEMM_CONFIGS_FILE}"
   done < "${GEMM_SHAPES_FILE}"
   echo "Finished running all configs for ${example_bin}" 1>&2
   echo "All results saved to ${OUT_DIR}" 1>&2
+}
+
+#######################################
+# Print the progress of the current session
+# Globals:
+#   None
+# Arguments:
+#   current   Current number of items
+#   total     Total number of items
+# Returns:
+#   None
+#######################################
+function print_progress() {
+  local current
+  local total
+  current=$1
+  total=$2
+  # Width of progress bar
+  local width
+  width=20
+  (( current_width= $width * current / total ))
+  echo -n -e "Progress [" 1>&2
+  for i in $(seq 1 ${width}); do
+    if [[ $i -le ${current_width} ]]; then
+      echo -n "#" 1>&2
+    else
+      echo -n " " 1>&2
+    fi
+  done
+  echo  "] $current / $total Experiments" 1>&2
 }
 
 # Functions }}}
@@ -341,6 +395,8 @@ GEMM_CONFIGS_FILE=""
 STRATEGY_OPTION=""
 # Path to output directory
 OUT_DIR=${DEFAULT_OUT_DIR}
+# Output benchmark result file extension
+OUT_EXTENSION="gemmtuner_benchmark"
 # Toggle help
 HELP=false
 
@@ -394,6 +450,8 @@ arr_contains "${STRATEGY_OPTION}" "${ALL_STRATEGY_OPTIONS[@]}" ||
 mkdir ${OUT_DIR}
 
 # Run selected strategy with all configurations
+# Restart the built-in timer
+SECONDS=0
 [ "${STRATEGY_OPTION}" == "native" ] && run $EXAMPLE_BIN_NATIVE
 [ "${STRATEGY_OPTION}" == "reshaped_rhs_only" ] && run $EXAMPLE_BIN_RESHAPED_RHS_ONLY
 [ "${STRATEGY_OPTION}" == "reshaped" ] && run $EXAMPLE_BIN_RESHAPED
