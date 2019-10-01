@@ -85,6 +85,27 @@ ITensor *IWeightsManager::run(const ITensor *weights, ITransformWeights *weights
         }
     }
 
+    // Check top level weights. If all the transformations are done
+    // mark the weights as unused
+    if(_managed_weights_parents.find(weights) == _managed_weights_parents.end())
+    {
+        auto item           = _managed_weights.find(weights);
+        bool mark_as_unused = true;
+        for(auto it : item->second)
+        {
+            if(!it->is_reshape_run())
+            {
+                mark_as_unused = false;
+                break;
+            }
+        }
+
+        if(mark_as_unused)
+        {
+            weights->mark_as_unused();
+        }
+    }
+
     return weights_tensor;
 }
 

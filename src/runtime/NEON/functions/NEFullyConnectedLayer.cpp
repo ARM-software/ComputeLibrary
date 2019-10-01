@@ -426,7 +426,6 @@ void NEFullyConnectedLayer::prepare()
         {
             if(_weights_manager && _weights_manager->are_weights_managed(_original_weights))
             {
-                cur_weights->mark_as_unused();
                 cur_weights = _weights_manager->run(cur_weights, &_reshape_weights_managed_function);
             }
             else
@@ -455,9 +454,9 @@ void NEFullyConnectedLayer::prepare()
             {
                 _converted_weights_output.allocator()->allocate();
                 _convert_weights.run();
+                cur_weights->mark_as_unused();
             }
 
-            cur_weights->mark_as_unused();
             _are_weights_converted = true;
         }
 
