@@ -120,6 +120,7 @@ public:
 
 private:
     MemoryGroup                                             _memory_group;
+    IWeightsManager                                        *_weights_manager;
     bool                                                    _is_prepared{ false };
     bool                                                    _pretranspose_b{ false };
     Window                                                  _block_walker{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,7 @@ public:
      */
     virtual bool do_setup(int argc, char **argv)
     {
+        ARM_COMPUTE_UNUSED(argc, argv);
         return true;
     };
     /** Run the example. */
@@ -67,6 +68,7 @@ public:
      */
     virtual void print_parameters(test::framework::Printer &printer)
     {
+        ARM_COMPUTE_UNUSED(printer);
     }
 
     /** Default destructor */

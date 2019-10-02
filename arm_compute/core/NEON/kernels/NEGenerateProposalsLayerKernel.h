@@ -75,7 +75,7 @@ public:
 
 private:
     template <typename T>
-    void internal_run(const Window &window, const ThreadInfo &info);
+    void internal_run(const Window &window);
 
     const ITensor     *_anchors;
     ITensor           *_all_anchors;

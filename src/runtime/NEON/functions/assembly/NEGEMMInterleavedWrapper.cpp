@@ -171,17 +171,21 @@ public:
     }
     void mark_as_reshaped(unsigned int index) override
     {
+        ARM_COMPUTE_UNUSED(index);
     }
     void wait_for_reshaping(unsigned int index) override
     {
+        ARM_COMPUTE_UNUSED(index);
     }
     void mark_as_unused(unsigned int index) override
     {
+        ARM_COMPUTE_UNUSED(index);
     }
 };
 
 NEGEMMInterleavedWrapper::NEGEMMInterleavedWrapper(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
-    : _memory_group(std::move(memory_manager))
+    : _memory_group(std::move(memory_manager)),
+      _weights_manager(weights_manager)
 {
 }
 
@@ -195,6 +199,7 @@ void NEGEMMInterleavedWrapper::run()
 
 void NEGEMMInterleavedWrapper::prepare()
 {
+    ARM_COMPUTE_UNUSED(_weights_manager);
     if(!_is_prepared)
     {
         if(_pretranspose_b)

@@ -32,7 +32,10 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Random.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "libnpy/npy.hpp"
+#pragma GCC diagnostic pop
 #include "tests/RawTensor.h"
 #include "tests/TensorCache.h"
 #include "tests/Utils.h"
@@ -467,7 +470,7 @@ void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std:
         window.set(1, Window::Dimension(-padding_size.top, tensor.shape()[1] + padding_size.bottom, 1));
     }
 
-    std::mt19937 gen(_seed);
+    std::mt19937 gen(_seed + seed_offset);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {

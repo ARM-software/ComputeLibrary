@@ -219,7 +219,7 @@ void run_dequantization_qasymm8_per_channel_nhwc(const ITensor *input, ITensor *
     Iterator in(input, win);
     Iterator out(output, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto in_ptr  = reinterpret_cast<const uint8_t *>(in.ptr());
         const auto out_ptr = reinterpret_cast<T *>(out.ptr());

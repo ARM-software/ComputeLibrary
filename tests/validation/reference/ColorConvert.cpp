@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -170,7 +170,7 @@ std::vector<SimpleTensor<T>> color_convert(const TensorShape &shape, const std::
             {
                 case Format::RGB888:
                 case Format::RGBA8888:
-                    colorconvert_helper::detail::colorconvert_iyuv_to_rgb(shape, tensor_planes, dst[0]);
+                    colorconvert_helper::detail::colorconvert_iyuv_to_rgb(tensor_planes, dst[0]);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Not Supported");
@@ -185,7 +185,7 @@ std::vector<SimpleTensor<T>> color_convert(const TensorShape &shape, const std::
             {
                 case Format::RGB888:
                 case Format::RGBA8888:
-                    colorconvert_helper::detail::colorconvert_nv12_to_rgb(shape, src_format, tensor_planes, dst[0]);
+                    colorconvert_helper::detail::colorconvert_nv12_to_rgb(src_format, tensor_planes, dst[0]);
                     break;
                 case Format::IYUV:
                     colorconvert_helper::detail::colorconvert_nv_to_iyuv(tensor_planes, src_format, dst);

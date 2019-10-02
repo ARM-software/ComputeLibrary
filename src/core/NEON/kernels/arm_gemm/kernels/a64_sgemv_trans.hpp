@@ -49,7 +49,7 @@ public:
 
     kern_type kernel=a64_sgemv_trans;
 
-    sgemv_trans(const CPUInfo *ci) { }
+    sgemv_trans(const CPUInfo *ci) { UNUSED(ci); }
 };
 
 } // namespace arm_gemm

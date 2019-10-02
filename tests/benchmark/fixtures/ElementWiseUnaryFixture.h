@@ -44,7 +44,7 @@ class ElementWiseUnaryBenchmarkFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, DataType input_data_type, ElementWiseUnary op)
+    void setup(TensorShape input_shape, DataType input_data_type)
     {
         src = create_tensor<TensorType>(input_shape, input_data_type);
         dst = create_tensor<TensorType>(input_shape, input_data_type);
@@ -80,7 +80,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
-        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::RSQRT);
+        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type);
     }
 };
 
@@ -91,7 +91,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
-        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::EXP);
+        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type);
     }
 };
 
@@ -102,7 +102,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
-        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::NEG);
+        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type);
     }
 };
 
@@ -113,7 +113,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
-        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::LOG);
+        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type);
     }
 };
 
@@ -124,7 +124,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
-        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::ABS);
+        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type);
     }
 };
 
@@ -135,7 +135,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type)
     {
-        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::SIN);
+        ElementWiseUnaryBenchmarkFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type);
     }
 };
 } // namespace validation

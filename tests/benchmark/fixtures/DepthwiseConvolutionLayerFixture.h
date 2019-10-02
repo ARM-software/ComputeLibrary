@@ -47,6 +47,8 @@ public:
     template <typename...>
     void setup(TensorShape src_shape, Size2D kernel_size, PadStrideInfo info, Size2D Dilation, DataType data_type, int batches)
     {
+        ARM_COMPUTE_UNUSED(Dilation);
+
         // Get shapes
         TensorShape weights_shape(kernel_size.width, kernel_size.height);
 

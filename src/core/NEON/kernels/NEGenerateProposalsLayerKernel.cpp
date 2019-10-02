@@ -100,7 +100,7 @@ Status NEComputeAllAnchorsKernel::validate(const ITensorInfo *anchors, const ITe
 }
 
 template <>
-void NEComputeAllAnchorsKernel::internal_run<int16_t>(const Window &window, const ThreadInfo &info)
+void NEComputeAllAnchorsKernel::internal_run<int16_t>(const Window &window)
 {
     Iterator all_anchors_it(_all_anchors, window);
     Iterator anchors_it(_all_anchors, window);
@@ -136,7 +136,7 @@ void NEComputeAllAnchorsKernel::internal_run<int16_t>(const Window &window, cons
 }
 
 template <typename T>
-void NEComputeAllAnchorsKernel::internal_run(const Window &window, const ThreadInfo &info)
+void NEComputeAllAnchorsKernel::internal_run(const Window &window)
 {
     Iterator all_anchors_it(_all_anchors, window);
     Iterator anchors_it(_all_anchors, window);
@@ -174,19 +174,19 @@ void NEComputeAllAnchorsKernel::run(const Window &window, const ThreadInfo &info
     {
         case DataType::QSYMM16:
         {
-            internal_run<int16_t>(window, info);
+            internal_run<int16_t>(window);
             break;
         }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {
-            internal_run<float16_t>(window, info);
+            internal_run<float16_t>(window);
             break;
         }
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F32:
         {
-            internal_run<float>(window, info);
+            internal_run<float>(window);
             break;
         }
         default:

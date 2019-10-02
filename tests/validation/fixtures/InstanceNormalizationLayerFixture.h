@@ -48,7 +48,7 @@ public:
     void setup(TensorShape shape, DataType data_type, DataLayout data_layout, bool in_place)
     {
         _target    = compute_target(shape, data_type, data_layout, in_place);
-        _reference = compute_reference(shape, data_type, data_layout);
+        _reference = compute_reference(shape, data_type);
     }
 
 protected:
@@ -118,7 +118,7 @@ protected:
         }
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, DataLayout data_layout)
+    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type)
     {
         std::mt19937                          gen(library->seed());
         std::uniform_real_distribution<float> dist_gamma(1.f, 2.f);

@@ -68,6 +68,7 @@ public:
     kern_type kernel = a64_gemm_u8_4x4;
 
     gemm_u8_4x4(const CPUInfo *ci) {
+        UNUSED(ci);
     }
 };
 

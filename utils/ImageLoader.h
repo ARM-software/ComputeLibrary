@@ -203,7 +203,7 @@ public:
                     unsigned char green = 0;
                     unsigned char blue  = 0;
 
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         red   = _feeder->get();
                         green = _feeder->get();
@@ -225,7 +225,7 @@ public:
                     Iterator out(&image, window);
                     size_t   row_size = _width * image.info()->element_size();
 
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         _feeder->get_row(out.ptr(), row_size);
                     },
@@ -302,7 +302,7 @@ public:
             unsigned char green = 0;
             unsigned char blue  = 0;
 
-            execute_window_loop(window, [&](const Coordinates & id)
+            execute_window_loop(window, [&](const Coordinates &)
             {
                 red   = _feeder->get();
                 green = _feeder->get();
@@ -352,6 +352,7 @@ protected:
     /** Validate metadata */
     virtual void validate_info(const ITensorInfo *tensor_info)
     {
+        ARM_COMPUTE_UNUSED(tensor_info);
     }
 
 protected:
@@ -418,7 +419,7 @@ protected:
 
         ARM_COMPUTE_ERROR_ON_MSG((end_position - current_position) < tensor_info->tensor_shape().total_size(),
                                  "Not enough data in file");
-        ARM_COMPUTE_UNUSED(end_position);
+        ARM_COMPUTE_UNUSED(end_position, tensor_info);
     }
 
 private:

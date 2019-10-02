@@ -65,7 +65,7 @@ struct generate_array<T, 0, val, vals...>
     static constexpr std::array<T, sizeof...(vals)> value{ vals... };
 };
 
-template <typename T, T val, T... vals>
+template <typename T, T                  val, T... vals>
 constexpr std::array<T, sizeof...(vals)> generate_array<T, 0, val, vals...>::value;
 /** @endcond */
 
@@ -83,6 +83,7 @@ T make_array(Iterator first, index_sequence<S...>)
 template <std::size_t N, typename Iterator>
 std::array<typename std::iterator_traits<Iterator>::value_type, N> make_array(Iterator first, Iterator last)
 {
+    ARM_COMPUTE_UNUSED(last);
     return detail::make_array(first, index_sequence_t<N> {});
 }
 

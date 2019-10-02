@@ -28,7 +28,11 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/runtime/SubTensor.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "utils/ImageLoader.h"
+#pragma GCC diagnostic pop
 #include "utils/Utils.h"
 
 #include <iomanip>

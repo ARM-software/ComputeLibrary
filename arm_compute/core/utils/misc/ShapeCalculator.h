@@ -859,6 +859,7 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
  */
 inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, const GEMMReshapeInfo &gemm_info)
 {
+    ARM_COMPUTE_UNUSED(input1);
     ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
 
     const bool reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d();
@@ -896,6 +897,7 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
  */
 inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, const GEMMKernelInfo &gemm_info)
 {
+    ARM_COMPUTE_UNUSED(input1);
     ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
 
     const bool         reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d;

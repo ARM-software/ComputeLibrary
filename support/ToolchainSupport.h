@@ -71,6 +71,17 @@ inline int stoi(const std::string &str, std::size_t *pos = 0, NumericBase base =
     }
     ss << str;
     ss >> x;
+
+    if(pos)
+    {
+        std::string       s;
+        std::stringstream ss_p;
+
+        ss_p << x;
+        ss_p >> s;
+        *pos = s.length();
+    }
+
     return x;
 }
 
@@ -96,6 +107,17 @@ inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, Numeric
     }
     stream << str;
     stream >> value;
+
+    if(pos)
+    {
+        std::string       s;
+        std::stringstream ss_p;
+
+        ss_p << value;
+        ss_p >> s;
+        *pos = s.length();
+    }
+
     return value;
 }
 

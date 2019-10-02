@@ -129,11 +129,11 @@ if not env['exceptions']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_EXCEPTIONS_DISABLED'])
     env.Append(CXXFLAGS = ['-fno-exceptions'])
 
-env.Append(CXXFLAGS = ['-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
-         '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
+env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
+         '-Wextra','-pedantic','-Wdisabled-optimization','-Wformat=2', '-Wno-format-nonliteral',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
          '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
-         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow'])
+         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings','-Wno-strict-overflow'])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 

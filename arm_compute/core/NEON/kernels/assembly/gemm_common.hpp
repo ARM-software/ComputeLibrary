@@ -25,6 +25,8 @@
 
 #include <cstddef>
 
+#define UNUSED(x)   (void)(x)
+
 namespace arm_gemm {
 
 // Abstract class for the GEMM/GEMV functions.
@@ -95,7 +97,7 @@ public:
 
     /*** "Quantized bias" interface (optional) ***/
     /* Set the bias vector for quantized GEMMs */
-    virtual void set_quantized_bias(const int32_t *bias) { }
+    virtual void set_quantized_bias(const int32_t *bias) { UNUSED(bias); }
 
     // Destructor
     virtual ~IGemmCommon() { }

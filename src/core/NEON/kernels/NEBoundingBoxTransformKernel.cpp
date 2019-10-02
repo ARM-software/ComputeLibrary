@@ -79,6 +79,7 @@ Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxe
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *boxes, ITensorInfo *pred_boxes, ITensorInfo *deltas, const BoundingBoxTransformInfo &bb_info)
 {
+    ARM_COMPUTE_UNUSED(bb_info);
     ARM_COMPUTE_ERROR_ON_NULLPTR(boxes, pred_boxes);
 
     auto_init_if_empty(*pred_boxes, deltas->clone()->set_data_type(boxes->data_type()).set_quantization_info(boxes->quantization_info()));
@@ -130,7 +131,7 @@ Status NEBoundingBoxTransformKernel::validate(const ITensorInfo *boxes, const IT
 }
 
 template <>
-void NEBoundingBoxTransformKernel::internal_run<uint16_t>(const Window &window, const ThreadInfo &info)
+void NEBoundingBoxTransformKernel::internal_run<uint16_t>(const Window &window)
 {
     const size_t num_classes  = _deltas->info()->tensor_shape()[0] >> 2;
     const size_t deltas_width = _deltas->info()->tensor_shape()[0];
@@ -187,7 +188,7 @@ void NEBoundingBoxTransformKernel::internal_run<uint16_t>(const Window &window, 
 }
 
 template <typename T>
-void NEBoundingBoxTransformKernel::internal_run(const Window &window, const ThreadInfo &info)
+void NEBoundingBoxTransformKernel::internal_run(const Window &window)
 {
     const size_t num_classes  = _deltas->info()->tensor_shape()[0] >> 2;
     const size_t deltas_width = _deltas->info()->tensor_shape()[0];
@@ -242,24 +243,25 @@ void NEBoundingBoxTransformKernel::internal_run(const Window &window, const Thre
 
 void NEBoundingBoxTransformKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     switch(_boxes->info()->data_type())
     {
         case DataType::F32:
         {
-            internal_run<float>(window, info);
+            internal_run<float>(window);
             break;
         }
         case DataType::QASYMM16:
         {
-            internal_run<uint16_t>(window, info);
+            internal_run<uint16_t>(window);
             break;
         }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {
-            internal_run<float16_t>(window, info);
+            internal_run<float16_t>(window);
             break;
         }
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

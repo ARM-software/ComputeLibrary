@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ public:
         const unsigned int transpose_w = 16 / data_size_from_type(data_type);
         const TensorShape  shape_b(static_cast<size_t>(y * transpose_w), static_cast<size_t>(std::ceil(x / static_cast<float>(transpose_w))));
         _target    = compute_target(shape_a, shape_b, data_type);
-        _reference = compute_reference(shape_a, shape_b, data_type);
+        _reference = compute_reference(shape_a, data_type);
     }
 
 protected:
@@ -106,7 +106,7 @@ protected:
         return b;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &shape_a, DataType data_type)
     {
         // Create reference
         SimpleTensor<T> a{ shape_a, data_type, 1 };

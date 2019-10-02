@@ -139,7 +139,7 @@ public:
                                           a.stride(1), first_m, last_m, wl._k0, wl._kmax, _transpose_a);
             }
         });
-        auto on_new_row_size = [&](unsigned int start, unsigned int end)
+        auto on_new_row_size = [&](unsigned int, unsigned int end)
         {
             last_m = std::min(end, _Msize);
         };

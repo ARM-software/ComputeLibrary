@@ -155,22 +155,22 @@ public:
                      .set_name("MatMul_3_bias");
 
         // LSTM Block
-        std::pair<SubStream, SubStream> new_state_1  = add_lstm_cell(data_path, unstack_nid, 0, previous_state, previous_state, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_2  = add_lstm_cell(data_path, unstack_nid, 1, new_state_1.first, new_state_1.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_3  = add_lstm_cell(data_path, unstack_nid, 2, new_state_2.first, new_state_2.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_4  = add_lstm_cell(data_path, unstack_nid, 3, new_state_3.first, new_state_3.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_5  = add_lstm_cell(data_path, unstack_nid, 4, new_state_4.first, new_state_4.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_6  = add_lstm_cell(data_path, unstack_nid, 5, new_state_5.first, new_state_5.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_7  = add_lstm_cell(data_path, unstack_nid, 6, new_state_6.first, new_state_6.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_8  = add_lstm_cell(data_path, unstack_nid, 7, new_state_7.first, new_state_7.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_9  = add_lstm_cell(data_path, unstack_nid, 8, new_state_8.first, new_state_8.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_10 = add_lstm_cell(data_path, unstack_nid, 9, new_state_9.first, new_state_9.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_11 = add_lstm_cell(data_path, unstack_nid, 10, new_state_10.first, new_state_10.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_12 = add_lstm_cell(data_path, unstack_nid, 11, new_state_11.first, new_state_11.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_13 = add_lstm_cell(data_path, unstack_nid, 12, new_state_12.first, new_state_12.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_14 = add_lstm_cell(data_path, unstack_nid, 13, new_state_13.first, new_state_13.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_15 = add_lstm_cell(data_path, unstack_nid, 14, new_state_14.first, new_state_14.second, add_y, lstm_fc_weights, lstm_fc_bias);
-        std::pair<SubStream, SubStream> new_state_16 = add_lstm_cell(data_path, unstack_nid, 15, new_state_15.first, new_state_15.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_1  = add_lstm_cell(unstack_nid, 0, previous_state, previous_state, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_2  = add_lstm_cell(unstack_nid, 1, new_state_1.first, new_state_1.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_3  = add_lstm_cell(unstack_nid, 2, new_state_2.first, new_state_2.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_4  = add_lstm_cell(unstack_nid, 3, new_state_3.first, new_state_3.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_5  = add_lstm_cell(unstack_nid, 4, new_state_4.first, new_state_4.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_6  = add_lstm_cell(unstack_nid, 5, new_state_5.first, new_state_5.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_7  = add_lstm_cell(unstack_nid, 6, new_state_6.first, new_state_6.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_8  = add_lstm_cell(unstack_nid, 7, new_state_7.first, new_state_7.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_9  = add_lstm_cell(unstack_nid, 8, new_state_8.first, new_state_8.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_10 = add_lstm_cell(unstack_nid, 9, new_state_9.first, new_state_9.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_11 = add_lstm_cell(unstack_nid, 10, new_state_10.first, new_state_10.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_12 = add_lstm_cell(unstack_nid, 11, new_state_11.first, new_state_11.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_13 = add_lstm_cell(unstack_nid, 12, new_state_12.first, new_state_12.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_14 = add_lstm_cell(unstack_nid, 13, new_state_13.first, new_state_13.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_15 = add_lstm_cell(unstack_nid, 14, new_state_14.first, new_state_14.second, add_y, lstm_fc_weights, lstm_fc_bias);
+        std::pair<SubStream, SubStream> new_state_16 = add_lstm_cell(unstack_nid, 15, new_state_15.first, new_state_15.second, add_y, lstm_fc_weights, lstm_fc_bias);
 
         // Concatenate new states on height
         const int axis = 1;
@@ -241,8 +241,7 @@ private:
         return Status{};
     }
 
-    std::pair<SubStream, SubStream> add_lstm_cell(const std::string &data_path,
-                                                  NodeID       unstack_nid,
+    std::pair<SubStream, SubStream> add_lstm_cell(NodeID unstack_nid,
                                                   unsigned int unstack_idx,
                                                   SubStream    previous_state_c,
                                                   SubStream    previous_state_h,

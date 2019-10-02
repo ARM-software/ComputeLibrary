@@ -165,7 +165,7 @@ public:
             // Merge the result with the other blocks' results:
             strat.transforms.Merge(c(0, 0, batch, wl._multi), tmp_c(0, info.thread_id), c.stride(1), y, ymax, wl._x0, wl._xmax, _alpha, (wl._k0 == 0 ? _beta : static_cast<typename strategy::result_type>(1)));
         });
-        auto on_new_row_size = [&](unsigned int start, unsigned int end)
+        auto on_new_row_size = [&](unsigned int, unsigned int)
         {
             //Nothing to do
         };

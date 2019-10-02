@@ -65,7 +65,7 @@ public:
 
     kern_type kernel = a64_gemm_s16_asimd_12x8;
 
-    gemm_s16_12x8(const CPUInfo *ci) { }
+    gemm_s16_12x8(const CPUInfo *ci) { UNUSED(ci); }
 };
 
 } // namespace arm_gemm

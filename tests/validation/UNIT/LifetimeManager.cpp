@@ -46,6 +46,7 @@ class MockMemoryManageable : public IMemoryManageable
 public:
     void associate_memory_group(IMemoryGroup *memory_group) override
     {
+        ARM_COMPUTE_UNUSED(memory_group);
     }
 };
 /** Creates a lifetime of three objects where the two of them can share the same underlying within the given scope

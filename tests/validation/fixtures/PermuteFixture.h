@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,9 +46,9 @@ class PermuteValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, DataLayout input_layout, PermutationVector perm, DataType data_type)
+    void setup(TensorShape input_shape, PermutationVector perm, DataType data_type)
     {
-        _target    = compute_target(input_shape, input_layout, data_type, perm);
+        _target    = compute_target(input_shape, data_type, perm);
         _reference = compute_reference(input_shape, data_type, perm);
     }
 
@@ -59,7 +59,7 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &input_shape, DataLayout input_layout, DataType data_type, PermutationVector perm)
+    TensorType compute_target(const TensorShape &input_shape, DataType data_type, PermutationVector perm)
     {
         // Permute shapes
         TensorShape output_shape = input_shape;

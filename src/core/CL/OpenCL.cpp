@@ -22,7 +22,10 @@
  * SOFTWARE.
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "arm_compute/core/CL/OpenCL.h"
+#pragma GCC diagnostic pop
 
 #include <dlfcn.h>
 #include <iostream>

@@ -518,6 +518,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const arm_com
                                                                    bool                                         is_validation = false,
                                                                    std::ostream                                &output_stream = std::cout)
 {
+    ARM_COMPUTE_UNUSED(is_validation);
     if(!graph_parameters.validation_file.empty())
     {
         return arm_compute::support::cpp14::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file,
@@ -551,6 +552,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_detection_output_accessor(con
                                                                              bool                                         is_validation = false,
                                                                              std::ostream                                &output_stream = std::cout)
 {
+    ARM_COMPUTE_UNUSED(is_validation);
     if(!graph_parameters.validation_file.empty())
     {
         return arm_compute::support::cpp14::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file,

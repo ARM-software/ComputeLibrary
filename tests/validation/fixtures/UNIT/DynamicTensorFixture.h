@@ -104,6 +104,7 @@ public:
     }
     void configure(ITensorType *src, ITensorType *dst)
     {
+        ARM_COMPUTE_UNUSED(src, dst);
     }
     void run()
     {

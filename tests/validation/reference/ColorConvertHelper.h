@@ -306,7 +306,7 @@ inline void colorconvert_yuyv_to_rgb(const SimpleTensor<T> src, const Format for
 }
 
 template <typename T>
-inline void colorconvert_iyuv_to_rgb(const TensorShape &shape, const std::vector<SimpleTensor<T>> &tensor_planes, SimpleTensor<T> &dst)
+inline void colorconvert_iyuv_to_rgb(const std::vector<SimpleTensor<T>> &tensor_planes, SimpleTensor<T> &dst)
 {
     SimpleTensor<T> yvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
     SimpleTensor<T> uvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
@@ -361,7 +361,7 @@ inline void colorconvert_iyuv_to_rgb(const TensorShape &shape, const std::vector
 }
 
 template <typename T>
-inline void colorconvert_nv12_to_rgb(const TensorShape &shape, const Format format, const std::vector<SimpleTensor<T>> &tensor_planes, SimpleTensor<T> &dst)
+inline void colorconvert_nv12_to_rgb(const Format format, const std::vector<SimpleTensor<T>> &tensor_planes, SimpleTensor<T> &dst)
 {
     SimpleTensor<T> yvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);
     SimpleTensor<T> uvec(TensorShape{ tensor_planes[0].shape().x() / 2, tensor_planes[0].shape().y() }, Format::U8);

@@ -32,6 +32,7 @@ namespace
 #if defined(ARM_COMPUTE_ASSERTS_ENABLED)
 void printf_callback(const char *buffer, unsigned int len, size_t complete, void *user_data)
 {
+    ARM_COMPUTE_UNUSED(complete, user_data);
     printf("%.*s", len, buffer);
 }
 #endif /* defined(ARM_COMPUTE_ASSERTS_ENABLED) */

@@ -146,6 +146,7 @@ public:
 
     // Execute
     void execute(unsigned int start, unsigned int end, int threadid) override {
+        UNUSED(threadid);
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif

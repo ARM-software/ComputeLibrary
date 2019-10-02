@@ -30,7 +30,10 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/Tensor.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "libnpy/npy.hpp"
+#pragma GCC diagnostic pop
 #include "support/ToolchainSupport.h"
 
 #ifdef ARM_COMPUTE_CL
@@ -79,6 +82,7 @@ public:
      */
     virtual bool do_setup(int argc, char **argv)
     {
+        ARM_COMPUTE_UNUSED(argc, argv);
         return true;
     };
     /** Run the example. */
@@ -570,7 +574,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
                 arm_compute::Iterator in(&tensor, window);
 
-                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
+                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
                 {
                     const unsigned char value = *in.ptr();
 
@@ -588,7 +592,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
                 arm_compute::Iterator in(&tensor, window);
 
-                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
+                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
                 {
                     fs.write(reinterpret_cast<std::fstream::char_type *>(in.ptr()), width * tensor.info()->element_size());
                 },
@@ -653,7 +657,7 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 
         arm_compute::Iterator in(&tensor, window);
 
-        arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
+        arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
         {
             stream.write(reinterpret_cast<const char *>(in.ptr()), sizeof(typestring_type));
         },
@@ -705,7 +709,7 @@ void load_trained_data(T &tensor, const std::string &filename)
 
         arm_compute::Iterator in(&tensor, window);
 
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             fs.read(reinterpret_cast<std::fstream::char_type *>(in.ptr()), tensor.info()->tensor_shape()[0] * tensor.info()->element_size());
         },
@@ -739,7 +743,7 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
         {
             std::uniform_real_distribution<float> dist(lower_bound, upper_bound);
 
-            execute_window_loop(window, [&](const Coordinates & id)
+            execute_window_loop(window, [&](const Coordinates &)
             {
                 *reinterpret_cast<half *>(it.ptr()) = (half)dist(gen);
             },
@@ -751,7 +755,7 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
         {
             std::uniform_real_distribution<float> dist(lower_bound, upper_bound);
 
-            execute_window_loop(window, [&](const Coordinates & id)
+            execute_window_loop(window, [&](const Coordinates &)
             {
                 *reinterpret_cast<float *>(it.ptr()) = dist(gen);
             },
@@ -803,7 +807,7 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2, T tolerance)
     Iterator itensor1(&tensor1, window);
     Iterator itensor2(&tensor2, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         if(std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > tolerance)
         {

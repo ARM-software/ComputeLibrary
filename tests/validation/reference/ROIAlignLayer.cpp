@@ -132,6 +132,8 @@ SimpleTensor<float> convert_rois_from_asymmetric(SimpleTensor<uint16_t> rois)
 template <typename T, typename TRois>
 SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<TRois> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
 {
+    ARM_COMPUTE_UNUSED(output_qinfo);
+
     const size_t values_per_roi = rois.shape()[0];
     const size_t num_rois       = rois.shape()[1];
     DataType     dst_data_type  = src.data_type();

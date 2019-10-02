@@ -48,6 +48,8 @@ public:
     void set_arrays(const To *A, const int lda, const int A_batch_stride, const int A_multi_stride,
                     const To *B, const int ldb, const int B_multi_stride,
                           Tr *C, const int ldc, const int C_batch_stride, const int C_multi_stride) override {
+        UNUSED(lda);
+        UNUSED(ldc);
         /* A and C's batch stride becomes their new row stride.  New batch stride is 0 as nbatches for subgemm is always 1. */
         _subgemm->set_arrays(A, A_batch_stride, 0, A_multi_stride,
                              B, ldb, B_multi_stride,

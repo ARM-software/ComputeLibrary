@@ -51,8 +51,9 @@ public:
     template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type)
     {
-        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type);
-        _reference = compute_reference(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type);
+        ARM_COMPUTE_UNUSED(pretranspose);
+        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type);
+        _reference = compute_reference(shape_a, shape_b, output_shape, alpha, beta, data_type);
     }
 
 protected:
@@ -74,7 +75,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, const TensorShape &output_shape, float alpha, float beta,
-                              bool pretranspose, DataType data_type)
+                              DataType data_type)
     {
         // Create tensors
         TensorType a   = create_tensor<TensorType>(shape_a, data_type, 1);
@@ -124,7 +125,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, const TensorShape &output_shape, float alpha, float beta,
+    SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &output_shape, float alpha, float beta,
                                       DataType data_type)
     {
         TensorShape shape_a_to_use = shape_a;
@@ -183,7 +184,7 @@ public:
                                      broadcast_bias ? 1 : batch_size);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, fp16_mixed_precision, act_info, gpu_arch);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -244,7 +245,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -289,6 +290,8 @@ public:
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, bool broadcast_bias, bool fp16_mixed_precision,
                const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch)
     {
+        ARM_COMPUTE_UNUSED(broadcast_bias);
+
         // In case of GEMM3D, m is the product between m_w and m_h
         const unsigned int m = m_w * m_h;
 
@@ -298,7 +301,7 @@ public:
         const TensorShape bias_shape(n, 1, 1);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, fp16_mixed_precision, act_info, gpu_arch);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -355,7 +358,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -421,7 +424,7 @@ public:
                                      broadcast_bias ? 1 : batch_size);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, fp16_mixed_precision, act_info, gpu_arch);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -494,7 +497,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -539,6 +542,8 @@ public:
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, float alpha, float beta, unsigned int v0, unsigned int h0, bool broadcast_bias,
                bool fp16_mixed_precision, const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch)
     {
+        ARM_COMPUTE_UNUSED(broadcast_bias);
+
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = 4;
         lhs_info.k0         = 4;
@@ -562,7 +567,7 @@ public:
         const TensorShape bias_shape(n, 1, 1);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, fp16_mixed_precision, act_info, gpu_arch);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -631,7 +636,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -697,7 +702,7 @@ public:
                                      broadcast_bias ? 1 : batch_size);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -778,7 +783,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -854,7 +859,7 @@ public:
         const TensorShape bias_shape(n, 1, 1);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -931,7 +936,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -1001,7 +1006,7 @@ public:
                                      broadcast_bias ? 1 : batch_size);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -1075,7 +1080,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -1140,7 +1145,7 @@ public:
         const TensorShape bias_shape(n, 1, 1);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -1211,7 +1216,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -1271,7 +1276,7 @@ public:
                                      broadcast_bias ? 1 : batch_size);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -1337,7 +1342,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
@@ -1399,7 +1404,7 @@ public:
         const TensorShape bias_shape(n, 1, 1);
 
         _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -1463,7 +1468,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
                                       const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;

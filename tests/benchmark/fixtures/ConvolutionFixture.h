@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,7 +73,7 @@ public:
         dst = create_tensor<TensorType>(src_shape, output_data_type);
 
         // Configure function
-        configure_target(convolution_func, src, dst, conv.data(), scale, border_mode, constant_border_value);
+        configure_target(src, dst, conv.data(), scale, border_mode, constant_border_value);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -96,7 +96,7 @@ public:
     }
 
 protected:
-    virtual void configure_target(Function &func, TensorType &src, TensorType &dst, const int16_t *conv, uint32_t scale,
+    virtual void configure_target(TensorType &src, TensorType &dst, const int16_t *conv, uint32_t scale,
                                   BorderMode border_mode, uint8_t border_value) = 0;
 
 protected:
@@ -122,7 +122,7 @@ public:
     }
 
 protected:
-    void configure_target(Function &func, TensorType &src, TensorType &dst, const int16_t *conv, uint32_t scale,
+    void configure_target(TensorType &src, TensorType &dst, const int16_t *conv, uint32_t scale,
                           BorderMode border_mode, uint8_t constant_border_value)
     {
         this->convolution_func.configure(&src, &dst, conv, scale, border_mode, constant_border_value);
@@ -141,7 +141,7 @@ public:
     }
 
 protected:
-    void configure_target(Function &func, TensorType &src, TensorType &dst, const int16_t *conv, uint32_t scale,
+    void configure_target(TensorType &src, TensorType &dst, const int16_t *conv, uint32_t scale,
                           BorderMode border_mode, uint8_t constant_border_value)
     {
         this->convolution_func.configure(&src, &dst, conv, this->_width, this->_height, scale, border_mode, constant_border_value);
@@ -160,7 +160,7 @@ public:
     }
 
 protected:
-    void configure_target(Function &func, TensorType &src, TensorType &dst, const int16_t *conv, uint32_t scale,
+    void configure_target(TensorType &src, TensorType &dst, const int16_t *conv, uint32_t scale,
                           BorderMode border_mode, uint8_t constant_border_value)
     {
         this->convolution_func.configure(&src, &dst, conv, scale, border_mode, constant_border_value);

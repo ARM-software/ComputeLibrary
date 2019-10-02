@@ -81,8 +81,6 @@ protected:
             default:
             {
                 ARM_COMPUTE_ERROR("Not supported");
-                library->fill_tensor_uniform(tensor, i);
-                break;
             }
         }
     }
@@ -168,7 +166,7 @@ public:
     {
         ARM_COMPUTE_UNUSED(dilation);
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, info, data_type, act_info);
     }
 
 protected:
@@ -192,8 +190,6 @@ protected:
             default:
             {
                 ARM_COMPUTE_ERROR("Not supported");
-                library->fill_tensor_uniform(tensor, i);
-                break;
             }
         }
     }
@@ -247,7 +243,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const PadStrideInfo &info,
                                       DataType data_type, ActivationLayerInfo act_info)
     {
         // Create reference
@@ -332,7 +328,7 @@ public:
         TensorShape output_shape = compute_winograd_input_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
 
         _target    = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
-        _reference = compute_reference(input_shape, output_shape, winograd_info, data_layout, data_type);
+        _reference = compute_reference(input_shape, output_shape, winograd_info, data_type);
     }
 
 protected:
@@ -351,8 +347,6 @@ protected:
             default:
             {
                 ARM_COMPUTE_ERROR("Not supported");
-                library->fill_tensor_uniform(tensor, i);
-                break;
             }
         }
     }
@@ -390,7 +384,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataType data_type)
     {
         // Create reference
         SimpleTensor<T> src{ input_shape, data_type, 1, QuantizationInfo() };
@@ -416,7 +410,7 @@ public:
         TensorShape  output_shape = compute_winograd_filter_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
 
         _target    = compute_target(input_shape, output_shape, winograd_info, data_layout, data_type);
-        _reference = compute_reference(input_shape, output_shape, winograd_info, data_layout, data_type);
+        _reference = compute_reference(input_shape, output_shape, winograd_info, data_type);
     }
 
 protected:
@@ -435,8 +429,6 @@ protected:
             default:
             {
                 ARM_COMPUTE_ERROR("Not supported");
-                library->fill_tensor_uniform(tensor, i);
-                break;
             }
         }
     }
@@ -474,7 +466,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataType data_type)
     {
         // Create reference
         SimpleTensor<T> src{ input_shape, data_type, 1, QuantizationInfo() };
@@ -516,8 +508,6 @@ protected:
             default:
             {
                 ARM_COMPUTE_ERROR("Not supported");
-                library->fill_tensor_uniform(tensor, i);
-                break;
             }
         }
     }

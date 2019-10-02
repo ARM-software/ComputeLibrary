@@ -176,103 +176,103 @@ public:
 
 #ifndef DOXYGEN_SKIP_THIS
     // Inherited methods overridden
-    virtual void visit(INode &n) override
+    virtual void visit(INode &) override
     {
         default_visit();
     }
-    virtual void visit(ActivationLayerNode &n) override
+    virtual void visit(ActivationLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(BatchNormalizationLayerNode &n) override
+    virtual void visit(BatchNormalizationLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(ConcatenateLayerNode &n) override
+    virtual void visit(ConcatenateLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(ConstNode &n) override
+    virtual void visit(ConstNode &) override
     {
         default_visit();
     }
-    virtual void visit(ConvolutionLayerNode &n) override
+    virtual void visit(ConvolutionLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(DetectionOutputLayerNode &n) override
+    virtual void visit(DetectionOutputLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(DetectionPostProcessLayerNode &n) override
+    virtual void visit(DetectionPostProcessLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(DepthwiseConvolutionLayerNode &n) override
+    virtual void visit(DepthwiseConvolutionLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(EltwiseLayerNode &n) override
+    virtual void visit(EltwiseLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(FlattenLayerNode &n) override
+    virtual void visit(FlattenLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(FullyConnectedLayerNode &n) override
+    virtual void visit(FullyConnectedLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(FusedConvolutionBatchNormalizationNode &n) override
+    virtual void visit(FusedConvolutionBatchNormalizationNode &) override
     {
         default_visit();
     }
-    virtual void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override
+    virtual void visit(FusedDepthwiseConvolutionBatchNormalizationNode &) override
     {
         default_visit();
     }
-    virtual void visit(InputNode &n) override
+    virtual void visit(InputNode &) override
     {
         default_visit();
     }
-    virtual void visit(NormalizationLayerNode &n) override
+    virtual void visit(NormalizationLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(OutputNode &n) override
+    virtual void visit(OutputNode &) override
     {
         default_visit();
     }
-    virtual void visit(PermuteLayerNode &n) override
+    virtual void visit(PermuteLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(PoolingLayerNode &n) override
+    virtual void visit(PoolingLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(PriorBoxLayerNode &n) override
+    virtual void visit(PriorBoxLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(QuantizationLayerNode &n) override
+    virtual void visit(QuantizationLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(ReshapeLayerNode &n) override
+    virtual void visit(ReshapeLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(SoftmaxLayerNode &n) override
+    virtual void visit(SoftmaxLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(SplitLayerNode &n) override
+    virtual void visit(SplitLayerNode &) override
     {
         default_visit();
     }
-    virtual void visit(StackLayerNode &n) override
+    virtual void visit(StackLayerNode &) override
     {
         default_visit();
     }

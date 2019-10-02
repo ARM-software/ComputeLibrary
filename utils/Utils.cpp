@@ -34,6 +34,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-default"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #pragma GCC diagnostic pop
@@ -313,6 +314,8 @@ void restore_program_cache_from_file(const std::string &filename)
         }
         cache_file.close();
     }
+#else  /* ARM_COMPUTE_CL */
+    ARM_COMPUTE_UNUSED(filename);
 #endif /* ARM_COMPUTE_CL */
 }
 
@@ -347,6 +350,8 @@ void save_program_cache_to_file(const std::string &filename)
             ARM_COMPUTE_ERROR("Cannot open cache file");
         }
     }
+#else  /* ARM_COMPUTE_CL */
+    ARM_COMPUTE_UNUSED(filename);
 #endif /* ARM_COMPUTE_CL */
 }
 } // namespace utils

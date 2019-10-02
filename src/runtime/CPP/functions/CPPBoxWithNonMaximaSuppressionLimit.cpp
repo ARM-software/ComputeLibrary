@@ -196,6 +196,7 @@ void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, co
 Status validate(const ITensorInfo *scores_in, const ITensorInfo *boxes_in, const ITensorInfo *batch_splits_in, const ITensorInfo *scores_out, const ITensorInfo *boxes_out, const ITensorInfo *classes,
                 const ITensorInfo *batch_splits_out, const ITensorInfo *keeps, const ITensorInfo *keeps_size, const BoxNMSLimitInfo info)
 {
+    ARM_COMPUTE_UNUSED(batch_splits_in, batch_splits_out, keeps, keeps_size, info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores_in, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
 

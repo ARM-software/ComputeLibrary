@@ -1,4 +1,4 @@
-# Copyright (c) 2017, 2018 ARM Limited.
+# Copyright (c) 2017-2019 ARM Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -57,12 +57,6 @@ Help(new_options.GenerateHelpText(test_env))
 
 Import("arm_compute_test_framework")
 test_env.Append(LIBS = arm_compute_test_framework)
-
-# Remove warnings from tests
-warnings_to_remove = ['-Wno-deprecated-declarations']
-for warning in warnings_to_remove:
-    if warning in test_env['CXXFLAGS']:
-        test_env['CXXFLAGS'].remove(warning)
 
 # Remove -Wnoexcept from tests
 if 'g++' in test_env['CXX'] and '-Wnoexcept' in test_env['CXXFLAGS']:

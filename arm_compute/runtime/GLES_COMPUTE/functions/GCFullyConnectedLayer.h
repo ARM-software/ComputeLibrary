@@ -94,6 +94,7 @@ private:
     void configure_conv_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
 
     MemoryGroup                         _memory_group;
+    IWeightsManager                    *_weights_manager;
     GCIm2ColKernel                      _im2col_kernel;
     GCFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
     GCGEMMMatrixMultiplyKernel          _mm_kernel;

@@ -805,6 +805,8 @@ inline void sync_tensor_if_necessary(TensorType &tensor)
         t.map();
         t.unmap();
     }
+#else  /* ARM_COMPUTE_GC */
+    ARM_COMPUTE_UNUSED(tensor);
 #endif /* ARM_COMPUTE_GC */
 }
 } // namespace test

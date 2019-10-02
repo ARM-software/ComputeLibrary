@@ -51,7 +51,7 @@ public:
     void setup(TensorShape shape_w, DataType data_type, DataLayout data_layout, bool in_place, bool with_bias, bool with_gamma, bool with_beta)
     {
         std::tie(_target_w, _target_b)       = compute_target(shape_w, data_type, data_layout, in_place, with_bias, with_gamma, with_beta);
-        std::tie(_reference_w, _reference_b) = compute_reference(shape_w, data_type, data_layout, with_bias, with_gamma, with_beta);
+        std::tie(_reference_w, _reference_b) = compute_reference(shape_w, data_type, with_bias, with_gamma, with_beta);
     }
 
 protected:
@@ -138,7 +138,7 @@ protected:
         return std::make_pair(std::move(in_place_w ? w : w_fused), std::move(in_place_b ? b : b_fused));
     }
 
-    std::pair<SimpleTensor<T>, SimpleTensor<T>> compute_reference(TensorShape shape_w, DataType data_type, DataLayout data_layout, bool with_bias, bool with_gamma, bool with_beta)
+    std::pair<SimpleTensor<T>, SimpleTensor<T>> compute_reference(TensorShape shape_w, DataType data_type, bool with_bias, bool with_gamma, bool with_beta)
     {
         const TensorShape shape_v(shape_w[dims_weights - 1]);
 

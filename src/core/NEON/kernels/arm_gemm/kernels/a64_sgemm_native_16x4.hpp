@@ -62,7 +62,7 @@ public:
     kern_type kernel=a64_sgemm_native_16x4;
 
     sgemm_native_16x4(const CPUInfo *ci) {
-
+        UNUSED(ci);
     }
 };
 

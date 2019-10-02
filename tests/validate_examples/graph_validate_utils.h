@@ -405,6 +405,7 @@ public:
                                 arm_compute::test::SimpleTensor<TBias> &bias,
                                 ITensor                                &tensor)
     {
+        ARM_COMPUTE_UNUSED(tensor);
         //Create Input tensors
         src     = arm_compute::test::SimpleTensor<D> { TensorShape(_params.input.width, _params.input.height, _params.input.fm, _params.input.batch), _params.data_type, 1, _params.input.quant_info };
         weights = arm_compute::test::SimpleTensor<D> { TensorShape(_params.weights.width, _params.weights.height, _params.weights.fm), _params.data_type, 1, _params.weights.quant_info };

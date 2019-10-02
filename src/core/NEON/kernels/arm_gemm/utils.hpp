@@ -32,6 +32,8 @@
 // Paranoid option for the above with assert
 // #define UNREACHABLE(why)   assert(0 && why)
 
+#define UNUSED(x)   (void)(x)
+
 template<typename T>
 inline T iceildiv(const T a, const T b) {
     return (a + b - 1) / b;

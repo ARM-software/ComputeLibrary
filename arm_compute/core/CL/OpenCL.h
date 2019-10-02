@@ -37,6 +37,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #if defined(__GNUG__) && __GNUG__ >= 8
 #pragma GCC diagnostic ignored "-Wcatch-value"
 #endif // defined(__GNUG__) && __GNUG__ >= 8

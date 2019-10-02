@@ -32,6 +32,7 @@
 namespace arm_gemm {
 
 void a64_smallK_hybrid_s8s32_dot_4x8_a55(const int8_t *A, int lda, const int8_t *B, int32_t *C, int ldc, int32_t beta, int M, int N, int K) {
+    UNUSED(beta);
     const long loops_count = (N / 4) - 1;
     const long ldab = lda * sizeof(int8_t);
     const long ldcb = ldc * sizeof(int32_t);

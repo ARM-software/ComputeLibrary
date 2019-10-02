@@ -638,6 +638,7 @@ void error_on_format_not_in(const char *function, const char *file, const int li
         return f == object_format;
     }),
     function, file, line, "Format %s not supported by this kernel", string_from_format(object_format).c_str());
+    ARM_COMPUTE_UNUSED(function, format, file, line);
 }
 #define ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(t, ...) ::arm_compute::error_on_format_not_in(__func__, __FILE__, __LINE__, t, __VA_ARGS__)
 

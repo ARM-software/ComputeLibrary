@@ -83,6 +83,7 @@ void validate_node(const INode &node, size_t num_expected_inputs, size_t num_exp
     ARM_COMPUTE_ERROR_ON(TargetInfo::TargetType != node.assigned_target());
     ARM_COMPUTE_ERROR_ON(node.num_inputs() != num_expected_inputs);
     ARM_COMPUTE_ERROR_ON(node.num_outputs() != num_expected_outputs);
+    ARM_COMPUTE_UNUSED(node, num_expected_inputs, num_expected_outputs);
 }
 
 /** Creates a backend activation layer function
@@ -1471,6 +1472,7 @@ std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
 template <typename UpsampleLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_upsample_layer(UpsampleLayerNode &node, GraphContext &ctx)
 {
+    ARM_COMPUTE_UNUSED(ctx);
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info
@@ -1514,6 +1516,7 @@ std::unique_ptr<IFunction> create_upsample_layer(UpsampleLayerNode &node, GraphC
 template <typename YOLOlayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_yolo_layer(YOLOLayerNode &node, GraphContext &ctx)
 {
+    ARM_COMPUTE_UNUSED(ctx);
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info
