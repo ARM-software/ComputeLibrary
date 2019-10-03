@@ -58,8 +58,8 @@ __kernel void instance_normalization(
 #endif /* IN_PLACE */
 )
 {
-    DATA_TYPE sum    = 0.f;
-    DATA_TYPE sum_sq = 0.f;
+    float sum    = 0.f;
+    float sum_sq = 0.f;
 
 #if defined(NHWC)
 
@@ -73,7 +73,7 @@ __kernel void instance_normalization(
     {
         for(int i_h = 0; i_h < DIM_Z; ++i_h)
         {
-            DATA_TYPE data = *((__global DATA_TYPE *)input_ptr + pc + i_w * DIM_X + i_h * elements_x_y + pn * elements_x_y_z);
+            float data = (float)*((__global DATA_TYPE *)input_ptr + pc + i_w * DIM_X + i_h * elements_x_y + pn * elements_x_y_z);
             sum += data;
             sum_sq += data * data;
         }
@@ -120,14 +120,14 @@ __kernel void instance_normalization(
         part_sum_sq.s0 += data * data;
     }
 
-    sum    = part_sum.s0;
-    sum_sq = part_sum_sq.s0;
+    sum    = (float)part_sum.s0;
+    sum_sq = (float)part_sum_sq.s0;
 
 #endif // defined(NHWC)
 
-    const DATA_TYPE mean_float   = ((float)sum / elements_plane);
+    const float mean_float   = (sum / elements_plane);
     const DATA_TYPE mean         = (DATA_TYPE)mean_float;
-    const float     var_float    = ((float)sum_sq / elements_plane) - (mean_float * mean_float);
+    const float     var_float    = (sum_sq / elements_plane) - (mean_float * mean_float);
     const float     multip_float = GAMMA / sqrt(var_float + EPSILON);
     const DATA_TYPE multip       = (DATA_TYPE)multip_float;
 

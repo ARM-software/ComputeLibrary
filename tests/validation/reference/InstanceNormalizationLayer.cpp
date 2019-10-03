@@ -52,26 +52,21 @@ SimpleTensor<T> instance_normalization(const SimpleTensor<T> &src, float gamma, 
         for(size_t c_i = 0; c_i < c_size; ++c_i)
         {
             float sum_h_w = 0;
-            //Compute mean
-            for(size_t h_i = 0; h_i < h_size; ++h_i)
-            {
-                for(size_t w_i = 0; w_i < w_size; ++w_i)
-                {
-                    sum_h_w += src[coord2index(src.shape(), Coordinates(w_i, h_i, c_i, n_i))];
-                }
-            }
-            const float mean_h_w = sum_h_w / (h_size * w_size);
+            float sum_sq_h_w = 0;
 
-            //Compute variance
-            float partial_var_h_w = 0;
             for(size_t h_i = 0; h_i < h_size; ++h_i)
             {
                 for(size_t w_i = 0; w_i < w_size; ++w_i)
                 {
-                    partial_var_h_w += std::pow(src[coord2index(src.shape(), Coordinates(w_i, h_i, c_i, n_i))] - mean_h_w, 2);
+                    float val = src[coord2index(src.shape(), Coordinates(w_i, h_i, c_i, n_i))];
+                    sum_h_w += val;
+                    sum_sq_h_w += val*val;
                 }
             }
-            const float var_h_w = partial_var_h_w / (h_size * w_size);
+            //Compute mean
+            const float mean_h_w = sum_h_w / (h_size * w_size);
+            //Compute variance
+            const float var_h_w = sum_sq_h_w / (h_size * w_size) - mean_h_w * mean_h_w;;
 
             //Apply mean
             for(size_t h_i = 0; h_i < h_size; ++h_i)
