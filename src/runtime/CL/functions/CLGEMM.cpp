@@ -109,7 +109,7 @@ CLGEMM::GEMMType CLGEMM::select_gemm_type(unsigned int m, unsigned int n, unsign
         {
             if((m == 1) || (!reshape_b_only_on_first_run))
             {
-                gemm_type = GEMMType::NATIVE;
+                gemm_type = GEMMType::RESHAPED_ONLY_RHS;
             }
             else
             {
