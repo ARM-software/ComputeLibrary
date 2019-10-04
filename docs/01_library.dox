@@ -28,7 +28,7 @@ namespace arm_compute
 
 @tableofcontents
 
-@section S4_1 Core vs Runtime libraries
+@section S4_1_1 Core vs Runtime libraries
 
 The Core library is a low level collection of algorithms implementations, it is designed to be embedded in existing projects and applications:
 
@@ -42,6 +42,12 @@ The Runtime library is a very basic wrapper around the Core library which can be
 - For OpenCL it uses the default CLScheduler command queue for all mapping operations and kernels.
 
 For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between NEON and OpenCL, etc.)
+
+@section S4_1_2 Thread-safety
+
+Although the library supports multi-threading during workload dispatch, thus parallelizing the execution of the workload at multiple threads, the current runtime module implementation is not thread-safe in the sense of executing different functions from separate threads.
+This lies to the fact that the provided scheduling mechanism wasn't designed with thread-safety in mind.
+As it is true with the rest of the runtime library a custom scheduling mechanism can be re-implemented to account for thread-safety if needed and be injected as the library's default scheduler.
 
 @section S4_2_windows_kernels_mt_functions Windows, kernels, multi-threading and functions
 
