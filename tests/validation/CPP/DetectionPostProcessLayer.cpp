@@ -89,7 +89,7 @@ inline QuantizationInfo qinfo_scaleoffset_from_minmax(const float min, const flo
         }
         else
         {
-            uint8_offset = static_cast<uint8_t>(std::round(f_offset));
+            uint8_offset = static_cast<uint8_t>(arm_compute::support::cpp11::round(f_offset));
         }
         offset = uint8_offset;
     }

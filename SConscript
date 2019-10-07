@@ -31,6 +31,14 @@ Import('env')
 Import('vars')
 Import('install_lib')
 
+def build_bootcode_objs(sources):
+
+    arm_compute_env.Append(ASFLAGS = "-I bootcode/")
+    obj = arm_compute_env.Object(sources)
+    obj = install_lib(obj)
+    Default(obj)
+    return obj
+
 def build_library(name, sources, static=False, libs=[]):
     if static:
         obj = arm_compute_env.StaticLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
@@ -239,6 +247,12 @@ if env['gles_compute']:
     runtime_files += Glob('src/runtime/GLES_COMPUTE/functions/*.cpp')
 
     graph_files += Glob('src/graph/backends/GLES/*.cpp')
+
+bootcode_o = []
+if env['os'] == 'bare_metal':
+    bootcode_files = Glob('bootcode/*.s')
+    bootcode_o = build_bootcode_objs(bootcode_files)
+Export('bootcode_o')
 
 arm_compute_core_a = build_library('arm_compute_core-static', core_files, static=True)
 Export('arm_compute_core_a')

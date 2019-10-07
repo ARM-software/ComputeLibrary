@@ -73,6 +73,9 @@ else:
     test_env.Append(LIBS = ["arm_compute_graph", "arm_compute", "arm_compute_core"])
     arm_compute_lib = arm_compute_graph_so
 
+if env['os'] in ['bare_metal']:
+    Import("bootcode_o")
+
 #FIXME Delete before release
 if env['internal_only']:
     test_env.Append(CPPDEFINES=['INTERNAL_ONLY'])
@@ -121,8 +124,14 @@ if env['neon']:
     if env['internal_only']:
         files_benchmark += Glob('../3rdparty/tests/benchmark/NEON/' + filter_pattern)
 
-    files_validation += Glob('validation/NEON/*/' + filter_pattern)
     files_validation += Glob('validation/NEON/' + filter_pattern)
+    if env['os'] == 'bare_metal':
+        files_validation += Glob('validation/NEON/UNIT/MemoryManager.cpp' + filter_pattern)
+        files_validation += Glob('validation/NEON/UNIT/DynamicTensor.cpp' + filter_pattern)
+        files_validation += Glob('validation/NEON/UNIT/TensorAllocator.cpp' + filter_pattern)
+    else:
+        files_validation += Glob('validation/NEON/*/' + filter_pattern)
+
 
 if env['gles_compute']:
     test_env.Append(CPPDEFINES=['ARM_COMPUTE_GC'])
@@ -146,12 +155,22 @@ if test_env['benchmark_tests']:
     Default(arm_compute_benchmark)
     Export('arm_compute_benchmark')
 
+bm_link_flags = []
+if test_env['linker_script']:
+    bm_link_flags = ['-Wl,--build-id=none', '-T', env['linker_script']]
+
 if test_env['validation_tests']:
     arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LIBS= [ arm_compute_test_framework, arm_compute_core_a])
     Depends(arm_compute_validation_framework , arm_compute_test_framework)
     Depends(arm_compute_validation_framework , arm_compute_core_a)
 
-    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation + common_objects, LIBS=[arm_compute_validation_framework] + test_env['LIBS'])
+    program_objects = files_validation + common_objects
+    if test_env['os'] == 'bare_metal':
+        Depends(arm_compute_validation_framework , bootcode_o)
+        program_objects += bootcode_o
+
+
+    arm_compute_validation = test_env.Program('arm_compute_validation', program_objects, LIBS=[arm_compute_validation_framework] + test_env['LIBS'], LINKFLAGS=test_env['LINKFLAGS'] + bm_link_flags)
     arm_compute_validation = install_bin(arm_compute_validation)
     Depends(arm_compute_validation, arm_compute_validation_framework)
     Depends(arm_compute_validation, arm_compute_test_framework)
@@ -162,11 +181,14 @@ if test_env['validation_tests']:
 
     if test_env['validate_examples']:
         files_validate_examples = [ test_env.Object('validate_examples/RunExample.cpp') ] + [ x for x in common_objects if not "main.o" in str(x)]
+        if test_env['os'] == 'bare_metal':
+            files_validate_examples += bootcode_o
+
         arm_compute_validate_examples = []
         if test_env['neon']:
             for file in Glob("validate_examples/neon_*.cpp"):
                 example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
-                arm_compute_validate_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_validate_examples, LIBS = [ arm_compute_validation_framework]) ]
+                arm_compute_validate_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_validate_examples, LIBS = [ arm_compute_validation_framework], LINKFLAGS=test_env['LINKFLAGS'] + bm_link_flags) ]
         if test_env['opencl']:
             cl_examples = []
             files = Glob("validate_examples/cl_*.cpp")
@@ -181,7 +203,7 @@ if test_env['validation_tests']:
                 for file in Glob("validate_examples/graph_*.cpp"):
                     example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
                     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + [ arm_compute_validation_framework ], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'])
+                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + [ arm_compute_validation_framework ], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'] + bm_link_flags)
                         arm_compute_validate_examples += [ prog ]
                     else:
                         #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
@@ -196,6 +218,8 @@ if test_env['validation_tests']:
 
 if test_env['benchmark_examples']:
     files_benchmark_examples = test_env.Object('benchmark_examples/RunExample.cpp')
+    if test_env['os'] == 'bare_metal':
+        files_benchmark_examples += bootcode_o
     graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
     graph_params = test_env.Object(source="../utils/CommonGraphOptions.cpp", target="CommonGraphOptions")
     arm_compute_benchmark_examples = []
@@ -203,7 +227,7 @@ if test_env['benchmark_examples']:
         if test_env['neon']:
             for file in Glob("%s/neon_*.cpp" % examples_folder):
                 example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
-                arm_compute_benchmark_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples) ]
+                arm_compute_benchmark_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples, LINKFLAGS=test_env["LINKFLAGS"]+ bm_link_flags) ]
         if test_env['opencl']:
             cl_examples = []
             files = Glob("%s/cl_*.cpp" % examples_folder)
@@ -228,11 +252,11 @@ if test_env['benchmark_examples']:
         for file in Glob("%s/graph_*.cpp" % examples_folder ):
             example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
             if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'])
+                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'] + bm_link_flags)
                 arm_compute_benchmark_examples += [ prog ]
             else:
                 #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
-                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'])
                 arm_compute_benchmark_examples += [ prog ]
     arm_compute_benchmark_examples = install_bin(arm_compute_benchmark_examples)
     Depends(arm_compute_benchmark_examples, arm_compute_test_framework)

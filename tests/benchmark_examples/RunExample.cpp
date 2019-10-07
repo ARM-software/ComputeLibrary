@@ -163,8 +163,12 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
     }
     framework.set_throw_errors(options.throw_errors->value());
     arm_compute::test::framework::detail::TestSuiteRegistrar suite{ "Examples" };
-    framework.add_test_case<ExampleTest>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
 
+#ifdef BARE_METAL
+    framework.add_test_case<ExampleTest>(argv[0], framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+#else  /* BARE_METAL */
+    framework.add_test_case<ExampleTest>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+#endif /* BARE_METAL */
     //func(argc, argv);
     bool success = framework.run();
     if(options.log_level->value() > framework::LogLevel::NONE)

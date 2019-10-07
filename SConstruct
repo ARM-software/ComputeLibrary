@@ -59,6 +59,7 @@ vars.AddVariables(
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
+    PathVariable("linker_script", "Use an external linker script", "", PathVariable.PathAccept),
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", False),
     ("toolchain_prefix", "Override the toolchain prefix", ""),
@@ -104,6 +105,10 @@ Export('install_lib')
 Export('install_bin')
 
 Help(vars.GenerateHelpText(env))
+
+if env['linker_script'] and env['os'] != 'bare_metal':
+    print("Linker script is only supported for bare_metal builds")
+    Exit(1)
 
 if env['build'] == "embed_only":
     SConscript('./SConscript', variant_dir=build_path, duplicate=0)
@@ -330,8 +335,14 @@ if env['gles_compute'] and env['os'] != 'android':
 
 SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
-if env['examples'] and env['os'] != 'bare_metal' and env['exceptions']:
+if env['examples'] and env['exceptions']:
+    if env['os'] == 'bare_metal' and env['arch'] == 'armv7a':
+        print("Building examples for bare metal and armv7a is not supported. Use examples=0.")
+        Exit(1)
     SConscript('./examples/SConscript', variant_dir='%s/examples' % build_path, duplicate=0)
 
-if env['os'] != 'bare_metal' and env['exceptions']:
+if env['exceptions']:
+    if env['os'] == 'bare_metal' and env['arch'] == 'armv7a':
+        print("WARNING: Building tests for bare metal and armv7a is not supported")
+        Return()
     SConscript('./tests/SConscript', variant_dir='%s/tests' % build_path, duplicate=0)
