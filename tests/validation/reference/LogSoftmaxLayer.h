@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_SOFTMAX_LAYER_H__
-#define __ARM_COMPUTE_TEST_SOFTMAX_LAYER_H__
+#ifndef __ARM_COMPUTE_TEST_LOG_SOFTMAX_LAYER_H__
+#define __ARM_COMPUTE_TEST_LOG_SOFTMAX_LAYER_H__
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,13 +36,10 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, size_t axis, bool is_log = false);
-
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis = 1);
+SimpleTensor<T> log_softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis = 1);
 
 template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type = 0>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis = 1);
+SimpleTensor<T> log_softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis = 1);
 } // namespace reference
 } // namespace validation
 } // namespace test

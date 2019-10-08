@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,12 +69,20 @@ private:
 };
 
 /** Interface for softmax computation for QASYMM8 with pre-computed max. */
+template <bool IS_LOG = false>
 class NELogits1DSoftmaxKernel : public INEKernel
 {
 public:
     const char *name() const override
     {
-        return "NELogits1DSoftmaxKernel";
+        if(IS_LOG)
+        {
+            return "NELogits1DSoftmaxKernel";
+        }
+        else
+        {
+            return "NELogits1DLogSoftmaxKernel";
+        }
     }
     /** Default constructor */
     NELogits1DSoftmaxKernel();

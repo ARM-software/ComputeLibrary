@@ -34,7 +34,7 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis)
+SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, size_t axis, bool is_log)
 {
     // Create reference
     SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
@@ -65,21 +65,46 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axi
 
         // Regularize
         T sum(0.f);
-        std::transform(src_row_ptr, src_row_ptr + lower_dims, dst_row_ptr, [&sum, max, beta](T val)
+        std::transform(src_row_ptr, src_row_ptr + lower_dims, dst_row_ptr, [&sum, max, beta, is_log](T val)
         {
-            const T res(std::exp((val - max) * beta));
-            sum += res;
+            T res{ (val - max) *beta };
+
+            if(is_log)
+            {
+                sum += std::exp(res);
+            }
+            else
+            {
+                res = std::exp(res);
+                sum += res;
+            }
             return res;
         });
 
         // Normalize
-        std::transform(dst_row_ptr, dst_row_ptr + lower_dims, dst_row_ptr, [sum](T val)
+        std::transform(dst_row_ptr, dst_row_ptr + lower_dims, dst_row_ptr, [sum, is_log](T val)
         {
-            return val / sum;
+            if(is_log)
+            {
+                return val - sum;
+            }
+            else
+            {
+                return val / sum;
+            }
         });
     }
 
     return dst;
+}
+
+template SimpleTensor<float> softmax_layer_generic(const SimpleTensor<float> &src, float beta, size_t axis, bool is_log);
+template SimpleTensor<half> softmax_layer_generic(const SimpleTensor<half> &src, float beta, size_t axis, bool is_log);
+
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis)
+{
+    return softmax_layer_generic<T>(src, beta, axis, false);
 }
 
 template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type>

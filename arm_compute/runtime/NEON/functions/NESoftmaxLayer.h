@@ -36,29 +36,33 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to compute a SoftmaxLayer.
+/** Basic function to compute a SoftmaxLayer and a Log SoftmaxLayer.
  *
  * Softmax is calculated by :
  * @f[ out = \frac{e^{x - max(x)}}{\sum{e^{x - max(x)}}} @f]
+ *
+ * Log Softmax is calculated by :
+ * @f[ out = (x - max(x)) - \sum{e^{x - max(x)}} @f]
  *
  * This function runs the following kernels:
  * -# @ref NEFillBorderKernel
  * -# @ref NELogits1DMaxKernel
  * -# @ref NELogits1DSoftmaxKernel
  */
-class NESoftmaxLayer : public IFunction
+template <bool IS_LOG = false>
+class NESoftmaxLayerGeneric : public IFunction
 {
 public:
     /** Constructor */
-    NESoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NESoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NESoftmaxLayer(const NESoftmaxLayer &) = delete;
+    NESoftmaxLayerGeneric(const NESoftmaxLayerGeneric &) = delete;
     /** Default move constructor */
-    NESoftmaxLayer(NESoftmaxLayer &&) = default;
+    NESoftmaxLayerGeneric(NESoftmaxLayerGeneric &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NESoftmaxLayer &operator=(const NESoftmaxLayer &) = delete;
+    NESoftmaxLayerGeneric &operator=(const NESoftmaxLayerGeneric &) = delete;
     /** Default move assignment operator */
-    NESoftmaxLayer &operator=(NESoftmaxLayer &&) = default;
+    NESoftmaxLayerGeneric &operator=(NESoftmaxLayerGeneric &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in,out] input  Source tensor. Data types supported: QASYMM8/F16/F32. If the width is not a
@@ -103,17 +107,21 @@ private:
      */
     void configure_reshape_input_kernel(const ITensor *input, const ITensor *output, size_t axis);
 
-    MemoryGroup                _memory_group;
-    NELogits1DMaxKernel        _max_kernel;
-    NELogits1DSoftmaxKernel    _softmax_kernel;
-    std::unique_ptr<INEKernel> _flat_or_reshape_kernel_ptr;
-    NEFillBorderKernel         _fill_border_kernel;
-    NEReshapeLayerKernel       _reshape_kernel;
-    Tensor                     _max;
-    Tensor                     _tmp;
-    Tensor                     _input_flattened;
-    Tensor                     _output_flattened;
-    bool                       _needs_flattening;
+    MemoryGroup                     _memory_group;
+    NELogits1DMaxKernel             _max_kernel;
+    NELogits1DSoftmaxKernel<IS_LOG> _softmax_kernel;
+    std::unique_ptr<INEKernel>      _flat_or_reshape_kernel_ptr;
+    NEFillBorderKernel              _fill_border_kernel;
+    NEReshapeLayerKernel            _reshape_kernel;
+    Tensor                          _max;
+    Tensor                          _tmp;
+    Tensor                          _input_flattened;
+    Tensor                          _output_flattened;
+    bool                            _needs_flattening;
 };
+
+using NESoftmaxLayer    = NESoftmaxLayerGeneric<false>;
+using NELogSoftmaxLayer = NESoftmaxLayerGeneric<true>;
+
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NESOFTMAXLAYER_H__ */
