@@ -49,7 +49,7 @@ public:
     CLDepthwiseConvolutionLayerNativeKernel &operator=(CLDepthwiseConvolutionLayerNativeKernel &&) = default;
     /** Initialize the function's source, destination and parameters
      *
-     * @param[in]  input            Source tensor. Data type supported: FP32/FP16. Data layout supported: NHWC
+     * @param[in]  input            Source tensor. Data type supported: QASYMM8/FP32/FP16. Data layout supported: NHWC
      * @param[in]  weights          Weights tensor. A 3D tensor with dimensions [IFM, N, M]. Data type supported: Same as @p input.
      * @param[in]  biases           Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
      *                              Data type supported: Same as @p input.
@@ -64,7 +64,7 @@ public:
                    const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1, const Size2D &dilation = Size2D(1U, 1U));
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayerNativeKernel
      *
-     * @param[in] input            Source tensor info. Data type supported: FP32/FP16. Data layout supported: NHWC
+     * @param[in] input            Source tensor info. Data type supported: QASYMM8/FP32/FP16. Data layout supported: NHWC
      * @param[in] weights          Weights tensor info. A 3D tensor with dimensions [IFM, N, M]. Data type supported: Same as @p input.
      * @param[in] biases           Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
      *                             Data type supported: Same as @p input.

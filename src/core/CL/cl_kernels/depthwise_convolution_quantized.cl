@@ -24,18 +24,29 @@
 
 #include "helpers_asymm.h"
 
-#if defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && ((defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)) || defined(REAL_MULTIPLIER))
+#ifndef VEC_SIZE
+#if defined(N0)
+#define VEC_SIZE N0
+#else /* defined(N0) */
+#define VEC_SIZE 8
+#endif /* defined(N0) */
+#endif /* VEC_SIZE */
 
 #if defined(ACTIVATION_TYPE) && defined(CONST_0)
 #define DATA_TYPE uchar
-#ifndef VEC_SIZE
-#define VEC_SIZE 8
-#endif /* VEC_SIZE */
 #include "activation_layer_quant.cl"
 #define ACTIVATION_FUNC(x) PERFORM_ACTIVATION_QUANT(ACTIVATION_TYPE, x)
 #else /* defined(ACTIVATION_TYPE) && defined(CONST_0) */
 #define ACTIVATION_FUNC(x) (x)
 #endif /* defined(ACTIVATION_TYPE) && defined(CONST_0) */
+
+#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
+#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
+#define VEC_UCHAR VEC_DATA_TYPE(uchar, VEC_SIZE)
+#define VEC_USHORT VEC_DATA_TYPE(ushort, VEC_SIZE)
+#define VEC_SHORT VEC_DATA_TYPE(short, VEC_SIZE)
+
+#if defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && ((defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)) || defined(REAL_MULTIPLIER))
 
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
@@ -634,11 +645,6 @@ __kernel void dwc_3x3_native_qasymm8_dot8_nchw(
 #if defined(VEC_SIZE) && defined(SRC_DIM_1) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT)
 
 #define asymm_mult_by_quant_multiplier_less_than_one(x, y, z) ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(x, y, z, VEC_SIZE)
-
-#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
-#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
-#define VEC_UCHAR VEC_DATA_TYPE(uchar, VEC_SIZE)
-#define VEC_USHORT VEC_DATA_TYPE(ushort, VEC_SIZE)
 
 #define MULTIPLY_ADD(x, y, acc) acc += CONVERT(CONVERT(x, VEC_USHORT) * CONVERT(y, VEC_USHORT), VEC_INT)
 
@@ -1375,3 +1381,144 @@ __kernel void dwc_3x3_reshaped_qasymm8_dot8_stride1_nhwc(
 #endif // defined(VEC_SIZE) && defined(SRC_DIM_1) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT)
 
 #endif // defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && ((defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)) || defined(REAL_MULTIPLIER))
+
+#if defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)
+/** This function computes the depthwise convolution for NHWC data layout. This kernel assumes that the weights tensor is NOT reshaped
+ *
+ * @note The number of elements processed must be passed at compile time using -DN0 (e.g. -DN0=2)
+ * @note The depth multiplier must be passed at compile time using -DDEPTH_MULTIPLIER (e.g. -DDEPTH_MULTIPLIER=1)
+ * @note The first dimension of the input tensor must be passed at compile time using -DSRC_DIM1 (e.g. -DSRC_DIM1=112)
+ * @note The second dimension of the input tensor must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM2=80)
+ * @note The kernel width must be passed at compile time using -DKERNEL_WIDTH (e.g. -DKERNEL_WIDTH=5)
+ * @note The kernel height must be passed at compile time using -DKERNEL_HEIGHT (e.g. -DKERNEL_HEIGHT=5)
+ * @note The convolution pad top must be passed at compile time using -DCONV_PAD_TOP (e.g. -DCONV_PAD_TOP=1)
+ * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
+ * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
+ * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
+ *
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
+ * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                            src_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in] src_stride_w                          Stride of the source tensor in W dimension (in bytes)
+ * @param[in] src_step_w                            src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
+ * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as src_ptr
+ * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_w                          Stride of the destination tensor in W dimension (in bytes)
+ * @param[in] dst_step_w                            dst_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
+ * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in] weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
+ * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: same as src_ptr
+ * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
+ * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
+ */
+__kernel void dwc_MxN_native_quantized8_nhwc(
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(weights),
+#if defined(HAS_BIAS)
+    VECTOR_DECLARATION(biases)
+#endif // defined(HAS_BIAS)
+)
+{
+    int x = get_global_id(0); // channels
+    int y = get_global_id(1); // spatial coordinate x
+#if defined(DST_DEPTH)
+    int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
+    int b = get_global_id(2) / (int)DST_DEPTH; // batch
+#else                                          // defined(DST_DEPTH)
+    int z = get_global_id(2); // spatial coordinate y
+#endif                                         // defined(DST_DEPTH)
+
+    __global uchar *s_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(uchar) * (int)N0;
+
+    __global uchar *d_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(uchar) * (int)DEPTH_MULTIPLIER * (int)N0 + y * dst_stride_y + z * dst_stride_z;
+
+    __global uchar *w_addr = weights_ptr + weights_offset_first_element_in_bytes + x * sizeof(uchar) * (int)DEPTH_MULTIPLIER * (int)N0;
+
+#if defined(HAS_BIAS)
+    __global uchar *b_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int) * (int)DEPTH_MULTIPLIER * (int)N0;
+#endif // defined(HAS_BIAS)
+
+#if defined(DST_DEPTH)
+    s_addr += b * src_stride_w;
+    d_addr += b * dst_stride_w;
+#endif // defined(DST_DEPTH)
+
+#if DEPTH_MULTIPLIER > 1
+    for(int d = 0; d < (int)DEPTH_MULTIPLIER; ++d)
+    {
+#endif // DEPTH_MULTIPLIER > 1
+        // Each work-item computes N0x1x1 elements
+        VEC_SHORT res = 0;
+
+        int x_coord = y * CONV_STRIDE_X - (int)CONV_PAD_LEFT;
+        int y_coord = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP;
+
+        for(int yk = 0; yk < KERNEL_HEIGHT; ++yk)
+        {
+            if(y_coord >= 0 && y_coord < SRC_DIM2)
+            {
+                int x_coord_tmp = x_coord;
+
+                for(int xk = 0; xk < KERNEL_WIDTH; ++xk)
+                {
+                    if(x_coord_tmp >= 0 && x_coord_tmp < SRC_DIM1)
+                    {
+                        int s_offset = x_coord_tmp * (int)src_stride_y + y_coord * (int)src_stride_z;
+                        int w_offset = xk * weights_stride_y + yk * weights_stride_z;
+
+                        // Load input and weights values
+                        VEC_SHORT i = CONVERT(VLOAD(N0)(0, (__global uchar *)(s_addr + s_offset)), VEC_SHORT);
+                        VEC_SHORT w = CONVERT(VLOAD(N0)(0, (__global uchar *)(w_addr + w_offset)), VEC_SHORT);
+
+                        res += (i + (VEC_SHORT)INPUT_OFFSET) * (w + (VEC_SHORT)WEIGHTS_OFFSET);
+                    }
+                    x_coord_tmp += DILATION_X;
+                }
+            }
+            y_coord += DILATION_Y;
+        }
+
+#if defined(HAS_BIAS)
+        VEC_SHORT bias = CONVERT(VLOAD(N0)(0, (__global int *)(b_addr)), VEC_SHORT);
+        res += bias;
+#endif // defined(HAS_BIAS)
+
+        res = CONVERT(ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(CONVERT(res, VEC_INT), OUTPUT_MULTIPLIER, OUTPUT_SHIFT, N0), VEC_SHORT);
+        res += (VEC_SHORT)OUTPUT_OFFSET;
+
+        VEC_UCHAR res1 = CONVERT_SAT(res, VEC_UCHAR);
+
+        VSTORE(N0)
+        (ACTIVATION_FUNC(res1), 0, (__global uchar *)(d_addr));
+
+#if DEPTH_MULTIPLIER > 1
+        w_addr += sizeof(uchar);
+        d_addr += sizeof(uchar);
+#if defined(HAS_BIAS)
+        b_addr += sizeof(int);
+#endif // defined(HAS_BIAS)
+    }
+#endif // DEPTH_MULTIPLIER > 1
+}
+#endif // defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defiend(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)

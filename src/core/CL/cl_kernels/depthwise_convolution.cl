@@ -782,173 +782,6 @@ __kernel void depthwise_convolution_reshape_weights(
 }
 #endif // defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DST_WIDTH)
 
-#if defined(NCHW)
-#define in_stride_x src_stride_x
-#define in_stride_y src_stride_y
-#define in_stride_z src_stride_z
-#define out_stride_x dst_stride_x
-#define out_stride_y dst_stride_y
-#define out_stride_z dst_stride_z
-#else //defined(NCHW)
-#define in_stride_x src_stride_y
-#define in_stride_y src_stride_z
-#define in_stride_z src_stride_x
-#define out_stride_x dst_stride_y
-#define out_stride_y dst_stride_z
-#define out_stride_z dst_stride_x
-#endif //defined(NCHW)
-
-#if defined(SRC_WIDTH) && defined(DATA_TYPE)
-/** This kernel reshapes each of the tensor's low three dimensions to single rows.
- *
- * @note Datatype and source width should be given as a preprocessor argument using -DDATA_TYPE=type and -DSRC_WIDTH=width. e.g. -DSRC_WIDTH=128
- *
- * @param[in]  src_ptr                              Pointer to the source tensor. Supported data types: F16/F32
- * @param[in]  src_stride_x                         Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                         Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                           src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                         Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                           src_stride_z * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes    The offset of the first element in the source tensor
- * @param[out] dst_ptr                              Pointer to the destination tensor. Same as @p src_ptr
- * @param[in]  dst_stride_x                         Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                           dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                         Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                           dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes    The offset of the first element in the destination tensor
- * @param[in]  biases_ptr                           (Optional) Pointer to the biases vector. Supported data types: F16/F32
- * @param[in]  biases_stride_x                      (Optional) Stride of the biases vector in X dimension (in bytes)
- * @param[in]  biases_step_x                        (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes (Optional) The offset of the first element in the biases vector
- */
-__kernel void depthwise_convolution_reshape_weights_generic(
-    TENSOR3D_DECLARATION(src),
-    IMAGE_DECLARATION(dst)
-#ifdef HAS_BIAS
-    ,
-    VECTOR_DECLARATION(biases)
-#endif /* HAS_BIAS */
-)
-{
-#ifdef HAS_BIAS
-    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
-#endif /* HAS_BIAS */
-
-    __global uchar *input_ptr  = src_ptr + src_offset_first_element_in_bytes + get_global_id(1) * in_stride_y + get_global_id(2) * in_stride_z;
-    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + get_global_id(1) * SRC_WIDTH * dst_stride_x + get_global_id(2) * dst_stride_y;
-
-    for(int i = 0; i < SRC_WIDTH; ++i, input_ptr += in_stride_x)
-    {
-        *((__global DATA_TYPE *)(output_ptr + i * dst_stride_x)) = *((__global DATA_TYPE *)input_ptr);
-    }
-
-#if defined(HAS_BIAS)
-    if(get_global_id(1) == 0)
-    {
-        *((__global DATA_TYPE *)(output_ptr + SRC_WIDTH * get_global_size(1) * dst_stride_x)) = *((__global DATA_TYPE *)(biases.ptr + get_global_id(2) * biases_stride_x));
-    }
-#endif // defined(HAS_BIAS)
-}
-#endif //defined(SRC_WIDTH) && defined(DATA_TYPE)
-
-#if defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DATA_TYPE) && defined(PAD_VALUE) && defined(DEPTH_MULTIPLIER) && defined(DILATION_X) && defined(DILATION_Y)
-/** This kernel performs a reshaping of the input tensor to a tensor used to perform depthwise convolution using vector to matrix multiplication.
- *
- * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
- * @note The convolution information must be passed at compile time using -DSTRIDE_X, -DSTRIDE_Y, -DPAD_LEFT, -DPAD_TOP, -DPAD_RIGHT, -DPAD_BOTTOM, -DKERNEL_WIDHT, -DKERNEL_HEIGHT, -DSRC_WIDTH, -DSRC_HEIGHT, -DDEPTH_MULTIPLIER
- * @note The dilation_x and dilation_y must be passed at compile time using -DDILATION_X and -DDILATION_Y: e.g. -DDILATION_X=1, -DDILATION_Y=1
- *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- */
-__kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(dst))
-{
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
-
-    const int src_pixel_linear = get_global_id(1) * STRIDE_X;
-    const int full_length      = SRC_WIDTH + PAD_LEFT + PAD_RIGHT;
-    const int max_initial_x    = STRIDE_X * (((full_length - (KERNEL_WIDTH + (KERNEL_WIDTH - 1) * (DILATION_X - 1))) / STRIDE_X) + 1);
-
-    const int src_x = -PAD_LEFT + src_pixel_linear % max_initial_x;
-    const int src_y = -PAD_TOP + src_pixel_linear / max_initial_x * STRIDE_Y;
-    const int src_z = get_global_id(2) / DEPTH_MULTIPLIER;
-
-    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + src_z * in_stride_z;
-    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst.ptr));
-
-    for(int y = src_y; y < src_y + KERNEL_HEIGHT + (KERNEL_HEIGHT - 1) * (DILATION_Y - 1); y += DILATION_Y)
-    {
-        for(int x = src_x; x < src_x + KERNEL_WIDTH + (KERNEL_WIDTH - 1) * (DILATION_X - 1); x += DILATION_X, ++output_ptr)
-        {
-            if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
-            {
-                *output_ptr = PAD_VALUE;
-            }
-            else
-            {
-                *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * in_stride_x + y * in_stride_y));
-            }
-        }
-    }
-#if defined(HAS_BIAS)
-    *output_ptr = (DATA_TYPE)(1);
-#endif // defined(HAS_BIAS)
-}
-
-#endif //defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(DATA_TYPE) && defined(PAD_VALUE) && defined(DEPTH_MULTIPLIER)
-
-#if defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
-
-/** This kernel performs a reshaping of the output of the depthwise generic convolution.
- *
- * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
- * @note The convolution information must be passed at compile time using -DCONV_WIDTH, -DCONV_HEIGHT, e.g -DCONV_WIDTH=32, -DCONV_HEIGHT=42
- *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- */
-__kernel void depthwise_vector_to_tensor(
-    VECTOR_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
-{
-    Vector src = CONVERT_TO_VECTOR_STRUCT(src);
-
-    const int patch_size = CONV_WIDTH * CONV_HEIGHT;
-    const int id0        = get_global_id(0);
-    const int z          = id0 / patch_size;
-    const int index2D    = id0 - z * patch_size;
-
-    __global uchar *out_ptr          = dst_ptr + dst_offset_first_element_in_bytes + index2D % CONV_WIDTH * out_stride_x + index2D / CONV_WIDTH * out_stride_y + z * out_stride_z;
-    *((__global DATA_TYPE *)out_ptr) = *((__global DATA_TYPE *)src.ptr);
-}
-
-#endif //defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
-
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F16)
 #if defined(CONV_STRIDE_X)
 #if CONV_STRIDE_X == 1
@@ -1478,7 +1311,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     //3x3 Convolution of elements starting in 0th row
     pixels0 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src.stride_x, src.stride_y, 0, weights_addr, weights_stride_y);
     //3x3 Convolution of elements starting in 2nd row
-    pixels1                  = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src.stride_x, src.stride_y, 2, weights_addr, weights_stride_y);
+    pixels1                 = convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(src_addr, src.stride_x, src.stride_y, 2, weights_addr, weights_stride_y);
 #endif /* DILATION_X==1 && DILATION_Y==1 */
 
 #ifdef HAS_BIAS
@@ -1556,23 +1389,17 @@ __kernel void dwc_MxN_native_fp_nhwc(
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
 #else                                          // defined(DST_DEPTH)
-    int      z               = get_global_id(2); // spatial coordinate y
+    int z                   = get_global_id(2); // spatial coordinate y
 #endif                                         // defined(DST_DEPTH)
 
-    __global uchar *s_addr = src_ptr + src_offset_first_element_in_bytes +
-                             x * sizeof(DATA_TYPE) * (int)N0;
+    __global uchar *s_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)N0;
 
-    __global uchar *d_addr = dst_ptr + dst_offset_first_element_in_bytes +
-                             x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0 +
-                             y * dst_stride_y +
-                             z * dst_stride_z;
+    __global uchar *d_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0 + y * dst_stride_y + z * dst_stride_z;
 
-    __global uchar *w_addr = weights_ptr + weights_offset_first_element_in_bytes +
-                             x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0;
+    __global uchar *w_addr = weights_ptr + weights_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0;
 
 #if defined(HAS_BIAS)
-        __global uchar *b_addr = biases_ptr + biases_offset_first_element_in_bytes +
-                                 x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0;
+    __global uchar *b_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)DEPTH_MULTIPLIER * (int)N0;
 #endif // defined(HAS_BIAS)
 
 #if defined(DST_DEPTH)
@@ -1611,7 +1438,7 @@ __kernel void dwc_MxN_native_fp_nhwc(
 #if GPU_ARCH == GPU_ARCH_MIDGARD
                         res += i * w;
 #else  // GPU_ARCH == GPU_ARCH_MIDGARD
-                        res  = fma(i, w, res);
+                        res = fma(i, w, res);
 #endif // GPU_ARCH == GPU_ARCH_MIDGARD
                     }
                     x_coord_tmp += DILATION_X;

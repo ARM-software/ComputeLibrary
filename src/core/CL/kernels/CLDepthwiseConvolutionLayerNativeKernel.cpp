@@ -35,6 +35,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 namespace arm_compute
 {
@@ -46,7 +47,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_UNUSED(dwc_info);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1 && dwc_weights_info.n0 != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1);
@@ -59,8 +60,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     if(biases != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(0));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
+
+        if(is_data_type_quantized(input->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        }
     }
 
     if(output->total_size() != 0)
@@ -137,6 +146,7 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const ICLTensor *input, 
     const size_t idx_h          = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
     const size_t weights_width  = weights->info()->dimension(idx_w);
     const size_t weights_height = weights->info()->dimension(idx_h);
+    const bool   is_quantized   = is_data_type_quantized(input->info()->data_type());
 
     CLBuildOptions build_opts;
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
@@ -155,10 +165,46 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const ICLTensor *input, 
     build_opts.add_option("-DCONV_STRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
     build_opts.add_option("-DDILATION_X=" + support::cpp11::to_string(dilation.x()));
     build_opts.add_option("-DDILATION_Y=" + support::cpp11::to_string(dilation.y()));
-    build_opts.add_option_if(dwc_info.activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(dwc_info.activation_info.a()));
-    build_opts.add_option_if(dwc_info.activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(dwc_info.activation_info.b()));
 
-    std::string kernel_name("dwc_MxN_native_fp_nhwc");
+    std::string kernel_name = (is_quantized) ? "dwc_MxN_native_quantized8_nhwc" : "dwc_MxN_native_fp_nhwc";
+
+    if(is_quantized)
+    {
+        const UniformQuantizationInfo iq_info = _input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = _weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = _output->info()->quantization_info().uniform();
+
+        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+        build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-iq_info.offset));
+        build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-wq_info.offset));
+        build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(oq_info.offset));
+        build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+        build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
+
+        if(dwc_info.activation_info.enabled())
+        {
+            const int a_val = quantize_qasymm8(dwc_info.activation_info.a(), oq_info);
+            const int b_val = quantize_qasymm8(dwc_info.activation_info.b(), oq_info);
+            const int o1    = oq_info.offset;
+
+            build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
+            build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));
+            build_opts.add_option("-DCONST_0=" + support::cpp11::to_string(o1));
+
+            const float s1 = iq_info.scale;
+            build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
+            build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
+        }
+    }
+    else
+    {
+        build_opts.add_option_if(dwc_info.activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(dwc_info.activation_info.a()));
+        build_opts.add_option_if(dwc_info.activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(dwc_info.activation_info.b()));
+    }
 
     ICLKernel::configure_internal(win_config.second);
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));

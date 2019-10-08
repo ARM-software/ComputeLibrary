@@ -26,17 +26,12 @@
 
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerNativeKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseIm2ColKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseVectorToTensorKernel.h"
-#include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -121,17 +116,15 @@ private:
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
  *
- * -# @ref CLDepthwiseIm2ColKernel
- * -# @ref CLGEMMMatrixVectorMultiplyKernel
- * -# @ref CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel
- * -# @ref CLFillBorderKernel (if pad_x or pad_y > 0)
+ * -# @ref CLDepthwiseConvolutionLayerNativeKernel
+ * -# @ref CLPermute (x 3) if the data layout is NCHW
  *
  */
 class CLDepthwiseConvolutionLayer : public IFunction
 {
 public:
     /** Default constructor */
-    CLDepthwiseConvolutionLayer();
+    CLDepthwiseConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLDepthwiseConvolutionLayer(const CLDepthwiseConvolutionLayer &) = delete;
     /** Default move constructor */
@@ -177,23 +170,21 @@ public:
     void prepare() override;
 
 private:
-    CLDepthwiseIm2ColKernel                                _im2col_kernel;
-    CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel _weights_reshape_kernel;
-    CLGEMMMatrixVectorMultiplyKernel                       _v2mm_kernel;
-    CLDepthwiseVectorToTensorKernel                        _vector_to_tensor_kernel;
-    CLDirectConvolutionLayerOutputStageKernel              _output_stage_kernel;
-    CLActivationLayer                                      _activationlayer_function;
-    CLFillBorderKernel                                     _v2mm_input_fill_border;
-    CLFillBorderKernel                                     _v2mm_weights_fill_border;
-    CLTensor                                               _input_reshaped;
-    CLTensor                                               _weights_reshaped;
-    CLTensor                                               _v2mm_output;
-    CLTensor                                               _output_reshaped;
-    bool                                                   _is_prepared;
-    bool                                                   _is_quantized;
-    bool                                                   _is_activationlayer_enabled;
-    const ICLTensor                                       *_original_weights;
-    std::unique_ptr<IFunction>                             _optimised_function;
+    MemoryGroup _memory_group;
+
+    std::unique_ptr<IFunction>              _optimised_function;
+    CLDepthwiseConvolutionLayerNativeKernel _dwc_native_kernel;
+    CLPermute                               _permute_input_to_nhwc;
+    CLPermute                               _permute_weights_to_nhwc;
+    CLPermute                               _permute_output_to_nchw;
+
+    CLTensor       _permuted_input;
+    CLTensor       _permuted_weights;
+    CLTensor       _permuted_output;
+    const ITensor *_original_weights;
+
+    bool _needs_permute;
+    bool _is_prepared;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__ */

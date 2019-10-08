@@ -150,6 +150,28 @@
 #define convert_half8_sat convert_half8
 #define convert_half16_sat convert_half16
 
+#define convert_float1 convert_float
+#define convert_half1 convert_half
+#define convert_char1 convert_char
+#define convert_uchar1 convert_uchar
+#define convert_short1 convert_short
+#define convert_ushort1 convert_ushort
+#define convert_int1 convert_int
+#define convert_uint1 convert_uint
+#define convert_long1 convert_long
+#define convert_ulong1 convert_ulong
+#define convert_double1 convert_double
+
+#define convert_char1_sat convert_char_sat
+#define convert_uchar1_sat convert_uchar_sat
+#define convert_short1_sat convert_short_sat
+#define convert_ushort1_sat convert_ushort_sat
+#define convert_int1_sat convert_int_sat
+#define convert_uint1_sat convert_uint_sat
+#define convert_long1_sat convert_long_sat
+#define convert_ulong1_sat convert_ulong_sat
+#define convert_double1_sat convert_double_sat
+
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
 
