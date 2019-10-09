@@ -70,6 +70,54 @@ std::string get_cl_type_from_data_type(const DataType &dt)
     }
 }
 
+std::string get_cl_promoted_type_from_data_type(const DataType &dt)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+        case DataType::QASYMM8_PER_CHANNEL:
+            return "ushort";
+        case DataType::S8:
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+            return "short";
+        case DataType::U16:
+        case DataType::QASYMM16:
+            return "uint";
+        case DataType::S16:
+        case DataType::QSYMM16:
+            return "int";
+        case DataType::U32:
+            return "ulong";
+        case DataType::S32:
+            return "long";
+        case DataType::F16:
+            return "float";
+        default:
+            ARM_COMPUTE_ERROR("Cannot get promoted OpenCL type for the input data type.");
+            return "";
+    }
+}
+
+std::string get_cl_unsigned_type_from_element_size(size_t element_size)
+{
+    switch(element_size)
+    {
+        case 1:
+            return "uchar";
+        case 2:
+            return "ushort";
+        case 4:
+            return "uint";
+        case 8:
+            return "ulong";
+        default:
+            ARM_COMPUTE_ERROR("Data type not supported");
+            return "";
+    }
+}
+
 std::string get_cl_select_type_from_data_type(const DataType &dt)
 {
     switch(dt)

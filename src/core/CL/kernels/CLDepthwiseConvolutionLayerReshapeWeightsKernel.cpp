@@ -47,7 +47,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON(info.c0 != 4);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_h) != 3);
@@ -98,10 +97,10 @@ void CLDepthwiseConvolutionLayerReshapeWeightsKernel::configure(const ICLTensor 
 
     // Build the kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(_input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(info.c0));
     build_opts.add_option("-DDST_WIDTH=" + support::cpp11::to_string(_output->info()->dimension(0)));
     build_opts.add_option_if(info.transpose, "-DTRANSPOSE");
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_convolution_reshape_weights", build_opts.options()));
 }

@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_QUANTIZATION_ASYMM_HELPERS_H__
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -60,9 +61,23 @@ Status calculate_quantized_multiplier_less_than_one(float multiplier, int *quant
 Status calculate_quantized_multiplier_greater_than_one(float multiplier, int *quantized_multiplier, int *left_shift);
 /** Get minimum and maximum values for the input quantized data type
  *
- * @ return min and max values for the quantized data type
+ * @return min and max values for the quantized data type
  */
 std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_type);
+/** Compute quantized per-channel multipliers and shifts. As many multipliers
+ * and shifts as output channels are computed. If weights are not quantized
+ * per-channel, multipliers and shifts will end up being the same for each
+ * channel.
+ *
+ * @param[in]  input                  Input tensor.
+ * @param[in]  weights                Weights tensor.
+ * @param[in]  output                 Output tensor.
+ * @param[out] output_multipliers_ptr Pointer to the buffer where to store per-channel multipliers.
+ * @param[out] output_shifts_ptr      Pointer to the buffer where to store per-channel shifts.
+ *
+ * @return min and max values for the quantized data type
+ */
+void compute_quantized_multipliers_and_shifts(const ITensor *input, const ITensor *weights, const ITensor *output, int32_t *output_multipliers_ptr, int32_t *output_shifts_ptr);
 } // namespace quantization
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_IO_FILE_HANDLER_H__ */

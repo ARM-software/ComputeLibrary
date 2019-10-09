@@ -41,17 +41,18 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
-                          const ActivationLayerInfo &act_info, const Size2D &dilation)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+                          const PadStrideInfo &conv_info, unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation,
+                          const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && (input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && (input->data_type() == DataType::QASYMM8)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
                                     "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1); // COMPMID-1071 Add depth multiplier support for NHWC
 
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1);
@@ -63,26 +64,47 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     const size_t weights_width  = 3;
     const size_t weights_height = 3;
 
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(
+                                         *input, TensorInfo(TensorShape(weights_width, weights_height), 1, weights->data_type()).set_data_layout(DataLayout::NCHW), conv_info, depth_multiplier, dilation);
     if(is_qasymm)
     {
         DepthwiseConvolutionReshapeInfo info;
         info.c0 = 4;
         ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(0) / info.c0) != weights_width * weights_height);
+
+        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output_multipliers, output_shifts);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_multipliers, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_shifts, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON(output_multipliers->num_dimensions() > 1);
+        ARM_COMPUTE_RETURN_ERROR_ON(output_shifts->num_dimensions() > 1);
+
+        if(is_data_type_quantized_per_channel(weights->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON(output_shape[0] != output_multipliers->dimension(0));
+            ARM_COMPUTE_RETURN_ERROR_ON(output_shape[0] != output_shifts->dimension(0));
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+            ARM_COMPUTE_RETURN_ERROR_ON(1 != output_multipliers->dimension(0));
+            ARM_COMPUTE_RETURN_ERROR_ON(1 != output_shifts->dimension(0));
+        }
     }
     else
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
         ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(1) != weights_width) || (weights->dimension(2) != weights_height));
     }
 
     if(biases != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != output_shape[0]);
         if(is_qasymm)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(0));
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
         }
 
@@ -91,27 +113,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 
     if(output->total_size() != 0)
     {
-        const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(
-                                             *input, TensorInfo(TensorShape(weights_width, weights_height), 1, weights->data_type()).set_data_layout(DataLayout::NCHW), conv_info, depth_multiplier, dilation);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
-    }
-
-    if(is_qasymm)
-    {
-        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = (output->total_size() != 0) ? output->quantization_info().uniform() : iq_info;
-
-        float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
-        ARM_COMPUTE_UNUSED(multiplier);
-        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
     }
 
     return Status{};
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *output,
-                                                        const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation)
+                                                        const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation,
+                                                        ITensorInfo *output_multipliers, ITensorInfo *output_shifts)
 {
     const size_t weights_width  = 3;
     const size_t weights_height = 3;
@@ -144,7 +154,17 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     if(is_qasymm)
     {
-        window_changed = update_window_and_padding(win, input_access, output_access);
+        if((output_multipliers != nullptr) && (output_shifts != nullptr))
+        {
+            AccessWindowHorizontal output_multipliers_access(output_multipliers, 0, num_elems_accessed_per_iteration);
+            AccessWindowHorizontal output_shifts_access(output_shifts, 0, num_elems_accessed_per_iteration);
+            window_changed = window_changed || update_window_and_padding(win, input_access, output_access, output_multipliers_access, output_shifts_access);
+        }
+        else
+        {
+            Status err = ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "output_multipliers and output_shifts must be non-nullptr for quantized input");
+            return std::make_pair(err, win);
+        }
     }
     else
     {
@@ -157,7 +177,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         AccessWindowHorizontal bias_access(bias, 0, num_elems_accessed_per_iteration);
         window_changed = window_changed || update_window_and_padding(win, bias_access);
     }
-
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -175,19 +194,26 @@ BorderSize CLDepthwiseConvolutionLayer3x3NHWCKernel::border_size() const
     return _border_size;
 }
 
-void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                                         unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
+void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                                         const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation,
+                                                         const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info, dilation));
-    auto win_config = validate_and_configure_window(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, dilation);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(),
+                                                  conv_info, depth_multiplier, act_info, dilation,
+                                                  (output_multipliers != nullptr) ? output_multipliers->info() : nullptr,
+                                                  (output_shifts != nullptr) ? output_shifts->info() : nullptr));
+    auto win_config = validate_and_configure_window(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(),
+                                                    conv_info, depth_multiplier, dilation,
+                                                    (output_multipliers != nullptr) ? output_multipliers->info() : nullptr,
+                                                    (output_shifts != nullptr) ? output_shifts->info() : nullptr);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
-    const bool is_qasymm              = is_data_type_quantized_asymmetric(input->info()->data_type());
     const bool is_stride_1            = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
     const bool is_stride_1_dilation_1 = (is_stride_1 && dilation.x() == 1 && dilation.y() == 1);
 
-    const bool is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
+    const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights->info()->data_type());
+    const bool is_dot8_supported        = dot8_supported(CLKernelLibrary::get().get_device()) && !is_quantized_per_channel;
 
     _input                              = input;
     _output                             = output;
@@ -196,16 +222,19 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _conv_stride_y                      = conv_info.stride().second;
     _num_rows_processed_per_iteration   = is_stride_1_dilation_1 ? 2 : 1;
     _num_planes_processed_per_iteration = is_stride_1_dilation_1 ? 2 : 1;
+    _output_multipliers                 = output_multipliers;
+    _output_shifts                      = output_shifts;
+    _is_quantized                       = is_data_type_quantized_asymmetric(input->info()->data_type());
 
     // If QASYMM8 and the 8 bit dot product is available, force _num_planes_processed_per_iteration to 1
-    if(is_dot8_supported && is_qasymm)
+    if(is_dot8_supported && _is_quantized)
     {
         _num_planes_processed_per_iteration = 1;
     }
 
-    _border_size = BorderSize(is_qasymm && is_stride_1 ? 0 : conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
+    _border_size = BorderSize(_is_quantized && is_stride_1 ? 0 : conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
 
-    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->info()->element_size());
+    const unsigned int num_elems_accessed_per_iteration = _is_quantized ? 4 : (8 / input->info()->element_size());
 
     CLBuildOptions build_opts;
     build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
@@ -217,24 +246,19 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     build_opts.add_option("-DDILATION_X=" + support::cpp11::to_string(dilation.x()));
     build_opts.add_option("-DDILATION_Y=" + support::cpp11::to_string(dilation.y()));
 
-    if(is_qasymm)
+    if(_is_quantized)
     {
         const UniformQuantizationInfo iq_info = _input->info()->quantization_info().uniform();
         const UniformQuantizationInfo wq_info = _weights->info()->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = _output->info()->quantization_info().uniform();
-
-        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
-        int   output_multiplier = 0;
-        int   output_shift      = 0;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
         build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-iq_info.offset));
         build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-wq_info.offset));
         build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(oq_info.offset));
         build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * iq_info.offset * wq_info.offset));
-        build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
-        build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
+        build_opts.add_option_if(is_quantized_per_channel, "-DPER_CHANNEL_QUANTIZATION");
+        build_opts.add_option_if(is_dot8_supported, "-DIS_DOT8");
 
         if(act_info.enabled())
         {
@@ -250,6 +274,10 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
             build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
             build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
         }
+
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+        build_opts.add_option("-DWEIGHTS_TYPE=" + get_cl_type_from_data_type(weights->info()->data_type()));
+        build_opts.add_option("-DWEIGHTS_PROMOTED_TYPE=" + get_cl_promoted_type_from_data_type(weights->info()->data_type()));
     }
     else
     {
@@ -274,9 +302,9 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
 
     std::string kernel_name;
     // Create kernel
-    if(is_qasymm)
+    if(_is_quantized)
     {
-        kernel_name = std::string("dwc_3x3_reshaped_qasymm8");
+        kernel_name = std::string("dwc_3x3_reshaped_quantized8");
         kernel_name += (is_dot8_supported && is_stride_1_dilation_1 ? "_dot8" : "");
         kernel_name += (is_stride_1_dilation_1 ? "_stride1" : "");
         kernel_name += "_nhwc";
@@ -309,13 +337,16 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _config_id += string_from_data_type(input->info()->data_type());
 }
 
-Status CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                          unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
+Status CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+                                                          const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation,
+                                                          const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation, output_multipliers, output_shifts));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(),
                                                               biases != nullptr ? biases->clone().get() : nullptr,
-                                                              output->clone().get(), conv_info, depth_multiplier, dilation)
+                                                              output->clone().get(), conv_info, depth_multiplier, dilation,
+                                                              (output_multipliers != nullptr) ? output_multipliers->clone().get() : nullptr,
+                                                              (output_shifts != nullptr) ? output_shifts->clone().get() : nullptr)
                                 .first);
 
     return Status{};
@@ -329,7 +360,6 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
     // Collapse window
     Window       window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     const size_t total_batches    = _input->info()->tensor_shape().total_size_upper(3);
-    const bool   is_qasymm        = is_data_type_quantized_asymmetric(_input->info()->data_type());
 
     Window win = window_collapsed;
     win.set(Window::DimZ, Window::Dimension(0, std::ceil(_output->info()->dimension(2) / static_cast<float>(_num_planes_processed_per_iteration)) * total_batches, 1));
@@ -344,7 +374,16 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
     Window slice_in  = win_in.first_slice_window_4D();
     Window slice_out = win.first_slice_window_4D();
 
-    unsigned int idx = 2 * num_arguments_per_4D_tensor() + (is_qasymm ? num_arguments_per_2D_tensor() : num_arguments_per_3D_tensor());
+    unsigned int idx = 2 * num_arguments_per_4D_tensor() + (_is_quantized ? num_arguments_per_2D_tensor() : num_arguments_per_3D_tensor());
+
+    if(_is_quantized)
+    {
+        Window slice;
+        slice.use_tensor_dimensions(_output_multipliers->info()->tensor_shape());
+        slice.set_dimension_step(Window::DimX, window.x().step());
+        add_1D_tensor_argument(idx, _output_multipliers, slice);
+        add_1D_tensor_argument(idx, _output_shifts, slice);
+    }
 
     if(_biases != nullptr)
     {
@@ -398,7 +437,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
         unsigned int idx = 0;
         add_4D_tensor_argument(idx, _input, slice_in);
         add_4D_tensor_argument(idx, _output, slice_out);
-        if(is_qasymm)
+        if(_is_quantized)
         {
             add_2D_tensor_argument(idx, _weights, slice_out);
         }

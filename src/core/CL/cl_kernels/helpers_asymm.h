@@ -93,16 +93,18 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
  *
  * @return Correctly-rounded-to-nearest division by a power-of-two.
  */
-#define ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(size)                                                                   \
-    inline VEC_DATA_TYPE(int, size) asymm_rounding_divide_by_POW2_##size(VEC_DATA_TYPE(int, size) x, int exponent) \
-    {                                                                                                              \
-        VEC_DATA_TYPE(int, size)                                                                                   \
-        mask = (1 << exponent) - 1;                                                                                \
-        const VEC_DATA_TYPE(int, size) zero = 0;                                                                   \
-        const VEC_DATA_TYPE(int, size) one  = 1;                                                                   \
-        VEC_DATA_TYPE(int, size)                                                                                   \
-        threshold = (mask >> 1) + select(zero, one, x < 0);                                                        \
-        return (x >> exponent) + select(zero, one, (x & mask) > threshold);                                        \
+#define ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(size)                                                                                        \
+    inline VEC_DATA_TYPE(int, size) asymm_rounding_divide_by_POW2_##size(VEC_DATA_TYPE(int, size) x, VEC_DATA_TYPE(int, size) exponent) \
+    {                                                                                                                                   \
+        const VEC_DATA_TYPE(int, size)                                                                                                  \
+        zero = (VEC_DATA_TYPE(int, size))0;                                                                                         \
+        const VEC_DATA_TYPE(int, size)                                                                                                  \
+        one = (VEC_DATA_TYPE(int, size))1;                                                                                          \
+        VEC_DATA_TYPE(int, size)                                                                                                        \
+        mask = (one << exponent) - one;                                                                                                 \
+        VEC_DATA_TYPE(int, size)                                                                                                        \
+        threshold = (mask >> 1) + select(zero, one, x < 0);                                                                             \
+        return (x >> exponent) + select(zero, one, (x & mask) > threshold);                                                             \
     }
 
 /** Product of two numbers, interpreting them as fixed-point values in the interval [-1, 1),

@@ -50,6 +50,22 @@ static constexpr unsigned int max_cl_vector_width = 16;
  */
 std::string get_cl_type_from_data_type(const DataType &dt);
 
+/** Translates a tensor data type to the appropriate OpenCL promoted type.
+ *
+ * @param[in] dt @ref DataType to be used to get the promoted OpenCL type.
+ *
+ * @return The string specifying the OpenCL type to be used.
+ */
+std::string get_cl_promoted_type_from_data_type(const DataType &dt);
+
+/** Translates the element size to an unsigned integer data type
+ *
+ * @param[in] element_size Size in bytes of an element.
+ *
+ * @return The string specifying the OpenCL type to be used.
+ */
+std::string get_cl_unsigned_type_from_element_size(size_t element_size);
+
 /** Translates a tensor data type to the appropriate OpenCL select type.
  *
  * @param[in] dt @ref DataType to be translated to OpenCL select type.

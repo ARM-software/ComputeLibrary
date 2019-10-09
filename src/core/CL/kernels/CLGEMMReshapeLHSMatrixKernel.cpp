@@ -37,7 +37,8 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
@@ -139,21 +140,7 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(input->info()->dimension(1)));
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(input->info()->dimension(2)));
-
-    switch(input->info()->element_size())
-    {
-        case 1:
-            build_opts.add_option("-DDATA_TYPE=uchar");
-            break;
-        case 2:
-            build_opts.add_option("-DDATA_TYPE=ushort");
-            break;
-        case 4:
-            build_opts.add_option("-DDATA_TYPE=uint");
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Data type not supported");
-    }
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
 
     std::string kernel_name("gemm_reshape_lhs_matrix_");
     kernel_name += lhs_info.transpose ? "t" : "nt";
@@ -220,3 +207,4 @@ void CLGEMMReshapeLHSMatrixKernel::run(const Window &window, cl::CommandQueue &q
     }
     while(window.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

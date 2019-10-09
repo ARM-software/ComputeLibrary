@@ -58,8 +58,10 @@ public:
      * @note Supported data layouts: NHWC
      *
      * @param[in]  input            Source tensor. DataType supported: QASYMM8/F16/F32.
-     * @param[in]  weights          Weights tensor. This is a 3D tensor with dimensions [IFM, W, H]. Data type supported: Same as @p input.
-     * @param[in]  biases           Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed. Data type supported: Same as @p input.
+     * @param[in]  weights          Weights tensor. This is a 3D tensor with dimensions [IFM, W, H].
+     *                              Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     * @param[in]  biases           Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                              Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[out] output           Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info        Padding and stride information to use for the convolution.
      * @param[in]  depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -73,8 +75,10 @@ public:
      * @note Supported data layouts: NHWC
      *
      * @param[in] input            Source tensor info. DataType supported: QASYMM8/F16/F32.
-     * @param[in] weights          Weights tensor info. This is a 3D tensor with dimensions [IFM, W, H]. Data type supported: Same as @p input.
-     * @param[in] biases           Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed. Data type supported: Same as @p input.
+     * @param[in] weights          Weights tensor info. This is a 3D tensor with dimensions [IFM, W, H].
+     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     * @param[in] biases           Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in] output           Destination tensor info. Data type supported: Same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.

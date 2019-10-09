@@ -40,7 +40,8 @@
 
 #include <map>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 namespace
 {
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int height_offset, ITensorInfo *output, unsigned int &num_elems_processed_per_iteration)
@@ -102,31 +103,7 @@ void CLHeightConcatenateLayerKernel::configure(const ICLTensor *input, unsigned 
 
     // Add build options
     CLBuildOptions build_opts;
-
-    switch(input->info()->element_size())
-    {
-        case 1:
-        {
-            build_opts.add_option("-DDATA_TYPE=uchar");
-            break;
-        }
-        case 2:
-        {
-            build_opts.add_option("-DDATA_TYPE=short");
-            break;
-        }
-        case 4:
-        {
-            build_opts.add_option("-DDATA_TYPE=int");
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Unsupported input data type.");
-            break;
-        }
-    }
-
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(_num_elems_processed_per_iteration));
     build_opts.add_option("-DHEIGHT_OFFSET=" + support::cpp11::to_string(_height_offset));
     build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
@@ -164,3 +141,4 @@ void CLHeightConcatenateLayerKernel::run(const Window &window, cl::CommandQueue 
     add_4D_tensor_argument(idx, _output, window);
     enqueue(queue, *this, window, lws_hint());
 }
+} // namespace arm_compute

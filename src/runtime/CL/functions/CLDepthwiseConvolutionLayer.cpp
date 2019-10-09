@@ -45,6 +45,7 @@ Status validate_arguments_3x3(const ITensorInfo *input, const ITensorInfo *weigh
 {
     // This function should be removed and incorporated inside CLDepthwiseConvolutionLayerInternal3x3 once CLDepthwiseConvolutionLayer3x3 is properly removed
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
     const bool                      is_quantized           = is_data_type_quantized_asymmetric(input->data_type());
@@ -58,15 +59,20 @@ Status validate_arguments_3x3(const ITensorInfo *input, const ITensorInfo *weigh
     info.c0        = 4;
     info.transpose = is_stride_1_dilation_1 && is_dot8_supported;
 
+    TensorInfo output_multipliers_shifts_info(TensorInfo(TensorShape(1U), 1, DataType::S32));
     if(is_quantized)
     {
-        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = (output->total_size() == 0) ? iq_info : output->quantization_info().uniform();
+        if(is_data_type_quantized_per_channel(weights->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QSYMM8_PER_CHANNEL);
 
-        const float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
-        ARM_COMPUTE_UNUSED(multiplier);
-        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
+            const size_t idx_c = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::CHANNEL);
+            output_multipliers_shifts_info.set_tensor_shape(TensorShape(weights->dimension(idx_c)));
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+        }
     }
 
     if(needs_permute)
@@ -83,25 +89,29 @@ Status validate_arguments_3x3(const ITensorInfo *input, const ITensorInfo *weigh
         const TensorInfo permuted_weights = weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_weights_shape).set_data_layout(DataLayout::NCHW);
         const TensorInfo permuted_output  = output->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_output_shape).set_data_layout(DataLayout::NCHW);
 
-        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(&permuted_input, &permuted_weights, biases, &permuted_output, conv_info, depth_multiplier, act_info, gpu_target,
-                                                                                       dilation));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(&permuted_input, &permuted_weights, biases, &permuted_output,
+                                                                                       conv_info, depth_multiplier, act_info, gpu_target,
+                                                                                       dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
     }
     else if(is_nhwc)
     {
         if(needs_weights_reshape)
         {
             auto reshaped_weights_shape = arm_compute::misc::shape_calculator::compute_reshaped_depthwise_weights_shape(*weights, info);
-            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, &weights->clone()->set_tensor_shape(reshaped_weights_shape), biases, output, conv_info, depth_multiplier,
-                                                                                           act_info, dilation));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, &weights->clone()->set_tensor_shape(reshaped_weights_shape), biases,
+                                                                                           output, conv_info, depth_multiplier, act_info,
+                                                                                           dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
         }
         else
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info,
+                                                                                           dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
         }
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target, dilation));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target,
+                                                                                       dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
     }
     return Status{};
 }
@@ -143,9 +153,14 @@ CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::CLDepthwiseConv
       _permuted_input(),
       _permuted_weights(),
       _permuted_output(),
+      _output_multipliers(),
+      _output_shifts(),
       _original_weights(),
+      _input(),
+      _output(),
       _needs_permute(false),
-      _is_prepared(false)
+      _is_prepared(false),
+      _is_quantized(false)
 {
 }
 
@@ -162,8 +177,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(
                                                                      act_info,
                                                                      dilation));
 
+    _is_quantized     = is_data_type_quantized(input->info()->data_type());
     _is_prepared      = false;
     _original_weights = weights;
+    _input            = input;
+    _output           = output;
     _needs_permute    = input->info()->data_layout() == DataLayout::NCHW;
 
     ICLTensor       *input_to_use   = input;
@@ -190,11 +208,27 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(
         output_to_use  = &_permuted_output;
     }
 
+    CLTensor *output_multipliers_to_use = nullptr;
+    CLTensor *output_shifts_to_use      = nullptr;
+    if(_is_quantized)
+    {
+        const size_t idx_c       = get_data_layout_dimension_index(weights->info()->data_layout(), DataLayoutDimension::CHANNEL);
+        const size_t num_filters = (is_data_type_quantized_per_channel(weights->info()->data_type())) ? weights->info()->dimension(idx_c) : 1;
+
+        _output_multipliers.allocator()->init(TensorInfo(TensorShape(num_filters), 1, DataType::S32));
+        _output_shifts.allocator()->init(TensorInfo(TensorShape(num_filters), 1, DataType::S32));
+
+        output_multipliers_to_use = &_output_multipliers;
+        output_shifts_to_use      = &_output_shifts;
+    }
+
     DWCWeightsKernelInfo dwc_weights_info;
     dwc_weights_info.n0 = (depth_multiplier == 1) ? 8 : 1;
     DWCKernelInfo dwc_info;
     dwc_info.activation_info = act_info;
-    _dwc_native_kernel.configure(input_to_use, weights_to_use, biases, output_to_use, dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation);
+    _dwc_native_kernel.configure(input_to_use, weights_to_use, biases, output_to_use,
+                                 dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation,
+                                 output_multipliers_to_use, output_shifts_to_use);
 
     if(_needs_permute)
     {
@@ -204,6 +238,12 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(
         _permuted_output.info()->set_data_layout(DataLayout::NCHW);
         _permute_output_to_nchw.configure(&_permuted_output, output, PermutationVector(1U, 2U, 0U));
         _permuted_output.allocator()->allocate();
+    }
+
+    if(_is_quantized)
+    {
+        _output_multipliers.allocator()->allocate();
+        _output_shifts.allocator()->allocate();
     }
 }
 
@@ -225,6 +265,24 @@ Status CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::validate
 
     const bool needs_permute = input->data_layout() == DataLayout::NCHW;
 
+    const bool is_quantized = is_data_type_quantized(input->data_type());
+
+    TensorInfo output_multipliers_shifts_info(TensorInfo(TensorShape(1U), 1, DataType::S32));
+    if(is_quantized)
+    {
+        if(is_data_type_quantized_per_channel(weights->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QSYMM8_PER_CHANNEL);
+
+            const size_t idx_c = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::CHANNEL);
+            output_multipliers_shifts_info.set_tensor_shape(TensorShape(weights->dimension(idx_c)));
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+        }
+    }
+
     if(needs_permute)
     {
         TensorShape permuted_input_shape   = input->tensor_shape();
@@ -242,12 +300,14 @@ Status CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::validate
         ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(input, &permuted_input, PermutationVector(2U, 0U, 1U)));
         ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(weights, &permuted_weights, PermutationVector(2U, 0U, 1U)));
         ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayerNativeKernel::validate(&permuted_input, &permuted_weights, biases, &permuted_output, dwc_weights_info,
-                                                                                      dwc_info, conv_info, depth_multiplier, dilation));
+                                                                                      dwc_info, conv_info, depth_multiplier, dilation,
+                                                                                      &output_multipliers_shifts_info, &output_multipliers_shifts_info));
         ARM_COMPUTE_RETURN_ON_ERROR(CLPermute::validate(&permuted_output, output, PermutationVector(1U, 2U, 0U)));
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayerNativeKernel::validate(input, weights, biases, output, dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayerNativeKernel::validate(input, weights, biases, output, dwc_weights_info, dwc_info, conv_info, depth_multiplier,
+                                                                                      dilation, &output_multipliers_shifts_info, &output_multipliers_shifts_info));
     }
     return Status{};
 }
@@ -273,6 +333,19 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
 {
     if(!_is_prepared)
     {
+        if(_is_quantized)
+        {
+            _output_multipliers.map();
+            _output_shifts.map();
+            quantization::compute_quantized_multipliers_and_shifts(_input,
+                                                                   _original_weights,
+                                                                   _output,
+                                                                   reinterpret_cast<int32_t *>(_output_multipliers.ptr_to_element(Coordinates(0))),
+                                                                   reinterpret_cast<int32_t *>(_output_shifts.ptr_to_element(Coordinates(0))));
+            _output_multipliers.unmap();
+            _output_shifts.unmap();
+        }
+
         if(_needs_permute)
         {
             ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
@@ -286,40 +359,63 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
 }
 
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::CLDepthwiseConvolutionLayerInternal3x3(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _kernel(nullptr), _border_handler(), _permute_input_to_nchw(), _permute_weights_to_nchw(), _permute_output_to_nhwc(), _reshape_weights(), _permuted_input(),
-      _permuted_weights(), _permuted_output(), _original_weights(nullptr), _needs_permute(false), _needs_weights_reshape(false), _is_prepared(false)
+    : _memory_group(std::move(memory_manager)),
+      _kernel(nullptr),
+      _border_handler(),
+      _permute_input_to_nchw(),
+      _permute_weights_to_nchw(),
+      _permute_output_to_nhwc(),
+      _reshape_weights(),
+      _permuted_input(),
+      _permuted_weights(),
+      _permuted_output(),
+      _output_multipliers(),
+      _output_shifts(),
+      _original_weights(nullptr),
+      _input(nullptr),
+      _output(nullptr),
+      _needs_permute(false),
+      _needs_weights_reshape(false),
+      _is_prepared(false),
+      _is_quantized(false)
 {
 }
 
 void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                                                                     const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    // idx_w and idx_h only used for validation
-    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_UNUSED(idx_w);
-    ARM_COMPUTE_UNUSED(idx_h);
+    const GPUTarget gpu_target = CLScheduler::get().target();
 
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_w) + (weights->info()->dimension(idx_w) - 1) * (dilation.x() - 1) > input->info()->dimension(idx_w) + conv_info.pad_left() + conv_info.pad_right());
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_h) + (weights->info()->dimension(idx_h) - 1) * (dilation.y() - 1) > input->info()->dimension(idx_h) + conv_info.pad_top() + conv_info.pad_bottom());
+    // Perform validation step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_ERROR_THROW_ON(CLDepthwiseConvolutionLayer3x3::validate(input->info(),
+                                                                        weights->info(),
+                                                                        biases != nullptr ? biases->info() : nullptr,
+                                                                        output->info(),
+                                                                        conv_info,
+                                                                        depth_multiplier,
+                                                                        act_info,
+                                                                        gpu_target,
+                                                                        dilation));
 
-    const bool is_nhwc = input->info()->data_layout() == DataLayout::NHWC;
-
+    const bool is_nhwc     = input->info()->data_layout() == DataLayout::NHWC;
+    _is_quantized          = is_data_type_quantized_asymmetric(input->info()->data_type());
     _needs_permute         = is_nhwc && (depth_multiplier > 1);
-    _needs_weights_reshape = is_nhwc && (depth_multiplier == 1)
-                             && is_data_type_quantized_asymmetric(input->info()->data_type());
+    _needs_weights_reshape = is_nhwc && (depth_multiplier == 1) && _is_quantized;
+
     _is_prepared      = false;
     _original_weights = weights;
+    _input            = input;
+    _output           = output;
 
     ICLTensor       *input_to_use   = input;
     const ICLTensor *weights_to_use = weights;
     ICLTensor       *output_to_use  = output;
 
-    const bool is_stride_1            = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
-    const bool is_dot8_supported      = dot8_supported(CLKernelLibrary::get().get_device());
-    const bool is_stride_1_dilation_1 = (is_stride_1 && dilation.x() == 1 && dilation.y() == 1);
+    const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights->info()->data_type());
+    const bool is_stride_1              = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
+    const bool is_dot8_supported        = dot8_supported(CLKernelLibrary::get().get_device()) && !is_quantized_per_channel;
+    const bool is_stride_1_dilation_1   = (is_stride_1 && dilation.x() == 1 && dilation.y() == 1);
 
     DepthwiseConvolutionReshapeInfo info;
     info.c0        = 4;
@@ -359,9 +455,30 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
         _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
     }
 
+    CLTensor *output_multipliers_to_use = nullptr;
+    CLTensor *output_shifts_to_use      = nullptr;
+    if(_is_quantized)
+    {
+        const size_t idx_c       = get_data_layout_dimension_index(weights->info()->data_layout(), DataLayoutDimension::CHANNEL);
+        const size_t num_filters = (is_quantized_per_channel) ? weights->info()->dimension(idx_c) : 1;
+
+        _output_multipliers.allocator()->init(TensorInfo(TensorShape(num_filters), 1, DataType::S32));
+        _output_shifts.allocator()->init(TensorInfo(TensorShape(num_filters), 1, DataType::S32));
+
+        output_multipliers_to_use = &_output_multipliers;
+        output_shifts_to_use      = &_output_shifts;
+    }
+
     // Configure kernel
-    _kernel->set_target(CLScheduler::get().target());
-    _kernel->configure(input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier, act_info, dilation);
+    _kernel->set_target(gpu_target);
+    _kernel->configure(input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier,
+                       act_info, dilation, output_multipliers_to_use, output_shifts_to_use);
+
+    if(_is_quantized)
+    {
+        _output_multipliers.allocator()->allocate();
+        _output_shifts.allocator()->allocate();
+    }
 
     // Permute output if needed
     if(_needs_permute)
@@ -412,6 +529,19 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::prepar
 {
     if(!_is_prepared)
     {
+        if(_is_quantized)
+        {
+            _output_multipliers.map();
+            _output_shifts.map();
+            quantization::compute_quantized_multipliers_and_shifts(_input,
+                                                                   _original_weights,
+                                                                   _output,
+                                                                   reinterpret_cast<int32_t *>(_output_multipliers.ptr_to_element(Coordinates(0))),
+                                                                   reinterpret_cast<int32_t *>(_output_shifts.ptr_to_element(Coordinates(0))));
+            _output_multipliers.unmap();
+            _output_shifts.unmap();
+        }
+
         if(_needs_permute)
         {
             ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());

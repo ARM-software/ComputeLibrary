@@ -553,6 +553,8 @@ TEST_SUITE_END() // Float
 
 template <typename T>
 using CLDepthwiseConvolutionLayerQuantizedFixture = DepthwiseConvolutionLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer, T>;
+template <typename T>
+using CLDepthwiseConvolutionLayerQuantizedPerChannelFixture = DepthwiseConvolutionLayerValidationQuantizedPerChannelFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer, T, int8_t>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -653,6 +655,113 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uin
 TEST_SUITE_END() // Dilation
 TEST_SUITE_END() // W3x3
 TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QSYMM8_PER_CHANNEL)
+TEST_SUITE(Generic)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
+                                                                               depth_multipliers),
+                                                                       framework::dataset::make("SrcDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
+                                                                               large_depth_multipliers),
+                                                                       framework::dataset::make("SrcDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.7f, 2) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE(Dilation)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset(),
+                                                                               depth_multipliers),
+                                                                       framework::dataset::make("SrcDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.8, 1) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset(),
+                                                                               large_depth_multipliers),
+                                                                       framework::dataset::make("SrcDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.9f, 11) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // Dilation
+TEST_SUITE_END() // Generic
+TEST_SUITE(W3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                                                               depth_multipliers),
+                                                                       framework::dataset::make("SrcDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+                                                                               large_depth_multipliers),
+                                                                       framework::dataset::make("SrcDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE(Dilation)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(),
+                                                                               depth_multipliers),
+                                                                       framework::dataset::make("SrcDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
+                                                                               large_depth_multipliers),
+                                                                       framework::dataset::make("SrcDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // Dilation
+TEST_SUITE_END() // W3x3
+TEST_SUITE_END() // QSYMM8_PER_CHANNEL
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // DepthwiseConvolutionLayer

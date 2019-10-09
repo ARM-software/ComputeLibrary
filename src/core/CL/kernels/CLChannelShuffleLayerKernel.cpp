@@ -113,21 +113,7 @@ void CLChannelShuffleLayerKernel::configure(const ICLTensor *input, ICLTensor *o
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size));
     build_opts.add_option("-DSRC_DIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
     build_opts.add_option("-DLAST_ACCESSED=" + support::cpp11::to_string(std::max(static_cast<int>(channels - vec_size), 0)));
-
-    switch(input->info()->element_size())
-    {
-        case 1:
-            build_opts.add_option("-DDATA_TYPE=uchar");
-            break;
-        case 2:
-            build_opts.add_option("-DDATA_TYPE=ushort");
-            break;
-        case 4:
-            build_opts.add_option("-DDATA_TYPE=uint");
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Data type not supported");
-    }
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
 
     // Create kernel
     std::string kernel_name = "channel_shuffle_" + lower_string(string_from_data_layout(data_layout));

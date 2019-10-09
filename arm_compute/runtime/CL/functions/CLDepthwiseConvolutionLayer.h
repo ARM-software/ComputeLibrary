@@ -58,7 +58,8 @@ public:
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/FP16/FP32. Data layout supported: NHWC, NCHW
-     * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+     * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
+     *                                  Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
@@ -73,7 +74,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer
      *
      * @param[in] input            Source tensor info. Data type supported: QASYMM8/FP16/FP32. Data layout supported: NHWC, NCHW
-     * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+     * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
+     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in] biases           Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
@@ -95,7 +97,8 @@ private:
     /** Static function to choose the best depthwise convolution function for @ref CLDepthwiseConvolutionLayer
      *
      * @param[in] input            Source tensor info. Data type supported: QASYMM8/FP16/FP32. Data layout supported: NHWC, NCHW
-     * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+     * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
+     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in] biases           Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
@@ -135,7 +138,8 @@ private:
         /** Initialize the function's source, destination, conv and border_size.
          *
          * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
-         * @param[in]      weights          Weights tensor. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
+         * @param[in]      weights          Weights tensor. A 3D tensor with shape [3, 3, IFM].
+         *                                  Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
          * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
          *                                  Data type supported: Same as @p input.
          * @param[out]     output           Destination tensor. Data type supported: same as @p input.
@@ -150,7 +154,8 @@ private:
         /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3
          *
          * @param[in] input            Source tensor info. Data type supported: QASYMM8 for all layouts, F16/F32 for NCHW.
-         * @param[in] weights          Weights tensor info. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
+         * @param[in] weights          Weights tensor info. A 3D tensor with shape [3, 3, IFM].
+         *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
          * @param[in] biases           Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
          *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
          * @param[in] output           Destination tensor. Data type supported: same as @p input.
@@ -184,10 +189,15 @@ private:
         CLTensor                                               _permuted_input;
         CLTensor                                               _permuted_weights;
         CLTensor                                               _permuted_output;
+        CLTensor                                               _output_multipliers;
+        CLTensor                                               _output_shifts;
         const ITensor                                         *_original_weights;
+        const ITensor                                         *_input;
+        const ITensor                                         *_output;
         bool                                                   _needs_permute;
         bool                                                   _needs_weights_reshape;
         bool                                                   _is_prepared;
+        bool                                                   _is_quantized;
     };
 
     /** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
@@ -212,7 +222,8 @@ private:
         /** Initialize the function's source, destination, weights and convolution information.
          *
          * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
-         * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+         * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
+         *                                  Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
          * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
          *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
          * @param[out]     output           Destination tensor. Data type supported: same as @p input.
@@ -227,7 +238,8 @@ private:
         /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayerGeneric
          *
          * @param[in] input            Source tensor info. Data type supported: QASYMM8/F32.
-         * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+         * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
+         *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
          * @param[in] biases           Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
          *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
          * @param[in] output           Destination tensor. Data type supported: same as @p input.
@@ -261,10 +273,15 @@ private:
         CLTensor       _permuted_input;
         CLTensor       _permuted_weights;
         CLTensor       _permuted_output;
+        CLTensor       _output_multipliers;
+        CLTensor       _output_shifts;
         const ITensor *_original_weights;
+        const ITensor *_input;
+        const ITensor *_output;
 
         bool _needs_permute;
         bool _is_prepared;
+        bool _is_quantized;
     };
 
     std::shared_ptr<IMemoryManager> _memory_manager;
@@ -298,7 +315,8 @@ public:
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
-     * @param[in]      weights          Weights tensor. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
+     * @param[in]      weights          Weights tensor. A 3D tensor with shape [3, 3, IFM].
+     *                                  Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                                  Data type supported: Same as @p input.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
@@ -314,7 +332,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3
      *
      * @param[in] input            Source tensor info. Data type supported: QASYMM8 for all layouts, F16/F32 for NCHW.
-     * @param[in] weights          Weights tensor info. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
+     * @param[in] weights          Weights tensor info. A 3D tensor with shape [3, 3, IFM].
+     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in] biases           Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
