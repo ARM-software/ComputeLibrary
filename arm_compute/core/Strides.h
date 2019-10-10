@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@
 namespace arm_compute
 {
 /** Strides of an item in bytes */
-class Strides : public Dimensions<size_t>
+class Strides : public Dimensions<uint32_t>
 {
 public:
     /** Constructor to initialize the strides.

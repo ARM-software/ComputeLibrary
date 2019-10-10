@@ -344,7 +344,7 @@ public:
         try
         {
             _fs.open(npy_filename, std::ios::in | std::ios::binary);
-            ARM_COMPUTE_EXIT_ON_MSG(!_fs.good(), "Failed to load binary data from %s", npy_filename.c_str());
+            ARM_COMPUTE_EXIT_ON_MSG_VAR(!_fs.good(), "Failed to load binary data from %s", npy_filename.c_str());
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _file_layout = file_layout;
 
@@ -352,7 +352,7 @@ public:
         }
         catch(const std::ifstream::failure &e)
         {
-            ARM_COMPUTE_ERROR("Accessing %s: %s", npy_filename.c_str(), e.what());
+            ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", npy_filename.c_str(), e.what());
         }
     }
     /** Return true if a NPY file is currently open */
@@ -521,7 +521,7 @@ public:
         }
         catch(const std::ifstream::failure &e)
         {
-            ARM_COMPUTE_ERROR("Loading NPY file: %s", e.what());
+            ARM_COMPUTE_ERROR_VAR("Loading NPY file: %s", e.what());
         }
     }
 
@@ -609,7 +609,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
     }
     catch(const std::ofstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Writing %s: (%s)", ppm_filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", ppm_filename.c_str(), e.what());
     }
 }
 
@@ -668,7 +668,7 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
     }
     catch(const std::ofstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Writing %s: (%s)", npy_filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", npy_filename.c_str(), e.what());
     }
 }
 
@@ -720,7 +720,7 @@ void load_trained_data(T &tensor, const std::string &filename)
     }
     catch(const std::ofstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Writing %s: (%s)", filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", filename.c_str(), e.what());
     }
 }
 

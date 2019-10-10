@@ -130,7 +130,7 @@ if not env['exceptions']:
     env.Append(CXXFLAGS = ['-fno-exceptions'])
 
 env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
-         '-Wextra','-pedantic','-Wdisabled-optimization','-Wformat=2', '-Wno-format-nonliteral',
+         '-Wextra','-pedantic','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
          '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
          '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings','-Wno-strict-overflow'])
@@ -146,11 +146,11 @@ if env['os'] == 'android' and ( 'clang++' not in cpp_compiler or 'clang' not in 
     print( "WARNING: Only clang is officially supported to build the Compute Library for Android")
 
 if 'clang++' in cpp_compiler:
-    env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
+    env.Append(CXXFLAGS = ['-Wno-vla-extension'])
 elif 'armclang' in cpp_compiler:
     pass
 else:
-    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel', '-Wno-redundant-move'])
+    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
 
 if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])

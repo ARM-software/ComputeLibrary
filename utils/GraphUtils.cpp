@@ -35,6 +35,7 @@
 #pragma GCC diagnostic pop
 #include "utils/Utils.h"
 
+#include <inttypes.h>
 #include <iomanip>
 #include <limits>
 
@@ -258,9 +259,9 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
         {
             std::tie(permuted_shape, perm) = compute_permutation_parameters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
         }
-        ARM_COMPUTE_EXIT_ON_MSG(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
-                                "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
-                                image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
+        ARM_COMPUTE_EXIT_ON_MSG_VAR(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
+                                    "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu32 ",%" PRIu32 "].",
+                                    image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
 
         // Fill the tensor with the PPM content (BGR)
         image_loader->fill_planar_tensor(tensor, _bgr);
@@ -310,7 +311,7 @@ ValidationInputAccessor::ValidationInputAccessor(const std::string             &
     }
     catch(const std::ifstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Accessing %s: %s", image_list.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", image_list.c_str(), e.what());
     }
 }
 
@@ -334,9 +335,9 @@ bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
             std::tie(permuted_shape, perm) = compute_permutation_parameters(tensor.info()->tensor_shape(),
                                                                             tensor.info()->data_layout());
         }
-        ARM_COMPUTE_EXIT_ON_MSG(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
-                                "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
-                                jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
+        ARM_COMPUTE_EXIT_ON_MSG_VAR(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
+                                    "Failed to load image file: dimensions [%d,%d] not correct, expected [%" PRIu32 ",%" PRIu32 "].",
+                                    jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
 
         // Fill the tensor with the JPEG content (BGR)
         jpeg.fill_planar_tensor(tensor, _bgr);
@@ -383,7 +384,7 @@ ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list
     }
     catch(const std::ifstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Accessing %s: %s", image_list.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", image_list.c_str(), e.what());
     }
 }
 
@@ -499,7 +500,7 @@ DetectionOutputAccessor::DetectionOutputAccessor(const std::string &labels_path,
     }
     catch(const std::ifstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Accessing %s: %s", labels_path.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", labels_path.c_str(), e.what());
     }
 }
 
@@ -570,7 +571,7 @@ TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
     }
     catch(const std::ifstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Accessing %s: %s", labels_path.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", labels_path.c_str(), e.what());
     }
 }
 

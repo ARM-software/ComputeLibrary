@@ -128,7 +128,7 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     }
     else
     {
-        ARM_COMPUTE_ERROR("Gradient size %d not supported", gradient_size);
+        ARM_COMPUTE_ERROR_VAR("Gradient size %d not supported", gradient_size);
     }
 
     // Manage intermediate buffers

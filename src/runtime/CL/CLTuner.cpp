@@ -237,7 +237,7 @@ void CLTuner::load_from_file(const std::string &filename)
     fs.open(filename, std::ios::in);
     if(!fs.is_open())
     {
-        ARM_COMPUTE_ERROR("Failed to open '%s' (%s [%d])", filename.c_str(), strerror(errno), errno);
+        ARM_COMPUTE_ERROR_VAR("Failed to open '%s' (%s [%d])", filename.c_str(), strerror(errno), errno);
     }
     std::string line;
     while(!std::getline(fs, line).fail())
@@ -246,7 +246,7 @@ void CLTuner::load_from_file(const std::string &filename)
         std::string        token;
         if(std::getline(ss, token, ';').fail())
         {
-            ARM_COMPUTE_ERROR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
+            ARM_COMPUTE_ERROR_VAR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
         }
         std::string kernel_id = token;
         cl::NDRange lws(1, 1, 1);
@@ -254,7 +254,7 @@ void CLTuner::load_from_file(const std::string &filename)
         {
             if(std::getline(ss, token, ';').fail())
             {
-                ARM_COMPUTE_ERROR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
+                ARM_COMPUTE_ERROR_VAR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
             }
             lws.get()[i] = support::cpp11::stoi(token);
         }

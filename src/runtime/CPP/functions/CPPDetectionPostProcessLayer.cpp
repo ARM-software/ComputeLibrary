@@ -46,16 +46,16 @@ Status validate_arguments(const ITensorInfo *input_box_encoding, const ITensorIn
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_box_encoding->num_dimensions() > 3, "The location input tensor shape should be [4, N, kBatchSize].");
     if(input_box_encoding->num_dimensions() > 2)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_box_encoding->dimension(2) != kBatchSize, "The third dimension of the input box_encoding tensor should be equal to %d.", kBatchSize);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG_VAR(input_box_encoding->dimension(2) != kBatchSize, "The third dimension of the input box_encoding tensor should be equal to %d.", kBatchSize);
     }
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_box_encoding->dimension(0) != kNumCoordBox, "The first dimension of the input box_encoding tensor should be equal to %d.", kNumCoordBox);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG_VAR(input_box_encoding->dimension(0) != kNumCoordBox, "The first dimension of the input box_encoding tensor should be equal to %d.", kNumCoordBox);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_class_score->dimension(0) != (info.num_classes() + 1),
                                     "The first dimension of the input class_prediction should be equal to the number of classes plus one.");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_anchors->num_dimensions() > 3, "The anchors input tensor shape should be [4, N, kBatchSize].");
     if(input_anchors->num_dimensions() > 2)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_anchors->dimension(0) != kNumCoordBox, "The first dimension of the input anchors tensor should be equal to %d.", kNumCoordBox);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG_VAR(input_anchors->dimension(0) != kNumCoordBox, "The first dimension of the input anchors tensor should be equal to %d.", kNumCoordBox);
     }
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((input_box_encoding->dimension(1) != input_class_score->dimension(1))
                                     || (input_box_encoding->dimension(1) != input_anchors->dimension(1)),

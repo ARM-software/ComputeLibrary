@@ -663,7 +663,7 @@ inline arm_compute::Status error_on_data_type_not_in(const char *function, const
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_dt == DataType::UNKNOWN, function, file, line);
 
     const std::array<T, sizeof...(Ts)> dts_array{ { std::forward<Ts>(dts)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor_dt != dt && std::none_of(dts_array.begin(), dts_array.end(), [&](const T & d)
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor_dt != dt && std::none_of(dts_array.begin(), dts_array.end(), [&](const T & d)
     {
         return d == tensor_dt;
     }),
@@ -715,7 +715,7 @@ inline arm_compute::Status error_on_data_layout_not_in(const char *function, con
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_dl == DataLayout::UNKNOWN, function, file, line);
 
     const std::array<T, sizeof...(Ts)> dls_array{ { std::forward<Ts>(dls)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor_dl != dl && std::none_of(dls_array.begin(), dls_array.end(), [&](const T & l)
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor_dl != dl && std::none_of(dls_array.begin(), dls_array.end(), [&](const T & l)
     {
         return l == tensor_dl;
     }),
@@ -764,7 +764,7 @@ inline arm_compute::Status error_on_data_type_channel_not_in(const char *functio
 {
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_not_in(function, file, line, tensor_info, std::forward<T>(dt), std::forward<Ts>(dts)...));
     const size_t tensor_nc = tensor_info->num_channels();
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor_nc != num_channels, function, file, line, "Number of channels %d. Required number of channels %d", tensor_nc, num_channels);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor_nc != num_channels, function, file, line, "Number of channels %zu. Required number of channels %zu", tensor_nc, num_channels);
     return arm_compute::Status{};
 }
 /** Return an error if the data type or the number of channels of the passed tensor does not match any of the data types and number of channels provided.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,14 +40,17 @@
         }                                                                                \
     } while(false)
 
-#define ARM_COMPUTE_LOG_MSG_WITH_FORMAT(logger_name, log_level, fmt, ...)                \
-    do                                                                                   \
-    {                                                                                    \
-        auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
-        if(__logger != nullptr)                                                          \
-        {                                                                                \
-            __logger->log(log_level, fmt, __VA_ARGS__);                                  \
-        }                                                                                \
+#define ARM_COMPUTE_LOG_MSG_WITH_FORMAT(logger_name, log_level, fmt, ...)                     \
+    do                                                                                        \
+    {                                                                                         \
+        auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name);      \
+        if(__logger != nullptr)                                                               \
+        {                                                                                     \
+            size_t size     = ::snprintf(nullptr, 0, fmt, __VA_ARGS__) + 1;                   \
+            auto   char_str = support::cpp14::make_unique<char[]>(size);                      \
+            ::snprintf(char_str.get(), size, #fmt, __VA_ARGS__);                              \
+            __logger->log(log_level, std::string(char_str.get(), char_str.get() + size - 1)); \
+        }                                                                                     \
     } while(false)
 
 #define ARM_COMPUTE_LOG_STREAM(logger_name, log_level, stream)                           \

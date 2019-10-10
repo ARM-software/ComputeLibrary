@@ -75,7 +75,7 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
     }
     catch(const std::ifstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
     }
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 

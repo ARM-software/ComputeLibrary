@@ -1196,8 +1196,8 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
                 int x = 0;
                 for(; x <= (pool_size_x - 4); x += 4)
                 {
-                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
-                                                                                       (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                                       (_input->info()->strides_in_bytes().y())));
 
                     // Get power of 2 in case of l2 pooling and accumulate
                     if(pooling_type == PoolingType::L2)
@@ -1213,7 +1213,8 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
                 // Leftover for loop
                 for(; x < pool_size_x; ++x)
                 {
-                    float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                   (_input->info()->strides_in_bytes().y())));
 
                     // Get power of 2 in case of l2 pooling
                     if(pooling_type == PoolingType::L2)
@@ -1248,15 +1249,16 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
                 int x = 0;
                 for(; x <= (pool_size_x - 4); x += 4)
                 {
-                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
-                                                                                       (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                                       (_input->info()->strides_in_bytes().y())));
                     vres                   = vmaxq_f32(vres, data);
                 }
 
                 // Leftover for loop
                 for(; x < pool_size_x; ++x)
                 {
-                    const float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    const float data = *(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                         (_input->info()->strides_in_bytes().y())));
                     res              = std::max(res, data);
                 }
             }
@@ -1540,8 +1542,8 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
             {
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
-                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().y() +
-                                                                                       (y - pool_pad_top) * _input->info()->strides_in_bytes().z()));
+                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                       (_input->info()->strides_in_bytes().z())));
 
                     // Get power of 2 in case of l2 pooling and accumulate
                     if(pooling_type == PoolingType::L2)
@@ -1564,8 +1566,8 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
             {
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
-                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().y() +
-                                                                                       (y - pool_pad_top) * _input->info()->strides_in_bytes().z()));
+                    const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                       (_input->info()->strides_in_bytes().z())));
                     vres                   = vmaxq_f32(vres, data);
                 }
             }
@@ -1621,8 +1623,8 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
                 int x = 0;
                 for(; x <= (pool_size_x - 8); x += 8)
                 {
-                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
-                                                                                     (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                                     (_input->info()->strides_in_bytes().y())));
 
                     const uint16x8_t data_u16 = vmovl_u8(data);
                     vres                      = vaddq_u32(vres, vaddl_u16(vget_high_u16(data_u16), vget_low_u16(data_u16)));
@@ -1631,7 +1633,8 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
                 // Leftover for loop
                 for(; x < pool_size_x; ++x)
                 {
-                    uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                       (_input->info()->strides_in_bytes().y())));
                     sres += data;
                 }
             }
@@ -1653,15 +1656,16 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
                 int x = 0;
                 for(; x <= (pool_size_x - 8); x += 8)
                 {
-                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
-                                                                                     (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                                     (_input->info()->strides_in_bytes().y())));
                     vres                 = vmax_u8(vres, data);
                 }
 
                 // Leftover for loop
                 for(; x < pool_size_x; ++x)
                 {
-                    const uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    const uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                             (_input->info()->strides_in_bytes().y())));
                     res                = std::max(res, data);
                 }
             }
@@ -1732,8 +1736,8 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
             {
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
-                    const uint8x16_t data = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().y() +
-                                                                                       (y - pool_pad_top) * _input->info()->strides_in_bytes().z()));
+                    const uint8x16_t data = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                       (_input->info()->strides_in_bytes().z())));
 
                     const uint16x8_t data_u16  = vmovl_u8(vget_low_u8(data));
                     const uint16x8_t data2_u16 = vmovl_u8(vget_high_u8(data));
@@ -1770,8 +1774,8 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
             {
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
-                    const uint8x16_t data = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().y() +
-                                                                                       (y - pool_pad_top) * _input->info()->strides_in_bytes().z()));
+                    const uint8x16_t data = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                       (_input->info()->strides_in_bytes().z())));
                     vres                  = vmaxq_u8(vres, data);
                 }
             }

@@ -265,7 +265,7 @@ inline void Window::use_tensor_dimensions(const TensorShape &shape, size_t first
 {
     for(unsigned int n = first_dimension; n < shape.num_dimensions(); ++n)
     {
-        set(n, Window::Dimension(0, std::max(shape[n], static_cast<size_t>(1))));
+        set(n, Window::Dimension(0, std::max(shape[n], static_cast<uint32_t>(1))));
     }
 }
 

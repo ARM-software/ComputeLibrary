@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,7 +95,7 @@ T PMU::get_value() const
 
     if(result == -1)
     {
-        ARM_COMPUTE_ERROR("Can't get PMU counter value: %d", errno);
+        ARM_COMPUTE_ERROR_VAR("Can't get PMU counter value: %d", errno);
     }
 
     return value;

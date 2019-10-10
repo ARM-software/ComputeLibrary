@@ -384,11 +384,11 @@ ITensorInfo &TensorInfo::reset_padding()
     return *this;
 }
 
-size_t TensorInfo::offset_element_in_bytes(const Coordinates &pos) const
+int32_t TensorInfo::offset_element_in_bytes(const Coordinates &pos) const
 {
     ARM_COMPUTE_ERROR_ON_COORDINATES_DIMENSIONS_GTE(pos, _tensor_shape.num_dimensions());
 
-    size_t offset = _offset_first_element_in_bytes;
+    int32_t offset = _offset_first_element_in_bytes;
 
     for(size_t i = 0; i < _tensor_shape.num_dimensions(); ++i)
     {

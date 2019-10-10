@@ -66,7 +66,7 @@ GLuint GCProgram::link_program(GLuint shader)
 
         std::vector<GLchar> log(length);
         ARM_COMPUTE_GL_CHECK(glGetProgramInfoLog(program, length, nullptr, log.data()));
-        ARM_COMPUTE_ERROR("Error: Linker log:\n%s\n", log.data());
+        ARM_COMPUTE_ERROR_VAR("Error: Linker log:\n%s\n", log.data());
 
         return 0;
     }
@@ -120,7 +120,7 @@ GLuint GCProgram::compile_shader(const std::string &build_options)
                                          << output_stream.rdbuf());
 #endif /* ARM_COMPUTE_DEBUG_ENABLED */
 
-        ARM_COMPUTE_ERROR("Error: Compiler log:\n%s\n", log.data());
+        ARM_COMPUTE_ERROR_VAR("Error: Compiler log:\n%s\n", log.data());
 
         return 0;
     }
@@ -152,9 +152,9 @@ GCKernel::GCKernel(std::string name, GLuint program)
     ARM_COMPUTE_GL_CHECK(glGenBuffers(1, &_shader_params_ubo_name));
 
     _shader_params_index = ARM_COMPUTE_GL_CHECK(glGetUniformBlockIndex(_program, _shader_params_name));
-    ARM_COMPUTE_ERROR_ON_MSG(_shader_params_index == GL_INVALID_INDEX, "Failed to get index of %s", _shader_params_name);
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(_shader_params_index == GL_INVALID_INDEX, "Failed to get index of %s", _shader_params_name);
     ARM_COMPUTE_GL_CHECK(glGetActiveUniformBlockiv(_program, _shader_params_index, GL_UNIFORM_BLOCK_DATA_SIZE, &_shader_params_size));
-    ARM_COMPUTE_ERROR_ON_MSG(_shader_params_size == 0, "Failed to get size of %s", _shader_params_name);
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(_shader_params_size == 0, "Failed to get size of %s", _shader_params_name);
 }
 
 void GCKernel::cleanup()
@@ -177,8 +177,8 @@ void GCKernel::unuse()
 
 void GCKernel::update_shader_params()
 {
-    ARM_COMPUTE_ERROR_ON_MSG((_shader_params_size != (int)(_shader_arguments.size() * sizeof(_shader_arguments[0]))), "Arguments size (%d) is not equal to shader params block size (%d)",
-                             _shader_arguments.size() * sizeof(_shader_arguments[0]), _shader_params_size);
+    ARM_COMPUTE_ERROR_ON_MSG_VAR((_shader_params_size != (int)(_shader_arguments.size() * sizeof(_shader_arguments[0]))), "Arguments size (%zu) is not equal to shader params block size (%d)",
+                                 _shader_arguments.size() * sizeof(_shader_arguments[0]), _shader_params_size);
 
     ARM_COMPUTE_GL_CHECK(glUniformBlockBinding(_program, _shader_params_index, _shader_params_binding_point));
     ARM_COMPUTE_GL_CHECK(glBindBufferBase(GL_UNIFORM_BUFFER, _shader_params_binding_point, _shader_params_ubo_name));
@@ -344,7 +344,7 @@ GCKernel GCKernelLibrary::create_kernel(const std::string &shader_name, const St
 
     if(_shader_program_map.end() == shader_program_it)
     {
-        ARM_COMPUTE_ERROR("Shader %s not found in the GCKernelLibrary", shader_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Shader %s not found in the GCKernelLibrary", shader_name.c_str());
     }
 
     // Check if the program has been built before with same build options.
@@ -473,7 +473,7 @@ const GCProgram &GCKernelLibrary::load_program(const std::string &program_name) 
 
     if(_program_source_map.end() == program_source_it)
     {
-        ARM_COMPUTE_ERROR("Embedded program for %s does not exist.", program_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Embedded program for %s does not exist.", program_name.c_str());
     }
 
     program = GCProgram(program_name, program_source_it->second);
@@ -486,7 +486,7 @@ const GCProgram &GCKernelLibrary::load_program(const std::string &program_name) 
     }
     else
     {
-        ARM_COMPUTE_ERROR("Shader file %s does not exist.", source_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Shader file %s does not exist.", source_name.c_str());
     }
 #endif /* EMBEDDED_KERNELS */
 

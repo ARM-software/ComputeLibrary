@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,9 +82,9 @@ arm_compute::Status arm_compute::error_on_window_dimensions_gte(const char *func
 {
     for(unsigned int i = max_dim; i < arm_compute::Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((win[i].start() != 0) || (win[i].end() != win[i].step()),
-                                            function, file, line,
-                                            "Maximum number of dimensions expected %u but dimension %u is not empty", max_dim, i);
+        ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR((win[i].start() != 0) || (win[i].end() != win[i].step()),
+                                                function, file, line,
+                                                "Maximum number of dimensions expected %u but dimension %u is not empty", max_dim, i);
     }
     return arm_compute::Status{};
 }
@@ -94,9 +94,9 @@ arm_compute::Status arm_compute::error_on_tensor_not_2d(const char *function, co
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor->info() == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor->info()->num_dimensions() != 2,
-                                        function, file, line,
-                                        "Only 2D Tensors are supported by this kernel (%d passed)", tensor->info()->num_dimensions());
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor->info()->num_dimensions() != 2,
+                                            function, file, line,
+                                            "Only 2D Tensors are supported by this kernel (%zu passed)", tensor->info()->num_dimensions());
     return arm_compute::Status{};
 }
 
@@ -104,9 +104,9 @@ arm_compute::Status arm_compute::error_on_tensor_not_2d(const char *function, co
                                                         const arm_compute::ITensorInfo *tensor)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor->num_dimensions() != 2,
-                                        function, file, line,
-                                        "Only 2D Tensors are supported by this kernel (%d passed)", tensor->num_dimensions());
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(tensor->num_dimensions() != 2,
+                                            function, file, line,
+                                            "Only 2D Tensors are supported by this kernel (%zu passed)", tensor->num_dimensions());
     return arm_compute::Status{};
 }
 

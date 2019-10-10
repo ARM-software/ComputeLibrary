@@ -136,7 +136,7 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->offset_element_in_bytes(_coords);
     }
-    size_t offset_element_in_bytes(const Coordinates &pos) const override;
+    int32_t offset_element_in_bytes(const Coordinates &pos) const override;
     size_t element_size() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);

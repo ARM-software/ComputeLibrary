@@ -1074,7 +1074,7 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
 
     if(_kernel_program_map.end() == kernel_program_it)
     {
-        ARM_COMPUTE_ERROR("Kernel %s not found in the CLKernelLibrary", kernel_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Kernel %s not found in the CLKernelLibrary", kernel_name.c_str());
     }
     std::string concat_str;
 
@@ -1218,7 +1218,7 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
 
     if(_program_source_map.end() == program_source_it)
     {
-        ARM_COMPUTE_ERROR("Embedded program for %s does not exist.", program_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Embedded program for %s does not exist.", program_name.c_str());
     }
 
     program = Program(_context, program_name, program_source_it->second);
@@ -1238,7 +1238,7 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
     }
     else
     {
-        ARM_COMPUTE_ERROR("Kernel file %s does not exist.", source_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Kernel file %s does not exist.", source_name.c_str());
     }
 #endif /* EMBEDDED_KERNELS */
 
@@ -1293,7 +1293,7 @@ std::string CLKernelLibrary::get_program_source(const std::string &program_name)
 
     if(program_source_it == _program_source_map.end())
     {
-        ARM_COMPUTE_ERROR("Embedded program for %s does not exist.", program_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Embedded program for %s does not exist.", program_name.c_str());
     }
 
     return program_source_it->second;

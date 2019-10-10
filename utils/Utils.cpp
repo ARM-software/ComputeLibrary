@@ -186,7 +186,7 @@ ImageType get_image_type_from_file(const std::string &filename)
     }
     catch(std::runtime_error &e)
     {
-        ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
     }
 
     return type;

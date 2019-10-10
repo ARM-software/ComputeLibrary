@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace arm_compute
 /** Class to describe a number of elements in each dimension. Similar to @ref
  *  Strides but not in bytes but number of elements.
  */
-class Steps : public Dimensions<unsigned int>
+class Steps : public Dimensions<uint32_t>
 {
 public:
     /** Constructor to initialize the steps.

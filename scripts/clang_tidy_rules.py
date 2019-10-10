@@ -129,6 +129,7 @@ def filter_clang_tidy_lines( lines ):
                    ("BOOST_TEST" in lines[i + 1] or
                     "BOOST_FAIL" in lines[i + 1] or
                     "BOOST_CHECK_THROW" in lines[i + 1] or
+                    "ARM_COMPUTE_ERROR_VAR" in lines[i + 1] or
                     "ARM_COMPUTE_RETURN_ON" in lines[i + 1] or
                     "syscall" in lines[i + 1])):
                         print_context=False

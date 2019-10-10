@@ -148,7 +148,7 @@ public:
      *
      * @return Offset in bytes from the beginning of the memory allocation to access the element (x, y, z, ...)
      */
-    virtual size_t offset_element_in_bytes(const Coordinates &pos) const = 0;
+    virtual int32_t offset_element_in_bytes(const Coordinates &pos) const = 0;
 
     /** Element size in bytes calculated as data_size() * num_channels()
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,12 +49,12 @@ void arm_compute::enqueue(IGCKernel &kernel, const Window &window, const gles::N
 
     ARM_COMPUTE_ERROR_ON((0 == (window.x().end() - window.x().start())) || (0 == (window.y().end() - window.y().start())));
 
-    ARM_COMPUTE_ERROR_ON_MSG((((window.x().end() - window.x().start()) % (window.x().step() * lws[0])) != 0),
-                             "window x end =%d, start=%d, step=%d, lws x=%d", window.x().end(), window.x().start(), window.x().step(), lws[0]);
-    ARM_COMPUTE_ERROR_ON_MSG((((window.y().end() - window.y().start()) % (window.y().step() * lws[1])) != 0),
-                             "window y end =%d, start=%d, step=%d, lws y=%d", window.y().end(), window.y().start(), window.y().step(), lws[1]);
-    ARM_COMPUTE_ERROR_ON_MSG((((window.z().end() - window.z().start()) % (window.z().step() * lws[2])) != 0),
-                             "window z end =%d, start=%d, step=%d, lws z=%d", window.z().end(), window.z().start(), window.z().step(), lws[2]);
+    ARM_COMPUTE_ERROR_ON_MSG_VAR((((window.x().end() - window.x().start()) % (window.x().step() * lws[0])) != 0),
+                                 "window x end =%d, start=%d, step=%d, lws x=%zu", window.x().end(), window.x().start(), window.x().step(), lws[0]);
+    ARM_COMPUTE_ERROR_ON_MSG_VAR((((window.y().end() - window.y().start()) % (window.y().step() * lws[1])) != 0),
+                                 "window y end =%d, start=%d, step=%d, lws y=%zu", window.y().end(), window.y().start(), window.y().step(), lws[1]);
+    ARM_COMPUTE_ERROR_ON_MSG_VAR((((window.z().end() - window.z().start()) % (window.z().step() * lws[2])) != 0),
+                                 "window z end =%d, start=%d, step=%d, lws z=%zu", window.z().end(), window.z().start(), window.z().step(), lws[2]);
 
     ARM_COMPUTE_GL_CHECK(glDispatchCompute(((window.x().end() - window.x().start()) / window.x().step()) / lws[0],
                                            ((window.y().end() - window.y().start()) / window.y().step()) / lws[1],
@@ -114,8 +114,8 @@ void IGCKernel::add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, 
 
     ARM_COMPUTE_GL_CHECK(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding_point, tensor->gc_buffer()));
 
-    ARM_COMPUTE_ERROR_ON_MSG(idx_start + num_arguments_per_tensor<dimension_size>() != idx,
-                             "add_%dD_tensor_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_tensor<dimension_size>());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(idx_start + num_arguments_per_tensor<dimension_size>() != idx,
+                                 "add_%dD_tensor_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_tensor<dimension_size>());
     ARM_COMPUTE_UNUSED(idx_start);
 }
 

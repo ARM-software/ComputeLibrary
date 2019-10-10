@@ -85,11 +85,11 @@ void GCScheduler::setup_context()
     EGLBoolean res;
     _display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
-    ARM_COMPUTE_ERROR_ON_MSG(_display == EGL_NO_DISPLAY, "Failed to get display: 0x%x.", eglGetError());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(_display == EGL_NO_DISPLAY, "Failed to get display: 0x%x.", eglGetError());
 
     res = eglInitialize(_display, nullptr, nullptr);
 
-    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to initialize egl: 0x%x.", eglGetError());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(res == EGL_FALSE, "Failed to initialize egl: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
 
     const char *egl_extension_st = eglQueryString(_display, EGL_EXTENSIONS);
@@ -107,12 +107,12 @@ void GCScheduler::setup_context()
 
     res = eglChooseConfig(_display, config_attribs.data(), &cfg, 1, &count);
 
-    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to choose config: 0x%x.", eglGetError());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(res == EGL_FALSE, "Failed to choose config: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
 
     res = eglBindAPI(EGL_OPENGL_ES_API);
 
-    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to bind api: 0x%x.", eglGetError());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(res == EGL_FALSE, "Failed to bind api: 0x%x.", eglGetError());
 
     const std::array<EGLint, 3> attribs =
     {
@@ -124,11 +124,11 @@ void GCScheduler::setup_context()
                                 EGL_NO_CONTEXT,
                                 attribs.data());
 
-    ARM_COMPUTE_ERROR_ON_MSG(_context == EGL_NO_CONTEXT, "Failed to create context: 0x%x.", eglGetError());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(_context == EGL_NO_CONTEXT, "Failed to create context: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
 
     res = eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, _context);
 
-    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to make current: 0x%x.", eglGetError());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(res == EGL_FALSE, "Failed to make current: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
 }

@@ -464,7 +464,7 @@ void CPPDetectionOutputLayer::run()
                 // Ignore background class.
                 continue;
             }
-            ARM_COMPUTE_ERROR_ON_MSG(_all_location_predictions[i].find(label) == _all_location_predictions[i].end(), "Could not find location predictions for label %d.", label);
+            ARM_COMPUTE_ERROR_ON_MSG_VAR(_all_location_predictions[i].find(label) == _all_location_predictions[i].end(), "Could not find location predictions for label %d.", label);
 
             const std::vector<BBox> &label_loc_preds = _all_location_predictions[i].find(label)->second;
 
@@ -497,7 +497,7 @@ void CPPDetectionOutputLayer::run()
             const int label = _info.share_location() ? -1 : c;
             if(conf_scores.find(c) == conf_scores.end() || decode_bboxes.find(label) == decode_bboxes.end())
             {
-                ARM_COMPUTE_ERROR("Could not find predictions for label %d.", label);
+                ARM_COMPUTE_ERROR_VAR("Could not find predictions for label %d.", label);
             }
             const std::vector<float> &scores = conf_scores.find(c)->second;
             const std::vector<BBox> &bboxes = decode_bboxes.find(label)->second;
@@ -518,7 +518,7 @@ void CPPDetectionOutputLayer::run()
 
                 if(conf_scores.find(label) == conf_scores.end())
                 {
-                    ARM_COMPUTE_ERROR("Could not find predictions for label %d.", label);
+                    ARM_COMPUTE_ERROR_VAR("Could not find predictions for label %d.", label);
                 }
 
                 const std::vector<float> &scores = conf_scores.find(label)->second;
@@ -570,7 +570,7 @@ void CPPDetectionOutputLayer::run()
             {
                 // Either if there are no confidence predictions
                 // or there are no location predictions for current label.
-                ARM_COMPUTE_ERROR("Could not find predictions for the label %d.", label);
+                ARM_COMPUTE_ERROR_VAR("Could not find predictions for the label %d.", label);
             }
             const std::vector<BBox> &bboxes  = decode_bboxes.find(loc_label)->second;
             const std::vector<int> &indices = it.second;

@@ -236,7 +236,7 @@ public:
     {
         return _offset_first_element_in_bytes;
     }
-    size_t offset_element_in_bytes(const Coordinates &pos) const override;
+    int32_t offset_element_in_bytes(const Coordinates &pos) const override;
     size_t element_size() const override
     {
         return data_size_from_type(_data_type) * _num_channels;
