@@ -90,16 +90,22 @@ inline void TransformImpl<8, 4, false, 1, 1, false>::Transform(T *out, const T *
                     /* Everything falls through in here */
                     case 6:
                         inptr1 = zerobuff;
+                        // fall through
                     case 5:
                         inptr2 = zerobuff;
+                        // fall through
                     case 4:
                         inptr3 = zerobuff;
+                        // fall through
                     case 3:
                         inptr4 = zerobuff;
+                        // fall through
                     case 2:
                         inptr5 = zerobuff;
+                        // fall through
                     case 1:
                         inptr6 = zerobuff;
+                        // fall through
                     case 0:
                         inptr7 = zerobuff;
                         break;

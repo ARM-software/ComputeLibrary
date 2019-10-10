@@ -126,6 +126,16 @@ FIXTURE_DATA_TEST_CASE(DynamicTensorType3Complex, CLDynamicTensorType3ComplexFun
     }
 }
 
+using CLDynamicTensorType2PipelineFunction = DynamicTensorType2PipelineFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLConvolutionLayer>;
+/** Tests the memory manager with dynamic input and output tensors.
+ *
+ *  Create and manage the tensors needed to run a pipeline. After the function is executed, resize the input size and rerun.
+ */
+FIXTURE_DATA_TEST_CASE(DynamicTensorType2Pipeline, CLDynamicTensorType2PipelineFunction, framework::DatasetMode::ALL,
+                       framework::dataset::make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }))
+{
+}
+
 TEST_SUITE_END() // DynamicTensor
 TEST_SUITE_END() // UNIT
 TEST_SUITE_END() // CL
