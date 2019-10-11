@@ -2094,7 +2094,11 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
+#if defined(MIXED_PRECISION)
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
+#else  // defined(MIXED_PRECISION)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+#endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
@@ -2570,7 +2574,11 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(BETA)
 
 #if defined(ACTIVATION_TYPE)
+#if defined(MIXED_PRECISION)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
+#else  // defined(MIXED_PRECISION)
     ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+#endif // defined(MIXED_PRECISION)
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
