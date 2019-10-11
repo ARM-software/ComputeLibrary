@@ -41,23 +41,15 @@
 
 #include <cmath>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    if(act_info.enabled())
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::F16, DataType::F32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-                                        && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                        && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
-                                        && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
-                                        "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
-    }
+    ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
 
@@ -267,3 +259,4 @@ void CLWinogradOutputTransformKernel::run(const Window &window, cl::CommandQueue
     }
     while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_out));
 }
+} // namespace arm_compute
