@@ -56,6 +56,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != weights->dimension(height_idx), "Weights should have same width and height");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 1 && weights->dimension(width_idx) != 3 && weights->dimension(width_idx) != 5 && weights->dimension(width_idx) != 9,
                                     "Kernel sizes other than 1x1, 3x3, 5x5 or 9x9 are not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) == 9 && input->data_type() == DataType::QASYMM8, "Kernel sizes of 9x9 is not supported for quantized types");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(channel_idx) != input->dimension(channel_idx),
                                     "Weights feature map dimension should match the respective input's one");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->num_dimensions() > 4, "Weights can be at most 4 dimensional");
