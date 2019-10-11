@@ -252,7 +252,7 @@ __kernel void reduction_operation_x(
 #if defined(PROD)
                 local_results[lid] *= local_results[lid + i];
 #elif defined(ARG_MAX)
-                __global DATA_TYPE *src_in_row = src_ptr + src_offset_first_element_in_bytes + y_idx * src_step_y;
+                __global DATA_TYPE *src_in_row = (__global DATA_TYPE *) (src_ptr + src_offset_first_element_in_bytes + y_idx * src_step_y);
                 DATA_TYPE           tmp0       = *(src_in_row + local_results[lid]);
                 DATA_TYPE           tmp1       = *(src_in_row + local_results[lid + i]);
                 local_results[lid]             = select(
@@ -261,7 +261,7 @@ __kernel void reduction_operation_x(
                                                      ((tmp0 == tmp1) && (local_results[lid + i] < local_results[lid])) || (tmp0 < tmp1));
 
 #elif defined(ARG_MIN)
-                __global DATA_TYPE *src_in_row = src_ptr + src_offset_first_element_in_bytes + y_idx * src_step_y;
+                __global DATA_TYPE *src_in_row = (__global DATA_TYPE *)(src_ptr + src_offset_first_element_in_bytes + y_idx * src_step_y);
                 DATA_TYPE           tmp0       = *(src_in_row + local_results[lid]);
                 DATA_TYPE           tmp1       = *(src_in_row + local_results[lid + i]);
                 local_results[lid]             = select(
