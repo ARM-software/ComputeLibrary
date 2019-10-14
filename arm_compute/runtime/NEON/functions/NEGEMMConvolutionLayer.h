@@ -26,7 +26,6 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
@@ -34,7 +33,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
@@ -250,8 +248,6 @@ private:
     NEGEMM                                                             _mm_gemm;
     NEGEMMLowpMatrixMultiplyCore                                       _mm_gemmlowp;
     NECol2ImKernel                                                     _col2im_kernel;
-    NEActivationLayer                                                  _activationlayer_function;
-    NEArithmeticAdditionKernel                                         _add_bias_kernel;
     NEReshapeLayer                                                     _reshape_layer;
 
     const ITensor *_original_weights;
@@ -263,11 +259,9 @@ private:
 
     DataLayout _data_layout;
 
-    bool _append_bias;
     bool _skip_im2col;
     bool _skip_col2im;
     bool _is_quantized;
-    bool _is_activationlayer_enabled;
     bool _is_prepared;
 };
 } // namespace arm_compute

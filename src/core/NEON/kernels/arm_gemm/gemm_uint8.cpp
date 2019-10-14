@@ -48,66 +48,66 @@ static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_u8u32_dot_1VLx8",
-    [](const GemmArgs<uint32_t> &args) { return args._Ksize<=64 && args._alpha==1 && args._beta==0 && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return args._Ksize<=64 && !args._trA && args._pretransposed_hint; },
     nullptr,
-    [](const GemmArgs<uint32_t> &args) { return new GemmHybrid<smallK_hybrid_u8u32_dot_1VLx8, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_u8u32_dot_1VLx8, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_u8u32_dot_4VLx4",
-    [](const GemmArgs<uint32_t> &args) { return args._Ksize>=16 && args._alpha==1 && !args._trA && args._pretransposed_hint; },
-    [](const GemmArgs<uint32_t> &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
-    [](const GemmArgs<uint32_t> &args) { return new GemmHybrid<hybrid_u8u32_dot_4VLx4, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return args._Ksize>=16 && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs &args) { return new GemmHybrid<hybrid_u8u32_dot_4VLx4, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_NATIVE,
     "native_u8u32_dot_4VLx4",
-    [](const GemmArgs<uint32_t> &args) { return (args._Ksize>=16 && args._alpha==1 && !args._trA && !args._trB); },
-    [](const GemmArgs<uint32_t> &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)); },
-    [](const GemmArgs<uint32_t> &args) { return new GemmNative<native_u8u32_dot_4VLx4, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return (args._Ksize>=16 && !args._trA && !args._trB); },
+    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)); },
+    [](const GemmArgs &args) { return new GemmNative<native_u8u32_dot_4VLx4, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
     "interleaved_u8u32_dot_3VLx8",
-    [](const GemmArgs<uint32_t> &args) { return (args._Ksize>4) && args._alpha==1 && (args._beta==0 || args._beta==1); },
+    [](const GemmArgs &args) { return (args._Ksize>4); },
     nullptr,
-    [](const GemmArgs<uint32_t> &args) { return new GemmInterleaved<interleaved_u8u32_dot_3VLx8, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_u8u32_dot_3VLx8, uint8_t, uint32_t>(args); }
 },
 #endif
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_u8u32_dot_4x8",
-    [](const GemmArgs<uint32_t> &args) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32) && args._alpha==1 && args._beta==0 && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32) && !args._trA && args._pretransposed_hint; },
     nullptr,
-    [](const GemmArgs<uint32_t> &args) { return new GemmHybrid<smallK_hybrid_u8u32_dot_4x8, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_u8u32_dot_4x8, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_u8u32_dot_4x6",
-    [](const GemmArgs<uint32_t> &args) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64) && args._alpha==1 && args._beta==0 && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64) && !args._trA && args._pretransposed_hint; },
     nullptr,
-    [](const GemmArgs<uint32_t> &args) { return new GemmHybrid<smallK_hybrid_u8u32_dot_4x6, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_u8u32_dot_4x6, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_u8u32_dot_16x4",
-    [](const GemmArgs<uint32_t> &args) { return args._ci->has_dotprod() && args._Ksize>=16 && args._alpha==1 && !args._trA && !args._trB && args._pretransposed_hint; },
-    [](const GemmArgs<uint32_t> &args) { return args._Nsize<=256 && args._Ksize>128; },
-    [](const GemmArgs<uint32_t> &args) { return new GemmHybrid<hybrid_u8u32_dot_16x4, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return args._ci->has_dotprod() && args._Ksize>=16 && !args._trA && !args._trB && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return args._Nsize<=256 && args._Ksize>128; },
+    [](const GemmArgs &args) { return new GemmHybrid<hybrid_u8u32_dot_16x4, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
     "gemm_u8_12x8",
-    [](const GemmArgs<uint32_t> &args) { return args._ci->has_dotprod() && args._alpha==1 && (args._beta==0 || args._beta==1); },
+    [](const GemmArgs &args) { return args._ci->has_dotprod(); },
     nullptr,
-    [](const GemmArgs<uint32_t> &args) { return new GemmInterleaved<gemm_u8_12x8, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<gemm_u8_12x8, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
     "gemm_u8_4x4",
     nullptr,
     nullptr,
-    [](const GemmArgs<uint32_t> &args) { return new GemmInterleaved<gemm_u8_4x4, uint8_t, uint32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<gemm_u8_4x4, uint8_t, uint32_t>(args); }
 },
 {
     GemmMethod::DEFAULT,
@@ -124,9 +124,9 @@ const GemmImplementation<uint8_t, uint32_t> *gemm_implementation_list<uint8_t, u
 }
 
 /* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<uint8_t, uint32_t> gemm<uint8_t, uint32_t, Nothing>(const GemmArgs<uint32_t> &args, const Nothing &);
-template KernelDescription get_gemm_method<uint8_t, uint32_t, Nothing>(const GemmArgs<uint32_t> &args, const Nothing &);
-template std::vector<KernelDescription> get_compatible_kernels<uint8_t, uint32_t, Nothing> (const GemmArgs<uint32_t> &args, const Nothing &);
+template UniqueGemmCommon<uint8_t, uint32_t> gemm<uint8_t, uint32_t, Nothing>(const GemmArgs &args, const Nothing &);
+template KernelDescription get_gemm_method<uint8_t, uint32_t, Nothing>(const GemmArgs &args, const Nothing &);
+template std::vector<KernelDescription> get_compatible_kernels<uint8_t, uint32_t, Nothing> (const GemmArgs &args, const Nothing &);
 
 } // namespace arm_gemm
 

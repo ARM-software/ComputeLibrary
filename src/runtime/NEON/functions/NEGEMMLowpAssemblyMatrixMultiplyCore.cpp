@@ -59,7 +59,7 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            _asm_glue.configure(a, b, c, output, 1.f, 0.f, GEMMInfo(false, false, true));
+            _asm_glue.configure(a, b, c, output, GEMMInfo(false, false, true));
             run_optimised = _asm_glue.is_configured();
             break;
         }

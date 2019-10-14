@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,51 +23,61 @@
  */
 #pragma once
 
-#ifdef __ARM_FEATURE_SVE
-
-
+#ifdef __aarch64__
 
 namespace arm_gemm
 {
 
 // Actual kernel implementations
-void sve_smallK_hybrid_fp32_mla_1VLx4(const float *, int, const float *, float *, int, float, int, int, int);
+void a64_smallK_hybrid_fp32_mla_4x6(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
-class smallK_hybrid_fp32_mla_1VLx4
+class smallK_hybrid_fp32_mla_4x6
 {
 public:
     typedef float operand_type;
     typedef float result_type;
 
-    typedef void (*kern_type)(const float *, int, const float *, float *, int, float, int, int, int);
+    typedef void (*kern_type)(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
     /* Kernel blocking parameters */
-    static unsigned int out_height()
+    static constexpr unsigned int out_height()
     {
-        return 4;
+        return 6;
     }
 
     static unsigned int out_width()
     {
-        return get_vector_length<float>() * 1;
+        return 4;
     }
 
-    static unsigned int k_unroll()
+    static constexpr unsigned int k_unroll()
     {
         return 1;
     }
 
-    StdTransformsSVE<operand_type, result_type, 4, 1, 1> transforms = {};
+    static constexpr bool supports_append()
+    {
+        return false;
+    }
+
+    static constexpr bool supports_bias()
+    {
+        return true;
+    }
+
+    static constexpr bool supports_activation()
+    {
+        return true;
+    }
+
+    StdTransformsFixed<operand_type, result_type, 6, 4, 1> transforms = {};
 
     // Default to the generic kernel
-    kern_type kernel=sve_smallK_hybrid_fp32_mla_1VLx4;
+    kern_type kernel=a64_smallK_hybrid_fp32_mla_4x6;
 
-    smallK_hybrid_fp32_mla_1VLx4(const CPUInfo *ci)
-    {
-
-    }
+    smallK_hybrid_fp32_mla_4x6(const CPUInfo *ci) { UNUSED(ci); }
 };
 
 } // namespace arm_gemm
 
-#endif // __ARM_FEATURE_SVE
+#endif // __aarch64__

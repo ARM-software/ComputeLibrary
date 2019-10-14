@@ -136,7 +136,6 @@ namespace arm_compute
     - @ref NEGEMM
     - @ref NEGEMMAssemblyDispatch
     - @ref NEGEMMConvolutionLayer
-    - @ref NEGEMMInterleavedWrapper
     - @ref NEGEMMLowpAssemblyMatrixMultiplyCore
     - @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEHarrisCorners

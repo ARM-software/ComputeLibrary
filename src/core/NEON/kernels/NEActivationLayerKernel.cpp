@@ -109,7 +109,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 NEActivationLayerKernel::NEActivationLayerKernel()
-    : _input(nullptr), _output(nullptr), _func(nullptr), _act_info(ActivationFunction::LOGISTIC)
+    : _input(nullptr), _output(nullptr), _func(nullptr), _act_info()
 {
 }
 
@@ -121,9 +121,16 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     _act_info = activation_info;
     _output   = input;
 
+    // Out-of-place calculation
     if(output != nullptr)
     {
         _output = output;
+    }
+
+    // Disabled activation, thus no operation needed
+    if(!activation_info.enabled())
+    {
+        _func = nullptr;
     }
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, activation_info));
@@ -610,6 +617,12 @@ Status NEActivationLayerKernel::validate(const ITensorInfo *input, const ITensor
 
 void NEActivationLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
+    // Early exit on disabled activation
+    if(!_act_info.enabled())
+    {
+        return;
+    }
+
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);

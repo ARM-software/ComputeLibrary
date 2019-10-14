@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,52 +25,59 @@
 
 #ifdef __aarch64__
 
-namespace arm_gemm {
+
+
+namespace arm_gemm
+{
 
 // Actual kernel implementations
-void a64_sgemm_nativeA_pretransposeB_16x4(const float *, int, const float *, float *, int, float, unsigned int, unsigned int, unsigned int);
+void a64_smallK_hybrid_fp32_mla_4x8(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
-// Native A/Pretranspose B SGEMM "strategy" class.
-//
-// This describes the characteristics of a family of kernels, in terms of
-// the required interleave properties and the output block size.
-//
-// All kernels in the family must share these characteristics.  The actual
-// kernel to be used can be chosen at runtime, based on the CPUInfo
-// structure.
-class sgemm_nativeA_pretransposeB_16x4 {
+class smallK_hybrid_fp32_mla_4x8
+{
 public:
     typedef float operand_type;
     typedef float result_type;
 
-    typedef void (*kern_type)(const float *, int, const float *, float *, int, float, unsigned int, unsigned int, unsigned int);
-
-    /* Desired data layout for B buffer (used for pretranspose) */
-    static const int  B_interleave = 16;
-    static const int  B_block = 1;
-    static const bool B_transpose = true;
+    typedef void (*kern_type)(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
     /* Kernel blocking parameters */
-    static unsigned int out_width() {
-        return 16;
+    static constexpr unsigned int out_height()
+    {
+        return 8;
     }
 
-    static unsigned int out_height() {
+    static unsigned int out_width()
+    {
         return 4;
     }
 
-    static unsigned int k_unroll() {
+    static constexpr unsigned int k_unroll()
+    {
         return 1;
     }
 
-    StdTransformsFixed<operand_type, result_type, 4, 16> transforms = {};
+    static constexpr bool supports_append()
+    {
+        return false;
+    }
+
+    static constexpr bool supports_bias()
+    {
+        return true;
+    }
+
+    static constexpr bool supports_activation()
+    {
+        return true;
+    }
+
+    StdTransformsFixed<operand_type, result_type, 8, 4, 1> transforms = {};
 
     // Default to the generic kernel
-    kern_type kernel=a64_sgemm_nativeA_pretransposeB_16x4;
+    kern_type kernel=a64_smallK_hybrid_fp32_mla_4x8;
 
-    sgemm_nativeA_pretransposeB_16x4(const CPUInfo *ci) {
-        UNUSED(ci);
-    }
+    smallK_hybrid_fp32_mla_4x8(const CPUInfo *ci) { UNUSED(ci); }
 };
 
 } // namespace arm_gemm

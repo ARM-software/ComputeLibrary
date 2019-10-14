@@ -495,10 +495,10 @@ namespace {
                      * We could do 64 adds in the signed case, but that
                      * optimization is not worth the complexity.
                      */
-                     if (i > 0 && ((i & 31) == 0)) {
-                         finalsums[r] = vpadalq_s16(finalsums[r], sums[r]);
-                         sums[r] = vdupq_n_s16(0);
-                     }
+                    if (i > 0 && ((i & 31) == 0)) {
+                        finalsums[r] = vpadalq_s16(finalsums[r], sums[r]);
+                        sums[r] = vdupq_n_s16(0);
+                    }
                     sums[r] = accumulate_16(input + (r * in_stride) + (i * 16), sums[r]);
                 }
             }
@@ -526,6 +526,7 @@ namespace {
              * that the terms can simply be added in the requantize code.
              * */
             switch (rows) {
+                default:
                 case 1:
                     /* If we only have one output, just use ADDV.  Multiply
                      * the offset into all four components separately so it
@@ -566,8 +567,6 @@ namespace {
                     t0 = vmulq_s32(t0, offset_mul);
 
                     vst1q_s32(row_bias, t0);
-                    break;
-                default:
                     break;
             }
         }
@@ -736,12 +735,11 @@ inline void add_block(const int8_t *input, unsigned int in_stride, int32_t *outp
     }
 }
 
-
 /* "first_col" parameter is used to offset the read into the qp.bias array,
  * in cases where we are not computing the first columns of the output (i.e.
  * in multithreaded cases where we divide columns across threads) */
 template<typename T>
-void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned int height, const T *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int first_col) {
+void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned int height, const T *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col) {
     memset(reinterpret_cast<void *>(col_bias), 0, width * sizeof(int32_t));
 
     for (unsigned int row=0; row<height; row+=4) {
@@ -752,6 +750,7 @@ void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned
 
             if (numcols==16) {
                 switch(numrows) {
+                    default:
                     case 1:
                         add_block<1>(input + row * in_stride + col, in_stride, col_bias + col);
                         break;
@@ -766,8 +765,6 @@ void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned
 
                     case 4:
                         add_block<4>(input + row * in_stride + col, in_stride, col_bias + col);
-                        break;
-                    default:
                         break;
                 }
             } else {
@@ -788,15 +785,15 @@ void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned
         result = (qp.a_offset * qp.b_offset * depth) - (result * qp.a_offset);
 
         if (qp.bias != nullptr) {
-            result += qp.bias[col + first_col];
+            result += qp.bias[multi * qp.bias_multi_stride + col + first_col];
         }
 
         col_bias[col] = result;
     }
 }
 
-template void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned int height, const int8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int first_col);
-template void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned int height, const uint8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int first_col);
+template void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned int height, const int8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col);
+template void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned int height, const uint8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col);
 
 } // namespace arm_gemm
 

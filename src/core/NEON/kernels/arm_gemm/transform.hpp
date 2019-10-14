@@ -84,7 +84,6 @@ struct TransformImpl {
                         *out++ = static_cast<TOut>(0);
                     }
                 }
-
                 // "row" tail - row is out of range so fill with zeros always.
                 TOut zeroval = static_cast<TOut>(0);
                 int pads = blank_rows * (fill_cols + blank_cols);

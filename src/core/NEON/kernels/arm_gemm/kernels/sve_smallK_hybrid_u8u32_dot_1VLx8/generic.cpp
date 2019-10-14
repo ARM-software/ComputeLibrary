@@ -25,13 +25,15 @@
 
 #include <algorithm>
 
+#include "arm_gemm.hpp"
+
 #include <cstdint>
 #include "../../asmlib.hpp"
 #include "../../utils.hpp"
 
 namespace arm_gemm {
 
-void sve_smallK_hybrid_u8u32_dot_1VLx8(const uint8_t *A, int lda, const uint8_t *B, uint32_t *C, int ldc, uint32_t beta, int M, int N, int K) {
+void sve_smallK_hybrid_u8u32_dot_1VLx8(const uint8_t *A, int lda, const uint8_t *B, uint32_t *C, int ldc, int M, int N, int K, const uint32_t *, Activation, bool) {
     const long loops_count = iceildiv(N, (int)get_vector_length<uint32_t>()) - 1;
     const long ldab = lda * sizeof(uint8_t);
     const long ldcb = ldc * sizeof(uint32_t);

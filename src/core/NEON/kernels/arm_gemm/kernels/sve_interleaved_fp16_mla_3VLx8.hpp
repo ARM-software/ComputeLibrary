@@ -61,10 +61,7 @@ public:
 
     kern_type kernel=sve_interleaved_fp16_mla_3VLx8;
 
-    interleaved_fp16_mla_3VLx8(const CPUInfo *ci)
-    {
-
-    }
+    interleaved_fp16_mla_3VLx8(const CPUInfo *ci) { UNUSED(ci); }
 };
 
 } // namespace arm_gemm

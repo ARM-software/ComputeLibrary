@@ -23,58 +23,9 @@
  */
 #pragma once
 
-/* As some of the merges need these headers, but are all included in the
- * arm_gemm namespace, put these headers here.  */
-#include <arm_neon.h>
-
-#include "asmlib.hpp"
-#include "utils.hpp"
-
 namespace arm_gemm {
 
 template<unsigned int twidth, unsigned int height, bool sve=false, typename Tin, typename Tout>
-inline void MergeResults(Tout * out, const Tin * in, int ldc, int y0, int ymax, int x0, int xmax, const Tout alpha, const Tout beta) {
-    // For SVE cases, multiply the width up by the vector length.
-    // Use the *input* type to determine this, since this will be what the kernel operated on.
-    const int width = twidth * (sve ? get_vector_length<Tin>() : 1);
-
-    const int full_y_blocks = (ymax - y0) / height;
-    const int y_remainder = (ymax - y0) % height;
-    const int y_blocks = full_y_blocks + (y_remainder ? 1 : 0);
-
-    const int full_x_blocks = (xmax - x0) / width;
-    const int x_remainder = (xmax - x0) % width;
-    const int x_blocks = full_x_blocks + (x_remainder ? 1 : 0);
-
-    for (int y_block = 0; y_block < y_blocks; y_block++) {
-        int ybase = y0 + (y_block * height);
-
-        int fill_rows = (y_block < full_y_blocks) ? height : y_remainder;
-
-        for (int x_block = 0; x_block < x_blocks; x_block++) {
-            int xbase = x0 + (x_block * width);
-
-            int fill_cols = (x_block < full_x_blocks) ? width : x_remainder;
-
-            for (int row=0; row < fill_rows; row++) {
-                for (int col=0; col < fill_cols; col++) {
-                    Tout &p = out[(ybase + row) * ldc + xbase + col];
-
-                    // Special case for beta==0 - don't read the input;
-                    // (0 * x == 0) is not always true for FP types.
-                    if (beta == static_cast<Tout>(0)) {
-                        p = (alpha * in[row * width + col]);
-                    } else {
-                        p = (p * beta) + (alpha * in[row * width + col]);
-                    }
-                }
-            }
-
-            in += (width * height);
-        }
-    }
-}
-
-#include "merges/list.hpp"
+void MergeResults(Tout * out, const Tin * in, int ldc, int y0, int ymax, int x0, int xmax, const Tout *bias, Activation act, bool append);
 
 } // namespace arm_gemm

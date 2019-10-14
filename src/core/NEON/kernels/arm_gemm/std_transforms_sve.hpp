@@ -63,8 +63,8 @@ public:
     }
 
     template<typename TOut>
-    void Merge(TOut *out, const TResult *in, int stride, int y0, int ymax, int x0, int xmax, const TOut alpha, const TOut beta) {
-        MergeResults<width_vectors / mmla, height, true>(out, in, stride, y0, ymax, x0, xmax, alpha, beta);
+    void Merge(TOut *out, const TResult *in, int stride, int y0, int ymax, int x0, int xmax, const TOut *bias, const Activation act, bool append) {
+        MergeResults<width_vectors / mmla, height, true>(out, in, stride, y0, ymax, x0, xmax, bias, act, append);
     }
 };
 

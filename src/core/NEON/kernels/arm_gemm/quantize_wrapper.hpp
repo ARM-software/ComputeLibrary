@@ -41,7 +41,7 @@ private:
     int32_t                     *_row_sums = nullptr;
     int32_t                     *_col_sums = nullptr;
     ARequantizeLayer32           _params;
-    GemmArgs<Tr>                 _args;
+    GemmArgs                     _args;
     barrier                      _barrier;
 
     void *working_space = nullptr;
@@ -80,12 +80,13 @@ private:
         /* Use the first part of our working space for the subgemm result, pass the operand details straight through. */
         _subgemm->set_arrays(this->_Aptr, this->_lda, this->_A_batch_stride, this->_A_multi_stride,
                              this->_Bptr, this->_ldb,                        this->_B_multi_stride,
-                             reinterpret_cast<Tgemm *>(working_space), _args._Nsize, (_args._Nsize * _args._Msize), (_args._Nsize * _args._Msize * _args._nbatches));
+                             reinterpret_cast<Tgemm *>(working_space), _args._Nsize, (_args._Nsize * _args._Msize), (_args._Nsize * _args._Msize * _args._nbatches),
+                             nullptr, 0);
     }
 
     void col_sums_pretransposed(const To *B, const int ldb, const int B_multi_stride) {
         for (unsigned int multi=0; multi<_args._nmulti; multi++) {
-            compute_col_sums(_params, _args._Nsize, _args._Ksize, B + (multi * B_multi_stride), ldb, _col_sums + (multi * _args._Nsize), _args._Ksize, 0);
+            compute_col_sums(_params, _args._Nsize, _args._Ksize, B + (multi * B_multi_stride), ldb, _col_sums + (multi * _args._Nsize), _args._Ksize, multi, 0);
         }
     }
 
@@ -94,7 +95,7 @@ private:
         unsigned int last_col = ((threadid + 1) * _args._Nsize) / _args._maxthreads;
 
         for (unsigned int multi=0; multi<_args._nmulti; multi++) {
-            compute_col_sums(_params, (last_col - first_col), _args._Ksize, this->_Bptr + (multi * this->_B_multi_stride) + first_col, this->_ldb, _col_sums + (multi * _args._Nsize) + first_col, _args._Ksize, first_col);
+            compute_col_sums(_params, (last_col - first_col), _args._Ksize, this->_Bptr + (multi * this->_B_multi_stride) + first_col, this->_ldb, _col_sums + (multi * _args._Nsize) + first_col, _args._Ksize, multi, first_col);
         }
     }
 
@@ -121,8 +122,11 @@ private:
 
 
 public:
-    QuantizeWrapper(const GemmArgs<Tr> &args, const ARequantizeLayer32 &qp) : _params(qp), _args(args), _barrier(args._maxthreads) {
-        GemmArgs<Tgemm> newargs = GemmArgs<Tgemm>(args._ci, args._Msize, args._Nsize, args._Ksize, args._nbatches, args._nmulti, args._trA, args._trB, 1, 0, args._maxthreads, args._pretransposed_hint, nullptr);
+    QuantizeWrapper(const QuantizeWrapper &) = delete;
+    QuantizeWrapper operator=(const QuantizeWrapper &) = delete;
+
+    QuantizeWrapper(const GemmArgs &args, const ARequantizeLayer32 &qp) : _params(qp), _args(args), _barrier(args._maxthreads) {
+        GemmArgs newargs = GemmArgs(args._ci, args._Msize, args._Nsize, args._Ksize, args._nbatches, args._nmulti, args._trA, args._trB, Activation(), args._maxthreads, args._pretransposed_hint, nullptr);
         _subgemm = gemm<To, Tgemm>(newargs);
 
         if (_subgemm == nullptr) {
@@ -134,15 +138,11 @@ public:
         }
     }
 
-    QuantizeWrapper(const QuantizeWrapper &) = delete;
-    QuantizeWrapper &operator=(const QuantizeWrapper &) = delete;
-    QuantizeWrapper(QuantizeWrapper &&)                 = default;
-    QuantizeWrapper &operator=(QuantizeWrapper &&) = default;
-
     void set_arrays(const To *A, const int lda, const int A_batch_stride, const int A_multi_stride,
                     const To *B, const int ldb, const int B_multi_stride,
-                          Tr *C, const int ldc, const int C_batch_stride, const int C_multi_stride) override {
-        GemmCommon<To, Tr>::set_arrays(A, lda, A_batch_stride, A_multi_stride, B, ldb, B_multi_stride, C, ldc, C_batch_stride, C_multi_stride);
+                          Tr *C, const int ldc, const int C_batch_stride, const int C_multi_stride,
+                    const Tr *bias, const int bias_multi_stride) override {
+        GemmCommon<To, Tr>::set_arrays(A, lda, A_batch_stride, A_multi_stride, B, ldb, B_multi_stride, C, ldc, C_batch_stride, C_multi_stride, bias, bias_multi_stride);
 
         arrays_set = true;
         set_child_arrays();
@@ -232,8 +232,9 @@ public:
         _col_sums = reinterpret_cast<int32_t *>(buffer);
     }
 
-    void set_quantized_bias(const int32_t *bias) override {
+    void set_quantized_bias(const int32_t *bias, size_t bias_multi_stride) override {
         _params.bias = bias;
+        _params.bias_multi_stride = bias_multi_stride;
     }
 };
 
