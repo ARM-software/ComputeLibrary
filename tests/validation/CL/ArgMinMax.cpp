@@ -25,7 +25,9 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLArgMinMaxLayer.h"
+#include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/SplitDataset.h"
@@ -49,16 +51,18 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid axis
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid output shape
                                                 TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32) // Invalid operation
+                                                TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32), // Invalid operation
+                                                TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32) // Not allowed keeping the dimension 
         }),
-        framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
-                                                 TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
-                                                 TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::U32),
-                                                 TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::F32)
+        framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32),
+                                                 TensorInfo(TensorShape(27U, 3U, 2U), 1, DataType::F32),
+                                                 TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::U32),
+                                                 TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
+                                                 TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::U32)
         })),
-        framework::dataset::make("Axis", { 4, 0, 2, 0 })),
-        framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::MEAN_SUM })),
-        framework::dataset::make("Expected", { false, false, true, false })),
+        framework::dataset::make("Axis", { 4, 0, 2, 0, 2 })),
+        framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::MEAN_SUM, ReductionOperation::ARG_IDX_MAX })),
+        framework::dataset::make("Expected", { false, false, true, false, false })),
         input_info, output_info, axis, operation, expected)
 {
     const Status status = CLArgMinMaxLayer::validate(&input_info.clone()->set_is_resizable(false), axis, &output_info.clone()->set_is_resizable(false), operation);
@@ -76,13 +80,13 @@ DATA_TEST_CASE(Configuration,
     CLTensor ref_src = create_tensor<CLTensor>(shape, data_type);
     CLTensor dst;
 
+    constexpr int axis = 1;
+
     // Create and Configure function
     CLArgMinMaxLayer arg_min_max_layer;
-    arg_min_max_layer.configure(&ref_src, 1, &dst, ReductionOperation::ARG_IDX_MAX);
+    arg_min_max_layer.configure(&ref_src, axis, &dst, ReductionOperation::ARG_IDX_MAX);
 
-    // Validate valid region
-    TensorShape output_shape = shape;
-    output_shape.set(1, 1);
+    const auto        output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(shape, axis, false);
     const ValidRegion valid_region = shape_to_valid_region(output_shape);
     validate(dst.info()->valid_region(), valid_region);
 }

@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
@@ -121,8 +122,7 @@ protected:
         // Fill reference
         fill(src);
 
-        TensorShape output_shape = src_shape;
-        output_shape.set(axis, 1);
+        TensorShape output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(src_shape, axis, false);
         return reference::reduction_operation<T, uint32_t>(src, output_shape, axis, op);
     }
 

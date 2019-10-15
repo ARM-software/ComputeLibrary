@@ -881,6 +881,16 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsi
                                                         const PadStrideInfo &pad_stride_info,
                                                         const Size2D        &dilation = Size2D(1U, 1U));
 
+/** Check if the given reduction operation should be handled in a serial way.
+ *
+ * @param[in] op   Reduction operation to perform
+ * @param[in] dt   Data type
+ * @param[in] axis Axis along which to reduce
+ *
+ * @return True if the given reduction operation should be handled in a serial way.
+ */
+bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis);
+
 /** Convert a tensor format into a string.
  *
  * @param[in] format @ref Format to be translated to string.

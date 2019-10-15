@@ -23,47 +23,35 @@
  */
 
 #include "arm_compute/runtime/NEON/functions/NEArgMinMaxLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 namespace arm_compute
 {
 NEArgMinMaxLayer::NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _reduction_kernel(), _fill_border_kernel(), _run_fill_border(false)
+    : _reduction_function(support::cpp14::make_unique<NEReductionOperation>())
 {
+    ARM_COMPUTE_UNUSED(memory_manager);
 }
 void NEArgMinMaxLayer::configure(ITensor *input, int axis, ITensor *output, const ReductionOperation &op)
 {
-    _reduction_kernel.configure(input, output, axis, op);
-
-    if(axis == 0)
-    {
-        _fill_border_kernel.configure(input, _reduction_kernel.border_size(), BorderMode::REPLICATE);
-        _run_fill_border = true;
-    }
+    _reduction_function->configure(input, output, axis, op, false);
 }
 
 Status NEArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN, "Invalid operation");
-    ARM_COMPUTE_RETURN_ON_ERROR(NEReductionOperationKernel::validate(input, output, axis, op));
-    return Status{};
+    return NEReductionOperation::validate(input, output, axis, op, false);
 }
 
 void NEArgMinMaxLayer::run()
 {
-    MemoryGroupResourceScope scope_mg(_memory_group);
-
-    if(_run_fill_border)
-    {
-        NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
-    }
-    NEScheduler::get().schedule(&_reduction_kernel, Window::DimY);
+    _reduction_function->run();
 }
 
 } // namespace arm_compute

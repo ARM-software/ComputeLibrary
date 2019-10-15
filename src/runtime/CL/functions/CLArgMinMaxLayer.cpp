@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,26 +23,33 @@
  */
 
 #include "arm_compute/runtime/CL/functions/CLArgMinMaxLayer.h"
+#include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 
-#include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
 
 namespace arm_compute
 {
-void CLArgMinMaxLayer::configure(const ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op)
+CLArgMinMaxLayer::CLArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _reduction_function(support::cpp14::make_unique<CLReductionOperation>(std::move(memory_manager)))
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLReductionOperationKernel>();
-    k->configure(input, output, axis, op);
-    _kernel = std::move(k);
+}
+
+void CLArgMinMaxLayer::configure(ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op)
+{
+    _reduction_function->configure(input, output, axis, op, false);
 }
 
 Status CLArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN, "Invalid operation");
-    return CLReductionOperationKernel::validate(input, output, axis, op);
+    return CLReductionOperation::validate(input, output, axis, op, false);
+}
+
+void CLArgMinMaxLayer::run()
+{
+    _reduction_function->run();
 }
 } // namespace arm_compute

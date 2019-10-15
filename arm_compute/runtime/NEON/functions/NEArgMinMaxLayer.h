@@ -24,8 +24,6 @@
 #ifndef __ARM_COMPUTE_NEARGMINMAXLAYER_H__
 #define __ARM_COMPUTE_NEARGMINMAXLAYER_H__
 
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEReductionOperationKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -33,6 +31,7 @@
 namespace arm_compute
 {
 class ITensor;
+class NEReductionOperation;
 
 /** Function to calculate the index of the minimum or maximum values in a
  *  tensor based on an axis.
@@ -74,10 +73,7 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                _memory_group;
-    NEReductionOperationKernel _reduction_kernel;
-    NEFillBorderKernel         _fill_border_kernel;
-    bool                       _run_fill_border;
+    std::unique_ptr<NEReductionOperation> _reduction_function;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEARGMINMAXLAYER_H__ */
