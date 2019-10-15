@@ -26,21 +26,11 @@
 
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDepthwiseIm2ColKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDepthwiseVectorToTensorKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDepthwiseWeightsReshapeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/misc/Macros.h"
-#include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/IMemoryManager.h"
-#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/NEON/functions/assembly/NEDepthwiseConvolutionAssemblyDispatch.h"
-#include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
 {
@@ -279,16 +269,9 @@ private:
     bool                                      _is_prepared;
 };
 
-/** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:
+/** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernel:
  *
- * If data type is F32 and data layout is NHWC:
  * -# @ref NEDepthwiseConvolutionLayerNativeKernel
- *
- * Otherwise:
- * -# @ref NEDepthwiseIm2ColKernel
- * -# @ref NEDepthwiseWeightsReshapeKernel
- * -# @ref NEGEMMMatrixVectorMultiplyKernel
- * -# @ref NEFillBorderKernel (if pad_x or pad_y > 0)
  *
  */
 class NEDepthwiseConvolutionLayer : public IFunction
@@ -341,32 +324,19 @@ public:
     void prepare() override;
 
 private:
-    NEDepthwiseIm2ColKernel                   _im2col_kernel;
-    NEDepthwiseWeightsReshapeKernel           _weights_reshape_kernel;
-    NEGEMMMatrixVectorMultiplyKernel          _v2mm_kernel;
-    NEDepthwiseConvolutionLayerNativeKernel   _depthwise_conv_kernel;
-    NEDepthwiseVectorToTensorKernel           _vector_to_tensor_kernel;
-    NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
-    NEFillBorderKernel                        _fill_border;
-    NEFillBorderKernel                        _v2mm_input_fill_border;
-    NEFillBorderKernel                        _v2mm_weights_fill_border;
-    NEPermute                                 _permute_input;
-    NEPermute                                 _permute_weights;
-    NEPermute                                 _permute_output;
-    NEActivationLayer                         _activationlayer_function;
-    Tensor                                    _input_reshaped;
-    Tensor                                    _weights_reshaped;
-    Tensor                                    _v2mm_output;
-    Tensor                                    _output_reshaped;
-    Tensor                                    _permuted_input;
-    Tensor                                    _permuted_weights;
-    Tensor                                    _permuted_output;
-    bool                                      _is_prepared;
-    bool                                      _is_quantized;
-    bool                                      _is_nhwc;
-    bool                                      _is_activationlayer_enabled;
-    bool                                      _is_optimized;
-    const ITensor                            *_original_weights;
+    NEDepthwiseConvolutionLayerNativeKernel _depthwise_conv_kernel;
+    NEFillBorderKernel                      _fill_border;
+    NEPermute                               _permute_input;
+    NEPermute                               _permute_weights;
+    NEPermute                               _permute_output;
+    NEActivationLayer                       _activationlayer_function;
+    Tensor                                  _permuted_input;
+    Tensor                                  _permuted_weights;
+    Tensor                                  _permuted_output;
+    bool                                    _is_prepared;
+    bool                                    _is_nchw;
+    bool                                    _is_activationlayer_enabled;
+    const ITensor                          *_original_weights;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__ */

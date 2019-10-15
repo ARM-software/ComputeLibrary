@@ -188,16 +188,16 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
     {
         for(int z = 0; z < input_depth; ++z)
         {
-            int         output_multiplier = 0;
-            int         output_shift      = 0;
-            const float weights_scale     = (is_quantized_per_channel) ? weights_scale_vec[z] : weights_scale_vec[0];
-            const float multiplier        = input_scale * weights_scale / output_scale;
-            arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-
             for(unsigned int m = 0; m < depth_multiplier; ++m)
             {
                 const int     out_z    = z * depth_multiplier + m;
                 const int32_t bias_val = *static_cast<const int32_t *>(biases(Coordinates(out_z)));
+
+                int         output_multiplier = 0;
+                int         output_shift      = 0;
+                const float weights_scale     = (is_quantized_per_channel) ? weights_scale_vec[out_z] : weights_scale_vec[0];
+                const float multiplier        = input_scale * weights_scale / output_scale;
+                arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
                 for(int y = minimum_y; y <= minimum_y + maximum_y; y += conv_info.stride().second)
                 {

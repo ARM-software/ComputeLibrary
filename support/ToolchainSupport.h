@@ -35,6 +35,10 @@
 #include <string>
 #include <type_traits>
 
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#include <arm_neon.h>
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 #include "support/Half.h"
 
 namespace arm_compute
@@ -228,7 +232,11 @@ inline T copysign(T x, T y)
  *
  * @return Result floating point value equal to (x*y) + z.c
  */
-template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+template < typename T, typename = typename std::enable_if < std::is_floating_point<T>::value
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                                            || std::is_same<T, float16_t>::value
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                                            >::type >
 inline T fma(T x, T y, T z)
 {
     return ::fma(x, y, z);
@@ -250,7 +258,7 @@ inline int snprintf(char *s, size_t n, const char *fmt, Ts &&... args)
 {
     return ::snprintf(s, n, fmt, std::forward<Ts>(args)...);
 }
-#else  /* (__ANDROID__ || BARE_METAL) */
+#else /* (__ANDROID__ || BARE_METAL) */
 /** Convert integer and float values to string.
  *
  * @note This function acts as a convenience wrapper around std::to_string. The
@@ -354,7 +362,11 @@ inline T copysign(T x, T y)
  *
  * @return Result floating point value equal to (x*y) + z.
  */
-template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+template < typename T, typename = typename std::enable_if < std::is_floating_point<T>::value
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                                            || std::is_same<T, float16_t>::value
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                                            >::type >
 inline T fma(T x, T y, T z)
 {
     return std::fma(x, y, z);

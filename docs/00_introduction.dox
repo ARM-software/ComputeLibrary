@@ -242,6 +242,10 @@ v19.11 Public major release
     - CLDepthwiseIm2ColKernel
     - CLDepthwiseVectorToTensorKernel
     - CLDirectConvolutionLayerOutputStageKernel
+ - Deprecated NEON kernels / functions
+    - NEDepthwiseWeightsReshapeKernel
+    - NEDepthwiseIm2ColKernel
+    - NEDepthwiseVectorToTensorKernel
 
 v19.08 Public major release
  - Various bug fixes.
@@ -706,7 +710,7 @@ v17.12 Public major release
  - New NEON kernels / functions
     - arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
     - arm_compute::NEHGEMMAArch64FP16Kernel
-    - @ref NEDepthwiseConvolutionLayer3x3Kernel / @ref NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / @ref NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
     - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
