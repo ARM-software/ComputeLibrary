@@ -249,7 +249,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "direct_convolution5x5", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_nhwc", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
-    { "direct_convolution_1x1_3x3_5x5_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
+    { "direct_convolution_quantized", "direct_convolution_quantized.cl" },
     { "direct_convolution9x9_nhwc", "direct_convolution9x9.cl" },
     { "elementwise_operation_ADD", "elementwise_operation.cl" },
     { "elementwise_operation_SUB", "elementwise_operation.cl" },
@@ -717,8 +717,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/direct_convolution5x5.clembed"
     },
     {
-        "direct_convolution_1x1_3x3_5x5_quantized.cl",
-#include "./cl_kernels/direct_convolution_1x1_3x3_5x5_quantized.clembed"
+        "direct_convolution_quantized.cl",
+#include "./cl_kernels/direct_convolution_quantized.clembed"
     },
     {
         "direct_convolution9x9.cl",
