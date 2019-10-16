@@ -276,6 +276,24 @@ void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &sh
  * @param[in] max        Floating point maximum value to be quantized
  */
 std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, float min, float max);
+
+/** Helper function to compute symmetric quantized min and max bounds
+ *
+ * @param[in] quant_info Quantization info to be used for conversion
+ * @param[in] min        Floating point minimum value to be quantized
+ * @param[in] max        Floating point maximum value to be quantized
+ * @param[in] channel_id Channel id for per channel quantization info.
+ */
+std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id = 0);
+
+/** Helper function to compute asymmetric quantized min and max bounds
+ *
+ * @param[in] quant_info Quantization info to be used for conversion
+ * @param[in] min        Floating point minimum value to be quantized
+ * @param[in] max        Floating point maximum value to be quantized
+ * @param[in] channel_id Channel id for per channel quantization info.
+ */
+std::pair<int, int> get_asymm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id = 0);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

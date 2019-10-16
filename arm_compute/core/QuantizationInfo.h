@@ -250,6 +250,36 @@ inline int8_t quantize_qsymm8(float value, const QuantizationInfo &qinfo)
     return quantized;
 }
 
+/** Quantize a value given a 8-bit symmetric per channel quantization scheme
+ *
+ * @param[in] value      Value to quantize
+ * @param[in] qinfo      Quantization information to use for quantizing
+ * @param[in] channel_id channel index into the scale vector of quantization info
+ *
+ * @return Quantized value
+ */
+inline int8_t quantize_qsymm8_per_channel(float value, const QuantizationInfo &qinfo, size_t channel_id = 0)
+{
+    int quantized = arm_compute::round(value / qinfo.scale()[channel_id], RoundingPolicy::TO_NEAREST_UP);
+    quantized     = std::max(-128, std::min(quantized, 127));
+    return quantized;
+}
+
+/** Quantize a value given a 8-bit asymmetric per channel quantization scheme
+ *
+ * @param[in] value      Value to quantize
+ * @param[in] qinfo      Quantization information to use for quantizing
+ * @param[in] channel_id channel index into the scale vector of quantization info
+ *
+ * @return Quantized value
+ */
+inline int8_t quantize_qasymm8_per_channel(float value, const QuantizationInfo &qinfo, size_t channel_id = 0)
+{
+    int quantized = arm_compute::round(value / qinfo.scale()[channel_id], RoundingPolicy::TO_NEAREST_UP);
+    quantized     = std::max(0, std::min(quantized, 255));
+    return quantized;
+}
+
 /** Dequantize a value given a 8-bit asymmetric quantization scheme
  *
  * @param[in] value Value to dequantize

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,25 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_CONVOLUTION_LAYER_H__
-#define __ARM_COMPUTE_TEST_CONVOLUTION_LAYER_H__
+#ifndef __ARM_COMPUTE_WRAPPER_EOR_H__
+#define __ARM_COMPUTE_WRAPPER_EOR_H__
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#include <arm_neon.h>
 
 namespace arm_compute
 {
-namespace test
+namespace wrapper
 {
-namespace validation
-{
-namespace reference
-{
-template <typename T, typename TW, typename TB>
-SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
-                                  const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, QuantizationInfo out_quant_info = QuantizationInfo());
-} // namespace reference
-} // namespace validation
-} // namespace test
+#define VEOR_IMPL(vtype, prefix, postfix)             \
+    inline vtype veor(const vtype &a, const vtype &b) \
+    {                                                 \
+        return prefix##_##postfix(a, b);              \
+    }
+
+VEOR_IMPL(uint8x8_t, veor, u8)
+VEOR_IMPL(int8x8_t, veor, s8)
+VEOR_IMPL(uint16x4_t, veor, u16)
+VEOR_IMPL(int16x4_t, veor, s16)
+VEOR_IMPL(uint32x2_t, veor, u32)
+VEOR_IMPL(int32x2_t, veor, s32)
+
+VEOR_IMPL(uint8x16_t, veorq, u8)
+VEOR_IMPL(int8x16_t, veorq, s8)
+VEOR_IMPL(uint16x8_t, veorq, u16)
+VEOR_IMPL(int16x8_t, veorq, s16)
+VEOR_IMPL(uint32x4_t, veorq, u32)
+VEOR_IMPL(int32x4_t, veorq, s32)
+
+#undef VEOR_IMPL
+} // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_CONVOLUTION_LAYER_H__ */
+#endif /* __ARM_COMPUTE_WRAPPER_EOR_H__ */

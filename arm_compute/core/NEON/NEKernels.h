@@ -46,6 +46,7 @@
 #include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
 #include "arm_compute/core/NEON/kernels/NEColorConvertKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
+#include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvolutionKernel.h"
 #include "arm_compute/core/NEON/kernels/NECopyKernel.h"
 #include "arm_compute/core/NEON/kernels/NECropKernel.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input       Input tensor. Data type supported: QASYMM8
+     * @param[in]  input       Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[out] output      Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
      * @param[in]  k           Number of matrix A columns (or matrix B rows)
      * @param[in]  is_reshaped True if the input tensor has been reshaped
@@ -75,7 +75,7 @@ public:
     }
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_a             Input tensor. Data type supported: QASYMM8
+     * @param[in]  mtx_a             Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[out] vector_sum_row    Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      * @param[in]  num_mtx_a_cols    Number of matrix A columns
      * @param[in]  is_interleaved4x4 True if the matrix A has been interleaved4x4
@@ -83,7 +83,7 @@ public:
     void configure(const ITensor *mtx_a, ITensor *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4) override;
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixAReductionKernel
      *
-     * @param[in] mtx_a             Input tensor. Data type supported: QASYMM8
+     * @param[in] mtx_a             Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in] vector_sum_row    Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      * @param[in] num_mtx_a_cols    Number of matrix A columns
      * @param[in] is_interleaved4x4 True if the matrix A has been interleaved4x4
@@ -94,6 +94,14 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
+
+private:
+    /** Execution of the reduction kernel specialized on the input type
+     *
+     * @param[in] window Execution window
+     */
+    template <typename T>
+    void run_internal(const Window &window);
 };
 
 /** NEON kernel used to compute the row-vectors of sums of all the entries in each column of Matrix B.
@@ -110,7 +118,7 @@ public:
     }
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in]  mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[out] vector_sum_col   Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      * @param[in]  num_mtx_b_rows   Number of matrix B rows
      * @param[in]  is_transposed1xW True if the input tensor is transposed 1xW
@@ -118,7 +126,7 @@ public:
     void configure(const ITensor *mtx_b, ITensor *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW) override;
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixBReductionKernel
      *
-     * @param[in] mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in] mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in] vector_sum_col   Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      * @param[in] num_mtx_b_rows   Number of matrix B rows
      * @param[in] is_transposed1xW True if the input tensor is transposed 1xW
@@ -129,6 +137,15 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
+
+private:
+    /** Execution of the reduction kernel specialized on the input type
+     *
+     * @param[in] window Execution window
+     * @param[in] info   Thread-related information
+     */
+    template <typename T>
+    void run_internal(const Window &window, const ThreadInfo &info);
 };
 } // namespace arm_compute
 

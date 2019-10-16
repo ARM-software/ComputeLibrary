@@ -108,6 +108,44 @@ Status calculate_quantized_multiplier_greater_than_one(float multiplier,
 
     return Status{};
 }
+
+arm_compute::Status calculate_quantized_multipliers_less_than_one(const QuantizationInfo &iq_info,
+                                                                  const QuantizationInfo &wq_info,
+                                                                  const QuantizationInfo &oq_info,
+                                                                  GEMMLowpOutputStageInfo &stage_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON(iq_info.scale().empty());
+    ARM_COMPUTE_RETURN_ERROR_ON(wq_info.scale().empty());
+    ARM_COMPUTE_RETURN_ERROR_ON(oq_info.scale().empty());
+
+    const unsigned int size = wq_info.scale().size();
+
+    auto &quant_multipliers = stage_info.gemmlowp_multipliers;
+    auto &quant_shifts      = stage_info.gemmlowp_shifts;
+    quant_multipliers.resize(size);
+    quant_shifts.resize(size);
+
+    const auto &w_scales = wq_info.scale();
+    const float i_scale  = iq_info.scale().at(0);
+    const float o_scale  = oq_info.scale().at(0);
+
+    for(unsigned int i = 0; i < size; ++i)
+    {
+        const float multiplier       = i_scale * w_scales[i] / o_scale;
+        int         quant_multiplier = 0;
+        int         quant_shift      = 0;
+        ARM_COMPUTE_RETURN_ON_ERROR(calculate_quantized_multiplier_less_than_one(multiplier, &quant_multiplier, &quant_shift));
+        quant_multipliers[i] = quant_multiplier;
+        quant_shifts[i]      = quant_shift;
+    }
+
+    // Legacy part
+    stage_info.gemmlowp_shift      = quant_shifts[0];
+    stage_info.gemmlowp_multiplier = quant_multipliers[0];
+
+    return Status{};
+}
+
 std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_type)
 {
     int min_quant_val = 0;

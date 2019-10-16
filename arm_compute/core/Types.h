@@ -77,7 +77,8 @@ enum class DataType
     U8,                  /**< unsigned 8-bit number */
     S8,                  /**< signed 8-bit number */
     QSYMM8,              /**< quantized, symmetric fixed-point 8-bit number */
-    QASYMM8,             /**< quantized, asymmetric fixed-point 8-bit number */
+    QASYMM8,             /**< quantized, asymmetric fixed-point 8-bit number unsigned */
+    QASYMM8_SIGNED,      /**< quantized, asymmetric fixed-point 8-bit number signed */
     QSYMM8_PER_CHANNEL,  /**< quantized, symmetric per channel fixed-point 8-bit number */
     QASYMM8_PER_CHANNEL, /**< quantized, asymmetric per channel fixed-point 8-bit number */
     U16,                 /**< unsigned 16-bit number */
@@ -1881,6 +1882,8 @@ struct GEMMLowpOutputStageInfo
     int                     gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
     int                     gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
     int                     gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
+    std::vector<int>        gemmlowp_multipliers{};                /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    std::vector<int>        gemmlowp_shifts{};                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
 };
 
 /** GEMM LHS (Left Hand Side) matrix information */
@@ -2014,6 +2017,14 @@ public:
     GEMMLowpOutputStageInfo gemmlowp_output_stage() const
     {
         return _gemmlowp_output_stage;
+    };
+    /** Sets GEMMLowp output stage
+     *
+     * @param[in] output_stage Output stage to set
+     */
+    void set_gemmlowp_output_stage(GEMMLowpOutputStageInfo &output_stage)
+    {
+        _gemmlowp_output_stage = output_stage;
     };
     /** Flag which specifies if a wider accumulator should be used.
      *

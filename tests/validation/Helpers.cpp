@@ -326,6 +326,24 @@ std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, flo
     return std::pair<int, int> { min_bound, max_bound };
 }
 
+std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(min > max, "min must be lower equal than max");
+
+    const int min_bound = quantize_qsymm8_per_channel(min, quant_info, channel_id);
+    const int max_bound = quantize_qsymm8_per_channel(max, quant_info, channel_id);
+    return std::pair<int, int> { min_bound, max_bound };
+}
+
+std::pair<int, int> get_asymm_quantized_per_channel_bounds(const QuantizationInfo &quant_info, float min, float max, size_t channel_id)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(min > max, "min must be lower equal than max");
+
+    const int min_bound = quantize_qasymm8_per_channel(min, quant_info, channel_id);
+    const int max_bound = quantize_qasymm8_per_channel(max, quant_info, channel_id);
+    return std::pair<int, int> { min_bound, max_bound };
+}
+
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);
 template void get_tile(const SimpleTensor<half> &in, SimpleTensor<half> &roi, const Coordinates &coord);
 template void get_tile(const SimpleTensor<int> &in, SimpleTensor<int> &roi, const Coordinates &coord);

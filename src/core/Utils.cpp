@@ -162,6 +162,7 @@ const std::string &arm_compute::string_from_data_type(DataType dt)
         { DataType::QSYMM8_PER_CHANNEL, "QSYMM8_PER_CHANNEL" },
         { DataType::QASYMM8_PER_CHANNEL, "QASYMM8_PER_CHANNEL" },
         { DataType::QASYMM8, "QASYMM8" },
+        { DataType::QASYMM8_SIGNED, "QASYMM8_SIGNED" },
         { DataType::QSYMM16, "QSYMM16" },
         { DataType::QASYMM16, "QASYMM16" },
     };
@@ -292,6 +293,7 @@ std::string arm_compute::string_from_pixel_value(const PixelValue &value, const 
             converted_string = ss.str();
             break;
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             // Needs conversion to 32 bit, otherwise interpreted as ASCII values
             ss << int32_t(value.get<int8_t>());
@@ -448,6 +450,7 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
             print_consecutive_elements_impl<uint8_t>(s, ptr, n, stream_width, element_delim);
             break;
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             print_consecutive_elements_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n, stream_width, element_delim);
             break;
@@ -485,6 +488,7 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
         case DataType::QASYMM8_PER_CHANNEL:
             return max_consecutive_elements_display_width_impl<uint8_t>(s, ptr, n);
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             return max_consecutive_elements_display_width_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n);
         case DataType::U16:

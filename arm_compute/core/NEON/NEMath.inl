@@ -294,6 +294,14 @@ inline float32x2_t vsin_f32(float32x2_t val)
 
 #endif /* DOXYGEN_SKIP_THIS */
 
+inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int32x4_t exponent)
+{
+    const int32x4_t shift_vec  = vnegq_s32(exponent);
+    const int32x4_t fixup      = vshrq_n_s32(vandq_s32(x, shift_vec), 31);
+    const int32x4_t fixed_up_x = vqaddq_s32(x, fixup);
+    return vrshlq_s32(fixed_up_x, shift_vec);
+}
+
 inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent)
 {
     const int32x4_t shift_vec  = vdupq_n_s32(-exponent);

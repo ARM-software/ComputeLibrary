@@ -114,6 +114,7 @@ inline size_t data_size_from_type(DataType data_type)
         case DataType::S8:
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QASYMM8_PER_CHANNEL:
             return 1;
@@ -191,6 +192,7 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::U8:
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             return 1;
         case DataType::U16:
@@ -533,6 +535,7 @@ inline DataType get_promoted_data_type(DataType dt)
             return DataType::S32;
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QASYMM8_PER_CHANNEL:
         case DataType::QSYMM16:
@@ -1024,6 +1027,7 @@ inline bool is_data_type_quantized(DataType dt)
     {
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QASYMM8_PER_CHANNEL:
         case DataType::QSYMM16:
@@ -1045,6 +1049,7 @@ inline bool is_data_type_quantized_asymmetric(DataType dt)
     switch(dt)
     {
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QASYMM8_PER_CHANNEL:
         case DataType::QASYMM16:
             return true;
