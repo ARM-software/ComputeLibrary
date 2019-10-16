@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -380,8 +380,8 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, U 
 template <typename T, typename U>
 void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
-    int64_t num_mismatches = 0;
-    int64_t num_elements   = 0;
+    uint64_t num_mismatches = 0;
+    uint64_t num_elements   = 0;
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.element_size(), reference.element_size(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT_EQUAL(tensor.data_type(), reference.data_type(), framework::LogLevel::ERRORS);
@@ -441,10 +441,10 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
         }
     }
 
-    if(num_elements > 0)
+    if(num_elements != 0)
     {
-        const int64_t absolute_tolerance_number = tolerance_number * num_elements;
-        const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
+        const uint64_t absolute_tolerance_number = tolerance_number * num_elements;
+        const float    percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
                               << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number * 100 << "%)");
@@ -455,8 +455,8 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
 template <typename T, typename U, typename = typename std::enable_if<std::is_integral<T>::value>::type>
 void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value, float tolerance_number)
 {
-    int64_t num_mismatches = 0;
-    int64_t num_elements   = 0;
+    uint64_t num_mismatches = 0;
+    uint64_t num_elements   = 0;
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.element_size(), reference.element_size(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT_EQUAL(tensor.data_type(), reference.data_type(), framework::LogLevel::ERRORS);
@@ -529,10 +529,10 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
         }
     }
 
-    if(num_elements > 0)
+    if(num_elements != 0)
     {
-        const int64_t absolute_tolerance_number = tolerance_number * num_elements;
-        const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
+        const uint64_t absolute_tolerance_number = tolerance_number * num_elements;
+        const float    percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
                               << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number * 100 << "%)");
@@ -543,8 +543,8 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
 template <typename T, typename U>
 void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const SimpleTensor<T> &valid_mask, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
-    int64_t num_mismatches = 0;
-    int64_t num_elements   = 0;
+    uint64_t num_mismatches = 0;
+    uint64_t num_elements   = 0;
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.element_size(), reference.element_size(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT_EQUAL(tensor.data_type(), reference.data_type(), framework::LogLevel::ERRORS);
@@ -608,10 +608,10 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const S
         }
     }
 
-    if(num_elements > 0)
+    if(num_elements != 0)
     {
-        const int64_t absolute_tolerance_number = tolerance_number * num_elements;
-        const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
+        const uint64_t absolute_tolerance_number = tolerance_number * num_elements;
+        const float    percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
                               << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number * 100 << "%)");

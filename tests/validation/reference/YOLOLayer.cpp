@@ -46,7 +46,8 @@ SimpleTensor<T> yolo_layer(const SimpleTensor<T> &src, const ActivationLayerInfo
     const T a(info.a());
     const T b(info.b());
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         const size_t z = index2coord(dst.shape(), i).z() % (num_classes + 5);
 

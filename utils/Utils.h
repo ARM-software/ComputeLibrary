@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/Tensor.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 #include "libnpy/npy.hpp"
 #pragma GCC diagnostic pop
 #include "support/ToolchainSupport.h"

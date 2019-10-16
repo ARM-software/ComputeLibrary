@@ -633,8 +633,8 @@ inline void init_separable_conv(int16_t *conv, unsigned int width, unsigned int 
     // Set it between -128 and 127 to ensure the matrix does not overflow
     std::uniform_int_distribution<int16_t> distribution_int16(-128, 127);
 
-    int16_t conv_row[width];
-    int16_t conv_col[height];
+    int16_t *conv_row = new int16_t[width];
+    int16_t *conv_col = new int16_t[height];
 
     conv_row[0] = conv_col[0] = 1;
     for(unsigned int i = 1; i < width; ++i)
@@ -655,6 +655,9 @@ inline void init_separable_conv(int16_t *conv, unsigned int width, unsigned int 
             conv[i * width + j] = conv_col[i] * conv_row[j];
         }
     }
+
+    delete[] conv_row;
+    delete[] conv_col;
 }
 
 /** Create a vector with a uniform distribution of floating point values across the specified range.

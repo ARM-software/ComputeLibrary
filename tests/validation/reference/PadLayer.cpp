@@ -54,7 +54,8 @@ SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &padding
     SimpleTensor<T> dst(padded_shape, dst_data_type);
 
     // Reference algorithm: loop over the different dimension of the input.
-    for(int idx = 0; idx < dst.num_elements(); ++idx)
+    const uint32_t num_elements = dst.num_elements();
+    for(uint32_t idx = 0; idx < num_elements; ++idx)
     {
         const Coordinates coord = index2coord(padded_shape, idx);
 

@@ -63,7 +63,8 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
         policy = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
 
-    for(int element_idx = 0, count = 0; element_idx < out.num_elements(); ++element_idx, ++count)
+    const uint32_t num_elements = out.num_elements();
+    for(uint32_t element_idx = 0, count = 0; element_idx < num_elements; ++element_idx, ++count)
     {
         Coordinates id    = index2coord(out.shape(), element_idx);
         int         idx   = id.x();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,8 @@ SimpleTensor<T> convert_fully_connected_weights(const SimpleTensor<T> &src, cons
     const unsigned int factor_1                  = is_nchw_to_nhwc ? num_elems_per_input_plane : num_channels;
     const unsigned int factor_2                  = is_nchw_to_nhwc ? num_channels : num_elems_per_input_plane;
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates coords_in = index2coords(src.shape(), i);
         const Coordinates coords_out(coords_in.x(), coords_in.y() % factor_1 * factor_2 + coords_in.y() / factor_1);

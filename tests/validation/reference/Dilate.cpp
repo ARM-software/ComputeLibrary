@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,8 +50,9 @@ SimpleTensor<T> dilate(const SimpleTensor<T> &src, BorderMode border_mode, T con
         dst(x, y) = max[ src(x', y') for x-1<=x'<=x+1, y-1<=y'<=y+1 ] = max({tl, tc, tr, ml, xy, mr, bl, bc, br})
     */
     SimpleTensor<T> dst(src.shape(), src.data_type());
+    const uint32_t  num_elements = src.num_elements();
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         Coordinates coord = index2coord(src.shape(), i);
         const int   x     = coord.x();

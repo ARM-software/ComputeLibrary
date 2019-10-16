@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,10 @@ SimpleTensor<T> remap(const SimpleTensor<T> &in, SimpleTensor<float> &map_x, Sim
     ARM_COMPUTE_ERROR_ON_MSG(border_mode == BorderMode::REPLICATE, "BorderMode not supported");
     SimpleTensor<T> out(in.shape(), in.data_type());
     ARM_COMPUTE_ERROR_ON(out.num_elements() != map_x.num_elements());
-    const int width  = in.shape().x();
-    const int height = in.shape().y();
-    for(int idx = 0; idx < out.num_elements(); idx++)
+    const int      width        = in.shape().x();
+    const int      height       = in.shape().y();
+    const uint32_t num_elements = out.num_elements();
+    for(uint32_t idx = 0; idx < num_elements; idx++)
     {
         const Coordinates id_out = index2coord(out.shape(), idx);
         valid_mask[idx]          = 1;

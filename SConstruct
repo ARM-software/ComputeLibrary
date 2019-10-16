@@ -132,8 +132,8 @@ if not env['exceptions']:
 env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
          '-Wextra','-pedantic','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
-         '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
-         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings','-Wno-strict-overflow'])
+         '-fpermissive','-std=gnu++11','-Woverloaded-virtual', '-Wformat-security',
+         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings'])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,9 +94,10 @@ std::vector<SimpleTensor<T>> channel_combine(const TensorShape &shape, const std
 
     for(unsigned int plane_idx = 0; plane_idx < dst.size(); ++plane_idx)
     {
-        SimpleTensor<T> &dst_tensor = dst[plane_idx];
+        SimpleTensor<T> &dst_tensor   = dst[plane_idx];
+        const uint32_t   num_elements = dst_tensor.num_elements();
 
-        for(int element_idx = 0; element_idx < dst_tensor.num_elements(); ++element_idx)
+        for(uint32_t element_idx = 0; element_idx < num_elements; ++element_idx)
         {
             Coordinates coord = index2coord(dst_tensor.shape(), element_idx);
 

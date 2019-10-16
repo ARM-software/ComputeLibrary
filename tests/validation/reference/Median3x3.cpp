@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,8 +45,9 @@ SimpleTensor<T> median3x3(const SimpleTensor<T> &src, BorderMode border_mode, T 
 {
     SimpleTensor<T> dst(src.shape(), src.data_type());
     const int       size_tot_filter = filter_size * filter_size;
+    const uint32_t  num_elements    = src.num_elements();
 
-    for(int src_idx = 0; src_idx < src.num_elements(); ++src_idx)
+    for(uint32_t src_idx = 0; src_idx < num_elements; ++src_idx)
     {
         std::array<T, size_tot_filter> filter_elems = { { 0 } };
         Coordinates id = index2coord(src.shape(), src_idx);

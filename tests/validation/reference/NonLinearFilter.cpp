@@ -1,24 +1,24 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
- * deal src the Software without restriction, including without limitation the
+ * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included src all
+ * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. src NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER src AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * dst OF OR src CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "NonLinearFilter.h"
@@ -49,8 +49,9 @@ SimpleTensor<T> non_linear_filter(const SimpleTensor<T> &src, NonLinearFilterFun
     intermediate_type              current_value = 0;
 
     const ValidRegion valid_region = shape_to_valid_region(src.shape(), border_mode == BorderMode::UNDEFINED, BorderSize(half_mask_size));
+    const uint32_t    num_elements = src.num_elements();
 
-    for(int element_idx = 0, count = 0, index = 0; element_idx < src.num_elements(); ++element_idx, count = 0, index = 0)
+    for(uint32_t element_idx = 0, count = 0, index = 0; element_idx < num_elements; ++element_idx, count = 0, index = 0)
     {
         Coordinates id = index2coord(src.shape(), element_idx);
         if(is_in_valid_region(valid_region, id))

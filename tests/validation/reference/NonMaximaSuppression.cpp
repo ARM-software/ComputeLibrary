@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,8 @@ SimpleTensor<T> non_maxima_suppression(const SimpleTensor<T> &src, BorderMode bo
     SimpleTensor<T> dst(src.shape(), src.data_type(), src.num_channels());
     ValidRegion     valid_region = shape_to_valid_region(src.shape(), border_mode == BorderMode::UNDEFINED, BorderSize(block_size / 2));
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         Coordinates coord = index2coord(src.shape(), i);
         int         x     = coord.x();

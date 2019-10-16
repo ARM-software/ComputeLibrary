@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,8 @@ SimpleTensor<T> tile(const SimpleTensor<T> &src, const Multiples &multiples)
 
     SimpleTensor<T> dst{ tiled_shape, src.data_type() };
 
-    for(int idx = 0; idx < dst.num_elements(); idx++)
+    const uint32_t num_elements = dst.num_elements();
+    for(uint32_t idx = 0; idx < num_elements; idx++)
     {
         Coordinates coord = index2coord(tiled_shape, idx);
 
