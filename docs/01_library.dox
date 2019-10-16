@@ -489,5 +489,20 @@ However this process takes quite a lot of time, which is why it cannot be enable
 
 But, when the @ref CLTuner is disabled ( Target = 1 for the graph examples), the @ref graph::Graph will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not.
 
+@section S5_0_experimental Experimental Features
+
+@subsection S5_1_run_time_context Run-time Context
+
+Some of the Compute Library components are modelled as singletons thus posing limitations to supporting some use-cases and ensuring a more client-controlled API.
+Thus, we are introducing an aggregate service interface @ref IRuntimeContext which will encapsulate the services that the singletons were providing and allow better control of these by the client code.
+Run-time context encapsulates a list of mechanisms, some of them are: scheduling, memory management, kernel caching and others.
+Consequently, this will allow better control of these services among pipelines when Compute Library is integrated in higher level frameworks.
+
+This feature introduces some changes to our API.
+All the kernels/functions will now accept a Runtime Context object which will allow the function to use the mentioned services.
+Moreover, all the objects will require to be created using the context to have access to these services.
+Note that these will apply to the runtime components as the core ones do not need access to such services. The only exception is the kernel caching mechanism which will need to be passed down at kernel level.
+
+Finally, we will try to adapt our code-base progressively to use the new mechanism but will continue supporting the legacy mechanism to allow a smooth transition. Changes will apply to all our three backends: NEON, OpenCL and OpenGL ES.
 */
 } // namespace arm_compute
