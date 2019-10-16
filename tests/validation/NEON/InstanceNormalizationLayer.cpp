@@ -43,7 +43,7 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-AbsoluteTolerance<float> tolerance_f32(0.001f);
+AbsoluteTolerance<float> tolerance_f32(0.0015f);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 AbsoluteTolerance<float> tolerance_f16(0.2f);
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
