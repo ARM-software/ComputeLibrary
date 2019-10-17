@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/RuntimeContext.h"
 
-#include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/SchedulerFactory.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "support/ToolchainSupport.h"
 #include "tests/Globals.h"
@@ -61,9 +61,9 @@ TEST_CASE(Scheduler, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(ctx.scheduler() != nullptr, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(ctx.asset_manager() == nullptr, framework::LogLevel::ERRORS);
 
-    // Create a CPPScheduler
-    CPPScheduler scheduler;
-    ctx.set_scheduler(&scheduler);
+    // Create a Scheduler
+    auto scheduler = SchedulerFactory::create();
+    ctx.set_scheduler(scheduler.get());
     // Check if the scheduler has been properly setup
     ARM_COMPUTE_EXPECT(ctx.scheduler() != nullptr, framework::LogLevel::ERRORS);
 
