@@ -112,7 +112,14 @@ void quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<T> *in,
         }
 
         // Fixed point multiplication
-        result = asymm_rounding_divide_by_pow2(asymm_int_mult(result, result_fixedpoint_multiplier), result_shift);
+        if(result_shift < 0)
+        {
+            result = asymm_int_mult(result * (1 << (-result_shift)), result_fixedpoint_multiplier);
+        }
+        else
+        {
+            result = asymm_rounding_divide_by_pow2(asymm_int_mult(result, result_fixedpoint_multiplier), result_shift);
+        }
 
         // Bounded ReLu
         if(min != max)

@@ -305,6 +305,14 @@ const auto quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases = framewo
                                                                          2)
                                                                          * framework::dataset::make("min", -2, 0) * framework::dataset::make("max", 1, 3) * framework::dataset::make("addBias", { false, true });
 
+const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases = framework::dataset::make("result_fixedpoint_multiplier", 1073741823, 1073741825) * framework::dataset::make("result_shift", -3,
+                                                                    -2)
+                                                                    * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+
+const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", -3,
+                                                                         -1)
+                                                                         * framework::dataset::make("min", -2, 0) * framework::dataset::make("max", 1, 3) * framework::dataset::make("addBias", { false, true });
+
 using CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture =
     GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture<CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint>;
 
@@ -344,19 +352,41 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+TEST_SUITE(NoRelu)
+TEST_SUITE(MultSmallerEq1)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
                        quantize_down_int32_to_int16_scale_by_fixedpoint_cases))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+TEST_SUITE_END() // MultSmallerEq1
+TEST_SUITE(MultGreater1)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+                       quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // MultGreater1
+TEST_SUITE_END() // NoRelu
 TEST_SUITE(BoundedReLu)
+TEST_SUITE(MultSmallerEq1)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
                        quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+TEST_SUITE_END() // MultSmallerEq1
+TEST_SUITE(MultGreater1)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+                       quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // MultGreater1
 TEST_SUITE_END() // BoundedReLu
 TEST_SUITE_END() // QuantizeDownInt32ToInt16ScaleByFixedPoint
 TEST_SUITE_END() // OutputStage

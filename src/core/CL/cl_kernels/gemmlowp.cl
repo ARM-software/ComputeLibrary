@@ -1888,7 +1888,11 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
 #endif // defined(ADD_BIAS)
 
     // Multiply by result_mult_int and shift
+#if RESULT_SHIFT < 0
+    input_values = ASYMM_MULT(input_values * (1 << (-RESULT_SHIFT)), RESULT_FIXEDPOINT_MULTIPLIER, 4);
+#else // RESULT_SHIFT >= 0
     input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+#endif // RESULT_SHIFT < 0
 
     short4 res = convert_short4_sat(input_values);
 

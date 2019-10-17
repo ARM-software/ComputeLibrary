@@ -34,6 +34,20 @@ namespace quantization
 constexpr int64_t fixed_point_one_Q0 = (1LL << 31);
 constexpr float   epsilon            = 0.00001f;
 
+Status calculate_quantized_multiplier(float multiplier, int *quant_multiplier, int *shift)
+{
+    if(multiplier > 1.f)
+    {
+        Status status = calculate_quantized_multiplier_greater_than_one(multiplier, quant_multiplier, shift);
+        *shift *= -1;
+        return status;
+    }
+    else
+    {
+        return calculate_quantized_multiplier_less_than_one(multiplier, quant_multiplier, shift);
+    }
+}
+
 Status calculate_quantized_multiplier_less_than_one(float multiplier,
                                                     int *quant_multiplier,
                                                     int *right_shift)

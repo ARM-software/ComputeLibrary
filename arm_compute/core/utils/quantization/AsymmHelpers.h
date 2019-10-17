@@ -31,6 +31,15 @@ namespace arm_compute
 {
 namespace quantization
 {
+/** Calculate quantized representation of multiplier.
+ *
+ * @param[in]  multiplier       Real multiplier.
+ * @param[out] quant_multiplier Integer multiplier.
+ * @param[out] shift            bit shift. A negative value indicates a left shift, while a positive value indicates a right shift
+ *
+ * @return a status
+ */
+Status calculate_quantized_multiplier(float multiplier, int *quant_multiplier, int *shift);
 /** Calculate quantized representation of multiplier with value less than one.
  *
  * @param[in]  multiplier       Real multiplier.
@@ -39,7 +48,7 @@ namespace quantization
  *
  * @return a status
  */
-arm_compute::Status calculate_quantized_multiplier_less_than_one(float multiplier, int *quant_multiplier, int *right_shift);
+Status calculate_quantized_multiplier_less_than_one(float multiplier, int *quant_multiplier, int *right_shift);
 /** Calculate quantized representation of multiplier having value greater than one.
  *
  * @param[in]  multiplier           Real multiplier.
@@ -48,7 +57,7 @@ arm_compute::Status calculate_quantized_multiplier_less_than_one(float multiplie
  *
  * @return a status
  */
-arm_compute::Status calculate_quantized_multiplier_greater_than_one(float multiplier, int *quantized_multiplier, int *left_shift);
+Status calculate_quantized_multiplier_greater_than_one(float multiplier, int *quantized_multiplier, int *left_shift);
 /** Get minimum and maximum values for the input quantized data type
  *
  * @ return min and max values for the quantized data type

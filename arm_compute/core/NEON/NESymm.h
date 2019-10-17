@@ -54,13 +54,23 @@ int16x8_t finalize_quantization_int16(int32x4x2_t &in_s32,
                                       int16x8_t    min_s16,
                                       int16x8_t    max_s16)
 {
-    // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
-    in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
-    in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+    if(result_shift < 0)
+    {
+        in_s32.val[0] = vmulq_n_s32(in_s32.val[0], (1 << -result_shift));
+        in_s32.val[1] = vmulq_n_s32(in_s32.val[1], (1 << -result_shift));
 
-    // Round to the nearest division by a power-of-two using result_shift_s32
-    in_s32.val[0] = rounding_divide_by_pow2(in_s32.val[0], result_shift);
-    in_s32.val[1] = rounding_divide_by_pow2(in_s32.val[1], result_shift);
+        in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
+        in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+    }
+    else
+    {
+        // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
+        in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
+        in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+        // Round to the nearest division by a power-of-two using result_shift_s32
+        in_s32.val[0] = rounding_divide_by_pow2(in_s32.val[0], result_shift);
+        in_s32.val[1] = rounding_divide_by_pow2(in_s32.val[1], result_shift);
+    }
 
     // Convert S32 to S16
     int16x8_t out_s16 = vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1]));
@@ -90,13 +100,18 @@ template <bool is_bounded_relu>
 inline int16_t finalize_quantization_int16(int32_t in_value, int result_fixedpoint_multiplier,
                                            int32_t result_shift, int16_t min_s16, int16_t max_s16)
 {
-    int32x4_t in_s32 = vdupq_n_s32(in_value);
-
-    // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
-    in_value = vgetq_lane_s32(vqrdmulhq_n_s32(in_s32, result_fixedpoint_multiplier), 0);
-
-    // Shift value by result_shift_s32
-    in_value = rounding_divide_by_pow2(in_value, result_shift);
+    if(result_shift < 0)
+    {
+        const int64_t in_64 = static_cast<int64_t>(in_value) * (1 << (-result_shift)) * static_cast<int64_t>(result_fixedpoint_multiplier);
+        in_value = static_cast<int32_t>((in_64 + (1 << 30)) >> 31);
+    }
+    else
+    {
+        // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
+        const int64_t in_64 = static_cast<int64_t>(in_value) * static_cast<int64_t>(result_fixedpoint_multiplier);
+        // Shift value by result_shift_s32
+        in_value = rounding_divide_by_pow2(static_cast<int32_t>((in_64 + (1 << 30)) >> 31), result_shift);
+    }
 
     // Bound the result
     int16_t out_s16 = static_cast<int16_t>(std::max<int32_t>(-32768, std::min<int32_t>(32767, in_value)));
