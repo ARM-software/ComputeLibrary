@@ -489,6 +489,27 @@ However this process takes quite a lot of time, which is why it cannot be enable
 
 But, when the @ref CLTuner is disabled ( Target = 1 for the graph examples), the @ref graph::Graph will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not.
 
+@section S4_10_weights_manager Weights Manager
+
+@ref IWeightsManager is a weights managing interface that can be used to reduce the memory requirements of a given pipeline by reusing transformed weights across multiple function executions.
+@ref IWeightsManager is responsible for managing weight tensors alongside with their transformations.
+@ref ITransformWeights provides an interface for running the desired transform function. This interface is used by the weights manager.
+
+@subsection S4_10_1_working_with_weights_manager Working with the Weights Manager
+Following is a simple example that uses the weights manager:
+
+Initially a weights manager must be set-up:
+@code{.cpp}
+auto  wm = std::make_shared<IWeightsManager>(); // Create a weights manager
+@endcode
+
+Once done, weights can be managed, configured and run:
+@code{.cpp}
+wm->manage(weights); // Manage the weights
+wm->acquire(weights, &_reshape_weights_managed_function); // Acquire the address of the transformed weights based on the transform function
+wm->run(weights, &_reshape_weights_managed_function);     // Run the transpose function
+@endcode
+
 @section S5_0_experimental Experimental Features
 
 @subsection S5_1_run_time_context Run-time Context
