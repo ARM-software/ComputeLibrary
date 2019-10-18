@@ -106,7 +106,7 @@ MEMBERFN()
       _n_output_rows(n_output_rows), _n_output_cols(n_output_cols),
       _convs(_dilation_factor) {
   // Instantiate the base convolutions
-  for (int i = 0; i < _dilation_factor; i++) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(_dilation_factor); i++) {
     // Compute properties of this row of base convolutions
     const int row_top =
         i * StrideRows - _padding_top; // -ve values are in the padding
@@ -116,7 +116,7 @@ MEMBERFN()
     const int _n_input_rows = iceildiv(n_input_rows - i, dilation_factor);
     const int _n_output_rows = iceildiv(n_output_rows - i, dilation_factor);
 
-    for (int j = 0; j < _dilation_factor; j++) {
+    for (uint32_t j = 0; j < static_cast<uint32_t>(_dilation_factor); j++) {
       // Compute properties of the base convolution
       const int col_left =
           j * StrideColumns - padding_left; // -ve values are in the padding
@@ -161,7 +161,7 @@ MEMBERFN(void)
   const int ldcol_dilated = ldcol * _dilation_factor;
 
   // Pass input parameters on to base convolutions
-  for (int i = 0; i < _dilation_factor; i++) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(_dilation_factor); i++) {
     const int top_pos =
         i * StrideRows - _padding_top +
         ((static_cast<int>(i * StrideRows) < _padding_top)
@@ -171,7 +171,7 @@ MEMBERFN(void)
     const TIn *const inptr_i =
         static_cast<const TIn *>(inptr) + top_pos * ldrow;
 
-    for (int j = 0; j < _dilation_factor; j++) {
+    for (uint32_t j = 0; j < static_cast<uint32_t>(_dilation_factor); j++) {
       int left_pos = j * StrideColumns - _padding_left;
       while (left_pos < 0)
         left_pos += _dilation_factor;
@@ -205,8 +205,8 @@ MEMBERFN(void)
   const int ldcol_dilated = ldcol * _dilation_factor;
 
   // Pass input parameters on to base convolutions
-  for (int i = 0; i < _dilation_factor; i++) {
-    for (int j = 0; j < _dilation_factor; j++) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(_dilation_factor); i++) {
+    for (uint32_t j = 0; j < static_cast<uint32_t>(_dilation_factor); j++) {
       // Modify the pointer to point to the first element of the dilated input
       // tensor, then set the input for this convolution engine.
       void *const outptr_ij =
