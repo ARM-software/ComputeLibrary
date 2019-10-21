@@ -437,15 +437,15 @@ inline void colorconvert_rgb_to_nv12(const SimpleTensor<T> src, std::vector<Simp
     SimpleTensor<T> utmp(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
     SimpleTensor<T> vtmp(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
 
-    int utmp_width  = utmp.shape().x();
-    int utmp_height = utmp.shape().y();
+    uint32_t utmp_width  = utmp.shape().x();
+    uint32_t utmp_height = utmp.shape().y();
 
-    int         uvec_coord_x = 0;
-    int         uvec_coord_y = 0;
+    uint32_t    uvec_coord_x = 0;
+    uint32_t    uvec_coord_y = 0;
     Coordinates uvec_coord{ uvec_coord_x, uvec_coord_y };
-    for(int y = 0; y < utmp_height; y++)
+    for(uint32_t y = 0; y < utmp_height; y++)
     {
-        for(int x = 0; x < utmp_width; x++)
+        for(uint32_t x = 0; x < utmp_width; x++)
         {
             Coordinates coord{ x, y };
             auto       *utmp_pixel = reinterpret_cast<T *>(utmp(coord));
@@ -464,15 +464,15 @@ inline void colorconvert_rgb_to_nv12(const SimpleTensor<T> src, std::vector<Simp
         }
     }
 
-    int second_plane_x = dst[1].shape().x();
-    int second_plane_y = dst[1].shape().y();
+    uint32_t second_plane_x = dst[1].shape().x();
+    uint32_t second_plane_y = dst[1].shape().y();
 
-    int utmp_coord_x = 0;
-    int utmp_coord_y = 0;
+    uint32_t utmp_coord_x = 0;
+    uint32_t utmp_coord_y = 0;
 
-    for(int y = 0; y < second_plane_y; y++)
+    for(uint32_t y = 0; y < second_plane_y; y++)
     {
-        for(int x = 0; x < second_plane_x; x++)
+        for(uint32_t x = 0; x < second_plane_x; x++)
         {
             Coordinates coord{ x, y };
             Coordinates utmp_top_coord{ utmp_coord_x, utmp_coord_y };
@@ -524,15 +524,15 @@ inline void colorconvert_rgb_to_iyuv(const SimpleTensor<T> src, std::vector<Simp
 
     SimpleTensor<T> utmp(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
     SimpleTensor<T> vtmp(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
-    int             utmp_width  = utmp.shape().x();
-    int             utmp_height = utmp.shape().y();
+    uint32_t        utmp_width  = utmp.shape().x();
+    uint32_t        utmp_height = utmp.shape().y();
 
-    int         uvec_coord_x = 0;
-    int         uvec_coord_y = 0;
+    uint32_t    uvec_coord_x = 0;
+    uint32_t    uvec_coord_y = 0;
     Coordinates uvec_coord{ uvec_coord_x, uvec_coord_y };
-    for(int y = 0; y < utmp_height; y++)
+    for(uint32_t y = 0; y < utmp_height; y++)
     {
-        for(int x = 0; x < utmp_width; x++)
+        for(uint32_t x = 0; x < utmp_width; x++)
         {
             Coordinates coord{ x, y };
             auto       *utmp_pixel = reinterpret_cast<T *>(utmp(coord));
@@ -551,15 +551,15 @@ inline void colorconvert_rgb_to_iyuv(const SimpleTensor<T> src, std::vector<Simp
         }
     }
 
-    int second_plane_x = dst[1].shape().x();
-    int second_plane_y = dst[1].shape().y();
+    uint32_t second_plane_x = dst[1].shape().x();
+    uint32_t second_plane_y = dst[1].shape().y();
 
-    int utmp_coord_x = 0;
-    int utmp_coord_y = 0;
+    uint32_t utmp_coord_x = 0;
+    uint32_t utmp_coord_y = 0;
 
-    for(int y = 0; y < second_plane_y; y++)
+    for(uint32_t y = 0; y < second_plane_y; y++)
     {
-        for(int x = 0; x < second_plane_x; x++)
+        for(uint32_t x = 0; x < second_plane_x; x++)
         {
             Coordinates coord{ x, y };
             Coordinates utmp_top_coord{ utmp_coord_x, utmp_coord_y };
