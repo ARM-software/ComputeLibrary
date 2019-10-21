@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,6 @@
  */
 
 #pragma once
-
-#include <utility>
-
 #include "arm_gemm_local.hpp"
 #include "arm_gemm.hpp"
 #include "winograd.hpp"
@@ -42,8 +39,8 @@ class IWinogradConvolutionLayer
     virtual unsigned int weight_transform_get_window(void) const = 0;
     virtual void weight_transform_run(unsigned int start, unsigned int stop) = 0;
 
-    virtual ITransform& input_transform(void) = 0; // Expose the input transform
-    virtual ITransform& output_transform(void) = 0;  // Expose the output transform
+    virtual IInputTransform& input_transform(void) = 0; // Expose the input transform
+    virtual IOutputTransform& output_transform(void) = 0;  // Expose the output transform
     virtual arm_gemm::IGemmCommon *gemm(void) = 0;  // Expose the underlying GEMM
 };
 
@@ -65,22 +62,6 @@ template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols
           WinogradRoots Roots>
 class WinogradConvolutionLayer : public IWinogradConvolutionLayer
 {
-  private:
-    static constexpr int InnerTileRows = OutputTileRows + KernelRows - 1;
-    static constexpr int InnerTileCols = OutputTileCols + KernelCols - 1;
-    static constexpr int N_GEMMS = InnerTileRows * InnerTileCols;
-
-    const KernelShape _kernel_shape;
-    const Tensor4DShape _input_shape;
-    const PaddingType _padding;
-    const Tensor4DShape _output_shape;
-    const int _n_output_rows, _n_output_cols;
-    const int _kernel_matrix_stride, _kernel_matrix_row_stride;
-    const int _input_matrix_stride, _input_matrix_row_stride;
-    const int _output_matrix_stride, _output_matrix_row_stride;
-    const int _tile_rows, _tile_cols;
-    const int _m, _k, _n;
-
   public:
     using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols, Roots>;
     using WeightsTransform = typename WinogradBase::template WeightsTransform<TIn, TInGEMM>;
@@ -88,11 +69,25 @@ class WinogradConvolutionLayer : public IWinogradConvolutionLayer
     using WinogradConv = typename WinogradBase::template Convolution<TOut, TIn, TInGEMM, TOutGEMM>;
     using OutputTransform = typename WinogradBase::template OutputTransform<TOutGEMM, TOut>;
 
-    /* Public member variables. */
+  private:
+    static constexpr int InnerTileRows = OutputTileRows + KernelRows - 1;
+    static constexpr int InnerTileCols = OutputTileCols + KernelCols - 1;
+    static constexpr int N_GEMMS = InnerTileRows * InnerTileCols;
+
+    const int _n_output_rows, _n_output_cols;
+    const int _kernel_matrix_stride, _kernel_matrix_row_stride;
+    const int _input_matrix_stride, _input_matrix_row_stride;
+    const int _output_matrix_stride, _output_matrix_row_stride;
+    const int _tile_rows, _tile_cols;
+    const int _m, _k, _n;
+
     WeightsTransform weights_transform;  /** Operator to transform weights to Winograd domain. */
     InputTransform _input_transform;      /** Operator to transform input to Winograd domain. */
+    const arm_gemm::GemmArgs gemm_args;
     arm_gemm::UniqueGemmCommon<TInGEMM, TOutGEMM> gemms;    /** Operator to perform multiple GEMMs. */
     OutputTransform _output_transform;    /** Operator to transform output from Winograd domain. */
+
+  public:
 
     /** Determine how much memory (in units of TIn) to allocate for the
      * transformed weights.
@@ -186,6 +181,7 @@ class WinogradConvolutionLayer : public IWinogradConvolutionLayer
       const int n_input_cols,       /** Number of columns in a feature map of the input tensor. */
       const int n_output_channels,  /** Number of feature maps in the output tensor. */
       const bool same_padding,      /** Use "SAME" padding, otherwise use "VALID". */
+      const arm_gemm::Activation &activation,
       const TIn* const weights,     /** Pointer to weight tensor in spatial domain. Must be ordered as "Height x Rows x Input Feature Maps x Output Feature Maps. */
       TInGEMM* const weights_storage,  /** Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size`. */
       const TIn* const input,       /** Pointer to NHWC ordered input tensor, in the spatial domain. */
@@ -201,8 +197,8 @@ class WinogradConvolutionLayer : public IWinogradConvolutionLayer
     unsigned int weight_transform_get_window(void) const;
     void weight_transform_run(const unsigned int start, const unsigned int stop);
 
-    ITransform& input_transform(void);
-    ITransform& output_transform(void);
+    IInputTransform& input_transform(void);
+    IOutputTransform& output_transform(void);
 
     /* Get a pointer to the GEMM underlying the Winograd transform. */
     arm_gemm::IGemmCommon *gemm(void);

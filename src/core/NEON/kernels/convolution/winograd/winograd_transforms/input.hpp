@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,11 @@
 
 #pragma once
 
-#include "winograd.hpp"
+#include <algorithm>
+
 #include "padding.hpp"
+#include "utils.hpp"
+#include "winograd.hpp"
 
 #define MEMBERFN(RTYPE) template <\
   int InnerTileRows, int InnerTileCols,\

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,10 @@
 
 #pragma once
 
-#include "convolution.hpp"
-#include "tensor.hpp"
-#include "utils.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
+
+#include <cstddef>
+#include <utility>
 
 namespace winograd
 {
@@ -308,7 +309,8 @@ class OutputTransform : public IOutputTransform
       int n_batches,  /**< Number of batches in output tensor. */
       int n_rows,     /**< Number of rows in output tensor. */
       int n_cols,     /**< Number of columns in output tensor. */
-      int n_channels  /**< Number of channels in output tensor. */
+      int n_channels, /**< Number of channels in output tensor. */
+      const arm_gemm::Activation &activation
     );
 
     OutputTransform(OutputTransform&) = delete;
@@ -344,6 +346,7 @@ class OutputTransform : public IOutputTransform
     static constexpr int output_tile_cols = InnerTileCols - KernelCols + 1;
 
     const int _n_batches, _n_rows, _n_cols, _n_channels;
+    const TOut _output_min, _output_max;
 
   private:
     void transform_uncropped_tile(
@@ -372,7 +375,9 @@ class OutputTransform : public IOutputTransform
       const TOut* biases,
       TOut* output,
       int output_row_stride,
-      int output_col_stride
+      int output_col_stride,
+      TOut output_min,
+      TOut output_max
     );
 
     /** Get the working space for a thread. */
@@ -405,7 +410,8 @@ class OutputTransform<KernelRows, 1, InnerTileRows, 1, TIn, TOut, Roots> :
       int n_batches,  /**< Number of batches in output tensor. */
       int n_rows,     /**< Number of rows in output tensor. */
       int n_cols,     /**< Number of columns in output tensor. */
-      int n_channels  /**< Number of channels in output tensor. */
+      int n_channels, /**< Number of channels in output tensor. */
+      const arm_gemm::Activation &activation
     );
 
     /** Set pointers to the output tensor written by the transform. */
@@ -528,79 +534,84 @@ class WinogradGEMM
         typedef TIn InputType;
 
         /** Get the output shape of a convolution. */
-        static Tensor4DShape get_output_shape(
-          const KernelShape &kernel_shape,
-          const Tensor4DShape &in_shape,
-          const PaddingType padding
-        );
-
-        /* Get the memory required to transform the kernel.
-         */
-        static size_t get_kernel_transform_working_size(const KernelShape &shape);
+        static std::pair<unsigned int, unsigned int> get_output_shape(
+            const std::pair<unsigned int, unsigned int> input_shape,
+            bool padding_same);
 
         /** Get the memory required to store the kernel transformed into the
          * Winograd domain.
          */
-        static size_t get_kernel_storage_size(const KernelShape &shape);
+        static size_t get_kernel_storage_size(unsigned int n_input_channels,
+                                              unsigned int n_output_channels);
 
         /** Get the memory required to store the input tensor transformed into
          * the Winograd domain.
          */
         static size_t get_input_storage_size(
-          const KernelShape &kernel_shape,
-          const Tensor4DShape &input_shape,
-          const PaddingType padding_type
-        );
+            unsigned int n_batches,  // Number of batches
+            unsigned int n_rows,     // Number of input rows
+            unsigned int n_cols,     // Number of input columns
+            unsigned int n_channels, // Number of input channels
+            bool padding_same);
 
         /** Get the memory required to store the output tensor in the Winograd
          * domain.
          */
         static size_t get_output_storage_size(
-          const KernelShape &kernel_shape,
-          const Tensor4DShape &input_shape,
-          const PaddingType padding_type
-        );
+            unsigned int n_batches, // Number of batches
+            unsigned int n_rows,    // Number of output rows
+            unsigned int n_cols,    // Number of output columns
+            unsigned int n_channels // Number of output channels
+            );
 
         /** Get the memory required to apply a Winograd operator to some input.
          */
         static size_t get_working_space_size(
-          const KernelShape &kernel_shape,
-          const Tensor4DShape &input_shape,
-          const PaddingType padding_type
-        );
+            unsigned int n_batches,
+            unsigned int n_rows,            // Number of input rows
+            unsigned int n_cols,            // Number of input columns
+            unsigned int n_input_channels,  // Number of input channels
+            unsigned int n_output_channels, // Number of output channels
+            bool padding_same);
 
         /* Get the memory required by a single "input" matrix.
          */
         static size_t get_input_matrix_size(
-          const KernelShape &kernel_shape,
-          const Tensor4DShape &input_shape,
-          const PaddingType padding_type
-        );
+            unsigned int n_batches,  // Number of batches
+            unsigned int n_rows,     // Number of input rows
+            unsigned int n_cols,     // Number of input columns
+            unsigned int n_channels, // Number of input channels
+            bool padding_same);
 
         static int get_input_matrix_stride(
-          const KernelShape &kernel_shape,
-          const Tensor4DShape &input_shape,
-          const PaddingType padding_type
-        );
+            unsigned int n_batches,  // Number of batches
+            unsigned int n_rows,     // Number of input rows
+            unsigned int n_cols,     // Number of input columns
+            unsigned int n_channels, // Number of input channels
+            bool padding_same);
 
         /* Get the memory required by a single "output" matrix.
          */
         static size_t get_output_matrix_size(
-          const KernelShape &kernel_shape,
-          const Tensor4DShape &input_shape,
-          const PaddingType padding_type
-        );
+            unsigned int n_batches, // Number of batches
+            unsigned int n_rows,    // Number of output rows
+            unsigned int n_cols,    // Number of output columns
+            unsigned int n_channels // Number of output channels
+            );
 
         static int get_output_matrix_stride(
-          const KernelShape &kernel_shape,
-          const Tensor4DShape &input_shape,
-          const PaddingType padding_type
-        );
+            unsigned int n_batches, // Number of batches
+            unsigned int n_rows,    // Number of output rows
+            unsigned int n_cols,    // Number of output columns
+            unsigned int n_channels // Number of output channels
+            );
 
         /* Get the memory required by a single "kernel" matrix.
          */
-        static size_t get_kernel_matrix_size(const KernelShape &shape);
-        static int get_kernel_matrix_stride(const KernelShape &shape);
+        static size_t get_kernel_matrix_size(unsigned int n_input_channels,
+                                             unsigned int n_output_channels);
+        static int get_kernel_matrix_stride(unsigned int n_input_channels,
+                                            unsigned int n_output_channels);
 
         static constexpr int M_BLOCK = 4;   /** Size of block used by GEMM. */
         static constexpr int N_BLOCK = 16;  /** Size of block used by GEMM. */

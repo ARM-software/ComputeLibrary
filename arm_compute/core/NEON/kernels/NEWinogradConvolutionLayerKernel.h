@@ -64,13 +64,15 @@ public:
 
     /** Gets the stride between matrices in the input worspace
      *
-     * @param[in] kernel_shape The shape of the weights tensor.
-     * @param[in] input_shape  The shape of the input tensor.
-     * @param[in] padding_type The type of padding to be used.
+     * @param[in] num_batches  Number of batches in the input tensor.
+     * @param[in] num_channels Number of feature maps in the input tensor.
+     * @param[in] num_rows     Number of rows in each feature map.
+     * @param[in] num_cols     Number of columns in each feature map.
+     * @param[in] same_padding Use "SAME" padding, otherwise use "VALID".
      *
      * @return Stride expressed in bytes.
      */
-    virtual int get_matrix_stride(const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const = 0;
+    virtual int get_matrix_stride(int num_batches, int num_channels, int num_rows, int num_cols, bool same_padding) const = 0;
 
     /** Configure the output transform kernel.
      *
@@ -141,13 +143,20 @@ public:
 
     /** Gets the stride between matrices in the input worspace
      *
-     * @param[in] kernel_shape The shape of the weights tensor.
-     * @param[in] input_shape  The shape of the input tensor.
-     * @param[in] padding_type The type of padding to be used.
+     * @param[in] num_batches  Number of batches in the input tensor.
+     * @param[in] num_channels Number of feature maps in the input tensor.
+     * @param[in] num_rows     Number of rows in each feature map.
+     * @param[in] num_cols     Number of columns in each feature map.
+     * @param[in] same_padding Use "SAME" padding, otherwise use "VALID".
      *
      * @return Stride expressed in bytes.
      */
-    int get_matrix_stride(const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const override;
+    int get_matrix_stride(
+        int  num_batches,
+        int  num_channels,
+        int  num_rows,
+        int  num_cols,
+        bool same_padding) const override;
 
     /** Default constructor */
     NEWinogradLayerTransformInputKernel();
@@ -241,31 +250,35 @@ public:
      * @param[in] num_rows            Number of rows in each feature map of the input tensor.
      * @param[in] num_cols            Number of columns in each feature map of the input tensor.
      * @param[in] num_output_channels Number of feature maps in the output tensor.
-     * @param[in] same_padding        Use "SAME" padding, otherwise use "VALID".
      *
      * @return Storage size (in units of TOut) required.
      */
-    virtual unsigned int get_output_storage_size(int num_batches, int num_rows, int num_cols, int num_output_channels, bool same_padding) const = 0;
+    virtual unsigned int get_output_storage_size(int num_batches, int num_rows, int num_cols, int num_output_channels) const = 0;
 
     /** Gets the stride between matrices in the output worspace
      *
-     * @param[in] kernel_shape The shape of the weights tensor.
-     * @param[in] input_shape  The shape of the input tensor.
-     * @param[in] padding_type The type of padding to be used.
+     * @param[in] num_batches         Number of batches in the output tensor.
+     * @param[in] num_rows            Number of rows in each feature map of the input tensor.
+     * @param[in] num_cols            Number of columns in each feature map of the input tensor.
+     * @param[in] num_output_channels Number of feature maps in the output tensor.
      *
      * @return Stride expressed in bytes.
      */
-    virtual int get_matrix_stride(const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const = 0;
+    virtual int get_matrix_stride(int num_batches, int num_rows, int num_cols, int num_output_channels) const = 0;
 
     /** Get the output shape of a convolution.
      *
-     * @param[in] kernel_shape The shape of the weights tensor.
-     * @param[in] in_shape     The shape of the input tensor.
-     * @param[in] padding      The type of padding to be used.
+     * @param[in] num_rows     Number of rows in each feature map of the input tensor.
+     * @param[in] num_cols     Number of columns in each feature map of the input tensor.
+     * @param[in] padding_same True if padding is SAME, false otherwise
      *
-     * @return Stride expressed in bytes.
+     * @return Shape of the output tensor
      */
-    virtual Tensor4DShape get_output_shape(const KernelShape &kernel_shape, const Tensor4DShape &in_shape, const PaddingType padding) const = 0;
+    virtual std::pair<unsigned int, unsigned int> get_output_shape(
+        int  num_rows,    /* Number of rows in each feature map of the input tensor. */
+        int  num_cols,    /* Number of columns in each feature map of the input tensor. */
+        bool padding_same /* True if padding is SAME, false otherwise */
+    ) const = 0;
 
     /** Configure the output transform kernel.
      *
@@ -278,17 +291,19 @@ public:
      * @param[in]  num_cols           Number of columns in output tensor.
      * @param[in]  num_channels       Number of feature maps in the output tensor.
      * @param[in]  workspace          Tensor to be used as the working space during the computation.
+     * @param[in]  activation         Activation to be used
      */
     virtual void configure(
-        const ITensor *biases,
-        const ITensor *transformed_output,
-        const int      matrix_stride,
-        ITensor       *output_nhwc,
-        const int      num_batches,
-        const int      num_rows,
-        const int      num_cols,
-        const int      num_channels,
-        ITensor       *workspace) = 0;
+        const ITensor              *biases,
+        const ITensor              *transformed_output,
+        const int                   matrix_stride,
+        ITensor                    *output_nhwc,
+        const int                   num_batches,
+        const int                   num_rows,
+        const int                   num_cols,
+        const int                   num_channels,
+        ITensor                    *workspace,
+        const arm_gemm::Activation &activation) = 0;
 
     virtual ~INEWinogradLayerTransformOutputKernel()
     {
@@ -326,30 +341,33 @@ public:
      * @param[in] num_rows            Number of rows in each feature map of the input tensor.
      * @param[in] num_cols            Number of columns in each feature map of the input tensor.
      * @param[in] num_output_channels Number of feature maps in the output tensor.
-     * @param[in] same_padding        Use "SAME" padding, otherwise use "VALID".
      *
      * @return Storage size (in units of TOut) required.
      */
-    unsigned int get_output_storage_size(int num_batches, int num_rows, int num_cols, int num_output_channels, bool same_padding) const override;
+    unsigned int get_output_storage_size(int num_batches, int num_rows, int num_cols, int num_output_channels) const override;
 
     /** Gets the stride between matrices in the output worspace
      *
-     * @param[in] kernel_shape The shape of the weights tensor.
-     * @param[in] input_shape  The shape of the input tensor.
-     * @param[in] padding_type The type of padding to be used.
+     * @param[in] num_batches         Number of batches in the output tensor.
+     * @param[in] num_rows            Number of rows in each feature map of the input tensor.
+     * @param[in] num_cols            Number of columns in each feature map of the input tensor.
+     * @param[in] num_output_channels Number of feature maps in the output tensor.
      *
      * @return Stride expressed in bytes.
      */
-    int get_matrix_stride(const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const override;
+    int get_matrix_stride(int num_batches, int num_rows, int num_cols, int num_output_channels) const override;
     /** Get the output shape of a convolution.
      *
-     * @param[in] kernel_shape The shape of the weights tensor.
-     * @param[in] in_shape     The shape of the input tensor.
-     * @param[in] padding      The type of padding to be used.
+     * @param[in] num_rows     Number of rows in each feature map of the input tensor.
+     * @param[in] num_cols     Number of columns in each feature map of the input tensor.
+     * @param[in] padding_same True if padding is SAME, false otherwise
      *
-     * @return Stride expressed in bytes.
+     * @return Shape of the output tensor
      */
-    Tensor4DShape get_output_shape(const KernelShape &kernel_shape, const Tensor4DShape &in_shape, const PaddingType padding) const override;
+    std::pair<unsigned int, unsigned int> get_output_shape(
+        int  num_rows, /* Number of rows in each feature map of the input tensor. */
+        int  num_cols, /* Number of columns in each feature map of the input tensor. */
+        bool padding_same) const override;
 
     /** Get the working space required to perform the transformation.
      *
@@ -374,17 +392,19 @@ public:
      * @param[in]  num_cols           Number of columns in output tensor.
      * @param[in]  num_channels       Number of feature maps in the output tensor.
      * @param[in]  workspace          Tensor to be used as the working space during the computation.
+     * @param[in]  activation         Activation to be used
      */
     void configure(
-        const ITensor *biases,
-        const ITensor *transformed_output,
-        const int      matrix_stride,
-        ITensor       *output_nhwc,
-        const int      num_batches,
-        const int      num_rows,
-        const int      num_cols,
-        const int      num_channels,
-        ITensor       *workspace) override;
+        const ITensor              *biases,
+        const ITensor              *transformed_output,
+        const int                   matrix_stride,
+        ITensor                    *output_nhwc,
+        const int                   num_batches,
+        const int                   num_rows,
+        const int                   num_cols,
+        const int                   num_channels,
+        ITensor                    *workspace,
+        const arm_gemm::Activation &activation) override;
 
     void run(const Window &window, const ThreadInfo &info) override;
 
@@ -448,11 +468,12 @@ public:
     virtual unsigned int get_weight_storage_size(int num_output_channels, int num_input_channels) const = 0;
     /** Gets the stride between matrices in the kernel worspace
      *
-     * @param[in] kernel_shape The shape of the weights tensor.
+     * @param[in] num_output_channels Number of output feature maps.
+     * @param[in] num_input_channels  Number of input feature maps.
      *
      * @return Stride expressed in bytes.
      */
-    virtual int get_matrix_stride(const KernelShape &kernel_shape) const = 0;
+    virtual int get_matrix_stride(int num_output_channels, int num_input_channels) const = 0;
 
     /** Configure the weights transform kernel.
      *
@@ -535,11 +556,12 @@ public:
 
     /** Gets the stride between matrices in the input worspace
      *
-     * @param[in] kernel_shape The shape of the weights tensor.
+     * @param[in] num_output_channels Number of output feature maps.
+     * @param[in] num_input_channels  Number of input feature maps.
      *
      * @return Stride expressed in bytes.
      */
-    int get_matrix_stride(const KernelShape &kernel_shape) const override;
+    int get_matrix_stride(int num_output_channels, int num_input_channels) const override;
     void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 

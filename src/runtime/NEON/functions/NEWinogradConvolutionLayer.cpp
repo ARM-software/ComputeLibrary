@@ -33,6 +33,7 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "support/ToolchainSupport.h"
 
+#include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd.hpp"
 
 namespace arm_compute
@@ -232,6 +233,31 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
     return std::find(fast_math_winograd.begin(), fast_math_winograd.end(), p) != fast_math_winograd.end();
 }
 
+inline bool fuse_function_supported(const ActivationLayerInfo &act_info)
+{
+    return act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ||
+           act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU;
+}
+
+arm_gemm::Activation arm_gemm_activation_from_acl_activation(const ActivationLayerInfo &act_info)
+{
+        switch(act_info.activation())
+        {
+            case ActivationLayerInfo::ActivationFunction::RELU:
+            {
+                return arm_gemm::Activation(arm_gemm::Activation::Type::ReLU, act_info.a(), act_info.b());
+            }
+            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+            {
+                return arm_gemm::Activation(arm_gemm::Activation::Type::BoundedReLU, act_info.a(), act_info.b());
+            }
+            default:
+            {
+                return arm_gemm::Activation(arm_gemm::Activation::Type::None);
+            }
+        }
+}
+
 } //namespace
 
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
@@ -256,6 +282,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const Size2D input_dims  = Size2D(input->info()->dimension(width_idx), input->info()->dimension(height_idx));
     const Size2D kernel_size = Size2D(weights->info()->dimension(width_idx), weights->info()->dimension(height_idx));
     const Size2D output_tile = winograd_output_tile(input_dims, kernel_size);
+
+
 
     // Check if the Winograd configuration requires fast math
     if(!enable_fast_math)
@@ -388,21 +416,15 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
                                       * data_type_size;
 
     // Output storage
-    const size_t output_storage_size = transform_output_kernel->get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels,
-                                                                                        use_same_padding)
-                                       * data_type_size;
-    ;
-    const KernelShape kernel_shape({ out_channels, static_cast<int>(kernel_size.height), static_cast<int>(kernel_size.width), in_channels });
-    const int         kernel_matrix_stride = transform_weights_kernel->get_matrix_stride(kernel_shape);
-
-    const int  output_matrix_stride = transform_output_kernel->get_matrix_stride(kernel_shape, in_shape, use_padding_type);
-    const auto output_shape(transform_output_kernel->get_output_shape(kernel_shape, in_shape, use_padding_type));
-
-    const int input_matrix_stride = transform_input_kernel->get_matrix_stride(kernel_shape, in_shape, use_padding_type);
+    const size_t output_storage_size  = transform_output_kernel->get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels) * data_type_size;
+    const int    kernel_matrix_stride = transform_weights_kernel->get_matrix_stride(out_channels, in_channels);
+    const int    output_matrix_stride = transform_output_kernel->get_matrix_stride(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels);
+    const auto   output_shape         = transform_output_kernel->get_output_shape(in_shape.n_rows, in_shape.n_cols, use_padding_type == PADDING_SAME);
+    const int    input_matrix_stride  = transform_input_kernel->get_matrix_stride(in_shape.n_batches, in_channels, in_shape.n_rows, in_shape.n_cols, use_padding_type == PADDING_SAME);
 
     // Configure GEMM
-    const int tile_rows                = iceildiv(output_shape.n_rows, output_tile.height);
-    const int tile_cols                = iceildiv(output_shape.n_cols, output_tile.width);
+    const int tile_rows                = iceildiv(output_shape.first, output_tile.height);
+    const int tile_cols                = iceildiv(output_shape.second, output_tile.width);
     const int m                        = in_shape.n_batches * tile_rows * tile_cols;
     const int k                        = in_shape.n_channels;
     const int n                        = out_channels;
@@ -489,9 +511,19 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         _memory_group.manage(&_output_nhwc);
         output_to_use = &_output_nhwc;
     }
-    transform_output_kernel->configure(biases, &_output_transformed,
-                                       output_matrix_stride, output_to_use,
-                                       in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels, &_output_workspace);
+    const  arm_gemm::Activation activation = arm_gemm_activation_from_acl_activation(act_info);
+
+    transform_output_kernel->configure(biases,
+                                       &_output_transformed,
+                                       output_matrix_stride,
+                                       output_to_use,
+                                       in_shape.n_batches,
+                                       output_shape.first,
+                                       output_shape.second,
+                                       out_channels,
+                                       &_output_workspace,
+                                       activation);
+
     const size_t output_workspace_size = transform_output_kernel->get_working_space_size(max_num_threads);
     TensorInfo   output_workspace_info(TensorShape(output_workspace_size), 1, _output->info()->data_type());
     _output_workspace.allocator()->init(output_workspace_info);
@@ -510,7 +542,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     _transform_output_kernel  = std::move(transform_output_kernel);
 
     //Configure Activation Layer
-    _is_activationlayer_enabled = act_info.enabled();
+    _is_activationlayer_enabled = act_info.enabled() && ! fuse_function_supported(act_info);
     if(_is_activationlayer_enabled)
     {
         _activationlayer_function.configure(_output, nullptr, act_info);
@@ -546,7 +578,7 @@ void NEWinogradConvolutionLayer::run()
         _permute_output.run();
     }
 
-    if(_is_activationlayer_enabled)
+    if(_is_activationlayer_enabled )
     {
         _activationlayer_function.run();
     }
