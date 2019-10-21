@@ -150,6 +150,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "activation_layer", "activation_layer.cl" },
     { "activation_layer_quant", "activation_layer_quant.cl" },
     { "activation_layer_quant_f32", "activation_layer_quant.cl" },
+    { "arg_min_max_x", "arg_min_max.cl" },
+    { "arg_min_max_y", "arg_min_max.cl" },
+    { "arg_min_max_z", "arg_min_max.cl" },
+    { "arg_min_max_w", "arg_min_max.cl" },
     { "batch_to_space_nchw", "batch_to_space.cl" },
     { "batch_to_space_static_nchw", "batch_to_space.cl" },
     { "batch_to_space_nhwc", "batch_to_space.cl" },
@@ -583,6 +587,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "activation_layer_quant.cl",
 #include "./cl_kernels/activation_layer_quant.clembed"
+    },
+    {
+        "arg_min_max.cl",
+#include "./cl_kernels/arg_min_max.clembed"
     },
     {
         "batch_to_space.cl",

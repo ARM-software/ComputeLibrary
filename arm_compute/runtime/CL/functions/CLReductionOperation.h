@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLREDUCTIONOPERATION_H__
-#define __ARM_COMPUTE_CLREDUCTIONOPERATION_H__
+#ifndef ARM_COMPUTE_CLREDUCTIONOPERATION_H
+#define ARM_COMPUTE_CLREDUCTIONOPERATION_H
 
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
@@ -57,7 +57,7 @@ public:
      * @param[in]  input     Source tensor. Data types supported: QASYMM8/F16/F32.
      * @param[out] output    Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  axis      Axis along which to reduce. Supported reduction axis : 0, 1, 2, 3
-     * @param[in]  op        Reduction operation to perform.
+     * @param[in]  op        Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
      * @param[in]  keep_dims (Optional) Whether to keep the reduced dimension after the operation. Defaults to true.
      */
     void configure(ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims = true);
@@ -67,7 +67,7 @@ public:
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/F16/F32.
      * @param[in] output    Destination tensor info. Data types and data layouts supported: Same as @p input.
      * @param[in] axis      Axis along which to reduce. Supported reduction axis : 0, 1, 2, 3
-     * @param[in] op        Reduction operation to perform.
+     * @param[in] op        Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
      * @param[in] keep_dims (Optional) Whether to keep the reduced dimension after the operation. Defaults to true.
      *
      * @return a status
@@ -92,4 +92,4 @@ private:
     bool                                    _is_reshape_required;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLREDUCTIONOPERATION_H__ */
+#endif /* ARM_COMPUTE_CLREDUCTIONOPERATION_H */

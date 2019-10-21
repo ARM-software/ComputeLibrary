@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H__
-#define __ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H__
+#ifndef ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H
+#define ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -32,11 +32,6 @@ namespace arm_compute
 class ICLTensor;
 
 /** Interface for the reduction operation kernel
- *
- * @note For ARG_MIN/ARG_MAX reduction, the default data type for an uninitialized
- *       output tensor is signed 32-bit integer (S32). It is the user's responsibility
- *       to check that the results do not overflow because the indices are computed
- *       in unsigned 32-bit (U32).
  */
 class CLReductionOperationKernel : public ICLKernel
 {
@@ -57,10 +52,10 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/S32/F16/F32.
-     * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input, U32/S32 for ARG_MIX/ARG_MAX.
+     * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
      *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0,1,2,3
-     * @param[in]  op     Reduction operation to perform.
+     * @param[in]  op     Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
      * @param[in]  width  (Optional)  In case of x-axis we also need to provide the width of the input image.
      */
     void configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width = 0);
@@ -68,10 +63,10 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
      *
      * @param[in] input  Source tensor info. Data types supported: QASYMM8/S32/F16/F32.
-     * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input, U32/S32 for ARG_MIX/ARG_MAX.
+     * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
      *                   Output will have the same number of dimensions as input.
      * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0,1,2,3
-     * @param[in] op     Reduction operation to perform.
+     * @param[in] op     Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
      * @param[in] width  (Optional)  In case of x-axis we also need to provide the width of the input image.
      *
      * @return a status
@@ -90,4 +85,4 @@ private:
     BorderSize         _border_size;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLREDUCTIONOPERATIONKERNEL_H */

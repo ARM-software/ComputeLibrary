@@ -365,4 +365,12 @@ cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &ke
         return static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
     }
 }
+
+cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size)
+{
+    const unsigned int width_leftover = input_dimension % vector_size;
+    const unsigned int border_width   = (width_leftover != 0) ? vector_size - width_leftover : 0;
+    const unsigned int num_of_threads = ((input_dimension + border_width) / 16);
+    return cl::NDRange(std::min(8U, num_of_threads));
+}
 } // namespace arm_compute

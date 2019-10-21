@@ -42,6 +42,18 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
+const auto ArgMinMaxSmallDataset = framework::dataset::make("Shape",
+{
+    TensorShape{ 2U, 7U, 1U, 3U },
+    TensorShape{ 128U, 64U, 21U, 3U },
+    TensorShape{ 2560, 2U, 2U, 2U },
+});
+
+const auto ArgMinMaxLargeDataset = framework::dataset::make("Shape",
+{ TensorShape{ 517U, 123U, 13U, 2U } });
+} // namespace
 TEST_SUITE(CL)
 TEST_SUITE(ArgMinMax)
 
@@ -98,7 +110,17 @@ TEST_SUITE(S32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLArgMinMaxValidationFixture<int32_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(ArgMinMaxSmallDataset, framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLArgMinMaxValidationFixture<int32_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(ArgMinMaxLargeDataset, framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -110,7 +132,8 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLArgMinMaxValidationFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(ArgMinMaxSmallDataset, framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -119,7 +142,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLArgMinMaxValidationFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(ArgMinMaxLargeDataset, framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -130,7 +154,8 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLArgMinMaxValidationFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(ArgMinMaxSmallDataset, framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -139,7 +164,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLArgMinMaxValidationFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+                       combine(combine(combine(ArgMinMaxLargeDataset, framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                               framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

@@ -190,5 +190,16 @@ bool preferred_dummy_work_items_support(const cl::Device &device);
  * @return An opencl kernel
  */
 cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts);
+
+/** Creates a suitable LWS hint object for parallel implementations. Sets the number of WG based on the input size.
+ *  If input width is smaller than 128 we can use fewer threads than 8.
+ *
+ * @param[in] input_dimension number of elements along the dimension to apply the parallellization
+ * @param[in] vector_size     size of the vector in OpenCL
+ *
+ * @return An LWS hint object
+ */
+cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size);
+
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

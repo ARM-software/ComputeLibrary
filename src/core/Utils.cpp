@@ -431,12 +431,11 @@ std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned in
 
 bool arm_compute::needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis)
 {
-    const bool is_arg_min_max    = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN);
     const bool is_min_max        = (op == ReductionOperation::MAX || op == ReductionOperation::MIN);
     const bool is_quantized_type = is_data_type_quantized(dt);
     const bool is_first_dim      = (axis == 0);
 
-    return !is_first_dim || is_arg_min_max || is_min_max || is_quantized_type;
+    return !is_first_dim || is_min_max || is_quantized_type;
 }
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED

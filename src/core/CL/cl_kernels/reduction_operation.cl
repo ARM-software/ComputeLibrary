@@ -23,19 +23,6 @@
  */
 #include "helpers.h"
 
-#if FLOAT_DATA_TYPE
-#define ISGREATER(x, y) isgreater(x, y)
-#define ISLESS(x, y) isless(x, y)
-#else // !FLOAT_DATA_TYPE
-#if defined(WIDTH)
-#define ISGREATER(x, y) (x > y) ? 1 : 0
-#define ISLESS(x, y) (x < y) ? 1 : 0
-#else // !defined(WIDTH)
-#define ISGREATER(x, y) select((int16)0, (int16)-1, x > y)
-#define ISLESS(x, y) select((int16)0, (int16)-1, x < y)
-#endif // defined(WIDTH)
-#endif // FLOAT_DATA_TYPE
-
 /** Calculate square sum of a vector
  *
  * @param[in] input Pointer to the first pixel.
@@ -164,7 +151,7 @@ __kernel void reduction_operation_x(
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width size must be passed at compile time using -DWIDTH e.g. -DWIDTH=128
  * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
- * @note In case of ARG_MIN and ARG_MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
+ * @note In case of MIN and MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
  *
  * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: S32/F16/F32 and QASYMM8 for operation MEAN
  * @param[in] src_stride_x                         Stride of the source tensor in X dimension (in bytes)
@@ -184,32 +171,19 @@ __kernel void reduction_operation_non_parallel_x(
 
     DATA_TYPE_PROMOTED res = *((__global DATA_TYPE *)vector_offset(&src, 0));
 
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    uint indx = 0;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
-
     for(unsigned int x = 1; x < WIDTH; ++x)
     {
         DATA_TYPE_PROMOTED in = *((__global DATA_TYPE *)vector_offset(&src, x));
-#if defined(ARG_MAX)
-        indx = select(indx, x, ISGREATER(in, res));
-        res  = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
-#elif defined(ARG_MIN)
-        indx = select(indx, x, ISLESS(in, res));
-        res  = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
-#elif defined(MIN)
+#if defined(MIN)
         res = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
 #elif defined(MAX)
-        res = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
-#else  // !(defined(ARG_MAX) || defined(ARG_MIN))
+        res                         = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
+#else  // !(defined(MAX) || defined(MIN))
         res += in;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+#endif // defined(MAX) || defined(MIN)
     }
 
     // Store result
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    *((__global uint *)output.ptr) = indx;
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(MEAN)
     res /= WIDTH;
 #endif // defined(MEAN)
@@ -218,7 +192,6 @@ __kernel void reduction_operation_non_parallel_x(
 #else  // defined(MIN) || defined(MAX)
     *((__global uchar *)output.ptr) = convert_uchar(res);
 #endif // defined(MIN) || defined(MAX)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif // defined(WIDTH)
 
@@ -255,27 +228,15 @@ __kernel void reduction_operation_y(
     res *= res;
 #endif // defined(SUM_SQUARE)
 
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    uint16 indx = 0;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
-
     for(unsigned int y = 1; y < HEIGHT; ++y)
     {
         VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
         in = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, y)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
-#if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
-        indx             = select(indx, y, cond_conv);
-        res              = select(res, in, ISGREATER(in, res));
-#elif defined(ARG_MIN)
-        uint16 cond_conv                         = CONVERT(ISLESS(in, res), uint16);
-        indx                                     = select(indx, y, cond_conv);
-        res                                      = select(res, in, ISLESS(in, res));
-#elif defined(MIN)
+#if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res = select(res, in, ISGREATER(in, res));
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
+        res                         = select(res, in, ISGREATER(in, res));
+#else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
@@ -284,18 +245,14 @@ __kernel void reduction_operation_y(
 #else  // !defined(PROD)
         res += in;
 #endif // defined(PROD)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+#endif // defined(MAX) || defined(MIN)
     }
 
     // Store result
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    vstore16(indx, 0, (__global uint *)output.ptr);
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(MEAN)
     res /= HEIGHT;
 #endif // defined(MEAN)
     vstore16(CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif // defined(HEIGHT)
 
@@ -340,10 +297,6 @@ __kernel void reduction_operation_z(
     res *= res;
 #endif // defined(SUM_SQUARE)
 
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    uint16 indx = 0;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
-
     for(unsigned int z = 1; z < DEPTH; ++z)
     {
         VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
@@ -354,19 +307,11 @@ __kernel void reduction_operation_z(
         in1 = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 8, 0, z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 #endif // defined(COMPLEX)
 
-#if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
-        indx             = select(indx, z, cond_conv);
-        res              = select(res, in, ISGREATER(in, res));
-#elif defined(ARG_MIN)
-        uint16 cond_conv = CONVERT(ISLESS(in, res), uint16);
-        indx             = select(indx, z, cond_conv);
-        res              = select(res, in, ISLESS(in, res));
-#elif defined(MIN)
+#if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res = select(res, in, ISGREATER(in, res));
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
+        res                         = select(res, in, ISGREATER(in, res));
+#else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
@@ -377,14 +322,11 @@ __kernel void reduction_operation_z(
 #if defined(COMPLEX)
         res1 += in1;
 #endif // defined(COMPLEX)
-#endif //defined(PROD)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+#endif // defined(PROD)
+#endif // defined(MAX) || defined(MIN)
     }
 
     // Store result
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    vstore16(indx, 0, (__global uint *)output.ptr);
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(MEAN)
     res /= DEPTH;
 #endif // defined(MEAN)
@@ -392,7 +334,6 @@ __kernel void reduction_operation_z(
 #if defined(COMPLEX)
     vstore16(CONVERT(res1, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)tensor3D_offset(&output, 8, 0, 0));
 #endif // defined(COMPLEX)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif /* defined(DEPTH) */
 
@@ -438,28 +379,16 @@ __kernel void reduction_operation_w(
     res *= res;
 #endif // defined(SUM_SQUARE)
 
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    uint16 indx = 0;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
-
     for(unsigned int w = 1; w < BATCH; ++w)
     {
         VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
         in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, w)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 
-#if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
-        indx             = select(indx, w, cond_conv);
-        res              = select(res, in, ISGREATER(in, res));
-#elif defined(ARG_MIN)
-        uint16 cond_conv = CONVERT(ISLESS(in, res), uint16);
-        indx             = select(indx, w, cond_conv);
-        res              = select(res, in, ISLESS(in, res));
-#elif defined(MIN)
+#if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res = select(res, in, ISGREATER(in, res));
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
+        res                         = select(res, in, ISGREATER(in, res));
+#else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
@@ -468,17 +397,13 @@ __kernel void reduction_operation_w(
 #else  //!defined(PROD)
         res += in;
 #endif //defined(PROD)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+#endif // defined(MAX) || defined(MIN)
     }
 
     // Store result
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    vstore16(indx, 0, (__global uint *)output.ptr);
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(MEAN)
     res /= BATCH;
 #endif // defined(MEAN)
     vstore16(CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif /* defined(BATCH) && defined(DEPTH) */
