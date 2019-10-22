@@ -1377,8 +1377,9 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
 __kernel void dwc_MxN_native_fp_nhwc(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst),
-    TENSOR3D_DECLARATION(weights),
+    TENSOR3D_DECLARATION(weights)
 #if defined(HAS_BIAS)
+    ,
     VECTOR_DECLARATION(biases)
 #endif // defined(HAS_BIAS)
 )

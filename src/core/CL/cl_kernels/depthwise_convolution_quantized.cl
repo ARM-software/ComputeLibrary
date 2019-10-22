@@ -1434,8 +1434,9 @@ __kernel void dwc_3x3_reshaped_qasymm8_dot8_stride1_nhwc(
 __kernel void dwc_MxN_native_quantized8_nhwc(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst),
-    TENSOR3D_DECLARATION(weights),
+    TENSOR3D_DECLARATION(weights)
 #if defined(HAS_BIAS)
+    ,
     VECTOR_DECLARATION(biases)
 #endif // defined(HAS_BIAS)
 )
