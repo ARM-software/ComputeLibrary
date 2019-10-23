@@ -60,7 +60,7 @@ Status construct_gemmlowp_output_stage(const ITensorInfo &input, const ITensorIn
         const float multiplier        = (iq_info.scale * wq_info.scale) / output_quant_info.scale;
         int         output_multiplier = 0;
         int         output_shift      = 0;
-        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
 
         // Set the GEMMLowp output stage info
         gemmlowp_output_stage.gemmlowp_offset     = output_quant_info.offset;

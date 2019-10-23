@@ -197,7 +197,7 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
                 int         output_shift      = 0;
                 const float weights_scale     = (is_quantized_per_channel) ? weights_scale_vec[out_z] : weights_scale_vec[0];
                 const float multiplier        = input_scale * weights_scale / output_scale;
-                arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+                arm_compute::quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
                 for(int y = minimum_y; y <= minimum_y + maximum_y; y += conv_info.stride().second)
                 {
@@ -220,9 +220,8 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
                             }
                         }
                         val += bias_val;
-                        val = asymm_rounding_divide_by_pow2(asymm_int_mult(val, output_multiplier), output_shift);
-                        val += output_offset;
-                        val = utility::clamp<int32_t>(val, 0, 255);
+                        // Quantize down
+                        val = quantize_down_scale_by_fixedpoint(val, output_multiplier, output_shift, output_offset, 0, 255);
 
                         // Store the result
                         dst[out_pos++] = val;

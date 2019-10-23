@@ -191,8 +191,7 @@ void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
         int         output_multiplier = 0;
         int         output_shift      = 0;
         const float multiplier        = iq_info.scale * wq_info.scale()[i] / oq_info.scale;
-        ARM_COMPUTE_ERROR_ON(multiplier > 1.0f);
-        calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+        calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
         output_multipliers_ptr[i] = output_multiplier;
         output_shifts_ptr[i]      = output_shift;

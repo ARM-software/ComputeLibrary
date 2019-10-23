@@ -107,6 +107,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
     }
 
+    if(is_data_type_quantized(input->data_type()))
+    {
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = (output->total_size() != 0) ? output->quantization_info().uniform() : iq_info;
+
+        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
+    }
+
     return Status{};
 }
 
@@ -235,6 +247,14 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const ICLTensor *input, 
         build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-wq_info.offset));
         build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(oq_info.offset));
         build_opts.add_option_if(is_data_type_quantized_per_channel(weights->info()->data_type()), "-DPER_CHANNEL_QUANTIZATION");
+
+        // Compute non-per-channel multiplier and shift anyway to make OpenCL kernel simpler
+        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+        build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+        build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
 
         if(dwc_info.activation_info.enabled())
         {

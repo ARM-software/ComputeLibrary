@@ -292,7 +292,7 @@ const auto QuantizationData = framework::dataset::make("QuantizationInfo",
 {
     QuantizationInfo(0.5f, 10),
     QuantizationInfo(0.3f, 3),
-    QuantizationInfo(1.f, 10),
+    QuantizationInfo(1.1f, 10),
 });
 TEST_SUITE(QASYMM8)
 

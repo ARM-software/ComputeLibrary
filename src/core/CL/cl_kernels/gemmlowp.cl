@@ -1673,9 +1673,17 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
     int4            result_multipliers_values = vload4(0, (__global int *)result_multipliers_addr);
     int4            result_shifts_values      = vload4(0, (__global int *)result_shifts_addr);
 
-    in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, result_multipliers_values, result_shifts_values, 4);
-#else  // !defined(PER_CHANNEL_QUANTIZATION)
+    int4 in_s32_shift_lt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(in_s32, result_multipliers_values, result_shifts_values, 4);
+    int4 in_s32_shift_gt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, result_multipliers_values, result_shifts_values, 4);
+    in_s32                = select(in_s32_shift_lt0, in_s32_shift_gt0, result_shifts_values >= 0);
+#else // defined(PER_CHANNEL_QUANTIZATION)
+
+#if RESULT_SHIFT < 0
+    in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, 4);
+#else  // RESULT_SHIFT >= 0
     in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, 4);
+#endif // RESULT_SHIFT < 0
+
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
     // Add the offset terms to GEMM's result
@@ -1768,7 +1776,11 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
     // Multiply by result_mult_int and shift
     input_values *= RESULT_MULT_INT;
 
+#if RESULT_SHIFT < 0
+    input_values >>= -RESULT_SHIFT;
+#else  // RESULT_SHIFT >= 0
     input_values >>= RESULT_SHIFT;
+#endif // RESULT_SHIFT < 0
 
     uchar4 res = convert_uchar4_sat(input_values);
 
@@ -1850,7 +1862,11 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
 #endif // defined(ADD_BIAS)
 
     // Multiply by result_mult_int and shift
+#if RESULT_SHIFT < 0
+    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+#else  // RESULT_SHIFT >= 0
     input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+#endif // RESULT_SHIFT < 0
 
     // Add the offset terms to GEMM's result
     input_values += (int4)RESULT_OFFSET_AFTER_SHIFT;
@@ -1937,7 +1953,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
 
     // Multiply by result_mult_int and shift
 #if RESULT_SHIFT < 0
-    input_values = ASYMM_MULT(input_values * (1 << (-RESULT_SHIFT)), RESULT_FIXEDPOINT_MULTIPLIER, 4);
+    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
 #else  // RESULT_SHIFT >= 0
     input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
 #endif // RESULT_SHIFT < 0

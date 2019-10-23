@@ -81,7 +81,7 @@ void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &w
     int         output_multiplier = 0;
     int         output_shift      = 0;
     const float multiplier        = input_scale * weights_scale / output_scale;
-    arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+    arm_compute::quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
     for(int y = 0; y < rows_weights; ++y)
     {
@@ -96,9 +96,8 @@ void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &w
         // Accumulate the bias
         acc += bias_ptr[y];
 
-        acc = asymm_rounding_divide_by_pow2(asymm_int_mult(acc, output_multiplier), output_shift);
-        acc += output_offset;
-        acc = utility::clamp<int32_t>(acc, 0, 255);
+        // Quantize down
+        acc = quantize_down_scale_by_fixedpoint(acc, output_multiplier, output_shift, output_offset, 0, 255);
 
         // Store the result
         dst_ptr[y] = static_cast<T>(acc);

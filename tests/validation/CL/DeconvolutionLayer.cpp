@@ -123,19 +123,19 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using CLDeconvolutionLayerFixture4x4      = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 4, 4>;
+using CLDeconvolutionLayerFixture4x4 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 4, 4>;
 
 template <typename T>
-using CLDeconvolutionLayerFixture3x3      = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 3, 3>;
+using CLDeconvolutionLayerFixture3x3 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 3, 3>;
 
 template <typename T>
 using CLDeconvolutionLayerAsymmFixture3x3 = DeconvolutionValidationAsymmFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 3, 3>;
 
 template <typename T>
-using CLDeconvolutionLayerFixture2x2      = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 2, 2>;
+using CLDeconvolutionLayerFixture2x2 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 2, 2>;
 
 template <typename T>
-using CLDeconvolutionLayerFixture1x1      = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 1, 1>;
+using CLDeconvolutionLayerFixture1x1 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 1, 1>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
@@ -286,8 +286,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t
                        framework::dataset::make("DataType",
                                                 DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
-                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f, 0) })),
+                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(3.f, 0) })),
                        add_bias_dataset))
 {
     // Validate output
@@ -297,8 +297,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t
                        framework::dataset::make("DataType",
                                                 DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
-                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f, 0) })),
+                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(3.f, 0) })),
                        add_bias_dataset))
 {
     // Validate output
@@ -310,8 +310,8 @@ TEST_SUITE(W2x2)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture2x2<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(data2x2_precommit,
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
-                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f, 0) })),
+                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(3.f, 0) })),
                        add_bias_dataset))
 {
     // Validate output
@@ -323,8 +323,8 @@ TEST_SUITE(W1x1)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data1x1, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
-                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f, 0) })),
+                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(3.f, 0) })),
                                                                                                                        add_bias_dataset))
 {
     // Validate output

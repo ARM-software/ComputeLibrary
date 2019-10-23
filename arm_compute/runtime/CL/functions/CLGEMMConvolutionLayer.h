@@ -21,14 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__
-#define __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__
+#ifndef ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H
+#define ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
-#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
@@ -36,8 +34,6 @@
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
-#include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
-#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/ITransformWeights.h"
 #include "arm_compute/runtime/IWeightsManager.h"
@@ -143,7 +139,6 @@ private:
  * -# @ref CLGEMM (if the data type is FP32 or FP16)
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
  * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
- * -# @ref CLElementwiseOperationKernel for addition (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
  * -# @ref CLCol2ImKernel (if NCHW data layout)
  */
 class CLGEMMConvolutionLayer : public IFunction
@@ -267,4 +262,4 @@ private:
     bool _is_prepared;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */
+#endif /* ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H */

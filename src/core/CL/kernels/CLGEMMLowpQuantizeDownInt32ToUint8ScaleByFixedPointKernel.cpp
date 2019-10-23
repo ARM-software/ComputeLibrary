@@ -35,8 +35,6 @@
 
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
 namespace
@@ -99,9 +97,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     return std::make_pair(err, win);
 }
 } // namespace
-
-class Coordinates;
-} // namespace arm_compute
 
 CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel()
     : _input(nullptr), _bias(nullptr), _output(nullptr)
@@ -180,3 +175,4 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

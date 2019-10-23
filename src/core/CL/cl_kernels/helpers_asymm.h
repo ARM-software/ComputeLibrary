@@ -369,6 +369,8 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
 
 #define ASYMM_ROUNDING_DIVIDE_BY_POW2(x, exponent, size) asymm_rounding_divide_by_POW2_##size(x, exponent)
 #define ASYMM_MULT(a, b, size) asymm_mult##size(a, b)
+#define ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(x, quantized_multiplier, left_shift, size) \
+    ASYMM_MULT(x *((VEC_DATA_TYPE(int, size))(1) << (-left_shift)), quantized_multiplier, size)
 #define ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(x, quantized_multiplier, right_shift, size) \
     ASYMM_ROUNDING_DIVIDE_BY_POW2(ASYMM_MULT(x, quantized_multiplier, size), right_shift, size)
 #define ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL(a, size) asymm_exp_on_interval_between_negative_one_quarter_and_0_excl##size(a)

@@ -60,6 +60,12 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 });
 
 const auto FullyConnectedParameters = combine(framework::dataset::make("TransposeWeights", { false, true }), framework::dataset::make("ReshapeWeights", { false, true }));
+
+const auto QuantizationData = framework::dataset::make("QuantizationInfo",
+{
+    QuantizationInfo(1.f / 255.f, 10),
+    QuantizationInfo(1.1f, 10),
+});
 } // namespace
 
 TEST_SUITE(CL)
@@ -204,20 +210,14 @@ using CLFullyConnectedLayerQuantizedFixture = FullyConnectedLayerValidationQuant
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(
-                           combine(datasets::SmallFullyConnectedLayerDataset(),
-                                   FullyConnectedParameters),
-                           framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 10) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8)), QuantizationData))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(
-                           combine(datasets::LargeFullyConnectedLayerDataset(),
-                                   FullyConnectedParameters),
-                           framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 256.f, 10) })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8)), QuantizationData))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
