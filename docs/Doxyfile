@@ -769,11 +769,12 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ./docs/00_introduction.dox \
-                         ./docs/05_functions_list.dox \
                          ./docs/01_library.dox \
-                         ./docs/04_adding_operator.dox \
                          ./docs/02_tests.dox \
                          ./docs/03_scripts.dox \
+                         ./docs/04_adding_operator.dox \
+                         ./docs/05_contribution_guidelines.dox \
+                         ./docs/06_functions_list.dox \
                          ./arm_compute/ \
                          ./src/ \
                          ./examples/ \
@@ -996,7 +997,7 @@ INLINE_SOURCES         = YES
 # Fortran comments will always remain visible.
 # The default value is: YES.
 
-STRIP_CODE_COMMENTS    = YES
+STRIP_CODE_COMMENTS    = NO
 
 # If the REFERENCED_BY_RELATION tag is set to YES then for each documented
 # function all documented functions referencing it will be listed.

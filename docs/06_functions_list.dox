@@ -29,7 +29,7 @@ namespace arm_compute
 
 @tableofcontents
 
-@section S5_1 NEON functions
+@section S6_1 NEON functions
 
 - @ref IFunction
     - @ref INESimpleFunction
@@ -175,7 +175,7 @@ namespace arm_compute
     - @ref NEUpsampleLayer
     - @ref NEWinogradConvolutionLayer
 
-@section S5_2 OpenCL functions
+@section S6_2 OpenCL functions
 
 - @ref IFunction
     - @ref CLBatchNormalizationLayer
@@ -323,7 +323,7 @@ namespace arm_compute
         - @ref CLWinogradInputTransform
         - @ref CLYOLOLayer
 
-@section S5_3 GLES Compute functions
+@section S6_3 GLES Compute functions
 
 - @ref IFunction
     - @ref GCBatchNormalizationLayer
@@ -352,7 +352,7 @@ namespace arm_compute
         - @ref GCTensorShift
         - @ref GCTranspose
 
-@section S5_4 CPP functions
+@section S6_4 CPP functions
 
  - @ref IFunction
     - @ref CPPDetectionOutputLayer
