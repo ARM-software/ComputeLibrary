@@ -21,15 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H__
-#define __ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H__
+#ifndef __ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H__
+#define __ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H__
 
-#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
+#include "arm_compute/runtime/CPP/functions/CPPDetectionPostProcessLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <map>
@@ -38,21 +39,21 @@ namespace arm_compute
 {
 class ITensor;
 
-/** CPP Function to generate the detection output based on center size encoded boxes, class prediction and anchors
+/** NE Function to generate the detection output based on center size encoded boxes, class prediction and anchors
  *  by doing non maximum suppression.
  *
  * @note Intended for use with MultiBox detection method.
  */
-class CPPDetectionPostProcessLayer : public IFunction
+class NEDetectionPostProcessLayer : public IFunction
 {
 public:
     /** Constructor */
-    CPPDetectionPostProcessLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEDetectionPostProcessLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CPPDetectionPostProcessLayer(const CPPDetectionPostProcessLayer &) = delete;
+    NEDetectionPostProcessLayer(const NEDetectionPostProcessLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CPPDetectionPostProcessLayer &operator=(const CPPDetectionPostProcessLayer &) = delete;
-    /** Configure the detection output layer CPP function
+    NEDetectionPostProcessLayer &operator=(const NEDetectionPostProcessLayer &) = delete;
+    /** Configure the detection output layer NE function
      *
      * @param[in]  input_box_encoding The bounding box input tensor. Data types supported: F32, QASYMM8.
      * @param[in]  input_score        The class prediction input tensor. Data types supported: Same as @p input_box_encoding.
@@ -67,7 +68,7 @@ public:
      */
     void configure(const ITensor *input_box_encoding, const ITensor *input_score, const ITensor *input_anchors,
                    ITensor *output_boxes, ITensor *output_classes, ITensor *output_scores, ITensor *num_detection, DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo());
-    /** Static function to check if given info will lead to a valid configuration of @ref CPPDetectionPostProcessLayer
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDetectionPostProcessLayer
      *
      * @param[in]  input_box_encoding The bounding box input tensor info. Data types supported: F32, QASYMM8.
      * @param[in]  input_class_score  The class prediction input tensor info. Data types supported: F32, QASYMM8.
@@ -87,29 +88,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                   _memory_group;
-    CPPNonMaximumSuppression      _nms;
-    const ITensor                *_input_box_encoding;
-    const ITensor                *_input_scores;
-    const ITensor                *_input_anchors;
-    ITensor                      *_output_boxes;
-    ITensor                      *_output_classes;
-    ITensor                      *_output_scores;
-    ITensor                      *_num_detection;
-    DetectionPostProcessLayerInfo _info;
+    MemoryGroup _memory_group;
 
-    const unsigned int _kBatchSize   = 1;
-    const unsigned int _kNumCoordBox = 4;
-    unsigned int       _num_boxes;
-    unsigned int       _num_classes_with_background;
-    unsigned int       _num_max_detected_boxes;
-    bool               _dequantize_scores;
+    NEDequantizationLayer        _dequantize;
+    CPPDetectionPostProcessLayer _detection_post_process;
 
-    Tensor         _decoded_boxes;
-    Tensor         _decoded_scores;
-    Tensor         _selected_indices;
-    Tensor         _class_scores;
-    const ITensor *_input_scores_to_use;
+    Tensor _decoded_scores;
+    bool   _run_dequantize;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H__ */
+#endif /* __ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H__ */

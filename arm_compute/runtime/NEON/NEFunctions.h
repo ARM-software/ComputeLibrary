@@ -59,6 +59,7 @@
 #include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDerivative.h"
+#include "arm_compute/runtime/NEON/functions/NEDetectionPostProcessLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDilate.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"

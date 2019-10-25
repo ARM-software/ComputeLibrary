@@ -42,7 +42,7 @@ Status validate_arguments(const ITensorInfo *input_box_encoding, const ITensorIn
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_box_encoding, input_class_score, input_anchors);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_box_encoding, 1, DataType::F32, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_box_encoding, input_class_score, input_anchors);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_box_encoding, input_anchors);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_box_encoding->num_dimensions() > 3, "The location input tensor shape should be [4, N, kBatchSize].");
     if(input_box_encoding->num_dimensions() > 2)
     {
@@ -183,8 +183,8 @@ void SaveOutputs(const Tensor *decoded_boxes, const std::vector<int> &result_idx
 
 CPPDetectionPostProcessLayer::CPPDetectionPostProcessLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _nms(), _input_box_encoding(nullptr), _input_scores(nullptr), _input_anchors(nullptr), _output_boxes(nullptr), _output_classes(nullptr),
-      _output_scores(nullptr), _num_detection(nullptr), _info(), _num_boxes(), _num_classes_with_background(), _num_max_detected_boxes(), _decoded_boxes(), _decoded_scores(), _selected_indices(),
-      _class_scores(), _input_scores_to_use(nullptr)
+      _output_scores(nullptr), _num_detection(nullptr), _info(), _num_boxes(), _num_classes_with_background(), _num_max_detected_boxes(), _dequantize_scores(false), _decoded_boxes(), _decoded_scores(),
+      _selected_indices(), _class_scores(), _input_scores_to_use(nullptr)
 {
 }
 
@@ -214,6 +214,7 @@ void CPPDetectionPostProcessLayer::configure(const ITensor *input_box_encoding, 
     _info                        = info;
     _num_boxes                   = input_box_encoding->info()->dimension(1);
     _num_classes_with_background = _input_scores->info()->dimension(0);
+    _dequantize_scores           = (info.dequantize_scores() && is_data_type_quantized(input_box_encoding->info()->data_type()));
 
     auto_init_if_empty(*_decoded_boxes.info(), TensorInfo(TensorShape(_kNumCoordBox, _input_box_encoding->info()->dimension(1), _kBatchSize), 1, DataType::F32));
     auto_init_if_empty(*_decoded_scores.info(), TensorInfo(TensorShape(_input_scores->info()->dimension(0), _input_scores->info()->dimension(1), _kBatchSize), 1, DataType::F32));
@@ -221,7 +222,7 @@ void CPPDetectionPostProcessLayer::configure(const ITensor *input_box_encoding, 
     const unsigned int num_classes_per_box = std::min(info.max_classes_per_detection(), info.num_classes());
     auto_init_if_empty(*_class_scores.info(), TensorInfo(info.use_regular_nms() ? TensorShape(_num_boxes) : TensorShape(_num_boxes * num_classes_per_box), 1, DataType::F32));
 
-    _input_scores_to_use = is_data_type_quantized(input_box_encoding->info()->data_type()) ? &_decoded_scores : _input_scores;
+    _input_scores_to_use = _dequantize_scores ? &_decoded_scores : _input_scores;
 
     // Manage intermediate buffers
     _memory_group.manage(&_decoded_boxes);
@@ -261,7 +262,7 @@ void CPPDetectionPostProcessLayer::run()
     DecodeCenterSizeBoxes(_input_box_encoding, _input_anchors, _info, &_decoded_boxes);
 
     // Decode scores if necessary
-    if(is_data_type_quantized(_input_box_encoding->info()->data_type()))
+    if(_dequantize_scores)
     {
         for(unsigned int idx_c = 0; idx_c < _num_classes_with_background; ++idx_c)
         {
@@ -365,7 +366,6 @@ void CPPDetectionPostProcessLayer::run()
 
         // Run Non-maxima Suppression
         _nms.run();
-
         std::vector<unsigned int> selected_indices;
         for(unsigned int i = 0; i < max_detections; ++i)
         {

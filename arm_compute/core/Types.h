@@ -1099,7 +1099,8 @@ public:
           _num_classes(),
           _scales_values(),
           _use_regular_nms(),
-          _detection_per_class()
+          _detection_per_class(),
+          _dequantize_scores()
     {
     }
     /** Constructor
@@ -1110,11 +1111,12 @@ public:
      * @param[in] iou_threshold             Threshold to be used during the intersection over union.
      * @param[in] num_classes               Number of classes.
      * @param[in] scales_values             Scales values used for decode center size boxes.
-     * @param[in] use_regular_nms           (Optional) Boolean to determinate if use regular or fast nms.
-     * @param[in] detection_per_class       (Optional) Number of detection per class. Used in the Regular Non-Max-Suppression
+     * @param[in] use_regular_nms           (Optional) Boolean to determinate if use regular or fast nms. Defaults to false.
+     * @param[in] detection_per_class       (Optional) Number of detection per class. Used in the Regular Non-Max-Suppression. Defaults to 100.
+     * @param[in] dequantize_scores         (Optional) If the scores need to be dequantized. Defaults to true.
      */
     DetectionPostProcessLayerInfo(unsigned int max_detections, unsigned int max_classes_per_detection, float nms_score_threshold, float iou_threshold, unsigned int num_classes,
-                                  std::array<float, 4> scales_values, bool use_regular_nms = false, unsigned int detection_per_class = 100)
+                                  std::array<float, 4> scales_values, bool use_regular_nms = false, unsigned int detection_per_class = 100, bool dequantize_scores = true)
         : _max_detections(max_detections),
           _max_classes_per_detection(max_classes_per_detection),
           _nms_score_threshold(nms_score_threshold),
@@ -1122,7 +1124,8 @@ public:
           _num_classes(num_classes),
           _scales_values(scales_values),
           _use_regular_nms(use_regular_nms),
-          _detection_per_class(detection_per_class)
+          _detection_per_class(detection_per_class),
+          _dequantize_scores(dequantize_scores)
     {
     }
     /** Get max detections. */
@@ -1184,6 +1187,11 @@ public:
         // Saved as [y,x,h,w]
         return _scales_values[3];
     }
+    /** Get dequantize_scores value. */
+    bool dequantize_scores() const
+    {
+        return _dequantize_scores;
+    }
 
 private:
     unsigned int _max_detections;
@@ -1194,6 +1202,7 @@ private:
     std::array<float, 4> _scales_values;
     bool         _use_regular_nms;
     unsigned int _detection_per_class;
+    bool         _dequantize_scores;
 };
 
 /** Pooling Layer Information class */
