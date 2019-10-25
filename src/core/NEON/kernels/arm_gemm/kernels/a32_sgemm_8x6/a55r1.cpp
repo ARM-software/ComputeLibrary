@@ -224,7 +224,6 @@ void a32_sgemm_8x6_a55r1(const float *Apanel, const float *Bpanel, float *Cpanel
                 "vmla.f32	q11, q3, d0[1]\n"
                 "vldr		d0, [%[a_ptr], #0x20]\n"
                 "vmla.f32	q12, q3, d1[0]\n"
-                "add		%[b_ptr], %[b_ptr], #0x30\n"
                 "vmla.f32	q13, q3, d1[1]\n"
                 "vldr		d1, [%[a_ptr], #0x28]\n"
                 "vmla.f32	q14, q3, d2[0]\n"
