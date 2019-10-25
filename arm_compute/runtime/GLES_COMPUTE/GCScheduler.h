@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,40 +30,50 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class IGCKernel;
 
 /** Provides global access to a OpenGL ES context and command queue. */
-class GCScheduler
+class GCScheduler final
 {
 public:
+    /** Constructor */
+    GCScheduler();
+    /** Destructor */
+    ~GCScheduler();
+    /** Prevent instances of this class from being copied */
+    GCScheduler(const GCScheduler &) = delete;
+    /** Prevent instances of this class from being copied */
+    GCScheduler &operator=(const GCScheduler &) = delete;
     /** Access the scheduler singleton.
      *
      * @return The scheduler
      */
     static GCScheduler &get();
-
     /** Initialises the context and command queue used by the scheduler to default values
      *  and sets a default device and kernel path for the @ref GCKernelLibrary.
      */
     void default_init();
-
+    /** Initializes the context and display used by the Scheduler.
+     *
+     * @param[in] display Display to use
+     * @param[in] ctx     Context to use
+     */
+    void default_init_with_context(EGLDisplay display, EGLContext ctx);
     /** Schedule the execution of the passed kernel if possible.
      *
      * @param[in] kernel Kernel to execute.
      * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
      */
     void dispatch(IGCKernel &kernel, bool flush = true);
-
     /** Initialises the display and context to be used by the scheduler.
      *
      * @param[in] dpy The EGL display connection
      * @param[in] ctx The EGL rendering context
      */
     void init(EGLDisplay dpy, EGLContext ctx);
-
     /** Defines a barrier ordering memory transactions. */
     void memory_barrier();
-
     /** Get the target GPU.
      *
      * @return The target GPU.
@@ -72,7 +82,6 @@ public:
     {
         return _target;
     }
-
     /** Accessor to set target GPU to be used by the scheduler.
      *
      * @param[in] target The target GPU.
@@ -83,15 +92,6 @@ public:
     }
 
 private:
-    /** Constructor */
-    GCScheduler();
-    /** Destructor */
-    ~GCScheduler();
-    /** Prevent instances of this class from being copied */
-    GCScheduler(const GCScheduler &) = delete;
-    /** Prevent instances of this class from being copied */
-    GCScheduler &operator=(const GCScheduler &) = delete;
-
     /** Set up EGL context */
     void setup_context();
 

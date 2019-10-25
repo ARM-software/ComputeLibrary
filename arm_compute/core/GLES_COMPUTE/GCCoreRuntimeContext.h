@@ -21,33 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CL_HELPERS_H__
-#define __ARM_COMPUTE_CL_HELPERS_H__
+#ifndef __ARM_COMPUTE_GCCORERUNTIME_CONTEXT_H__
+#define __ARM_COMPUTE_GCCORERUNTIME_CONTEXT_H__
 
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/IScheduler.h"
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 
 namespace arm_compute
 {
 // Forward declarations
-class CLRuntimeContext;
-class ICLKernel;
+class GCKernelLibrary;
 
-/** This function creates an OpenCL context and a device.
- *
- * @note In debug builds, the function will automatically enable cl_arm_printf if the driver/device supports it.
- *
- * @return A std::tuple where the first element is the opencl context, the second element is the opencl device
- *         and the third one an error code. The error code will be CL_SUCCESS upon successful creation, otherwise
- *         a value telling why the function failed.
- */
-std::tuple<cl::Context, cl::Device, cl_int> create_opencl_context_and_device();
-/** Schedules a kernel using the context if not nullptr else uses the legacy scheduling flow.
- *
- * @param[in] ctx    Context to use.
- * @param[in] kernel Kernel to schedule.
- * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
- */
-void schedule_kernel_on_ctx(CLRuntimeContext *ctx, ICLKernel *kernel, bool flush = true);
+/** Core runtime context for OpenGL ES */
+class GCCoreRuntimeContext final
+{
+public:
+    /** Legacy constructor */
+    GCCoreRuntimeContext();
+
+    /** Constructor */
+    GCCoreRuntimeContext(GCKernelLibrary *kernel_lib);
+    /** Destructor */
+    ~GCCoreRuntimeContext() = default;
+    /** Default copy constructor */
+    GCCoreRuntimeContext(const GCCoreRuntimeContext &) = default;
+    /** Default move constructor */
+    GCCoreRuntimeContext(GCCoreRuntimeContext &&) = default;
+    /** Default copy assignment */
+    GCCoreRuntimeContext &operator=(const GCCoreRuntimeContext &) = default;
+    /** Default move assignment operator */
+    GCCoreRuntimeContext &operator=(GCCoreRuntimeContext &&) = default;
+    /** Kernel Library accessor
+     *
+     * @return The kernel library instance used by the core context
+     */
+    GCKernelLibrary *kernel_library() const;
+
+private:
+    GCKernelLibrary *_kernel_lib{ nullptr };
+};
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CL_HELPERS_H__ */
+#endif /*__ARM_COMPUTE_GCCORERUNTIME_CONTEXT_H__ */

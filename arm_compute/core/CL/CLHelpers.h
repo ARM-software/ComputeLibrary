@@ -182,5 +182,5 @@ bool preferred_dummy_work_items_support(const cl::Device &device);
  * @return An opencl kernel
  */
 cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts);
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

@@ -92,10 +92,6 @@ bool file_exists(const std::string &filename)
 
 int main(int argc, char **argv)
 {
-#ifdef ARM_COMPUTE_GC
-    GCScheduler::get().default_init();
-#endif /* ARM_COMPUTE_GC */
-
     framework::Framework &framework = framework::Framework::get();
 
     utils::CommandLineParser parser;
@@ -173,6 +169,20 @@ int main(int argc, char **argv)
         parameters = support::cpp14::make_unique<ParametersLibrary>();
         parameters->set_cpu_ctx(std::move(cpu_ctx));
 
+#ifdef ARM_COMPUTE_GC
+        // Setup OpenGL context
+        {
+            auto gles_ctx = support::cpp14::make_unique<GCRuntimeContext>();
+            ARM_COMPUTE_ERROR_ON(gles_ctx == nullptr);
+            {
+                // Legacy singletons API: This has been deprecated and the singletons will be removed
+                // Setup singleton for backward compatibility
+                GCScheduler::get().default_init();
+            }
+            parameters->set_gc_ctx(std::move(gles_ctx));
+        };
+#endif /* ARM_COMPUTE_GC */
+
 #ifdef ARM_COMPUTE_CL
         CLTuner cl_tuner(false);
         // Create GPU context
@@ -186,7 +196,7 @@ int main(int argc, char **argv)
             // Setup singleton for backward compatibility
             CLScheduler::get().init(gpu_scheduler->context(), gpu_scheduler->queue(), cl_ctx->kernel_library().get_device(), &cl_tuner);
         }
-        parameters->set_gpu_ctx(std::move(cl_ctx));
+        parameters->set_cl_ctx(std::move(cl_ctx));
 
         if(enable_tuner->is_set())
         {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,46 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ICLSIMPLEFUNCTION_H__
-#define __ARM_COMPUTE_ICLSIMPLEFUNCTION_H__
+#ifndef __ARM_COMPUTE_GCRUNTIME_CONTEXT_H__
+#define __ARM_COMPUTE_GCRUNTIME_CONTEXT_H__
 
-#include "arm_compute/core/CL/ICLKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/runtime/IFunction.h"
-
-#include <memory>
+#include "arm_compute/core/GLES_COMPUTE/GCCoreRuntimeContext.h"
+#include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
+#include "arm_compute/runtime/IScheduler.h"
+#include "arm_compute/runtime/RuntimeContext.h"
 
 namespace arm_compute
 {
-// Forward declarations
-class CLRuntimeContext;
-
-/** Basic interface for functions which have a single OpenCL kernel */
-class ICLSimpleFunction : public IFunction
+/** Runtime context */
+class GCRuntimeContext : public RuntimeContext
 {
 public:
-    /** Constructor
-     *
-     * @param[in] ctx Runtime context to be used by the function
-     */
-    ICLSimpleFunction(CLRuntimeContext *ctx = nullptr);
-
+    /** Default Constructor */
+    GCRuntimeContext();
+    /** Destructor */
+    ~GCRuntimeContext() = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    ICLSimpleFunction(const ICLSimpleFunction &) = delete;
+    GCRuntimeContext(const GCRuntimeContext &) = delete;
     /** Default move constructor */
-    ICLSimpleFunction(ICLSimpleFunction &&) = default;
+    GCRuntimeContext(GCRuntimeContext &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    ICLSimpleFunction &operator=(const ICLSimpleFunction &) = delete;
+    GCRuntimeContext &operator=(const GCRuntimeContext &) = delete;
     /** Default move assignment operator */
-    ICLSimpleFunction &operator=(ICLSimpleFunction &&) = default;
+    GCRuntimeContext &operator=(GCRuntimeContext &&) = default;
+    /** CPU Scheduler setter */
+    void set_gpu_scheduler(GCScheduler *scheduler);
 
-    // Inherited methods overridden:
-    void run() override final;
+    // Inherited overridden methods
+    GCScheduler          *gpu_scheduler();
+    GCKernelLibrary      &kernel_library();
+    GCCoreRuntimeContext *core_runtime_context();
 
-protected:
-    std::unique_ptr<ICLKernel> _kernel;         /**< Kernel to run */
-    CLFillBorderKernel         _border_handler; /**< Kernel to handle  borders */
-    CLRuntimeContext          *_ctx;            /**< Context to use */
+private:
+    std::unique_ptr<GCScheduler> _gpu_owned_scheduler{ nullptr };
+    GCScheduler                 *_gpu_scheduler{ nullptr };
+    GCKernelLibrary              _kernel_lib{};
+    GCCoreRuntimeContext         _core_context{};
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_ICLSIMPLEFUNCTION_H__ */
+#endif /*__ARM_COMPUTE_GCRUNTIME_CONTEXT_H__ */

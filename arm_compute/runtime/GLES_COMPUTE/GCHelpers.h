@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,25 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
+#ifndef __ARM_COMPUTE_GC_HELPERS_H__
+#define __ARM_COMPUTE_GC_HELPERS_H__
 
-#include "arm_compute/core/GLES_COMPUTE/kernels/GCActivationLayerKernel.h"
-#include "arm_compute/core/Helpers.h"
-#include "support/ToolchainSupport.h"
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 
 namespace arm_compute
 {
-GCActivationLayer::GCActivationLayer(GCRuntimeContext *ctx)
-    : IGCSimpleFunction(ctx)
-{
-}
-
-void GCActivationLayer::configure(IGCTensor *input, IGCTensor *output, ActivationLayerInfo act_info)
-{
-    auto core_ctx = _ctx ? _ctx->core_runtime_context() : /* Legacy */ nullptr;
-
-    auto k = arm_compute::support::cpp14::make_unique<GCActivationLayerKernel>(core_ctx);
-    k->configure(input, output, act_info);
-    _kernel = std::move(k);
-}
+/** This function creates an OpenGL-ES context and a display.
+ *
+ * @return A std::tuple where the first element is the opengl display, the second element is the opengl context
+ *         and the third one an error code. The error code will be EGL_TRUE upon successful creation, otherwise
+ *         a value telling why the function failed.
+ */
+std::tuple<EGLDisplay, EGLContext, EGLBoolean> create_opengl_display_and_context();
 } // namespace arm_compute
+#endif /* __ARM_COMPUTE_GC_HELPERS_H__ */

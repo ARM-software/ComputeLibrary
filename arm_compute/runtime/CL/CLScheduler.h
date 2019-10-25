@@ -153,5 +153,5 @@ private:
     ICLTuner                 *_cl_tuner;
     std::unique_ptr<ICLTuner> _cl_default_static_tuner;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLSCHEDULER_H__ */

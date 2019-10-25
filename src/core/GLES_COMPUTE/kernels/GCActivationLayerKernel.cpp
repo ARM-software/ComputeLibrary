@@ -39,8 +39,8 @@
 
 using namespace arm_compute;
 
-GCActivationLayerKernel::GCActivationLayerKernel()
-    : _input(nullptr), _output(nullptr)
+GCActivationLayerKernel::GCActivationLayerKernel(GCCoreRuntimeContext *ctx)
+    : _input(nullptr), _output(nullptr), _ctx(ctx)
 {
 }
 
@@ -77,7 +77,7 @@ void GCActivationLayerKernel::configure(IGCTensor *input, IGCTensor *output, Act
     build_opts.emplace(("#define LOCAL_SIZE_Z " + support::cpp11::to_string(1)));
 
     // Create kernel
-    _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("activation_layer", build_opts));
+    _kernel = create_opengl_kernel(_ctx, "activation_layer", build_opts);
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));

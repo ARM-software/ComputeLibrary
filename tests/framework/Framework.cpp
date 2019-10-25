@@ -576,7 +576,7 @@ bool Framework::run()
                 }
                 if(parameters)
                 {
-                    parameters->set_gpu_ctx(std::move(cl_ctx));
+                    parameters->set_cl_ctx(std::move(cl_ctx));
                 }
             }
 #endif // ARM_COMPUTE_CL

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,25 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
-
-#include "arm_compute/core/GLES_COMPUTE/kernels/GCActivationLayerKernel.h"
-#include "arm_compute/core/Helpers.h"
-#include "support/ToolchainSupport.h"
+#include "arm_compute/core/GLES_COMPUTE/GCCoreRuntimeContext.h"
 
 namespace arm_compute
 {
-GCActivationLayer::GCActivationLayer(GCRuntimeContext *ctx)
-    : IGCSimpleFunction(ctx)
+GCCoreRuntimeContext::GCCoreRuntimeContext()
+    : _kernel_lib(nullptr)
 {
 }
 
-void GCActivationLayer::configure(IGCTensor *input, IGCTensor *output, ActivationLayerInfo act_info)
+GCCoreRuntimeContext::GCCoreRuntimeContext(GCKernelLibrary *kernel_lib)
+    : _kernel_lib(kernel_lib)
 {
-    auto core_ctx = _ctx ? _ctx->core_runtime_context() : /* Legacy */ nullptr;
+}
 
-    auto k = arm_compute::support::cpp14::make_unique<GCActivationLayerKernel>(core_ctx);
-    k->configure(input, output, act_info);
-    _kernel = std::move(k);
+GCKernelLibrary *GCCoreRuntimeContext::kernel_library() const
+{
+    return _kernel_lib;
 }
 } // namespace arm_compute

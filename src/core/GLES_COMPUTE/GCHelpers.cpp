@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
 
+#include "arm_compute/core/GLES_COMPUTE/GCCoreRuntimeContext.h"
+
 namespace arm_compute
 {
 GPUTarget get_target_from_device()
@@ -30,5 +32,19 @@ GPUTarget get_target_from_device()
     const std::string device_name = reinterpret_cast<const char *>(glGetString(GL_RENDERER));
 
     return get_target_from_name(device_name);
+}
+
+GCKernel create_opengl_kernel(GCCoreRuntimeContext *ctx, const std::string &kernel_name, const std::set<std::string> &build_opts)
+{
+    if(ctx && ctx->kernel_library())
+    {
+        // New api going through the core context
+        return ctx->kernel_library()->create_kernel(kernel_name, build_opts);
+    }
+    else
+    {
+        // Legacy code through the singleton
+        return GCKernelLibrary::get().create_kernel(kernel_name, build_opts);
+    }
 }
 } // namespace arm_compute

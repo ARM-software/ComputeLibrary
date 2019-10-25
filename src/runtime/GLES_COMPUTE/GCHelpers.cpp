@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,85 +22,25 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCHelpers.h"
 
-#include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
-#include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
+#include "arm_compute/core/Error.h"
 
-using namespace arm_compute;
-
-std::once_flag GCScheduler::_initialize_symbols;
-
-GCScheduler::GCScheduler()
-    : _display(EGL_NO_DISPLAY), _context(EGL_NO_CONTEXT), _target(GPUTarget::MIDGARD)
+namespace arm_compute
 {
-}
-
-GCScheduler::~GCScheduler()
-{
-    eglDestroyContext(_display, _context);
-    eglTerminate(_display);
-
-    _context = EGL_NO_CONTEXT;
-    _display = EGL_NO_DISPLAY;
-}
-
-void GCScheduler::default_init()
-{
-    setup_context();
-
-    init(_display, _context);
-}
-
-void GCScheduler::default_init_with_context(EGLDisplay display, EGLContext ctx)
-{
-    _context = ctx;
-    _display = display;
-
-    _target = get_target_from_device();
-}
-
-void GCScheduler::init(EGLDisplay dpy, EGLContext ctx)
-{
-    _target = get_target_from_device();
-
-    GCKernelLibrary::get().init("./cs_shaders/", dpy, ctx);
-}
-
-GCScheduler &GCScheduler::get()
-{
-    std::call_once(_initialize_symbols, opengles31_is_available);
-    static GCScheduler scheduler;
-    return scheduler;
-}
-
-void GCScheduler::dispatch(IGCKernel &kernel, bool flush)
-{
-    kernel.run(kernel.window());
-    if(flush)
-    {
-        ARM_COMPUTE_GL_CHECK(glFlush());
-    }
-}
-
-void GCScheduler::memory_barrier()
-{
-    ARM_COMPUTE_GL_CHECK(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
-}
-
-void GCScheduler::setup_context()
+std::tuple<EGLDisplay, EGLContext, EGLBoolean> create_opengl_display_and_context()
 {
     EGLBoolean res;
-    _display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
-    ARM_COMPUTE_ERROR_ON_MSG_VAR(_display == EGL_NO_DISPLAY, "Failed to get display: 0x%x.", eglGetError());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(display == EGL_NO_DISPLAY, "Failed to get display: 0x%x.", eglGetError());
 
-    res = eglInitialize(_display, nullptr, nullptr);
+    res = eglInitialize(display, nullptr, nullptr);
 
     ARM_COMPUTE_ERROR_ON_MSG_VAR(res == EGL_FALSE, "Failed to initialize egl: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
 
-    const char *egl_extension_st = eglQueryString(_display, EGL_EXTENSIONS);
+    const char *egl_extension_st = eglQueryString(display, EGL_EXTENSIONS);
     ARM_COMPUTE_ERROR_ON_MSG((strstr(egl_extension_st, "EGL_KHR_create_context") == nullptr), "Failed to query EGL_KHR_create_context");
     ARM_COMPUTE_ERROR_ON_MSG((strstr(egl_extension_st, "EGL_KHR_surfaceless_context") == nullptr), "Failed to query EGL_KHR_surfaceless_context");
     ARM_COMPUTE_UNUSED(egl_extension_st);
@@ -113,7 +53,7 @@ void GCScheduler::setup_context()
     EGLConfig cfg;
     EGLint    count;
 
-    res = eglChooseConfig(_display, config_attribs.data(), &cfg, 1, &count);
+    res = eglChooseConfig(display, config_attribs.data(), &cfg, 1, &count);
 
     ARM_COMPUTE_ERROR_ON_MSG_VAR(res == EGL_FALSE, "Failed to choose config: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
@@ -127,16 +67,19 @@ void GCScheduler::setup_context()
         EGL_CONTEXT_CLIENT_VERSION, 3,
         EGL_NONE
     };
-    _context = eglCreateContext(_display,
-                                cfg,
-                                EGL_NO_CONTEXT,
-                                attribs.data());
+    EGLContext context = eglCreateContext(display,
+                                          cfg,
+                                          EGL_NO_CONTEXT,
+                                          attribs.data());
 
-    ARM_COMPUTE_ERROR_ON_MSG_VAR(_context == EGL_NO_CONTEXT, "Failed to create context: 0x%x.", eglGetError());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(context == EGL_NO_CONTEXT, "Failed to create context: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
 
-    res = eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, _context);
+    res = eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, context);
 
     ARM_COMPUTE_ERROR_ON_MSG_VAR(res == EGL_FALSE, "Failed to make current: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
+
+    return std::make_tuple(display, context, res);
 }
+} // namespace arm_compute

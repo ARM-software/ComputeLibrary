@@ -29,6 +29,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class IGCTensor;
 
 /** Basic function to run @ref GCActivationLayerKernel
@@ -40,9 +41,9 @@ class GCActivationLayer : public IGCSimpleFunction
 public:
     /** Constructor
      *
-     * @param[in] ctx Runtime context to be used by the function
+     * @param[in, out] ctx Runtime context to be used by the function
      */
-    GCActivationLayer(void *ctx = nullptr);
+    explicit GCActivationLayer(GCRuntimeContext *ctx = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCActivationLayer(const GCActivationLayer &) = delete;
     /** Default move constructor */

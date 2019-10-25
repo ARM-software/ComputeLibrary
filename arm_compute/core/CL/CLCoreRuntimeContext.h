@@ -28,8 +28,10 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class CLKernelLibrary;
-/** Core runtime context */
+
+/** Core runtime context for OpenCL */
 class CLCoreRuntimeContext final
 {
 public:
@@ -48,10 +50,20 @@ public:
     CLCoreRuntimeContext &operator=(const CLCoreRuntimeContext &) = default;
     /** Default move assignment operator */
     CLCoreRuntimeContext &operator=(CLCoreRuntimeContext &&) = default;
-    /** CPU Scheduler setter */
-
+    /** Kernel Library accessor
+     *
+     * @return The kernel library instance used by the core context
+     */
     CLKernelLibrary *kernel_library() const;
-    cl::Context      context();
+    /** OpenCL context accessor
+     *
+     * @return The OpenCL context used by the core context
+     */
+    cl::Context context();
+    /** OpenCL command queue accessor
+     *
+     * @return The OpenCL queue used by the core context
+     */
     cl::CommandQueue queue();
 
 private:

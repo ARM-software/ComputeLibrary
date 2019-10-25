@@ -338,12 +338,12 @@ cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &ke
 {
     if(ctx && ctx->kernel_library())
     {
-        //New api going through the core context
+        // New api going through the core context
         return static_cast<cl::Kernel>(ctx->kernel_library()->create_kernel(kernel_name, build_opts.options()));
     }
     else
     {
-        //Legacy code through the singleton
+        // Legacy code through the singleton
         return static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
     }
 }

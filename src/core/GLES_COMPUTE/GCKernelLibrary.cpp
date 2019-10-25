@@ -337,6 +337,33 @@ GCKernelLibrary &GCKernelLibrary::get()
     return _kernel_library;
 }
 
+void GCKernelLibrary::init(std::string shader_path, EGLDisplay dpy, EGLContext ctx)
+{
+    //TODO: deal with old display and context.
+    _shader_path = std::move(shader_path);
+
+    _display = dpy;
+    _context = ctx;
+
+    eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, _context);
+    setup_dummy_fbo();
+}
+
+void GCKernelLibrary::set_shader_path(const std::string &shader_path)
+{
+    _shader_path = shader_path;
+}
+
+void GCKernelLibrary::set_context(EGLDisplay dpy, EGLContext ctx)
+{
+    //TODO: deal with old display and context.
+    _display = dpy;
+    _context = ctx;
+
+    eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, ctx);
+    setup_dummy_fbo();
+}
+
 GCKernel GCKernelLibrary::create_kernel(const std::string &shader_name, const StringSet &build_options_set) const
 {
     // Find which program contains the kernel

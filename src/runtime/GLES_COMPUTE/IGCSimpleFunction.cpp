@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,17 +28,20 @@
 
 using namespace arm_compute;
 
-IGCSimpleFunction::IGCSimpleFunction() //NOLINT
+IGCSimpleFunction::IGCSimpleFunction(GCRuntimeContext *ctx) //NOLINT
     : _kernel(),
-      _border_handler()
+      _border_handler(),
+      _ctx(ctx)
 {
 }
 
 void IGCSimpleFunction::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(!_kernel, "The child class didn't set the GLES kernel or function isn't configured");
+    GCScheduler *scheduler = (_ctx != nullptr) ? _ctx->gpu_scheduler() : &GCScheduler::get().get();
+    ARM_COMPUTE_ERROR_ON(scheduler == nullptr);
 
-    GCScheduler::get().dispatch(_border_handler, false);
-    GCScheduler::get().memory_barrier();
-    GCScheduler::get().dispatch(*_kernel);
+    scheduler->dispatch(_border_handler, false);
+    scheduler->memory_barrier();
+    scheduler->dispatch(*_kernel);
 }

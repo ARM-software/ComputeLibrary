@@ -32,9 +32,14 @@ void ParametersLibrary::set_cpu_ctx(std::unique_ptr<IRuntimeContext> cpu_ctx)
     _cpu_ctx = std::move(cpu_ctx);
 }
 
-void ParametersLibrary::set_gpu_ctx(std::unique_ptr<IRuntimeContext> gpu_ctx)
+void ParametersLibrary::set_cl_ctx(std::unique_ptr<IRuntimeContext> cl_ctx)
 {
-    _gpu_ctx = std::move(gpu_ctx);
+    _cl_ctx = std::move(cl_ctx);
+}
+
+void ParametersLibrary::set_gc_ctx(std::unique_ptr<IRuntimeContext> gc_ctx)
+{
+    _gc_ctx = std::move(gc_ctx);
 }
 
 template <>
@@ -47,8 +52,16 @@ typename ContextType<Tensor>::type *ParametersLibrary::get_ctx<Tensor>()
 template <>
 typename ContextType<CLTensor>::type *ParametersLibrary::get_ctx<CLTensor>()
 {
-    return static_cast<typename ContextType<CLTensor>::type *>(_gpu_ctx.get());
+    return static_cast<typename ContextType<CLTensor>::type *>(_cl_ctx.get());
 }
 #endif /* ARM_COMPUTE_CL */
+
+#if ARM_COMPUTE_GC
+template <>
+typename ContextType<GCTensor>::type *ParametersLibrary::get_ctx<GCTensor>()
+{
+    return static_cast<typename ContextType<GCTensor>::type *>(_gc_ctx.get());
+}
+#endif /* ARM_COMPUTE_GC */
 } // namespace test
 } // namespace arm_compute

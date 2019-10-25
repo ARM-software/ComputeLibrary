@@ -61,9 +61,13 @@ bool opencl_is_available();
 class CLSymbols final
 {
 public:
+    /** Default Constructor */
     CLSymbols() = default;
+    /** Load OpenCL symbols from handle
+     *
+     * @param[in] handle Handle to load symbols from
+     */
     void load_symbols(void *handle);
-
     /** Get the static instance of CLSymbols.
      *
      * @return The static instance of CLSymbols.

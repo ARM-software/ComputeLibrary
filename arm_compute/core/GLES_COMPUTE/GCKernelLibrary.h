@@ -36,7 +36,7 @@
 namespace arm_compute
 {
 /** GCProgram class */
-class GCProgram
+class GCProgram final
 {
 public:
     /** Default constructor. */
@@ -84,7 +84,7 @@ private:
 };
 
 /** GCKernel class */
-class GCKernel
+class GCKernel final
 {
 public:
     /** Default Constructor. */
@@ -184,22 +184,21 @@ private:
 };
 
 /** GCKernelLibrary class */
-class GCKernelLibrary
+class GCKernelLibrary final
 {
     using StringSet = std::set<std::string>;
 
-private:
+public:
     /** Default Constructor. */
     GCKernelLibrary();
+    /** Default Destructor */
     ~GCKernelLibrary();
-
-public:
     /** Prevent instances of this class from being copied */
     GCKernelLibrary(const GCKernelLibrary &) = delete;
     /** Prevent instances of this class from being copied */
     const GCKernelLibrary &operator=(const GCKernelLibrary &) = delete;
     /** Get the static instance of @ref GCKernelLibrary.
-     *
+     * This method has been deprecated and will be removed in the next release.
      * @return The static instance of GCKernelLibrary.
      */
     static GCKernelLibrary &get();
@@ -209,40 +208,18 @@ public:
      * @param[in] dpy         (Optional) EGLdisplay set by external application.
      * @param[in] ctx         (Optional) EGLContext set by external application.
      */
-    void init(std::string shader_path = "./", EGLDisplay dpy = EGL_NO_DISPLAY, EGLContext ctx = EGL_NO_CONTEXT)
-    {
-        //TODO: deal with old display and context.
-        _shader_path = std::move(shader_path);
-
-        _display = dpy;
-        _context = ctx;
-
-        eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, _context);
-        setup_dummy_fbo();
-    }
-
+    void init(std::string shader_path = "./", EGLDisplay dpy = EGL_NO_DISPLAY, EGLContext ctx = EGL_NO_CONTEXT);
     /** Sets the path that the shaders reside in.
      *
      * @param[in] shader_path Path of the shader.
      */
-    void set_shader_path(const std::string &shader_path)
-    {
-        _shader_path = shader_path;
-    };
+    void set_shader_path(const std::string &shader_path);
     /** Sets display and context to create kernel.
      *
      * @param[in] dpy EGLdisplay set by external application.
      * @param[in] ctx EGLContext set by external application.
      */
-    void set_context(EGLDisplay dpy, EGLContext ctx)
-    {
-        //TODO: deal with old display and context.
-        _display = dpy;
-        _context = ctx;
-
-        eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, ctx);
-        setup_dummy_fbo();
-    };
+    void set_context(EGLDisplay dpy, EGLContext ctx);
     /** Creates a kernel from the kernel library.
      *
      * @param[in] shader_name       Shader name.
@@ -251,17 +228,11 @@ public:
      * @return The created kernel.
      */
     GCKernel create_kernel(const std::string &shader_name, const StringSet &build_options_set = {}) const;
-    /** Serializes and saves programs to a binary.
-     *
-     */
+    /** Serializes and saves programs to a binary. */
     void save_binary();
-    /** Load serialized binary with all the programs.
-     *
-     */
+    /** Load serialized binary with all the programs. */
     void load_binary();
-    /** Setup a dummy fbo to workaround an issue on Galaxy S8.
-     *
-     */
+    /** Setup a dummy fbo to workaround an issue on Galaxy S8. */
     void setup_dummy_fbo();
 
 private:
@@ -296,5 +267,5 @@ private:
     static const std::map<std::string, std::string> _program_source_map; /**< Contains sources for all programs.
                                                                               Used for compile-time shader inclusion. */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCKERNELLIBRARY_H__ */

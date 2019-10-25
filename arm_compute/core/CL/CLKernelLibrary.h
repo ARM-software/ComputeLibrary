@@ -327,5 +327,5 @@ private:
     static const std::map<std::string, std::string> _program_source_map; /**< Contains sources for all programs.
                                                                               Used for compile-time kernel inclusion. >*/
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLKERNELLIBRARY_H__ */
