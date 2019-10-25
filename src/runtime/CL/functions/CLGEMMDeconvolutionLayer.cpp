@@ -279,7 +279,7 @@ void CLGEMMDeconvolutionLayer::configure(const ICLTensor *input, const ICLTensor
     {
         const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
         const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = _gemmlowp_final.info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
         float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
         int   output_multiplier(0);

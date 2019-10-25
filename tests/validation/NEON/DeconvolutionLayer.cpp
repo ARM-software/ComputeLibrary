@@ -274,10 +274,11 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 
 TEST_SUITE(W4x4)
-FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data4x4, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data4x4, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))),
+                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
+                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
                                                                                                                        add_bias_dataset))
 {
     // Validate output
@@ -286,20 +287,23 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture4x4<uint8_t>, fr
 TEST_SUITE_END() // W4x4
 
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(data3x3_precommit,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(data3x3_precommit,
                        framework::dataset::make("DataType",
                                                 DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))),
+                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
+                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
                        add_bias_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data3x3, framework::dataset::make("DataType",
-                       DataType::QASYMM8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data3x3,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))),
+                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
+                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
                        add_bias_dataset))
 {
     // Validate output
@@ -308,10 +312,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t
 TEST_SUITE_END() // W3x3
 
 TEST_SUITE(W1x1)
-FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(data1x1, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data1x1, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))),
+                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
+                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
                                                                                                                        add_bias_dataset))
 {
     // Validate output

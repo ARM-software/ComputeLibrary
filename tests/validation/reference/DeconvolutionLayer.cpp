@@ -35,7 +35,7 @@ namespace reference
 {
 template <typename T, typename TB>
 SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape,
-                                    const PadStrideInfo &info)
+                                    const PadStrideInfo &info, QuantizationInfo out_qinfo)
 {
     // Create reference
     const unsigned int pad_left   = info.pad_left();
@@ -133,15 +133,15 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     }
 
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
-    return convolution_layer(scaled, weights_flipped, bias, output_shape, conv_info);
+    return convolution_layer(scaled, weights_flipped, bias, output_shape, conv_info, Size2D(1U, 1U), 1, out_qinfo);
 }
 
 template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
-                                                   const PadStrideInfo &info);
+                                                   const PadStrideInfo &info, QuantizationInfo out_quant_info);
 template SimpleTensor<float> deconvolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info);
+                                                 const PadStrideInfo &info, QuantizationInfo out_quant_info);
 template SimpleTensor<half> deconvolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
-                                                const PadStrideInfo &info);
+                                                const PadStrideInfo &info, QuantizationInfo out_quant_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
