@@ -174,9 +174,9 @@ public:
     void prepare() override;
 
 private:
-    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights);
-    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights);
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights);
+    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
+    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
 
     MemoryGroup                                                         _memory_group;
     IWeightsManager                                                    *_weights_manager;

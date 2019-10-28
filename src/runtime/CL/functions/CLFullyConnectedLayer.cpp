@@ -73,21 +73,21 @@ Status construct_gemmlowp_output_stage(const ITensorInfo &input, const ITensorIn
     return Status{};
 }
 
-Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const ITensorInfo *bias, const ITensorInfo &output)
+Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const ITensorInfo *bias, const ITensorInfo &output, const FullyConnectedLayerInfo &fc_info)
 {
     GEMMLowpOutputStageInfo gemmlowp_output_stage;
     ARM_COMPUTE_RETURN_ON_ERROR(construct_gemmlowp_output_stage(input, weights, output, gemmlowp_output_stage));
 
-    const GEMMInfo &gemm_info = GEMMInfo(false,                  // is_a_reshaped
-                                         false,                  // is_b_reshaped
-                                         true,                   // reshape_b_only_on_first_run
-                                         0,                      // depth_output_gemm3d
-                                         false,                  // reinterpret_input_as_3d
-                                         false,                  // retain_internal_weights
-                                         gemmlowp_output_stage,  // gemmlowp_output_stage
-                                         false,                  // fp_mixed_precision
-                                         true,                   // broadcast_bias
-                                         ActivationLayerInfo()); // activation_info
+    const GEMMInfo &gemm_info = GEMMInfo(false,                           // is_a_reshaped
+                                         false,                           // is_b_reshaped
+                                         true,                            // reshape_b_only_on_first_run
+                                         0,                               // depth_output_gemm3d
+                                         false,                           // reinterpret_input_as_3d
+                                         fc_info.retain_internal_weights, // retain_internal_weights
+                                         gemmlowp_output_stage,           // gemmlowp_output_stage
+                                         fc_info.fp_mixed_precision,      // fp_mixed_precision
+                                         true,                            // broadcast_bias
+                                         ActivationLayerInfo());          // activation_info
 
     if(is_data_type_quantized_asymmetric(input.data_type()))
     {
@@ -133,21 +133,21 @@ CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> mem
       _are_weights_reshaped(true), _is_fc_after_conv(true), _is_quantized(false), _is_prepared(false), _original_weights(nullptr)
 {
 }
-void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights)
+void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info)
 {
     GEMMLowpOutputStageInfo gemmlowp_output_stage;
     construct_gemmlowp_output_stage(*input->info(), *weights->info(), *output->info(), gemmlowp_output_stage);
 
-    const GEMMInfo &gemm_info = GEMMInfo(false,                   // is_a_reshaped
-                                         false,                   // is_b_reshaped
-                                         true,                    // reshape_b_only_on_first_run
-                                         0,                       // depth_output_gemm3d
-                                         false,                   // reinterpret_input_as_3d
-                                         retain_internal_weights, // retain_internal_weights
-                                         gemmlowp_output_stage,   // gemmlowp_output_stage
-                                         false,                   // fp_mixed_precision
-                                         true,                    // broadcast_bias
-                                         ActivationLayerInfo());  // activation_info
+    const GEMMInfo &gemm_info = GEMMInfo(false,                           // is_a_reshaped
+                                         false,                           // is_b_reshaped
+                                         true,                            // reshape_b_only_on_first_run
+                                         0,                               // depth_output_gemm3d
+                                         false,                           // reinterpret_input_as_3d
+                                         fc_info.retain_internal_weights, // retain_internal_weights
+                                         gemmlowp_output_stage,           // gemmlowp_output_stage
+                                         fc_info.fp_mixed_precision,      // fp_mixed_precision
+                                         true,                            // broadcast_bias
+                                         ActivationLayerInfo());          // activation_info
 
     if(_is_quantized)
     {
@@ -173,7 +173,7 @@ void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor
     }
 }
 
-void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights)
+void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info)
 {
     ARM_COMPUTE_ERROR_ON((weights->info()->dimension(1) != (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))));
 
@@ -188,18 +188,18 @@ void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLT
     _flatten_layer.configure(input, &_flatten_output);
 
     // Configure matrix multiply kernel
-    configure_mm(&_flatten_output, weights, bias, output, retain_internal_weights);
+    configure_mm(&_flatten_output, weights, bias, output, fc_info);
 
     // Allocate the output tensor for flatten once all the configure methods have been called
     _flatten_output.allocator()->allocate();
 }
 
-void CLFullyConnectedLayer::configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights)
+void CLFullyConnectedLayer::configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info)
 {
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != weights->info()->dimension(1));
 
     // Configure matrix multiply kernel
-    configure_mm(input, weights, bias, output, retain_internal_weights);
+    configure_mm(input, weights, bias, output, fc_info);
 }
 
 void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
@@ -289,12 +289,12 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
     if(_is_fc_after_conv)
     {
         // Fully Connected layer after a Convolution Layer without batches
-        configure_conv_fc(input, weights_to_use, biases, output, fc_info.retain_internal_weights);
+        configure_conv_fc(input, weights_to_use, biases, output, fc_info);
     }
     else
     {
         // Fully Connected layer after a Fully Connected Layer without batches
-        configure_fc_fc(input, weights_to_use, biases, output, fc_info.retain_internal_weights);
+        configure_fc_fc(input, weights_to_use, biases, output, fc_info);
     }
 }
 
@@ -368,7 +368,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     }
 
     // Validate matrix multiply kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(*input_to_use, *weights_to_use, biases, *output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(*input_to_use, *weights_to_use, biases, *output, fc_info));
 
     return Status{};
 }
