@@ -174,9 +174,9 @@ public:
     void prepare() override;
 
 private:
-    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
-    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
+    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights);
+    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, bool retain_internal_weights);
 
     MemoryGroup                                                         _memory_group;
     IWeightsManager                                                    *_weights_manager;
@@ -187,16 +187,12 @@ private:
     CLFullyConnectedLayerReshapeWeights                                 _reshape_weights_function;
     CLGEMM                                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                                        _mm_gemmlowp;
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint                 _gemmlowp_output_stage;
-    CLGEMMMatrixAccumulateBiasesKernel                                  _accumulate_biases_kernel; // TODO(COMPMID-1889): Use CLGEMM to add bias in CLFullyConnectedLayer
     CLTensor                                                            _flatten_output;
-    CLTensor                                                            _gemmlowp_output;
     CLTensor                                                            _converted_weights_output;
     CLTensor                                                            _reshape_weights_output;
     bool                                                                _are_weights_converted;
     bool                                                                _are_weights_reshaped;
     bool                                                                _is_fc_after_conv;
-    bool                                                                _accumulate_biases;
     bool                                                                _is_quantized;
     bool                                                                _is_prepared;
     const ICLTensor                                                    *_original_weights;
