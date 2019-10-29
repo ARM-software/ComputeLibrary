@@ -34,13 +34,15 @@
 
 namespace arm_compute
 {
-CLSoftmaxLayer::CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
+template <bool IS_LOG>
+CLSoftmaxLayerGeneric<IS_LOG>::CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _max_shift_exp_sum_kernel(), _norm_kernel(), _flatten_kernel_ptr(), _reshape_kernel(), _max(), _sum(), _tmp(), _input_flattened(), _output_flattened(),
       _needs_flattening(false)
 {
 }
 
-void CLSoftmaxLayer::configure_reshape_input_kernel(const ICLTensor *input, const ICLTensor *output, size_t axis)
+template <bool IS_LOG>
+void CLSoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ICLTensor *input, const ICLTensor *output, size_t axis)
 {
     // Flatten the input
     const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input->info(), axis);
@@ -69,11 +71,12 @@ void CLSoftmaxLayer::configure_reshape_input_kernel(const ICLTensor *input, cons
     auto_init_if_empty(*output->info(), *input->info()->clone());
 }
 
-void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float beta, size_t axis)
+template <bool IS_LOG>
+void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor *output, float beta, size_t axis)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CLSoftmaxLayer::validate(input->info(), output->info(), beta, axis));
+    ARM_COMPUTE_ERROR_THROW_ON(CLSoftmaxLayerGeneric<IS_LOG>::validate(input->info(), output->info(), beta, axis));
 
     // We don't need flattening only in the case the input is 2D and axis is 1
     _needs_flattening = axis != 1;
@@ -114,8 +117,12 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
     _memory_group.manage(&_max);
     _memory_group.manage(&_sum);
 
+    SoftmaxKernelInfo softmax_info;
+    softmax_info.beta   = beta;
+    softmax_info.is_log = IS_LOG;
+
     // Configure kernels
-    _max_shift_exp_sum_kernel.configure(input_2D, &_max, &_tmp, &_sum, beta);
+    _max_shift_exp_sum_kernel.configure(input_2D, &_max, &_tmp, &_sum, softmax_info);
 
     if(_needs_flattening)
     {
@@ -123,7 +130,7 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
         _memory_group.manage(&_output_flattened);
 
         // The normalization kernel stores the result in a flat output tensor
-        _norm_kernel.configure(&_tmp, &_sum, &_output_flattened, beta);
+        _norm_kernel.configure(&_tmp, &_sum, &_output_flattened, softmax_info);
 
         // Reshape the flat output into a the requested (4D) output
         _reshape_kernel.configure(&_output_flattened, output);
@@ -135,7 +142,7 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
     else
     {
         // Softmax 2D case
-        _norm_kernel.configure(&_tmp, &_sum, output, beta);
+        _norm_kernel.configure(&_tmp, &_sum, output, softmax_info);
     }
 
     // Allocate intermediate buffers
@@ -144,7 +151,8 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
     _sum.allocator()->allocate();
 }
 
-Status CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, size_t axis)
+template <bool IS_LOG>
+Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Only up to 4 dimensions are supported");
@@ -188,7 +196,8 @@ Status CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *out
     return Status{};
 }
 
-void CLSoftmaxLayer::run()
+template <bool IS_LOG>
+void CLSoftmaxLayerGeneric<IS_LOG>::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
 
@@ -205,5 +214,8 @@ void CLSoftmaxLayer::run()
         CLScheduler::get().enqueue(_reshape_kernel, true);
     }
 }
+
+template class CLSoftmaxLayerGeneric<false>;
+template class CLSoftmaxLayerGeneric<true>;
 
 } // namespace arm_compute

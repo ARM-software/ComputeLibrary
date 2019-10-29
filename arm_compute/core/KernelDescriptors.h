@@ -75,5 +75,12 @@ struct DWCWeightsKernelInfo
 {
     unsigned int n0{ 0 }; /**< Number of columns processed by each thread */
 };
+
+/** Descriptor used by the softmax kernels */
+struct SoftmaxKernelInfo
+{
+    float beta{ 1.f };     /**< A scaling factor for the exponent with default value 1.0 */
+    bool  is_log{ false }; /**< Flag used to perform Log Softmax operation */
+};
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__ */

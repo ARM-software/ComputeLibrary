@@ -30,6 +30,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
@@ -217,7 +218,7 @@ CLLogits1DMaxShiftExpSumKernel::CLLogits1DMaxShiftExpSumKernel()
 {
 }
 
-void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, float beta)
+void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
 
@@ -236,6 +237,7 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     const DataType                dt                 = input->info()->data_type();
     const UniformQuantizationInfo qinfo              = input->info()->quantization_info().uniform();
     const size_t                  reduction_dim_size = input->info()->dimension(0);
+    const float                   beta               = info.beta;
 
     // Set build options
     CLBuildOptions build_opts;
@@ -243,6 +245,7 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     build_opts.add_option_if(dt == DataType::F16, "-DUSE_F16");
     build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
     build_opts.add_options_if(is_data_type_quantized_asymmetric(dt), prepare_quantized_softmax_build_options(qinfo.scale, beta).options());
+    build_opts.add_option_if(info.is_log, "-DLOG_SOFTMAX");
 
     cl::NDRange lws_hint(cl::NullRange);
     std::string kernel_name = is_data_type_quantized_asymmetric(dt) ? std::string("softmax_layer_max_shift_exp_sum_quantized_serial") :
@@ -334,7 +337,7 @@ CLLogits1DNormKernel::CLLogits1DNormKernel()
 {
 }
 
-void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, float beta)
+void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
 
@@ -359,7 +362,8 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_options_if(is_quantized_asymmetric,
-                              prepare_quantized_softmax_build_options(qinfo.scale, beta).options());
+                              prepare_quantized_softmax_build_options(qinfo.scale, info.beta).options());
+    build_opts.add_option_if(info.is_log, "-DLOG_SOFTMAX");
 
     // Create kernel
     std::string kernel_name = is_quantized_asymmetric ? "softmax_layer_norm_quantized" : "softmax_layer_norm";
