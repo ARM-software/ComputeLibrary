@@ -60,7 +60,7 @@ Status calculate_quantized_multiplier_less_than_one(float multiplier, int32_t *q
  */
 Status calculate_quantized_multiplier_greater_than_one(float multiplier, int32_t *quantized_multiplier, int32_t *left_shift);
 
-/** Calculate quantized representation of per-channel multipliers with value less than one.
+/** Calculate quantized representation of per-channel multipliers
  *
  * @param[in]      iq_info    Input quantization info.
  * @param[in]      wq_info    Weights quantization info.
@@ -69,10 +69,10 @@ Status calculate_quantized_multiplier_greater_than_one(float multiplier, int32_t
  *
  * @return a status
  */
-Status calculate_quantized_multipliers_less_than_one(const QuantizationInfo &iq_info,
-                                                     const QuantizationInfo &wq_info,
-                                                     const QuantizationInfo &oq_info,
-                                                     GEMMLowpOutputStageInfo &stage_info);
+Status calculate_quantized_multipliers(const QuantizationInfo &iq_info,
+                                       const QuantizationInfo &wq_info,
+                                       const QuantizationInfo &oq_info,
+                                       GEMMLowpOutputStageInfo &stage_info);
 
 /** Get minimum and maximum values for the input quantized data type
  *

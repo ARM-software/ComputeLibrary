@@ -80,6 +80,7 @@ const auto QuantizationData = framework::dataset::make("QuantizationInfo",
     QuantizationInfo(0.5f, 10),
     QuantizationInfo(0.3f, 3),
     QuantizationInfo(1.f, 10),
+    QuantizationInfo(1.1f, 10),
 });
 } // namespace
 
@@ -482,7 +483,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedPerChannelFixtur
                                                                framework::dataset::make("DataType", { DataType::QASYMM8 })),
                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                QuantizationData),
-                                       ActivationFunctionsDataset),
+                                       QuantizedActivationFunctionsDataset),
                                framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
 {
     // Validate output

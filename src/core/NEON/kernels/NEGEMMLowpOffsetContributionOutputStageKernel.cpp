@@ -909,8 +909,12 @@ get_configured_function(const ITensor *mm_result, const ITensor *vector_sum_row,
                                    && mm_result->info()->tensor_shape().y() != vector_sum_row->info()->tensor_shape().x();
 
     // Check if we need to clamp the result using min and max
-    const bool is_bounded_relu = ((output_stage.gemmlowp_min_bound != output_stage.gemmlowp_max_bound)
-                                  && !(output_stage.gemmlowp_min_bound == 0 && output_stage.gemmlowp_max_bound == 255));
+    PixelValue type_min = 0;
+    PixelValue type_max = 0;
+    std::tie(type_min, type_max) = get_min_max(output->info()->data_type());
+    int        type_min_int    = type_min.get<int>();
+    int        type_max_int    = type_max.get<int>();
+    const bool is_bounded_relu = !(output_stage.gemmlowp_min_bound == type_min_int && output_stage.gemmlowp_max_bound == type_max_int);
 
     // Check if we need to perform fixed point requantization
     const bool is_fixed_point = output_stage.type != GEMMLowpOutputStageType::QUANTIZE_DOWN;

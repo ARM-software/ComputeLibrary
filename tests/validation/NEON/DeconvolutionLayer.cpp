@@ -68,6 +68,18 @@ const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::
 const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
 
 const auto add_bias_dataset = framework::dataset::make("AddBias", { true, false });
+
+const auto input_qinfo_dataset = framework::dataset::make("InputQInfo",
+{
+    QuantizationInfo(1.f / 255.f, 0),
+    QuantizationInfo(2.f, 0),
+});
+
+const auto output_qinfo_dataset = framework::dataset::make("OutputQInfo",
+{
+    QuantizationInfo(3.f / 255.f, 0),
+    QuantizationInfo(4.f, 0),
+});
 } // namespace
 
 TEST_SUITE(NEON)
@@ -161,16 +173,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using NEDeconvolutionLayerFixture4x4      = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 4, 4>;
+using NEDeconvolutionLayerFixture4x4 = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 4, 4>;
 
 template <typename T>
-using NEDeconvolutionLayerFixture3x3      = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3>;
+using NEDeconvolutionLayerFixture3x3 = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3>;
 
 template <typename T>
 using NEDeconvolutionLayerAsymmFixture3x3 = DeconvolutionValidationAsymmFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3>;
 
 template <typename T>
-using NEDeconvolutionLayerFixture1x1      = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 1, 1>;
+using NEDeconvolutionLayerFixture1x1 = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 1, 1>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
@@ -277,8 +289,8 @@ TEST_SUITE(W4x4)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data4x4, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
-                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                                                                                                                       input_qinfo_dataset),
+                                                                                                                       output_qinfo_dataset),
                                                                                                                        add_bias_dataset))
 {
     // Validate output
@@ -291,8 +303,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t
                        framework::dataset::make("DataType",
                                                 DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
-                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                       input_qinfo_dataset),
+                       output_qinfo_dataset),
                        add_bias_dataset))
 {
     // Validate output
@@ -302,8 +314,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t
                        framework::dataset::make("DataType",
                                                 DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
-                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                       input_qinfo_dataset),
+                       output_qinfo_dataset),
                        add_bias_dataset))
 {
     // Validate output
@@ -315,8 +327,8 @@ TEST_SUITE(W1x1)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data1x1, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
-                                                                                                                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                                                                                                                       input_qinfo_dataset),
+                                                                                                                       output_qinfo_dataset),
                                                                                                                        add_bias_dataset))
 {
     // Validate output

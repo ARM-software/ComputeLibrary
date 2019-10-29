@@ -344,6 +344,19 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     {
         run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, c, output, gemm_info));
         run_optimised_requantized = run_optimised;
+
+        const UniformQuantizationInfo a_qinfo      = a_to_use->quantization_info().uniform();
+        const QuantizationInfo        b_qinfo      = b->quantization_info();
+        const UniformQuantizationInfo output_qinfo = output->quantization_info().uniform();
+        for(auto const s : b_qinfo.scale())
+        {
+            const float fmultipler = a_qinfo.scale * s / output_qinfo.scale;
+            if(fmultipler > 1.f)
+            {
+                run_optimised_requantized = false;
+                break;
+            }
+        }
     }
     else
     {

@@ -38,14 +38,15 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
                           int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
 {
     ARM_COMPUTE_UNUSED(result_fixedpoint_multiplier);
+    ARM_COMPUTE_UNUSED(result_shift);
     ARM_COMPUTE_UNUSED(result_offset_after_shift);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
@@ -53,7 +54,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
                                                          DataType::F16,
                                                          DataType::S32, DataType::F32);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(result_shift < 0, "Result shift must be a non negative integer");
     if(bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::F16, DataType::S32, DataType::F32);
@@ -596,3 +596,4 @@ void NEDirectConvolutionLayerOutputStageKernel::run(const Window &window, const 
 
     (*_func)(_input, _bias, window, _output, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift);
 }
+} // namespace arm_compute

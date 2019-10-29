@@ -289,7 +289,16 @@ void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *w
                 acc.at(i) += *reinterpret_cast<int32_t *>(biases_it.ptr() + i * sizeof(int32_t));
             }
 
-            acc.at(i)   = rounding_divide_by_exp2(saturating_doubling_high_mul(acc.at(i), output_multiplier.at(id.x() + i)), output_shift.at(id.x() + i)) + output_qoffset;
+            const int out_mul   = output_multiplier.at(id.x() + i);
+            const int out_shift = output_shift.at(id.x() + i);
+            if(out_shift < 0)
+            {
+                acc.at(i) = saturating_doubling_high_mul(acc.at(i) * (1 << (-out_shift)), out_mul) + output_qoffset;
+            }
+            else
+            {
+                acc.at(i) = rounding_divide_by_exp2(saturating_doubling_high_mul(acc.at(i), out_mul), out_shift) + output_qoffset;
+            }
             out_vals[i] = static_cast<T>(utility::clamp<int32_t, uint8_t>(acc.at(i)));
         }
 
@@ -381,21 +390,20 @@ void depthwise_loop_generic_quantized(const ITensor *input, const ITensor *weigh
 
             if(has_biases)
             {
-                const auto biases_val = *(reinterpret_cast<int32_t *>(biases_it.ptr() + m * sizeof(int32_t)));
+                acc.at(m) += *(reinterpret_cast<int32_t *>(biases_it.ptr() + m * sizeof(int32_t)));
+            }
 
-                int32_t out_val = acc.at(m) + biases_val;
-                out_val         = rounding_divide_by_exp2(saturating_doubling_high_mul(out_val, output_multiplier.at(id.x() + m)),
-                                                          output_shift.at(id.x() + m))
-                                  + output_qoffset;
-                *(reinterpret_cast<T *>(output_it.ptr() + m * sizeof(T))) = static_cast<T>(utility::clamp<int32_t, uint8_t>(out_val));
+            const int out_mul   = output_multiplier.at(id.x() + m);
+            const int out_shift = output_shift.at(id.x() + m);
+            if(out_shift < 0)
+            {
+                acc.at(m) = saturating_doubling_high_mul(acc.at(m) * (1 << (-out_shift)), out_mul) + output_qoffset;
             }
             else
             {
-                int32_t out_val = rounding_divide_by_exp2(saturating_doubling_high_mul(acc.at(m), output_multiplier.at(id.x() + m)),
-                                                          output_shift.at(id.x() + m))
-                                  + output_qoffset;
-                *(reinterpret_cast<T *>(output_it.ptr() + m * sizeof(T))) = static_cast<T>(utility::clamp<int32_t, uint8_t>(out_val));
+                acc.at(m) = rounding_divide_by_exp2(saturating_doubling_high_mul(acc.at(m), out_mul), out_shift) + output_qoffset;
             }
+            *(reinterpret_cast<T *>(output_it.ptr() + m * sizeof(T))) = static_cast<T>(utility::clamp<int32_t, uint8_t>(acc.at(m)));
         }
     },
     input_it, weights_it, biases_it, output_it);
@@ -531,8 +539,7 @@ void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, co
             int32_t     out_mult   = 0;
             int32_t     out_shift  = 0;
             const float multiplier = input_scale * weights_scale.at(i) / output_scale;
-            ARM_COMPUTE_ERROR_ON(multiplier > 1.f);
-            arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &out_mult, &out_shift);
+            arm_compute::quantization::calculate_quantized_multiplier(multiplier, &out_mult, &out_shift);
 
             _output_multiplier.push_back(out_mult);
             _output_shift.push_back(out_shift);

@@ -106,10 +106,10 @@ Status calculate_quantized_multiplier_greater_than_one(float    multiplier,
     return Status{};
 }
 
-arm_compute::Status calculate_quantized_multipliers_less_than_one(const QuantizationInfo &iq_info,
-                                                                  const QuantizationInfo &wq_info,
-                                                                  const QuantizationInfo &oq_info,
-                                                                  GEMMLowpOutputStageInfo &stage_info)
+arm_compute::Status calculate_quantized_multipliers(const QuantizationInfo &iq_info,
+                                                    const QuantizationInfo &wq_info,
+                                                    const QuantizationInfo &oq_info,
+                                                    GEMMLowpOutputStageInfo &stage_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(iq_info.scale().empty());
     ARM_COMPUTE_RETURN_ERROR_ON(wq_info.scale().empty());
@@ -131,7 +131,7 @@ arm_compute::Status calculate_quantized_multipliers_less_than_one(const Quantiza
         const float multiplier       = i_scale * w_scales[i] / o_scale;
         int32_t     quant_multiplier = 0;
         int32_t     quant_shift      = 0;
-        ARM_COMPUTE_RETURN_ON_ERROR(calculate_quantized_multiplier_less_than_one(multiplier, &quant_multiplier, &quant_shift));
+        ARM_COMPUTE_RETURN_ON_ERROR(calculate_quantized_multiplier(multiplier, &quant_multiplier, &quant_shift));
         quant_multipliers[i] = quant_multiplier;
         quant_shifts[i]      = quant_shift;
     }

@@ -64,6 +64,12 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 });
 
 const auto FullyConnectedParameters = combine(framework::dataset::make("TransposeWeights", { false, true }), framework::dataset::make("ReshapeWeights", { false, true }));
+
+const auto QuantizationData = framework::dataset::make("QuantizationInfo",
+{
+    QuantizationInfo(1.f / 256.f, 10),
+    QuantizationInfo(1.1f, 10),
+});
 } // namespace
 
 TEST_SUITE(NEON)
@@ -214,7 +220,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<uint8_t>,
                            combine(datasets::SmallFullyConnectedLayerDataset(),
                                    FullyConnectedParameters),
                            framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 10) })))
+                       QuantizationData))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -223,7 +229,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerQuantizedFixture<uint8_t>,
                            combine(datasets::LargeFullyConnectedLayerDataset(),
                                    FullyConnectedParameters),
                            framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 256.f, 10) })))
+                       QuantizationData))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);

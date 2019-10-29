@@ -64,15 +64,17 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
-     * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                     Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
      * @param[out] output  Destination tensor. Data types supported: Same as @p weights.
      */
     void configure(const ITensor *weights, const ITensor *biases, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayerReshapeWeights
      *
      * @param[in] weights Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
-     * @param[in] biases  Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[in] output  Destination tensor info. Data types supported: Same as @p weights.
+     * @param[in] biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                    Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
+     * @param[in] output  Destination tensor. Data types supported: Same as @p weights.
      *
      * @return an error status
      */

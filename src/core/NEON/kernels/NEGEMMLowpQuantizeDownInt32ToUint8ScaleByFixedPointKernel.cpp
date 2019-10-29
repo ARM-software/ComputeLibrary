@@ -39,8 +39,8 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
@@ -245,3 +245,4 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
 
     (this->*_func)(window);
 }
+} // namespace arm_compute

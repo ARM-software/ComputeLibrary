@@ -60,16 +60,6 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
 
     const bool is_quantized = (!is_data_type_quantized_per_channel(weights->data_type())) && is_data_type_quantized_asymmetric(input->data_type());
 
-    if(is_quantized)
-    {
-        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
-
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        ARM_COMPUTE_UNUSED(multiplier);
-        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
-    }
     if(!NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(input, weights, conv_info, depth_multiplier, dilation))
     {
         TensorInfo accumulator = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
@@ -205,7 +195,7 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
         float   multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
         int32_t output_multiplier;
         int32_t output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
         _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, output_multiplier, output_shift, oq_info.offset);
         _accumulator.allocator()->allocate();
     }

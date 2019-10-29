@@ -217,7 +217,7 @@ public:
             output_stage.gemmlowp_shifts.resize(num_channels);
             for(size_t i = 0; i < num_channels; ++i)
             {
-                quantization::calculate_quantized_multiplier_less_than_one(scales[i], &output_stage.gemmlowp_multipliers[i], &output_stage.gemmlowp_shifts[i]);
+                quantization::calculate_quantized_multiplier(scales[i], &output_stage.gemmlowp_multipliers[i], &output_stage.gemmlowp_shifts[i]);
             }
 
             _reference = compute_reference(shape_a, shape_b, shape_output, a_offset, 0, output_stage, data_type_b, QuantizationInfo(scales));

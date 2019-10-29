@@ -154,7 +154,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         output_info.gemmlowp_min_bound       = min_activation;
         output_info.gemmlowp_max_bound       = max_activation;
         output_info.is_quantized_per_channel = (weights->info()->data_type() == DataType::QSYMM8_PER_CHANNEL);
-        quantization::calculate_quantized_multipliers_less_than_one(iqinfo, wqinfo, oqinfo, output_info);
+        quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info);
 
         _mm_gemmlowp.configure(input, weights, biases, output, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info));
 
@@ -217,7 +217,7 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         output_info.gemmlowp_min_bound       = min_activation;
         output_info.gemmlowp_max_bound       = max_activation;
         output_info.is_quantized_per_channel = (weights->data_type() == DataType::QSYMM8_PER_CHANNEL);
-        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multipliers_less_than_one(iqinfo, wqinfo, oqinfo, output_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multipliers(iqinfo, wqinfo, oqinfo, output_info));
 
         // Perform validation step on GEMMLowp
         std::unique_ptr<ITensorInfo> input_qa   = input->clone();

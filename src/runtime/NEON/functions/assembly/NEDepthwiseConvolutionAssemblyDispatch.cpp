@@ -437,6 +437,16 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
+    // The uniform quantization case will only have 1 scale value in the weights quantization info
+    const UniformQuantizationInfo input_qinfo   = input->quantization_info().uniform();
+    const QuantizationInfo        weights_qinfo = weights->quantization_info();
+    const UniformQuantizationInfo output_qinfo  = output->quantization_info().uniform();
+    for(auto const s : weights_qinfo.scale())
+    {
+        const float fmultipler = input_qinfo.scale * s / output_qinfo.scale;
+        ARM_COMPUTE_RETURN_ERROR_ON(fmultipler > 1.f);
+    }
+
     return Status{};
 }
 

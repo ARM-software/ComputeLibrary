@@ -33,7 +33,8 @@
 #include <algorithm>
 #include <cmath>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
@@ -258,7 +259,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
         float   multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
         int32_t output_multiplier;
         int32_t output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
         _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, oq_info.offset);
         _gemmlowp_output.allocator()->allocate();
     }
@@ -352,13 +353,14 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     // Validate output stage for asymmetric quantized types
     if(is_quantized)
     {
-        const UniformQuantizationInfo iq_info    = input->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info    = weights->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info    = output->quantization_info().uniform();
-        const float                   multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
 
-        ARM_COMPUTE_UNUSED(multiplier);
-        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
+        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        int   output_multiplier;
+        int   output_shift;
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&gemmlowp_output, biases, output));
     }
 
@@ -476,3 +478,4 @@ void NEFullyConnectedLayer::prepare()
         _is_prepared = true;
     }
 }
+} // namespace arm_compute
