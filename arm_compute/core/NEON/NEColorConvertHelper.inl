@@ -24,6 +24,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IMultiImage.h"
+#include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/Utils.h"
 
 #include <arm_neon.h>
@@ -49,37 +50,6 @@ constexpr float rgb2u8_red_coef   = 0.2126f;
 constexpr float rgb2u8_green_coef = 0.7152f;
 constexpr float rgb2u8_blue_coef  = 0.0722f;
 
-inline float32x4x4_t convert_uint8x16_to_float32x4x4(const uint8x16_t &in)
-{
-    float32x4x4_t out;
-    const auto    tmp1 = vmovl_u8(vget_low_u8(in));
-    out.val[0]         = vcvtq_f32_u32(vmovl_u16(vget_low_u16(tmp1)));
-    out.val[1]         = vcvtq_f32_u32(vmovl_u16(vget_high_u16(tmp1)));
-    const auto tmp2    = vmovl_u8(vget_high_u8(in));
-    out.val[2]         = vcvtq_f32_u32(vmovl_u16(vget_low_u16(tmp2)));
-    out.val[3]         = vcvtq_f32_u32(vmovl_u16(vget_high_u16(tmp2)));
-    return out;
-}
-
-inline void convert_float32x4x3_to_uint8x8x3(const float32x4x3_t &in1, const float32x4x3_t &in2, uint8x8x3_t &out)
-{
-    out.val[0] = vqmovn_u16(vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in1.val[0])),
-                                         vqmovn_u32(vcvtq_u32_f32(in2.val[0]))));
-    out.val[1] = vqmovn_u16(vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in1.val[1])),
-                                         vqmovn_u32(vcvtq_u32_f32(in2.val[1]))));
-    out.val[2] = vqmovn_u16(vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in1.val[2])),
-                                         vqmovn_u32(vcvtq_u32_f32(in2.val[2]))));
-}
-
-inline void convert_float32x4x4_to_unit8x16(const float32x4x4_t &in, uint8x16_t &out)
-{
-    const auto low = vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in.val[0])),
-                                  vqmovn_u32(vcvtq_u32_f32(in.val[1])));
-    const auto high = vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in.val[2])),
-                                   vqmovn_u32(vcvtq_u32_f32(in.val[3])));
-    out = vcombine_u8(vqmovn_u16(low), vqmovn_u16(high));
-}
-
 inline float32x4_t rgb_to_greyscale_calculation(const float32x4_t &rcolor, const float32x4_t &gcolor, const float32x4_t &bcolor,
                                                 const float rcoef, const float gcoef, const float bcoef)
 {
@@ -94,9 +64,9 @@ inline void rgb_to_u8_conversion(const uint8x16x3_t &in, uint8x16_t &out)
     float32x4x4_t out_float32;
 
     //Conversion from 3(RGB) 4 uint8s to 3(RGB) 4 floats
-    const float32x4x4_t r_float32 = convert_uint8x16_to_float32x4x4(in.val[0]);
-    const float32x4x4_t g_float32 = convert_uint8x16_to_float32x4x4(in.val[1]);
-    const float32x4x4_t b_float32 = convert_uint8x16_to_float32x4x4(in.val[2]);
+    const float32x4x4_t r_float32 = arm_compute::convert_uint8x16_to_float32x4x4(in.val[0]);
+    const float32x4x4_t g_float32 = arm_compute::convert_uint8x16_to_float32x4x4(in.val[1]);
+    const float32x4x4_t b_float32 = arm_compute::convert_uint8x16_to_float32x4x4(in.val[2]);
 
     //New grayscale image = ( (RED_COEFF * R) + (GREEN_COEFF * G) + (BLUE_COEFF * B) )
     //Computation of 1(Greyscale) 4 uint8 using 3(RGB) 4 uint8s float
@@ -113,7 +83,7 @@ inline void rgb_to_u8_conversion(const uint8x16x3_t &in, uint8x16_t &out)
                                                       rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
 
     //Conversion from 1(Greyscale) 4 floats to 1(Greyscale) 4 uint8s
-    convert_float32x4x4_to_unit8x16(out_float32, out);
+    arm_compute::convert_float32x4x4_to_unit8x16(out_float32, out);
 }
 
 inline void rgb_to_yuv_calculation(const float32x4_t &rvec, const float32x4_t &gvec, const float32x4_t &bvec,
@@ -172,7 +142,7 @@ inline void yuyv_to_rgb_calculation(const float32x4_t &yvec_val, float32x4_t uve
     rgb2.val[2] = vaddq_f32(yyvec_val, blue);
 
     uint8x8x3_t u8_rgb;
-    convert_float32x4x3_to_uint8x8x3(rgb1, rgb2, u8_rgb);
+    arm_compute::convert_float32x4x3_to_uint8x8x3(rgb1, rgb2, u8_rgb);
 
     if(!alpha)
     {
@@ -225,13 +195,13 @@ inline uint8x16x3_t load_rgb(const unsigned char *const ptr, const bool alpha)
 inline void rgb_to_yuv_conversion(uint8x16x3_t &vec_top, uint8x16x3_t &vec_bottom)
 {
     // Convert the uint8x16_t to float32x4x4_t
-    const float32x4x4_t frvec_top = convert_uint8x16_to_float32x4x4(vec_top.val[0]);
-    const float32x4x4_t fgvec_top = convert_uint8x16_to_float32x4x4(vec_top.val[1]);
-    const float32x4x4_t fbvec_top = convert_uint8x16_to_float32x4x4(vec_top.val[2]);
+    const float32x4x4_t frvec_top = arm_compute::convert_uint8x16_to_float32x4x4(vec_top.val[0]);
+    const float32x4x4_t fgvec_top = arm_compute::convert_uint8x16_to_float32x4x4(vec_top.val[1]);
+    const float32x4x4_t fbvec_top = arm_compute::convert_uint8x16_to_float32x4x4(vec_top.val[2]);
 
-    const float32x4x4_t frvec_bottom = convert_uint8x16_to_float32x4x4(vec_bottom.val[0]);
-    const float32x4x4_t fgvec_bottom = convert_uint8x16_to_float32x4x4(vec_bottom.val[1]);
-    const float32x4x4_t fbvec_bottom = convert_uint8x16_to_float32x4x4(vec_bottom.val[2]);
+    const float32x4x4_t frvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(vec_bottom.val[0]);
+    const float32x4x4_t fgvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(vec_bottom.val[1]);
+    const float32x4x4_t fbvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(vec_bottom.val[2]);
 
     float32x4x4_t fyvec_top, fuvec_top, fvvec_top;
     float32x4x4_t fyvec_bottom, fuvec_bottom, fvvec_bottom;
@@ -244,12 +214,12 @@ inline void rgb_to_yuv_conversion(uint8x16x3_t &vec_top, uint8x16x3_t &vec_botto
                                fyvec_bottom.val[i], fuvec_bottom.val[i], fvvec_bottom.val[i]);
     }
 
-    convert_float32x4x4_to_unit8x16(fyvec_top, vec_top.val[0]);
-    convert_float32x4x4_to_unit8x16(fuvec_top, vec_top.val[1]);
-    convert_float32x4x4_to_unit8x16(fvvec_top, vec_top.val[2]);
-    convert_float32x4x4_to_unit8x16(fyvec_bottom, vec_bottom.val[0]);
-    convert_float32x4x4_to_unit8x16(fuvec_bottom, vec_bottom.val[1]);
-    convert_float32x4x4_to_unit8x16(fvvec_bottom, vec_bottom.val[2]);
+    arm_compute::convert_float32x4x4_to_unit8x16(fyvec_top, vec_top.val[0]);
+    arm_compute::convert_float32x4x4_to_unit8x16(fuvec_top, vec_top.val[1]);
+    arm_compute::convert_float32x4x4_to_unit8x16(fvvec_top, vec_top.val[2]);
+    arm_compute::convert_float32x4x4_to_unit8x16(fyvec_bottom, vec_bottom.val[0]);
+    arm_compute::convert_float32x4x4_to_unit8x16(fuvec_bottom, vec_bottom.val[1]);
+    arm_compute::convert_float32x4x4_to_unit8x16(fvvec_bottom, vec_bottom.val[2]);
 }
 
 inline void store_rgb_to_nv12(const uint8x16_t &rvec_top, const uint8x16_t &gvec_top, const uint8x16_t &bvec_top,
@@ -316,9 +286,9 @@ inline void store_rgb_to_yuv4(const uint8x16_t &rvec, const uint8x16_t &gvec, co
                               unsigned char *const __restrict out_v)
 {
     // Convert the uint8x16_t to float32x4x4_t
-    const float32x4x4_t frvec = convert_uint8x16_to_float32x4x4(rvec);
-    const float32x4x4_t fgvec = convert_uint8x16_to_float32x4x4(gvec);
-    const float32x4x4_t fbvec = convert_uint8x16_to_float32x4x4(bvec);
+    const float32x4x4_t frvec = arm_compute::convert_uint8x16_to_float32x4x4(rvec);
+    const float32x4x4_t fgvec = arm_compute::convert_uint8x16_to_float32x4x4(gvec);
+    const float32x4x4_t fbvec = arm_compute::convert_uint8x16_to_float32x4x4(bvec);
 
     float32x4x4_t fyvec, fuvec, fvvec;
     for(auto i = 0; i < 4; ++i)
@@ -328,9 +298,9 @@ inline void store_rgb_to_yuv4(const uint8x16_t &rvec, const uint8x16_t &gvec, co
     }
 
     uint8x16_t yvec, uvec, vvec;
-    convert_float32x4x4_to_unit8x16(fyvec, yvec);
-    convert_float32x4x4_to_unit8x16(fuvec, uvec);
-    convert_float32x4x4_to_unit8x16(fvvec, vvec);
+    arm_compute::convert_float32x4x4_to_unit8x16(fyvec, yvec);
+    arm_compute::convert_float32x4x4_to_unit8x16(fuvec, uvec);
+    arm_compute::convert_float32x4x4_to_unit8x16(fvvec, vvec);
 
     vst1q_u8(out_y, yvec);
     vst1q_u8(out_u, uvec);
@@ -461,10 +431,10 @@ void colorconvert_yuyv_to_rgb(const void *__restrict input, void *__restrict out
         //ta.val[3] = V0 V2 V4 V7 ...
 
         // Convert the uint8x16x4_t to float32x4x4_t
-        const float32x4x4_t yvec  = convert_uint8x16_to_float32x4x4(ta.val[0 + shift]);
-        const float32x4x4_t uvec  = convert_uint8x16_to_float32x4x4(ta.val[1 - shift]);
-        const float32x4x4_t yyvec = convert_uint8x16_to_float32x4x4(ta.val[2 + shift]);
-        const float32x4x4_t vvec  = convert_uint8x16_to_float32x4x4(ta.val[3 - shift]);
+        const float32x4x4_t yvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[0 + shift]);
+        const float32x4x4_t uvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[1 - shift]);
+        const float32x4x4_t yyvec = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[2 + shift]);
+        const float32x4x4_t vvec  = arm_compute::convert_uint8x16_to_float32x4x4(ta.val[3 - shift]);
 
         yuyv_to_rgb_calculation(yvec.val[0], uvec.val[0], yyvec.val[0], vvec.val[0], out.ptr() + 0 * element_size, alpha);
         yuyv_to_rgb_calculation(yvec.val[1], uvec.val[1], yyvec.val[1], vvec.val[1], out.ptr() + 1 * element_size, alpha);
@@ -516,12 +486,12 @@ void colorconvert_nv12_to_rgb(const void *__restrict input, void *__restrict out
         //ta_uv.val[1] = V0 V2 V4 V6 ...
 
         // Convert the uint8x16x4_t to float32x4x4_t
-        float32x4x4_t yvec_top     = convert_uint8x16_to_float32x4x4(ta_y_top.val[0]);
-        float32x4x4_t yyvec_top    = convert_uint8x16_to_float32x4x4(ta_y_top.val[1]);
-        float32x4x4_t yvec_bottom  = convert_uint8x16_to_float32x4x4(ta_y_bottom.val[0]);
-        float32x4x4_t yyvec_bottom = convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
-        float32x4x4_t uvec         = convert_uint8x16_to_float32x4x4(ta_uv.val[0 + shift]);
-        float32x4x4_t vvec         = convert_uint8x16_to_float32x4x4(ta_uv.val[1 - shift]);
+        float32x4x4_t yvec_top     = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[0]);
+        float32x4x4_t yyvec_top    = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[1]);
+        float32x4x4_t yvec_bottom  = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[0]);
+        float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
+        float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_uv.val[0 + shift]);
+        float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_uv.val[1 - shift]);
 
         yuyv_to_rgb_calculation(yvec_top.val[0], uvec.val[0], yyvec_top.val[0], vvec.val[0], out.ptr() + 0 * element_size, alpha);
         yuyv_to_rgb_calculation(yvec_top.val[1], uvec.val[1], yyvec_top.val[1], vvec.val[1], out.ptr() + 1 * element_size, alpha);
@@ -579,12 +549,12 @@ void colorconvert_iyuv_to_rgb(const void *__restrict input, void *__restrict out
         //ta_v.val[0] = V0 V2 V4 V6 ...
 
         // Convert the uint8x16x4_t to float32x4x4_t
-        float32x4x4_t yvec_top     = convert_uint8x16_to_float32x4x4(ta_y_top.val[0]);
-        float32x4x4_t yyvec_top    = convert_uint8x16_to_float32x4x4(ta_y_top.val[1]);
-        float32x4x4_t yvec_bottom  = convert_uint8x16_to_float32x4x4(ta_y_bottom.val[0]);
-        float32x4x4_t yyvec_bottom = convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
-        float32x4x4_t uvec         = convert_uint8x16_to_float32x4x4(ta_u);
-        float32x4x4_t vvec         = convert_uint8x16_to_float32x4x4(ta_v);
+        float32x4x4_t yvec_top     = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[0]);
+        float32x4x4_t yyvec_top    = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_top.val[1]);
+        float32x4x4_t yvec_bottom  = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[0]);
+        float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
+        float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_u);
+        float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_v);
 
         yuyv_to_rgb_calculation(yvec_top.val[0], uvec.val[0], yyvec_top.val[0], vvec.val[0], out.ptr() + 0 * element_size, alpha);
         yuyv_to_rgb_calculation(yvec_top.val[1], uvec.val[1], yyvec_top.val[1], vvec.val[1], out.ptr() + 1 * element_size, alpha);

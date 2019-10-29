@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEMATH_H__
-#define __ARM_COMPUTE_NEMATH_H__
+#ifndef ARM_COMPUTE_NEMATH_H
+#define ARM_COMPUTE_NEMATH_H
 
 #include <arm_neon.h>
 
@@ -157,6 +157,29 @@ int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent);
  */
 int32_t rounding_divide_by_pow2(int32_t x, int exponent);
 
+/** Converts from uint8x16 to float32x4x4_t
+ *
+ * @param[in] in Vector of uint8 to be converted
+ *
+ * @return Converted vector of float
+ */
+float32x4x4_t convert_uint8x16_to_float32x4x4(const uint8x16_t &in);
+
+/** Converts from two float32x4x3_t to just one uint8x8x3_t
+ *
+ * @param[in]  in1 First input vector of float to be converted
+ * @param[in]  in2 Second input vector of float to be converted
+ * @param[out] out Converted output vector uint8 to store the result
+ */
+void convert_float32x4x3_to_uint8x8x3(const float32x4x3_t &in1, const float32x4x3_t &in2, uint8x8x3_t &out);
+
+/** Converts from two float32x4x4_t to just one uint8x16_t
+ *
+ * @param[in]  in  Vector of float to be converted
+ * @param[out] out Converted vector of uint8 to store the result
+ */
+void convert_float32x4x4_to_unit8x16(const float32x4x4_t &in, uint8x16_t &out);
+
 /** Calculate sine.
  *
  * @param[in] val Input vector value in radians, F32 format.
@@ -256,4 +279,4 @@ float16x8_t vsinq_f16(float16x8_t val);
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #include "arm_compute/core/NEON/NEMath.inl"
-#endif /* __ARM_COMPUTE_NEMATH_H__ */
+#endif /* ARM_COMPUTE_NEMATH_H */

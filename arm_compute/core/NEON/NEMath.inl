@@ -317,6 +317,39 @@ inline int32_t rounding_divide_by_pow2(int32_t x, int exponent)
     return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
 }
 
+inline float32x4x4_t convert_uint8x16_to_float32x4x4(const uint8x16_t &in)
+{
+    float32x4x4_t out;
+
+    const auto tmp1 = vmovl_u8(vget_low_u8(in));
+    out.val[0]      = vcvtq_f32_u32(vmovl_u16(vget_low_u16(tmp1)));
+    out.val[1]      = vcvtq_f32_u32(vmovl_u16(vget_high_u16(tmp1)));
+
+    const auto tmp2 = vmovl_u8(vget_high_u8(in));
+    out.val[2]      = vcvtq_f32_u32(vmovl_u16(vget_low_u16(tmp2)));
+    out.val[3]      = vcvtq_f32_u32(vmovl_u16(vget_high_u16(tmp2)));
+    return out;
+}
+
+inline void convert_float32x4x3_to_uint8x8x3(const float32x4x3_t &in1, const float32x4x3_t &in2, uint8x8x3_t &out)
+{
+    out.val[0] = vqmovn_u16(vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in1.val[0])),
+                                         vqmovn_u32(vcvtq_u32_f32(in2.val[0]))));
+    out.val[1] = vqmovn_u16(vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in1.val[1])),
+                                         vqmovn_u32(vcvtq_u32_f32(in2.val[1]))));
+    out.val[2] = vqmovn_u16(vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in1.val[2])),
+                                         vqmovn_u32(vcvtq_u32_f32(in2.val[2]))));
+}
+
+inline void convert_float32x4x4_to_unit8x16(const float32x4x4_t &in, uint8x16_t &out)
+{
+    const auto low = vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in.val[0])),
+                                  vqmovn_u32(vcvtq_u32_f32(in.val[1])));
+    const auto high = vcombine_u16(vqmovn_u32(vcvtq_u32_f32(in.val[2])),
+                                   vqmovn_u32(vcvtq_u32_f32(in.val[3])));
+    out = vcombine_u8(vqmovn_u16(low), vqmovn_u16(high));
+}
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Exponent polynomial coefficients */
 /** Logarithm polynomial coefficients */

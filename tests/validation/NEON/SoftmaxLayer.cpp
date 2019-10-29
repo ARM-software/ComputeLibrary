@@ -162,12 +162,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<half>, framework::Dataset
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunSmall4D, NESoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small4DShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
                                                                                                                    framework::dataset::make("Beta", { 1.0f, 2.0f })),
                                                                                                            framework::dataset::make("Axis", { 1, 2, 3 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
