@@ -26,6 +26,13 @@
 
 #include "helpers.h"
 
+/** Convert the given vector with round to nearest even rounding mode
+ *
+ * @param[in] x    The target to be converted
+ * @param[in] type The target type
+ *
+ * @return The converted vector
+ */
 #define CONVERT_DOWN_RTE_STR(x, type) (convert_##type##_rte((x)))
 #define CONVERT_DOWN_RTE(x, type) CONVERT_DOWN_RTE_STR(x, type)
 

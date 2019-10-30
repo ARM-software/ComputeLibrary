@@ -43,22 +43,70 @@
 #define GPU_ARCH_MIDGARD 0x100
 #define GPU_ARCH_BIFROST 0x200
 
+/** Concatenate two inputs.
+ *
+ * @param[in] a The first input to be concatenated
+ * @param[in] b The second input to be concatenated
+ *
+ * @return The concatenated output
+ */
 #define CONCAT(a, b) a##b
 
+/** Expand the given vector
+ *
+ * @param[in] x The vector to be expanded
+ *
+ * @return The expanded output
+ */
 #define EXPAND(x) x
 
+/** Clamp the given value between an upper and lower bound.
+ *
+ * @param[in] x       The value to be clamped
+ * @param[in] min_val The lower bound
+ * @param[in] max_val The upper bound
+ *
+ * @return The clamped value.
+ */
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)
 
+/** REVn reverses the given vector whose size is n.
+ * @name REVn
+ *
+ * @param[in] x The vector to be reversed
+ *
+ * @return The reversed vector
+ * @{
+ */
 #define REV1(x) ((x))
 #define REV2(x) ((x).s10)
 #define REV3(x) ((x).s210)
 #define REV4(x) ((x).s3210)
 #define REV8(x) ((x).s76543210)
 #define REV16(x) ((x).sFEDCBA9876543210)
+/** @} */ // end of group REVn
 
+/** Reverse the given vector.
+ * @name REVERSE
+ *
+ * @param[in] x The vector to be reversed
+ * @param[in] s The size of the vector
+ *
+ * @return The reversed vector
+ * @{
+ */
 #define REVERSE_STR(x, s) REV##s((x))
 #define REVERSE(x, s) REVERSE_STR(x, s)
+/** @} */ // end of group REVERSE
 
+/** Circular-right-shift (rotate-right) the vector of size s by the amount of n.
+ * @name ROTs_n
+ *
+ * @param[in] x The vector to be shifted
+ *
+ * @return The shifted vector
+ * @{
+ */
 #define ROT1_0(x) ((x))
 
 #define ROT2_0(x) ((x))
@@ -98,19 +146,50 @@
 #define ROT16_13(x) ((x).s3456789ABCDEF012)
 #define ROT16_14(x) ((x).s23456789ABCDEF01)
 #define ROT16_15(x) ((x).s123456789ABCDEF0)
+/** @} */ // end of group ROTs_n
 
+/** Circular-right-shift (rotate-right) the given vector by the given amount.
+ * @name ROTATE
+ *
+ * @param[in] x The vector to be shifted
+ * @param[in] s The size of the vector
+ * @param[in] n The amount to be shifted
+ *
+ * @return The shifted vector
+ * @{
+ */
 #define ROTATE_STR(x, s, n) ROT##s##_##n(x)
 #define ROTATE(x, s, n) ROTATE_STR(x, s, n)
+/** @} */ // end of group ROTATE
 
+/** Creates a vector of size n filled with offset values corresponding to the location of each element.
+ * @name V_OFFSn
+ *
+ * @param[in] dt The data type of the output vector
+ *
+ * @return The vector filled with offset values
+ * @{
+ */
 #define V_OFFS1(dt) (dt)(0)
 #define V_OFFS2(dt) (dt)(0, 1)
 #define V_OFFS3(dt) (dt)(0, 1, 3)
 #define V_OFFS4(dt) (dt)(0, 1, 2, 3)
 #define V_OFFS8(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7)
 #define V_OFFS16(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+/** @} */ // end of group V_OFFSn
 
+/** Create a vector filled with offset values corresponding to the location of each element.
+ * @name VEC_OFFS
+ *
+ * @param[in] dt The data type of the output vector
+ * @param[in] s  The size of the output vector
+ *
+ * @return The vector filled with offset values
+ * @{
+ */
 #define VEC_OFFS_STR(dt, s) V_OFFS##s(dt)
 #define VEC_OFFS(dt, s) VEC_OFFS_STR(dt, s)
+/** @} */ // end of group VEC_OFFS
 
 #define VLOAD_STR(size) vload##size
 #define VLOAD(size) VLOAD_STR(size)
