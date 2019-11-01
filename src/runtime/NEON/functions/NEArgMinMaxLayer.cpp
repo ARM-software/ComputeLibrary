@@ -23,7 +23,6 @@
  */
 
 #include "arm_compute/runtime/NEON/functions/NEArgMinMaxLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"

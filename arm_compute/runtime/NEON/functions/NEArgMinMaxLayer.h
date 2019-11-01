@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_NEARGMINMAXLAYER_H__
 #define __ARM_COMPUTE_NEARGMINMAXLAYER_H__
 
+#include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
+
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -31,7 +33,6 @@
 namespace arm_compute
 {
 class ITensor;
-class NEReductionOperation;
 
 /** Function to calculate the index of the minimum or maximum values in a
  *  tensor based on an axis.
