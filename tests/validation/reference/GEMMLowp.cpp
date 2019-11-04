@@ -39,10 +39,11 @@ namespace reference
 namespace
 {
 template <typename T>
-void quantize_down_int32_to_uint8_scale(const SimpleTensor<T> *in, const SimpleTensor<T> *bias, SimpleTensor<uint8_t> *dst, int32_t result_offset, int32_t result_mult_int, int32_t result_shift,
-                                        int32_t min, int32_t max)
+void quantize_down_int32_to_uint8_scale(const SimpleTensor<T> *in, const SimpleTensor<T> *bias, SimpleTensor<uint8_t> *dst, int32_t result_offset, std::vector<int32_t> result_mult_int,
+                                        std::vector<int32_t> result_shift, int32_t min, int32_t max)
 {
-    const int cols_in = in->shape().x();
+    const int  cols_in        = in->shape().x();
+    const bool is_per_channel = result_mult_int.size() > 1;
 
     for(int i = 0; i < in->num_elements(); ++i)
     {
@@ -53,9 +54,9 @@ void quantize_down_int32_to_uint8_scale(const SimpleTensor<T> *in, const SimpleT
             result += (*bias)[i % cols_in];
         }
 
-        result *= result_mult_int;
+        result *= (is_per_channel) ? result_mult_int[i % cols_in] : result_mult_int[0];
 
-        result >>= result_shift;
+        result >>= (is_per_channel) ? result_shift[i % cols_in] : result_shift[0];
 
         // Bounded ReLu
         if(min != max)
@@ -68,10 +69,11 @@ void quantize_down_int32_to_uint8_scale(const SimpleTensor<T> *in, const SimpleT
 }
 
 template <typename T>
-void quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> *in, const SimpleTensor<T> *bias, SimpleTensor<uint8_t> *dst, int32_t result_fixedpoint_multiplier, int32_t result_shift,
-                                                      int32_t result_offset_after_shift, int32_t min, int32_t max)
+void quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> *in, const SimpleTensor<T> *bias, SimpleTensor<uint8_t> *dst, std::vector<int32_t> result_fixedpoint_multiplier,
+                                                      std::vector<int32_t> result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max)
 {
-    const int cols_in = in->shape().x();
+    const int  cols_in        = in->shape().x();
+    const bool is_per_channel = result_fixedpoint_multiplier.size() > 1;
 
     for(int i = 0; i < in->num_elements(); ++i)
     {
@@ -83,7 +85,10 @@ void quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> *in,
         }
 
         // Fixed point multiplication
-        result = asymm_rounding_divide_by_pow2(asymm_int_mult(result, result_fixedpoint_multiplier), result_shift);
+        const int32_t multiplier = (is_per_channel) ? result_fixedpoint_multiplier[i % cols_in] : result_fixedpoint_multiplier[0];
+        const int32_t shift      = (is_per_channel) ? result_shift[i % cols_in] : result_shift[0];
+
+        result = asymm_rounding_divide_by_pow2(asymm_int_mult(result, multiplier), shift);
         result += result_offset_after_shift;
 
         // Bounded ReLu
@@ -132,8 +137,8 @@ void quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<T> *in,
 }
 } // namespace
 
-template <typename T_out, typename T_in>
-SimpleTensor<T_out> gemmlowp_matrix_multiply_core(const SimpleTensor<T_in> &a, const SimpleTensor<T_in> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset)
+template <typename T_out, typename T_in, typename T_in_1>
+SimpleTensor<T_out> gemmlowp_matrix_multiply_core(const SimpleTensor<T_in> &a, const SimpleTensor<T_in_1> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset)
 {
     static_assert(std::is_same<typename std::decay<T_out>::type, int32_t>::value, "Only int32_t is allowed for the output");
 
@@ -186,14 +191,15 @@ SimpleTensor<T_out> gemmlowp_matrix_multiply_core(const SimpleTensor<T_in> &a, c
 }
 
 // used to validate assembly kernels which don't know anything about offsets
-template <typename T1, typename T2>
-SimpleTensor<T1> gemmlowp(const SimpleTensor<T2> &a, const SimpleTensor<T2> &b, TensorShape shape_c)
+template <typename T1, typename T2, typename T3>
+SimpleTensor<T1> gemmlowp(const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c)
 {
-    return gemmlowp_matrix_multiply_core<T1, T2>(a, b, shape_c, 0, 0);
+    return gemmlowp_matrix_multiply_core<T1, T2, T3>(a, b, shape_c, 0, 0);
 }
 
 template <typename T>
-SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min, int32_t max)
+SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, std::vector<int32_t> result_mult_int, std::vector<int32_t> result_shift,
+                                                                  int32_t min, int32_t max)
 {
     SimpleTensor<uint8_t> dst(in.shape(), DataType::QASYMM8);
 
@@ -203,8 +209,8 @@ SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTe
 }
 
 template <typename T>
-SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, int32_t result_offset, int32_t result_mult_int, int32_t result_shift,
-                                                                  int32_t min, int32_t max)
+SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, int32_t result_offset, std::vector<int32_t> result_mult_int,
+                                                                  std::vector<int32_t> result_shift, int32_t min, int32_t max)
 {
     SimpleTensor<uint8_t> dst(in.shape(), DataType::QASYMM8);
 
@@ -214,9 +220,8 @@ SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTe
 }
 
 template <typename T>
-SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> &in, int32_t result_fixedpoint_multiplier, int32_t result_shift,
-                                                                                int32_t result_offset_after_shift, int32_t min,
-                                                                                int32_t max)
+SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> &in, std::vector<int32_t> result_fixedpoint_multiplier, std::vector<int32_t> result_shift,
+                                                                                int32_t result_offset_after_shift, int32_t min, int32_t max)
 {
     SimpleTensor<uint8_t> dst(in.shape(), DataType::QASYMM8);
 
@@ -226,8 +231,8 @@ SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(
 }
 
 template <typename T>
-SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, int32_t result_fixedpoint_multiplier, int32_t result_shift,
-                                                                                int32_t result_offset_after_shift, int32_t min, int32_t max)
+SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, std::vector<int32_t> result_fixedpoint_multiplier,
+                                                                                std::vector<int32_t> result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max)
 {
     SimpleTensor<uint8_t> dst(in.shape(), DataType::QASYMM8);
 
@@ -258,22 +263,24 @@ SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(
     return dst;
 }
 
-template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, int32_t result_fixedpoint_multiplier, int32_t result_shift,
-                                                                                         int32_t result_offset_after_shift, int32_t min, int32_t max);
-template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_fixedpoint_multiplier,
-                                                                                         int32_t result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max);
+template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, std::vector<int32_t> result_fixedpoint_multiplier,
+                                                                                         std::vector<int32_t> result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max);
+template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b,
+                                                                                         std::vector<int32_t> result_fixedpoint_multiplier,
+                                                                                         std::vector<int32_t> result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max);
 template SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, int32_t result_fixedpoint_multiplier, int32_t result_shift,
                                                                                          int32_t min, int32_t max);
 template SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_fixedpoint_multiplier,
                                                                                          int32_t result_shift, int32_t min, int32_t max);
-template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min,
-                                                                           int32_t max);
-template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_offset, int32_t result_mult_int,
-                                                                           int32_t result_shift, int32_t min, int32_t max);
+template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, int32_t result_offset, std::vector<int32_t> result_mult_int,
+                                                                           std::vector<int32_t> result_shift, int32_t min, int32_t max);
+template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_offset, std::vector<int32_t> result_mult_int,
+                                                                           std::vector<int32_t> result_shift, int32_t min, int32_t max);
 template SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset);
 template SimpleTensor<int32_t> gemmlowp_matrix_multiply_core(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset);
-template SimpleTensor<int32_t> gemmlowp(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, TensorShape shape_c);
-template SimpleTensor<int32_t> gemmlowp(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, TensorShape shape_c);
+template SimpleTensor<int32_t> gemmlowp<int32_t, int8_t, int8_t>(const SimpleTensor<int8_t> &a, const SimpleTensor<int8_t> &b, TensorShape shape_c);
+template SimpleTensor<int32_t> gemmlowp<int32_t, uint8_t, uint8_t>(const SimpleTensor<uint8_t> &a, const SimpleTensor<uint8_t> &b, TensorShape shape_c);
+template SimpleTensor<int32_t> gemmlowp<int32_t, uint8_t, int8_t>(const SimpleTensor<uint8_t> &a, const SimpleTensor<int8_t> &b, TensorShape shape_c);
 } // namespace reference
 } // namespace validation
 } // namespace test

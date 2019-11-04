@@ -216,6 +216,19 @@ public:
     /** Fills the specified @p raw tensor with random values drawn from @p
      * distribution.
      *
+     * @param[in, out] vec          To be filled vector.
+     * @param[in]      distribution Distribution used to fill the tensor.
+     * @param[in]      seed_offset  The offset will be added to the global seed before initialising the random generator.
+     *
+     * @note The @p distribution has to provide operator(Generator &) which
+     *       will be used to draw samples.
+     */
+    template <typename T, typename D>
+    void fill(std::vector<T> &vec, D &&distribution, std::random_device::result_type seed_offset) const;
+
+    /** Fills the specified @p raw tensor with random values drawn from @p
+     * distribution.
+     *
      * @param[in, out] raw          To be filled raw.
      * @param[in]      distribution Distribution used to fill the tensor.
      * @param[in]      seed_offset  The offset will be added to the global seed before initialising the random generator.
@@ -519,6 +532,22 @@ void AssetsLibrary::fill_boxes(T &&tensor, D &&distribution, std::random_device:
         store_value_with_data_type(&target_value_y2, std::get<3>(box), tensor.data_type());
     }
     fill_borders_with_garbage(tensor, distribution, seed_offset);
+}
+
+template <typename T, typename D>
+void AssetsLibrary::fill(std::vector<T> &vec, D &&distribution, std::random_device::result_type seed_offset) const
+{
+    ARM_COMPUTE_ERROR_ON_MSG(vec.empty(), "Vector must not be empty");
+
+    using ResultType = typename std::remove_reference<D>::type::result_type;
+
+    std::mt19937 gen(_seed + seed_offset);
+    for(size_t i = 0; i < vec.size(); ++i)
+    {
+        const ResultType value = distribution(gen);
+
+        vec[i] = value;
+    }
 }
 
 template <typename T, typename D>

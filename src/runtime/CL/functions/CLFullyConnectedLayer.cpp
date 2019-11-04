@@ -68,6 +68,8 @@ Status construct_gemmlowp_output_stage(const ITensorInfo &input, const ITensorIn
         gemmlowp_output_stage.gemmlowp_shift      = output_shift;
         gemmlowp_output_stage.gemmlowp_min_bound  = 0;
         gemmlowp_output_stage.gemmlowp_max_bound  = 255;
+        gemmlowp_output_stage.gemmlowp_multipliers.push_back(output_multiplier);
+        gemmlowp_output_stage.gemmlowp_shifts.push_back(output_shift);
     }
 
     return Status{};

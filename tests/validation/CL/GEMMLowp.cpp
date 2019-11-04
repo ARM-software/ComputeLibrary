@@ -86,13 +86,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFixture, framework:
 
 using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
 TEST_SUITE(FusedOffsetOutput)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpFusedOffsetOutputDataset())
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpFusedOffsetOutputDataset(),
+                       framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpFusedOffsetOutputDataset())
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpFusedOffsetOutputDataset(),
+                       framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -305,13 +307,17 @@ const auto quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases = framewo
                                                                          2)
                                                                          * framework::dataset::make("min", -2, 0) * framework::dataset::make("max", 1, 3) * framework::dataset::make("addBias", { false, true });
 
-const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases = framework::dataset::make("result_fixedpoint_multiplier", 1073741823, 1073741825) * framework::dataset::make("result_shift", -3,
-                                                                    -2)
-                                                                    * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases = framework::dataset::make("result_fixedpoint_multiplier", 1073741823,
+                                                                                                        1073741825)
+                                                                               * framework::dataset::make("result_shift", -3,
+                                                                                                          -2)
+                                                                               * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
 
-const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", -3,
-                                                                         -1)
-                                                                         * framework::dataset::make("min", -2, 0) * framework::dataset::make("max", 1, 3) * framework::dataset::make("addBias", { false, true });
+const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600,
+                                                                                                             254601602)
+                                                                                    * framework::dataset::make("result_shift", -3,
+                                                                                                               -1)
+                                                                                    * framework::dataset::make("min", -2, 0) * framework::dataset::make("max", 1, 3) * framework::dataset::make("addBias", { false, true });
 
 using CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture =
     GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture<CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint>;

@@ -84,15 +84,21 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
  * per-channel, multipliers and shifts will end up being the same for each
  * channel.
  *
- * @param[in]  input                  Input tensor.
- * @param[in]  weights                Weights tensor.
- * @param[in]  output                 Output tensor.
+ * @param[in]  input                  Input tensor info.
+ * @param[in]  weights                Weights tensor info.
+ * @param[in]  output                 Output tensor info.
+ * @param[in]  idx_ofms               Dimension index to get OFMs from the weights tensor.
  * @param[out] output_multipliers_ptr Pointer to the buffer where to store per-channel multipliers.
  * @param[out] output_shifts_ptr      Pointer to the buffer where to store per-channel shifts.
  *
  * @return min and max values for the quantized data type
  */
-void compute_quantized_multipliers_and_shifts(const ITensor *input, const ITensor *weights, const ITensor *output, int32_t *output_multipliers_ptr, int32_t *output_shifts_ptr);
+void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
+                                              const ITensorInfo *weights,
+                                              const ITensorInfo *output,
+                                              unsigned int       idx_ofms,
+                                              int32_t           *output_multipliers_ptr,
+                                              int32_t           *output_shifts_ptr);
 } // namespace quantization
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_IO_FILE_HANDLER_H__ */

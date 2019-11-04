@@ -173,14 +173,18 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
     }
     return std::make_pair(min_quant_val, max_quant_val);
 }
-void compute_quantized_multipliers_and_shifts(const ITensor *input, const ITensor *weights, const ITensor *output, int32_t *output_multipliers_ptr, int32_t *output_shifts_ptr)
+void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
+                                              const ITensorInfo *weights,
+                                              const ITensorInfo *output,
+                                              unsigned int       idx_ofms,
+                                              int32_t           *output_multipliers_ptr,
+                                              int32_t           *output_shifts_ptr)
 {
-    const unsigned int idx_c       = get_data_layout_dimension_index(weights->info()->data_layout(), DataLayoutDimension::CHANNEL);
-    const unsigned int num_filters = is_data_type_quantized_per_channel(weights->info()->data_type()) ? weights->info()->dimension(idx_c) : 1;
+    const unsigned int num_filters = is_data_type_quantized_per_channel(weights->data_type()) ? weights->dimension(idx_ofms) : 1;
 
-    const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
-    const QuantizationInfo        wq_info = weights->info()->quantization_info();
-    const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+    const QuantizationInfo        wq_info = weights->quantization_info();
+    const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
 
     for(unsigned int i = 0; i < num_filters; ++i)
     {

@@ -313,16 +313,19 @@ public:
 
                 SimpleTensor<int32_t> ref_tmp_dst = reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(ref_src0, ref_src1, TensorShape(N, M, B), offset_src0, offset_src1);
 
+                const std::vector<int32_t> dst_multiplier_vec = { dst_multiplier };
+                const std::vector<int32_t> dst_shift_vec      = { dst_shift };
+
                 if(add_bias)
                 {
                     SimpleTensor<int32_t> biases{ TensorShape(N), DataType::S32, 1 };
                     // Fill bias
                     fill(biases, 3);
-                    ref_dst = reference::gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint<int32_t>(ref_tmp_dst, biases, dst_multiplier, dst_shift, offset_dst);
+                    ref_dst = reference::gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint<int32_t>(ref_tmp_dst, biases, dst_multiplier_vec, dst_shift_vec, offset_dst);
                 }
                 else
                 {
-                    ref_dst = reference::gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint<int32_t>(ref_tmp_dst, dst_multiplier, dst_shift, offset_dst);
+                    ref_dst = reference::gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint<int32_t>(ref_tmp_dst, dst_multiplier_vec, dst_shift_vec, offset_dst);
                 }
                 validate(CLAccessor(dst), ref_dst);
                 break;

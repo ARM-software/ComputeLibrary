@@ -66,13 +66,14 @@ void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const
 Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
     if(biases != nullptr)
     {
         const int idx_kernels = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::BATCHES);
-        ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(weights->data_type()));
+        ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(weights->data_type()));
+
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(idx_kernels));
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
@@ -81,7 +82,6 @@ Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
     if((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, output);
-
         CLWeightsReshapeKernel::validate(weights, biases, output, num_groups);
     }
 
@@ -201,9 +201,9 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
 
     const unsigned int kernel_width  = weights->info()->dimension(idx_width);
     const unsigned int kernel_height = weights->info()->dimension(idx_height);
+    const unsigned int num_kernels   = weights->info()->dimension(idx_kernels);
 
     const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
     const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
     _is_prepared      = weights_info.retain_internal_weights();
@@ -237,7 +237,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
                                                  conv_info,
                                                  dilation);
 
-    unsigned int mat_weights_cols = weights->info()->dimension(idx_kernels) / num_groups;
+    unsigned int mat_weights_cols = num_kernels / num_groups;
 
     const ICLTensor *biases_to_use = biases;
     bool             append_bias   = false;
@@ -310,20 +310,28 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     }
 
     GEMMLowpOutputStageInfo gemmlowp_output_stage;
-    gemmlowp_output_stage.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-    gemmlowp_output_stage.gemmlowp_offset     = 0;
-    gemmlowp_output_stage.gemmlowp_multiplier = 0;
-    gemmlowp_output_stage.gemmlowp_shift      = 0;
+    gemmlowp_output_stage.type            = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+    gemmlowp_output_stage.gemmlowp_offset = 0;
 
     // Configure output stage for quantized case
     if(_is_quantized)
     {
-        const auto output_quant_info = (output->info()->total_size() == 0) ? iq_info : oq_info;
+        const auto         output_quant_info        = (output->info()->total_size() == 0) ? iq_info : oq_info;
+        const bool         is_quantized_per_channel = is_data_type_quantized_per_channel(weights->info()->data_type());
+        const unsigned int num_filters              = (is_quantized_per_channel) ? num_kernels : 1;
 
-        const float multiplier        = (iq_info.scale * wq_info.scale) / output_quant_info.scale;
-        int         output_multiplier = 0;
-        int         output_shift      = 0;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+        gemmlowp_output_stage.is_quantized_per_channel = is_quantized_per_channel;
+
+        gemmlowp_output_stage.gemmlowp_multipliers.resize(num_filters);
+        gemmlowp_output_stage.gemmlowp_shifts.resize(num_filters);
+        quantization::compute_quantized_multipliers_and_shifts(input->info(),
+                                                               weights->info(),
+                                                               output->info(),
+                                                               idx_kernels,
+                                                               gemmlowp_output_stage.gemmlowp_multipliers.data(),
+                                                               gemmlowp_output_stage.gemmlowp_shifts.data());
+        gemmlowp_output_stage.gemmlowp_multiplier = gemmlowp_output_stage.gemmlowp_multipliers[0];
+        gemmlowp_output_stage.gemmlowp_shift      = gemmlowp_output_stage.gemmlowp_shifts[0];
 
         int min_activation = 0;
         int max_activation = 0;
@@ -350,11 +358,9 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         }
 
         // Set the GEMMLowp output stage info
-        gemmlowp_output_stage.gemmlowp_offset     = output_quant_info.offset;
-        gemmlowp_output_stage.gemmlowp_multiplier = output_multiplier;
-        gemmlowp_output_stage.gemmlowp_shift      = output_shift;
-        gemmlowp_output_stage.gemmlowp_min_bound  = min_activation;
-        gemmlowp_output_stage.gemmlowp_max_bound  = max_activation;
+        gemmlowp_output_stage.gemmlowp_offset    = output_quant_info.offset;
+        gemmlowp_output_stage.gemmlowp_min_bound = min_activation;
+        gemmlowp_output_stage.gemmlowp_max_bound = max_activation;
     }
 
     // Configure and tune GEMM
@@ -396,8 +402,17 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
+    const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights->data_type());
+
+    if(is_quantized_per_channel)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() != DataType::QASYMM8, "Input data type not compatible with Weights");
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1) && (input->data_layout() != DataLayout::NCHW), "Grouping (num_groups != 1) with NHWC data layout is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1) && (input->data_type() == DataType::QASYMM8), "Grouping (num_groups != 1) is not supported with QASYMM8");
@@ -412,6 +427,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     const unsigned int kernel_width  = weights->dimension(idx_width);
     const unsigned int kernel_height = weights->dimension(idx_height);
+    const unsigned int num_kernels   = weights->dimension(idx_kernels);
 
     TensorInfo         im2col_reshaped_info{};
     TensorInfo         info_gemm{};
@@ -419,15 +435,10 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const ITensorInfo *gemm_input_to_use  = input;
     const ITensorInfo *gemm_output_to_use = output;
     const ITensorInfo *weights_to_use     = weights;
-
-    const bool is_quantized    = is_data_type_quantized_asymmetric(data_type);
-    const bool skip_im2col     = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
-    const bool skip_col2im     = data_layout == DataLayout::NHWC;
-    bool       fuse_activation = true;
-
-    const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
-    const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
-    const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+    const bool         is_quantized       = is_data_type_quantized_asymmetric(data_type);
+    const bool         skip_im2col        = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
+    const bool         skip_col2im        = data_layout == DataLayout::NHWC;
+    bool               fuse_activation    = true;
 
     ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * num_groups) != input->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
@@ -463,7 +474,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
                                                  conv_info,
                                                  dilation);
 
-    unsigned int mat_weights_cols = weights->dimension(idx_kernels) / num_groups;
+    unsigned int mat_weights_cols = num_kernels / num_groups;
 
     const ITensorInfo *biases_to_use = biases;
     bool               append_bias   = false;
@@ -514,20 +525,27 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     }
 
     GEMMLowpOutputStageInfo gemmlowp_output_stage;
-    gemmlowp_output_stage.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-    gemmlowp_output_stage.gemmlowp_offset     = 0;
-    gemmlowp_output_stage.gemmlowp_multiplier = 0;
-    gemmlowp_output_stage.gemmlowp_shift      = 0;
+    gemmlowp_output_stage.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+    gemmlowp_output_stage.gemmlowp_offset          = 0;
+    gemmlowp_output_stage.is_quantized_per_channel = is_quantized_per_channel;
 
     if(is_quantized)
     {
-        const auto output_quant_info = (output->total_size() == 0) ? iq_info : oq_info;
+        const UniformQuantizationInfo iq_info           = input->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info           = output->quantization_info().uniform();
+        const auto                    output_quant_info = (output->total_size() == 0) ? iq_info : oq_info;
+        const unsigned int            num_filters       = (is_quantized_per_channel) ? num_kernels : 1;
 
-        const float multiplier        = (iq_info.scale * wq_info.scale) / output_quant_info.scale;
-        int         output_multiplier = 0;
-        int         output_shift      = 0;
-
-        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
+        gemmlowp_output_stage.gemmlowp_multipliers.resize(num_filters);
+        gemmlowp_output_stage.gemmlowp_shifts.resize(num_filters);
+        quantization::compute_quantized_multipliers_and_shifts(input,
+                                                               weights,
+                                                               output,
+                                                               idx_kernels,
+                                                               gemmlowp_output_stage.gemmlowp_multipliers.data(),
+                                                               gemmlowp_output_stage.gemmlowp_shifts.data());
+        gemmlowp_output_stage.gemmlowp_multiplier = gemmlowp_output_stage.gemmlowp_multipliers[0];
+        gemmlowp_output_stage.gemmlowp_shift      = gemmlowp_output_stage.gemmlowp_shifts[0];
 
         int min_activation = 0;
         int max_activation = 0;
@@ -554,11 +572,9 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         }
 
         // Set the GEMMLowp output stage info
-        gemmlowp_output_stage.gemmlowp_offset     = output_quant_info.offset;
-        gemmlowp_output_stage.gemmlowp_multiplier = output_multiplier;
-        gemmlowp_output_stage.gemmlowp_shift      = output_shift;
-        gemmlowp_output_stage.gemmlowp_min_bound  = min_activation;
-        gemmlowp_output_stage.gemmlowp_max_bound  = max_activation;
+        gemmlowp_output_stage.gemmlowp_offset    = output_quant_info.offset;
+        gemmlowp_output_stage.gemmlowp_min_bound = min_activation;
+        gemmlowp_output_stage.gemmlowp_max_bound = max_activation;
     }
 
     // In case of NHWC, we need to run GEMM3D (gemm_3d_depth != 0) in order to avoid reshaping the output matrix

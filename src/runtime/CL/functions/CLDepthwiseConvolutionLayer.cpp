@@ -337,9 +337,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::prepare()
         {
             _output_multipliers.map();
             _output_shifts.map();
-            quantization::compute_quantized_multipliers_and_shifts(_input,
-                                                                   _original_weights,
-                                                                   _output,
+            const unsigned int idx_ofms = get_data_layout_dimension_index(_output->info()->data_layout(), DataLayoutDimension::CHANNEL);
+            quantization::compute_quantized_multipliers_and_shifts(_input->info(),
+                                                                   _original_weights->info(),
+                                                                   _output->info(),
+                                                                   idx_ofms,
                                                                    reinterpret_cast<int32_t *>(_output_multipliers.ptr_to_element(Coordinates(0))),
                                                                    reinterpret_cast<int32_t *>(_output_shifts.ptr_to_element(Coordinates(0))));
             _output_multipliers.unmap();
@@ -533,9 +535,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::prepar
         {
             _output_multipliers.map();
             _output_shifts.map();
-            quantization::compute_quantized_multipliers_and_shifts(_input,
-                                                                   _original_weights,
-                                                                   _output,
+            const unsigned int idx_ofms = get_data_layout_dimension_index(_output->info()->data_layout(), DataLayoutDimension::CHANNEL);
+            quantization::compute_quantized_multipliers_and_shifts(_input->info(),
+                                                                   _original_weights->info(),
+                                                                   _output->info(),
+                                                                   idx_ofms,
                                                                    reinterpret_cast<int32_t *>(_output_multipliers.ptr_to_element(Coordinates(0))),
                                                                    reinterpret_cast<int32_t *>(_output_shifts.ptr_to_element(Coordinates(0))));
             _output_multipliers.unmap();
