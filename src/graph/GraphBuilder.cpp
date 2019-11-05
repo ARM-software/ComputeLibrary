@@ -376,6 +376,11 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
 
     return conv_nid;
 }
+NodeID GraphBuilder::add_dequantization_node(Graph &g, NodeParams params, NodeIdxPair input)
+{
+    return create_simple_single_input_output_node<DequantizationLayerNode>(g, params, input);
+}
+
 NodeID GraphBuilder::add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, const DetectionOutputLayerInfo &detect_info)
 {
     check_nodeidx_pair(input_loc, g);

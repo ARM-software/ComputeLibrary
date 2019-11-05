@@ -138,6 +138,7 @@ enum class NodeType
     ConvolutionLayer,
     DeconvolutionLayer,
     DepthwiseConvolutionLayer,
+    DequantizationLayer,
     DetectionOutputLayer,
     DetectionPostProcessLayer,
     EltwiseLayer,

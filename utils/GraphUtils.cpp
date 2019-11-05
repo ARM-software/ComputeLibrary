@@ -223,6 +223,19 @@ bool NumPyAccessor::access_tensor(ITensor &tensor)
     return false;
 }
 
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+PrintAccessor::PrintAccessor(std::ostream &output_stream, IOFormatInfo io_fmt)
+    : _output_stream(output_stream), _io_fmt(io_fmt)
+{
+}
+
+bool PrintAccessor::access_tensor(ITensor &tensor)
+{
+    tensor.print(_output_stream, _io_fmt);
+    return false;
+}
+#endif /* ARM_COMPUTE_ASSERTS_ENABLED */
+
 SaveNumPyAccessor::SaveNumPyAccessor(std::string npy_name, const bool is_fortran)
     : _npy_name(std::move(npy_name)), _is_fortran(is_fortran)
 {

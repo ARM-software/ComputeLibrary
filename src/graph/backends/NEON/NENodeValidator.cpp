@@ -59,6 +59,8 @@ Status NENodeValidator::validate(INode *node)
                    NEWinogradConvolutionLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::DequantizationLayer:
+            return detail::validate_dequantization_layer<NEDequantizationLayer>(*polymorphic_downcast<DequantizationLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
             return detail::validate_detection_output_layer<CPPDetectionOutputLayer>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::DetectionPostProcessLayer:

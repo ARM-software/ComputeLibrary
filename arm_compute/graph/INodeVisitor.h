@@ -71,6 +71,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(DepthwiseConvolutionLayerNode &n) = 0;
+    /** Visit DequantizationLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(DequantizationLayerNode &n) = 0;
     /** Visit DetectionOutputLayerNode.
      *
      * @param[in] n Node to visit.
@@ -197,6 +202,10 @@ public:
         default_visit();
     }
     virtual void visit(ConvolutionLayerNode &) override
+    {
+        default_visit();
+    }
+    virtual void visit(DequantizationLayerNode &) override
     {
         default_visit();
     }

@@ -110,6 +110,8 @@ Status GCNodeValidator::validate(INode *node)
             return validate_convolution_layer(*polymorphic_downcast<ConvolutionLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return validate_depthwise_convolution_layer(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::DequantizationLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : DequantizationLayer");
         case NodeType::DetectionOutputLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : DetectionOutputLayer");
         case NodeType::DetectionPostProcessLayer:

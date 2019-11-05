@@ -207,6 +207,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_concatenate_layer<NEConcatenateLayer, NETargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::create_depthwise_convolution_layer<NEDepthwiseConvolutionLayer, NETargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::DequantizationLayer:
+            return detail::create_dequantization_layer<NEDequantizationLayer, NETargetInfo>(*polymorphic_downcast<DequantizationLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
             return detail::create_detection_output_layer<CPPDetectionOutputLayer, NETargetInfo>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::DetectionPostProcessLayer:

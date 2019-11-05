@@ -199,6 +199,33 @@ private:
     const bool        _is_fortran;
 };
 
+/** Print accessor class
+ *  @note The print accessor will print only when asserts are enabled.
+ *  */
+class PrintAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[out] output_stream (Optional) Output stream
+     * @param[in]  io_fmt        (Optional) Format information
+     */
+    PrintAccessor(std::ostream &output_stream = std::cout, IOFormatInfo io_fmt = IOFormatInfo());
+    /** Allow instances of this class to be move constructed */
+    PrintAccessor(PrintAccessor &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    PrintAccessor(const PrintAccessor &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    PrintAccessor &operator=(const PrintAccessor &) = delete;
+
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
+private:
+    std::ostream &_output_stream;
+    IOFormatInfo  _io_fmt;
+};
+
 /** Image accessor class */
 class ImageAccessor final : public graph::ITensorAccessor
 {
@@ -613,6 +640,17 @@ inline std::unique_ptr<graph::ITensorAccessor> get_save_npy_output_accessor(cons
     {
         return arm_compute::support::cpp14::make_unique<SaveNumPyAccessor>(npy_name, is_fortran);
     }
+}
+
+/** Generates print tensor accessor
+ *
+ * @param[out] output_stream (Optional) Output stream
+ *
+ * @return A print tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_print_output_accessor(std::ostream &output_stream = std::cout)
+{
+    return arm_compute::support::cpp14::make_unique<PrintAccessor>(output_stream);
 }
 
 /** Permutes a given tensor shape given the input and output data layout

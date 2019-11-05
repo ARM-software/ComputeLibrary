@@ -83,6 +83,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::DeconvolutionLayer:
             os << "DeconvolutionLayer";
             break;
+        case NodeType::DequantizationLayer:
+            os << "DequantizationLayer";
+            break;
         case NodeType::DetectionOutputLayer:
             os << "DetectionOutputLayer";
             break;

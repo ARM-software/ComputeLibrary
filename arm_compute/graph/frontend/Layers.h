@@ -489,6 +489,25 @@ private:
     const QuantizationInfo _weights_quant_info;
     const QuantizationInfo _out_quant_info;
 };
+/** Dequantization Layer */
+class DequantizationLayer final : public ILayer
+{
+public:
+    /** Construct a dequantization layer.
+     *
+     */
+    DequantizationLayer()
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_dequantization_node(s.graph(), common_params, input);
+    }
+};
+
 /** DetectionOutput Layer */
 class DetectionOutputLayer final : public ILayer
 {
@@ -555,7 +574,7 @@ private:
 class DummyLayer final : public ILayer
 {
 public:
-    /** Construct an input layer.
+    /** Construct a dummy layer.
      *
      * @param[in] shape Output shape
      */
