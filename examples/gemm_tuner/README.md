@@ -25,4 +25,5 @@ python >= 3.6. The script will output the best configuration, along with some
 analysis statistics for each strategy, and optionally save the parsed benchmark
 results into csv files (one for each strategy) for further analysis.
 
-python GemmTuner.py -b \<benchmark_results_dir\> [-o \<out_dir\>]
+python GemmTuner.py -b \<benchmark_results_dir\> [-t \<tolerance\>]
+[-o \<out_dir\>]
