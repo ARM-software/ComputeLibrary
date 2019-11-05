@@ -201,6 +201,8 @@ private:
     IWeightsManager *_weights_manager{ nullptr };
     /** Weights transform object */
     FallbackTransform<TypeInput, TypeOutput> _weights_transform{};
+    /** GEMM kernel description */
+    arm_gemm::KernelDescription _kernel_info{};
 };
 
 template <typename TypeInput, typename TypeOutput, class OutputStage>
@@ -208,12 +210,12 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensor *a, c
                                                              arm_gemm::GemmArgs args, const GEMMInfo &gemm_info,
                                                              MemoryGroup &memory_group, IWeightsManager *weights_manager, const OutputStage &os)
 {
-    arm_gemm::GemmConfig              gemm_cfg;
-    const arm_gemm::KernelDescription gemm_kernel_info = arm_gemm::get_gemm_method<TypeInput, TypeOutput, OutputStage>(args, os);
-    _weights_manager                                   = weights_manager;
-    if(gemm_kernel_info.method != arm_gemm::GemmMethod::GEMV_BATCHED)
+    arm_gemm::GemmConfig gemm_cfg;
+    _kernel_info     = arm_gemm::get_gemm_method<TypeInput, TypeOutput, OutputStage>(args, os);
+    _weights_manager = weights_manager;
+    if(_kernel_info.method != arm_gemm::GemmMethod::GEMV_BATCHED)
     {
-        gemm_cfg.filter = gemm_kernel_info.name;
+        gemm_cfg.filter = _kernel_info.name;
         args._cfg       = &gemm_cfg;
     }
     _gemm_kernel_asm = arm_gemm::gemm<TypeInput, TypeOutput, OutputStage>(args, os);
@@ -387,7 +389,13 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
                                  bias, 0);
 
     // Schedule assembly kernel
-    NEScheduler::get().schedule(_optimised_kernel.get(), Window::DimX);
+    IScheduler::Hints scheduling_hint = IScheduler::Hints(Window::DimX);
+    if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED)
+    {
+        constexpr int granule_threshold = 200;
+        scheduling_hint                 = IScheduler::Hints(Window::DimX, IScheduler::StrategyHint::DYNAMIC, granule_threshold);
+    }
+    NEScheduler::get().schedule(_optimised_kernel.get(), scheduling_hint);
 }
 
 template <typename TypeInput, typename TypeOutput>

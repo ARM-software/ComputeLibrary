@@ -76,7 +76,7 @@ public:
     void schedule(ICPPKernel *kernel, const Hints &hints) override
     {
         _timer.start();
-        _real_scheduler.schedule(kernel, hints.split_dimension());
+        _real_scheduler.schedule(kernel, hints);
         _timer.stop();
 
         typename SchedulerClock<output_timestamps>::kernel_info info;

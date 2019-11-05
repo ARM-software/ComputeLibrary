@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,9 +53,10 @@ public:
          *
          * @param[in] split_dimension Dimension along which to split the kernel's execution window.
          * @param[in] strategy        (Optional) Split strategy.
+         * @param[in] threshold       (Optional) Dynamic scheduling capping threshold.
          */
-        Hints(unsigned int split_dimension, StrategyHint strategy = StrategyHint::STATIC)
-            : _split_dimension(split_dimension), _strategy(strategy)
+        Hints(unsigned int split_dimension, StrategyHint strategy = StrategyHint::STATIC, int threshold = 0)
+            : _split_dimension(split_dimension), _strategy(strategy), _threshold(threshold)
         {
         }
         /** Set the split_dimension hint
@@ -97,10 +98,19 @@ public:
         {
             return _strategy;
         }
+        /** Return the granule capping threshold to be used by dynamic scheduling.
+         *
+         * @return The capping threshold
+         */
+        int threshold() const
+        {
+            return _threshold;
+        }
 
     private:
         unsigned int _split_dimension;
         StrategyHint _strategy;
+        int          _threshold;
     };
     /** Signature for the workloads to execute */
     using Workload = std::function<void(const ThreadInfo &)>;
@@ -165,5 +175,5 @@ protected:
 private:
     unsigned int _num_threads_hint = {};
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_ISCHEDULER_H__ */
