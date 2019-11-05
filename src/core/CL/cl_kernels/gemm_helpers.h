@@ -24,6 +24,18 @@
 #include "activation_float_helpers.h"
 #include "helpers.h"
 
+/** Loads the rows from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
+ * @name LOAD_ROW_n
+ *
+ * @param[in] N0        The number of rows to load
+ * @param[in] DATA_TYPE The data type of variables
+ * @param[in] BASENAME  The basename of the destination variables for the loaded rows
+ * @param[in] PTR       The base pointer
+ * @param[in] OFFSET    The offset within a row
+ * @param[in] STRIDE_Y  The stride value in y-axis direction
+ * @param[in] Z         The z-axis offset vector
+ * @{
+ */
 #define LOAD_ROW_1(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) \
     VEC_DATA_TYPE(DATA_TYPE, N0)                                      \
     BASENAME##0 = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + 0 * STRIDE_Y + Z##0));
@@ -103,15 +115,45 @@
     VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
     BASENAME##F = VLOAD(N0)(0, (__global DATA_TYPE *)(PTR + OFFSET + 15 * STRIDE_Y + Z##F));
 
-// LOAD_ROW_n loads the rows 0..n-1 in variables BASENAME##0 to BASENAME##(n-1)
-#define LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
-/** Load Blocks of M0 consecutive rows and N0 consecutive columns when using Z offset as well
- * Supported cases M0=1,2,3..16. N0=1,2,3,4,8,16, for variables BASENAME[0..M0]
- * The data to load is expected to have consecutive names for each row, For e.g. For M0=3, and basename=c, the expected data is c0, c1 and c2.
- * The Z offset is expected to have consecutive names For e.g. For M0=3, and Z=zin, the expected z offsets are zin0, zin1 and zin2.
- */
-#define LOAD_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
+/** @}*/ // end of group LOAD_ROW_n
 
+/** Load Blocks (consecutive rows and columns) with Z offset.
+ * @name LOAD_BLOCK
+ *
+ * Supported cases are M0=1,2,3,...,16 and N0=1,2,3,4,8,16
+ * The data to load is expected to have consecutive names for each row.
+ * E.g., for M0=3, and BASENAME=c, the expected data is c0, c1 and c2.
+ * The Z offset is expected to have consecutive names.
+ * E.g., for M0=3, and Z=zin, the expected Z offsets are zin0, zin1 and zin2.
+ *
+ * @param[in] M0        The number of consecutive rows
+ * @param[in] N0        The number of consecutive columns
+ * @param[in] DATA_TYPE The data type of the target
+ * @param[in] BASENAME  The basename of the result variables
+ * @param[in] PTR       The base pointer for the data
+ * @param[in] OFFSET    The offset within a row
+ * @param[in] STRIDE_Y  The stride in y-axis direction
+ * @param[in] Z         The z-axis offset vector
+ * @{
+ */
+#define LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
+#define LOAD_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
+/** @} */ // end of group LOAD_BLOCK
+
+/** Basic macros to calculate Z offset values from Z0 to Zn-1
+ * @name CALCULATE_Z_OFFSET_n
+ *
+ * @param[in] M0              The number of offset values to calculate
+ * @param[in] DATA_TYPE       The data type of the results
+ * @param[in] Z               The basename of the result variables
+ * @param[in] Y               The work-itme ID of y-axis
+ * @param[in] HEIGHT_GEMM3D   The height of GEMM3D
+ * @param[in] DEPTH_GEMM3D    The depth of GEMM3D
+ * @param[in] CROSS_PLANE_PAD The padding required for plane changes accross the z-dimension
+ * @param[in] STRIDE_Y        The stride value in y-axis direction
+ *
+ * @{
+ */
 #define CALCULATE_Z_OFFSET_1(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     Z##0 = (0 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
     Z##0 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##0);                                                      \
@@ -159,28 +201,55 @@
     Z##7 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##7);                                                      \
     Z##7 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
-// CALCULATE_Z_OFFSET_n calculates Z for Z##0 to Z##(n-1)
-#define CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) CALCULATE_Z_OFFSET_##M0(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
-/** The Z offsets are expected to have consecutive names, For e.g. For M0=3, and Z=zin, the expected Z offsets are zin1, zin2, zin3.
- * Note for the REINTERPRET_INPUT_AS_3D case
- * Since we load a 2D input tile from a 3D tensor, we need to check when the plane changes across the z dimension
- * in order to take into account the presence of possible cross plane paddings
- *
- *  |                  |
- *  |      plane0      |
- *  |                  |
- *  |__________________|
- *  |******************|
- *  |  cross_plane_pad |
- *  |******************|
- *  |                  |
- *  |      plane1      |
- *  |                  |
- *  |__________________|
- */
-#define CALCULATE_Z_OFFSET(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
+/** @} */ // end of group CALCULATE_Z_OFFSET_n
 
-// STORE_ROW_n macros
+/** Calculate Z offset values from Z0 to Zn-1
+ * @name CALCULATE_Z_OFFSET
+ *
+ * The Z offsets are expected to have consecutive names.
+ * E.g., for M0=3 and Z=zin, the expected names of Z offsets are zin1, zin2, zin3.
+ * Note that, CROSS_PLANE_PAD (cross plain padding) is required to take into account
+ * the possible cross plane paddings in case of the plance changes across the z-dimension.
+ *
+ * <!--
+ * |                  |
+ * |      plane0      |
+ * |                  |
+ * |__________________|
+ * |******************|
+ * |  cross_plane_pad |
+ * |******************|
+ * |                  |
+ * |      plane1      |
+ * |                  |
+ * |__________________|
+ * -->
+ *
+ * @param[in] M0              The number of offset values to calculate
+ * @param[in] DATA_TYPE       The data type of the results
+ * @param[in] Z               The basename of the result variables
+ * @param[in] Y               The work-itme ID of y-axis
+ * @param[in] HEIGHT_GEMM3D   The height of GEMM3D
+ * @param[in] DEPTH_GEMM3D    The depth of GEMM3D
+ * @param[in] CROSS_PLANE_PAD The padding required for plane changes accross the z-dimension
+ * @param[in] STRIDE_Y        The stride value in y-axis direction
+ * @{
+ */
+#define CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) CALCULATE_Z_OFFSET_##M0(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
+#define CALCULATE_Z_OFFSET(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
+/** @} */ // end of group CALCULATE_Z_OFFSET
+
+/** Store the 0 to (n-1)th rows of the given variables
+ * @name STORE_ROW_n
+ *
+ * @param[in] N0        The size of the vectors
+ * @param[in] DATA_TYPE The data type of the vectors
+ * @param[in] BASENAME  The basename of the variables
+ * @param[in] PTR       The base pointer
+ * @param[in] STRIDE_Y  The stride value in y-axis direction
+ * @param[in] Z         The offset in z-axis direction
+ * @{
+ */
 #define STORE_ROW_1(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
     VSTORE(N0)                                                 \
     (BASENAME##0, 0, (__global DATA_TYPE *)(PTR + 0 * STRIDE_Y + Z##0));
@@ -259,8 +328,19 @@
     STORE_ROW_15(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
     VSTORE(N0)                                                  \
     (BASENAME##F, 0, (__global DATA_TYPE *)(PTR + 15 * STRIDE_Y + Z##F));
+/** @} */ // end of groupd STORE_ROW_n
 
-// CONVERT_STORE_ROW_n macros
+/** Convert and store the 0th to (n-1)th rows of the given variables
+ * @name CONVERT_STORE_ROW_n
+ *
+ * @param[in] N0        The size of the vectors
+ * @param[in] DATA_TYPE The data type of the vectors
+ * @param[in] BASENAME  The basename of the variables
+ * @param[in] PTR       The base pointer
+ * @param[in] STRIDE_Y  The stride value in y-axis direction
+ * @param[in] Z         The offset in z-axis direction
+ * @{
+ */
 #define CONVERT_STORE_ROW_1(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
     VSTORE(N0)                                                         \
     (CONVERT_SAT((BASENAME##0), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 0 * STRIDE_Y + Z##0));
@@ -340,26 +420,60 @@
     VSTORE(N0)                                                          \
     (CONVERT_SAT((BASENAME##F), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 15 * STRIDE_Y + Z##F));
 
-// STORE_ROW_n stores the rows 0..n-1 from variables BASENAME##0 to BASENAME##(n-1)
+/** @} */ // end of groupd CONVERT_STORE_ROW_n
+
+/** Store a block of the given size M0xN0
+ * @name STORE_BLOCK
+ *
+ * Supported cases are M0=1,2,3,...,16 and N0=2,3,4,8,16.
+ * The data to store is expected to have consecutive names for each row.
+ * E.g., for M0=3 and basename=c, the expected names are c0, c1 and c2.
+ * The Z offset is expected to have consecutive names.
+ * E.g., for M0=3 and Z=zin, the expected z offset names are zin0, zin1 and zin2.
+ *
+ * @param[in] M0        The number of rows to store
+ * @param[in] N0        The size of each vector
+ * @param[in] DATA_TYPE The data type of the vectors
+ * @param[in] BASENAME  The basename of the variables
+ * @param[in] PTR       The base pointer
+ * @param[in] STRIDE_Y  The stride value in y-axis direction
+ * @param[in] Z         The offset in z-axis direction
+ * @{
+ */
 #define STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
-
-// CONVERT_STORE_ROW_n converts and stores the rows 0..n-1 from variables BASENAME##0 to BASENAME##(n-1)
-#define CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) CONVERT_STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
-
-/** Store a block of size M0 (rows) x NO (columns).
- *  Supported cases M0=1,2,3..16. N0=2,3,4,8,16, for variables BASENAME[0..M]
- *  The data to store is expected to have consecutive names for each row, For e.g. For M0=3, and basename=c, the expected data is c0, c1 and c2.
- *  The Z offset is expected to have consecutive names For e.g. For M0=3, and Z=zin, the expected z offsets are zin0, zin1 and zin2.
- */
 #define STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+/** @} */ // end of group STORE_BLOCK
 
-/** Convert and store a block of size M0 (rows) x NO (columns).
- *  Supported cases M0=1,2,3..16. N0=2,3,4,8,16, for variables BASENAME[0..M]
- *  The data to store is expected to have consecutive names for each row, For e.g. For M0=3, and basename=c, the expected data is c0, c1 and c2.
- *  The Z offset is expected to have consecutive names For e.g. For M0=3, and Z=zin, the expected z offsets are zin0, zin1 and zin2.
+/** Convert and store a block of the given size M0xN0
+ * @name CONVERT_STORE_BLOCK
+ *
+ * Supported cases are M0=1,2,3,...,16 and N0=2,3,4,8,16.
+ * The data to store is expected to have consecutive names for each row.
+ * E.g., for M0=3 and basename=c, the expected names are c0, c1 and c2.
+ * The Z offset is expected to have consecutive names.
+ * E.g., for M0=3 and Z=zin, the expected z offset names are zin0, zin1 and zin2.
+ *
+ * @param[in] M0        The number of rows to store
+ * @param[in] N0        The size of each vector
+ * @param[in] DATA_TYPE The data type of the vectors
+ * @param[in] BASENAME  The basename of the variables
+ * @param[in] PTR       The base pointer
+ * @param[in] STRIDE_Y  The stride value in y-axis direction
+ * @param[in] Z         The offset in z-axis direction
+ * @{
  */
+#define CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) CONVERT_STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 #define CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+/** @} */ // end of group CONVERT_STORE_BLOCK
 
+/** Scale the rows in the given variables (BASENAME0 to BASENAMEn-1)
+ * @name SCALE_ROW_n
+ *
+ * @param[in] DATA_TYPE The data type of the variables
+ * @param[in] BASENAME  The basename of the variables
+ * @param[in] SCALE     The scale factor
+ * @{
+ */
 #define SCALE_ROW_1(DATA_TYPE, BASENAME, SCALE) \
     BASENAME##0 *= (DATA_TYPE)SCALE;
 
@@ -422,15 +536,31 @@
 #define SCALE_ROW_16(DATA_TYPE, BASENAME, SCALE) \
     SCALE_ROW_15(DATA_TYPE, BASENAME, SCALE)     \
     BASENAME##F *= (DATA_TYPE)SCALE;
+/** @} */ // end of group SCALE_ROW_n
 
-// SCALE_BLOCK_n scales the variables BASENAME##0 to BASENAME##(n-1) by SCALE
-#define SCALE_BLOCK_STR(N, DATA_TYPE, BASENAME, SCALE) SCALE_ROW_##N(DATA_TYPE, BASENAME, SCALE)
-/** Scale elements stored in variables BASENAME##0 to BASENAME##(N-1) by SCALE
- * Supported cases N=1,2,3..16, for variables BASENAME[0..N]
+/** Scale elements stored in a block (BASENAME)
+ * @name SCALE_BLOCK
+ *
+ * Supported cases are N=1,2,3,...,16
+ *
+ * @param[in] N         The number of rows in the block
+ * @param[in] DATA_TYPE The data type of the block
+ * @param[in] BASENAME  The basename of the block
+ * @param[in] SCALE     The scale factor
+ * @{
  */
+#define SCALE_BLOCK_STR(N, DATA_TYPE, BASENAME, SCALE) SCALE_ROW_##N(DATA_TYPE, BASENAME, SCALE)
 #define SCALE_BLOCK(N, DATA_TYPE, BASENAME, SCALE) SCALE_BLOCK_STR(N, DATA_TYPE, BASENAME, SCALE)
+/** @} */ // end of group SCALE_BLOCK
 
-/** Given a set of vectors of size K0, these macros create a new vector to contain the values at index IDX_COL (with IDX_COL < N0) for all input vectors */
+/** Create a new vector containing the values at the given index for a set of given vectors
+ * @name COLUMN_VECTORn
+ *
+ * @param[in] IDX_COL  The index value
+ * @param[in] BASENAME The basename of the destination vectors
+ * @param[in] X        The basename of the source vectors
+ * @{
+ */
 #define COLUMN_VECTOR1(IDX_COL, BASENAME, X) \
     uchar BASENAME##IDX_COL = (uchar)((X##0).s##IDX_COL);
 #define COLUMN_VECTOR2(IDX_COL, BASENAME, X) \
@@ -443,8 +573,16 @@
     uchar8 BASENAME##IDX_COL = (uchar8)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL);
 #define COLUMN_VECTOR16(IDX_COL, BASENAME, X) \
     uchar16 BASENAME##IDX_COL = (uchar16)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL, (X##8).s##IDX_COL, (X##9).s##IDX_COL, (X##A).s##IDX_COL, (X##B).s##IDX_COL, (X##C).s##IDX_COL, (X##D).s##IDX_COL, (X##E).s##IDX_COL, (X##F).s##IDX_COL);
+/** @} */ // end of group COLUMN_VECTORn
 
-/** Given N0 vectors of size K0, these macros create K0 vectors of size N0 which are the result of a transposition */
+/** Create transposed vectors of the given vectors
+ * @name TRANSPOSE_K0Xn
+ *
+ * @param[in] K0       The size of the source vectors
+ * @param[in] BASENAME The basename of transposed vectors
+ * @param[in] B        The basename of source vectors for transposition
+ * @{
+ */
 #define TRANSPOSE_K0X1(K0, BASENAME, B) \
     COLUMN_VECTOR(K0, 0, BASENAME, B);
 #define TRANSPOSE_K0X2(K0, BASENAME, B) \
@@ -473,14 +611,38 @@
     COLUMN_VECTOR(K0, E, BASENAME, B);   \
     COLUMN_VECTOR(K0, F, BASENAME, B);
 
+/** @} */ // end of group TRANSPOSE_K0Xn
+
+/** Create column vectors to contain the values at the given index for a set of given vectors
+ *
+ * @param[in] K0       The number of source vectors
+ * @param[in] IDX_COL  The index value
+ * @param[in] BASENAME The basename of the destination vectors
+ * @param[in] B        The basename of the source vectors
+ */
 #define COLUMN_VECTOR(K0, IDX_COL, BASENAME, B) \
     CONCAT(COLUMN_VECTOR, K0)                   \
     (IDX_COL, BASENAME, B);
 
+/** Create transposed vectors form the given source vectors
+ *
+ * @param[in] K0       The size of source vectors
+ * @param[in] N0       The number of source vectors
+ * @param[in] BASENAME The basename of transposed vectors
+ * @param[in] B        The basename of source vectors for transposition
+ *
+ */
 #define TRANSPOSE_K0XN0(K0, N0, BASENAME, B) \
     CONCAT(TRANSPOSE_K0X, N0)                \
     (K0, BASENAME, B);
 
+/** Add the variables (BIAS0 to BIASn-1) to the others (BASENAME0 to BASENAMEn-1)
+ * @name ADD_ROW_n
+ *
+ * @param[in] BASENAME The basename of the destination variables
+ * @param[in] BIAS     The basename of the added variables
+ * @{
+ */
 #define ADD_ROW_1(BASENAME, BIAS) \
     BASENAME##0 += BIAS##0;
 
@@ -544,13 +706,29 @@
     ADD_ROW_15(BASENAME, BIAS)     \
     BASENAME##F += BIAS##F;
 
-// ADD_ROW_n add the variables BIAS##0... BIAS##(n-1) to BASENAME##0 to BASENAME##(n-1)
-#define ADD_BLOCK_STR(N, BASENAME, BIAS) ADD_ROW_##N(BASENAME, BIAS)
-/** Add BIAS to  BASENAME##0 ... BASENAME##(N-1)
- * Supported cases N=1,2,3..16, for variables BASENAME[0..N]
- */
-#define ADD_BLOCK(N, BASENAME, BIAS) ADD_BLOCK_STR(N, BASENAME, BIAS)
+/** @} */ // end of group ADD_ROW_n
 
+/** Add the block (BIAS) to another block (BASENAME)
+ * @name ADD_BLOCK
+ *
+ * Supported cases are N=1,2,3,...,16
+ *
+ * @param[in] N        The number of vectors in the block
+ * @param[in] BASENAME The basename of the destination variables
+ * @param[in] BIAS     The basename of the added variables
+ * @{
+ */
+#define ADD_BLOCK_STR(N, BASENAME, BIAS) ADD_ROW_##N(BASENAME, BIAS)
+#define ADD_BLOCK(N, BASENAME, BIAS) ADD_BLOCK_STR(N, BASENAME, BIAS)
+/** @} */ // end of group ADD_BLOCK
+
+/** Broadcast (add single value) to the each element of the destination variables
+ * @name ADD_ROW_BROADCAST_n
+ *
+ * @param[in] BASENAME The basename of the destination variables
+ * @param[in] BIAS     The variable containing the value to add
+ * @{
+ */
 #define ADD_ROW_BROADCAST_1(BASENAME, BIAS) \
     BASENAME##0 += BIAS;
 
@@ -614,13 +792,30 @@
     ADD_ROW_BROADCAST_15(BASENAME, BIAS)     \
     BASENAME##F += BIAS;
 
-// ADD_ROW_n add the variables BIAS to BASENAME##0 to BASENAME##(n-1)
-#define ADD_BLOCK_BROADCAST_STR(N, BASENAME, BIAS) ADD_ROW_BROADCAST_##N(BASENAME, BIAS)
-/** Add elements stored in variables BIAS##0 ... BIAS##(N-1) to  BASENAME##0 ... BASENAME##(N-1)
- * Supported cases N=1,2,3..16, for variables BASENAME[0..N]
+/** Broadcast (add a value) to the each element of the destination block (BASENAME)
+ * @name ADD_BLOCK_BROADCAST
+ *
+ * Supported cases are N=1,2,3,...,16.
+ *
+ * @param[in] N        The number of vectors in the block
+ * @param[in] BASENAME The basename of the destination variables
+ * @param[in] BIAS     The variable containing the value to add
+ * @{
  */
+#define ADD_BLOCK_BROADCAST_STR(N, BASENAME, BIAS) ADD_ROW_BROADCAST_##N(BASENAME, BIAS)
 #define ADD_BLOCK_BROADCAST(N, BASENAME, BIAS) ADD_BLOCK_BROADCAST_STR(N, BASENAME, BIAS)
+/** @} */ // end of group ADD_BLOCK_BROADCAST
 
+/** Apply activation to the given variables
+ * @name ACTIVATION_ROW_n
+ *
+ * @param[in] ACTIVATION_TYPE The type of the activation
+ * @param[in] DATA_TYPE       The data type of the vectors
+ * @param[in] BASENAME        The basename of the variables
+ * @param[in] A_VAL           Additional value required by the activation
+ * @param[in] B_VAL           Additional value required by the activation
+ * @{
+ */
 #define ACTIVATION_ROW_1(ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL) \
     BASENAME##0 = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, BASENAME##0, A_VAL, B_VAL);
 
@@ -683,14 +878,33 @@
 #define ACTIVATION_ROW_16(ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL) \
     ACTIVATION_ROW_15(ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL)     \
     BASENAME##F = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, BASENAME##F, A_VAL, B_VAL);
+/** @} */ // end of group ACTIVATION_ROW_n
 
-// ACTIVATION_ROW_n apply activation to the variables BASENAME##0... BASENAME##(n-1)
-#define ACTIVATION_BLOCK_STR(N, ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL) ACTIVATION_ROW_##N(ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL)
-/** Apply activation to the variables BASENAME##0... BASENAME##(n-1)
- * Supported cases N=1,2,3..16, for variables BASENAME[0..N]
+/** Apply activation to a block (BASENAME)
+ * @name ACTIVATION_BLOCK
+ *
+ * Supported cases are N=1,2,3,...,16.
+ *
+ * @param[in] N               The number of vectors in the block
+ * @param[in] ACTIVATION_TYPE The type of the activation
+ * @param[in] DATA_TYPE       The data type of the vectors
+ * @param[in] BASENAME        The basename of the variables
+ * @param[in] A_VAL           Additional value required by the activation
+ * @param[in] B_VAL           Additional value required by the activation
+ * @{
  */
+#define ACTIVATION_BLOCK_STR(N, ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL) ACTIVATION_ROW_##N(ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL)
 #define ACTIVATION_BLOCK(N, ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL) ACTIVATION_BLOCK_STR(N, ACTIVATION_TYPE, DATA_TYPE, BASENAME, A_VAL, B_VAL)
+/** @} */ // end of group ACTIVATION_BLOCK
 
+/** Apply convert_<data_type> to the given variables
+ * @name CONVERT_ROW_n
+ *
+ * @param[in] N            The size of the vectors
+ * @param[in] DATA_TYPE    The data type of the vectors
+ * @param[in] BASENAME_SRC The basename of the source variables
+ * @param[in] BASENAME_DST The basename of the destination variables
+ */
 #define CONVERT_ROW_1(N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) \
     VEC_DATA_TYPE(DATA_TYPE, N)                                 \
     BASENAME_DST##0 = CONVERT(BASENAME_SRC##0, VEC_DATA_TYPE(DATA_TYPE, N));
@@ -769,10 +983,19 @@
     CONVERT_ROW_15(N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)     \
     VEC_DATA_TYPE(DATA_TYPE, N)                                  \
     BASENAME_DST##F = CONVERT(BASENAME_SRC##F, VEC_DATA_TYPE(DATA_TYPE, N));
+/** @} */ // end of group CONVERT_ROW_n
 
-// CONVERT_ROW_m apply convert to the variables BASENAME_SRC##0... BASENAME_SRC##(n-1)
-#define CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) CONVERT_ROW_##M(N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)
-/** Apply convert_<data_type> to the variables BASENAME_SRC##0... BASENAME_SRC##(m-1)
- * Supported cases N=1,2,3..16, for variables BASENAME_SRC[0..N]
+/** Apply convert_<data_type> to a block (BASENAME_SRC) and save to another block (BASENAME_DST)
+ * @name CONVERT_BLOCK
+ *
+ * Supported cases N=1,2,3,...,16.
+ *
+ * @param[in] M            The number of vectors to convert
+ * @param[in] N            The size of the vectors
+ * @param[in] DATA_TYPE    The data type of the vectors
+ * @param[in] BASENAME_SRC The basename of the source variables
+ * @param[in] BASENAME_DST The basename of the destination variables
  */
+#define CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) CONVERT_ROW_##M(N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)
 #define CONVERT_BLOCK(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST) CONVERT_BLOCK_STR(M, N, DATA_TYPE, BASENAME_SRC, BASENAME_DST)
+/** @} */ // end of group CONVERT_BLOCK
