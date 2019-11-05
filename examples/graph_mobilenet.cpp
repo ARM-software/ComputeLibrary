@@ -235,7 +235,7 @@ private:
         };
 
         graph << InputLayer(input_descriptor.set_quantization_info(in_quant_info),
-                            get_weights_accessor(data_path, common_params.image))
+                            get_input_accessor(common_params, nullptr, false))
               << ConvolutionLayer(
                   3U, 3U, 32U,
                   get_weights_accessor(data_path, "Conv2d_0_weights.npy"),

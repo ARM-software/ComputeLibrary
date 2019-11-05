@@ -257,7 +257,7 @@ public:
     void fill_planar_tensor(T &tensor, bool bgr = false)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::F32, DataType::F16);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::QASYMM8, DataType::F32, DataType::F16);
 
         const DataLayout  data_layout  = tensor.info()->data_layout();
         const TensorShape tensor_shape = tensor.info()->tensor_shape();
@@ -312,6 +312,7 @@ public:
                 switch(tensor.info()->data_type())
                 {
                     case DataType::U8:
+                    case DataType::QASYMM8:
                     {
                         *(out.ptr() + 0 * stride_z) = bgr ? blue : red;
                         *(out.ptr() + 1 * stride_z) = green;

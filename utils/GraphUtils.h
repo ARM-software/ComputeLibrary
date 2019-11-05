@@ -486,7 +486,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const arm_comp
         const std::string &image_file_lower = lower_string(image_file);
         if(arm_compute::utility::endswith(image_file_lower, ".npy"))
         {
-            return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(image_file);
+            return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(image_file, graph_parameters.data_layout);
         }
         else if(arm_compute::utility::endswith(image_file_lower, ".jpeg")
                 || arm_compute::utility::endswith(image_file_lower, ".jpg")
