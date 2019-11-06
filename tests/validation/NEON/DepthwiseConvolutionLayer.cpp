@@ -680,6 +680,33 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedSymmetricPe
 }
 TEST_SUITE_END() // Dilation
 TEST_SUITE_END() // Generic
+
+TEST_SUITE(Optimized)
+FIXTURE_DATA_TEST_CASE(RunSmall3x3, NEDepthwiseConvolutionLayerQuantizedSymmetricPerChannelFixture, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset3x3(),
+                                                                               framework::dataset::make("DepthMultiplier", 1)),
+                                                                       framework::dataset::make("InputDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge3x3, NEDepthwiseConvolutionLayerQuantizedSymmetricPerChannelFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(datasets::LargeOptimizedDepthwiseConvolutionLayerDataset3x3(),
+                                                                               framework::dataset::make("DepthMultiplier", 1)),
+                                                                       framework::dataset::make("InputDataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("WeightsDataType", DataType::QSYMM8_PER_CHANNEL)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // Optimized
 TEST_SUITE_END() // QSYMM8_PER_CHANNEL
 TEST_SUITE_END() // Quantized
 

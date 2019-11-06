@@ -40,7 +40,10 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    if(!is_data_type_quantized_per_channel(weights->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    }
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() < 1 || dilation.y() < 1);
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
@@ -55,7 +58,7 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(channel_idx));
     }
 
-    const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
+    const bool is_quantized = (!is_data_type_quantized_per_channel(weights->data_type())) && is_data_type_quantized_asymmetric(input->data_type());
 
     if(is_quantized)
     {
@@ -67,7 +70,6 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
         ARM_COMPUTE_UNUSED(multiplier);
         ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
     }
-
     if(!NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(input, weights, conv_info, depth_multiplier, dilation))
     {
         TensorInfo accumulator = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
@@ -88,7 +90,6 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
     }
-
     return Status{};
 }
 } // namespace
