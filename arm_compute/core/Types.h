@@ -1882,8 +1882,8 @@ struct GEMMLowpOutputStageInfo
     int                     gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
     int                     gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
     int                     gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
-    std::vector<int>        gemmlowp_multipliers{};                /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    std::vector<int>        gemmlowp_shifts{};                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    std::vector<int32_t>    gemmlowp_multipliers{};                /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    std::vector<int32_t>    gemmlowp_shifts{};                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
 };
 
 /** GEMM LHS (Left Hand Side) matrix information */
