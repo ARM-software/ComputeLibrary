@@ -1664,7 +1664,7 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
     {
 #endif // DEPTH_MULTIPLIER > 1
         // Each work-item computes N0x1x1 elements
-        VEC_SHORT res = 0;
+        VEC_INT res = 0;
 
         int x_coord = y * CONV_STRIDE_X - (int)CONV_PAD_LEFT;
         int y_coord = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP;
@@ -1683,10 +1683,10 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
                         int w_offset = xk * weights_stride_y + yk * weights_stride_z;
 
                         // Load input and weights values
-                        VEC_SHORT i = CONVERT(VLOAD(N0)(0, (__global DATA_TYPE *)(s_addr + s_offset)), VEC_SHORT);
-                        VEC_SHORT w = CONVERT(VLOAD(N0)(0, (__global WEIGHTS_TYPE *)(w_addr + w_offset)), VEC_SHORT);
+                        VEC_INT i = CONVERT(VLOAD(N0)(0, (__global DATA_TYPE *)(s_addr + s_offset)), VEC_INT);
+                        VEC_INT w = CONVERT(VLOAD(N0)(0, (__global WEIGHTS_TYPE *)(w_addr + w_offset)), VEC_INT);
 
-                        res += (i + (VEC_SHORT)INPUT_OFFSET) * (w + (VEC_SHORT)WEIGHTS_OFFSET);
+                        res += (i + (VEC_INT)INPUT_OFFSET) * (w + (VEC_INT)WEIGHTS_OFFSET);
                     }
                     x_coord_tmp += DILATION_X;
                 }
@@ -1695,7 +1695,7 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
         }
 
 #if defined(HAS_BIAS)
-        VEC_SHORT bias = CONVERT(VLOAD(N0)(0, (__global int *)(b_addr)), VEC_SHORT);
+        VEC_INT bias = VLOAD(N0)(0, (__global int *)(b_addr));
         res += bias;
 #endif // defined(HAS_BIAS)
 
@@ -1704,8 +1704,8 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
         output_shift      = VLOAD(N0)(0, (__global int *)(out_shift_addr));
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
-        res = CONVERT(ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(CONVERT(res, VEC_INT), output_multiplier, output_shift, N0), VEC_SHORT);
-        res += (VEC_SHORT)OUTPUT_OFFSET;
+        res = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(res, output_multiplier, output_shift, N0);
+        res += (VEC_INT)OUTPUT_OFFSET;
 
         VEC_TYPE(VEC_SIZE)
         res1 = CONVERT_SAT(res, VEC_TYPE(VEC_SIZE));
