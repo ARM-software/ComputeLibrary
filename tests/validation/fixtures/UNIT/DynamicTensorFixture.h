@@ -454,9 +454,9 @@ protected:
             tensor_info.set_data_layout(_data_layout);
             weights_info.set_data_layout(_data_layout);
 
+            tensors[0].allocator()->init(tensor_info);
             for(unsigned int f = 0; f < num_functions; ++f)
             {
-                tensors[f].allocator()->init(tensor_info);
                 tensors[f + 1].allocator()->init(tensor_info);
                 ws[f].allocator()->init(weights_info);
 
