@@ -476,7 +476,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedPerChannelFixtur
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()),
+                       combine(combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                                framework::dataset::make("DataType", { DataType::QASYMM8 })),
                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),

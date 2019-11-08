@@ -97,6 +97,9 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         output_stage_corr.gemmlowp_min_bound -= offset_correction;
         output_stage_corr.gemmlowp_max_bound -= offset_correction;
         info.set_gemmlowp_output_stage(output_stage_corr);
+
+        // Update matrix a
+        matrix_a = &_signed_a;
     }
 
     // If GEMMLowpOutputStage != NONE, fuse the offset contribution with the output stage
@@ -329,6 +332,9 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         output_stage_corr.gemmlowp_min_bound -= offset_correction;
         output_stage_corr.gemmlowp_max_bound -= offset_correction;
         info.set_gemmlowp_output_stage(output_stage_corr);
+
+        // Update matrix a
+        matrix_a_info = &signed_a;
     }
 
     // Check if we need to run the optimized assembly kernel
@@ -463,6 +469,12 @@ void NEGEMMLowpMatrixMultiplyCore::run()
 
     MemoryGroupResourceScope scope_mg(_memory_group);
 
+    // Convert QASYMM8->QASYMM8_SIGNED
+    if(_flip_signedness)
+    {
+        NEScheduler::get().schedule(&_convert_to_signed_asymm, Window::DimY);
+    }
+
     // Reshape inputs
     if(_mtx_a_reshape_kernel)
     {
@@ -471,12 +483,6 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     if(_mtx_b_reshape_kernel && !_reshape_b_only_on_first_run)
     {
         NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
-    }
-
-    // Convert QASYMM8->QASYMM8_SIGNED
-    if(_flip_signedness)
-    {
-        NEScheduler::get().schedule(&_convert_to_signed_asymm, Window::DimY);
     }
 
     // Run GEMM

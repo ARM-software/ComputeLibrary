@@ -870,6 +870,7 @@ void NEGEMMLowpMatrixMultiplyKernel::run(const Window &window, const ThreadInfo 
         switch(_input0->info()->data_type())
         {
             case DataType::S8:
+            case DataType::QASYMM8_SIGNED:
             {
                 vector_matrix_multiply_s8(ina, inb, out, width_matrix_a, width_matrix_b, in_b_stride, window);
                 break;
