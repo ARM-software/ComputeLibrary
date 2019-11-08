@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,20 +57,26 @@ TEST_SUITE(ReduceMean)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid axis
                                                 TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), // Invalid output shape
-                                                TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32)
+                                                TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32),// OK
+                                                TensorInfo(TensorShape{228U, 19U, 2U, 2U}, 1, DataType::F32),// OK
+                                                TensorInfo(TensorShape{228U, 19U, 2U, 1U}, 1, DataType::F32) // Cannot support axis 3 not valid
         }),
         framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
-                                                 TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::F32)
+                                                 TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::F32),
+                                                 TensorInfo(TensorShape(19U), 1, DataType::F32),
+                                                 TensorInfo(TensorShape(19U), 1, DataType::F32)
+
         })),
-        framework::dataset::make("Axis", { Coordinates(4), Coordinates(0,2), Coordinates(2) })),
-        framework::dataset::make("Expected", { false, false, true })),
-        input_info, output_info, axis, expected)
+        framework::dataset::make("Axis", { Coordinates(4), Coordinates(0,2), Coordinates(2), Coordinates(3,2,0), Coordinates(3,2,0) })),
+        framework::dataset::make("Keep", { true, true, true, false, false })),
+        framework::dataset::make("Expected", { false, false, true, true, false })),
+        input_info, output_info, axis, keep, expected)
 {
-    const Status status = NEReduceMean::validate(&input_info.clone()->set_is_resizable(false), axis, true, &output_info.clone()->set_is_resizable(false));
+    const Status status = NEReduceMean::validate(&input_info.clone()->set_is_resizable(false), axis, keep, &output_info.clone()->set_is_resizable(false));
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
