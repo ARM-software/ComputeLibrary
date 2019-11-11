@@ -280,6 +280,7 @@ namespace arm_compute
         - @ref CLElementwiseSquaredDiff
         - @ref CLErode
         - @ref CLExpLayer
+        - @ref CLFill
         - @ref CLFillBorder
         - @ref CLFlattenLayer
         - @ref CLFloor

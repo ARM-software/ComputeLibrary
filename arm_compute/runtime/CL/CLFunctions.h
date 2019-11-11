@@ -69,6 +69,7 @@
 #include "arm_compute/runtime/CL/functions/CLFFT2D.h"
 #include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFastCorners.h"
+#include "arm_compute/runtime/CL/functions/CLFill.h"
 #include "arm_compute/runtime/CL/functions/CLFillBorder.h"
 #include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFloor.h"
