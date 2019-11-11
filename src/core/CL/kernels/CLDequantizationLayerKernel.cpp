@@ -40,7 +40,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_PER_CHANNEL, DataType::QSYMM8, DataType::QSYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8, DataType::QSYMM16);
 
     if(output->tensor_shape().total_size() > 0)
     {
@@ -144,7 +144,6 @@ void CLDequantizationLayerKernel::run(const Window &window, cl::CommandQueue &qu
     {
         unsigned int idx = num_arguments_per_3D_tensor() * 2; //Skip the input and output parameters
         _kernel.setArg(idx++, _input->quantization().scale->cl_buffer());
-        _kernel.setArg(idx++, _input->quantization().offset->cl_buffer());
     }
 
     do

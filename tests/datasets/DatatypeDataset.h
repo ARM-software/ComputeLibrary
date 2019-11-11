@@ -54,7 +54,7 @@ public:
     QuantizedPerChannelTypes()
         : ContainerDataset("QuantizedPerChannelTypes",
     {
-        DataType::QASYMM8_PER_CHANNEL
+        DataType::QSYMM8_PER_CHANNEL
     })
     {
     }

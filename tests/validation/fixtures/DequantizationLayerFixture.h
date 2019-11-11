@@ -101,12 +101,12 @@ protected:
         switch(src_data_type)
         {
             case DataType::QASYMM8:
-            case DataType::QASYMM8_PER_CHANNEL:
             {
                 SimpleTensor<uint8_t> src{ shape, src_data_type, 1, _quantization_info };
                 fill(src);
                 return reference::dequantization_layer<T>(src);
             }
+            case DataType::QSYMM8_PER_CHANNEL:
             case DataType::QSYMM8:
             {
                 SimpleTensor<int8_t> src{ shape, src_data_type, 1, _quantization_info };
@@ -138,16 +138,14 @@ protected:
                 return QuantizationInfo(1.f / distribution_scale_q16(gen));
             case DataType::QSYMM8:
                 return QuantizationInfo(1.f / distribution_scale_q8(gen));
-            case DataType::QASYMM8_PER_CHANNEL:
+            case DataType::QSYMM8_PER_CHANNEL:
             {
-                std::vector<float>   scale(num_channels);
-                std::vector<int32_t> offset(num_channels);
+                std::vector<float> scale(num_channels);
                 for(int32_t i = 0; i < num_channels; ++i)
                 {
-                    scale[i]  = 1.f / distribution_scale_q8(gen);
-                    offset[i] = distribution_offset_q8(gen);
+                    scale[i] = 1.f / distribution_offset_q8(gen);
                 }
-                return QuantizationInfo(scale, offset);
+                return QuantizationInfo(scale);
             }
             case DataType::QASYMM8:
                 return QuantizationInfo(1.f / distribution_scale_q8(gen), distribution_offset_q8(gen));
