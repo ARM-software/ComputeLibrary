@@ -83,7 +83,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     // Output tensor auto initialization if not yet initialized
     const bool        is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
     const TensorShape output_shape     = arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis, !is_arg_min_max);
-    const DataType    output_data_type = is_arg_min_max ? DataType::U32 : input->data_type();
+    const DataType    output_data_type = is_arg_min_max ? DataType::S32 : input->data_type();
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
 
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;

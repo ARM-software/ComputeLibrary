@@ -38,9 +38,10 @@ class CLReductionOperation;
 /** Function to calculate the index of the minimum or maximum values in a
  *  tensor based on an axis.
  *
- * @note The indices are computed in unsigned 32-bit (U32). It is the user's
- *       responsibility to check that the results do not overflow in case the
- *       output data type is set to signed 32-bit integer (S32).
+ * @note The default data type for an uninitialized output tensor is
+ *       signed 32-bit integer (S32). It is the user's responsibility to check
+ *       that the results do not overflow because the indices are computed
+ *       in unsigned 32-bit (U32).
  */
 class CLArgMinMaxLayer : public IFunction
 {

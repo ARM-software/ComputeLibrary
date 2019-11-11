@@ -56,7 +56,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         }),
         framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
-                                                 TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::U32),
+                                                 TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::S32),
                                                  TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::F32)
         })),
         framework::dataset::make("Axis", { 4, 0, 2, 0 })),

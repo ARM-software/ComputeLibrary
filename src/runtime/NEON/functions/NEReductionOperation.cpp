@@ -80,7 +80,7 @@ Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInf
         const auto input_num_channles = input->num_channels();
         const auto input_qinfo        = input->quantization_info();
         const auto is_arg_min_max     = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
-        const auto output_data_type   = is_arg_min_max ? DataType::U32 : output->data_type();
+        const auto output_data_type   = is_arg_min_max ? DataType::S32 : output->data_type();
 
         info_before_reshape.set_data_type(output_data_type).set_tensor_shape(shape_before_reshape).set_num_channels(input_num_channles).set_quantization_info(input_qinfo);
 
@@ -110,7 +110,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     {
         const auto output_internal_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis);
         const auto output_external_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis, false);
-        const auto output_data_type      = is_arg_min_max ? DataType::U32 : input->info()->data_type();
+        const auto output_data_type      = is_arg_min_max ? DataType::S32 : input->info()->data_type();
         const auto num_channels          = input->info()->num_channels();
         const auto qinfo                 = input->info()->quantization_info();
 

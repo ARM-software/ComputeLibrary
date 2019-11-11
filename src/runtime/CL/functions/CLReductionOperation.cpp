@@ -86,7 +86,7 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
     const auto input_data_type    = input->data_type();
     const auto input_num_channles = input->num_channels();
     const auto input_qinfo        = input->quantization_info();
-    const auto output_data_type   = is_arg_min_max ? DataType::U32 : output->data_type();
+    const auto output_data_type   = is_arg_min_max ? DataType::S32 : output->data_type();
 
     auto initialize_tensorinfo = [](TensorInfo & ti, TensorShape shape, DataType data_type, int num_channels, QuantizationInfo qinfo)
     {
@@ -208,7 +208,7 @@ ICLTensor *CLReductionOperation::configure_intermediate_result_vector(ICLTensor 
 
     if(is_arg_min_max)
     {
-        _results_vector.back().info()->set_data_type(DataType::U32).set_is_resizable(true).reset_padding();
+        _results_vector.back().info()->set_data_type(DataType::S32).set_is_resizable(true).reset_padding();
     }
 
     return _is_reshape_required ? &_results_vector.back() : output;
@@ -229,7 +229,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
     if(_is_reshape_required)
     {
         const TensorShape output_shape     = arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis, false);
-        const auto        output_data_type = is_arg_min_max ? DataType::U32 : input->info()->data_type();
+        const auto        output_data_type = is_arg_min_max ? DataType::S32 : input->info()->data_type();
         auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
     }
 

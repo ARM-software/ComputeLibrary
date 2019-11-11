@@ -114,7 +114,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<uint32_t> compute_reference(TensorShape &src_shape, DataType data_type, int axis, ReductionOperation op, QuantizationInfo q_info)
+    SimpleTensor<int32_t> compute_reference(TensorShape &src_shape, DataType data_type, int axis, ReductionOperation op, QuantizationInfo q_info)
     {
         // Create reference
         SimpleTensor<T> src{ src_shape, data_type, 1, q_info };
@@ -123,11 +123,11 @@ protected:
         fill(src);
 
         TensorShape output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(src_shape, axis, false);
-        return reference::reduction_operation<T, uint32_t>(src, output_shape, axis, op);
+        return reference::reduction_operation<T, int32_t>(src, output_shape, axis, op);
     }
 
-    TensorType             _target{};
-    SimpleTensor<uint32_t> _reference{};
+    TensorType            _target{};
+    SimpleTensor<int32_t> _reference{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
