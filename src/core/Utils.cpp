@@ -340,13 +340,15 @@ std::string arm_compute::lower_string(const std::string &val)
 PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout, const Size2D &dilation,
                                               const DimensionRoundingType &rounding_type)
 {
+    const auto &strides = conv_info.stride();
+    ARM_COMPUTE_ERROR_ON_MSG((strides.first < 1 || strides.second < 1), "Stride values should be greater than or equal to 1.");
+
     const unsigned int width_idx     = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx    = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const unsigned int in_width      = input_shape[width_idx];
     const unsigned int in_height     = input_shape[height_idx];
     const unsigned int kernel_width  = weights_shape[width_idx];
     const unsigned int kernel_height = weights_shape[height_idx];
-    const auto        &strides       = conv_info.stride();
 
     // Calculate output dimensions
     const auto         is_ceil    = static_cast<unsigned int>(rounding_type == DimensionRoundingType::CEIL);
