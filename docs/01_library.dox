@@ -423,6 +423,7 @@ operation2.run();       // Run operation2
 memory_group.release(); // Release memory so that it can be reused
 @endcode
 @note Execution of a pipeline can be done in a multi-threading environment as memory acquisition/release are thread safe.
+@note If you are handling sensitive data and it's required to zero out the memory buffers before freeing, make sure to also zero out the intermediate buffers. You can access the buffers through the memory group's mappings.
 
 @subsection S4_7_3_memory_manager_function_support Function support
 
