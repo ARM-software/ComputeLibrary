@@ -187,10 +187,11 @@ public:
      * @param[in] input  Source tensor. Data types supported: S32/F16/F32
      * @param[in] sum    Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
      * @param[in] output Destination tensor. Data types supported: QASYMM8 for S32 @p input, or same as @p input
+     * @param[in] info   Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, const SoftmaxKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

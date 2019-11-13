@@ -958,6 +958,15 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsi
  */
 bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis);
 
+/** Returns output quantization information for softmax layer
+ *
+ * @param[in] input_type The data type of the input tensor
+ * @param[in] is_log     True for log softmax
+ *
+ * @return Quantization information for the output tensor
+ */
+QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool is_log);
+
 /** Convert a tensor format into a string.
  *
  * @param[in] format @ref Format to be translated to string.

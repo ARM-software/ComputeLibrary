@@ -49,6 +49,15 @@ RelativeTolerance<float> tolerance_f32(0.001f);
 
 /** Tolerance for quantized operations */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
+
+/*
+ The following tolerance number is used as a workaround for the mismatches
+ caused by float computation in reference (and NEON) kernel
+ and integer computations in OpenCL kernel.
+ COMPMID-2958 is created to investigate this.
+*/
+constexpr float tolerance_number_qasymm8_signed = 0.05f;
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -110,6 +119,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 12)),
+                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8_SIGNED,
+                                                                  QuantizationInfo(1.f/256, 12))
                                                       }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
@@ -120,8 +131,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 0)),
+                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8_SIGNED,
+                                                                  QuantizationInfo(1.f/256, -128)),
                                                      })),
-               framework::dataset::make("Expected", { false, false, false, false, false, true, true })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true, true, true })),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLSoftmaxLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
@@ -221,11 +234,24 @@ FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE(QASYMM8_SIGNED)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                      combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                              framework::dataset::make("Beta", { 1.0f, 2.f }))),
+                                                                                                              framework::dataset::make("Axis", { 1, 2 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_signed, tolerance_number_qasymm8_signed);
+}
+
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
+TEST_SUITE_END() // SoftmaxLayer
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -118,8 +118,9 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const ICLTensor *input, ICLTensor 
     _memory_group.manage(&_sum);
 
     SoftmaxKernelInfo softmax_info;
-    softmax_info.beta   = beta;
-    softmax_info.is_log = IS_LOG;
+    softmax_info.beta            = beta;
+    softmax_info.is_log          = IS_LOG;
+    softmax_info.input_data_type = input_2D->info()->data_type();
 
     // Configure kernels
     _max_shift_exp_sum_kernel.configure(input_2D, &_max, &_tmp, &_sum, softmax_info);
@@ -184,8 +185,13 @@ Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
         }
     }
 
+    SoftmaxKernelInfo softmax_info;
+    softmax_info.beta            = beta;
+    softmax_info.is_log          = IS_LOG;
+    softmax_info.input_data_type = input->data_type();
+
     ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DNormKernel::validate(&tensor_info_tmp, &tensor_info_sum, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DNormKernel::validate(&tensor_info_tmp, &tensor_info_sum, output, softmax_info));
 
     if(needs_flattening)
     {

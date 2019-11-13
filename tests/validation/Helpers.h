@@ -177,7 +177,7 @@ void fill_lookuptable(T &&table)
     }
 }
 
-/** Convert a quantized simple tensor into float using tensor quantization information.
+/** Convert an asymmetric quantized simple tensor into float using tensor quantization information.
  *
  * @param[in] src Quantized tensor.
  *

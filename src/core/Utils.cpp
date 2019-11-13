@@ -438,6 +438,27 @@ bool arm_compute::needs_serialized_reduction(ReductionOperation op, DataType dt,
     return !is_first_dim || is_min_max || is_quantized_type;
 }
 
+QuantizationInfo arm_compute::get_softmax_output_quantization_info(DataType input_type, bool is_log)
+{
+    // Note: Output quantization info for softmax should always have
+    // * Softmax with QASYMM8: scale = 1/256, offset = 0
+    // * Softmax with QASYMM8_SIGNED: scale = 1/256, offset = -128
+    // * LogSoftmax with QASYMM8: scale = 1/256, offset = 0
+    // * LogSoftmax with QASYMM8_SIGNED: scale = 16/256, offset = 127
+    if(is_data_type_quantized_asymmetric_signed(input_type))
+    {
+        if(is_log)
+        {
+            return QuantizationInfo(16.f / 256, 127);
+        }
+        else
+        {
+            return QuantizationInfo(1.f / 256, -128);
+        }
+    }
+    return QuantizationInfo(1.f / 256, 0);
+}
+
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
 {

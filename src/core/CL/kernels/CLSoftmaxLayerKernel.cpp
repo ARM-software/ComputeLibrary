@@ -84,7 +84,7 @@ CLBuildOptions prepare_quantized_softmax_build_options(float input_scale, float 
 Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(max, sum, output);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, max);
@@ -122,7 +122,7 @@ Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITens
     return Status{};
 }
 
-Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
+Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32, DataType::F16, DataType::F32);
@@ -130,8 +130,8 @@ Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *su
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
 
     // Note: output should always have a scale of 1/256 and offset 0
-    const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.f / 256, 0);
-    const bool             is_quantized_asymmetric   = (input->data_type() == DataType::S32);
+    const QuantizationInfo allowed_quantization_info = get_softmax_output_quantization_info(info.input_data_type, info.is_log);
+    const bool             is_quantized_asymmetric   = is_data_type_quantized_asymmetric(info.input_data_type);
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -143,7 +143,7 @@ Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *su
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
             ARM_COMPUTE_RETURN_ERROR_ON(output->quantization_info() != allowed_quantization_info);
         }
     }
@@ -178,11 +178,10 @@ std::pair<Status, Window> validate_and_configure_window_1DMaxShiftExpSum(ITensor
     return std::make_pair(err, win);
 }
 
-std::pair<Status, Window> validate_and_configure_window_1DNorm(ITensorInfo *input, ITensorInfo *output, ITensorInfo *sum)
+std::pair<Status, Window> validate_and_configure_window_1DNorm(ITensorInfo *input, ITensorInfo *output, ITensorInfo *sum, const SoftmaxKernelInfo &info)
 {
-    const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.f / 256, 0);
-    const bool             is_quantized_asymmetric   = (input->data_type() == DataType::S32);
-    const DataType         output_data_type          = is_quantized_asymmetric ? DataType::QASYMM8 : input->data_type();
+    const DataType         output_data_type          = info.input_data_type;
+    const QuantizationInfo allowed_quantization_info = get_softmax_output_quantization_info(info.input_data_type, info.is_log);
 
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output,
@@ -238,10 +237,14 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     const UniformQuantizationInfo qinfo              = input->info()->quantization_info().uniform();
     const size_t                  reduction_dim_size = input->info()->dimension(0);
     const float                   beta               = info.beta;
+    const auto                    is_signed_qasymm8  = is_data_type_quantized_asymmetric_signed(info.input_data_type);
+    const int                     min_value          = is_signed_qasymm8 ? CL_SCHAR_MIN : 0;
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
+    build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(min_value));
+    build_opts.add_option_if(is_signed_qasymm8, "-DQASYMM8_SIGNED");
     build_opts.add_option_if(dt == DataType::F16, "-DUSE_F16");
     build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
     build_opts.add_options_if(is_data_type_quantized_asymmetric(dt), prepare_quantized_softmax_build_options(qinfo.scale, beta).options());
@@ -342,9 +345,9 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
 
     // Note: output should always have a scale of 1/256 and offset 0
-    const QuantizationInfo        allowed_quantization_info = QuantizationInfo(1.F / 256, 0);
-    const bool                    is_quantized_asymmetric   = (input->info()->data_type() == DataType::S32);
-    const DataType                output_data_type          = is_quantized_asymmetric ? DataType::QASYMM8 : input->info()->data_type();
+    const bool                    is_quantized_asymmetric   = is_data_type_quantized_asymmetric(info.input_data_type);
+    const DataType                output_data_type          = info.input_data_type;
+    const QuantizationInfo        allowed_quantization_info = get_softmax_output_quantization_info(info.input_data_type, info.is_log);
     const UniformQuantizationInfo qinfo                     = input->info()->quantization_info().uniform();
 
     // Output auto initialization if not yet initialized
@@ -352,15 +355,20 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
                        input->info()->clone()->set_data_type(output_data_type).set_quantization_info(allowed_quantization_info));
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DNorm(input->info(), sum->info(), output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_1DNorm(input->info(), sum->info(), output->info(), info));
 
     _input  = input;
     _sum    = sum;
     _output = output;
 
+    const auto is_signed_qasymm8 = is_data_type_quantized_asymmetric_signed(info.input_data_type);
+    const int  min_value         = is_signed_qasymm8 ? CL_SCHAR_MIN : 0;
+
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(info.input_data_type));
+    build_opts.add_option("-DMIN_VALUE=" + support::cpp11::to_string(min_value));
+    build_opts.add_option_if(is_data_type_quantized_asymmetric_signed(info.input_data_type), "-DQASYMM8_SIGNED");
     build_opts.add_options_if(is_quantized_asymmetric,
                               prepare_quantized_softmax_build_options(qinfo.scale, info.beta).options());
     build_opts.add_option_if(info.is_log, "-DLOG_SOFTMAX");
@@ -370,15 +378,15 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure window
-    auto win_config = validate_and_configure_window_1DNorm(input->info(), output->info(), sum->info());
+    auto win_config = validate_and_configure_window_1DNorm(input->info(), output->info(), sum->info(), info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 }
 
-Status CLLogits1DNormKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
+Status CLLogits1DNormKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, const SoftmaxKernelInfo &info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DNorm(input, sum, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DNorm(input->clone().get(), output->clone().get(), sum->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_1DNorm(input, sum, output, info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_1DNorm(input->clone().get(), output->clone().get(), sum->clone().get(), info).first);
 
     return Status{};
 }

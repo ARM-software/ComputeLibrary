@@ -79,8 +79,9 @@ struct DWCWeightsKernelInfo
 /** Descriptor used by the softmax kernels */
 struct SoftmaxKernelInfo
 {
-    float beta{ 1.f };     /**< A scaling factor for the exponent with default value 1.0 */
-    bool  is_log{ false }; /**< Flag used to perform Log Softmax operation */
+    float    beta{ 1.f };                          /**< A scaling factor for the exponent with default value 1.0 */
+    bool     is_log{ false };                      /**< Flag used to perform Log Softmax operation */
+    DataType input_data_type{ DataType::UNKNOWN }; /**< Input tensor data type */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */
