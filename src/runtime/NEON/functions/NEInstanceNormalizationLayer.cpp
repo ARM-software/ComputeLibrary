@@ -64,7 +64,7 @@ void NEInstanceNormalizationLayer::configure(ITensor *input, ITensor *output, fl
 
 Status NEInstanceNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon)
 {
-    return NEInstanceNormalizationLayerKernel::validate(input, &output->clone()->set_data_layout(DataLayout::NCHW), gamma, beta, epsilon);
+    return NEInstanceNormalizationLayerKernel::validate(&input->clone()->set_data_layout(DataLayout::NCHW), &output->clone()->set_data_layout(DataLayout::NCHW), gamma, beta, epsilon);
 }
 
 void NEInstanceNormalizationLayer::run()

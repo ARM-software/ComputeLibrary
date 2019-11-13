@@ -53,6 +53,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in, out] input   Source tensor. Data types supported: F16/F32. Data layout supported: NCHW
+     *                         In case of @p output tensor = nullptr this tensor will store the result of the normalization.
      * @param[out]     output  Destination tensor. Data types and data layouts supported: same as @p input.
      * @param[in]      gamma   (Optional) The scale scalar value applied to the normalized tensor. Defaults to 1.0
      * @param[in]      beta    (Optional) The offset scalar value applied to the normalized tensor. Defaults to 0.0
@@ -62,8 +63,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEInstanceNormalizationLayer.
      *
-     * @param[in] input   Source tensor info. In case of @p output tensor = nullptr this tensor will store the result of the normalization.
-     *                    Data types supported: F16/F32. Data layout supported: NCHW
+     * @param[in] input   Source tensor info. Data types supported: F16/F32. Data layout supported: NCHW
      * @param[in] output  Destination tensor info. Data types and data layouts supported: same as @p input.
      * @param[in] gamma   (Optional) The scale scalar value applied to the normalized tensor. Defaults to 1.0
      * @param[in] beta    (Optional) The offset scalar value applied to the normalized tensor. Defaults to 0.0

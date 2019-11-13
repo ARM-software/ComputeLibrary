@@ -53,7 +53,6 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/neg.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/not.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/orr.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/padd.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pmax.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pmin.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pow.h"

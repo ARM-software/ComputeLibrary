@@ -101,6 +101,15 @@ public:
 
     /** Constructor
      *
+     * @param[in] tensor_shape It specifies the size for each dimension of the tensor in number of elements.
+     * @param[in] num_channels It indicates the number of channels for each tensor element
+     * @param[in] data_type    Data type to use for each tensor element
+     * @param[in] data_layout  The data layout setting for the tensor data.
+     */
+    TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, DataLayout data_layout);
+
+    /** Constructor
+     *
      * @param[in] tensor_shape      It specifies the size for each dimension of the tensor in number of elements.
      * @param[in] num_channels      It indicates the number of channels for each tensor element
      * @param[in] data_type         Data type to use for each tensor element

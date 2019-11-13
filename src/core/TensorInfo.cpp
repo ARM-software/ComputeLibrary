@@ -91,6 +91,13 @@ TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, Dat
     _quantization_info = std::move(quantization_info);
 }
 
+TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, DataLayout data_layout)
+    : TensorInfo()
+{
+    init(tensor_shape, num_channels, data_type);
+    _data_layout = data_layout;
+}
+
 TensorInfo::TensorInfo(const HOGInfo &hog_info, unsigned int width, unsigned int height)
     : TensorInfo()
 {

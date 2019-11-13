@@ -176,6 +176,26 @@ VPADDL_IMPL(int32x4_t, int16x8_t, vpaddlq, s16)
 VPADDL_IMPL(uint64x2_t, uint32x4_t, vpaddlq, u32)
 VPADDL_IMPL(int64x2_t, int32x4_t, vpaddlq, s32)
 #undef VPADDL_IMPL
+
+// VPADD: Add pairwise
+#define VPADD_IMPL(stype, vtype, prefix, postfix)      \
+    inline vtype vpadd(const vtype &a, const vtype &b) \
+    {                                                  \
+        return prefix##_##postfix(a, b);               \
+    }
+
+VPADD_IMPL(uint8x8_t, uint8x8_t, vpadd, u8)
+VPADD_IMPL(int8x8_t, int8x8_t, vpadd, s8)
+VPADD_IMPL(uint16x4_t, uint16x4_t, vpadd, u16)
+VPADD_IMPL(int16x4_t, int16x4_t, vpadd, s16)
+VPADD_IMPL(uint32x2_t, uint32x2_t, vpadd, u32)
+VPADD_IMPL(int32x2_t, int32x2_t, vpadd, s32)
+VPADD_IMPL(float32x2_t, float32x2_t, vpadd, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VPADD_IMPL(float16x4_t, float16x4_t, vpadd, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+#undef VPADD_IMPL
 } // namespace wrapper
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_WRAPPER_ADD_H__ */

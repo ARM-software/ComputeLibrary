@@ -45,7 +45,7 @@ namespace
 /** Tolerance for float operations */
 AbsoluteTolerance<float> tolerance_f32(0.0015f);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-AbsoluteTolerance<float> tolerance_f16(0.2f);
+AbsoluteTolerance<float> tolerance_f16(0.5f);
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 } // namespace
 
@@ -59,6 +59,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32), // Mismatching shape input/output
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 2, DataType::F32), // Number of Input channels != 1
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::S16), // DataType != F32
+                                             TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32, DataLayout::NCHW),
+                                             TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32, DataLayout::NHWC),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
@@ -68,12 +70,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                              TensorInfo(TensorShape(256U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::S16),
+                                             TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32, DataLayout::NCHW),
+                                             TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32, DataLayout::NHWC),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32)
                                            })),
-    framework::dataset::make("Expected",   { false, false, false, false, true, true, true, true })),
+    framework::dataset::make("Expected",   { false, false, false, false, true, true, true, true, true, true })),
     input_info, output_info, expected)
 {
     bool is_valid = bool(NEInstanceNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false),
@@ -98,31 +102,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<float>, fra
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEInstanceNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large4DShapes(),
-                                               framework::dataset::make("DataType", DataType::F32)),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                               framework::dataset::make("InPlace", { false, true })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
-}
 TEST_SUITE_END() // FP32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallShapes(),
-                                               framework::dataset::make("DataType", DataType::F16)),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                               framework::dataset::make("InPlace", { false, true })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEInstanceNormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(),
                                                framework::dataset::make("DataType", DataType::F16)),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                framework::dataset::make("InPlace", { false, true })))
