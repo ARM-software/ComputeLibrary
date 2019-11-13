@@ -231,13 +231,14 @@ private:
     /** Static function to check if GEMM3D is supported in @ref NEGEMM or in @ref NEGEMMLowpMatrixMultiplyCore
      *
      * @param[in] input_info    Input tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] weights_info  Weights tensor info. Data types supported: QASYMM8/F16/F32.
      * @param[in] act_info      Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      * @param[in] gemm_3d_depth Depth of GEMM 3D
      * @param[in] skip_im2col   Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout
      *
      * @return a status
      */
-    static Status validate_gemm3d(const ITensorInfo *input_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col);
+    static Status validate_gemm3d(const ITensorInfo *input_info, const ITensorInfo *weights_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col);
 
 private:
     MemoryGroup                                                        _memory_group;

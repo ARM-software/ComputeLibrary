@@ -218,7 +218,7 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
     }
 }
 
-Status NEGEMMConvolutionLayer::validate_gemm3d(const ITensorInfo *input_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col)
+Status NEGEMMConvolutionLayer::validate_gemm3d(const ITensorInfo *input_info, const ITensorInfo *weights_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col)
 {
     const DataType     data_type = input_info->data_type();
     const unsigned int mult_y    = skip_im2col ? 1U : gemm_3d_depth;
@@ -226,7 +226,7 @@ Status NEGEMMConvolutionLayer::validate_gemm3d(const ITensorInfo *input_info, co
 
     // Set dummy tensor shapes for the validation
     const TensorInfo dummy_input_info(TensorShape(4U, 4U * mult_y, 1U * mult_z), 1, data_type, input_info->quantization_info());
-    const TensorInfo dummy_weights_info(TensorShape(4U, 4U), 1, data_type);
+    const TensorInfo dummy_weights_info(TensorShape(4U, 4U), 1, data_type, weights_info->quantization_info());
     const TensorInfo dummy_output_info(TensorShape(4U, 4U, gemm_3d_depth), 1, data_type, input_info->quantization_info());
 
     return validate_mm(&dummy_input_info, &dummy_weights_info, nullptr, &dummy_output_info, act_info, gemm_3d_depth, skip_im2col);
@@ -278,7 +278,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     // Check if GEMM3D is supported
     if(data_layout == DataLayout::NHWC)
     {
-        _skip_col2im = bool(validate_gemm3d(input->info(), act_info, conv_h, true));
+        _skip_col2im = bool(validate_gemm3d(input->info(), weights->info(), act_info, conv_h, true));
         // If not supported, we need to perform im2col and col2im (or reshape layer)
         if(!_skip_col2im)
         {
@@ -429,7 +429,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     bool skip_col2im = false;
     if(data_layout == DataLayout::NHWC)
     {
-        skip_col2im = bool(validate_gemm3d(input, act_info, conv_h, true));
+        skip_col2im = bool(validate_gemm3d(input, weights, act_info, conv_h, true));
         // If not supported, we need to perform im2col and col2im (or reshape layer)
         if(!skip_col2im)
         {
@@ -440,7 +440,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     if(skip_col2im)
     {
         // If not supported, we need to perform im2col and col2im (or reshape layer)
-        if(!bool(validate_gemm3d(input, act_info, conv_h, skip_im2col)))
+        if(!bool(validate_gemm3d(input, weights, act_info, conv_h, skip_im2col)))
         {
             skip_im2col = false;
             skip_col2im = false;
