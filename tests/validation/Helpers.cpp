@@ -146,6 +146,31 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
 }
 
 template <>
+SimpleTensor<int8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<int8_t>           dst{ src.shape(), DataType::QASYMM8_SIGNED, 1, quantization_info };
+    const UniformQuantizationInfo &qinfo = quantization_info.uniform();
+
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        dst[i] = quantize_qasymm8_signed(src[i], qinfo);
+    }
+    return dst;
+}
+
+SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<int8_t> &src)
+{
+    const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
+    SimpleTensor<float>            dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
+
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        dst[i] = dequantize_qasymm8_signed(src[i], quantization_info);
+    }
+    return dst;
+}
+
+template <>
 SimpleTensor<uint16_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
 {
     SimpleTensor<uint16_t>         dst{ src.shape(), DataType::QASYMM16, 1, quantization_info };

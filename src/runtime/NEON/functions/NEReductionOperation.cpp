@@ -198,7 +198,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
             case ReductionOperation::SUM_SQUARE:
             case ReductionOperation::SUM:
             {
-                pixelValue = PixelValue(0, input->info()->data_type());
+                pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
                 break;
             }
             default:
