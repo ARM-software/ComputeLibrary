@@ -65,7 +65,7 @@ bool file_exists(const std::string &filename)
 static detail::BackendRegistrar<CLDeviceBackend> CLDeviceBackend_registrar(Target::CL);
 
 CLDeviceBackend::CLDeviceBackend()
-    : _context_count(0), _tuner(), _allocator(nullptr), _tuner_file(), _legacy_ctx()
+    : _context_count(0), _tuner(), _allocator(nullptr), _tuner_file()
 {
 }
 
@@ -92,9 +92,8 @@ void CLDeviceBackend::initialize_backend()
 {
     // Setup Scheduler
     CLScheduler::get().default_init(&_tuner);
-    _legacy_ctx = support::cpp14::make_unique<CLCoreRuntimeContext>(nullptr, CLScheduler::get().context(), CLScheduler::get().queue());
     // Create allocator with new context
-    _allocator = support::cpp14::make_unique<CLBufferAllocator>(_legacy_ctx.get());
+    _allocator = support::cpp14::make_unique<CLBufferAllocator>(nullptr /* legacy path for CLCoreRuntimeContext */);
 }
 
 void CLDeviceBackend::release_backend_context(GraphContext &ctx)

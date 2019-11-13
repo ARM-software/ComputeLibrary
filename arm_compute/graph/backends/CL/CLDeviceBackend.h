@@ -31,7 +31,6 @@
 
 namespace arm_compute
 {
-class CLCoreRuntimeContext;
 namespace graph
 {
 namespace backends
@@ -75,7 +74,6 @@ private:
     CLTuner                               _tuner;         /**< CL kernel tuner */
     std::unique_ptr<CLBufferAllocator>    _allocator;     /**< CL buffer affinity allocator */
     std::string                           _tuner_file;    /**< Filename to load/store the tuner's values from */
-    std::unique_ptr<CLCoreRuntimeContext> _legacy_ctx;
 };
 } // namespace backends
 } // namespace graph
