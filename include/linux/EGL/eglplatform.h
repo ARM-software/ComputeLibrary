@@ -2,7 +2,7 @@
 #define __eglplatform_h_
 
 /*
-** Copyright (c) 2007-2009 The Khronos Group Inc.
+** Copyright (c) 2007-2019 The Khronos Group Inc.
 **
 ** Permission is hereby granted, free of charge, to any person obtaining a
 ** copy of this software and/or associated documentation files (the
@@ -84,11 +84,10 @@ typedef void *EGLNativeWindowType;
 typedef void *EGLNativePixmapType;
 
 #elif (defined(__arm__) || defined(__aarch64__)) && defined(__gnu_linux__)  /* ARM Linux Mali */
-#include <EGL/fbdev_window.h>
 
-typedef void*         EGLNativeDisplayType;
-typedef void*         EGLNativePixmapType;
-typedef fbdev_window* EGLNativeWindowType;
+typedef int   EGLNativeDisplayType;
+typedef void *EGLNativeWindowType;
+typedef void *EGLNativePixmapType;
 
 #elif defined(__unix__)
 
