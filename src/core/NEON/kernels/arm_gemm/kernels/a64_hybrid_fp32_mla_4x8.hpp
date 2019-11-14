@@ -25,65 +25,62 @@
 
 #ifdef __aarch64__
 
-#include <cstdint>
+
 #include "../std_transforms_fixed.hpp"
 
 namespace arm_gemm
 {
 
 // Actual kernel implementations
-void a64_hybrid_s8s32_dot_16x4(const int8_t *, int, const int8_t *, int32_t *, int, int, int, int, const int32_t *, Activation, bool);
-void a64_hybrid_s8s32_dot_16x4_a55(const int8_t *, int, const int8_t *, int32_t *, int, int, int, int, const int32_t *, Activation, bool);
+void a64_hybrid_fp32_mla_4x8(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
-class hybrid_s8s32_dot_16x4
+class hybrid_fp32_mla_4x8
 {
 public:
-    typedef int8_t operand_type;
-    typedef int32_t result_type;
+    typedef float operand_type;
+    typedef float result_type;
 
-    typedef void (*kern_type)(const int8_t *, int, const int8_t *, int32_t *, int, int, int, int, const int32_t *, Activation, bool);
+    typedef void (*kern_type)(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
     /* Kernel blocking parameters */
     static constexpr unsigned int out_height()
     {
-        return 4;
+        return 8;
     }
 
     static unsigned int out_width()
     {
-        return 16;
+        return 4;
     }
 
     static constexpr unsigned int k_unroll()
     {
-        return 4;
+        return 1;
     }
 
     static constexpr bool supports_append()
     {
-        return true;
+        return false;
     }
 
     static constexpr bool supports_bias()
     {
-        return false;
+        return true;
     }
 
     static constexpr bool supports_activation()
     {
-        return false;
+        return true;
     }
 
-    StdTransformsFixed<operand_type, result_type, 4, 16, 4> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 8, 4, 1> transforms = {};
 
     // Default to the generic kernel
-    kern_type kernel=a64_hybrid_s8s32_dot_16x4;
+    kern_type kernel=a64_hybrid_fp32_mla_4x8;
 
-    hybrid_s8s32_dot_16x4(const CPUInfo *ci)
+    hybrid_fp32_mla_4x8(const CPUInfo *ci)
     {
-        if (ci->get_cpu_model() == CPUModel::A55r1) {
-            kernel = a64_hybrid_s8s32_dot_16x4_a55;
-        }
+        UNUSED(ci);
     }
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 
 #include "kernels/a32_sgemm_8x6.hpp"
 #include "kernels/a64_hybrid_fp32_mla_16x4.hpp"
+#include "kernels/a64_hybrid_fp32_mla_4x8.hpp"
 #include "kernels/a64_native_fp32_mla_16x4.hpp"
 #include "kernels/a64_smallK_hybrid_fp32_mla_4x6.hpp"
 #include "kernels/a64_smallK_hybrid_fp32_mla_4x8.hpp"
@@ -106,9 +107,16 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 {
     GemmMethod::GEMM_HYBRID,
+    "hybrid_fp32_mla_4x8_normal",
+    [](const GemmArgs &args) { return (args._Ksize >= 4) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return (args._Nsize < 12); },
+    [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mla_4x8, float, float>(args); }
+},
+{
+    GemmMethod::GEMM_HYBRID,
     "hybrid_fp32_mla_16x4",
     [](const GemmArgs &args) { return (args._Ksize >= 4) && !args._trA && args._pretransposed_hint; },
-    [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || (args._Msize < 16) || (args._nmulti > 1); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mla_16x4, float, float>(args); }
 },
 {

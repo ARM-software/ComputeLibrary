@@ -25,62 +25,62 @@
 
 #include "arm_gemm.hpp"
 
-#include "kernels/a64_hybrid_u8u32_dot_16x4.hpp"
-#include "kernels/a64_smallK_hybrid_u8u32_dot_4x6.hpp"
-#include "kernels/a64_smallK_hybrid_u8u32_dot_4x8.hpp"
-#include "kernels/sve_hybrid_u8u32_dot_4VLx4.hpp"
-#include "kernels/sve_smallK_hybrid_u8u32_dot_1VLx8.hpp"
+#include "kernels/a64_hybrid_s8s32_dot_16x4.hpp"
+#include "kernels/a64_smallK_hybrid_s8s32_dot_4x6.hpp"
+#include "kernels/a64_smallK_hybrid_s8s32_dot_4x8.hpp"
+#include "kernels/sve_hybrid_s8s32_dot_4VLx4.hpp"
+#include "kernels/sve_smallK_hybrid_s8s32_dot_1VLx8.hpp"
 
 #include "gemm_hybrid_quantized.hpp"
 #include "quantize_wrapper.hpp"
 
 namespace arm_gemm {
 
-static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_methods[] =
+static const GemmImplementation<int8_t, int8_t, Requantize32> gemm_qint8_methods[] =
 {
 #ifdef __ARM_FEATURE_SVE
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
-    "smallK_hybrid_u8u32_dot_1VLx8",
+    "smallK_hybrid_s8s32_dot_1VLx8",
     [](const GemmArgs &args, const Requantize32 &) { return args._Ksize<=64 && !args._trA && args._pretransposed_hint; },
     nullptr,
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_u8u32_dot_1VLx8, uint8_t, uint8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_s8s32_dot_1VLx8, int8_t, int8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
-    "hybrid_u8u32_dot_4VLx4",
+    "hybrid_s8s32_dot_4VLx4",
     [](const GemmArgs &args, const Requantize32 &) { return args._Ksize>=16 && !args._trA && !args._trB && args._pretransposed_hint; },
     [](const GemmArgs &args, const Requantize32 &) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_u8u32_dot_4VLx4, uint8_t, uint8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_s8s32_dot_4VLx4, int8_t, int8_t>(args, qp); }
 },
 #endif
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
-    "smallK_hybrid_u8u32_dot_4x8",
+    "smallK_hybrid_s8s32_dot_4x8",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32) && !args._trA && args._pretransposed_hint; },
     nullptr,
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_u8u32_dot_4x8, uint8_t, uint8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_s8s32_dot_4x8, int8_t, int8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
-    "smallK_hybrid_u8u32_dot_4x6",
+    "smallK_hybrid_s8s32_dot_4x6",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64) && !args._trA && args._pretransposed_hint; },
     nullptr,
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_u8u32_dot_4x6, uint8_t, uint8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_s8s32_dot_4x6, int8_t, int8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
-    "hybrid_u8u32_dot_16x4",
+    "hybrid_s8s32_dot_16x4",
     [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && args._Ksize>=16 && !args._trA && !args._trB && args._pretransposed_hint; },
     [](const GemmArgs &args, const Requantize32 &) { return args._Nsize<=256 && args._Ksize>128; },
-    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_u8u32_dot_16x4, uint8_t, uint8_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_s8s32_dot_16x4, int8_t, int8_t>(args, qp); }
 },
 {
     GemmMethod::QUANTIZE_WRAPPER,
     "quantized_wrapper",
     nullptr,
     nullptr,
-    [](const GemmArgs &args, const Requantize32 &qp) { return new QuantizeWrapper<uint8_t, uint8_t, uint32_t>(args, qp); }
+    [](const GemmArgs &args, const Requantize32 &qp) { return new QuantizeWrapper<int8_t, int8_t, int32_t>(args, qp); }
 },
 {
     GemmMethod::DEFAULT,
@@ -92,13 +92,13 @@ static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_meth
 };
 
 template<>
-const GemmImplementation<uint8_t, uint8_t, Requantize32> *gemm_implementation_list<uint8_t, uint8_t, Requantize32>() {
-    return gemm_quint8_methods;
+const GemmImplementation<int8_t, int8_t, Requantize32> *gemm_implementation_list<int8_t, int8_t, Requantize32>() {
+    return gemm_qint8_methods;
 }
 
-template UniqueGemmCommon<uint8_t, uint8_t> gemm<uint8_t, uint8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
-template KernelDescription get_gemm_method<uint8_t, uint8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
-template std::vector<KernelDescription> get_compatible_kernels<uint8_t, uint8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
+template UniqueGemmCommon<int8_t, int8_t> gemm<int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
+template KernelDescription get_gemm_method<int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
+template std::vector<KernelDescription> get_compatible_kernels<int8_t, int8_t, Requantize32>(const GemmArgs &args, const Requantize32 &os);
 
 } // namespace arm_gemm
 
