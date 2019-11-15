@@ -390,10 +390,10 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
 
     // Schedule assembly kernel
     IScheduler::Hints scheduling_hint = IScheduler::Hints(Window::DimX);
-    if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED)
+    if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED && _d->info()->data_type() == DataType::F32)
     {
-        constexpr int granule_threshold = 200;
-        scheduling_hint                 = IScheduler::Hints(Window::DimX, IScheduler::StrategyHint::DYNAMIC, granule_threshold);
+        const int granule_threshold = 200;
+        scheduling_hint             = IScheduler::Hints(Window::DimX, IScheduler::StrategyHint::DYNAMIC, granule_threshold);
     }
     NEScheduler::get().schedule(_optimised_kernel.get(), scheduling_hint);
 }
