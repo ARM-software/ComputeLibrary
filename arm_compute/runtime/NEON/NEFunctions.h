@@ -70,6 +70,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFFT2D.h"
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFastCorners.h"
+#include "arm_compute/runtime/NEON/functions/NEFill.h"
 #include "arm_compute/runtime/NEON/functions/NEFillBorder.h"
 #include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"

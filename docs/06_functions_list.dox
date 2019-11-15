@@ -126,6 +126,7 @@ namespace arm_compute
     - @ref NEFFT1D
     - @ref NEFFT2D
     - @ref NEFFTConvolutionLayer
+    - @ref NEFill
     - @ref NEFillBorder
     - @ref NEFullyConnectedLayer
     - @ref NEFuseBatchNormalization
