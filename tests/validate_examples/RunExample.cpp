@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "utils/Utils.h"
-//FIXME / INTERNAL_ONLY: This file should not be released!
 
 #define BENCHMARK_EXAMPLES
 #include "utils/Utils.cpp"

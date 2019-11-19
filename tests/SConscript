@@ -30,7 +30,6 @@ SConscript('./framework/SConscript', duplicate=0)
 
 # vars is imported from arm_compute:
 variables = [
-    #FIXME: Remove before release!
     BoolVariable("benchmark_examples", "Build benchmark examples programs", True),
     BoolVariable("validate_examples", "Build validate examples programs", True),
     #FIXME Switch the following two options to False before releasing
@@ -161,7 +160,6 @@ if test_env['validation_tests']:
     Default(arm_compute_validation)
     Export('arm_compute_validation')
 
-    #FIXME: Remove before release!
     if test_env['validate_examples']:
         files_validate_examples = [ test_env.Object('validate_examples/RunExample.cpp') ] + [ x for x in common_objects if not "main.o" in str(x)]
         arm_compute_validate_examples = []
@@ -196,7 +194,6 @@ if test_env['validation_tests']:
         Default(arm_compute_validate_examples)
         Export('arm_compute_validate_examples')
 
-#FIXME: Remove before release!
 if test_env['benchmark_examples']:
     files_benchmark_examples = test_env.Object('benchmark_examples/RunExample.cpp')
     graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")

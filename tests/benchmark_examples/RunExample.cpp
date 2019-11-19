@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "utils/Utils.h"
-//FIXME / INTERNAL_ONLY: This file should not be released!
 
 #define BENCHMARK_EXAMPLES
 #include "utils/Utils.cpp"
