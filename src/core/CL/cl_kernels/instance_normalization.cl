@@ -58,44 +58,58 @@ __kernel void instance_normalization(
 #endif /* IN_PLACE */
 )
 {
+    Tensor4D in = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(input, 0);
+#ifndef IN_PLACE
+    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
+#endif /* IN_PLACE */
+
     float sum    = 0.f;
     float sum_sq = 0.f;
 
 #if defined(NHWC)
 
-    const int pc             = get_global_id(0);
-    const int pn             = get_global_id(2);
+    const int ch             = get_global_id(0); // Current channel
+    const int batch          = get_global_id(2); // Current batch
     const int elements_plane = DIM_Y * DIM_Z;
-    const int elements_x_y   = DIM_X * DIM_Y;
-    const int elements_x_y_z = DIM_X * DIM_Y * DIM_Z;
 
     for(int i_w = 0; i_w < DIM_Y; ++i_w)
     {
         for(int i_h = 0; i_h < DIM_Z; ++i_h)
         {
-            float data = (float)*((__global DATA_TYPE *)input_ptr + pc + i_w * DIM_X + i_h * elements_x_y + pn * elements_x_y_z);
+            float data = (float) * ((__global DATA_TYPE *)tensor4D_offset(&in, ch, i_w, i_h, batch));
             sum += data;
             sum_sq += data * data;
         }
     }
 
 #else // !defined(NHWC)
+    const int ch             = get_global_id(2) % DIM_Z; // Current channel
+    const int batch          = get_global_id(2) / DIM_Z; // Current batch
     const int elements_plane = DIM_X * DIM_Y;
-    const int plane_address  = get_global_id(2) * elements_plane;
-    int       i              = 0;
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     part_sum = 0.f;
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     part_sum_sq = 0.f;
     // Calculate partial sum
-    for(; i <= (elements_plane - VEC_SIZE); i += VEC_SIZE)
+    for(int y = 0; y < DIM_Y; ++y)
     {
-        // Load data
-        VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-        data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_ptr + i + plane_address);
-        part_sum += data;
-        part_sum_sq += data * data;
+        int x = 0;
+        for(; x <= (DIM_X - VEC_SIZE); x += VEC_SIZE)
+        {
+            // Load data
+            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+            data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch));
+            part_sum += data;
+            part_sum_sq += data * data;
+        }
+        // Left-overs loop
+        for(; x < DIM_X; ++x)
+        {
+            DATA_TYPE data = *((__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch));
+            part_sum.s0 += data;
+            part_sum_sq.s0 += data * data;
+        }
     }
     // Perform reduction
 #if VEC_SIZE > 8
@@ -112,20 +126,13 @@ __kernel void instance_normalization(
 #endif // VEC_SIZE > 2
     part_sum.s0 += part_sum.s1;
     part_sum_sq.s0 += part_sum_sq.s1;
-    // Left-overs loop
-    for(; i < elements_plane; ++i)
-    {
-        DATA_TYPE data = *((__global DATA_TYPE *)input_ptr + i + plane_address);
-        part_sum.s0 += data;
-        part_sum_sq.s0 += data * data;
-    }
 
     sum    = (float)part_sum.s0;
     sum_sq = (float)part_sum_sq.s0;
 
 #endif // defined(NHWC)
 
-    const float mean_float   = (sum / elements_plane);
+    const float     mean_float   = (sum / elements_plane);
     const DATA_TYPE mean         = (DATA_TYPE)mean_float;
     const float     var_float    = (sum_sq / elements_plane) - (mean_float * mean_float);
     const float     multip_float = GAMMA / sqrt(var_float + EPSILON);
@@ -137,44 +144,48 @@ __kernel void instance_normalization(
     {
         for(int i_h = 0; i_h < DIM_Z; ++i_h)
         {
-            __global DATA_TYPE *input_address = (__global DATA_TYPE *)input_ptr + pc + i_w * DIM_X + i_h * elements_x_y + pn * elements_x_y_z;
+            __global DATA_TYPE *input_address = (__global DATA_TYPE *)tensor4D_offset(&in, ch, i_w, i_h, batch);
 #ifdef IN_PLACE
             __global DATA_TYPE *output_address = input_address;
 #else  /* !IN_PLACE */
-            __global DATA_TYPE *output_address = (__global DATA_TYPE *)output_ptr + pc + i_w * DIM_X + i_h * elements_x_y + pn * elements_x_y_z;
+            __global DATA_TYPE *output_address = (__global DATA_TYPE *)tensor4D_offset(&out, ch, i_w, i_h, batch);
 #endif /* IN_PLACE */
             *(output_address) = (*(input_address) - mean) * multip + (DATA_TYPE)BETA;
         }
     }
 
 #else // !defined(NHWC)
-    i      = 0;
-    for(; i <= (elements_plane - VEC_SIZE); i += VEC_SIZE)
+    for(int y = 0; y < DIM_Y; ++y)
     {
-        __global DATA_TYPE *input_address  = (__global DATA_TYPE *)input_ptr + i + plane_address;
+        int x = 0;
+        for(; x <= (DIM_X - VEC_SIZE); x += VEC_SIZE)
+        {
+            __global DATA_TYPE *input_address  = (__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch);
 #ifdef IN_PLACE
-        __global DATA_TYPE *output_address = input_address;
+            __global DATA_TYPE *output_address = input_address;
 #else  /* !IN_PLACE */
-        __global DATA_TYPE *output_address = (__global DATA_TYPE *)output_ptr + i + plane_address;
+            __global DATA_TYPE *output_address = (__global DATA_TYPE *)tensor4D_offset(&out, x, y, ch, batch);
 #endif /* IN_PLACE */
 
-        VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-        data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input_address);
+            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+            data = VLOAD(VEC_SIZE)(0, input_address);
 
-        VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-        res = (data - mean) * multip + (DATA_TYPE)BETA;
-        VSTORE(VEC_SIZE)
-        (res, 0, (__global DATA_TYPE *)output_address);
-    }
-    for(; i < elements_plane; ++i)
-    {
-        __global DATA_TYPE *input_address  = (__global DATA_TYPE *)input_ptr + i + plane_address;
+            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+            res = (data - mean) * multip + (DATA_TYPE)BETA;
+            VSTORE(VEC_SIZE)
+            (res, 0, output_address);
+        }
+        // Left-overs loop
+        for(; x < DIM_X; ++x)
+        {
+            __global DATA_TYPE *input_address  = (__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch);
 #ifdef IN_PLACE
-        __global DATA_TYPE *output_address = input_address;
+            __global DATA_TYPE *output_address = input_address;
 #else  /* !IN_PLACE */
-        __global DATA_TYPE *output_address = (__global DATA_TYPE *)output_ptr + i + plane_address;
+            __global DATA_TYPE *output_address = (__global DATA_TYPE *)tensor4D_offset(&out, x, y, ch, batch);
 #endif /* IN_PLACE */
-        *(output_address)                  = (*(input_address) - mean) * multip + (DATA_TYPE)BETA;
+            *(output_address)                  = (*(input_address) - mean) * multip + (DATA_TYPE)BETA;
+        }
     }
 #endif // defined(NHWC)
 }
