@@ -115,6 +115,66 @@ uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
     return out_u8;
 }
 
+/** Performs final quantization step on 16 elements
+ *
+ * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
+ *
+ * @param in_s32                        Input to be quantized.
+ * @param result_fixedpoint_multiplier  Result multiplier parameter
+ * @param result_shift                  Result shift parameter
+ * @param result_offset_after_shift_s32 Result offset parameter
+ * @param min_s8                        Relu lower bound
+ * @param max_s8                        Relu upper bound
+ *
+ * @return Quantized values
+ */
+template <bool is_bounded_relu>
+int8x16_t finalize_quantization(int32x4x4_t &in_s32,
+                                int          result_fixedpoint_multiplier,
+                                int32_t      result_shift,
+                                int32x4_t    result_offset_after_shift_s32,
+                                int8x16_t    min_s8,
+                                int8x16_t    max_s8)
+{
+    // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
+    in_s32.val[0] = vqrdmulhq_n_s32(in_s32.val[0], result_fixedpoint_multiplier);
+    in_s32.val[1] = vqrdmulhq_n_s32(in_s32.val[1], result_fixedpoint_multiplier);
+    in_s32.val[2] = vqrdmulhq_n_s32(in_s32.val[2], result_fixedpoint_multiplier);
+    in_s32.val[3] = vqrdmulhq_n_s32(in_s32.val[3], result_fixedpoint_multiplier);
+
+    // Round to the nearest division by a power-of-two using result_shift_s32
+    in_s32.val[0] = rounding_divide_by_pow2(in_s32.val[0], result_shift);
+    in_s32.val[1] = rounding_divide_by_pow2(in_s32.val[1], result_shift);
+    in_s32.val[2] = rounding_divide_by_pow2(in_s32.val[2], result_shift);
+    in_s32.val[3] = rounding_divide_by_pow2(in_s32.val[3], result_shift);
+
+    // Add the offset terms
+    in_s32.val[0] = vaddq_s32(in_s32.val[0], result_offset_after_shift_s32);
+    in_s32.val[1] = vaddq_s32(in_s32.val[1], result_offset_after_shift_s32);
+    in_s32.val[2] = vaddq_s32(in_s32.val[2], result_offset_after_shift_s32);
+    in_s32.val[3] = vaddq_s32(in_s32.val[3], result_offset_after_shift_s32);
+
+    // Convert S32 to S16
+    const int16x8x2_t in_s16 =
+    {
+        {
+            vcombine_s16(vqmovn_s32(in_s32.val[0]), vqmovn_s32(in_s32.val[1])),
+            vcombine_s16(vqmovn_s32(in_s32.val[2]), vqmovn_s32(in_s32.val[3]))
+        }
+    };
+
+    // Convert S16 to S8
+    int8x16_t out_s8 = vcombine_s8(vqmovn_s16(in_s16.val[0]), vqmovn_s16(in_s16.val[1]));
+
+    if(is_bounded_relu)
+    {
+        out_s8 = vmaxq_s8(out_s8, min_s8);
+        out_s8 = vminq_s8(out_s8, max_s8);
+    }
+
+    return out_s8;
+}
+
 /** Performs final quantization step on 16 elements for symmetric quantization
  *
  * @tparam is_bounded_relu Specified if a fused bounded relu should be applied

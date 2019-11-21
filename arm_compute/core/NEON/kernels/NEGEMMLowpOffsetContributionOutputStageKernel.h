@@ -83,7 +83,7 @@ public:
      * @param[in]  vector_sum_row Input row-vector of sums of all the entries in each row of matrix A.
      * @param[in]  bias           Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
      *                            Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p mm_result.
-     * @param[out] output         Output tensor containing the final quantized result. Data type supported: QASYMM8
+     * @param[out] output         Output tensor containing the final quantized result. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in]  k              Number of matrix A columns or Matrix B rows
      * @param[in]  a_offset       Offset to be added to each element of the matrix A.
      * @param[in]  b_offset       Offset to be added to each element of the matrix B.
@@ -100,7 +100,7 @@ public:
      *                           Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
      * @param[in] bias           Biases tensor info. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
      *                           Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p mm_result.
-     * @param[in] output         Output tensor info containing the final quantized result. Data type supported: QASYMM8
+     * @param[in] output         Output tensor info containing the final quantized result. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in] a_offset       Offset to be added to each element of the matrix A.
      * @param[in] b_offset       Offset to be added to each element of the matrix B.
      * @param[in] output_stage   GEMMLowp output stage info, providing the type of quantization and the necessary parameters.

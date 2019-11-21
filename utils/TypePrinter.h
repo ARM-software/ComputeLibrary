@@ -628,6 +628,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
         case DataType::QASYMM8:
             os << "QASYMM8";
             break;
+        case DataType::QASYMM8_SIGNED:
+            os << "QASYMM8_SIGNED";
+            break;
         case DataType::QSYMM8_PER_CHANNEL:
             os << "QSYMM8_PER_CHANNEL";
             break;

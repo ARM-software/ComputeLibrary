@@ -321,11 +321,11 @@ public:
                     SimpleTensor<int32_t> biases{ TensorShape(N), DataType::S32, 1 };
                     // Fill bias
                     fill(biases, 3);
-                    ref_dst = reference::gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint<int32_t>(ref_tmp_dst, biases, dst_multiplier_vec, dst_shift_vec, offset_dst);
+                    ref_dst = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, uint8_t>(ref_tmp_dst, biases, dst_multiplier_vec, dst_shift_vec, offset_dst);
                 }
                 else
                 {
-                    ref_dst = reference::gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint<int32_t>(ref_tmp_dst, dst_multiplier_vec, dst_shift_vec, offset_dst);
+                    ref_dst = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, uint8_t>(ref_tmp_dst, dst_multiplier_vec, dst_shift_vec, offset_dst);
                 }
                 validate(CLAccessor(dst), ref_dst);
                 break;
