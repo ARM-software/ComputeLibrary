@@ -29,7 +29,7 @@ Blogs:
 
 - [Happy Birthday ACL!](https://community.arm.com/developer/tools-software/graphics/b/blog/posts/arm-compute-library-19-05-is-coming)
 
-Documentation available here:
+Documentation (API, changelogs, build guide, contribution guide, errata, etc.) available here:
 
 - [v19.08](https://arm-software.github.io/ComputeLibrary/v19.08/)
 - [v19.05](https://arm-software.github.io/ComputeLibrary/v19.05/)
