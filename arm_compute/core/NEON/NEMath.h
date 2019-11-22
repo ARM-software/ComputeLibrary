@@ -165,6 +165,14 @@ int32_t rounding_divide_by_pow2(int32_t x, int exponent);
  */
 float32x4x4_t convert_uint8x16_to_float32x4x4(const uint8x16_t &in);
 
+/** Converts from int8x16 to float32x4x4_t
+ *
+ * @param[in] in Vector of int8 to be converted
+ *
+ * @return Converted vector of float
+ */
+float32x4x4_t convert_int8x16_to_float32x4x4(const int8x16_t &in);
+
 /** Converts from two float32x4x3_t to just one uint8x8x3_t
  *
  * @param[in]  in1 First input vector of float to be converted
@@ -178,7 +186,14 @@ void convert_float32x4x3_to_uint8x8x3(const float32x4x3_t &in1, const float32x4x
  * @param[in]  in  Vector of float to be converted
  * @param[out] out Converted vector of uint8 to store the result
  */
-void convert_float32x4x4_to_unit8x16(const float32x4x4_t &in, uint8x16_t &out);
+void convert_float32x4x4_to_uint8x16(const float32x4x4_t &in, uint8x16_t &out);
+
+/** Converts from float32x4x4_t to just one int8x16_t
+ *
+ * @param[in]  in  Vector of float to be converted
+ * @param[out] out Converted vector of uint8 to store the result
+ */
+void convert_float32x4x4_to_int8x16(const float32x4x4_t &in, int8x16_t &out);
 
 /** Calculate sine.
  *

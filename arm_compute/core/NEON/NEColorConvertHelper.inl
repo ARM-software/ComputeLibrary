@@ -83,7 +83,7 @@ inline void rgb_to_u8_conversion(const uint8x16x3_t &in, uint8x16_t &out)
                                                       rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
 
     //Conversion from 1(Greyscale) 4 floats to 1(Greyscale) 4 uint8s
-    arm_compute::convert_float32x4x4_to_unit8x16(out_float32, out);
+    arm_compute::convert_float32x4x4_to_uint8x16(out_float32, out);
 }
 
 inline void rgb_to_yuv_calculation(const float32x4_t &rvec, const float32x4_t &gvec, const float32x4_t &bvec,
@@ -214,12 +214,12 @@ inline void rgb_to_yuv_conversion(uint8x16x3_t &vec_top, uint8x16x3_t &vec_botto
                                fyvec_bottom.val[i], fuvec_bottom.val[i], fvvec_bottom.val[i]);
     }
 
-    arm_compute::convert_float32x4x4_to_unit8x16(fyvec_top, vec_top.val[0]);
-    arm_compute::convert_float32x4x4_to_unit8x16(fuvec_top, vec_top.val[1]);
-    arm_compute::convert_float32x4x4_to_unit8x16(fvvec_top, vec_top.val[2]);
-    arm_compute::convert_float32x4x4_to_unit8x16(fyvec_bottom, vec_bottom.val[0]);
-    arm_compute::convert_float32x4x4_to_unit8x16(fuvec_bottom, vec_bottom.val[1]);
-    arm_compute::convert_float32x4x4_to_unit8x16(fvvec_bottom, vec_bottom.val[2]);
+    arm_compute::convert_float32x4x4_to_uint8x16(fyvec_top, vec_top.val[0]);
+    arm_compute::convert_float32x4x4_to_uint8x16(fuvec_top, vec_top.val[1]);
+    arm_compute::convert_float32x4x4_to_uint8x16(fvvec_top, vec_top.val[2]);
+    arm_compute::convert_float32x4x4_to_uint8x16(fyvec_bottom, vec_bottom.val[0]);
+    arm_compute::convert_float32x4x4_to_uint8x16(fuvec_bottom, vec_bottom.val[1]);
+    arm_compute::convert_float32x4x4_to_uint8x16(fvvec_bottom, vec_bottom.val[2]);
 }
 
 inline void store_rgb_to_nv12(const uint8x16_t &rvec_top, const uint8x16_t &gvec_top, const uint8x16_t &bvec_top,
@@ -298,9 +298,9 @@ inline void store_rgb_to_yuv4(const uint8x16_t &rvec, const uint8x16_t &gvec, co
     }
 
     uint8x16_t yvec, uvec, vvec;
-    arm_compute::convert_float32x4x4_to_unit8x16(fyvec, yvec);
-    arm_compute::convert_float32x4x4_to_unit8x16(fuvec, uvec);
-    arm_compute::convert_float32x4x4_to_unit8x16(fvvec, vvec);
+    arm_compute::convert_float32x4x4_to_uint8x16(fyvec, yvec);
+    arm_compute::convert_float32x4x4_to_uint8x16(fuvec, uvec);
+    arm_compute::convert_float32x4x4_to_uint8x16(fvvec, vvec);
 
     vst1q_u8(out_y, yvec);
     vst1q_u8(out_u, uvec);

@@ -44,12 +44,46 @@
 
 namespace arm_compute
 {
+template <typename float_vec_type, typename int_vec_type>
+int_vec_type convert_float_to_int(const float_vec_type &in);
+
+template <typename float_vec_type, typename int_vec_type>
+float_vec_type convert_int_to_float(const int_vec_type &in);
+
+template <>
+uint8x16_t convert_float_to_int<float32x4x4_t, uint8x16_t>(const float32x4x4_t &in)
+{
+    uint8x16_t out;
+    convert_float32x4x4_to_uint8x16(in, out);
+    return out;
+}
+
+template <>
+int8x16_t convert_float_to_int<float32x4x4_t, int8x16_t>(const float32x4x4_t &in)
+{
+    int8x16_t out;
+    convert_float32x4x4_to_int8x16(in, out);
+    return out;
+}
+
+template <>
+float32x4x4_t convert_int_to_float<float32x4x4_t, uint8x16_t>(const uint8x16_t &in)
+{
+    return convert_uint8x16_to_float32x4x4(in);
+}
+
+template <>
+float32x4x4_t convert_int_to_float<float32x4x4_t, int8x16_t>(const int8x16_t &in)
+{
+    return convert_int8x16_to_float32x4x4(in);
+}
+
 namespace
 {
 Status validate_arguments_logits_1d_max(const ITensorInfo &input, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
 
     // Validate in case of configured output
     if(output.total_size() != 0)
@@ -156,6 +190,9 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
         case DataType::QASYMM8:
             _func = &logits_1d_max<qasymm8_t>;
             break;
+        case DataType::QASYMM8_SIGNED:
+            _func = &logits_1d_max<qasymm8_signed_t>;
+            break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
             _func = &logits_1d_max<float16_t>;
@@ -203,12 +240,12 @@ void NELogits1DMaxKernel::run(const Window &window, const ThreadInfo &info)
 namespace
 {
 Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensorInfo &max,
-                                         const ITensorInfo &output, const float beta, const ITensorInfo &tmp)
+                                         const ITensorInfo &output, const float beta, const ITensorInfo &tmp, bool is_log)
 {
     ARM_COMPUTE_UNUSED(beta);
     // Check input
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
 
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input.data_type());
 
@@ -220,7 +257,7 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
     // Check output if configured
     if(output.total_size() != 0)
     {
-        const QuantizationInfo output_quantization = is_quantized_asymmetric ? QuantizationInfo(1.f / 256.f, 0) : output.quantization_info();
+        const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(input.data_type(), is_log) : output.quantization_info();
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON(output.quantization_info() != output_quantization);
@@ -240,12 +277,12 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
 }
 
 std::pair<Status, Window> validate_and_configure_window_logits_softmax(ITensorInfo &input, ITensorInfo &max,
-                                                                       ITensorInfo &output, ITensorInfo &tmp)
+                                                                       ITensorInfo &output, ITensorInfo &tmp, bool is_log)
 {
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input.data_type());
 
     // Output auto initialization if not yet initialized
-    const QuantizationInfo output_quantization = is_quantized_asymmetric ? QuantizationInfo(1.f / 256.f, 0) : output.quantization_info();
+    const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(input.data_type(), is_log) : output.quantization_info();
     auto_init_if_empty(output, TensorInfo(input).set_quantization_info(output_quantization).reset_padding());
 
     // Tmp auto initialization if not yet initialized
@@ -269,9 +306,13 @@ std::pair<Status, Window> validate_and_configure_window_logits_softmax(ITensorIn
     return std::make_pair(err, win);
 }
 
-template <bool is_log>
+template <typename T, bool is_log>
 void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *const tmp, ITensor &out, const float beta, const Window &window)
 {
+    static_assert(std::is_same<T, qasymm8_t>::value
+                  || std::is_same<T, qasymm8_signed_t>::value,
+                  "quantized type should be either qasymm8_t or qasymm8_signed_t.");
+
     const int start_x     = in.info()->valid_region().anchor.x();
     const int input_width = in.info()->valid_region().shape.x();
 
@@ -286,8 +327,8 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
     execute_window_loop(window, [&](const Coordinates &)
     {
         /* Get pointers */
-        const auto in_ptr  = reinterpret_cast<const qasymm8_t *>(in_it.ptr()) + start_x;
-        const auto out_ptr = reinterpret_cast<qasymm8_t *>(out_it.ptr()) + start_x;
+        const auto in_ptr  = reinterpret_cast<const T *>(in_it.ptr()) + start_x;
+        const auto out_ptr = reinterpret_cast<T *>(out_it.ptr()) + start_x;
         const auto tmp_ptr = reinterpret_cast<float *>(tmp);
 
         float sum{};
@@ -296,8 +337,8 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
         /* Compute exponentials and sum */
         {
             /* Get max value */
-            const auto max_val = *reinterpret_cast<const qasymm8_t *>(max_it.ptr());
-            const auto vec_max = vdupq_n_u8(max_val);
+            const auto max_val = *reinterpret_cast<const T *>(max_it.ptr());
+            const auto vec_max = wrapper::vdup_n(max_val, wrapper::traits::vector_128_tag{});
 
             /* Init sum to zero */
             float32x4x4_t vec_sum =
@@ -313,8 +354,8 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
             for(; x <= (input_width - vec_size); x += vec_size)
             {
                 auto vec_elements     = wrapper::vloadq(in_ptr + x);
-                vec_elements          = vsubq_u8(vec_max, vec_elements);
-                auto vec_elements_flt = convert_uint8x16_to_float32x4x4(vec_elements);
+                vec_elements          = wrapper::vsub(vec_max, vec_elements);
+                auto vec_elements_flt = convert_int_to_float<float32x4x4_t>(vec_elements);
 
                 if(is_log)
                 {
@@ -374,12 +415,14 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
 
         /* Normalize exponentials */
         {
+            constexpr bool is_qasymm8_signed = std::is_same<T, qasymm8_signed_t>::value;
             /* Loop over row and compute softmax */
             int x = 0;
             for(; x <= (input_width - vec_size); x += vec_size)
             {
+                using int_vec_type   = wrapper::traits::neon_vector_t<T, 16>;
                 float32x4x4_t vec_in = vld4q_f32(tmp_ptr + x);
-                uint8x16_t    normalized_value{};
+                int_vec_type  normalized_value{};
                 if(is_log)
                 {
                     const float32x4x4_t sub =
@@ -389,31 +432,41 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
                         vsubq_f32(vec_in.val[2], vdupq_n_f32(sum)),
                         vsubq_f32(vec_in.val[3], vdupq_n_f32(sum)),
                     };
-                    convert_float32x4x4_to_unit8x16(sub, normalized_value);
+                    normalized_value = convert_float_to_int<float32x4x4_t, int_vec_type>(sub);
                 }
                 else
                 {
-                    const float32x4x4_t mul =
+                    float32x4x4_t mul =
                     {
                         vmulq_f32(vec_in.val[0], vdupq_n_f32(sum_inversed)),
                         vmulq_f32(vec_in.val[1], vdupq_n_f32(sum_inversed)),
                         vmulq_f32(vec_in.val[2], vdupq_n_f32(sum_inversed)),
                         vmulq_f32(vec_in.val[3], vdupq_n_f32(sum_inversed)),
                     };
-                    convert_float32x4x4_to_unit8x16(mul, normalized_value);
+
+                    if(is_qasymm8_signed)
+                    {
+                        const auto offset_vec = wrapper::vdup_n(128.f, wrapper::traits::vector_128_tag{});
+                        mul.val[0]            = wrapper::vsub(mul.val[0], offset_vec);
+                        mul.val[1]            = wrapper::vsub(mul.val[1], offset_vec);
+                        mul.val[2]            = wrapper::vsub(mul.val[2], offset_vec);
+                        mul.val[3]            = wrapper::vsub(mul.val[3], offset_vec);
+                    }
+
+                    normalized_value = convert_float_to_int<float32x4x4_t, int_vec_type>(mul);
                 }
-                vst1q_u8(out_ptr + x, normalized_value);
+                wrapper::vstore(out_ptr + x, normalized_value);
             }
             /* Run remaining elements */
             for(; x < input_width; ++x)
             {
                 if(is_log)
                 {
-                    out_ptr[x] = utils::cast::saturate_cast<qasymm8_t>(tmp_ptr[x] - sum);
+                    out_ptr[x] = utils::cast::saturate_cast<T>(tmp_ptr[x] - sum);
                 }
                 else
                 {
-                    out_ptr[x] = utils::cast::saturate_cast<qasymm8_t>(tmp_ptr[x] * sum_inversed);
+                    out_ptr[x] = utils::cast::saturate_cast<T>((tmp_ptr[x] * sum_inversed) - (is_qasymm8_signed ? 128.f : 0));
                 }
             }
         }
@@ -556,15 +609,18 @@ void NELogits1DSoftmaxKernel<IS_LOG>::configure(const ITensor *input, const ITen
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, output, tmp);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), max->info(), output->info(), tmp->info());
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_softmax(*input->info(), *max->info(), *output->info(), beta, *tmp->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_softmax(*input->info(), *max->info(), *output->info(), beta, *tmp->info(), IS_LOG));
     // Configure kernel window
-    auto win_config = validate_and_configure_window_logits_softmax(*input->info(), *max->info(), *output->info(), *tmp->info());
+    auto win_config = validate_and_configure_window_logits_softmax(*input->info(), *max->info(), *output->info(), *tmp->info(), IS_LOG);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     switch(input->info()->data_type())
     {
         case DataType::QASYMM8:
-            _func = &logits_1d_softmax_qasymm8<IS_LOG>;
+            _func = &logits_1d_softmax_qasymm8<qasymm8_t, IS_LOG>;
+            break;
+        case DataType::QASYMM8_SIGNED:
+            _func = &logits_1d_softmax_qasymm8<qasymm8_signed_t, IS_LOG>;
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
@@ -594,8 +650,8 @@ Status NELogits1DSoftmaxKernel<IS_LOG>::validate(const ITensorInfo *input, const
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, output, tmp);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_softmax(*input, *max, *output, beta, *tmp));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_softmax(*input->clone(), *max->clone(), *output->clone(), *tmp->clone()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_softmax(*input, *max, *output, beta, *tmp, IS_LOG));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_softmax(*input->clone(), *max->clone(), *output->clone(), *tmp->clone(), IS_LOG).first);
 
     return Status{};
 }
