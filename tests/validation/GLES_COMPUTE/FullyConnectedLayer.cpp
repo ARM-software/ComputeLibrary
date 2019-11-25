@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,8 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-RelativeTolerance<float>            tolerance_f32(0.05f);
+constexpr RelativeTolerance<float>  rel_tolerance_f32(0.05f);
+constexpr AbsoluteTolerance<float>  abs_tolerance_f32(0.0001f);
 RelativeTolerance<half_float::half> tolerance_f16(half(0.2));
 constexpr float                     tolerance_num = 0.07f; /**< Tolerance number */
 
@@ -127,13 +128,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, GCFullyConnectedLayerFixture<float>, framework:
                                                                                                                  framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(GCAccessor(_target), _reference, tolerance_f32);
+    validate(GCAccessor(_target), _reference, rel_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, GCFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
                                                                                                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(GCAccessor(_target), _reference, tolerance_f32);
+    validate(GCAccessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
