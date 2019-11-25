@@ -977,8 +977,8 @@ void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const
                 int x = 0;
                 for(; x <= (pool_size_x - 8); x += 8)
                 {
-                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
-                                                                                           (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) +
+                                                                                           (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().y())));
 
                     // Get power of 2 in case of l2 pooling and accumulate
                     if(pooling_type == PoolingType::L2)
@@ -994,7 +994,8 @@ void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const
                 // Leftover for loop
                 for(; x < pool_size_x; ++x)
                 {
-                    float16_t data = *(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    float16_t data = *(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x())
+                                                                           + (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().y())));
 
                     // Get power of 2 in case of l2 pooling
                     if(pooling_type == PoolingType::L2)
@@ -1026,16 +1027,17 @@ void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const
                 int x = 0;
                 for(; x <= (pool_size_x - 8); x += 8)
                 {
-                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() +
-                                                                                           (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
+                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) +
+                                                                                           (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().y())));
                     vres                   = vmaxq_f16(vres, data);
                 }
 
                 // Leftover for loop
                 for(; x < pool_size_x; ++x)
                 {
-                    const float16_t data = *(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().x() + (y - pool_pad_top) * _input->info()->strides_in_bytes().y()));
-                    res                  = std::max(res, data);
+                    const float16_t data = *(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x())
+                                                                                 + (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().y())));
+                    res = std::max(res, data);
                 }
             }
 
@@ -1111,8 +1113,8 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
             {
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
-                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().y() +
-                                                                                           (y - pool_pad_top) * _input->info()->strides_in_bytes().z()));
+                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) +
+                                                                                           (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().z())));
 
                     // Get power of 2 in case of l2 pooling and accumulate
                     if(pooling_type == PoolingType::L2)
@@ -1136,8 +1138,8 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
             {
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
-                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * _input->info()->strides_in_bytes().y() +
-                                                                                           (y - pool_pad_top) * _input->info()->strides_in_bytes().z()));
+                    const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) +
+                                                                                           (y - pool_pad_top) * static_cast<int>(_input->info()->strides_in_bytes().z())));
                     vres                   = vmaxq_f16(vres, data);
                 }
             }
