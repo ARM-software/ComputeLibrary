@@ -177,21 +177,14 @@ void fill_lookuptable(T &&table)
     }
 }
 
-/** Convert 8-bit asymmetric quantized simple tensor into float using tensor quantization information.
+/** Convert a quantized simple tensor into float using tensor quantization information.
  *
  * @param[in] src Quantized tensor.
  *
  * @return Float tensor.
  */
-SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src);
-
-/** Convert 16-bit asymmetric quantized simple tensor into float using tensor quantization information.
- *
- * @param[in] src Quantized tensor.
- *
- * @return Float tensor.
- */
-SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src);
+template <typename T>
+SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<T> &src);
 
 /** Convert float simple tensor into quantized using specified quantization information.
  *
@@ -202,14 +195,6 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src);
  */
 template <typename T>
 SimpleTensor<T> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
-
-/** Convert quantized simple tensor into float using tensor quantization information.
- *
- * @param[in] src Quantized tensor.
- *
- * @return Float tensor.
- */
-SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src);
 
 /** Convert quantized simple tensor into float using tensor quantization information.
  *

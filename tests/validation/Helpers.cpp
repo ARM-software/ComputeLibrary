@@ -108,6 +108,7 @@ CannyEdgeParameters canny_edge_parameters()
     return params;
 }
 
+template <>
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 {
     const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
@@ -120,6 +121,7 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
     return dst;
 }
 
+template <>
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src)
 {
     const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
@@ -158,6 +160,7 @@ SimpleTensor<int8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const
     return dst;
 }
 
+template <>
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<int8_t> &src)
 {
     const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
