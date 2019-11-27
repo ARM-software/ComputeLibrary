@@ -304,12 +304,9 @@ for dirname in os.listdir("./include"):
 
 Export('version_at_least')
 
-if env['opencl']:
-    SConscript("./opencl-1.2-stubs/SConscript", variant_dir="%s/opencl-1.2-stubs" % build_path, duplicate=0)
 
 if env['gles_compute'] and env['os'] != 'android':
     env.Append(CPPPATH = ['#/include/linux'])
-    SConscript("./opengles-3.1-stubs/SConscript", variant_dir="%s/opengles-3.1-stubs" % build_path, duplicate=0)
 
 SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
