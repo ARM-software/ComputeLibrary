@@ -695,7 +695,6 @@ inline uint8x16_t vquantize(const float32x4x4_t &qv, const UniformQuantizationIn
  *
  * @return A neon vector holding the quantized values
  */
-
 inline int8x16_t vquantize_signed(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
 {
     const float       scale     = qi.scale;
@@ -716,7 +715,6 @@ inline int8x16_t vquantize_signed(const float32x4x4_t &qv, const UniformQuantiza
             vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[2], vinvscale)),
             vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[3], vinvscale)),
 #endif //__aarch64__
-
         }
     };
     const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));

@@ -84,7 +84,7 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    template <typename T>
+    template <typename TIn, typename TOut>
     void run_quantize_qasymm8(const Window &window);
     /** Function to apply QASYMM16 quantization on a tensor.
      *
