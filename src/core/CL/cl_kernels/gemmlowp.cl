@@ -25,6 +25,8 @@
 #include "helpers_asymm.h"
 #include "repeat.h"
 
+#if defined(DATA_TYPE) && defined(ACC_DATA_TYPE)
+
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 #define ARM_DOT(x, y, val) val = arm_dot_acc((x), (y), (val));
@@ -36,17 +38,17 @@
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 /** Specialized macros to perform the dot product instruction between two vectors of size N [1,16]. These macros use the dot8 instruction */
-#define ARM_DOT1(a, b, c)                                           \
-    ({                                                              \
-        ARM_DOT((uchar4)(a, (uchar3)0), (uchar4)(b, (uchar3)0), c); \
+#define ARM_DOT1(a, b, c)                                                                                                                               \
+    ({                                                                                                                                                  \
+        ARM_DOT((VEC_DATA_TYPE(DATA_TYPE, 4))(a, (VEC_DATA_TYPE(DATA_TYPE, 3))0), (VEC_DATA_TYPE(DATA_TYPE, 4))(b, (VEC_DATA_TYPE(DATA_TYPE, 3))0), c); \
     })
-#define ARM_DOT2(a, b, c)                                           \
-    ({                                                              \
-        ARM_DOT((uchar4)(a, (uchar2)0), (uchar4)(b, (uchar2)0), c); \
+#define ARM_DOT2(a, b, c)                                                                                                                               \
+    ({                                                                                                                                                  \
+        ARM_DOT((VEC_DATA_TYPE(DATA_TYPE, 4))(a, (VEC_DATA_TYPE(DATA_TYPE, 2))0), (VEC_DATA_TYPE(DATA_TYPE, 4))(b, (VEC_DATA_TYPE(DATA_TYPE, 2))0), c); \
     })
-#define ARM_DOT3(a, b, c)                                         \
-    ({                                                            \
-        ARM_DOT((uchar4)(a, (uchar)0), (uchar4)(b, (uchar)0), c); \
+#define ARM_DOT3(a, b, c)                                                                                           \
+    ({                                                                                                              \
+        ARM_DOT((VEC_DATA_TYPE(DATA_TYPE, 4))(a, (DATA_TYPE)0), (VEC_DATA_TYPE(DATA_TYPE, 4))(b, (DATA_TYPE)0), c); \
     })
 #define ARM_DOT4(a, b, c) \
     ({                    \
@@ -66,24 +68,24 @@
 #else // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 /** Specialized macros to perform the dot product instruction between two vectors of size K0 [1,16] without using the dot8 instruction. */
-#define ARM_DOT1(a, b, c) \
-    ({                    \
-        c += (uint)a * b; \
+#define ARM_DOT1(a, b, c)          \
+    ({                             \
+        c += (ACC_DATA_TYPE)a * b; \
     })
-#define ARM_DOT2(a, b, c)       \
-    ({                          \
-        c += (uint)a.s0 * b.s0; \
-        c += (uint)a.s1 * b.s1; \
+#define ARM_DOT2(a, b, c)                \
+    ({                                   \
+        c += (ACC_DATA_TYPE)a.s0 * b.s0; \
+        c += (ACC_DATA_TYPE)a.s1 * b.s1; \
     })
-#define ARM_DOT3(a, b, c)       \
-    ({                          \
-        ARM_DOT2(a, b, c);      \
-        c += (uint)a.s2 * b.s2; \
+#define ARM_DOT3(a, b, c)                \
+    ({                                   \
+        ARM_DOT2(a, b, c);               \
+        c += (ACC_DATA_TYPE)a.s2 * b.s2; \
     })
-#define ARM_DOT4(a, b, c)       \
-    ({                          \
-        ARM_DOT3(a, b, c);      \
-        c += (uint)a.s3 * b.s3; \
+#define ARM_DOT4(a, b, c)                \
+    ({                                   \
+        ARM_DOT3(a, b, c);               \
+        c += (ACC_DATA_TYPE)a.s3 * b.s3; \
     })
 #define ARM_DOT8(a, b, c)            \
     ({                               \
@@ -194,13 +196,15 @@
     })
 
 #if defined(NUM_ELEMS_PROCESSED_PER_THREAD_X) && defined(NUM_ELEMS_PROCESSED_PER_THREAD_Y) && defined(COLS_A)
-#define VECTOR_UCHAR VEC_DATA_TYPE(uchar, NUM_ELEMS_PROCESSED_PER_THREAD_X)
-#define VECTOR_UINT VEC_DATA_TYPE(uint, NUM_ELEMS_PROCESSED_PER_THREAD_X)
+#define VECTOR_TYPE VEC_DATA_TYPE(DATA_TYPE, NUM_ELEMS_PROCESSED_PER_THREAD_X)
+#define VECTOR_ACC_TYPE VEC_DATA_TYPE(ACC_DATA_TYPE, NUM_ELEMS_PROCESSED_PER_THREAD_X)
 #define VECTOR_INT VEC_DATA_TYPE(int, NUM_ELEMS_PROCESSED_PER_THREAD_X)
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
  *
+ * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
+ * @note The accumulator data type must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
  *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
  *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
@@ -302,93 +306,98 @@ __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
 
     int end_row_vec_a = src_addr.s0 + COLS_A;
 
-    VECTOR_UINT acc0 = 0;
+    VECTOR_ACC_TYPE acc0 = 0;
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-    VECTOR_UINT acc1 = 0;
+    VECTOR_ACC_TYPE acc1 = 0;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-    VECTOR_UINT acc2 = 0;
+    VECTOR_ACC_TYPE acc2 = 0;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-    VECTOR_UINT acc3 = 0;
+    VECTOR_ACC_TYPE acc3 = 0;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
-    VECTOR_UINT acc4 = 0;
+    VECTOR_ACC_TYPE acc4 = 0;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
 
     for(; src_addr.s0 <= (end_row_vec_a - 2); src_addr += (int2)(2, 2 * src1_stride_y))
     {
         // Load values from matrix A
-        uchar2 a0 = vload2(0, src0_ptr + src_addr.s0 + 0 * src0_stride_y);
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a0 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        uchar2 a1 = vload2(0, src0_ptr + src_addr.s0 + 1 * src0_stride_y);
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a1 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 1 * src0_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        uchar2 a2 = vload2(0, src0_ptr + src_addr.s0 + 2 * src0_stride_y);
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a2 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 2 * src0_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        uchar2 a3 = vload2(0, src0_ptr + src_addr.s0 + 3 * src0_stride_y);
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a3 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 3 * src0_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
-        uchar2 a4 = vload2(0, src0_ptr + src_addr.s0 + 4 * src0_stride_y);
+        VEC_DATA_TYPE(DATA_TYPE, 2)
+        a4 = vload2(0, (__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 4 * src0_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
         // Load values from matrix B
-        VECTOR_UCHAR b0 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, src1_ptr + src_addr.s1);
-        VECTOR_UCHAR b1 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, src1_ptr + src_addr.s1 + src1_stride_y);
+        VECTOR_TYPE b0 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, (__global DATA_TYPE *)(src1_ptr + src_addr.s1));
+        VECTOR_TYPE b1 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, (__global DATA_TYPE *)(src1_ptr + src_addr.s1 + src1_stride_y));
 
         // Accumulate
-        acc0 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a0.s0;
-        acc0 += CONVERT(b1, VECTOR_UINT) * (VECTOR_UINT)a0.s1;
+        acc0 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a0.s0;
+        acc0 += CONVERT(b1, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a0.s1;
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        acc1 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a1.s0;
-        acc1 += CONVERT(b1, VECTOR_UINT) * (VECTOR_UINT)a1.s1;
+        acc1 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a1.s0;
+        acc1 += CONVERT(b1, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a1.s1;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        acc2 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a2.s0;
-        acc2 += CONVERT(b1, VECTOR_UINT) * (VECTOR_UINT)a2.s1;
+        acc2 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a2.s0;
+        acc2 += CONVERT(b1, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a2.s1;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        acc3 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a3.s0;
-        acc3 += CONVERT(b1, VECTOR_UINT) * (VECTOR_UINT)a3.s1;
+        acc3 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a3.s0;
+        acc3 += CONVERT(b1, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a3.s1;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
-        acc4 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a4.s0;
-        acc4 += CONVERT(b1, VECTOR_UINT) * (VECTOR_UINT)a4.s1;
+        acc4 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a4.s0;
+        acc4 += CONVERT(b1, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a4.s1;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
     }
 
     for(; src_addr.s0 < end_row_vec_a; src_addr += (int2)(1, src1_stride_y))
     {
         // Load values from matrix A
-        uchar a0 = *(src0_ptr + src_addr.s0 + 0 * src0_stride_y);
+        DATA_TYPE a0 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 0 * src0_stride_y));
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        uchar a1 = *(src0_ptr + src_addr.s0 + 1 * src0_stride_y);
+        DATA_TYPE a1 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 1 * src0_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        uchar a2 = *(src0_ptr + src_addr.s0 + 2 * src0_stride_y);
+        DATA_TYPE a2 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 2 * src0_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        uchar a3 = *(src0_ptr + src_addr.s0 + 3 * src0_stride_y);
+        DATA_TYPE a3 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 3 * src0_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
-        uchar a4 = *(src0_ptr + src_addr.s0 + 4 * src0_stride_y);
+        DATA_TYPE a4 = *((__global DATA_TYPE *)(src0_ptr + src_addr.s0 + 4 * src0_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
         // Load values from matrix B
-        VECTOR_UCHAR b0 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, src1_ptr + src_addr.s1);
+        VECTOR_TYPE b0 = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, (__global DATA_TYPE *)(src1_ptr + src_addr.s1));
 
         // Accumulate
-        acc0 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a0;
+        acc0 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a0;
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-        acc1 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a1;
+        acc1 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a1;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        acc2 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a2;
+        acc2 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a2;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-        acc3 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a3;
+        acc3 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a3;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
-        acc4 += CONVERT(b0, VECTOR_UINT) * (VECTOR_UINT)a4;
+        acc4 += CONVERT(b0, VECTOR_ACC_TYPE) * (VECTOR_ACC_TYPE)a4;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
     }
 
@@ -476,6 +485,8 @@ __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
  *
+ * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
+ * @note The accumulator data type must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
  * @note The GEMM's dimensions M and N must be passed at compile time using -DM and -DN (i.e. -DM=52 and -DN=90).
  * @note The block's dimensions used for reshaping the LHS matrix and the RHS matrix (M0, N0 and K0) must be passed at compile time using -DM0, -DN0 and -DK0 (i.e. -DM0=4, -DN0=8, -DK0=4).
@@ -588,15 +599,15 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
     REPEAT_VAR_INIT_TO_CONST(16, uint, zrhs, 0);
 
     // Initialize the accumulators
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(uint, N0), c, 0); //VEC_DATA_TYPE(uint, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(ACC_DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(ACC_DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
 
     for(int i = 0; i < k; i += K0)
     {
         // Load values from LHS matrix
-        LOAD_BLOCK(M0, K0, uchar, a, lhs_addr, 0, LHS_STEP_X, zlhs);
+        LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_addr, 0, LHS_STEP_X, zlhs);
 
         // Load values from RHS matrix
-        LOAD_BLOCK(N0, K0, uchar, b, rhs_addr, 0, RHS_STEP_X, zrhs);
+        LOAD_BLOCK(N0, K0, DATA_TYPE, b, rhs_addr, 0, RHS_STEP_X, zrhs);
 
         // Partial matrix multiplication M0,N0,K0
         ARM_MM_K0XN0XM0(M0, N0, K0, a, b, c);
@@ -643,6 +654,8 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  *  The LHS matrix is NOT reshaped
  *  The RHS matrix is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is transposed
  *
+ * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
+ * @note The accumulator data type must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note The number of columns of LHS matrix must be passed at compile time using -DK (i.e. -DK=64)
  * @note The block's dimensions used for reshaping the RHS matrix (N0 and K0) must be passed at compile time using -DN0 and -DK0 (i.e. -DN0=8, -DK0=4).
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (i.e. -DM0=2)
@@ -661,7 +674,7 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns LHS matrix
  *
- * @param[in]  lhs_ptr                           Pointer to the LHS reshaped matrix. Supported data type: F16/F32
+ * @param[in]  lhs_ptr                           Pointer to the LHS reshaped matrix. Supported data type: QASYMM8/QASYMM8_SIGNED
  * @param[in]  lhs_stride_x                      Stride of the LHS reshaped matrix in X dimension (in bytes)
  * @param[in]  lhs_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  lhs_stride_y                      Stride of the LHS reshaped matrix in Y dimension (in bytes)
@@ -673,7 +686,7 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  * @param[in]  rhs_stride_y                      Stride of the RHS reshaped matrix in Y dimension (in bytes)
  * @param[in]  rhs_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  rhs_offset_first_element_in_bytes The offset of the first element in the RHS reshaped matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data type: same as @p lhs_ptr
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data type: S32
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -758,15 +771,15 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(REINTERPRET_INPUT_AS_3D)
 
     // Initialize the accumulators
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(uint, N0), c, 0); //VEC_DATA_TYPE(uint, N0)    c0=0,c1=0,c2=0,... c(N0-1)=0;
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(ACC_DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(ACC_DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(N0-1)=0;
 
     for(int i = 0; i < K; i += K0)
     {
         // Load values from LHS matrix
-        LOAD_BLOCK(M0, K0, uchar, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
+        LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
         // Load values from RHS matrix
-        LOAD_BLOCK(N0, K0, uchar, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
+        LOAD_BLOCK(N0, K0, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X, zrhs);
 
         // Partial matrix multiplication M0,N0,K0
         ARM_MM_K0XN0XM0(M0, N0, K0, a, b, c);
@@ -809,6 +822,8 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
  *  The LHS matrix is NOT reshaped
  *  The RHS matrix is NOT reshaped
  *
+ * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
+ * @note The accumulator data type must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  * @note The number of columns of LHS matrix must be passed at compile time using -DK (i.e. -DK=64)
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (i.e. -DM0=2)
  * @note The number of N0 columns to process must be passed at compile time using -DN0 (i.e. -DN0=2)
@@ -908,20 +923,20 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
 #endif // defined(REINTERPRET_INPUT_AS_3D)
 
     // Initialize the accumulators
-    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(uint, N0), c, 0); //VEC_DATA_TYPE(uint, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(ACC_DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(ACC_DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
 
     int i = 0;
 
     for(; i <= (K - K0); i += K0)
     {
         // Load values from LHS matrix
-        LOAD_BLOCK(M0, K0, uchar, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
+        LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
         // Load values from RHS matrix
-        LOAD_BLOCK(K0, N0, uchar, b, rhs_ptr, rhs_offset, rhs_stride_y, zrhs);
+        LOAD_BLOCK(K0, N0, DATA_TYPE, b, rhs_ptr, rhs_offset, rhs_stride_y, zrhs);
 
         // Transpose the values from RHS matrix
-        TRANSPOSE_K0XN0(K0, N0, b_t, b);
+        TRANSPOSE_K0XN0(K0, N0, b_t, b, DATA_TYPE);
 
         // Partial matrix multiplication M0,N0,K0
         ARM_MM_K0XN0XM0(M0, N0, K0, a, b_t, c);
@@ -935,13 +950,13 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
     for(; i < K; ++i)
     {
         // Load values from LHS matrix
-        LOAD_BLOCK(M0, 1, uchar, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
+        LOAD_BLOCK(M0, 1, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
         // Load values from RHS matrix
-        LOAD_BLOCK(1, N0, uchar, b, rhs_ptr, rhs_offset, rhs_stride_y, zrhs);
+        LOAD_BLOCK(1, N0, DATA_TYPE, b, rhs_ptr, rhs_offset, rhs_stride_y, zrhs);
 
         // Transpose the values from RHS matrix
-        TRANSPOSE_K0XN0(1, N0, b_t, b);
+        TRANSPOSE_K0XN0(1, N0, b_t, b, DATA_TYPE);
 
         // Partial matrix multiplication M0,N0,1
         ARM_MM_K0XN0XM0(M0, N0, 1, a, b_t, c);
@@ -974,6 +989,8 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
     CONVERT_STORE_BLOCK(M0, N0, int, c, dst_addr, dst_stride_y, zout);
 }
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(K)
+
+#endif // defined(DATA_TYPE) && defined(ACC_DATA_TYPE)
 
 #if defined(COLS_A)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.

@@ -216,6 +216,8 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const ICLTensor *input0, co
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
+    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(input0->info()->data_type()));
 
     std::string kernel_name("gemmlowp_mm_native");
 

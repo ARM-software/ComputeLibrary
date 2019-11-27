@@ -559,20 +559,26 @@
  * @param[in] IDX_COL  The index value
  * @param[in] BASENAME The basename of the destination vectors
  * @param[in] X        The basename of the source vectors
+ * @param[in] TYPE     The data type of the destination vectors
  * @{
  */
-#define COLUMN_VECTOR1(IDX_COL, BASENAME, X) \
-    uchar BASENAME##IDX_COL = (uchar)((X##0).s##IDX_COL);
-#define COLUMN_VECTOR2(IDX_COL, BASENAME, X) \
-    uchar2 BASENAME##IDX_COL = (uchar2)((X##0).s##IDX_COL, (X##1).s##IDX_COL);
-#define COLUMN_VECTOR3(IDX_COL, BASENAME, X) \
-    uchar3 BASENAME##IDX_COL = (uchar3)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL);
-#define COLUMN_VECTOR4(IDX_COL, BASENAME, X) \
-    uchar4 BASENAME##IDX_COL = (uchar4)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL);
-#define COLUMN_VECTOR8(IDX_COL, BASENAME, X) \
-    uchar8 BASENAME##IDX_COL = (uchar8)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL);
-#define COLUMN_VECTOR16(IDX_COL, BASENAME, X) \
-    uchar16 BASENAME##IDX_COL = (uchar16)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL, (X##8).s##IDX_COL, (X##9).s##IDX_COL, (X##A).s##IDX_COL, (X##B).s##IDX_COL, (X##C).s##IDX_COL, (X##D).s##IDX_COL, (X##E).s##IDX_COL, (X##F).s##IDX_COL);
+#define COLUMN_VECTOR1(IDX_COL, BASENAME, X, TYPE) \
+    TYPE BASENAME##IDX_COL = (TYPE)((X##0).s##IDX_COL);
+#define COLUMN_VECTOR2(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 2)                         \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 2))((X##0).s##IDX_COL, (X##1).s##IDX_COL);
+#define COLUMN_VECTOR3(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 3)                         \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 3))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL);
+#define COLUMN_VECTOR4(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 4)                         \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 4))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL);
+#define COLUMN_VECTOR8(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 8)                         \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 8))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL);
+#define COLUMN_VECTOR16(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 16)                         \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 16))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL, (X##8).s##IDX_COL, (X##9).s##IDX_COL, (X##A).s##IDX_COL, (X##B).s##IDX_COL, (X##C).s##IDX_COL, (X##D).s##IDX_COL, (X##E).s##IDX_COL, (X##F).s##IDX_COL);
 /** @} */ // end of group COLUMN_VECTORn
 
 /** Create transposed vectors of the given vectors
@@ -581,35 +587,36 @@
  * @param[in] K0       The size of the source vectors
  * @param[in] BASENAME The basename of transposed vectors
  * @param[in] B        The basename of source vectors for transposition
+ * @param[in] TYPE     The data type of the transposed vectors
  * @{
  */
-#define TRANSPOSE_K0X1(K0, BASENAME, B) \
-    COLUMN_VECTOR(K0, 0, BASENAME, B);
-#define TRANSPOSE_K0X2(K0, BASENAME, B) \
-    TRANSPOSE_K0X1(K0, BASENAME, B);    \
-    COLUMN_VECTOR(K0, 1, BASENAME, B);
-#define TRANSPOSE_K0X3(K0, BASENAME, B) \
-    TRANSPOSE_K0X2(K0, BASENAME, B);    \
-    COLUMN_VECTOR(K0, 2, BASENAME, B);
-#define TRANSPOSE_K0X4(K0, BASENAME, B) \
-    TRANSPOSE_K0X3(K0, BASENAME, B);    \
-    COLUMN_VECTOR(K0, 3, BASENAME, B);
-#define TRANSPOSE_K0X8(K0, BASENAME, B) \
-    TRANSPOSE_K0X4(K0, BASENAME, B);    \
-    COLUMN_VECTOR(K0, 4, BASENAME, B);  \
-    COLUMN_VECTOR(K0, 5, BASENAME, B);  \
-    COLUMN_VECTOR(K0, 6, BASENAME, B);  \
-    COLUMN_VECTOR(K0, 7, BASENAME, B);
-#define TRANSPOSE_K0X16(K0, BASENAME, B) \
-    TRANSPOSE_K0X8(K0, BASENAME, B);     \
-    COLUMN_VECTOR(K0, 8, BASENAME, B);   \
-    COLUMN_VECTOR(K0, 9, BASENAME, B);   \
-    COLUMN_VECTOR(K0, A, BASENAME, B);   \
-    COLUMN_VECTOR(K0, B, BASENAME, B);   \
-    COLUMN_VECTOR(K0, C, BASENAME, B);   \
-    COLUMN_VECTOR(K0, D, BASENAME, B);   \
-    COLUMN_VECTOR(K0, E, BASENAME, B);   \
-    COLUMN_VECTOR(K0, F, BASENAME, B);
+#define TRANSPOSE_K0X1(K0, BASENAME, B, TYPE) \
+    COLUMN_VECTOR(K0, 0, BASENAME, B, TYPE);
+#define TRANSPOSE_K0X2(K0, BASENAME, B, TYPE) \
+    TRANSPOSE_K0X1(K0, BASENAME, B, TYPE);    \
+    COLUMN_VECTOR(K0, 1, BASENAME, B, TYPE);
+#define TRANSPOSE_K0X3(K0, BASENAME, B, TYPE) \
+    TRANSPOSE_K0X2(K0, BASENAME, B, TYPE);    \
+    COLUMN_VECTOR(K0, 2, BASENAME, B, TYPE);
+#define TRANSPOSE_K0X4(K0, BASENAME, B, TYPE) \
+    TRANSPOSE_K0X3(K0, BASENAME, B, TYPE);    \
+    COLUMN_VECTOR(K0, 3, BASENAME, B, TYPE);
+#define TRANSPOSE_K0X8(K0, BASENAME, B, TYPE) \
+    TRANSPOSE_K0X4(K0, BASENAME, B, TYPE);    \
+    COLUMN_VECTOR(K0, 4, BASENAME, B, TYPE);  \
+    COLUMN_VECTOR(K0, 5, BASENAME, B, TYPE);  \
+    COLUMN_VECTOR(K0, 6, BASENAME, B, TYPE);  \
+    COLUMN_VECTOR(K0, 7, BASENAME, B, TYPE);
+#define TRANSPOSE_K0X16(K0, BASENAME, B, TYPE) \
+    TRANSPOSE_K0X8(K0, BASENAME, B, TYPE);     \
+    COLUMN_VECTOR(K0, 8, BASENAME, B, TYPE);   \
+    COLUMN_VECTOR(K0, 9, BASENAME, B, TYPE);   \
+    COLUMN_VECTOR(K0, A, BASENAME, B, TYPE);   \
+    COLUMN_VECTOR(K0, B, BASENAME, B, TYPE);   \
+    COLUMN_VECTOR(K0, C, BASENAME, B, TYPE);   \
+    COLUMN_VECTOR(K0, D, BASENAME, B, TYPE);   \
+    COLUMN_VECTOR(K0, E, BASENAME, B, TYPE);   \
+    COLUMN_VECTOR(K0, F, BASENAME, B, TYPE);
 
 /** @} */ // end of group TRANSPOSE_K0Xn
 
@@ -619,10 +626,11 @@
  * @param[in] IDX_COL  The index value
  * @param[in] BASENAME The basename of the destination vectors
  * @param[in] B        The basename of the source vectors
+ * @param[in] TYPE     The data type of the destination vectors
  */
-#define COLUMN_VECTOR(K0, IDX_COL, BASENAME, B) \
-    CONCAT(COLUMN_VECTOR, K0)                   \
-    (IDX_COL, BASENAME, B);
+#define COLUMN_VECTOR(K0, IDX_COL, BASENAME, B, TYPE) \
+    CONCAT(COLUMN_VECTOR, K0)                         \
+    (IDX_COL, BASENAME, B, TYPE);
 
 /** Create transposed vectors form the given source vectors
  *
@@ -630,11 +638,12 @@
  * @param[in] N0       The number of source vectors
  * @param[in] BASENAME The basename of transposed vectors
  * @param[in] B        The basename of source vectors for transposition
+ * @param[in] TYPE     The data type of the transposed vectors
  *
  */
-#define TRANSPOSE_K0XN0(K0, N0, BASENAME, B) \
-    CONCAT(TRANSPOSE_K0X, N0)                \
-    (K0, BASENAME, B);
+#define TRANSPOSE_K0XN0(K0, N0, BASENAME, B, TYPE) \
+    CONCAT(TRANSPOSE_K0X, N0)                      \
+    (K0, BASENAME, B, TYPE);
 
 /** Add the variables (BIAS0 to BIASn-1) to the others (BASENAME0 to BASENAMEn-1)
  * @name ADD_ROW_n

@@ -42,13 +42,9 @@
 #include <cstdint>
 #include <tuple>
 
-using namespace arm_compute;
-using namespace arm_compute::misc::shape_calculator;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
+using namespace misc::shape_calculator;
 
 namespace
 {
@@ -210,6 +206,8 @@ void CLGEMMLowpMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, 
     build_opts.add_option("-DK0=" + support::cpp11::to_string(lhs_info.k0));
     build_opts.add_option("-DV0=" + support::cpp11::to_string(lhs_info.v0));
     build_opts.add_option("-DH0=" + support::cpp11::to_string(rhs_info.h0));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
+    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(input0->info()->data_type()));
 
     std::string kernel_name("gemmlowp_mm_reshaped_");
     kernel_name += lhs_info.transpose ? "lhs_t_" : "lhs_nt_";
@@ -311,3 +309,4 @@ void CLGEMMLowpMatrixMultiplyReshapedKernel::run(const Window &window, cl::Comma
     }
     while(window.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

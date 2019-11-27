@@ -74,6 +74,14 @@ std::string get_cl_unsigned_type_from_element_size(size_t element_size);
  */
 std::string get_cl_select_type_from_data_type(const DataType &dt);
 
+/** Translates a tensor data type to the appropriate OpenCL dot8 accumulator type.
+ *
+ * @param[in] dt @ref DataType to be translated to OpenCL dot8 accumulator type.
+ *
+ * @return The string specifying the OpenCL dot8 accumulator type to be used.
+ */
+std::string get_cl_dot8_acc_type_from_data_type(const DataType &dt);
+
 /** Get the size of a data type in number of bits.
  *
  * @param[in] dt @ref DataType.
