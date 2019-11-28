@@ -51,8 +51,8 @@ For each release we provide some pre-built binaries of the library [here](https:
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf
             - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
-            - Android armv7a: clang++ / libc++ NDK r17b
-            - Android am64-v8a: clang++ / libc++ NDK r17b
+            - Android armv7a: clang++ / libc++ NDK r17c
+            - Android am64-v8a: clang++ / libc++ NDK r17c
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
@@ -239,6 +239,7 @@ If there is more than one release in a month then an extra sequential number is 
 v19.11 Public major release
  - Various bug fixes.
  - Various optimisations.
+ - Updated recommended NDK version to r17c.
  - Deprecated OpenCL kernels / functions:
     - CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel
     - CLDepthwiseIm2ColKernel
