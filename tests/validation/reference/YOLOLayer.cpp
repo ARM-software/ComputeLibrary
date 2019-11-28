@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,8 @@ SimpleTensor<T> yolo_layer(const SimpleTensor<T> &src, const ActivationLayerInfo
     const T a(info.a());
     const T b(info.b());
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         const size_t z = index2coord(dst.shape(), i).z() % (num_classes + 5);
 
@@ -68,7 +69,7 @@ SimpleTensor<uint8_t> yolo_layer<uint8_t>(const SimpleTensor<uint8_t> &src, cons
 {
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float>   dst_tmp = yolo_layer<float>(src_tmp, info, num_classes);
-    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, src.quantization_info());
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric<uint8_t>(dst_tmp, src.quantization_info());
     return dst;
 }
 

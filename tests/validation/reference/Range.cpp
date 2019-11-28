@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ SimpleTensor<uint8_t> range(SimpleTensor<uint8_t> &dst, float start, const size_
     {
         SimpleTensor<float> dst_tmp{ dst.shape(), DataType::F32, 1 };
         generate_range(dst_tmp, start, num_of_elements, step);
-        return convert_to_asymmetric(dst_tmp, dst.quantization_info());
+        return convert_to_asymmetric<uint8_t>(dst_tmp, dst.quantization_info());
     }
     generate_range(dst, start, num_of_elements, step);
     return dst;

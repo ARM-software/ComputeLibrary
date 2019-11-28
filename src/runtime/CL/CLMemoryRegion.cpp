@@ -23,13 +23,18 @@
  */
 #include "arm_compute/runtime/CL/CLMemoryRegion.h"
 
+#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 namespace arm_compute
 {
-ICLMemoryRegion::ICLMemoryRegion(cl::Context ctx, size_t size)
-    : IMemoryRegion(size), _ctx(std::move(ctx)), _mapping(nullptr), _mem()
+ICLMemoryRegion::ICLMemoryRegion(CLCoreRuntimeContext *ctx, size_t size)
+    : IMemoryRegion(size),
+      _queue((ctx != nullptr) ? ctx->queue() : CLScheduler::get().queue()),
+      _ctx((ctx != nullptr) ? ctx->context() : CLScheduler::get().context()),
+      _mapping(nullptr),
+      _mem()
 {
 }
 
@@ -54,17 +59,17 @@ std::unique_ptr<IMemoryRegion> ICLMemoryRegion::extract_subregion(size_t offset,
     return nullptr;
 }
 
-CLBufferMemoryRegion::CLBufferMemoryRegion(cl::Context ctx, cl_mem_flags flags, size_t size)
-    : ICLMemoryRegion(std::move(ctx), size)
+CLBufferMemoryRegion::CLBufferMemoryRegion(CLCoreRuntimeContext *ctx, cl_mem_flags flags, size_t size)
+    : ICLMemoryRegion(ctx, size)
 {
     if(_size != 0)
     {
-        _mem = cl::Buffer(_ctx, flags, _size);
+        _mem = cl::Buffer((ctx != nullptr) ? ctx->context() : CLScheduler::get().context(), flags, _size);
     }
 }
 
-CLBufferMemoryRegion::CLBufferMemoryRegion(const cl::Buffer &buffer)
-    : ICLMemoryRegion(buffer.getInfo<CL_MEM_CONTEXT>(), buffer.getInfo<CL_MEM_SIZE>())
+CLBufferMemoryRegion::CLBufferMemoryRegion(const cl::Buffer &buffer, CLCoreRuntimeContext *ctx)
+    : ICLMemoryRegion(ctx, buffer.getInfo<CL_MEM_SIZE>())
 {
     _mem = buffer;
 }
@@ -88,15 +93,15 @@ void CLBufferMemoryRegion::unmap(cl::CommandQueue &q)
     _mapping = nullptr;
 }
 
-ICLSVMMemoryRegion::ICLSVMMemoryRegion(cl::Context ctx, cl_mem_flags flags, size_t size, size_t alignment)
-    : ICLMemoryRegion(std::move(ctx), size), _ptr(nullptr)
+ICLSVMMemoryRegion::ICLSVMMemoryRegion(CLCoreRuntimeContext *ctx, cl_mem_flags flags, size_t size, size_t alignment)
+    : ICLMemoryRegion(ctx, size), _ptr(nullptr)
 {
     if(size != 0)
     {
-        _ptr = clSVMAlloc(_ctx.get(), flags, size, alignment);
+        _ptr = clSVMAlloc((ctx != nullptr) ? ctx->context().get() : CLScheduler::get().context().get(), flags, size, alignment);
         if(_ptr != nullptr)
         {
-            _mem = cl::Buffer(_ctx, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, _size, _ptr);
+            _mem = cl::Buffer((ctx != nullptr) ? ctx->context() : CLScheduler::get().context(), CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, _size, _ptr);
         }
     }
 }
@@ -107,7 +112,7 @@ ICLSVMMemoryRegion::~ICLSVMMemoryRegion()
     {
         try
         {
-            clFinish(CLScheduler::get().queue().get());
+            clFinish(_queue.get());
             _mem = cl::Buffer();
             clSVMFree(_ctx.get(), _ptr);
         }
@@ -122,8 +127,8 @@ void *ICLSVMMemoryRegion::ptr()
     return _ptr;
 }
 
-CLCoarseSVMMemoryRegion::CLCoarseSVMMemoryRegion(cl::Context ctx, cl_mem_flags flags, size_t size, size_t alignment)
-    : ICLSVMMemoryRegion(std::move(ctx), flags, size, alignment)
+CLCoarseSVMMemoryRegion::CLCoarseSVMMemoryRegion(CLCoreRuntimeContext *ctx, cl_mem_flags flags, size_t size, size_t alignment)
+    : ICLSVMMemoryRegion(ctx, flags, size, alignment)
 {
 }
 
@@ -142,8 +147,8 @@ void CLCoarseSVMMemoryRegion::unmap(cl::CommandQueue &q)
     _mapping = nullptr;
 }
 
-CLFineSVMMemoryRegion::CLFineSVMMemoryRegion(cl::Context ctx, cl_mem_flags flags, size_t size, size_t alignment)
-    : ICLSVMMemoryRegion(std::move(ctx), flags, size, alignment)
+CLFineSVMMemoryRegion::CLFineSVMMemoryRegion(CLCoreRuntimeContext *ctx, cl_mem_flags flags, size_t size, size_t alignment)
+    : ICLSVMMemoryRegion(ctx, flags, size, alignment)
 {
 }
 

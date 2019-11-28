@@ -203,7 +203,9 @@ public:
                      TensorShape{ 128U, 1U, 5U, 3U },
                      TensorShape{ 9U, 9U, 3U, 4U },
                      TensorShape{ 27U, 13U, 2U, 4U },
-                     TensorShape{ 1U, 1U, 1U, 5U }
+                     TensorShape{ 1U, 1U, 1U, 5U },
+                     TensorShape{ 1U, 16U, 10U, 2U, 128U },
+                     TensorShape{ 1U, 16U, 10U, 2U, 128U }
     }),
     ShapeDataset("Shape1",
     {
@@ -212,7 +214,9 @@ public:
         TensorShape{ 128U, 64U, 1U, 3U },
         TensorShape{ 9U, 1U, 3U },
         TensorShape{ 1U },
-        TensorShape{ 9U, 9U, 3U, 5U }
+        TensorShape{ 9U, 9U, 3U, 5U },
+        TensorShape{ 1U, 1U, 1U, 1U, 128U },
+        TensorShape{ 128U }
     }))
     {
     }
@@ -686,7 +690,7 @@ public:
         : ShapeDataset("InputShape",
     {
         // Batch size 1
-                     TensorShape{ 32U, 37U, 3U },
+        TensorShape{ 32U, 37U, 3U },
                      // Batch size 4
                      TensorShape{ 32U, 37U, 3U, 4U },
     })
@@ -702,7 +706,7 @@ public:
         : ShapeDataset("InputShape",
     {
         // Batch size 1
-                     TensorShape{ 32U, 37U, 3U },
+        TensorShape{ 32U, 37U, 3U },
                      // Batch size 4
                      TensorShape{ 32U, 37U, 3U, 4U },
                      // Arbitrary batch size

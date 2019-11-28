@@ -66,8 +66,8 @@ bool validate_subtensor_shape(const TensorInfo &parent_info, const TensorInfo &c
 }
 } // namespace
 
-TensorAllocator::TensorAllocator(Tensor *owner)
-    : _associated_memory_group(nullptr), _memory(), _owner(owner)
+TensorAllocator::TensorAllocator(IMemoryManageable *owner)
+    : _owner(owner), _associated_memory_group(nullptr), _memory()
 {
 }
 
@@ -78,27 +78,27 @@ TensorAllocator::~TensorAllocator()
 
 TensorAllocator::TensorAllocator(TensorAllocator &&o) noexcept
     : ITensorAllocator(std::move(o)),
+      _owner(o._owner),
       _associated_memory_group(o._associated_memory_group),
-      _memory(std::move(o._memory)),
-      _owner(o._owner)
+      _memory(std::move(o._memory))
 {
+    o._owner                   = nullptr;
     o._associated_memory_group = nullptr;
     o._memory                  = Memory();
-    o._owner                   = nullptr;
 }
 
 TensorAllocator &TensorAllocator::operator=(TensorAllocator &&o) noexcept
 {
     if(&o != this)
     {
+        _owner   = o._owner;
+        o._owner = nullptr;
+
         _associated_memory_group   = o._associated_memory_group;
         o._associated_memory_group = nullptr;
 
         _memory   = std::move(o._memory);
         o._memory = Memory();
-
-        _owner   = o._owner;
-        o._owner = nullptr;
 
         ITensorAllocator::operator=(std::move(o));
     }
@@ -132,13 +132,15 @@ uint8_t *TensorAllocator::data() const
 
 void TensorAllocator::allocate()
 {
+    // Align to 64-byte boundaries by default if alignment is not specified
+    const size_t alignment_to_use = (alignment() != 0) ? alignment() : 64;
     if(_associated_memory_group == nullptr)
     {
-        _memory.set_owned_region(support::cpp14::make_unique<MemoryRegion>(info().total_size(), alignment()));
+        _memory.set_owned_region(support::cpp14::make_unique<MemoryRegion>(info().total_size(), alignment_to_use));
     }
     else
     {
-        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size(), alignment());
+        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size(), alignment_to_use);
     }
     info().set_is_resizable(false);
 }
@@ -161,10 +163,10 @@ Status TensorAllocator::import_memory(void *memory)
     return Status{};
 }
 
-void TensorAllocator::set_associated_memory_group(MemoryGroup *associated_memory_group)
+void TensorAllocator::set_associated_memory_group(IMemoryGroup *associated_memory_group)
 {
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
-    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr);
+    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr && _associated_memory_group != associated_memory_group);
     ARM_COMPUTE_ERROR_ON(_memory.region() != nullptr && _memory.region()->buffer() != nullptr);
 
     _associated_memory_group = associated_memory_group;

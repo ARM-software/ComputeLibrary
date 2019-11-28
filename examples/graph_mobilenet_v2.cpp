@@ -50,6 +50,7 @@ public:
     {
         // Parse arguments
         cmd_parser.parse(argc, argv);
+        cmd_parser.validate();
 
         // Consume common parameters
         common_params = consume_common_graph_parameters(common_opts);
@@ -70,7 +71,6 @@ public:
 
         // Set graph hints
         graph << common_params.target
-              << DepthwiseConvolutionMethod::Optimized3x3 // TODO(COMPMID-1073): Add heuristics to automatically call the optimized 3x3 method
               << common_params.fast_math_hint;
 
         // Create core graph

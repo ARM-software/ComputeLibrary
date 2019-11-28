@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(document).ready(function(){initNavTree('tests_2validation_2_helpers_8cpp.xhtml
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2018 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -131,11 +131,19 @@ Functions</h2></td></tr>
 <tr class="memdesc:abd7b375e25d1b41ff9da321024c829ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate parameters for Canny edge algorithm.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#abd7b375e25d1b41ff9da321024c829ce">More...</a><br /></td></tr>
 <tr class="separator:abd7b375e25d1b41ff9da321024c829ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab24849be91cfb00a72f7a61a7e00fdb7"><td class="memItemLeft" align="right" valign="top">SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab24849be91cfb00a72f7a61a7e00fdb7">convert_from_asymmetric</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src)</td></tr>
-<tr class="memdesc:ab24849be91cfb00a72f7a61a7e00fdb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert quantized simple tensor into float using tensor quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ab24849be91cfb00a72f7a61a7e00fdb7">More...</a><br /></td></tr>
+<tr class="memdesc:ab24849be91cfb00a72f7a61a7e00fdb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert 8-bit asymmetric quantized simple tensor into float using tensor quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ab24849be91cfb00a72f7a61a7e00fdb7">More...</a><br /></td></tr>
 <tr class="separator:ab24849be91cfb00a72f7a61a7e00fdb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a291a16e64b05bdf4d08e1240d5bb286a"><td class="memItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a291a16e64b05bdf4d08e1240d5bb286a">convert_to_asymmetric</a> (const SimpleTensor&lt; float &gt; &amp;src, const QuantizationInfo &amp;quantization_info)</td></tr>
-<tr class="memdesc:a291a16e64b05bdf4d08e1240d5bb286a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert float simple tensor into quantized using specified quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a291a16e64b05bdf4d08e1240d5bb286a">More...</a><br /></td></tr>
-<tr class="separator:a291a16e64b05bdf4d08e1240d5bb286a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae275edb2967f853808fb08c97cbf05f1"><td class="memItemLeft" align="right" valign="top">SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae275edb2967f853808fb08c97cbf05f1">convert_from_asymmetric</a> (const SimpleTensor&lt; uint16_t &gt; &amp;src)</td></tr>
+<tr class="memdesc:ae275edb2967f853808fb08c97cbf05f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert 16-bit asymmetric quantized simple tensor into float using tensor quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ae275edb2967f853808fb08c97cbf05f1">More...</a><br /></td></tr>
+<tr class="separator:ae275edb2967f853808fb08c97cbf05f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9903e160135a0ed3e9a241263e3494c9"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
+<tr class="memitem:a9903e160135a0ed3e9a241263e3494c9"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9903e160135a0ed3e9a241263e3494c9">convert_to_asymmetric</a> (const SimpleTensor&lt; float &gt; &amp;src, const QuantizationInfo &amp;quantization_info)</td></tr>
+<tr class="memdesc:a9903e160135a0ed3e9a241263e3494c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert float simple tensor into quantized using specified quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a9903e160135a0ed3e9a241263e3494c9">More...</a><br /></td></tr>
+<tr class="separator:a9903e160135a0ed3e9a241263e3494c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8aed8f319f99505cc79f369e88174213"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
+<tr class="memitem:a8aed8f319f99505cc79f369e88174213"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint16_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8aed8f319f99505cc79f369e88174213">convert_to_asymmetric</a> (const SimpleTensor&lt; float &gt; &amp;src, const QuantizationInfo &amp;quantization_info)</td></tr>
+<tr class="memdesc:a8aed8f319f99505cc79f369e88174213"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert float simple tensor into quantized using specified quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8aed8f319f99505cc79f369e88174213">More...</a><br /></td></tr>
+<tr class="separator:a8aed8f319f99505cc79f369e88174213"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef1e9673f1e6ab63fb71e3698884f0c4"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
 <tr class="memitem:aef1e9673f1e6ab63fb71e3698884f0c4"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; int16_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aef1e9673f1e6ab63fb71e3698884f0c4">convert_to_symmetric</a> (const SimpleTensor&lt; float &gt; &amp;src, const QuantizationInfo &amp;quantization_info)</td></tr>
 <tr class="memdesc:aef1e9673f1e6ab63fb71e3698884f0c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert float simple tensor into quantized using specified quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#aef1e9673f1e6ab63fb71e3698884f0c4">More...</a><br /></td></tr>
@@ -162,6 +170,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a55866d648f6da2a3aaf3965bd1685868"><td class="memItemLeft" align="right" valign="top">std::pair&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a55866d648f6da2a3aaf3965bd1685868">get_quantized_bounds</a> (const QuantizationInfo &amp;quant_info, float min, float max)</td></tr>
 <tr class="memdesc:a55866d648f6da2a3aaf3965bd1685868"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to compute quantized min and max bounds.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a55866d648f6da2a3aaf3965bd1685868">More...</a><br /></td></tr>
 <tr class="separator:a55866d648f6da2a3aaf3965bd1685868"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7075ff9f78b0d90bbe428f1406d669b"><td class="memItemLeft" align="right" valign="top">std::pair&lt; int, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae7075ff9f78b0d90bbe428f1406d669b">get_symm_quantized_per_channel_bounds</a> (const QuantizationInfo &amp;quant_info, float min, float max, size_t channel_id=0)</td></tr>
+<tr class="memdesc:ae7075ff9f78b0d90bbe428f1406d669b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to compute symmetric quantized min and max bounds.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ae7075ff9f78b0d90bbe428f1406d669b">More...</a><br /></td></tr>
+<tr class="separator:ae7075ff9f78b0d90bbe428f1406d669b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7159671a452710595f7d01e69aef7a13"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7159671a452710595f7d01e69aef7a13">get_tile</a> (const SimpleTensor&lt; float &gt; &amp;in, SimpleTensor&lt; float &gt; &amp;roi, const Coordinates &amp;coord)</td></tr>
 <tr class="separator:a7159671a452710595f7d01e69aef7a13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f24eb9f64c22d82f465dfe37aceb3f0"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0f24eb9f64c22d82f465dfe37aceb3f0">get_tile</a> (const SimpleTensor&lt; half &gt; &amp;in, SimpleTensor&lt; half &gt; &amp;roi, const Coordinates &amp;coord)</td></tr>
@@ -197,7 +208,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="tests_2validation_2_helpers_8cpp.xhtml">Helpers.cpp</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:07 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -43,11 +43,153 @@
 #define GPU_ARCH_MIDGARD 0x100
 #define GPU_ARCH_BIFROST 0x200
 
+/** Concatenate two inputs.
+ *
+ * @param[in] a The first input to be concatenated
+ * @param[in] b The second input to be concatenated
+ *
+ * @return The concatenated output
+ */
 #define CONCAT(a, b) a##b
 
+/** Expand the given vector
+ *
+ * @param[in] x The vector to be expanded
+ *
+ * @return The expanded output
+ */
 #define EXPAND(x) x
 
+/** Clamp the given value between an upper and lower bound.
+ *
+ * @param[in] x       The value to be clamped
+ * @param[in] min_val The lower bound
+ * @param[in] max_val The upper bound
+ *
+ * @return The clamped value.
+ */
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)
+
+/** REVn reverses the given vector whose size is n.
+ * @name REVn
+ *
+ * @param[in] x The vector to be reversed
+ *
+ * @return The reversed vector
+ * @{
+ */
+#define REV1(x) ((x))
+#define REV2(x) ((x).s10)
+#define REV3(x) ((x).s210)
+#define REV4(x) ((x).s3210)
+#define REV8(x) ((x).s76543210)
+#define REV16(x) ((x).sFEDCBA9876543210)
+/** @} */ // end of group REVn
+
+/** Reverse the given vector.
+ * @name REVERSE
+ *
+ * @param[in] x The vector to be reversed
+ * @param[in] s The size of the vector
+ *
+ * @return The reversed vector
+ * @{
+ */
+#define REVERSE_STR(x, s) REV##s((x))
+#define REVERSE(x, s) REVERSE_STR(x, s)
+/** @} */ // end of group REVERSE
+
+/** Circular-right-shift (rotate-right) the vector of size s by the amount of n.
+ * @name ROTs_n
+ *
+ * @param[in] x The vector to be shifted
+ *
+ * @return The shifted vector
+ * @{
+ */
+#define ROT1_0(x) ((x))
+
+#define ROT2_0(x) ((x))
+#define ROT2_1(x) ((x).s10)
+
+#define ROT3_0(x) ((x))
+#define ROT3_1(x) ((x).s201)
+#define ROT3_2(x) ((x).s120)
+
+#define ROT4_0(x) ((x))
+#define ROT4_1(x) ((x).s3012)
+#define ROT4_2(x) ((x).s2301)
+#define ROT4_3(x) ((x).s1230)
+
+#define ROT8_0(x) ((x))
+#define ROT8_1(x) ((x).s70123456)
+#define ROT8_2(x) ((x).s67012345)
+#define ROT8_3(x) ((x).s56701234)
+#define ROT8_4(x) ((x).s45670123)
+#define ROT8_5(x) ((x).s34567012)
+#define ROT8_6(x) ((x).s23456701)
+#define ROT8_7(x) ((x).s12345670)
+
+#define ROT16_0(x) ((x))
+#define ROT16_1(x) ((x).sF0123456789ABCDE)
+#define ROT16_2(x) ((x).sEF0123456789ABCD)
+#define ROT16_3(x) ((x).sDEF0123456789ABC)
+#define ROT16_4(x) ((x).sCDEF0123456789AB)
+#define ROT16_5(x) ((x).sBCDEF0123456789A)
+#define ROT16_6(x) ((x).sABCDEF0123456789)
+#define ROT16_7(x) ((x).s9ABCDEF012345678)
+#define ROT16_8(x) ((x).s89ABCDEF01234567)
+#define ROT16_9(x) ((x).s789ABCDEF0123456)
+#define ROT16_10(x) ((x).s6789ABCDEF012345)
+#define ROT16_11(x) ((x).s56789ABCDEF01234)
+#define ROT16_12(x) ((x).s456789ABCDEF0123)
+#define ROT16_13(x) ((x).s3456789ABCDEF012)
+#define ROT16_14(x) ((x).s23456789ABCDEF01)
+#define ROT16_15(x) ((x).s123456789ABCDEF0)
+/** @} */ // end of group ROTs_n
+
+/** Circular-right-shift (rotate-right) the given vector by the given amount.
+ * @name ROTATE
+ *
+ * @param[in] x The vector to be shifted
+ * @param[in] s The size of the vector
+ * @param[in] n The amount to be shifted
+ *
+ * @return The shifted vector
+ * @{
+ */
+#define ROTATE_STR(x, s, n) ROT##s##_##n(x)
+#define ROTATE(x, s, n) ROTATE_STR(x, s, n)
+/** @} */ // end of group ROTATE
+
+/** Creates a vector of size n filled with offset values corresponding to the location of each element.
+ * @name V_OFFSn
+ *
+ * @param[in] dt The data type of the output vector
+ *
+ * @return The vector filled with offset values
+ * @{
+ */
+#define V_OFFS1(dt) (dt)(0)
+#define V_OFFS2(dt) (dt)(0, 1)
+#define V_OFFS3(dt) (dt)(0, 1, 3)
+#define V_OFFS4(dt) (dt)(0, 1, 2, 3)
+#define V_OFFS8(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7)
+#define V_OFFS16(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+/** @} */ // end of group V_OFFSn
+
+/** Create a vector filled with offset values corresponding to the location of each element.
+ * @name VEC_OFFS
+ *
+ * @param[in] dt The data type of the output vector
+ * @param[in] s  The size of the output vector
+ *
+ * @return The vector filled with offset values
+ * @{
+ */
+#define VEC_OFFS_STR(dt, s) V_OFFS##s(dt)
+#define VEC_OFFS(dt, s) VEC_OFFS_STR(dt, s)
+/** @} */ // end of group VEC_OFFS
 
 #define VLOAD_STR(size) vload##size
 #define VLOAD(size) VLOAD_STR(size)
@@ -68,6 +210,46 @@
 #define double1 double
 
 #define vload1(OFFSET, PTR) *(OFFSET + PTR)
+#define vstore1(DATA, OFFSET, PTR) *(OFFSET + PTR) = DATA
+
+// Convert built-in functions with _sat modifier are not supported in floating point so we create defines
+// without _sat to overcome this issue
+#define convert_float_sat convert_float
+#define convert_float1_sat convert_float
+#define convert_float2_sat convert_float2
+#define convert_float3_sat convert_float3
+#define convert_float4_sat convert_float4
+#define convert_float8_sat convert_float8
+#define convert_float16_sat convert_float16
+#define convert_half_sat convert_float
+#define convert_half1_sat convert_half
+#define convert_half2_sat convert_half2
+#define convert_half3_sat convert_half3
+#define convert_half4_sat convert_half4
+#define convert_half8_sat convert_half8
+#define convert_half16_sat convert_half16
+
+#define convert_float1 convert_float
+#define convert_half1 convert_half
+#define convert_char1 convert_char
+#define convert_uchar1 convert_uchar
+#define convert_short1 convert_short
+#define convert_ushort1 convert_ushort
+#define convert_int1 convert_int
+#define convert_uint1 convert_uint
+#define convert_long1 convert_long
+#define convert_ulong1 convert_ulong
+#define convert_double1 convert_double
+
+#define convert_char1_sat convert_char_sat
+#define convert_uchar1_sat convert_uchar_sat
+#define convert_short1_sat convert_short_sat
+#define convert_ushort1_sat convert_ushort_sat
+#define convert_int1_sat convert_int_sat
+#define convert_uint1_sat convert_uint_sat
+#define convert_long1_sat convert_long_sat
+#define convert_ulong1_sat convert_ulong_sat
+#define convert_double1_sat convert_double_sat
 
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)

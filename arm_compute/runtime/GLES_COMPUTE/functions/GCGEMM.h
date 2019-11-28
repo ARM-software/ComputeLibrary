@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,9 +29,9 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMTranspose1xWKernel.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -96,7 +96,7 @@ public:
     void prepare() override;
 
 private:
-    GCMemoryGroup              _memory_group;
+    MemoryGroup                _memory_group;
     GCGEMMInterleave4x4Kernel  _interleave_kernel;
     GCGEMMTranspose1xWKernel   _transpose_kernel;
     GCGEMMMatrixMultiplyKernel _mm_kernel;

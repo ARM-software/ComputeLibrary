@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_RUNTIME_UTILS_H__
 #define __ARM_COMPUTE_RUNTIME_UTILS_H__
 
+#include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Scheduler.h"
 
 #include <string>
@@ -37,5 +38,13 @@ namespace arm_compute
  * @return The string describing the scheduler type.
  */
 const std::string &string_from_scheduler_type(Scheduler::Type t);
-}
+
+/** Schedules a kernel using the context if not nullptr else uses the legacy scheduling flow.
+ *
+ * @param[in] ctx    Context to use.
+ * @param[in] kernel Kernel to schedule.
+ * @param[in] hints  Hints to use.
+ */
+void schedule_kernel_on_ctx(IRuntimeContext *ctx, ICPPKernel *kernel, const IScheduler::Hints &hints);
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_RUNTIME_UTILS_H__ */

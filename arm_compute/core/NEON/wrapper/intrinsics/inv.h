@@ -40,6 +40,7 @@ namespace wrapper
 #define VINV_IMPL_INT(vtype, prefix, postfix) \
     inline vtype vinv(const vtype &a)         \
     {                                         \
+        ARM_COMPUTE_UNUSED(a);                \
         ARM_COMPUTE_ERROR("Not supported");   \
     }
 

@@ -25,8 +25,6 @@
 
 #if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
-#include "arm_gemm.hpp"
-
 #include "../std_transforms_fixed.hpp"
 
 namespace arm_gemm {
@@ -66,7 +64,9 @@ public:
     kern_type kernel = a64_hgemm_asimd_24x8;
 
     hgemm_24x8(const CPUInfo *ci) {
-        if (ci->get_cpu_model() == CPUModel::A55r1) {
+        auto model = ci->get_cpu_model();
+
+        if (model == CPUModel::A55r1) {
             kernel = a64_hgemm_asimd_24x8_a55r1;
         }
     }

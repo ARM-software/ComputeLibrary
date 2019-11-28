@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -113,8 +113,11 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="structarm__compute_1_1graph_1_1_memory_manager_context.xhtml#a2a7ca82c5e74421cb45f17e936abf964">MemoryManagerContext</a>
 , <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml#a2a7ca82c5e74421cb45f17e936abf964">NodeParams</a>
 , <a class="el" href="structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml#a2a7ca82c5e74421cb45f17e936abf964">TensorDescriptor</a>
+, <a class="el" href="structarm__compute_1_1graph_1_1_weights_manager_context.xhtml#a2a7ca82c5e74421cb45f17e936abf964">WeightsManagerContext</a>
 , <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a770e3e82cb8e4632d754e651fd29b9cb">CommonGraphOptions</a>
 , <a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a29d9bc83bfba2fba21af47e575569dde">CommonGraphParams</a>
+, <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_validate_options.xhtml#a770e3e82cb8e4632d754e651fd29b9cb">CommonGraphValidateOptions</a>
+, <a class="el" href="structarm__compute_1_1utils_1_1_framework_params.xhtml#a29d9bc83bfba2fba21af47e575569dde">FrameworkParams</a>
 </li>
 <li>target_hint
 : <a class="el" href="structarm__compute_1_1graph_1_1frontend_1_1_stream_hints.xhtml#a81d9ddb43e3c89a5bf3334d475f9d74b">StreamHints</a>
@@ -125,6 +128,9 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 <li>tasks
 : <a class="el" href="structarm__compute_1_1graph_1_1_execution_workload.xhtml#ae7d2dcab167d9eba3483a1fa1f330c7f">ExecutionWorkload</a>
 </li>
+<li>TBias
+: <a class="el" href="classarm__compute_1_1utils_1_1_verify_accessor.xhtml#a4e68efc85570b62c7d53c78875ced9bc">VerifyAccessor&lt; D &gt;</a>
+</li>
 <li>teardown()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml#a4adab6322a0276f34a7d656d49fc865c">Fixture</a>
 </li>
@@ -132,7 +138,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">CLSubTensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">CLTensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">GCTensorHandle</a>
-, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">NESubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a5d9a543899a9f7c93a950a1d080f2437">NESubTensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">NETensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_edge.xhtml#aff6b38772acc09675f4f64e510e31055">Edge</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a91bccd842a1caad3149523a05f150ee6">Graph</a>
@@ -154,7 +160,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_tensor_accessor.xhtml#ac71bd355798608e6699d922b56e2041a">TensorAccessor&lt; T &gt;</a>
 </li>
 <li>TensorAllocator()
-: <a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a20c11f37f59a434b1dd0b69f62771ac6">TensorAllocator</a>
+: <a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a10ccec9a08d4c97e4d90d9a1771cbfe8">TensorAllocator</a>
 </li>
 <li>TensorConcreteType
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#a991b6faefbee1cf7b9cf77647c30a6ec">FusedConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;</a>
@@ -164,13 +170,13 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 : <a class="el" href="structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml#afb1242d3a5cd10691afac084fa49713f">TensorDescriptor</a>
 </li>
 <li>TensorInfo()
-: <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a21c2ae9fa438faf42669dadda628080c">TensorInfo</a>
+: <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#ad3e249a7d8f329aa470d6903c9e415fe">TensorInfo</a>
 </li>
 <li>tensors()
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#aabacbdcb2b491b129b119273a813bb67">Graph</a>
 </li>
 <li>TensorShape()
-: <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml#a5fa5abfb10a67d23a75339646e84517a">TensorShape</a>
+: <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml#a091252b04a1c79d499dd6184f9f5d715">TensorShape</a>
 </li>
 <li>TensorType
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#a4ae2727819a8e5fb0b0d9087e7ebd5ca">FusedConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;</a>
@@ -229,9 +235,12 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 <li>threads
 : <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_options.xhtml#ad6174941c7ae1c945e4f7fcb3261f87c">CommonGraphOptions</a>
 , <a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a4f987a98d3e1221916748962e45399fe">CommonGraphParams</a>
+, <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_validate_options.xhtml#ad6174941c7ae1c945e4f7fcb3261f87c">CommonGraphValidateOptions</a>
+, <a class="el" href="structarm__compute_1_1utils_1_1_framework_params.xhtml#a4f987a98d3e1221916748962e45399fe">FrameworkParams</a>
 </li>
-<li>threshold
-: <a class="el" href="structarm__compute_1_1test_1_1validation_1_1_harris_corners_parameters.xhtml#a376acef8954eadc70f4b55e8e0588e13">HarrisCornersParameters</a>
+<li>threshold()
+: <a class="el" href="classarm__compute_1_1_i_scheduler_1_1_hints.xhtml#a35edee05aa4b2e0e80c851cdc3e68654">IScheduler::Hints</a>
+, <a class="el" href="structarm__compute_1_1test_1_1validation_1_1_harris_corners_parameters.xhtml#a376acef8954eadc70f4b55e8e0588e13">HarrisCornersParameters</a>
 </li>
 <li>throw_errors
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#acfa78593a32c16d1b3f397a68bbd1c29">CommonOptions</a>
@@ -246,6 +255,11 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 </li>
 <li>ToggleOption()
 : <a class="el" href="classarm__compute_1_1utils_1_1_toggle_option.xhtml#ae27b8b254e5e02265bd1032771aa303e">ToggleOption</a>
+</li>
+<li>tolerance_number
+: <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_validate_options.xhtml#a3af7a44f7d0ef3276bc0b419f418012c">CommonGraphValidateOptions</a>
+, <a class="el" href="structarm__compute_1_1utils_1_1_verification_params.xhtml#ad2934e26bd8d5d9cb23040bf3135c4bf">VerificationParams</a>
+, <a class="el" href="classarm__compute_1_1utils_1_1_verify_accessor.xhtml#a399e4cdf08ce98d229dcaa8e4ee9841e">VerifyAccessor&lt; D &gt;</a>
 </li>
 <li>top
 : <a class="el" href="structarm__compute_1_1_border_size.xhtml#a3fdd42ea34070a54e696b3adc28c4be3">BorderSize</a>
@@ -342,6 +356,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">ConvolutionLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_deconvolution_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DeconvolutionLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DepthwiseConvolutionLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DequantizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DetectionOutputLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_detection_post_process_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DetectionPostProcessLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_dummy_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DummyNode</a>
@@ -378,9 +393,12 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 </li>
 <li>Type
 : <a class="el" href="classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7">Scheduler</a>
+, <a class="el" href="classarm__compute_1_1_scheduler_factory.xhtml#a1d1cfd8ffb84e947f82999c682b666a7">SchedulerFactory</a>
 </li>
 <li>type
-: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml#a9c9aae4b5f426f99087f48b40bc114fc">CartesianProductDataset&lt; T, U &gt;</a>
+: <a class="el" href="structarm__compute_1_1test_1_1_context_type.xhtml#a9572b98335b1c3aa5b9183ba6cdd6421">ContextType&lt; T &gt;</a>
+, <a class="el" href="structarm__compute_1_1test_1_1_context_type_3_01_tensor_01_4.xhtml#ad5b4ae415d2d7a4a1a272d2dbea38324">ContextType&lt; Tensor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml#a9c9aae4b5f426f99087f48b40bc114fc">CartesianProductDataset&lt; T, U &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset.xhtml#a6fdded42fc2978d6f9f60564b5b4190a">ContainerDataset&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset.xhtml#a18b86dafc894ede9c2b71030a731a106">InitializerListDataset&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#ad4f1d01a0af9cf719345464b2c3821ca">JoinDataset&lt; T, U &gt;</a>
@@ -395,6 +413,14 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml#a43022da9f622deba3284b748a6885e23">promote&lt; uint16_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml#a9659bbcc7fc016eda242219021c7980b">promote&lt; uint32_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml#a3085ed9ad7c9b1c88dcec24108730e54">promote&lt; uint8_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01float_01_4.xhtml#a05cacf975133703fccd67d8b60ed9ae0">promote&lt; float &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01half_01_4.xhtml#a871173f31fa2a65afb444d262bc1aadb">promote&lt; half &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int16__t_01_4.xhtml#a4f14ffc6d6f6ca92afb1baf996fc9305">promote&lt; int16_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int32__t_01_4.xhtml#a70ca3d636283d6713220cd8af5fc07b3">promote&lt; int32_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int8__t_01_4.xhtml#a8812bf779dca54354aa6ad00cef14a73">promote&lt; int8_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml#a43022da9f622deba3284b748a6885e23">promote&lt; uint16_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml#a9659bbcc7fc016eda242219021c7980b">promote&lt; uint32_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml#a3085ed9ad7c9b1c88dcec24108730e54">promote&lt; uint8_t &gt;</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -402,7 +428,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

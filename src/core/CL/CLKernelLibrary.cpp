@@ -161,6 +161,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "bitwise_xor", "bitwise_op.cl" },
     { "bitwise_not", "bitwise_op.cl" },
     { "bounding_box_transform", "bounding_box_transform.cl" },
+    { "bounding_box_transform_quantized", "bounding_box_transform_quantized.cl" },
     { "channel_combine_NV", "channel_combine.cl" },
     { "channel_combine_RGB888", "channel_combine.cl" },
     { "channel_combine_RGBA8888", "channel_combine.cl" },
@@ -220,11 +221,13 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_nhwc", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_nhwc_stride1", "depthwise_convolution.cl" },
-    { "dwc_3x3_native_qasymm8_nchw", "depthwise_convolution_quantized.cl" },
-    { "dwc_3x3_native_qasymm8_dot8_nchw", "depthwise_convolution_quantized.cl" },
-    { "dwc_3x3_reshaped_qasymm8_nhwc", "depthwise_convolution_quantized.cl" },
-    { "dwc_3x3_reshaped_qasymm8_stride1_nhwc", "depthwise_convolution_quantized.cl" },
-    { "dwc_3x3_reshaped_qasymm8_dot8_stride1_nhwc", "depthwise_convolution_quantized.cl" },
+    { "dwc_MxN_native_fp_nhwc", "depthwise_convolution.cl" },
+    { "dwc_MxN_native_quantized8_nhwc", "depthwise_convolution_quantized.cl" },
+    { "dwc_3x3_native_quantized8_nchw", "depthwise_convolution_quantized.cl" },
+    { "dwc_3x3_native_quantized8_dot8_nchw", "depthwise_convolution_quantized.cl" },
+    { "dwc_3x3_reshaped_quantized8_nhwc", "depthwise_convolution_quantized.cl" },
+    { "dwc_3x3_reshaped_quantized8_stride1_nhwc", "depthwise_convolution_quantized.cl" },
+    { "dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc", "depthwise_convolution_quantized.cl" },
     { "depth_to_space_nchw", "depth_to_space.cl" },
     { "depth_to_space_nhwc", "depth_to_space.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16", "depthwise_convolution.cl" },
@@ -232,10 +235,9 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32", "depthwise_convolution.cl" },
     { "depthwise_convolution_reshape_weights", "depthwise_convolution.cl" },
-    { "depthwise_convolution_reshape_weights_generic", "depthwise_convolution.cl" },
-    { "depthwise_im2col", "depthwise_convolution.cl" },
-    { "depthwise_vector_to_tensor", "depthwise_convolution.cl" },
     { "dequantization_layer", "dequantization_layer.cl" },
+    { "dequantization_layer_per_channel_nhwc", "dequantization_layer.cl" },
+    { "dequantization_layer_per_channel_nchw", "dequantization_layer.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
@@ -247,7 +249,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "direct_convolution5x5", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_nhwc", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
-    { "direct_convolution_1x1_3x3_5x5_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
+    { "direct_convolution_quantized", "direct_convolution_quantized.cl" },
     { "direct_convolution9x9_nhwc", "direct_convolution9x9.cl" },
     { "elementwise_operation_ADD", "elementwise_operation.cl" },
     { "elementwise_operation_SUB", "elementwise_operation.cl" },
@@ -320,6 +322,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_mm_floating_point_f32_bifrost_1000", "gemm.cl" },
     { "gemm_mm_native", "gemm.cl" },
     { "gemm_mm_reshaped_lhs_nt_rhs_t", "gemm.cl" },
+    { "gemm_mm_reshaped_lhs_t_rhs_nt", "gemm.cl" },
     { "gemm_mm_reshaped_only_rhs_nt", "gemm.cl" },
     { "gemm_mm_reshaped_only_rhs_t", "gemm.cl" },
     { "gemm_lc_vm_f32", "gemm.cl" },
@@ -342,6 +345,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16", "gemmlowp.cl" },
     { "gemmlowp_output_stage_quantize_down_float", "gemmlowp.cl" },
     { "generate_proposals_compute_all_anchors", "generate_proposals.cl" },
+    { "generate_proposals_compute_all_anchors_quantized", "generate_proposals_quantized.cl" },
     { "harris_score_3x3", "harris_corners.cl" },
     { "harris_score_5x5", "harris_corners.cl" },
     { "harris_score_7x7", "harris_corners.cl" },
@@ -365,6 +369,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "init_level", "optical_flow_pyramid_lk.cl" },
     { "init_level_max", "optical_flow_pyramid_lk.cl" },
     { "init_level_max_initial_estimate", "optical_flow_pyramid_lk.cl" },
+    { "instance_normalization", "instance_normalization.cl" },
     { "integral_horizontal", "integral_image.cl" },
     { "integral_vertical", "integral_image.cl" },
     { "IYUV_to_NV12_bt709", "color_convert.cl" },
@@ -406,7 +411,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "NV21_to_RGB888_bt709", "color_convert.cl" },
     { "NV21_to_RGBA8888_bt709", "color_convert.cl" },
     { "NV21_to_YUV444_bt709", "color_convert.cl" },
-    { "output_stage_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
+    { "pad_layer_constant", "pad_layer.cl" },
+    { "pad_layer_symmetric_reflect", "pad_layer.cl" },
     { "permute", "permute.cl" },
     { "pixelwise_mul_complex", "pixelwise_mul_float.cl" },
     { "pixelwise_mul_float", "pixelwise_mul_float.cl" },
@@ -446,6 +452,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "RGBA8888_to_RGB888_bt709", "color_convert.cl" },
     { "RGBA8888_to_YUV444_bt709", "color_convert.cl" },
     { "roi_align_layer", "roi_align_layer.cl" },
+    { "roi_align_layer_quantized", "roi_align_layer_quantized.cl" },
     { "roi_pooling_layer", "roi_pooling_layer.cl" },
     { "scale_nearest_neighbour_nchw", "scale.cl" },
     { "scale_nearest_neighbour_nhwc", "scale.cl" },
@@ -590,6 +597,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/bounding_box_transform.clembed"
     },
     {
+        "bounding_box_transform_quantized.cl",
+#include "./cl_kernels/bounding_box_transform_quantized.clembed"
+    },
+    {
         "canny.cl",
 #include "./cl_kernels/canny.clembed"
     },
@@ -706,8 +717,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/direct_convolution5x5.clembed"
     },
     {
-        "direct_convolution_1x1_3x3_5x5_quantized.cl",
-#include "./cl_kernels/direct_convolution_1x1_3x3_5x5_quantized.clembed"
+        "direct_convolution_quantized.cl",
+#include "./cl_kernels/direct_convolution_quantized.clembed"
     },
     {
         "direct_convolution9x9.cl",
@@ -782,6 +793,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/generate_proposals.clembed"
     },
     {
+        "generate_proposals_quantized.cl",
+#include "./cl_kernels/generate_proposals_quantized.clembed"
+    },
+    {
         "harris_corners.cl",
 #include "./cl_kernels/harris_corners.clembed"
     },
@@ -804,6 +819,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "im2col.cl",
 #include "./cl_kernels/im2col.clembed"
+    },
+    {
+        "instance_normalization.cl",
+#include "./cl_kernels/instance_normalization.clembed"
     },
     {
         "integral_image.cl",
@@ -874,6 +893,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/optical_flow_pyramid_lk.clembed"
     },
     {
+        "pad_layer.cl",
+#include "./cl_kernels/pad_layer.clembed"
+    },
+    {
         "permute.cl",
 #include "./cl_kernels/permute.clembed"
     },
@@ -928,6 +951,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "roi_align_layer.cl",
 #include "./cl_kernels/roi_align_layer.clembed"
+    },
+    {
+        "roi_align_layer_quantized.cl",
+#include "./cl_kernels/roi_align_layer_quantized.clembed"
     },
     {
         "roi_pooling_layer.cl",
@@ -1047,7 +1074,7 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
 
     if(_kernel_program_map.end() == kernel_program_it)
     {
-        ARM_COMPUTE_ERROR("Kernel %s not found in the CLKernelLibrary", kernel_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Kernel %s not found in the CLKernelLibrary", kernel_name.c_str());
     }
     std::string concat_str;
 
@@ -1117,6 +1144,49 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     return Kernel(kernel_name, cl_program);
 }
 
+void CLKernelLibrary::init(std::string kernel_path, cl::Context context, cl::Device device)
+{
+    _kernel_path = std::move(kernel_path);
+    _context     = std::move(context);
+    _device      = std::move(device);
+}
+
+void CLKernelLibrary::set_kernel_path(const std::string &kernel_path)
+{
+    _kernel_path = kernel_path;
+}
+
+cl::Context &CLKernelLibrary::context()
+{
+    return _context;
+}
+
+cl::Device &CLKernelLibrary::get_device()
+{
+    return _device;
+}
+
+void CLKernelLibrary::set_device(cl::Device device)
+{
+    _device = std::move(device);
+}
+
+std::string CLKernelLibrary::get_kernel_path()
+{
+    return _kernel_path;
+}
+
+void CLKernelLibrary::clear_programs_cache()
+{
+    _programs_map.clear();
+    _built_programs_map.clear();
+}
+
+const std::map<std::string, cl::Program> &CLKernelLibrary::get_built_programs() const
+{
+    return _built_programs_map;
+}
+
 void CLKernelLibrary::add_built_program(const std::string &built_program_name, const cl::Program &program)
 {
     _built_programs_map.emplace(built_program_name, program);
@@ -1148,7 +1218,7 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
 
     if(_program_source_map.end() == program_source_it)
     {
-        ARM_COMPUTE_ERROR("Embedded program for %s does not exist.", program_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Embedded program for %s does not exist.", program_name.c_str());
     }
 
     program = Program(_context, program_name, program_source_it->second);
@@ -1168,7 +1238,7 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
     }
     else
     {
-        ARM_COMPUTE_ERROR("Kernel file %s does not exist.", source_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Kernel file %s does not exist.", source_name.c_str());
     }
 #endif /* EMBEDDED_KERNELS */
 
@@ -1176,6 +1246,28 @@ const Program &CLKernelLibrary::load_program(const std::string &program_name) co
     const auto new_program = _programs_map.emplace(program_name, std::move(program));
 
     return new_program.first->second;
+}
+
+void CLKernelLibrary::set_context(cl::Context context)
+{
+    _context = std::move(context);
+    if(_context.get() == nullptr)
+    {
+        _device = cl::Device();
+    }
+    else
+    {
+        const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
+
+        if(cl_devices.empty())
+        {
+            _device = cl::Device();
+        }
+        else
+        {
+            _device = cl_devices[0];
+        }
+    }
 }
 
 std::string CLKernelLibrary::stringify_set(const StringSet &s) const
@@ -1201,7 +1293,7 @@ std::string CLKernelLibrary::get_program_source(const std::string &program_name)
 
     if(program_source_it == _program_source_map.end())
     {
-        ARM_COMPUTE_ERROR("Embedded program for %s does not exist.", program_name.c_str());
+        ARM_COMPUTE_ERROR_VAR("Embedded program for %s does not exist.", program_name.c_str());
     }
 
     return program_source_it->second;

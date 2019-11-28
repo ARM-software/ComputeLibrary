@@ -41,7 +41,7 @@ inline TYPE relu_op(TYPE x)
 // Bounded RELU Activation
 inline TYPE brelu_op(TYPE x)
 {
-    return min((TYPE)A_VAL, max(CONST_0, x));
+    return min((TYPE)A_VAL, max((TYPE)CONST_0, x));
 }
 // Lower Upper Bounded RELU Activation
 inline TYPE lu_brelu_op(TYPE x)

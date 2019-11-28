@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2018 ARM Limited.
+/// Copyright (c) 2017-2019 ARM Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -51,8 +51,8 @@ For each release we provide some pre-built binaries of the library [here](https:
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf
             - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
-            - Android armv7a: clang++ / libc++ NDK r17b
-            - Android am64-v8a: clang++ / libc++ NDK r17b
+            - Android armv7a: clang++ / libc++ NDK r17c
+            - Android am64-v8a: clang++ / libc++ NDK r17c
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
@@ -236,6 +236,72 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v19.11 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - Updated recommended NDK version to r17c.
+ - Deprecated OpenCL kernels / functions:
+    - CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel
+    - CLDepthwiseIm2ColKernel
+    - CLDepthwiseSeparableConvolutionLayer
+    - CLDepthwiseVectorToTensorKernel
+    - CLDirectConvolutionLayerOutputStageKernel
+ - Deprecated NEON kernels / functions:
+    - NEDepthwiseWeightsReshapeKernel
+    - NEDepthwiseIm2ColKernel
+    - NEDepthwiseSeparableConvolutionLayer
+    - NEDepthwiseVectorToTensorKernel
+    - NEDepthwiseConvolutionLayer3x3
+ - New OpenCL kernels / functions:
+    - @ref CLInstanceNormalizationLayerKernel / @ref CLInstanceNormalizationLayer
+    - @ref CLDepthwiseConvolutionLayerNativeKernel to replace the old generic depthwise convolution (see Deprecated
+      OpenCL kernels / functions)
+    - @ref CLLogSoftmaxLayer
+ - New NEON kernels / functions:
+    - @ref NEBoundingBoxTransformKernel / @ref NEBoundingBoxTransform
+    - @ref NEComputeAllAnchorsKernel / @ref NEComputeAllAnchors
+    - @ref NEDetectionPostProcessLayer
+    - @ref NEGenerateProposalsLayer
+    - @ref NEInstanceNormalizationLayerKernel / @ref NEInstanceNormalizationLayer
+    - @ref NELogSoftmaxLayer
+    - @ref NEROIAlignLayerKernel / @ref NEROIAlignLayer
+ - Added QASYMM8 support for:
+    - @ref CLGenerateProposalsLayer
+    - @ref CLROIAlignLayer
+    - @ref CPPBoxWithNonMaximaSuppressionLimit
+ - Added QASYMM16 support for:
+    - @ref CLBoundingBoxTransform
+ - Added FP16 support for:
+    - @ref CLGEMMMatrixMultiplyReshapedKernel
+ - Added new data type QASYMM8_PER_CHANNEL support for:
+    - @ref CLDequantizationLayer
+    - @ref NEDequantizationLayer
+ - Added new data type QSYMM8_PER_CHANNEL support for:
+    - @ref CLConvolutionLayer
+    - @ref NEConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer
+    - @ref NEDepthwiseConvolutionLayer
+ - Added FP16 mixed-precision support for:
+    - @ref CLGEMMMatrixMultiplyReshapedKernel
+    - @ref CLPoolingLayerKernel
+ - Added FP32 and FP16 ELU activation for:
+    - @ref CLActivationLayer
+    - @ref NEActivationLayer
+ - Added asymmetric padding support for:
+    - @ref CLDirectDeconvolutionLayer
+    - @ref CLGEMMDeconvolutionLayer
+    - @ref NEDeconvolutionLayer
+ - Added SYMMETRIC and REFLECT modes for @ref CLPadLayerKernel / @ref CLPadLayer.
+ - Replaced the calls to @ref NECopyKernel and @ref NEMemsetKernel with @ref NEPadLayer in @ref NEGenerateProposalsLayer.
+ - Replaced the calls to @ref CLCopyKernel and @ref CLMemsetKernel with @ref CLPadLayer in @ref CLGenerateProposalsLayer.
+ - Improved performance for CL Inception V3 - FP16.
+ - Improved accuracy for CL Inception V3 - FP16 by enabling FP32 accumulator (mixed-precision).
+ - Improved NEON performance by enabling fusing batch normalization with convolution and depth-wise convolution layer.
+ - Improved NEON performance for MobileNet-SSD by improving the output detection performance.
+ - Optimized @ref CLPadLayer.
+ - Optimized CL generic depthwise convolution layer by introducing @ref CLDepthwiseConvolutionLayerNativeKernel.
+ - Reduced memory consumption by implementing weights sharing.
+
 v19.08 Public major release
  - Various bug fixes.
  - Various optimisations.
@@ -290,7 +356,8 @@ v19.08 Public major release
  - Added an optimized depthwise convolution layer kernel for 5x5 filters (NEON only)
  - Added support to enable OpenCL kernel cache. Added example showing how to load the prebuilt OpenCL kernels from a binary cache file
  - Altered @ref QuantizationInfo interface to support per-channel quantization.
- - The @ref NEDepthwiseConvolutionLayer3x3 will be replaced by @ref NEDepthwiseConvolutionLayerOptimized to accommodate for future optimizations.
+ - The @ref CLDepthwiseConvolutionLayer3x3 will be included by @ref CLDepthwiseConvolutionLayer to accommodate for future optimizations.
+ - The @ref NEDepthwiseConvolutionLayerOptimized will be included by @ref NEDepthwiseConvolutionLayer to accommodate for future optimizations.
  - Removed inner_border_right and inner_border_top parameters from @ref CLDeconvolutionLayer interface
  - Removed inner_border_right and inner_border_top parameters from @ref NEDeconvolutionLayer interface
  - Optimized the NEON assembly kernel for GEMMLowp. The new implementation fuses the output stage and quantization with the matrix multiplication kernel
@@ -624,7 +691,7 @@ v18.02 Public major release
  - Added fused batched normalization and activation to @ref CLBatchNormalizationLayer and @ref NEBatchNormalizationLayer
  - Added support for non-square pooling to @ref NEPoolingLayer and @ref CLPoolingLayer
  - New OpenCL kernels / functions:
-    - @ref CLDirectConvolutionLayerOutputStageKernel
+    - CLDirectConvolutionLayerOutputStageKernel
  - New NEON kernels / functions
     - Added name() method to all kernels.
     - Added support for Winograd 5x5.
@@ -699,7 +766,7 @@ v17.12 Public major release
  - New NEON kernels / functions
     - arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
     - arm_compute::NEHGEMMAArch64FP16Kernel
-    - @ref NEDepthwiseConvolutionLayer3x3Kernel / @ref NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / @ref NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
     - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
@@ -746,7 +813,7 @@ v17.09 Public major release
     - @ref NEReshapeLayerKernel / @ref NEReshapeLayer
 
  - New OpenCL kernels / functions:
-    - @ref CLDepthwiseConvolutionLayer3x3NCHWKernel @ref CLDepthwiseConvolutionLayer3x3NHWCKernel @ref CLDepthwiseIm2ColKernel @ref CLDepthwiseVectorToTensorKernel CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer @ref CLDepthwiseSeparableConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer3x3NCHWKernel @ref CLDepthwiseConvolutionLayer3x3NHWCKernel CLDepthwiseIm2ColKernel CLDepthwiseVectorToTensorKernel CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer CLDepthwiseSeparableConvolutionLayer
     - @ref CLDequantizationLayerKernel / @ref CLDequantizationLayer
     - @ref CLDirectConvolutionLayerKernel / @ref CLDirectConvolutionLayer
     - @ref CLFlattenLayer
@@ -829,7 +896,7 @@ v17.03.1 First Major public release of the sources
 v17.03 Sources preview
  - New OpenCL kernels / functions:
    - @ref CLGradientKernel, @ref CLEdgeNonMaxSuppressionKernel, @ref CLEdgeTraceKernel / @ref CLCannyEdge
-   - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, @ref CLGEMMMatrixAdditionKernel / @ref CLGEMM
+   - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, CLGEMMMatrixAdditionKernel / @ref CLGEMM
    - @ref CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
    - @ref CLTransposeKernel / @ref CLTranspose
    - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / @ref CLOpticalFlow

@@ -12,9 +12,15 @@ var dir_9e71e2da941d3cafc4d98a9f6ae3de4f =
     [ "Fixture.h", "_fixture_8h.xhtml", [
       [ "Fixture", "classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml", "classarm__compute_1_1test_1_1framework_1_1_fixture" ]
     ] ],
-    [ "Framework.cpp", "_framework_8cpp.xhtml", null ],
+    [ "Framework.cpp", "_framework_8cpp.xhtml", "_framework_8cpp" ],
     [ "Framework.h", "_framework_8h.xhtml", "_framework_8h" ],
     [ "Macros.h", "tests_2framework_2_macros_8h.xhtml", "tests_2framework_2_macros_8h" ],
+    [ "ParametersLibrary.cpp", "_parameters_library_8cpp.xhtml", null ],
+    [ "ParametersLibrary.h", "_parameters_library_8h.xhtml", [
+      [ "ContextType", "structarm__compute_1_1test_1_1_context_type.xhtml", "structarm__compute_1_1test_1_1_context_type" ],
+      [ "ContextType< Tensor >", "structarm__compute_1_1test_1_1_context_type_3_01_tensor_01_4.xhtml", "structarm__compute_1_1test_1_1_context_type_3_01_tensor_01_4" ],
+      [ "ParametersLibrary", "classarm__compute_1_1test_1_1_parameters_library.xhtml", "classarm__compute_1_1test_1_1_parameters_library" ]
+    ] ],
     [ "Profiler.cpp", "_profiler_8cpp.xhtml", null ],
     [ "Profiler.h", "_profiler_8h.xhtml", [
       [ "Profiler", "classarm__compute_1_1test_1_1framework_1_1_profiler.xhtml", "classarm__compute_1_1test_1_1framework_1_1_profiler" ]

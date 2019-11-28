@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -359,10 +359,10 @@ Public Member Functions</h2></td></tr>
 <p>Implements <a class="el" href="classarm__compute_1_1cl__tuner_1_1_i_c_l_l_w_s_list.xhtml#a1bc808967db764b34c207daf44c066f6">ICLLWSList</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_l_w_s_list_8cpp_source.xhtml#l00050">50</a> of file <a class="el" href="_c_l_l_w_s_list_8cpp_source.xhtml">CLLWSList.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;{</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(index &gt;= size());</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keyword">auto</span> coords = <a class="code" href="namespacearm__compute.xhtml#ad34f2150f1c9f8a3ecb7298162124e5d">index2coords</a>(search_space_shape, index);</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordflow">return</span> cl::NDRange{ _lws_x[coords[0]], _lws_y[coords[1]], _lws_z[coords[2]] };</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_ad34f2150f1c9f8a3ecb7298162124e5d"><div class="ttname"><a href="namespacearm__compute.xhtml#ad34f2150f1c9f8a3ecb7298162124e5d">arm_compute::index2coords</a></div><div class="ttdeci">Coordinates index2coords(const TensorShape &amp;shape, int index)</div><div class="ttdoc">Convert a linear index into n-dimensional coordinates.</div><div class="ttdef"><b>Definition:</b> <a href="_helpers_8inl_source.xhtml#l00289">Helpers.inl:289</a></div></div>
-<div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
+<div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;{</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(index &gt;= size());</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keyword">auto</span> coords = <a class="code" href="namespacearm__compute.xhtml#ad34f2150f1c9f8a3ecb7298162124e5d">index2coords</a>(search_space_shape, index);</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordflow">return</span> cl::NDRange{ _lws_x[coords[0]], _lws_y[coords[1]], _lws_z[coords[2]] };</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_ad34f2150f1c9f8a3ecb7298162124e5d"><div class="ttname"><a href="namespacearm__compute.xhtml#ad34f2150f1c9f8a3ecb7298162124e5d">arm_compute::index2coords</a></div><div class="ttdeci">Coordinates index2coords(const TensorShape &amp;shape, int index)</div><div class="ttdoc">Convert a linear index into n-dimensional coordinates.</div><div class="ttdef"><b>Definition:</b> <a href="_helpers_8inl_source.xhtml#l00290">Helpers.inl:290</a></div></div>
+<div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00466">Error.h:466</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00289">arm_compute::index2coords()</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00466">ARM_COMPUTE_ERROR_ON</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00290">arm_compute::index2coords()</a>.</p>
 
 </div>
 </div>
@@ -376,7 +376,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1cl__tuner.xhtml">cl_tuner</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1cl__tuner_1_1_c_l_l_w_s_list_normal.xhtml">CLLWSListNormal</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:17 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

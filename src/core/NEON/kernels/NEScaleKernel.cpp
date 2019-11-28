@@ -227,7 +227,7 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
         border_value = static_cast<T>(constant_border_value.get<ConstType>());
     }
 
-    auto is_valid = [](int x, int low_x, int high_x, int y, int low_y, int high_y)
+    auto is_valid = [](int64_t x, int64_t low_x, int64_t high_x, int64_t y, int64_t low_y, int64_t high_y)
     {
         return !(x < low_x || x > high_x || y < low_y || y > high_y);
     };

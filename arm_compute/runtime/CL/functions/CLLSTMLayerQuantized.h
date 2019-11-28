@@ -132,7 +132,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup _memory_group;
+    MemoryGroup _memory_group;
 
     // Functions used
     CLGEMMLowpMatrixMultiplyCore                        _gemmlowp;

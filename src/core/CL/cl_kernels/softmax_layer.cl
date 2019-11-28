@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,7 +111,11 @@ __kernel void softmax_layer_norm(
     DATA_TYPE sum_val = *((__global DATA_TYPE *)offset(&sum, 0, get_global_id(1)));
     VEC_DATA_TYPE(DATA_TYPE, 16)
     data = vload16(0, (__global DATA_TYPE *)offset(&src, 0, 0));
+#ifdef LOG_SOFTMAX
+    vstore16(SUB_OP(data, sum_val, DATA_TYPE, 16), 0, (__global DATA_TYPE *)offset(&dst, 0, 0));
+#else  /* LOG_SOFTMAX */
     vstore16(DIV_OP(data, sum_val, DATA_TYPE, 16), 0, (__global DATA_TYPE *)offset(&dst, 0, 0));
+#endif /* LOG_SOFTMAX */
 }
 
 /** Identifies the maximum value across the 1st dimension and shifts the values of the input tensor by this maximum value,
@@ -226,9 +230,15 @@ __kernel void softmax_layer_max_shift_exp_sum_serial(
 #ifdef BETA
         data = MUL_OP(data, beta, DATA_TYPE, VECTOR_SIZE);
 #endif /* BETA */
+#ifdef LOG_SOFTMAX
+        VSTORE(VECTOR_SIZE)
+        (data, 0, (__global DATA_TYPE *)offset(&dst, i << LOG_VECTOR_SIZE, 0));
+        data = EXP_OP(data, DATA_TYPE, VECTOR_SIZE);
+#else  /* LOG_SOFTMAX */
         data = EXP_OP(data, DATA_TYPE, VECTOR_SIZE);
         VSTORE(VECTOR_SIZE)
         (data, 0, (__global DATA_TYPE *)offset(&dst, i << LOG_VECTOR_SIZE, 0));
+#endif /* LOG_SOFTMAX */
         sum1D = ADD_OP(sum1D, data, DATA_TYPE, VECTOR_SIZE);
     }
 
@@ -239,11 +249,19 @@ __kernel void softmax_layer_max_shift_exp_sum_serial(
 #ifdef BETA
     data = MUL_OP(data, beta, DATA_TYPE, VECTOR_SIZE);
 #endif /* BETA */
+#ifdef LOG_SOFTMAX
+    VSTORE(VECTOR_SIZE)
+    (data, 0, (__global DATA_TYPE *)offset(&dst, width_ << LOG_VECTOR_SIZE, 0));
+    data = EXP_OP(data, DATA_TYPE, VECTOR_SIZE);
+    widx = CONVERT((EXPAND((CL_VEC_DATA_TYPE(uint, VECTOR_SIZE)))(width_ << LOG_VECTOR_SIZE) + idx__) < width, VEC_DATA_TYPE(SELECT_DATA_TYPE, VECTOR_SIZE));
+    data = select(0, data, widx);
+#else  /* LOG_SOFTMAX */
     data = EXP_OP(data, DATA_TYPE, VECTOR_SIZE);
     widx = CONVERT((EXPAND((CL_VEC_DATA_TYPE(uint, VECTOR_SIZE)))(width_ << LOG_VECTOR_SIZE) + idx__) < width, VEC_DATA_TYPE(SELECT_DATA_TYPE, VECTOR_SIZE));
     data = select(0, data, widx);
     VSTORE(VECTOR_SIZE)
     (data, 0, (__global DATA_TYPE *)offset(&dst, width_ << LOG_VECTOR_SIZE, 0));
+#endif /* LOG_SOFTMAX */
     sum1D = ADD_OP(sum1D, data, DATA_TYPE, VECTOR_SIZE);
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 
@@ -455,9 +473,15 @@ __kernel void softmax_layer_max_shift_exp_sum_parallel(
 #ifdef BETA
         data = MUL_OP(data, beta, DATA_TYPE, 4);
 #endif /* BETA */
+#ifdef LOG_SOFTMAX
+        VSTORE(4)
+        (data, 0, (__global DATA_TYPE *)offset(&dst, i * GRID_SIZE * 4, 0));
+        data = EXP_OP(data, DATA_TYPE, 4);
+#else  /* LOG_SOFTMAX */
         data = EXP_OP(data, DATA_TYPE, 4);
         VSTORE(4)
         (data, 0, (__global DATA_TYPE *)offset(&dst, i * GRID_SIZE * 4, 0));
+#endif /* LOG_SOFTMAX */
         sum1D = ADD_OP(sum1D, data, DATA_TYPE, 4);
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
@@ -471,9 +495,15 @@ __kernel void softmax_layer_max_shift_exp_sum_parallel(
 #ifdef BETA
         data = MUL_OP(data, beta, DATA_TYPE, 4);
 #endif /* BETA */
+#ifdef LOG_SOFTMAX
+        VSTORE(4)
+        (data, 0, (__global DATA_TYPE *)offset(&dst, i * GRID_SIZE * 4, 0));
+        data = EXP_OP(data, DATA_TYPE, 4);
+#else  /* LOG_SOFTMAX */
         data = EXP_OP(data, DATA_TYPE, 4);
         VSTORE(4)
         (data, 0, (__global DATA_TYPE *)offset(&dst, i * GRID_SIZE * 4, 0));
+#endif /* LOG_SOFTMAX */
         sum1D = ADD_OP(sum1D, data, DATA_TYPE, 4);
     }
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
@@ -491,12 +521,21 @@ __kernel void softmax_layer_max_shift_exp_sum_parallel(
 #ifdef BETA
         data = MUL_OP(data, beta, DATA_TYPE, 4);
 #endif /* BETA */
+#ifdef LOG_SOFTMAX
+        VSTORE(4)
+        (data, 0, (__global DATA_TYPE *)offset(&dst, (GRID_SIZE * i * 4) + 4, 0));
+        data = EXP_OP(data, DATA_TYPE, 4);
+        VEC_DATA_TYPE(SELECT_DATA_TYPE, 4)
+        widx = CONVERT(((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width, VEC_DATA_TYPE(SELECT_DATA_TYPE, 4));
+        data = select(0, data, widx);
+#else  /* LOG_SOFTMAX */
         data = EXP_OP(data, DATA_TYPE, 4);
         VEC_DATA_TYPE(SELECT_DATA_TYPE, 4)
         widx = CONVERT(((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width, VEC_DATA_TYPE(SELECT_DATA_TYPE, 4));
         data = select(0, data, widx);
         VSTORE(4)
         (data, 0, (__global DATA_TYPE *)offset(&dst, (GRID_SIZE * i * 4) + 4, 0));
+#endif /* LOG_SOFTMAX */
         sum1D = ADD_OP(sum1D, data, DATA_TYPE, 4);
     }
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */

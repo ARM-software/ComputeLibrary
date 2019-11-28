@@ -81,20 +81,7 @@ void CLReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const
     // Set kernel build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DNUM_REVERSE_DIMS=" + support::cpp11::to_string(axis->info()->dimension(0)));
-    switch(input->info()->element_size())
-    {
-        case 1:
-            build_opts.add_option("-DDATA_TYPE=uchar");
-            break;
-        case 2:
-            build_opts.add_option("-DDATA_TYPE=ushort");
-            break;
-        case 4:
-            build_opts.add_option("-DDATA_TYPE=uint");
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Data type not supported");
-    }
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reverse", build_opts.options()));

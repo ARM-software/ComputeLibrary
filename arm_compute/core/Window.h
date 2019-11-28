@@ -48,7 +48,7 @@ public:
 
     /** Default constructor: create a window containing a single element. */
     constexpr Window()
-        : _dims()
+        : _dims(), _is_broadcasted(utility::generate_array<bool, Coordinates::num_max_dimensions, false>::value)
     {
     }
     /** Copy constructor
@@ -169,6 +169,20 @@ public:
      * @param[in] dim       The values to set the dimension to
      */
     void set(size_t dimension, const Dimension &dim);
+
+    /** Set the dimension as broadcasted dimension
+     *
+     * @param[in] dimension The dimension to set
+     */
+    void set_broadcasted(size_t dimension);
+
+    /** Return whether a dimension has been broadcasted
+     *
+     * @param[in] dimension The requested dimension
+     *
+     * @return true if the dimension has been broadcasted
+     */
+    bool is_broadcasted(size_t dimension) const;
 
     /** Use the tensor's dimensions to fill the window dimensions.
      *
@@ -419,6 +433,7 @@ private:
 
 private:
     std::array<Dimension, Coordinates::num_max_dimensions> _dims;
+    std::array<bool, Coordinates::num_max_dimensions>      _is_broadcasted;
 };
 } // namespace arm_compute
 #include "Window.inl"

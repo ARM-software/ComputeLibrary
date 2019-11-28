@@ -29,9 +29,7 @@
 #include "arm_compute/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/IMemoryManager.h"
 
 namespace arm_compute
 {

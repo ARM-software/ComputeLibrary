@@ -1,6 +1,7 @@
 var functions_func =
 [
-    [ "a", "functions_func.xhtml", null ],
+    [ "_", "functions_func.xhtml", null ],
+    [ "a", "functions_func_a.xhtml", null ],
     [ "b", "functions_func_b.xhtml", null ],
     [ "c", "functions_func_c.xhtml", null ],
     [ "d", "functions_func_d.xhtml", null ],

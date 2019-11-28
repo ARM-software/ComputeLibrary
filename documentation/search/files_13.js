@@ -1,5 +1,7 @@
 var searchData=
 [
+  ['safeintegerops_2ecpp',['SafeIntegerOps.cpp',['../_safe_integer_ops_8cpp.xhtml',1,'']]],
+  ['safeops_2eh',['SafeOps.h',['../_safe_ops_8h.xhtml',1,'']]],
   ['saturatecast_2eh',['SaturateCast.h',['../_saturate_cast_8h.xhtml',1,'']]],
   ['scalar_2eh',['scalar.h',['../scalar_8h.xhtml',1,'']]],
   ['scale_2ecl',['scale.cl',['../scale_8cl.xhtml',1,'']]],
@@ -12,6 +14,8 @@ var searchData=
   ['scharr_5ffilter_2ecl',['scharr_filter.cl',['../scharr__filter_8cl.xhtml',1,'']]],
   ['scheduler_2ecpp',['Scheduler.cpp',['../_scheduler_8cpp.xhtml',1,'']]],
   ['scheduler_2eh',['Scheduler.h',['../_scheduler_8h.xhtml',1,'']]],
+  ['schedulerfactory_2ecpp',['SchedulerFactory.cpp',['../_scheduler_factory_8cpp.xhtml',1,'']]],
+  ['schedulerfactory_2eh',['SchedulerFactory.h',['../_scheduler_factory_8h.xhtml',1,'']]],
   ['schedulertimer_2ecpp',['SchedulerTimer.cpp',['../_scheduler_timer_8cpp.xhtml',1,'']]],
   ['schedulertimer_2eh',['SchedulerTimer.h',['../_scheduler_timer_8h.xhtml',1,'']]],
   ['select_2ecl',['select.cl',['../select_8cl.xhtml',1,'']]],
@@ -90,7 +94,7 @@ var searchData=
   ['sve_5finterleaved_5ffp32_5fmla_5f3vlx8_2ehpp',['sve_interleaved_fp32_mla_3VLx8.hpp',['../sve__interleaved__fp32__mla__3_v_lx8_8hpp.xhtml',1,'']]],
   ['sve_5finterleaved_5fs8s32_5fdot_5f3vlx8_2ehpp',['sve_interleaved_s8s32_dot_3VLx8.hpp',['../sve__interleaved__s8s32__dot__3_v_lx8_8hpp.xhtml',1,'']]],
   ['sve_5finterleaved_5fu8u32_5fdot_5f3vlx8_2ehpp',['sve_interleaved_u8u32_dot_3VLx8.hpp',['../sve__interleaved__u8u32__dot__3_v_lx8_8hpp.xhtml',1,'']]],
-  ['sve_5fmerge_5ffp32_5f2vlx8_2ehpp',['sve_merge_fp32_2VLx8.hpp',['../sve__merge__fp32__2_v_lx8_8hpp.xhtml',1,'']]],
+  ['sve_5fmerge_5ffp16_5f3vlx8_2ehpp',['sve_merge_fp16_3VLx8.hpp',['../sve__merge__fp16__3_v_lx8_8hpp.xhtml',1,'']]],
   ['sve_5fmerge_5ffp32_5f3vlx8_2ehpp',['sve_merge_fp32_3VLx8.hpp',['../sve__merge__fp32__3_v_lx8_8hpp.xhtml',1,'']]],
   ['sve_5fmerge_5fs32_5f3vlx8_2ehpp',['sve_merge_s32_3VLx8.hpp',['../sve__merge__s32__3_v_lx8_8hpp.xhtml',1,'']]],
   ['sve_5fmerge_5fu32_5f3vlx8_2ehpp',['sve_merge_u32_3VLx8.hpp',['../sve__merge__u32__3_v_lx8_8hpp.xhtml',1,'']]],
@@ -98,8 +102,6 @@ var searchData=
   ['sve_5fnative_5ffp32_5fmla_5f4vlx4_2ehpp',['sve_native_fp32_mla_4VLx4.hpp',['../sve__native__fp32__mla__4_v_lx4_8hpp.xhtml',1,'']]],
   ['sve_5fnative_5fs8s32_5fdot_5f4vlx4_2ehpp',['sve_native_s8s32_dot_4VLx4.hpp',['../sve__native__s8s32__dot__4_v_lx4_8hpp.xhtml',1,'']]],
   ['sve_5fnative_5fu8u32_5fdot_5f4vlx4_2ehpp',['sve_native_u8u32_dot_4VLx4.hpp',['../sve__native__u8u32__dot__4_v_lx4_8hpp.xhtml',1,'']]],
-  ['sve_5fsmallk_5ffp32_5fmla_5f1vlx4_2ehpp',['sve_smallK_fp32_mla_1VLx4.hpp',['../sve__small_k__fp32__mla__1_v_lx4_8hpp.xhtml',1,'']]],
-  ['sve_5fsmallk_5fhybrid_5ffp32_5fmla_5f1vlx4_2ehpp',['sve_smallK_hybrid_fp32_mla_1VLx4.hpp',['../sve__small_k__hybrid__fp32__mla__1_v_lx4_8hpp.xhtml',1,'']]],
   ['sve_5fsmallk_5fhybrid_5fs8s32_5fdot_5f1vlx8_2ehpp',['sve_smallK_hybrid_s8s32_dot_1VLx8.hpp',['../sve__small_k__hybrid__s8s32__dot__1_v_lx8_8hpp.xhtml',1,'']]],
   ['sve_5fsmallk_5fhybrid_5fu8u32_5fdot_5f1vlx8_2ehpp',['sve_smallK_hybrid_u8u32_dot_1VLx8.hpp',['../sve__small_k__hybrid__u8u32__dot__1_v_lx8_8hpp.xhtml',1,'']]]
 ];

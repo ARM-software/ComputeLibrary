@@ -76,6 +76,8 @@ constexpr AbsoluteTolerance<float>   tolerance_f16(0.01f);  /**< Tolerance value
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);  /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
 const auto                           pool_data_layout_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
 
+const auto pool_fp_mixed_precision_dataset = framework::dataset::make("FpMixedPrecision", { true, false });
+
 } // namespace
 
 TEST_SUITE(CL)
@@ -125,6 +127,9 @@ using CLPoolingLayerFixture = PoolingLayerValidationFixture<CLTensor, CLAccessor
 template <typename T>
 using CLSpecialPoolingLayerFixture = SpecialPoolingLayerValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
 
+template <typename T>
+using CLMixedPrecesionPoolingLayerFixture = PoolingLayerValidationMixedPrecisionFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSpecial, CLSpecialPoolingLayerFixture<float>, framework::DatasetMode::ALL, datasets::PoolingLayerDatasetSpecial() * framework::dataset::make("DataType", DataType::F32))
@@ -151,16 +156,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<float>, framework::Datase
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPSmall,
-                                                                                                                 framework::dataset::make("DataType", DataType::F16))),
-                                                                                                         pool_data_layout_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMixedPrecesionPoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFPSmall,
+                                                                                                                       framework::dataset::make("DataType", DataType::F16))),
+                                                                                                                       pool_data_layout_dataset),
+                                                                                                                       pool_fp_mixed_precision_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
-                                                                                                               framework::dataset::make("DataType", DataType::F16))),
-                                                                                                       pool_data_layout_dataset))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLMixedPrecesionPoolingLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
+                                                                                                                     framework::dataset::make("DataType", DataType::F16))),
+                                                                                                                     pool_data_layout_dataset),
+                                                                                                                     pool_fp_mixed_precision_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

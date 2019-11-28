@@ -15,9 +15,5 @@ var searchData=
   ['printf',['PRINTF',['../_window_iterator_8h.xhtml#a1f464e950a4fa11e8821b5c725921a15',1,'WindowIterator.h']]],
   ['process_5f4x_5f1y_5f1z',['PROCESS_4X_1Y_1Z',['../_g_c_direct_convolution_layer_kernel_8cpp.xhtml#ad1d4c667360c7ed862d0abd918234d93',1,'GCDirectConvolutionLayerKernel.cpp']]],
   ['process_5f4x_5f3y_5f1z',['PROCESS_4X_3Y_1Z',['../_g_c_depthwise_convolution_layer3x3_kernel_8cpp.xhtml#ad291b7b94f105f430dfd66baa77ec740',1,'PROCESS_4X_3Y_1Z():&#160;GCDepthwiseConvolutionLayer3x3Kernel.cpp'],['../_g_c_direct_convolution_layer_kernel_8cpp.xhtml#ad291b7b94f105f430dfd66baa77ec740',1,'PROCESS_4X_3Y_1Z():&#160;GCDirectConvolutionLayerKernel.cpp']]],
-  ['process_5f8x_5f2y_5f1z',['PROCESS_8X_2Y_1Z',['../_g_c_direct_convolution_layer_kernel_8cpp.xhtml#a0067b16287eafbd53df0ac61c44eee71',1,'GCDirectConvolutionLayerKernel.cpp']]],
-  ['profile_5fkernel',['PROFILE_KERNEL',['../profiler_8hpp.xhtml#a97f4e398174b5e094f5262e5d785ac20',1,'profiler.hpp']]],
-  ['profile_5fmerge',['PROFILE_MERGE',['../profiler_8hpp.xhtml#a2f7c3e65a9ccab509d7776832f562dd0',1,'profiler.hpp']]],
-  ['profile_5fprepa',['PROFILE_PREPA',['../profiler_8hpp.xhtml#ac19bf2c5c388b9fb21cd0668475b2cf7',1,'profiler.hpp']]],
-  ['profile_5fprepb',['PROFILE_PREPB',['../profiler_8hpp.xhtml#af0477dfaa86fc08825cb3f31212f423c',1,'profiler.hpp']]]
+  ['process_5f8x_5f2y_5f1z',['PROCESS_8X_2Y_1Z',['../_g_c_direct_convolution_layer_kernel_8cpp.xhtml#a0067b16287eafbd53df0ac61c44eee71',1,'GCDirectConvolutionLayerKernel.cpp']]]
 ];

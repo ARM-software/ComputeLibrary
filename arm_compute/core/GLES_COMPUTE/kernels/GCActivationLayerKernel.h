@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,14 +28,19 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class IGCTensor;
+class GCCoreRuntimeContext;
 
 /** Interface for the activation layer kernel. */
 class GCActivationLayerKernel : public IGCKernel
 {
 public:
-    /** Default constructor */
-    GCActivationLayerKernel();
+    /** Default constructor
+     *
+     * @param[in, out] ctx Core context to use
+     */
+    explicit GCActivationLayerKernel(GCCoreRuntimeContext *ctx = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCActivationLayerKernel(const GCActivationLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -61,8 +66,9 @@ public:
     void run(const Window &window) override;
 
 private:
-    IGCTensor *_input;
-    IGCTensor *_output;
+    IGCTensor            *_input;
+    IGCTensor            *_output;
+    GCCoreRuntimeContext *_ctx;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_GCACTIVATIONLAYERKERNEL_H__ */

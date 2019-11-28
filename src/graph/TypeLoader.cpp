@@ -131,7 +131,6 @@ DepthwiseConvolutionMethod depthwise_convolution_method_from_name(const std::str
     static const std::map<std::string, DepthwiseConvolutionMethod> methods =
     {
         { "default", DepthwiseConvolutionMethod::Default },
-        { "gemv", DepthwiseConvolutionMethod::GEMV },
         { "optimized3x3", DepthwiseConvolutionMethod::Optimized3x3 },
     };
 

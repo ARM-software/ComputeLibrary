@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,9 +62,8 @@ const auto PermuteVectors4 = framework::dataset::make("PermutationVector",
     PermutationVector(0U, 3U, 2U, 1U)
 });
 const auto PermuteVectors         = concat(PermuteVectors3, PermuteVectors4);
-const auto PermuteInputLayout     = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
-const auto PermuteParametersSmall = concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()) * PermuteInputLayout * PermuteVectors;
-const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteInputLayout * PermuteVectors;
+const auto PermuteParametersSmall = concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()) * PermuteVectors;
+const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteVectors;
 } // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(Permute)

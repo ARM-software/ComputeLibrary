@@ -48,7 +48,7 @@ inline void configure_crop(const ICLTensor *input, ICLTensor *crop_boxes, ICLTen
                         std::floor(y0 * (input->info()->tensor_shape()[2] - 1) + 0.5f));
     end = Coordinates(std::floor(x1 * (input->info()->tensor_shape()[1] - 1) + 0.5f),
                       std::floor(y1 * (input->info()->tensor_shape()[2] - 1) + 0.5f));
-    const TensorShape out_shape(input->info()->tensor_shape()[0], abs(end[0] - start[0]) + 1, abs(end[1] - start[1]) + 1);
+    const TensorShape out_shape(input->info()->tensor_shape()[0], static_cast<uint32_t>(abs(end[0] - start[0])) + 1, static_cast<uint32_t>(abs(end[1] - start[1])) + 1);
     output->info()->set_tensor_shape(out_shape);
 }
 

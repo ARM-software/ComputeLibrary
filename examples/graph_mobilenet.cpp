@@ -52,6 +52,7 @@ public:
     {
         // Parse arguments
         cmd_parser.parse(argc, argv);
+        cmd_parser.validate();
 
         // Consume common parameters
         common_params = consume_common_graph_parameters(common_opts);
@@ -78,7 +79,6 @@ public:
 
         // Set graph hints
         graph << common_params.target
-              << DepthwiseConvolutionMethod::Optimized3x3 // TODO(COMPMID-1073): Add heuristics to automatically call the optimized 3x3 method
               << common_params.fast_math_hint;
 
         // Create core graph
@@ -235,7 +235,7 @@ private:
         };
 
         graph << InputLayer(input_descriptor.set_quantization_info(in_quant_info),
-                            get_weights_accessor(data_path, common_params.image))
+                            get_input_accessor(common_params, nullptr, false))
               << ConvolutionLayer(
                   3U, 3U, 32U,
                   get_weights_accessor(data_path, "Conv2d_0_weights.npy"),

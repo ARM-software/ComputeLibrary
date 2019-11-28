@@ -1,3 +1,10 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1gles_1_1_n_d_range.xhtml" title="Class interface for specifying NDRange values." alt="" coords="5,5,88,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_transform_weights.xhtml" title="Weights tensor transform interface In order to identify the different reshape functions,..." alt="" coords="5,209,143,235"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1weights__transformations_1_1_c_l_convert_fully_connected_weights_managed.xhtml" title="Basic function to run CLConvertFullyConnectedWeightsKernel." alt="" coords="193,5,426,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1weights__transformations_1_1_c_l_convolution_layer_reshape_weights_transform.xhtml" title="Basic function to manage the reshape weights generated from CLConvolutionLayerReshapeWeights." alt="" coords="208,71,411,112"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1weights__transformations_1_1_c_l_fully_connected_layer_reshape_weights_managed.xhtml" title="Basic function to manage the reshape weights generated from CLFullyConnectedLayerReshapeWeights." alt="" coords="198,136,421,177"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1weights__transformations_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel_managed.xhtml" title="Basic function to manage the reshape weights generated from CLGEMMReshapeRHSMatrixKernel." alt="" coords="191,201,428,243"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1weights__transformations_1_1_n_e_convert_fully_connected_weights_managed.xhtml" title="Basic function to run NEConvertFullyConnectedWeightsKernel." alt="" coords="192,267,427,308"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1weights__transformations_1_1_n_e_convolution_layer_reshape_weights_transform.xhtml" title="Basic function to manage the reshape weights generated from NEConvolutionLayerReshapeWeights." alt="" coords="207,332,411,373"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1weights__transformations_1_1_n_e_fully_connected_layer_reshape_weights_managed.xhtml" title="Basic function to manage the reshape weights generated from NEFullyConnectedLayerReshapeWeights." alt="" coords="197,397,422,439"/>
 </map>

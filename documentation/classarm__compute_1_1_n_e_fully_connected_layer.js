@@ -1,6 +1,6 @@
 var classarm__compute_1_1_n_e_fully_connected_layer =
 [
-    [ "NEFullyConnectedLayer", "classarm__compute_1_1_n_e_fully_connected_layer.xhtml#a7998301359e064aa20ce967b45301d3b", null ],
+    [ "NEFullyConnectedLayer", "classarm__compute_1_1_n_e_fully_connected_layer.xhtml#a9845f83f6f3bc45f9fb57ea1345e3dd3", null ],
     [ "NEFullyConnectedLayer", "classarm__compute_1_1_n_e_fully_connected_layer.xhtml#ae8b8211f8ff431633ad55b754638b805", null ],
     [ "NEFullyConnectedLayer", "classarm__compute_1_1_n_e_fully_connected_layer.xhtml#ad5678ca257e666aff1554ea527cffd41", null ],
     [ "configure", "classarm__compute_1_1_n_e_fully_connected_layer.xhtml#a91fb7694ae938cfec69ff6474451de49", null ],

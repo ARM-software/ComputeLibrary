@@ -76,10 +76,10 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     const int    height_scaled = _output->info()->dimension(1);
     const int    stride_x      = _info.stride().first;
     const int    stride_y      = _info.stride().second;
-    const int    start_x       = _info.pad().first;
-    const int    start_y       = _info.pad().second;
-    const int    end_y         = height_scaled - _info.pad().second;
-    const int    end_x         = width_scaled - _info.pad().first;
+    const int    start_x       = _info.pad_left();
+    const int    start_y       = _info.pad_top();
+    const int    end_x         = width_scaled - _info.pad_right();
+    const int    end_y         = height_scaled - _info.pad_bottom();
     const size_t element_size  = _input->info()->element_size();
 
     //The fill value is normally 0, but for QASYMM8 the '0' corresponds to the offset

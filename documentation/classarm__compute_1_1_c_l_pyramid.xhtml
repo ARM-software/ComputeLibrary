@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -229,10 +229,10 @@ Public Member Functions</h2></td></tr>
 <p>Implements <a class="el" href="classarm__compute_1_1_i_pyramid.xhtml#a11ab83492962adab883cb1d0fbdd7af6">IPyramid</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_pyramid_8cpp_source.xhtml#l00123">123</a> of file <a class="el" href="_c_l_pyramid_8cpp_source.xhtml">CLPyramid.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;{</div><div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(index &gt;= _info.<a class="code" href="classarm__compute_1_1_pyramid_info.xhtml#aa2fea6640d2bd5de24d0e0c2433faab6">num_levels</a>());</div><div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="keywordflow">return</span> &amp;_pyramid[index];</div><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
+<div class="fragment"><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;{</div><div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(index &gt;= _info.<a class="code" href="classarm__compute_1_1_pyramid_info.xhtml#aa2fea6640d2bd5de24d0e0c2433faab6">num_levels</a>());</div><div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="keywordflow">return</span> &amp;_pyramid[index];</div><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00466">Error.h:466</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_pyramid_info_xhtml_aa2fea6640d2bd5de24d0e0c2433faab6"><div class="ttname"><a href="classarm__compute_1_1_pyramid_info.xhtml#aa2fea6640d2bd5de24d0e0c2433faab6">arm_compute::PyramidInfo::num_levels</a></div><div class="ttdeci">size_t num_levels() const</div><div class="ttdoc">Return the number of the pyramid levels.</div><div class="ttdef"><b>Definition:</b> <a href="_pyramid_info_8cpp_source.xhtml#l00077">PyramidInfo.cpp:77</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>, and <a class="el" href="_pyramid_info_8cpp_source.xhtml#l00077">PyramidInfo::num_levels()</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00466">ARM_COMPUTE_ERROR_ON</a>, and <a class="el" href="_pyramid_info_8cpp_source.xhtml#l00077">PyramidInfo::num_levels()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_c_l_laplacian_pyramid_8cpp_source.xhtml#l00050">CLLaplacianPyramid::configure()</a>, <a class="el" href="_c_l_laplacian_reconstruct_8cpp_source.xhtml#l00045">CLLaplacianReconstruct::configure()</a>, <a class="el" href="_c_l_gaussian_pyramid_8cpp_source.xhtml#l00059">CLGaussianPyramidHalf::configure()</a>, <a class="el" href="_c_l_optical_flow_8cpp_source.xhtml#l00060">CLOpticalFlow::configure()</a>, and <a class="el" href="_c_l_gaussian_pyramid_8cpp_source.xhtml#l00139">CLGaussianPyramidOrb::configure()</a>.</p>
 
@@ -347,7 +347,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_pyramid.xhtml">CLPyramid</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:34 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:12 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

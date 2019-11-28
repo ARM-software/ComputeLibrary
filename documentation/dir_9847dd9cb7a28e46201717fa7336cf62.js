@@ -7,6 +7,7 @@ var dir_9847dd9cb7a28e46201717fa7336cf62 =
     [ "barrier.hpp", "barrier_8hpp.xhtml", [
       [ "barrier", "classarm__gemm_1_1barrier.xhtml", "classarm__gemm_1_1barrier" ]
     ] ],
+    [ "bias_adder.hpp", "bias__adder_8hpp.xhtml", "bias__adder_8hpp" ],
     [ "buffer_manager.hpp", "buffer__manager_8hpp.xhtml", "buffer__manager_8hpp" ],
     [ "gemm_fp16.cpp", "gemm__fp16_8cpp.xhtml", null ],
     [ "gemm_fp32.cpp", "gemm__fp32_8cpp.xhtml", "gemm__fp32_8cpp" ],
@@ -35,12 +36,12 @@ var dir_9847dd9cb7a28e46201717fa7336cf62 =
     [ "gemv_pretransposed.hpp", "gemv__pretransposed_8hpp.xhtml", [
       [ "GemvPretransposed", "classarm__gemm_1_1_gemv_pretransposed.xhtml", "classarm__gemm_1_1_gemv_pretransposed" ]
     ] ],
+    [ "mergeresults.cpp", "mergeresults_8cpp.xhtml", "mergeresults_8cpp" ],
     [ "mergeresults.hpp", "mergeresults_8hpp.xhtml", "mergeresults_8hpp" ],
     [ "misc.cpp", "misc_8cpp.xhtml", "misc_8cpp" ],
     [ "ndrange.hpp", "ndrange_8hpp.xhtml", [
       [ "NDRange", "classarm__gemm_1_1_n_d_range.xhtml", "classarm__gemm_1_1_n_d_range" ]
     ] ],
-    [ "profiler.hpp", "profiler_8hpp.xhtml", "profiler_8hpp" ],
     [ "quantize_wrapper.hpp", "quantize__wrapper_8hpp.xhtml", [
       [ "QuantizeWrapper", "classarm__gemm_1_1_quantize_wrapper.xhtml", "classarm__gemm_1_1_quantize_wrapper" ]
     ] ],

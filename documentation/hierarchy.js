@@ -20,6 +20,7 @@ var hierarchy =
     [ "CannyEdgeParameters", "structarm__compute_1_1test_1_1validation_1_1_canny_edge_parameters.xhtml", null ],
     [ "CLBuildOptions", "classarm__compute_1_1_c_l_build_options.xhtml", null ],
     [ "CLCoefficientTable", "structarm__compute_1_1_c_l_coefficient_table.xhtml", null ],
+    [ "CLCoreRuntimeContext", "classarm__compute_1_1_c_l_core_runtime_context.xhtml", null ],
     [ "CLDeviceOptions", "structarm__compute_1_1_c_l_device_options.xhtml", null ],
     [ "CLFunctionFactory", "classarm__compute_1_1graph_1_1backends_1_1_c_l_function_factory.xhtml", null ],
     [ "CLGEMMNativeKernelConfigurationFactory", "classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_native_kernel_configuration_factory.xhtml", null ],
@@ -36,9 +37,15 @@ var hierarchy =
     [ "CommandLineParser", "classarm__compute_1_1utils_1_1_command_line_parser.xhtml", null ],
     [ "common_promoted_signed_type< T >", "structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml", null ],
     [ "common_promoted_unsigned_type< T >", "structarm__compute_1_1test_1_1common__promoted__unsigned__type.xhtml", null ],
+    [ "CommonGemmExampleOptions", "classgemm__tuner_1_1_common_gemm_example_options.xhtml", null ],
+    [ "CommonGemmExampleParams", "structgemm__tuner_1_1_common_gemm_example_params.xhtml", null ],
     [ "CommonGraphOptions", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml", null ],
     [ "CommonGraphParams", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml", null ],
+    [ "CommonGraphValidateOptions", "classarm__compute_1_1utils_1_1_common_graph_validate_options.xhtml", null ],
     [ "CommonOptions", "classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml", null ],
+    [ "CommonParams", "structarm__compute_1_1utils_1_1_common_params.xhtml", [
+      [ "ExampleParams", "structarm__compute_1_1utils_1_1_example_params.xhtml", null ]
+    ] ],
     [ "compare< T >", "structarm__compute_1_1test_1_1validation_1_1compare.xhtml", null ],
     [ "compare_base< T >", "structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml", null ],
     [ "compare_base< AbsoluteTolerance< U > >", "structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml", [
@@ -50,6 +57,9 @@ var hierarchy =
     [ "compare_dimension< T >", "classarm__compute_1_1detail_1_1compare__dimension.xhtml", null ],
     [ "ComputeAnchorsInfo", "classarm__compute_1_1_compute_anchors_info.xhtml", null ],
     [ "ConcatLayerDescriptor", "structarm__compute_1_1graph_1_1descriptors_1_1_concat_layer_descriptor.xhtml", null ],
+    [ "ContextType< T >", "structarm__compute_1_1test_1_1_context_type.xhtml", null ],
+    [ "ContextType< Tensor >", "structarm__compute_1_1test_1_1_context_type_3_01_tensor_01_4.xhtml", null ],
+    [ "ConvolutionParams", "structarm__compute_1_1utils_1_1_convolution_params.xhtml", null ],
     [ "Coordinates2D", "struct_coordinates2_d.xhtml", null ],
     [ "Coordinates2D", "structarm__compute_1_1_coordinates2_d.xhtml", null ],
     [ "Coordinates3D", "structarm__compute_1_1_coordinates3_d.xhtml", null ],
@@ -71,19 +81,20 @@ var hierarchy =
     [ "DetectionPostProcessLayerInfo", "classarm__compute_1_1_detection_post_process_layer_info.xhtml", null ],
     [ "DetectionWindow", "struct_detection_window.xhtml", null ],
     [ "DetectionWindow", "structarm__compute_1_1_detection_window.xhtml", null ],
+    [ "DeviceProperties", "structarm__compute_1_1_device_properties.xhtml", null ],
     [ "Window::Dimension", "classarm__compute_1_1_window_1_1_dimension.xhtml", null ],
     [ "Dimensions< T >", "classarm__compute_1_1_dimensions.xhtml", null ],
     [ "Dimensions< int >", "classarm__compute_1_1_dimensions.xhtml", [
       [ "Coordinates", "classarm__compute_1_1_coordinates.xhtml", null ]
     ] ],
-    [ "Dimensions< size_t >", "classarm__compute_1_1_dimensions.xhtml", [
+    [ "Dimensions< uint32_t >", "classarm__compute_1_1_dimensions.xhtml", [
+      [ "Steps", "classarm__compute_1_1_steps.xhtml", null ],
       [ "Strides", "classarm__compute_1_1_strides.xhtml", null ],
       [ "TensorShape", "classarm__compute_1_1_tensor_shape.xhtml", null ]
     ] ],
-    [ "Dimensions< unsigned int >", "classarm__compute_1_1_dimensions.xhtml", [
-      [ "Steps", "classarm__compute_1_1_steps.xhtml", null ]
-    ] ],
     [ "dummy< T, S >", "structarm__compute_1_1detail_1_1dummy.xhtml", null ],
+    [ "DWCKernelInfo", "structarm__compute_1_1_d_w_c_kernel_info.xhtml", null ],
+    [ "DWCWeightsKernelInfo", "structarm__compute_1_1_d_w_c_weights_kernel_info.xhtml", null ],
     [ "Edge", "classarm__compute_1_1graph_1_1_edge.xhtml", null ],
     [ "enable_bitwise_ops< T >", "structarm__compute_1_1enable__bitwise__ops.xhtml", null ],
     [ "enable_bitwise_ops< arm_compute::GPUTarget >", "structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml", null ],
@@ -102,13 +113,17 @@ var hierarchy =
     [ "FileHandler", "classarm__compute_1_1io_1_1_file_handler.xhtml", null ],
     [ "Fixture", "classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml", null ],
     [ "Framework", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml", null ],
+    [ "FrameworkParams", "structarm__compute_1_1utils_1_1_framework_params.xhtml", null ],
     [ "FullyConnectedLayerInfo", "structarm__compute_1_1_fully_connected_layer_info.xhtml", null ],
+    [ "FullyConnectedParams", "structarm__compute_1_1utils_1_1_fully_connected_params.xhtml", null ],
+    [ "GCCoreRuntimeContext", "classarm__compute_1_1_g_c_core_runtime_context.xhtml", null ],
     [ "GCFunctionFactory", "classarm__compute_1_1graph_1_1backends_1_1_g_c_function_factory.xhtml", null ],
     [ "GCKernel", "classarm__compute_1_1_g_c_kernel.xhtml", null ],
     [ "GCKernelLibrary", "classarm__compute_1_1_g_c_kernel_library.xhtml", null ],
     [ "GCNodeValidator", "classarm__compute_1_1graph_1_1backends_1_1_g_c_node_validator.xhtml", null ],
     [ "GCProgram", "classarm__compute_1_1_g_c_program.xhtml", null ],
     [ "GCScheduler", "classarm__compute_1_1_g_c_scheduler.xhtml", null ],
+    [ "GEMMBenchmarkResultRecorder", "class_gemm_tuner_1_1_g_e_m_m_benchmark_result_recorder.xhtml", null ],
     [ "GemmCommon", null, [
       [ "GemmHybrid< strategy, To, Tr >", "classarm__gemm_1_1_gemm_hybrid.xhtml", null ],
       [ "GemmHybridQuantized< strategy, To, Tr >", "classarm__gemm_1_1_gemm_hybrid_quantized.xhtml", null ],
@@ -119,6 +134,7 @@ var hierarchy =
       [ "GemvPretransposed< strategy, To, Tr >", "classarm__gemm_1_1_gemv_pretransposed.xhtml", null ],
       [ "QuantizeWrapper< To, Tr, Tgemm >", "classarm__gemm_1_1_quantize_wrapper.xhtml", null ]
     ] ],
+    [ "GEMMConfigDistribution", "class_gemm_tuner_1_1_g_e_m_m_config_distribution.xhtml", null ],
     [ "GemmImplementation< Top, Tret, OutputStage >", "structarm__gemm_1_1_gemm_implementation.xhtml", null ],
     [ "GemmImplementation< Top, Tret, Nothing >", "structarm__gemm_1_1_gemm_implementation_3_01_top_00_01_tret_00_01_nothing_01_4.xhtml", null ],
     [ "GEMMInfo", "classarm__compute_1_1_g_e_m_m_info.xhtml", null ],
@@ -181,7 +197,7 @@ var hierarchy =
       [ "ArrayAccessor< T >", "classarm__compute_1_1test_1_1_array_accessor.xhtml", null ],
       [ "CLArrayAccessor< T >", "classarm__compute_1_1test_1_1_c_l_array_accessor.xhtml", null ]
     ] ],
-    [ "IBufferManager", "classarm__compute_1_1_i_buffer_manager.xhtml", null ],
+    [ "IAssetManager", "classarm__compute_1_1_i_asset_manager.xhtml", null ],
     [ "ICLGEMMKernelConfiguration", "classarm__compute_1_1_i_c_l_g_e_m_m_kernel_configuration.xhtml", [
       [ "CLGEMMNativeKernelConfigurationBifrost", "classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_native_kernel_configuration_bifrost.xhtml", null ],
       [ "CLGEMMReshapedKernelConfigurationBifrost", "classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_kernel_configuration_bifrost.xhtml", null ],
@@ -231,6 +247,7 @@ var hierarchy =
     ] ],
     [ "NEGEMMAssemblyDispatch::IFallback", "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch_1_1_i_fallback.xhtml", null ],
     [ "IFunction", "classarm__compute_1_1_i_function.xhtml", [
+      [ "CLArgMinMaxLayer", "classarm__compute_1_1_c_l_arg_min_max_layer.xhtml", null ],
       [ "CLBatchNormalizationLayer", "classarm__compute_1_1_c_l_batch_normalization_layer.xhtml", null ],
       [ "CLBatchToSpaceLayer", "classarm__compute_1_1_c_l_batch_to_space_layer.xhtml", null ],
       [ "CLCannyEdge", "classarm__compute_1_1_c_l_canny_edge.xhtml", null ],
@@ -244,7 +261,6 @@ var hierarchy =
       [ "CLDepthToSpaceLayer", "classarm__compute_1_1_c_l_depth_to_space_layer.xhtml", null ],
       [ "CLDepthwiseConvolutionLayer", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml", null ],
       [ "CLDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml", null ],
-      [ "CLDepthwiseSeparableConvolutionLayer", "classarm__compute_1_1_c_l_depthwise_separable_convolution_layer.xhtml", null ],
       [ "CLDirectConvolutionLayer", "classarm__compute_1_1_c_l_direct_convolution_layer.xhtml", null ],
       [ "CLDirectDeconvolutionLayer", "classarm__compute_1_1_c_l_direct_deconvolution_layer.xhtml", null ],
       [ "CLEqualizeHistogram", "classarm__compute_1_1_c_l_equalize_histogram.xhtml", null ],
@@ -288,7 +304,7 @@ var hierarchy =
       [ "CLRNNLayer", "classarm__compute_1_1_c_l_r_n_n_layer.xhtml", null ],
       [ "CLSobel5x5", "classarm__compute_1_1_c_l_sobel5x5.xhtml", null ],
       [ "CLSobel7x7", "classarm__compute_1_1_c_l_sobel7x7.xhtml", null ],
-      [ "CLSoftmaxLayer", "classarm__compute_1_1_c_l_softmax_layer.xhtml", null ],
+      [ "CLSoftmaxLayerGeneric< IS_LOG >", "classarm__compute_1_1_c_l_softmax_layer_generic.xhtml", null ],
       [ "CLSpaceToBatchLayer", "classarm__compute_1_1_c_l_space_to_batch_layer.xhtml", null ],
       [ "CLSpaceToDepthLayer", "classarm__compute_1_1_c_l_space_to_depth_layer.xhtml", null ],
       [ "CLSplit", "classarm__compute_1_1_c_l_split.xhtml", null ],
@@ -296,6 +312,7 @@ var hierarchy =
       [ "CLUnstack", "classarm__compute_1_1_c_l_unstack.xhtml", null ],
       [ "CLUpsampleLayer", "classarm__compute_1_1_c_l_upsample_layer.xhtml", null ],
       [ "CLWinogradConvolutionLayer", "classarm__compute_1_1_c_l_winograd_convolution_layer.xhtml", null ],
+      [ "CPPBoxWithNonMaximaSuppressionLimit", "classarm__compute_1_1_c_p_p_box_with_non_maxima_suppression_limit.xhtml", null ],
       [ "CPPDetectionOutputLayer", "classarm__compute_1_1_c_p_p_detection_output_layer.xhtml", null ],
       [ "CPPDetectionPostProcessLayer", "classarm__compute_1_1_c_p_p_detection_post_process_layer.xhtml", null ],
       [ "GCBatchNormalizationLayer", "classarm__compute_1_1_g_c_batch_normalization_layer.xhtml", null ],
@@ -320,7 +337,6 @@ var hierarchy =
         [ "CLAccumulateSquared", "classarm__compute_1_1_c_l_accumulate_squared.xhtml", null ],
         [ "CLAccumulateWeighted", "classarm__compute_1_1_c_l_accumulate_weighted.xhtml", null ],
         [ "CLActivationLayer", "classarm__compute_1_1_c_l_activation_layer.xhtml", null ],
-        [ "CLArgMinMaxLayer", "classarm__compute_1_1_c_l_arg_min_max_layer.xhtml", null ],
         [ "CLArithmeticAddition", "classarm__compute_1_1_c_l_arithmetic_addition.xhtml", null ],
         [ "CLArithmeticDivision", "classarm__compute_1_1_c_l_arithmetic_division.xhtml", null ],
         [ "CLArithmeticSubtraction", "classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml", null ],
@@ -363,6 +379,7 @@ var hierarchy =
         [ "CLGEMMLowpQuantizeDownInt32ToUint8Scale", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml", null ],
         [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml", null ],
         [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float.xhtml", null ],
+        [ "CLInstanceNormalizationLayer", "classarm__compute_1_1_c_l_instance_normalization_layer.xhtml", null ],
         [ "CLLogLayer", "classarm__compute_1_1_c_l_log_layer.xhtml", null ],
         [ "CLMagnitude", "classarm__compute_1_1_c_l_magnitude.xhtml", null ],
         [ "CLMeanStdDevNormalizationLayer", "classarm__compute_1_1_c_l_mean_std_dev_normalization_layer.xhtml", null ],
@@ -402,10 +419,13 @@ var hierarchy =
         [ "CLWinogradInputTransform", "classarm__compute_1_1_c_l_winograd_input_transform.xhtml", null ],
         [ "CLYOLOLayer", "classarm__compute_1_1_c_l_y_o_l_o_layer.xhtml", null ],
         [ "CLSynthetizeFunction< K >", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", null ],
-        [ "CLSynthetizeFunctionWithZeroConstantBorder< K, bordersize >", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml", null ]
+        [ "CLSynthetizeFunctionWithZeroConstantBorder< K, bordersize >", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml", null ],
+        [ "CLSynthetizeFunction< CLGEMMMatrixMultiplyNativeKernel >", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", null ],
+        [ "CLSynthetizeFunction< CLGEMMMatrixMultiplyReshapedKernel >", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", null ],
+        [ "CLSynthetizeFunction< CLGEMMMatrixMultiplyReshapedOnlyRHSKernel >", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", null ],
+        [ "CLSynthetizeFunction< CLGEMMReshapeLHSMatrixKernel >", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", null ]
       ] ],
       [ "ICPPSimpleFunction", "classarm__compute_1_1_i_c_p_p_simple_function.xhtml", [
-        [ "CPPBoxWithNonMaximaSuppressionLimit", "classarm__compute_1_1_c_p_p_box_with_non_maxima_suppression_limit.xhtml", null ],
         [ "CPPNonMaximumSuppression", "classarm__compute_1_1_c_p_p_non_maximum_suppression.xhtml", null ],
         [ "CPPPermute", "classarm__compute_1_1_c_p_p_permute.xhtml", null ],
         [ "CPPTopKV", "classarm__compute_1_1_c_p_p_top_k_v.xhtml", null ],
@@ -429,9 +449,11 @@ var hierarchy =
         [ "NEAbsoluteDifference", "classarm__compute_1_1_n_e_absolute_difference.xhtml", null ],
         [ "NEArithmeticAddition", "classarm__compute_1_1_n_e_arithmetic_addition.xhtml", null ],
         [ "NEArithmeticSubtraction", "classarm__compute_1_1_n_e_arithmetic_subtraction.xhtml", null ],
+        [ "NEBoundingBoxTransform", "classarm__compute_1_1_n_e_bounding_box_transform.xhtml", null ],
         [ "NEBox3x3", "classarm__compute_1_1_n_e_box3x3.xhtml", null ],
         [ "NECast", "classarm__compute_1_1_n_e_cast.xhtml", null ],
         [ "NEComplexPixelWiseMultiplication", "classarm__compute_1_1_n_e_complex_pixel_wise_multiplication.xhtml", null ],
+        [ "NEComputeAllAnchors", "classarm__compute_1_1_n_e_compute_all_anchors.xhtml", null ],
         [ "NEConvolution3x3", "classarm__compute_1_1_n_e_convolution3x3.xhtml", null ],
         [ "NEConvolutionRectangle", "classarm__compute_1_1_n_e_convolution_rectangle.xhtml", null ],
         [ "NEDilate", "classarm__compute_1_1_n_e_dilate.xhtml", null ],
@@ -454,6 +476,7 @@ var hierarchy =
         [ "NEPixelWiseMultiplication", "classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml", null ],
         [ "NEPReluLayer", "classarm__compute_1_1_n_e_p_relu_layer.xhtml", null ],
         [ "NERemap", "classarm__compute_1_1_n_e_remap.xhtml", null ],
+        [ "NEROIAlignLayer", "classarm__compute_1_1_n_e_r_o_i_align_layer.xhtml", null ],
         [ "NERoundLayer", "classarm__compute_1_1_n_e_round_layer.xhtml", null ],
         [ "NERsqrtLayer", "classarm__compute_1_1_n_e_rsqrt_layer.xhtml", null ],
         [ "NEScharr3x3", "classarm__compute_1_1_n_e_scharr3x3.xhtml", null ],
@@ -524,10 +547,9 @@ var hierarchy =
       [ "NEDeconvolutionLayer", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml", null ],
       [ "NEDepthwiseConvolutionAssemblyDispatch", "classarm__compute_1_1_n_e_depthwise_convolution_assembly_dispatch.xhtml", null ],
       [ "NEDepthwiseConvolutionLayer", "classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml", null ],
-      [ "NEDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_n_e_depthwise_convolution_layer3x3.xhtml", null ],
       [ "NEDepthwiseConvolutionLayerOptimized", "classarm__compute_1_1_n_e_depthwise_convolution_layer_optimized.xhtml", null ],
-      [ "NEDepthwiseSeparableConvolutionLayer", "classarm__compute_1_1_n_e_depthwise_separable_convolution_layer.xhtml", null ],
       [ "NEDerivative", "classarm__compute_1_1_n_e_derivative.xhtml", null ],
+      [ "NEDetectionPostProcessLayer", "classarm__compute_1_1_n_e_detection_post_process_layer.xhtml", null ],
       [ "NEDirectConvolutionLayer", "classarm__compute_1_1_n_e_direct_convolution_layer.xhtml", null ],
       [ "NEEqualizeHistogram", "classarm__compute_1_1_n_e_equalize_histogram.xhtml", null ],
       [ "NEFastCorners", "classarm__compute_1_1_n_e_fast_corners.xhtml", null ],
@@ -545,15 +567,16 @@ var hierarchy =
       [ "NEGEMM", "classarm__compute_1_1_n_e_g_e_m_m.xhtml", null ],
       [ "NEGEMMAssemblyDispatch", "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch.xhtml", null ],
       [ "NEGEMMConvolutionLayer", "classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml", null ],
-      [ "NEGEMMInterleavedWrapper", "classarm__compute_1_1_n_e_g_e_m_m_interleaved_wrapper.xhtml", null ],
       [ "NEGEMMLowpAssemblyMatrixMultiplyCore", "classarm__compute_1_1_n_e_g_e_m_m_lowp_assembly_matrix_multiply_core.xhtml", null ],
       [ "NEGEMMLowpMatrixMultiplyCore", "classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_core.xhtml", null ],
+      [ "NEGenerateProposalsLayer", "classarm__compute_1_1_n_e_generate_proposals_layer.xhtml", null ],
       [ "NEHarrisCorners", "classarm__compute_1_1_n_e_harris_corners.xhtml", null ],
       [ "NEHistogram", "classarm__compute_1_1_n_e_histogram.xhtml", null ],
       [ "NEHOGDescriptor", "classarm__compute_1_1_n_e_h_o_g_descriptor.xhtml", null ],
       [ "NEHOGGradient", "classarm__compute_1_1_n_e_h_o_g_gradient.xhtml", null ],
       [ "NEHOGMultiDetection", "classarm__compute_1_1_n_e_h_o_g_multi_detection.xhtml", null ],
       [ "NEIm2Col", "classarm__compute_1_1_n_e_im2_col.xhtml", null ],
+      [ "NEInstanceNormalizationLayer", "classarm__compute_1_1_n_e_instance_normalization_layer.xhtml", null ],
       [ "NEL2NormalizeLayer", "classarm__compute_1_1_n_e_l2_normalize_layer.xhtml", null ],
       [ "NELaplacianPyramid", "classarm__compute_1_1_n_e_laplacian_pyramid.xhtml", null ],
       [ "NELaplacianReconstruct", "classarm__compute_1_1_n_e_laplacian_reconstruct.xhtml", null ],
@@ -575,7 +598,7 @@ var hierarchy =
       [ "NESimpleAssemblyFunction", "classarm__compute_1_1_n_e_simple_assembly_function.xhtml", null ],
       [ "NESobel5x5", "classarm__compute_1_1_n_e_sobel5x5.xhtml", null ],
       [ "NESobel7x7", "classarm__compute_1_1_n_e_sobel7x7.xhtml", null ],
-      [ "NESoftmaxLayer", "classarm__compute_1_1_n_e_softmax_layer.xhtml", null ],
+      [ "NESoftmaxLayerGeneric< IS_LOG >", "classarm__compute_1_1_n_e_softmax_layer_generic.xhtml", null ],
       [ "NESpaceToBatchLayer", "classarm__compute_1_1_n_e_space_to_batch_layer.xhtml", null ],
       [ "NESpaceToDepthLayer", "classarm__compute_1_1_n_e_space_to_depth_layer.xhtml", null ],
       [ "NESplit", "classarm__compute_1_1_n_e_split.xhtml", null ],
@@ -641,14 +664,11 @@ var hierarchy =
         [ "CLDeconvolutionLayerUpsampleKernel", "classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml", null ],
         [ "CLDepthConcatenateLayerKernel", "classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml", null ],
         [ "CLDepthToSpaceLayerKernel", "classarm__compute_1_1_c_l_depth_to_space_layer_kernel.xhtml", null ],
-        [ "CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer_reshape_weights_generic_kernel.xhtml", null ],
+        [ "CLDepthwiseConvolutionLayerNativeKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer_native_kernel.xhtml", null ],
         [ "CLDepthwiseConvolutionLayerReshapeWeightsKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer_reshape_weights_kernel.xhtml", null ],
-        [ "CLDepthwiseIm2ColKernel", "classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml", null ],
-        [ "CLDepthwiseVectorToTensorKernel", "classarm__compute_1_1_c_l_depthwise_vector_to_tensor_kernel.xhtml", null ],
         [ "CLDequantizationLayerKernel", "classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml", null ],
         [ "CLDerivativeKernel", "classarm__compute_1_1_c_l_derivative_kernel.xhtml", null ],
         [ "CLDirectConvolutionLayerKernel", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml", null ],
-        [ "CLDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml", null ],
         [ "CLEdgeNonMaxSuppressionKernel", "classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml", null ],
         [ "CLEdgeTraceKernel", "classarm__compute_1_1_c_l_edge_trace_kernel.xhtml", null ],
         [ "CLElementwiseOperationKernel", "classarm__compute_1_1_c_l_elementwise_operation_kernel.xhtml", [
@@ -675,7 +695,6 @@ var hierarchy =
         [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float_kernel.xhtml", null ],
         [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml", null ],
         [ "CLGEMMMatrixAccumulateBiasesKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_accumulate_biases_kernel.xhtml", null ],
-        [ "CLGEMMMatrixAdditionKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_addition_kernel.xhtml", null ],
         [ "CLGEMMMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml", null ],
         [ "CLGEMMMatrixMultiplyNativeKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_native_kernel.xhtml", null ],
         [ "CLGEMMMatrixMultiplyReshapedKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel.xhtml", null ],
@@ -692,6 +711,7 @@ var hierarchy =
         [ "CLHOGDetectorKernel", "classarm__compute_1_1_c_l_h_o_g_detector_kernel.xhtml", null ],
         [ "CLHOGOrientationBinningKernel", "classarm__compute_1_1_c_l_h_o_g_orientation_binning_kernel.xhtml", null ],
         [ "CLIm2ColKernel", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml", null ],
+        [ "CLInstanceNormalizationLayerKernel", "classarm__compute_1_1_c_l_instance_normalization_layer_kernel.xhtml", null ],
         [ "CLIntegralImageVertKernel", "classarm__compute_1_1_c_l_integral_image_vert_kernel.xhtml", null ],
         [ "CLL2NormalizeLayerKernel", "classarm__compute_1_1_c_l_l2_normalize_layer_kernel.xhtml", null ],
         [ "CLLKTrackerFinalizeKernel", "classarm__compute_1_1_c_l_l_k_tracker_finalize_kernel.xhtml", null ],
@@ -711,6 +731,7 @@ var hierarchy =
         [ "CLMinMaxLocationKernel", "classarm__compute_1_1_c_l_min_max_location_kernel.xhtml", null ],
         [ "CLNormalizationLayerKernel", "classarm__compute_1_1_c_l_normalization_layer_kernel.xhtml", null ],
         [ "CLNormalizePlanarYUVLayerKernel", "classarm__compute_1_1_c_l_normalize_planar_y_u_v_layer_kernel.xhtml", null ],
+        [ "CLPadLayerKernel", "classarm__compute_1_1_c_l_pad_layer_kernel.xhtml", null ],
         [ "CLPermuteKernel", "classarm__compute_1_1_c_l_permute_kernel.xhtml", null ],
         [ "CLPixelWiseMultiplicationKernel", "classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml", null ],
         [ "CLPoolingLayerKernel", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml", null ],
@@ -859,12 +880,15 @@ var hierarchy =
         [ "NEBitwiseNotKernel", "classarm__compute_1_1_n_e_bitwise_not_kernel.xhtml", null ],
         [ "NEBitwiseOrKernel", "classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml", null ],
         [ "NEBitwiseXorKernel", "classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml", null ],
+        [ "NEBoundingBoxTransformKernel", "classarm__compute_1_1_n_e_bounding_box_transform_kernel.xhtml", null ],
         [ "NEChannelCombineKernel", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml", null ],
         [ "NEChannelShuffleLayerKernel", "classarm__compute_1_1_n_e_channel_shuffle_layer_kernel.xhtml", null ],
         [ "NECol2ImKernel", "classarm__compute_1_1_n_e_col2_im_kernel.xhtml", null ],
         [ "NEColorConvertKernel", "classarm__compute_1_1_n_e_color_convert_kernel.xhtml", null ],
         [ "NEComplexPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_complex_pixel_wise_multiplication_kernel.xhtml", null ],
+        [ "NEComputeAllAnchorsKernel", "classarm__compute_1_1_n_e_compute_all_anchors_kernel.xhtml", null ],
         [ "NEConvertFullyConnectedWeightsKernel", "classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml", null ],
+        [ "NEConvertQuantizedSignednessKernel", "classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml", null ],
         [ "NEConvolutionRectangleKernel", "classarm__compute_1_1_n_e_convolution_rectangle_kernel.xhtml", null ],
         [ "NECopyKernel", "classarm__compute_1_1_n_e_copy_kernel.xhtml", null ],
         [ "NECropKernel", "classarm__compute_1_1_n_e_crop_kernel.xhtml", null ],
@@ -874,9 +898,6 @@ var hierarchy =
         [ "NEDepthToSpaceLayerKernel", "classarm__compute_1_1_n_e_depth_to_space_layer_kernel.xhtml", null ],
         [ "NEDepthwiseConvolutionLayer3x3Kernel", "classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml", null ],
         [ "NEDepthwiseConvolutionLayerNativeKernel", "classarm__compute_1_1_n_e_depthwise_convolution_layer_native_kernel.xhtml", null ],
-        [ "NEDepthwiseIm2ColKernel", "classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml", null ],
-        [ "NEDepthwiseVectorToTensorKernel", "classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel.xhtml", null ],
-        [ "NEDepthwiseWeightsReshapeKernel", "classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml", null ],
         [ "NEDequantizationLayerKernel", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml", null ],
         [ "NEDerivativeKernel", "classarm__compute_1_1_n_e_derivative_kernel.xhtml", null ],
         [ "NEDirectConvolutionLayerKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml", null ],
@@ -917,10 +938,11 @@ var hierarchy =
         [ "NEHOGDetectorKernel", "classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml", null ],
         [ "NEHOGOrientationBinningKernel", "classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml", null ],
         [ "NEIm2ColKernel", "classarm__compute_1_1_n_e_im2_col_kernel.xhtml", null ],
+        [ "NEInstanceNormalizationLayerKernel", "classarm__compute_1_1_n_e_instance_normalization_layer_kernel.xhtml", null ],
         [ "NEL2NormalizeLayerKernel", "classarm__compute_1_1_n_e_l2_normalize_layer_kernel.xhtml", null ],
         [ "NELKTrackerKernel", "classarm__compute_1_1_n_e_l_k_tracker_kernel.xhtml", null ],
         [ "NELocallyConnectedMatrixMultiplyKernel", "classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml", null ],
-        [ "NELogits1DSoftmaxKernel", "classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml", null ],
+        [ "NELogits1DSoftmaxKernel< IS_LOG >", "classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml", null ],
         [ "NEMagnitudePhaseKernel< mag_type, phase_type >", "classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml", null ],
         [ "NEMeanStdDevKernel", "classarm__compute_1_1_n_e_mean_std_dev_kernel.xhtml", null ],
         [ "NEMeanStdDevNormalizationKernel", "classarm__compute_1_1_n_e_mean_std_dev_normalization_kernel.xhtml", null ],
@@ -931,6 +953,7 @@ var hierarchy =
         [ "NENonLinearFilterKernel", "classarm__compute_1_1_n_e_non_linear_filter_kernel.xhtml", null ],
         [ "NENonMaximaSuppression3x3Kernel", "classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml", null ],
         [ "NENormalizationLayerKernel", "classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml", null ],
+        [ "NEPadLayerKernel", "classarm__compute_1_1_n_e_pad_layer_kernel.xhtml", null ],
         [ "NEPermuteKernel", "classarm__compute_1_1_n_e_permute_kernel.xhtml", null ],
         [ "NEPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml", null ],
         [ "NEPoolingLayerKernel", "classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml", null ],
@@ -941,6 +964,7 @@ var hierarchy =
         [ "NERemapKernel", "classarm__compute_1_1_n_e_remap_kernel.xhtml", null ],
         [ "NEReorgLayerKernel", "classarm__compute_1_1_n_e_reorg_layer_kernel.xhtml", null ],
         [ "NEReverseKernel", "classarm__compute_1_1_n_e_reverse_kernel.xhtml", null ],
+        [ "NEROIAlignLayerKernel", "classarm__compute_1_1_n_e_r_o_i_align_layer_kernel.xhtml", null ],
         [ "NEROIPoolingLayerKernel", "classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel.xhtml", null ],
         [ "NEScaleKernel", "classarm__compute_1_1_n_e_scale_kernel.xhtml", null ],
         [ "NEScharr3x3Kernel", "classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml", null ],
@@ -1004,9 +1028,11 @@ var hierarchy =
       [ "BoundingBoxTransformLayer", "classarm__compute_1_1graph_1_1frontend_1_1_bounding_box_transform_layer.xhtml", null ],
       [ "ChannelShuffleLayer", "classarm__compute_1_1graph_1_1frontend_1_1_channel_shuffle_layer.xhtml", null ],
       [ "ConcatLayer", "classarm__compute_1_1graph_1_1frontend_1_1_concat_layer.xhtml", null ],
+      [ "ConstantLayer", "classarm__compute_1_1graph_1_1frontend_1_1_constant_layer.xhtml", null ],
       [ "ConvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_convolution_layer.xhtml", null ],
       [ "DeconvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_deconvolution_layer.xhtml", null ],
       [ "DepthwiseConvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_depthwise_convolution_layer.xhtml", null ],
+      [ "DequantizationLayer", "classarm__compute_1_1graph_1_1frontend_1_1_dequantization_layer.xhtml", null ],
       [ "DetectionOutputLayer", "classarm__compute_1_1graph_1_1frontend_1_1_detection_output_layer.xhtml", null ],
       [ "DetectionPostProcessLayer", "classarm__compute_1_1graph_1_1frontend_1_1_detection_post_process_layer.xhtml", null ],
       [ "DummyLayer", "classarm__compute_1_1graph_1_1frontend_1_1_dummy_layer.xhtml", null ],
@@ -1063,10 +1089,12 @@ var hierarchy =
       [ "Memory", "classarm__compute_1_1_memory.xhtml", null ]
     ] ],
     [ "IMemoryGroup", "classarm__compute_1_1_i_memory_group.xhtml", [
-      [ "MemoryGroupBase< TensorType >", "classarm__compute_1_1_memory_group_base.xhtml", null ],
-      [ "MemoryGroupBase< CLTensor >", "classarm__compute_1_1_memory_group_base.xhtml", null ],
-      [ "MemoryGroupBase< GCTensor >", "classarm__compute_1_1_memory_group_base.xhtml", null ],
-      [ "MemoryGroupBase< Tensor >", "classarm__compute_1_1_memory_group_base.xhtml", null ]
+      [ "MemoryGroup", "classarm__compute_1_1_memory_group.xhtml", null ]
+    ] ],
+    [ "IMemoryManageable", "classarm__compute_1_1_i_memory_manageable.xhtml", [
+      [ "CLTensor", "classarm__compute_1_1_c_l_tensor.xhtml", null ],
+      [ "GCTensor", "classarm__compute_1_1_g_c_tensor.xhtml", null ],
+      [ "Tensor", "classarm__compute_1_1_tensor.xhtml", null ]
     ] ],
     [ "IMemoryManager", "classarm__compute_1_1_i_memory_manager.xhtml", [
       [ "MemoryManagerOnDemand", "classarm__compute_1_1_memory_manager_on_demand.xhtml", null ]
@@ -1110,6 +1138,7 @@ var hierarchy =
       [ "ConvolutionLayerNode", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml", null ],
       [ "DeconvolutionLayerNode", "classarm__compute_1_1graph_1_1_deconvolution_layer_node.xhtml", null ],
       [ "DepthwiseConvolutionLayerNode", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml", null ],
+      [ "DequantizationLayerNode", "classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml", null ],
       [ "DetectionOutputLayerNode", "classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml", null ],
       [ "DetectionPostProcessLayerNode", "classarm__compute_1_1graph_1_1_detection_post_process_layer_node.xhtml", null ],
       [ "DummyNode", "classarm__compute_1_1graph_1_1_dummy_node.xhtml", null ],
@@ -1152,9 +1181,10 @@ var hierarchy =
       [ "SchedulerClock< output_timestamps >", "classarm__compute_1_1test_1_1framework_1_1_scheduler_clock.xhtml", null ],
       [ "WallClock< output_timestamps >", "classarm__compute_1_1test_1_1framework_1_1_wall_clock.xhtml", null ]
     ] ],
+    [ "InstrumentsInfo", "structarm__compute_1_1test_1_1framework_1_1_instruments_info.xhtml", null ],
     [ "InstrumentsStats", "classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml", null ],
-    [ "InternalKeypoint", "struct_internal_keypoint.xhtml", null ],
     [ "InternalKeyPoint", "structarm__compute_1_1_internal_key_point.xhtml", null ],
+    [ "InternalKeypoint", "struct_internal_keypoint.xhtml", null ],
     [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", null ],
     [ "IPoolManager", "classarm__compute_1_1_i_pool_manager.xhtml", [
       [ "PoolManager", "classarm__compute_1_1_pool_manager.xhtml", null ]
@@ -1166,6 +1196,12 @@ var hierarchy =
     [ "IPyramid", "classarm__compute_1_1_i_pyramid.xhtml", [
       [ "CLPyramid", "classarm__compute_1_1_c_l_pyramid.xhtml", null ],
       [ "Pyramid", "classarm__compute_1_1_pyramid.xhtml", null ]
+    ] ],
+    [ "IRuntimeContext", "classarm__compute_1_1_i_runtime_context.xhtml", [
+      [ "RuntimeContext", "classarm__compute_1_1_runtime_context.xhtml", [
+        [ "CLRuntimeContext", "classarm__compute_1_1_c_l_runtime_context.xhtml", null ],
+        [ "GCRuntimeContext", "classarm__compute_1_1_g_c_runtime_context.xhtml", null ]
+      ] ]
     ] ],
     [ "is_contained< T, Tuple >", "structarm__compute_1_1traits_1_1is__contained.xhtml", null ],
     [ "is_contained< T, std::tuple< Ts... > >", "structarm__compute_1_1traits_1_1is__contained.xhtml", [
@@ -1179,6 +1215,9 @@ var hierarchy =
       [ "CPPScheduler", "classarm__compute_1_1_c_p_p_scheduler.xhtml", null ],
       [ "OMPScheduler", "classarm__compute_1_1_o_m_p_scheduler.xhtml", null ],
       [ "SingleThreadScheduler", "classarm__compute_1_1_single_thread_scheduler.xhtml", null ]
+    ] ],
+    [ "ISchedulerUser", "classarm__compute_1_1test_1_1framework_1_1_i_scheduler_user.xhtml", [
+      [ "ContextSchedulerUser", "classarm__compute_1_1test_1_1_context_scheduler_user.xhtml", null ]
     ] ],
     [ "IStream", "classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml", [
       [ "Stream", "classarm__compute_1_1graph_1_1frontend_1_1_stream.xhtml", null ],
@@ -1202,11 +1241,13 @@ var hierarchy =
       [ "NumPyAccessor", "classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml", null ],
       [ "NumPyBinLoader", "classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml", null ],
       [ "PPMWriter", "classarm__compute_1_1graph__utils_1_1_p_p_m_writer.xhtml", null ],
+      [ "PrintAccessor", "classarm__compute_1_1graph__utils_1_1_print_accessor.xhtml", null ],
       [ "RandomAccessor", "classarm__compute_1_1graph__utils_1_1_random_accessor.xhtml", null ],
       [ "SaveNumPyAccessor", "classarm__compute_1_1graph__utils_1_1_save_num_py_accessor.xhtml", null ],
       [ "TopNPredictionsAccessor", "classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml", null ],
       [ "ValidationInputAccessor", "classarm__compute_1_1graph__utils_1_1_validation_input_accessor.xhtml", null ],
-      [ "ValidationOutputAccessor", "classarm__compute_1_1graph__utils_1_1_validation_output_accessor.xhtml", null ]
+      [ "ValidationOutputAccessor", "classarm__compute_1_1graph__utils_1_1_validation_output_accessor.xhtml", null ],
+      [ "VerifyAccessor< D >", "classarm__compute_1_1utils_1_1_verify_accessor.xhtml", null ]
     ] ],
     [ "ITensorAllocator", "classarm__compute_1_1_i_tensor_allocator.xhtml", [
       [ "CLTensorAllocator", "classarm__compute_1_1_c_l_tensor_allocator.xhtml", null ],
@@ -1221,13 +1262,23 @@ var hierarchy =
       [ "NETensorHandle", "classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml", null ]
     ] ],
     [ "CartesianProductDataset< T, U >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml", null ],
-    [ "ContainerDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml", null ],
-    [ "JoinDataset< T, U >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml", null ],
-    [ "RangeDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset_1_1iterator.xhtml", null ],
-    [ "SingletonDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset_1_1iterator.xhtml", null ],
     [ "InitializerListDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml", null ],
+    [ "JoinDataset< T, U >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml", null ],
+    [ "SingletonDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset_1_1iterator.xhtml", null ],
     [ "ZipDataset< T, U >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset_1_1iterator.xhtml", null ],
+    [ "RangeDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset_1_1iterator.xhtml", null ],
+    [ "ContainerDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml", null ],
     [ "Iterator", "classarm__compute_1_1_iterator.xhtml", null ],
+    [ "ITransformWeights", "classarm__compute_1_1_i_transform_weights.xhtml", [
+      [ "CLConvertFullyConnectedWeightsManaged", "classarm__compute_1_1weights__transformations_1_1_c_l_convert_fully_connected_weights_managed.xhtml", null ],
+      [ "CLConvolutionLayerReshapeWeightsTransform", "classarm__compute_1_1weights__transformations_1_1_c_l_convolution_layer_reshape_weights_transform.xhtml", null ],
+      [ "CLFullyConnectedLayerReshapeWeightsManaged", "classarm__compute_1_1weights__transformations_1_1_c_l_fully_connected_layer_reshape_weights_managed.xhtml", null ],
+      [ "CLGEMMReshapeRHSMatrixKernelManaged", "classarm__compute_1_1weights__transformations_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel_managed.xhtml", null ],
+      [ "NEConvertFullyConnectedWeightsManaged", "classarm__compute_1_1weights__transformations_1_1_n_e_convert_fully_connected_weights_managed.xhtml", null ],
+      [ "NEConvolutionLayerReshapeWeightsTransform", "classarm__compute_1_1weights__transformations_1_1_n_e_convolution_layer_reshape_weights_transform.xhtml", null ],
+      [ "NEFullyConnectedLayerReshapeWeightsManaged", "classarm__compute_1_1weights__transformations_1_1_n_e_fully_connected_layer_reshape_weights_managed.xhtml", null ]
+    ] ],
+    [ "IWeightsManager", "classarm__compute_1_1_i_weights_manager.xhtml", null ],
     [ "Kernel", "classarm__compute_1_1_kernel.xhtml", null ],
     [ "SchedulerClock< output_timestamps >::kernel_info", "structarm__compute_1_1test_1_1framework_1_1_scheduler_clock_1_1kernel__info.xhtml", null ],
     [ "Keypoint", "struct_keypoint.xhtml", null ],
@@ -1280,6 +1331,7 @@ var hierarchy =
       [ "SimpleOption< bool >", "classarm__compute_1_1utils_1_1_simple_option.xhtml", [
         [ "ToggleOption", "classarm__compute_1_1utils_1_1_toggle_option.xhtml", null ]
       ] ],
+      [ "SimpleOption< float >", "classarm__compute_1_1utils_1_1_simple_option.xhtml", null ],
       [ "SimpleOption< int >", "classarm__compute_1_1utils_1_1_simple_option.xhtml", null ],
       [ "SimpleOption< LogFormat >", "classarm__compute_1_1utils_1_1_simple_option.xhtml", [
         [ "EnumOption< LogFormat >", "classarm__compute_1_1utils_1_1_enum_option.xhtml", null ]
@@ -1287,35 +1339,46 @@ var hierarchy =
       [ "SimpleOption< LogLevel >", "classarm__compute_1_1utils_1_1_simple_option.xhtml", [
         [ "EnumOption< LogLevel >", "classarm__compute_1_1utils_1_1_enum_option.xhtml", null ]
       ] ],
+      [ "SimpleOption< size_t >", "classarm__compute_1_1utils_1_1_simple_option.xhtml", null ],
       [ "SimpleOption< std::string >", "classarm__compute_1_1utils_1_1_simple_option.xhtml", null ],
       [ "SimpleOption< unsigned int >", "classarm__compute_1_1utils_1_1_simple_option.xhtml", null ]
     ] ],
     [ "PaddingCalculator", "classarm__compute_1_1test_1_1_padding_calculator.xhtml", null ],
     [ "PadStrideInfo", "classarm__compute_1_1_pad_stride_info.xhtml", null ],
+    [ "ParametersLibrary", "classarm__compute_1_1test_1_1_parameters_library.xhtml", null ],
     [ "PassManager", "classarm__compute_1_1graph_1_1_pass_manager.xhtml", null ],
     [ "PixelValue", "classarm__compute_1_1_pixel_value.xhtml", null ],
     [ "PMU", "classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml", null ],
     [ "PoolingLayerInfo", "classarm__compute_1_1_pooling_layer_info.xhtml", null ],
-    [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_printer.xhtml", [
-      [ "JSONPrinter", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml", null ],
-      [ "PrettyPrinter", "classarm__compute_1_1test_1_1framework_1_1_pretty_printer.xhtml", null ]
-    ] ],
     [ "Printer", "classarm__compute_1_1logging_1_1_printer.xhtml", [
       [ "FilePrinter", "classarm__compute_1_1logging_1_1_file_printer.xhtml", null ],
       [ "StdPrinter", "classarm__compute_1_1logging_1_1_std_printer.xhtml", null ]
+    ] ],
+    [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_printer.xhtml", [
+      [ "JSONPrinter", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml", null ],
+      [ "PrettyPrinter", "classarm__compute_1_1test_1_1framework_1_1_pretty_printer.xhtml", null ]
     ] ],
     [ "PriorBoxLayerInfo", "classarm__compute_1_1_prior_box_layer_info.xhtml", null ],
     [ "Profiler", "classarm__compute_1_1test_1_1framework_1_1_profiler.xhtml", null ],
     [ "Program", "classarm__compute_1_1_program.xhtml", null ],
     [ "promote< T >", "structarm__compute_1_1test_1_1traits_1_1promote.xhtml", null ],
+    [ "promote< T >", "structarm__compute_1_1wrapper_1_1traits_1_1promote.xhtml", null ],
+    [ "promote< float >", "structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01float_01_4.xhtml", null ],
     [ "promote< float >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01float_01_4.xhtml", null ],
     [ "promote< half >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01half_01_4.xhtml", null ],
+    [ "promote< half >", "structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01half_01_4.xhtml", null ],
+    [ "promote< int16_t >", "structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int16__t_01_4.xhtml", null ],
     [ "promote< int16_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01int16__t_01_4.xhtml", null ],
+    [ "promote< int32_t >", "structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int32__t_01_4.xhtml", null ],
     [ "promote< int32_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01int32__t_01_4.xhtml", null ],
     [ "promote< int8_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01int8__t_01_4.xhtml", null ],
+    [ "promote< int8_t >", "structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int8__t_01_4.xhtml", null ],
     [ "promote< uint16_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml", null ],
+    [ "promote< uint16_t >", "structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml", null ],
     [ "promote< uint32_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml", null ],
+    [ "promote< uint32_t >", "structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml", null ],
     [ "promote< uint8_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml", null ],
+    [ "promote< uint8_t >", "structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml", null ],
     [ "PyramidInfo", "classarm__compute_1_1_pyramid_info.xhtml", null ],
     [ "QuantizationInfo", "classarm__compute_1_1_quantization_info.xhtml", null ],
     [ "RangedUniformDistribution< T >", "classarm__compute_1_1utils_1_1random_1_1_ranged_uniform_distribution.xhtml", null ],
@@ -1331,8 +1394,10 @@ var hierarchy =
       [ "TestError", "classarm__compute_1_1test_1_1framework_1_1_test_error.xhtml", null ]
     ] ],
     [ "Scheduler", "classarm__compute_1_1_scheduler.xhtml", null ],
+    [ "SchedulerFactory", "classarm__compute_1_1_scheduler_factory.xhtml", null ],
     [ "Semaphore", "classarm__compute_1_1_semaphore.xhtml", null ],
     [ "Size2D", "classarm__compute_1_1_size2_d.xhtml", null ],
+    [ "SoftmaxKernelInfo", "structarm__compute_1_1_softmax_kernel_info.xhtml", null ],
     [ "square< T, S >", "structarm__compute_1_1detail_1_1square.xhtml", null ],
     [ "Status", "classarm__compute_1_1_status.xhtml", null ],
     [ "StdTransformsFixed< TOperand, TResult, height, width, block >", "classarm__gemm_1_1_std_transforms_fixed.xhtml", null ],
@@ -1344,6 +1409,7 @@ var hierarchy =
     [ "Tensor4D", "struct_tensor4_d.xhtml", null ],
     [ "TensorAccessor< T >", "classarm__compute_1_1_tensor_accessor.xhtml", null ],
     [ "TensorCache", "classarm__compute_1_1test_1_1_tensor_cache.xhtml", null ],
+    [ "TensorParams", "structarm__compute_1_1utils_1_1_tensor_params.xhtml", null ],
     [ "TestCase", "classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml", [
       [ "DataTestCase< T >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
       [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetActivationLayerDataset(), data_types), framework::dataset::make(\"Batches\", 1)))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
@@ -1383,13 +1449,29 @@ var hierarchy =
     [ "TunerFactory", "classarm__compute_1_1tuners_1_1_tuner_factory.xhtml", null ],
     [ "uniform_real_distribution_fp16", "classarm__compute_1_1utils_1_1uniform__real__distribution__fp16.xhtml", null ],
     [ "UniformQuantizationInfo", "structarm__compute_1_1_uniform_quantization_info.xhtml", null ],
+    [ "ValidateExample", "classarm__compute_1_1utils_1_1_validate_example.xhtml", [
+      [ "GraphValidateExample< LayerT, OptionsT, VerifyAccessorT >", "classarm__compute_1_1utils_1_1_graph_validate_example.xhtml", null ],
+      [ "GraphValidateExample< ConvolutionLayer, ConvolutionOptions, ConvolutionVerifyAccessor >", "classarm__compute_1_1utils_1_1_graph_validate_example.xhtml", null ],
+      [ "GraphValidateExample< DepthwiseConvolutionLayer, DepthConvolutionOptions, DepthConvolutionVerifyAccessor >", "classarm__compute_1_1utils_1_1_graph_validate_example.xhtml", null ],
+      [ "GraphValidateExample< FullyConnectedLayer, FullyConnectedOptions, FullyConnectedVerifyAccessor >", "classarm__compute_1_1utils_1_1_graph_validate_example.xhtml", null ]
+    ] ],
     [ "ValidRegion", "structarm__compute_1_1_valid_region.xhtml", null ],
     [ "Measurement::Value", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml", null ],
     [ "Vector", "struct_vector.xhtml", null ],
     [ "vector_128_tag", "structarm__compute_1_1wrapper_1_1traits_1_1vector__128__tag.xhtml", null ],
     [ "vector_64_tag", "structarm__compute_1_1wrapper_1_1traits_1_1vector__64__tag.xhtml", null ],
+    [ "VerificationParams", "structarm__compute_1_1utils_1_1_verification_params.xhtml", null ],
     [ "WeightsInfo", "classarm__compute_1_1_weights_info.xhtml", null ],
+    [ "WeightsManagerContext", "structarm__compute_1_1graph_1_1_weights_manager_context.xhtml", null ],
     [ "Window", "classarm__compute_1_1_window.xhtml", null ],
     [ "WindowIterator< L >", "classarm__compute_1_1_window_iterator.xhtml", null ],
-    [ "WinogradInfo", "structarm__compute_1_1_winograd_info.xhtml", null ]
+    [ "WinogradInfo", "structarm__compute_1_1_winograd_info.xhtml", null ],
+    [ "NamedTuple", null, [
+      [ "BenchmarkResult", "class_gemm_tuner_1_1_benchmark_result.xhtml", null ],
+      [ "GEMMParam", "class_gemm_tuner_1_1_g_e_m_m_param.xhtml", null ],
+      [ "Measurement", "class_gemm_tuner_1_1_measurement.xhtml", null ],
+      [ "NativeGEMMConfig", "class_gemm_tuner_1_1_native_g_e_m_m_config.xhtml", null ],
+      [ "ReshapedGEMMConfig", "class_gemm_tuner_1_1_reshaped_g_e_m_m_config.xhtml", null ],
+      [ "ReshapedOnlyRHSGEMMConfig", "class_gemm_tuner_1_1_reshaped_only_r_h_s_g_e_m_m_config.xhtml", null ]
+    ] ]
 ];

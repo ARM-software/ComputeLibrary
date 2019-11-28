@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -172,6 +172,10 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 <li>InBoundsCropFunction
 : <a class="el" href="classarm__compute_1_1_n_e_crop_kernel.xhtml#a54afc81e82afa5ab200b81f536b8453a">NECropKernel</a>
 </li>
+<li>info_type
+: <a class="el" href="classarm__compute_1_1_blob_lifetime_manager.xhtml#a1ad8c3e2d13c488fc60f736d90cf25e0">BlobLifetimeManager</a>
+, <a class="el" href="classarm__compute_1_1_offset_lifetime_manager.xhtml#aac15baae40b44f0751db4ca0d1e1ac55">OffsetLifetimeManager</a>
+</li>
 <li>intermediate_type
 : <a class="el" href="structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml#a6d8309776a9cb10567df1735666919ff">common_promoted_signed_type&lt; T &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1common__promoted__unsigned__type.xhtml#a2d90fb6b02a4ec5df8c995eb66b5d724">common_promoted_unsigned_type&lt; T &gt;</a>
@@ -220,6 +224,9 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 
 
 <h3><a id="index_t"></a>- t -</h3><ul>
+<li>TBias
+: <a class="el" href="classarm__compute_1_1utils_1_1_verify_accessor.xhtml#a4e68efc85570b62c7d53c78875ced9bc">VerifyAccessor&lt; D &gt;</a>
+</li>
 <li>TensorConcreteType
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#a991b6faefbee1cf7b9cf77647c30a6ec">FusedConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_depthwise_convolution_batch_normalization_function.xhtml#a991b6faefbee1cf7b9cf77647c30a6ec">FusedDepthwiseConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;</a>
@@ -238,7 +245,9 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml#a45de1f3c30be8d2ee7424ca42677d5d9">NEWinogradLayerConfiguration&lt; TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
 </li>
 <li>type
-: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml#a9c9aae4b5f426f99087f48b40bc114fc">CartesianProductDataset&lt; T, U &gt;</a>
+: <a class="el" href="structarm__compute_1_1test_1_1_context_type.xhtml#a9572b98335b1c3aa5b9183ba6cdd6421">ContextType&lt; T &gt;</a>
+, <a class="el" href="structarm__compute_1_1test_1_1_context_type_3_01_tensor_01_4.xhtml#ad5b4ae415d2d7a4a1a272d2dbea38324">ContextType&lt; Tensor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml#a9c9aae4b5f426f99087f48b40bc114fc">CartesianProductDataset&lt; T, U &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset.xhtml#a6fdded42fc2978d6f9f60564b5b4190a">ContainerDataset&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset.xhtml#a18b86dafc894ede9c2b71030a731a106">InitializerListDataset&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#ad4f1d01a0af9cf719345464b2c3821ca">JoinDataset&lt; T, U &gt;</a>
@@ -253,6 +262,14 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml#a43022da9f622deba3284b748a6885e23">promote&lt; uint16_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml#a9659bbcc7fc016eda242219021c7980b">promote&lt; uint32_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml#a3085ed9ad7c9b1c88dcec24108730e54">promote&lt; uint8_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01float_01_4.xhtml#a05cacf975133703fccd67d8b60ed9ae0">promote&lt; float &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01half_01_4.xhtml#a871173f31fa2a65afb444d262bc1aadb">promote&lt; half &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int16__t_01_4.xhtml#a4f14ffc6d6f6ca92afb1baf996fc9305">promote&lt; int16_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int32__t_01_4.xhtml#a70ca3d636283d6713220cd8af5fc07b3">promote&lt; int32_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01int8__t_01_4.xhtml#a8812bf779dca54354aa6ad00cef14a73">promote&lt; int8_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml#a43022da9f622deba3284b748a6885e23">promote&lt; uint16_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml#a9659bbcc7fc016eda242219021c7980b">promote&lt; uint32_t &gt;</a>
+, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml#a3085ed9ad7c9b1c88dcec24108730e54">promote&lt; uint8_t &gt;</a>
 </li>
 </ul>
 
@@ -286,7 +303,7 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

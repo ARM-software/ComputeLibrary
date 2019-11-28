@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -108,8 +108,10 @@ $(document).ready(function(){initNavTree('_n_e_o_n_2_arg_min_max_8cpp.xhtml','')
 <div class="textblock"><code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="utils_2misc_2traits_8h_source.xhtml">arm_compute/core/utils/misc/Traits.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_arg_min_max_layer_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEArgMinMaxLayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_n_e_reduction_operation_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEReductionOperation.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="runtime_2_tensor_8h_source.xhtml">arm_compute/runtime/Tensor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_tensor_allocator_8h_source.xhtml">arm_compute/runtime/TensorAllocator.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_shape_calculator_8h_source.xhtml">arm_compute/core/utils/misc/ShapeCalculator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_accessor_8h_source.xhtml">tests/NEON/Accessor.h</a>&quot;</code><br />
 <code>#include &quot;tests/datasets/ShapeDatasets.h&quot;</code><br />
 <code>#include &quot;tests/datasets/SplitDataset.h&quot;</code><br />
@@ -123,7 +125,7 @@ $(document).ready(function(){initNavTree('_n_e_o_n_2_arg_min_max_8cpp.xhtml','')
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2018 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -138,8 +140,8 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a849706f06089adc69a74d78ad6609474"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a849706f06089adc69a74d78ad6609474">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(framework::dataset::make(&quot;InputInfo&quot;, { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32) }), framework::dataset::make(&quot;OutputInfo&quot;, { TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32), TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::U32), TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::F32) })), framework::dataset::make(&quot;Axis&quot;, { 4, 0, 2, 0 })), framework::dataset::make(&quot;Operation&quot;, { ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::MEAN_SUM })), framework::dataset::make(&quot;Expected&quot;, { false, false, true, false })), input_info, output_info, axis, operation, expected)</td></tr>
-<tr class="separator:a849706f06089adc69a74d78ad6609474"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c9767fa8091d865f4ce1d8af0e88821"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2c9767fa8091d865f4ce1d8af0e88821">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(framework::dataset::make(&quot;InputInfo&quot;, { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(32U, 16U, 16U, 2U), 1, DataType::F32) }), framework::dataset::make(&quot;OutputInfo&quot;, { TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32), TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::S32), TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::F32) })), framework::dataset::make(&quot;Axis&quot;, { 4, 0, 2, 0 })), framework::dataset::make(&quot;Operation&quot;, { ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::ARG_IDX_MAX, ReductionOperation::MEAN_SUM })), framework::dataset::make(&quot;Expected&quot;, { false, false, true, false })), input_info, output_info, axis, operation, expected)</td></tr>
+<tr class="separator:a2c9767fa8091d865f4ce1d8af0e88821"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ed8b4681b5e026cbac93b871e7ade81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5ed8b4681b5e026cbac93b871e7ade81">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, { DataType::F32 })), shape, data_type)</td></tr>
 <tr class="separator:a5ed8b4681b5e026cbac93b871e7ade81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a819a77f8b5d28cdabeff16b9c7ec0f2b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a819a77f8b5d28cdabeff16b9c7ec0f2b">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEArgMinMaxValidationFixture&lt; int32_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::S32)), framework::dataset::make(&quot;Axis&quot;, { 0, 1, 2, 3 })), framework::dataset::make(&quot;Operation&quot;, { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))</td></tr>
@@ -169,7 +171,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="_n_e_o_n_2_arg_min_max_8cpp.xhtml">ArgMinMax.cpp</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:08 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

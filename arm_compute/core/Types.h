@@ -77,11 +77,13 @@ enum class DataType
     U8,                 /**< unsigned 8-bit number */
     S8,                 /**< signed 8-bit number */
     QSYMM8,             /**< quantized, symmetric fixed-point 8-bit number */
-    QASYMM8,            /**< quantized, asymmetric fixed-point 8-bit number */
+    QASYMM8,            /**< quantized, asymmetric fixed-point 8-bit number unsigned */
+    QASYMM8_SIGNED,     /**< quantized, asymmetric fixed-point 8-bit number signed */
     QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
     U16,                /**< unsigned 16-bit number */
     S16,                /**< signed 16-bit number */
     QSYMM16,            /**< quantized, symmetric fixed-point 16-bit number */
+    QASYMM16,           /**< quantized, asymmetric fixed-point 16-bit number */
     U32,                /**< unsigned 32-bit number */
     S32,                /**< signed 32-bit number */
     U64,                /**< unsigned 64-bit number */
@@ -135,6 +137,13 @@ enum class ConvolutionMethod
     DIRECT,   /**< Direct convolution */
     WINOGRAD, /**< Convolution using Winograd */
     FFT       /**< Convolution using FFT */
+};
+
+/** Available DepthwiseConvolutionFunction*/
+enum class DepthwiseConvolutionFunction
+{
+    OPTIMIZED, /**< Optimized Depthwise Convolution */
+    GENERIC,   /**< Generic Depthwise Convolution */
 };
 
 /** Available DeconvolutionMethod*/
@@ -796,6 +805,7 @@ struct FullyConnectedLayerInfo
     bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
     bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
     bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
+    bool       fp_mixed_precision{ false };                /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
 
     /** Sets the weights trained data layout
      *
@@ -1090,7 +1100,8 @@ public:
           _num_classes(),
           _scales_values(),
           _use_regular_nms(),
-          _detection_per_class()
+          _detection_per_class(),
+          _dequantize_scores()
     {
     }
     /** Constructor
@@ -1101,11 +1112,12 @@ public:
      * @param[in] iou_threshold             Threshold to be used during the intersection over union.
      * @param[in] num_classes               Number of classes.
      * @param[in] scales_values             Scales values used for decode center size boxes.
-     * @param[in] use_regular_nms           (Optional) Boolean to determinate if use regular or fast nms.
-     * @param[in] detection_per_class       (Optional) Number of detection per class. Used in the Regular Non-Max-Suppression
+     * @param[in] use_regular_nms           (Optional) Boolean to determinate if use regular or fast nms. Defaults to false.
+     * @param[in] detection_per_class       (Optional) Number of detection per class. Used in the Regular Non-Max-Suppression. Defaults to 100.
+     * @param[in] dequantize_scores         (Optional) If the scores need to be dequantized. Defaults to true.
      */
     DetectionPostProcessLayerInfo(unsigned int max_detections, unsigned int max_classes_per_detection, float nms_score_threshold, float iou_threshold, unsigned int num_classes,
-                                  std::array<float, 4> scales_values, bool use_regular_nms = false, unsigned int detection_per_class = 100)
+                                  std::array<float, 4> scales_values, bool use_regular_nms = false, unsigned int detection_per_class = 100, bool dequantize_scores = true)
         : _max_detections(max_detections),
           _max_classes_per_detection(max_classes_per_detection),
           _nms_score_threshold(nms_score_threshold),
@@ -1113,7 +1125,8 @@ public:
           _num_classes(num_classes),
           _scales_values(scales_values),
           _use_regular_nms(use_regular_nms),
-          _detection_per_class(detection_per_class)
+          _detection_per_class(detection_per_class),
+          _dequantize_scores(dequantize_scores)
     {
     }
     /** Get max detections. */
@@ -1175,6 +1188,11 @@ public:
         // Saved as [y,x,h,w]
         return _scales_values[3];
     }
+    /** Get dequantize_scores value. */
+    bool dequantize_scores() const
+    {
+        return _dequantize_scores;
+    }
 
 private:
     unsigned int _max_detections;
@@ -1185,6 +1203,7 @@ private:
     std::array<float, 4> _scales_values;
     bool         _use_regular_nms;
     unsigned int _detection_per_class;
+    bool         _dequantize_scores;
 };
 
 /** Pooling Layer Information class */
@@ -1193,39 +1212,44 @@ class PoolingLayerInfo
 public:
     /** Default Constructor */
     PoolingLayerInfo()
-        : _pool_type(PoolingType::MAX), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false)
+        : _pool_type(PoolingType::MAX), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false), _fp_mixed_precision(false)
     {
     }
     /** Default Constructor
      *
-     * @param[in] pool_type       Pooling type @ref PoolingType.
-     * @param[in] pool_size       Pooling size, in elements, across  x and y.
-     * @param[in] pad_stride_info (Optional) Padding and stride information @ref PadStrideInfo
-     * @param[in] exclude_padding (Optional) Strategy when accounting padding in calculations.
-     *                             True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
-     *                             Defaults to false;
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               unsigned int  pool_size,
-                              PadStrideInfo pad_stride_info = PadStrideInfo(),
-                              bool          exclude_padding = false)
-        : _pool_type(pool_type), _pool_size(Size2D(pool_size, pool_size)), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false)
+                              PadStrideInfo pad_stride_info    = PadStrideInfo(),
+                              bool          exclude_padding    = false,
+                              bool          fp_mixed_precision = false)
+        : _pool_type(pool_type), _pool_size(Size2D(pool_size, pool_size)), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false),
+          _fp_mixed_precision(fp_mixed_precision)
     {
     }
     /** Default Constructor
      *
-     * @param[in] pool_type       Pooling type @ref PoolingType.
-     * @param[in] pool_size       Pooling size, in elements, across  x and y.
-     * @param[in] pad_stride_info (Optional) Padding and stride information @ref PadStrideInfo
-     * @param[in] exclude_padding (Optional) Strategy when accounting padding in calculations.
-     *                             True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
-     *                             Defaults to false;
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               Size2D        pool_size,
-                              PadStrideInfo pad_stride_info = PadStrideInfo(),
-                              bool          exclude_padding = false)
-        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false)
+                              PadStrideInfo pad_stride_info    = PadStrideInfo(),
+                              bool          exclude_padding    = false,
+                              bool          fp_mixed_precision = false)
+        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false), _fp_mixed_precision(fp_mixed_precision)
     {
     }
     /** Default Constructor
@@ -1235,7 +1259,7 @@ public:
      * @param[in] pool_type Pooling type @ref PoolingType.
      */
     explicit PoolingLayerInfo(PoolingType pool_type)
-        : _pool_type(pool_type), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true)
+        : _pool_type(pool_type), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true), _fp_mixed_precision(false)
     {
     }
     /** Get the pooling type */
@@ -1258,6 +1282,11 @@ public:
     {
         return _exclude_padding;
     }
+    /** Check if a wider accumulator should be used. */
+    bool fp_mixed_precision() const
+    {
+        return _fp_mixed_precision;
+    }
     /** Check if is global pooling */
     bool is_global_pooling() const
     {
@@ -1270,6 +1299,7 @@ private:
     PadStrideInfo _pad_stride_info;
     bool          _exclude_padding;
     bool          _is_global_pooling;
+    bool          _fp_mixed_precision;
 };
 
 /** ROI Pooling Layer Information class */
@@ -1527,6 +1557,7 @@ public:
         LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
         LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
         SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+        ELU,             /**< Exponential Linear Unit ( \f$ f(x) = \begin{cases}  \alpha (exp(x) - 1) & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
         ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
         SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
         SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
@@ -1850,6 +1881,9 @@ struct GEMMLowpOutputStageInfo
     int                     gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
     int                     gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
     int                     gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
+    std::vector<int32_t>    gemmlowp_multipliers{};                /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    std::vector<int32_t>    gemmlowp_shifts{};                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    bool                    is_quantized_per_channel{ false };     /**< GEMMLowp quantized per-channel flag */
 };
 
 /** GEMM LHS (Left Hand Side) matrix information */
@@ -1983,6 +2017,14 @@ public:
     GEMMLowpOutputStageInfo gemmlowp_output_stage() const
     {
         return _gemmlowp_output_stage;
+    };
+    /** Sets GEMMLowp output stage
+     *
+     * @param[in] output_stage Output stage to set
+     */
+    void set_gemmlowp_output_stage(GEMMLowpOutputStageInfo &output_stage)
+    {
+        _gemmlowp_output_stage = output_stage;
     };
     /** Flag which specifies if a wider accumulator should be used.
      *

@@ -48,7 +48,7 @@ public:
     CLGEMMReshapeRHSMatrixKernel &operator=(CLGEMMReshapeRHSMatrixKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input    Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input    Input tensor. Data types supported: All
      * @param[out] output   Output tensor. Data type supported: same as @p input
      * @param[in]  rhs_info RHS matrix information to be used for reshaping. This object contains all the necessary
      *                      information to reshape the input tensor. Only the following values are supported:
@@ -61,7 +61,7 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMReshapeRHSMatrixKernel
      *
-     * @param[in] input    Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input    Input tensor info. Data types supported: All
      * @param[in] output   Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
      * @param[in] rhs_info RHS matrix information to be used for reshaping. This object contains all the necessary
      *                     information to reshape the input tensor. Only the following values are supported:

@@ -63,7 +63,8 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
         policy = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
 
-    for(int element_idx = 0, count = 0; element_idx < out.num_elements(); ++element_idx, ++count)
+    const uint32_t num_elements = out.num_elements();
+    for(uint32_t element_idx = 0, count = 0; element_idx < num_elements; ++element_idx, ++count)
     {
         Coordinates id    = index2coord(out.shape(), element_idx);
         int         idx   = id.x();
@@ -196,7 +197,7 @@ SimpleTensor<uint8_t> scale(const SimpleTensor<uint8_t> &src, float scale_x, flo
         SimpleTensor<float> src_tmp                 = convert_from_asymmetric(src);
         float               constant_border_value_f = dequantize_qasymm8(constant_border_value, src.quantization_info());
         SimpleTensor<float> dst_tmp                 = scale_core<float>(src_tmp, scale_x, scale_y, policy, border_mode, constant_border_value_f, sampling_policy, ceil_policy_scale);
-        dst                                         = convert_to_asymmetric(dst_tmp, src.quantization_info());
+        dst                                         = convert_to_asymmetric<uint8_t>(dst_tmp, src.quantization_info());
     }
     else
     {

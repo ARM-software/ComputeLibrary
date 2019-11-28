@@ -48,16 +48,17 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
     ARM_COMPUTE_RETURN_ERROR_ON(input == output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input,
                                                          1,
-                                                         DataType::U8, DataType::S8, DataType::S16,
+                                                         DataType::U8, DataType::S8, DataType::QSYMM8_PER_CHANNEL, DataType::S16,
                                                          DataType::U16, DataType::U32, DataType::S32, DataType::F16,
                                                          DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output,
                                                          1,
-                                                         DataType::U8, DataType::S8, DataType::S16,
+                                                         DataType::U8, DataType::S8, DataType::QASYMM8, DataType::S16,
                                                          DataType::U16, DataType::U32, DataType::S32, DataType::F16,
                                                          DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == output->data_type(), "Input and output data types must be different");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_float(input->data_type()) && shift != 0, "Shift is used only with integer inputs");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_float(input->data_type()) && shift != 0, "Shift is used only with integer non-quantized inputs");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(input->data_type()) && shift != 0, "Shift is used only with integer non-quantized inputs");
     ARM_COMPUTE_RETURN_ERROR_ON(shift >= 8);
 
     // Validate in case of configured output
@@ -94,13 +95,14 @@ void CLDepthConvertLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     // Conversions from float always SATURATE as out-of-bounds conversion from float->integer is implementation defined
     build_opts.add_option_if(is_data_type_float(input->info()->data_type()) || policy == ConvertPolicy::SATURATE, "-DSATURATE");
     build_opts.add_option_if(is_data_type_float(input->info()->data_type()) || is_data_type_float(output->info()->data_type()), "-DIS_DATA_TYPE_FLOAT");
+    build_opts.add_option_if(is_data_type_quantized(input->info()->data_type()), "-DIS_DATA_TYPE_QUANTIZED");
 
     // Create kernel
     const std::string kernel_name = (input_size >= output_size) ? "convert_depth_down" : "convert_depth_up";
     _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Set shift arg
-    unsigned int idx = 2 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
+    unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
     _kernel.setArg(idx++, shift);
 
     // Configure kernel

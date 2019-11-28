@@ -47,8 +47,7 @@ struct BlockSizes
  * @param[in] ci                CPU information.
  * @param[in] num_threads       Maximum number of threads that might be used for the calculations.
  * @param[in] p                 M, N, K sizes.
- * @param[in] alpha             Alpha value.
- * @param[in] beta              Beta value.
+ * @param[in] activation        Activation struct
  * @param[in] pretranspose_hint Is B also pretransposed ?
  *
  * @return Kernel description that the assembly heuristics picked for the given configuration
@@ -57,8 +56,7 @@ arm_gemm::KernelDescription get_gemm_info(DataType                            in
                                           const CPUInfo                      &ci,
                                           const unsigned int                  num_threads,
                                           const INEGEMMWrapperKernel::Params &p,
-                                          float                               alpha,
-                                          float                               beta,
+                                          arm_gemm::Activation                activation,
                                           bool                                pretranspose_hint);
 
 /** Calculate the recommended block sizes to use based on the CPU cache sizes and the strategy which will be used

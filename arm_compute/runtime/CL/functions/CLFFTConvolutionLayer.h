@@ -109,7 +109,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup                    _memory_group;
+    MemoryGroup                      _memory_group;
     CLReverse                        _flip_weights_func;
     CLPermute                        _permute_input_func;
     CLPermute                        _permute_output_func;

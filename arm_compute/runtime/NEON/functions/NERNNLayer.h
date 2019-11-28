@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,7 +86,7 @@ private:
     NEGEMM                     _gemm_state_f;
     NEArithmeticAdditionKernel _add_kernel;
     NEActivationLayerKernel    _activation_kernel;
-    NEFullyConnectedLayer      _fully_connected_kernel;
+    NEFullyConnectedLayer      _fully_connected;
     NECopyKernel               _copy_kernel;
     Tensor                     _fully_connected_out;
     Tensor                     _gemm_output;

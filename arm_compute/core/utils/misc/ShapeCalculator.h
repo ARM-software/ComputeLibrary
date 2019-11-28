@@ -859,6 +859,7 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
  */
 inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, const GEMMReshapeInfo &gemm_info)
 {
+    ARM_COMPUTE_UNUSED(input1);
     ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
 
     const bool reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d();
@@ -896,6 +897,7 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
  */
 inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, const GEMMKernelInfo &gemm_info)
 {
+    ARM_COMPUTE_UNUSED(input1);
     ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
 
     const bool         reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d;
@@ -1177,15 +1179,24 @@ inline TensorShape compute_tiled_shape(const TensorShape &input_shape, const Mul
 
 /** Calculate the reduced shape of a tensor given an axis
  *
- * @param[in] input Input tensor info
- * @param[in] axis  Axis on which to perform reduction
+ * @param[in] input     Input tensor info
+ * @param[in] axis      Axis on which to perform reduction
+ * @param[in] keep_dims (Optional) Whether to keep the dimension after reduction operation. Defaults to true.
  *
  * @return the calculated shape
  */
-inline TensorShape compute_reduced_shape(const TensorShape &input, unsigned int axis)
+inline TensorShape compute_reduced_shape(const TensorShape &input, unsigned int axis, bool keep_dims = true)
 {
     TensorShape output_shape{ input };
-    output_shape.set(axis, 1);
+
+    if(!keep_dims)
+    {
+        output_shape.remove_dimension(axis);
+    }
+    else
+    {
+        output_shape.set(axis, 1);
+    }
 
     return output_shape;
 }

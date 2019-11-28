@@ -23,8 +23,8 @@
  */
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 
+#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
@@ -111,8 +111,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-CLActivationLayerKernel::CLActivationLayerKernel()
-    : _input(nullptr), _output(nullptr), _run_in_place(false)
+CLActivationLayerKernel::CLActivationLayerKernel(CLCoreRuntimeContext *ctx)
+    : _input(nullptr), _output(nullptr), _run_in_place(false), _ctx(ctx)
 {
 }
 
@@ -205,8 +205,8 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     {
         kernel_name += perform_activation_in_float ? std::string("_quant_f32") : std::string("_quant");
     }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
+    _kernel = create_opencl_kernel(_ctx, kernel_name, build_opts);
     // Make sure _kernel is initialized before calling the parent's configure
     _input  = input;
     _output = output;

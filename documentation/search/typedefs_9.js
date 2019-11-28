@@ -27,6 +27,7 @@ var searchData=
   ['inekernel',['INEKernel',['../namespacearm__compute.xhtml#a9f3ed96e009111cfbe53d3f77c712390',1,'arm_compute']]],
   ['inelkinternalkeypointarray',['INELKInternalKeypointArray',['../namespacearm__compute.xhtml#a19699533eb1b662e46a10715f6086487',1,'arm_compute']]],
   ['inesimplekernel',['INESimpleKernel',['../namespacearm__compute.xhtml#a4aad0c49ce3d7cf4693830398f190250',1,'arm_compute']]],
+  ['info_5ftype',['info_type',['../classarm__compute_1_1_blob_lifetime_manager.xhtml#a1ad8c3e2d13c488fc60f736d90cf25e0',1,'arm_compute::BlobLifetimeManager::info_type()'],['../classarm__compute_1_1_offset_lifetime_manager.xhtml#aac15baae40b44f0751db4ca0d1e1ac55',1,'arm_compute::OffsetLifetimeManager::info_type()']]],
   ['instrumentsdescription',['InstrumentsDescription',['../namespacearm__compute_1_1test_1_1framework.xhtml#a2a9beba9ddfcbb1d1d7f695c9d86296e',1,'arm_compute::test::framework']]],
   ['int16array',['Int16Array',['../namespacearm__compute.xhtml#a69c19b38cbee8fa6680513f6ff76bbb3',1,'arm_compute']]],
   ['int32array',['Int32Array',['../namespacearm__compute.xhtml#a6af9862834629c287a81b16837b51e44',1,'arm_compute']]],

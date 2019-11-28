@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 #define __ARM_COMPUTE_SCHEDULER_H__
 
 #include "arm_compute/runtime/IScheduler.h"
+
+#include <map>
 #include <memory>
 
 namespace arm_compute
@@ -74,7 +76,9 @@ public:
 private:
     static Type                        _scheduler_type;
     static std::shared_ptr<IScheduler> _custom_scheduler;
+    static std::map<Type, std::unique_ptr<IScheduler>> _schedulers;
+
     Scheduler();
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_SCHEDULER_H__ */

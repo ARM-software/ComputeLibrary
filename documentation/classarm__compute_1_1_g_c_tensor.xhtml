@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -110,15 +110,15 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_g_c_tensor.xhtml
 <div class="dynheader">
 Collaboration diagram for GCTensor:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_g_c_tensor__coll__graph.svg" width="96" height="187"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_g_c_tensor__coll__graph.svg" width="275" height="187"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 <center><span class="legend">[<a target="top" href="graph_legend.xhtml">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a4f2f38059311cf163fde21d2414048ee"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml#a4f2f38059311cf163fde21d2414048ee">GCTensor</a> ()</td></tr>
-<tr class="memdesc:a4f2f38059311cf163fde21d2414048ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a4f2f38059311cf163fde21d2414048ee">More...</a><br /></td></tr>
-<tr class="separator:a4f2f38059311cf163fde21d2414048ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93806fce8ea03359d37ec010a07216ef"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml#a93806fce8ea03359d37ec010a07216ef">GCTensor</a> (<a class="el" href="classarm__compute_1_1_i_runtime_context.xhtml">IRuntimeContext</a> *ctx=nullptr)</td></tr>
+<tr class="memdesc:a93806fce8ea03359d37ec010a07216ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a93806fce8ea03359d37ec010a07216ef">More...</a><br /></td></tr>
+<tr class="separator:a93806fce8ea03359d37ec010a07216ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a16786bbce187082569ebbc297143ec99"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml#a16786bbce187082569ebbc297143ec99">GCTensor</a> (const <a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml">GCTensor</a> &amp;)=delete</td></tr>
 <tr class="memdesc:a16786bbce187082569ebbc297143ec99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied (As this class contains pointers)  <a href="#a16786bbce187082569ebbc297143ec99">More...</a><br /></td></tr>
 <tr class="separator:a16786bbce187082569ebbc297143ec99"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,6 +155,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acccf4173f8c67e6f93ea3353c9590c9e"><td class="memItemLeft" align="right" valign="top">GLuint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml#acccf4173f8c67e6f93ea3353c9590c9e">gc_buffer</a> () const override</td></tr>
 <tr class="memdesc:acccf4173f8c67e6f93ea3353c9590c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to return the tensor's gles compute buffer id.  <a href="#acccf4173f8c67e6f93ea3353c9590c9e">More...</a><br /></td></tr>
 <tr class="separator:acccf4173f8c67e6f93ea3353c9590c9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad702fefc10e889efafeab8a514aee30b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml#ad702fefc10e889efafeab8a514aee30b">associate_memory_group</a> (<a class="el" href="classarm__compute_1_1_i_memory_group.xhtml">IMemoryGroup</a> *memory_group) override</td></tr>
+<tr class="memdesc:ad702fefc10e889efafeab8a514aee30b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Associates a memory managable object with the memory group that manages it.  <a href="#ad702fefc10e889efafeab8a514aee30b">More...</a><br /></td></tr>
+<tr class="separator:ad702fefc10e889efafeab8a514aee30b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_g_c_tensor"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_g_c_tensor')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a></td></tr>
 <tr class="memitem:a78e2cb61c2ed12459fea5a97728d74d2 inherit pub_methods_classarm__compute_1_1_i_g_c_tensor"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml#a78e2cb61c2ed12459fea5a97728d74d2">IGCTensor</a> ()</td></tr>
 <tr class="memdesc:a78e2cb61c2ed12459fea5a97728d74d2 inherit pub_methods_classarm__compute_1_1_i_g_c_tensor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="classarm__compute_1_1_i_g_c_tensor.xhtml#a78e2cb61c2ed12459fea5a97728d74d2">More...</a><br /></td></tr>
@@ -208,14 +211,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9bc00234de9adf8c99a21eb1d7d494c2 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a9bc00234de9adf8c99a21eb1d7d494c2">mark_as_unused</a> () const</td></tr>
 <tr class="memdesc:a9bc00234de9adf8c99a21eb1d7d494c2 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Marks a tensor as unused.  <a href="classarm__compute_1_1_i_tensor.xhtml#a9bc00234de9adf8c99a21eb1d7d494c2">More...</a><br /></td></tr>
 <tr class="separator:a9bc00234de9adf8c99a21eb1d7d494c2 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classarm__compute_1_1_i_memory_manageable"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_memory_manageable')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_memory_manageable.xhtml">IMemoryManageable</a></td></tr>
+<tr class="memitem:added32d63012f1fe88309043bdf65059 inherit pub_methods_classarm__compute_1_1_i_memory_manageable"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_memory_manageable.xhtml#added32d63012f1fe88309043bdf65059">~IMemoryManageable</a> ()=default</td></tr>
+<tr class="memdesc:added32d63012f1fe88309043bdf65059 inherit pub_methods_classarm__compute_1_1_i_memory_manageable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default virtual destructor.  <a href="classarm__compute_1_1_i_memory_manageable.xhtml#added32d63012f1fe88309043bdf65059">More...</a><br /></td></tr>
+<tr class="separator:added32d63012f1fe88309043bdf65059 inherit pub_methods_classarm__compute_1_1_i_memory_manageable"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for OpenGL ES tensor. </p>
 
-<p class="definition">Definition at line <a class="el" href="_g_c_tensor_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_g_c_tensor_8h_source.xhtml">GCTensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_g_c_tensor_8h_source.xhtml#l00038">38</a> of file <a class="el" href="_g_c_tensor_8h_source.xhtml">GCTensor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a4f2f38059311cf163fde21d2414048ee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4f2f38059311cf163fde21d2414048ee">&#9670;&nbsp;</a></span>GCTensor() <span class="overload">[1/3]</span></h2>
+<a id="a93806fce8ea03359d37ec010a07216ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93806fce8ea03359d37ec010a07216ef">&#9670;&nbsp;</a></span>GCTensor() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -223,13 +230,20 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml">GCTensor</a> </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_runtime_context.xhtml">IRuntimeContext</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em> = <code>nullptr</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Default constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td>(Optional) Pointer to the runtime context. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="_g_c_tensor_8cpp_source.xhtml#l00029">29</a> of file <a class="el" href="_g_c_tensor_8cpp_source.xhtml">GCTensor.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    : _allocator(<span class="keyword">this</span>)</div><div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;{</div><div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;}</div></div><!-- fragment -->
@@ -339,7 +353,48 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_g_c_tensor_8cpp_source.xhtml#l00034">34</a> of file <a class="el" href="_g_c_tensor_8cpp_source.xhtml">GCTensor.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordflow">return</span> &amp;_allocator;</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00041">GCTensorHandle::allocate()</a>, <a class="el" href="_g_c_normalization_layer_8cpp_source.xhtml#l00041">GCNormalizationLayer::configure()</a>, <a class="el" href="_g_c_softmax_layer_8cpp_source.xhtml#l00037">GCSoftmaxLayer::configure()</a>, <a class="el" href="_g_c_g_e_m_m_8cpp_source.xhtml#l00081">GCGEMM::configure()</a>, <a class="el" href="_g_c_convolution_layer_8cpp_source.xhtml#l00090">GCConvolutionLayer::configure()</a>, <a class="el" href="_g_l_e_s___c_o_m_p_u_t_e_2_helper_8h_source.xhtml#l00046">arm_compute::test::create_tensor()</a>, <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00046">GCTensorHandle::free()</a>, <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00035">GCTensorHandle::GCTensorHandle()</a>, <a class="el" href="_g_c_fully_connected_layer_8cpp_source.xhtml#l00178">GCFullyConnectedLayer::prepare()</a>, <a class="el" href="_g_c_g_e_m_m_8cpp_source.xhtml#l00192">GCGEMM::prepare()</a>, <a class="el" href="_g_c_convolution_layer_8cpp_source.xhtml#l00226">GCConvolutionLayer::prepare()</a>, and <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00070">GCTensorHandle::release_if_unused()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00040">GCTensorHandle::allocate()</a>, <a class="el" href="_g_c_normalization_layer_8cpp_source.xhtml#l00041">GCNormalizationLayer::configure()</a>, <a class="el" href="_g_c_softmax_layer_8cpp_source.xhtml#l00037">GCSoftmaxLayer::configure()</a>, <a class="el" href="_g_c_g_e_m_m_8cpp_source.xhtml#l00081">GCGEMM::configure()</a>, <a class="el" href="_g_c_convolution_layer_8cpp_source.xhtml#l00090">GCConvolutionLayer::configure()</a>, <a class="el" href="_g_l_e_s___c_o_m_p_u_t_e_2_helper_8h_source.xhtml#l00046">arm_compute::test::create_tensor()</a>, <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00045">GCTensorHandle::free()</a>, <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00034">GCTensorHandle::GCTensorHandle()</a>, <a class="el" href="_g_c_fully_connected_layer_8cpp_source.xhtml#l00178">GCFullyConnectedLayer::prepare()</a>, <a class="el" href="_g_c_g_e_m_m_8cpp_source.xhtml#l00192">GCGEMM::prepare()</a>, <a class="el" href="_g_c_convolution_layer_8cpp_source.xhtml#l00226">GCConvolutionLayer::prepare()</a>, and <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00068">GCTensorHandle::release_if_unused()</a>.</p>
+
+</div>
+</div>
+<a id="ad702fefc10e889efafeab8a514aee30b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad702fefc10e889efafeab8a514aee30b">&#9670;&nbsp;</a></span>associate_memory_group()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void associate_memory_group </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_memory_group.xhtml">IMemoryGroup</a> *&#160;</td>
+          <td class="paramname"><em>memory_group</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Associates a memory managable object with the memory group that manages it. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">memory_group</td><td><a class="el" href="classarm__compute_1_1_memory.xhtml" title="CPU implementation of memory object.">Memory</a> group that manages the object. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_memory_manageable.xhtml#ace3160d9bb6fdcf5e9973baaaa1fef08">IMemoryManageable</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="_g_c_tensor_8cpp_source.xhtml#l00059">59</a> of file <a class="el" href="_g_c_tensor_8cpp_source.xhtml">GCTensor.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;{</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    _allocator.<a class="code" href="classarm__compute_1_1_g_c_tensor_allocator.xhtml#a34177e00ce3d627e8a6a9ca215aaddfb">set_associated_memory_group</a>(memory_group);</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_g_c_tensor_allocator_xhtml_a34177e00ce3d627e8a6a9ca215aaddfb"><div class="ttname"><a href="classarm__compute_1_1_g_c_tensor_allocator.xhtml#a34177e00ce3d627e8a6a9ca215aaddfb">arm_compute::GCTensorAllocator::set_associated_memory_group</a></div><div class="ttdeci">void set_associated_memory_group(IMemoryGroup *associated_memory_group)</div><div class="ttdoc">Associates the tensor with a memory group.</div><div class="ttdef"><b>Definition:</b> <a href="_g_c_tensor_allocator_8cpp_source.xhtml#l00065">GCTensorAllocator.cpp:65</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="_g_c_tensor_allocator_8cpp_source.xhtml#l00065">GCTensorAllocator::set_associated_memory_group()</a>.</p>
 
 </div>
 </div>
@@ -512,12 +567,12 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The mapping address. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_g_c_tensor_8cpp_source.xhtml#l00059">59</a> of file <a class="el" href="_g_c_tensor_8cpp_source.xhtml">GCTensor.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;{</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <a class="code" href="classarm__compute_1_1_i_g_c_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">IGCTensor::map</a>(blocking);</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_g_c_tensor_xhtml_a14c53d2d17be6fa8a2c9861527c7b002"><div class="ttname"><a href="classarm__compute_1_1_i_g_c_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">arm_compute::IGCTensor::map</a></div><div class="ttdeci">void map(bool blocking=true)</div><div class="ttdoc">Map on an allocated buffer.</div><div class="ttdef"><b>Definition:</b> <a href="_i_g_c_tensor_8cpp_source.xhtml#l00033">IGCTensor.cpp:33</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_g_c_tensor_8cpp_source.xhtml#l00064">64</a> of file <a class="el" href="_g_c_tensor_8cpp_source.xhtml">GCTensor.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;{</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <a class="code" href="classarm__compute_1_1_i_g_c_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">IGCTensor::map</a>(blocking);</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_g_c_tensor_xhtml_a14c53d2d17be6fa8a2c9861527c7b002"><div class="ttname"><a href="classarm__compute_1_1_i_g_c_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">arm_compute::IGCTensor::map</a></div><div class="ttdeci">void map(bool blocking=true)</div><div class="ttdoc">Map on an allocated buffer.</div><div class="ttdef"><b>Definition:</b> <a href="_i_g_c_tensor_8cpp_source.xhtml#l00033">IGCTensor.cpp:33</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_i_g_c_tensor_8cpp_source.xhtml#l00033">IGCTensor::map()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00060">GCTensorHandle::map()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00058">GCTensorHandle::map()</a>.</p>
 
 </div>
 </div>
@@ -595,12 +650,12 @@ Public Member Functions</h2></td></tr>
 <p>Enqueue an unmap operation of the allocated and mapped buffer on the given queue. </p>
 <dl class="section note"><dt>Note</dt><dd>This method simply enqueues the unmap operation, it is the caller's responsibility to flush the queue and make sure the unmap is finished before the memory is accessed by the device. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_g_c_tensor_8cpp_source.xhtml#l00064">64</a> of file <a class="el" href="_g_c_tensor_8cpp_source.xhtml">GCTensor.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;{</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <a class="code" href="classarm__compute_1_1_i_g_c_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c">IGCTensor::unmap</a>();</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_g_c_tensor_xhtml_a1ffeb3b5abb3d61f62b58a391816201c"><div class="ttname"><a href="classarm__compute_1_1_i_g_c_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c">arm_compute::IGCTensor::unmap</a></div><div class="ttdeci">void unmap()</div><div class="ttdoc">Unmap an allocated and mapped buffer.</div><div class="ttdef"><b>Definition:</b> <a href="_i_g_c_tensor_8cpp_source.xhtml#l00038">IGCTensor.cpp:38</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_g_c_tensor_8cpp_source.xhtml#l00069">69</a> of file <a class="el" href="_g_c_tensor_8cpp_source.xhtml">GCTensor.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;{</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <a class="code" href="classarm__compute_1_1_i_g_c_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c">IGCTensor::unmap</a>();</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_g_c_tensor_xhtml_a1ffeb3b5abb3d61f62b58a391816201c"><div class="ttname"><a href="classarm__compute_1_1_i_g_c_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c">arm_compute::IGCTensor::unmap</a></div><div class="ttdeci">void unmap()</div><div class="ttdoc">Unmap an allocated and mapped buffer.</div><div class="ttdef"><b>Definition:</b> <a href="_i_g_c_tensor_8cpp_source.xhtml#l00038">IGCTensor.cpp:38</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_i_g_c_tensor_8cpp_source.xhtml#l00038">IGCTensor::unmap()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00065">GCTensorHandle::unmap()</a>, and <a class="el" href="_g_c_accessor_8h_source.xhtml#l00082">GCAccessor::~GCAccessor()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_g_c_tensor_handle_8cpp_source.xhtml#l00063">GCTensorHandle::unmap()</a>, and <a class="el" href="_g_c_accessor_8h_source.xhtml#l00082">GCAccessor::~GCAccessor()</a>.</p>
 
 </div>
 </div>
@@ -614,7 +669,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml">GCTensor</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:35 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:14 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

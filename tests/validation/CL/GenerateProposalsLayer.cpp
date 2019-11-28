@@ -82,6 +82,8 @@ const auto ComputeAllInfoDataset = framework::dataset::make("ComputeAllInfo",
     ComputeAnchorsInfo(100U, 100U, 1. / 4.f),
 
 });
+
+constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1);
 } // namespace
 
 TEST_SUITE(CL)
@@ -364,7 +366,7 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
     proposals_final.allocator()->allocate();
     select_proposals.run();
 
-    // Select the first N entries of the proposals
+    // Select the first N entries of the scores
     CLTensor scores_final;
     CLSlice  select_scores;
     select_scores.configure(&scores_out, &scores_final, Coordinates(0), Coordinates(N));
@@ -394,6 +396,22 @@ FIXTURE_DATA_TEST_CASE(ComputeAllAnchors, CLComputeAllAnchorsFixture<half>, fram
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
+
+template <typename T>
+using CLComputeAllAnchorsQuantizedFixture = ComputeAllAnchorsQuantizedFixture<CLTensor, CLAccessor, CLComputeAllAnchors, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(ComputeAllAnchors, CLComputeAllAnchorsQuantizedFixture<int16_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(framework::dataset::make("NumAnchors", { 2, 4, 8 }), ComputeAllInfoDataset),
+                                       framework::dataset::make("DataType", { DataType::QSYMM16 })),
+                               framework::dataset::make("QuantInfo", { QuantizationInfo(0.125f, 0) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // GenerateProposals
 TEST_SUITE_END() // CL

@@ -6,6 +6,7 @@ var classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend =
     [ "create_memory_manager", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#ad02dea2a998dcd64725620b72022ba56", null ],
     [ "create_subtensor", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#ae799bfb412ee884ddaec1111d65a5709", null ],
     [ "create_tensor", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#a5100fa4901700c5ce71b142e4b1b8d14", null ],
+    [ "create_weights_manager", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#afae4c74f4a8efc83d76cf56e661f3ebc", null ],
     [ "initialize_backend", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#aa3f63e23c21fa7f4049c49338ec9d9a8", null ],
     [ "is_backend_supported", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#a96a97b6b97a89e6940f8853d1dcbf213", null ],
     [ "release_backend_context", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#aa24d3f58d6e9c1d8c171d25defcdfb54", null ],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,12 +80,12 @@ inline void convert_float32x4x4_to_unit8x16(const float32x4x4_t &in, uint8x16_t 
     out = vcombine_u8(vqmovn_u16(low), vqmovn_u16(high));
 }
 
-inline float32x4_t rgb_to_greyscale_calculation(const float32x4_t &rcolor,const float32x4_t &gcolor,  const float32x4_t &bcolor, 
-        const float rcoef, const float gcoef, const float bcoef)
+inline float32x4_t rgb_to_greyscale_calculation(const float32x4_t &rcolor, const float32x4_t &gcolor, const float32x4_t &bcolor,
+                                                const float rcoef, const float gcoef, const float bcoef)
 {
     float32x4_t greyscale = vmulq_n_f32(rcolor, rcoef);
-    greyscale = vmlaq_n_f32(greyscale, gcolor, gcoef);
-    greyscale = vmlaq_n_f32(greyscale, bcolor, bcoef);
+    greyscale             = vmlaq_n_f32(greyscale, gcolor, gcoef);
+    greyscale             = vmlaq_n_f32(greyscale, bcolor, bcoef);
     return greyscale;
 }
 
@@ -101,16 +101,16 @@ inline void rgb_to_u8_conversion(const uint8x16x3_t &in, uint8x16_t &out)
     //New grayscale image = ( (RED_COEFF * R) + (GREEN_COEFF * G) + (BLUE_COEFF * B) )
     //Computation of 1(Greyscale) 4 uint8 using 3(RGB) 4 uint8s float
     out_float32.val[0] = rgb_to_greyscale_calculation(r_float32.val[0], g_float32.val[0], b_float32.val[0],
-            rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
+                                                      rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
 
     out_float32.val[1] = rgb_to_greyscale_calculation(r_float32.val[1], g_float32.val[1], b_float32.val[1],
-            rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
+                                                      rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
 
     out_float32.val[2] = rgb_to_greyscale_calculation(r_float32.val[2], g_float32.val[2], b_float32.val[2],
-            rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
+                                                      rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
 
     out_float32.val[3] = rgb_to_greyscale_calculation(r_float32.val[3], g_float32.val[3], b_float32.val[3],
-            rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
+                                                      rgb2u8_red_coef, rgb2u8_green_coef, rgb2u8_blue_coef);
 
     //Conversion from 1(Greyscale) 4 floats to 1(Greyscale) 4 uint8s
     convert_float32x4x4_to_unit8x16(out_float32, out);
@@ -359,7 +359,7 @@ void colorconvert_rgb_to_rgbx(const void *__restrict input, void *__restrict out
     Iterator in(input_ptr, win);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto   ta1 = vld3q_u8(in.ptr());
         uint8x16x4_t ta2;
@@ -390,7 +390,7 @@ void colorconvert_rgb_to_u8(const void *__restrict input, void *__restrict outpu
     Iterator in(input_ptr, win);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta1 = vld3q_u8(in.ptr());
         uint8x16_t ta2;
@@ -418,7 +418,7 @@ void colorconvert_rgbx_to_rgb(const void *input, void *output, const Window &win
     Iterator in(input_ptr, win);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto   ta1 = vld4q_u8(in.ptr());
         uint8x16x3_t ta2;
@@ -452,7 +452,7 @@ void colorconvert_yuyv_to_rgb(const void *__restrict input, void *__restrict out
     Iterator in(input_ptr, win);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta = vld4q_u8(in.ptr());
         //ta.val[0] = Y0 Y2 Y4 Y6 ...
@@ -505,7 +505,7 @@ void colorconvert_nv12_to_rgb(const void *__restrict input, void *__restrict out
     Iterator in_uv(input_ptr->plane(1), win_uv);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_y_top    = vld2q_u8(in_y.ptr());
         const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
@@ -567,7 +567,7 @@ void colorconvert_iyuv_to_rgb(const void *__restrict input, void *__restrict out
     Iterator in_v(input_ptr->plane(2), win_uv);
     Iterator out(output_ptr, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_y_top    = vld2q_u8(in_y.ptr());
         const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
@@ -628,7 +628,7 @@ void colorconvert_yuyv_to_nv12(const void *__restrict input, void *__restrict ou
     Iterator out_y(output_ptr->plane(0), win);
     Iterator out_uv(output_ptr->plane(1), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_top    = vld4q_u8(in.ptr());
         const auto ta_bottom = vld4q_u8(in.ptr() + input_ptr->info()->strides_in_bytes().y());
@@ -683,7 +683,7 @@ void colorconvert_iyuv_to_nv12(const void *__restrict input, void *__restrict ou
     Iterator out_y(output_ptr->plane(0), win);
     Iterator out_uv(output_ptr->plane(1), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto   ta_y_top    = vld2q_u8(in_y.ptr());
         const auto   ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
@@ -733,7 +733,7 @@ void colorconvert_nv12_to_iyuv(const void *__restrict input, void *__restrict ou
     Iterator out_u(output_ptr->plane(1), win_uv);
     Iterator out_v(output_ptr->plane(2), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_y_top    = vld2q_u8(in_y.ptr());
         const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
@@ -781,7 +781,7 @@ void colorconvert_yuyv_to_iyuv(const void *__restrict input, void *__restrict ou
     Iterator out_u(output_ptr->plane(1), win_uv);
     Iterator out_v(output_ptr->plane(2), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_top    = vld4q_u8(in.ptr());
         const auto ta_bottom = vld4q_u8(in.ptr() + input_ptr->info()->strides_in_bytes().y());
@@ -842,7 +842,7 @@ void colorconvert_nv12_to_yuv4(const void *__restrict input, void *__restrict ou
     Iterator out_u(output_ptr->plane(1), win);
     Iterator out_v(output_ptr->plane(2), win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_y_top    = vld2q_u8(in_y.ptr());
         const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
@@ -899,7 +899,7 @@ void colorconvert_iyuv_to_yuv4(const void *__restrict input, void *__restrict ou
     Iterator out_u(output_ptr->plane(1), win);
     Iterator out_v(output_ptr->plane(2), win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_y_top    = vld2q_u8(in_y.ptr());
         const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
@@ -955,7 +955,7 @@ void colorconvert_rgb_to_nv12(const void *__restrict input, void *__restrict out
     Iterator out_y(output_ptr->plane(0), win);
     Iterator out_uv(output_ptr->plane(1), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_rgb_top    = load_rgb(in.ptr(), alpha);
         const auto ta_rgb_bottom = load_rgb(in.ptr() + input_ptr->info()->strides_in_bytes().y(), alpha);
@@ -999,7 +999,7 @@ void colorconvert_rgb_to_iyuv(const void *__restrict input, void *__restrict out
     Iterator out_u(output_ptr->plane(1), win_uv);
     Iterator out_v(output_ptr->plane(2), win_uv);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_rgb_top    = load_rgb(in.ptr(), alpha);
         const auto ta_rgb_bottom = load_rgb(in.ptr() + input_ptr->info()->strides_in_bytes().y(), alpha);
@@ -1037,7 +1037,7 @@ void colorconvert_rgb_to_yuv4(const void *__restrict input, void *__restrict out
     Iterator out_u(output_ptr->plane(1), win);
     Iterator out_v(output_ptr->plane(2), win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto ta_rgb = load_rgb(in.ptr(), alpha);
         //ta_rgb.val[0] = R0 R1 R2 R3 ...

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -171,24 +171,6 @@ void tune_im2col_kernel(CLIm2ColKernel &k)
     k.set_lws_hint(lws_hint);
 }
 
-void tune_depthwise_im2col_kernel(CLDepthwiseIm2ColKernel &k)
-{
-    cl::NDRange     lws_hint   = k.lws_hint();
-    const GPUTarget gpu_target = k.get_target();
-
-    // Configure the local work size for Bifrost with a value obtained
-    // via exhaustive autotuning for the MobileNets tensor shapes.
-    if(gpu_target_is_in(gpu_target,
-                        GPUTarget::G71, GPUTarget::G72, GPUTarget::G76,
-                        GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT,
-                        GPUTarget::G52, GPUTarget::G52LIT))
-    {
-        lws_hint = cl::NDRange(1, 2, 1);
-    }
-
-    k.set_lws_hint(lws_hint);
-}
-
 void tune_gemv_kernel(CLGEMMMatrixVectorMultiplyKernel &k)
 {
     cl::NDRange     lws_hint   = k.lws_hint();
@@ -310,10 +292,6 @@ void BifrostTuner::tune_kernel_static(ICLKernel &kernel)
     else if(dynamic_cast<CLIm2ColKernel *>(&kernel) != nullptr)
     {
         tune_im2col_kernel(*utils::cast::polymorphic_downcast<CLIm2ColKernel *>(&kernel));
-    }
-    else if(dynamic_cast<CLDepthwiseIm2ColKernel *>(&kernel) != nullptr)
-    {
-        tune_depthwise_im2col_kernel(*utils::cast::polymorphic_downcast<CLDepthwiseIm2ColKernel *>(&kernel));
     }
     else if(dynamic_cast<CLGEMMMatrixVectorMultiplyKernel *>(&kernel) != nullptr)
     {

@@ -7,6 +7,7 @@ var searchData=
   ['u8',['u8',['../classarm__compute_1_1_pixel_value.xhtml#a0084c9e8c5778849f41d9de5df9c0f85',1,'arm_compute::PixelValue']]],
   ['upper_5fthresh',['upper_thresh',['../structarm__compute_1_1test_1_1validation_1_1_canny_edge_parameters.xhtml#ab8a8d1ea5336156261d2fa39d65bd3f3',1,'arm_compute::test::validation::CannyEdgeParameters']]],
   ['use_5ffunction_5fmemory_5fmanager',['use_function_memory_manager',['../structarm__compute_1_1graph_1_1_graph_config.xhtml#a20ed0cdea50eeeabdb8f4673b37802e9',1,'arm_compute::graph::GraphConfig']]],
+  ['use_5ffunction_5fweights_5fmanager',['use_function_weights_manager',['../structarm__compute_1_1graph_1_1_graph_config.xhtml#a8548fe89a1f2560508c8caf987c07410',1,'arm_compute::graph::GraphConfig']]],
   ['use_5finitial_5festimate',['use_initial_estimate',['../structarm__compute_1_1_optical_flow_parameters.xhtml#a1d79cd7ed111d3a441ba1372f90210de',1,'arm_compute::OpticalFlowParameters']]],
   ['use_5ftransition_5fmemory_5fmanager',['use_transition_memory_manager',['../structarm__compute_1_1graph_1_1_graph_config.xhtml#a1930adfaf721b59d516d41cce63746cc',1,'arm_compute::graph::GraphConfig']]],
   ['use_5ftuner',['use_tuner',['../structarm__compute_1_1graph_1_1_graph_config.xhtml#a9da74af255a3e6ea61180d4a03192a48',1,'arm_compute::graph::GraphConfig']]]

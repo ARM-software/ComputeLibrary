@@ -23,13 +23,71 @@
  */
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-#include "arm_compute/runtime/CL/CLHelpers.h"
-
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "arm_compute/runtime/CL/tuners/Tuners.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+cl::Context &CLScheduler::context()
+{
+    ARM_COMPUTE_ERROR_ON(!_is_initialised);
+    _context = CLKernelLibrary::get().context();
+    return _context;
+}
+
+cl::CommandQueue &CLScheduler::queue()
+{
+    ARM_COMPUTE_ERROR_ON(!_is_initialised);
+    return _queue;
+}
+
+GPUTarget CLScheduler::target() const
+{
+    return _target;
+}
+
+void CLScheduler::set_queue(cl::CommandQueue queue)
+{
+    _queue = std::move(queue);
+}
+
+void CLScheduler::set_target(GPUTarget target)
+{
+    _target = target;
+}
+
+void CLScheduler::set_tuner(ICLTuner *tuner)
+{
+    _cl_tuner = tuner;
+}
+
+void CLScheduler::sync()
+{
+    _queue.finish();
+}
+
+cl::Event CLScheduler::enqueue_sync_event()
+{
+    cl::Event event;
+    _queue.enqueueMarker(&event);
+    return event;
+}
+
+void CLScheduler::tune_kernel_static(ICLKernel &kernel)
+{
+    if(_cl_tuner != nullptr)
+    {
+        _cl_tuner->tune_kernel_static(kernel);
+    }
+}
+
+bool CLScheduler::is_initialised() const
+{
+    return _is_initialised;
+}
 
 std::once_flag CLScheduler::_initialize_symbols;
 
@@ -49,8 +107,9 @@ void CLScheduler::default_init_with_context(cl::Device &device, cl::Context &ctx
 {
     if(!_is_initialised)
     {
-        cl::CommandQueue queue = cl::CommandQueue(ctx, device);
-        CLKernelLibrary::get().init("./cl_kernels/", ctx, device);
+        const std::string cl_kernels_folder("./cl_kernels/");
+        cl::CommandQueue  queue = cl::CommandQueue(ctx, device);
+        CLKernelLibrary::get().init(cl_kernels_folder, ctx, device);
         init(ctx, queue, device, cl_tuner);
         _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
         _cl_tuner                = (cl_tuner == nullptr) ? _cl_default_static_tuner.get() : cl_tuner;
@@ -113,3 +172,4 @@ void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
         _queue.flush();
     }
 }
+} // namespace arm_compute

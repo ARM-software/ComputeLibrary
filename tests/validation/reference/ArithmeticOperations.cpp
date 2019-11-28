@@ -112,7 +112,7 @@ SimpleTensor<uint8_t> arithmetic_operation(ArithmeticOperation op, const SimpleT
 
         BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(op, src1_tmp, src2_tmp, dst_tmp, convert_policy, id_src1, id_src2, id_dst);
 
-        dst = convert_to_asymmetric(dst_tmp, dst.quantization_info());
+        dst = convert_to_asymmetric<uint8_t>(dst_tmp, dst.quantization_info());
         return dst;
     }
     else

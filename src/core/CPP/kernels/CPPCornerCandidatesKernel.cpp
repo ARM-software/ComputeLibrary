@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,8 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "support/Mutex.h"
+
 using namespace arm_compute;
 
 namespace
@@ -42,7 +44,7 @@ inline void check_corner(float x, float y, float strength, InternalKeypoint *out
     if(strength != 0.0f)
     {
         /* Set index and update num_corner_candidate */
-        std::unique_lock<arm_compute::Mutex> lock(*corner_candidates_mutex);
+        arm_compute::unique_lock<arm_compute::Mutex> lock(*corner_candidates_mutex);
 
         const int32_t idx = *num_corner_candidates;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2018-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,8 @@ namespace arm_gemm
 {
 
 // Actual kernel implementations
-void a64_hybrid_fp32_mla_16x4(const float *, int, const float *, float *, int, float, int, int, int);
-void a64_hybrid_fp32_mla_16x4_a55(const float *, int, const float *, float *, int, float, int, int, int);
+void a64_hybrid_fp32_mla_16x4(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
+void a64_hybrid_fp32_mla_16x4_a55(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
 class hybrid_fp32_mla_16x4
 {
@@ -41,10 +41,10 @@ public:
     typedef float operand_type;
     typedef float result_type;
 
-    typedef void (*kern_type)(const float *, int, const float *, float *, int, float, int, int, int);
+    typedef void (*kern_type)(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
     /* Kernel blocking parameters */
-    static unsigned int out_height()
+    static constexpr unsigned int out_height()
     {
         return 4;
     }
@@ -54,9 +54,24 @@ public:
         return 16;
     }
 
-    static unsigned int k_unroll()
+    static constexpr unsigned int k_unroll()
     {
         return 1;
+    }
+
+    static constexpr bool supports_append()
+    {
+        return true;
+    }
+
+    static constexpr bool supports_bias()
+    {
+        return true;
+    }
+
+    static constexpr bool supports_activation()
+    {
+        return true;
     }
 
     StdTransformsFixed<operand_type, result_type, 4, 16, 1> transforms = {};

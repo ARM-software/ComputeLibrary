@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@ public:
         _quantization_info = quantization_info;
 
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, transpose_weights, reshape_weights);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, transpose_weights, reshape_weights);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape);
     }
 
 protected:
@@ -181,8 +181,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, bool transpose_weights,
-                                      bool reshape_weights)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape)
     {
         // Create reference
         SimpleTensor<T>     src{ input_shape, _data_type, 1, _quantization_info };

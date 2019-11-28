@@ -43,7 +43,7 @@ public:
      *
      * @param[in] v        int value.
      * @param[in] datatype DataType that @p v have to be stored
-     * @param[in] qinfo    (Optional) QuantizationInfo to apply in case of QASYMM8 datatype to @p v
+     * @param[in] qinfo    (Optional) QuantizationInfo to apply in case of quantized data types to @p v
      */
     PixelValue(uint64_t v, DataType datatype, QuantizationInfo qinfo = QuantizationInfo())
         : PixelValue()
@@ -67,6 +67,9 @@ public:
                 break;
             case DataType::S16:
                 value.s16 = static_cast<int16_t>(v);
+                break;
+            case DataType::QASYMM16:
+                value.u16 = quantize_qasymm16(static_cast<uint16_t>(v), qinfo);
                 break;
             case DataType::QSYMM16:
                 value.s16 = quantize_qsymm16(static_cast<int16_t>(v), qinfo);

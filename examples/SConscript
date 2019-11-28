@@ -86,6 +86,17 @@ if env['opencl']:
         alias = examples_env.Alias(example, prog)
         Default(alias)
 
+if env['gemm_tuner'] and env['opencl']:
+    gemm_tuner_common_options = examples_env.Object("./gemm_tuner/CommonGemmExampleOptions.cpp")
+    for file in Glob("./gemm_tuner/cl_*.cpp"):
+        example = os.path.basename(os.path.splitext(str(file))[0])
+        example = os.path.join("gemm_tuner", example)
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils, gemm_tuner_common_options], CPPDEFINES=['ARM_COMPUTE_CL'], LIBS = examples_libs + arm_compute_libs)
+        Depends(prog, arm_compute_dependency)
+        prog = install_bin(prog)
+        alias = examples_env.Alias(example, prog)
+        Default(alias)
+
 if env['neon']:
     for file in Glob("./neon_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])

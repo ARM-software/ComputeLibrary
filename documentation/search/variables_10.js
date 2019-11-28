@@ -1,8 +1,17 @@
 var searchData=
 [
   ['p_5fvalue',['p_value',['../_mali_counter_8cpp.xhtml#ad6d507311ebc7aa745155092583925de',1,'MaliCounter.cpp']]],
-  ['padding',['padding',['../namespacearm__compute_1_1test_1_1validation.xhtml#a735a025fce26c1ef147b54426df18181',1,'arm_compute::test::validation']]],
+  ['padding',['padding',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#a1fd82c3f7bd713d01efc8796364f35eb',1,'arm_compute::utils::ConvolutionParams::padding()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a735a025fce26c1ef147b54426df18181',1,'arm_compute::test::validation::padding()']]],
+  ['padding_5fbottom',['padding_bottom',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#aa6d771cbcf870679140f742c5703d617',1,'arm_compute::utils::ConvolutionParams']]],
+  ['padding_5fleft',['padding_left',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#af50219e3555b6a249b4f52ac5d61ba21',1,'arm_compute::utils::ConvolutionParams']]],
+  ['padding_5fmode',['padding_mode',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#af95e133b6f176c39dda5a19abfeb052d',1,'arm_compute::utils::ConvolutionParams']]],
+  ['padding_5fright',['padding_right',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#a674e7b3c7f8aaf704f352704a5899a8e',1,'arm_compute::utils::ConvolutionParams']]],
+  ['padding_5fstride_5fx',['padding_stride_x',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#af2246dc6ff43e8b91817f211801be9d5',1,'arm_compute::utils::ConvolutionParams']]],
+  ['padding_5fstride_5fy',['padding_stride_y',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#a2268d3b0d31e3e74d6e4cb7d7e9fae0e',1,'arm_compute::utils::ConvolutionParams']]],
+  ['padding_5ftop',['padding_top',['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#aa6c55f2c9300c3ba619d7270b63fde74',1,'arm_compute::utils::ConvolutionParams']]],
   ['paddingsizesdataset',['PaddingSizesDataset',['../namespacearm__compute_1_1test_1_1validation.xhtml#a226250a0a5438b40d8c3cefb73f89d83',1,'arm_compute::test::validation']]],
+  ['parameters',['parameters',['../namespacearm__compute_1_1test.xhtml#abb222b6342b2b9056ec65056984d5e21',1,'arm_compute::test']]],
+  ['parser',['parser',['../namespace_gemm_tuner.xhtml#a90eee7a4677ca8b1ed116364a24367f9',1,'GemmTuner']]],
   ['pixels_5fper_5fitem',['pixels_per_item',['../_c_l_histogram_kernel_8cpp.xhtml#ac260a86d9a014807ac72a5790f5ff1eb',1,'CLHistogramKernel.cpp']]],
   ['policy',['policy',['../namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34',1,'arm_compute::test::validation']]],
   ['precision',['precision',['../structarm__compute_1_1_i_o_format_info.xhtml#a1fba9343eade93326cb985cfcb6de487',1,'arm_compute::IOFormatInfo']]],

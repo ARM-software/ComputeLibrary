@@ -1,7 +1,8 @@
 var classarm__compute_1_1_detection_post_process_layer_info =
 [
     [ "DetectionPostProcessLayerInfo", "classarm__compute_1_1_detection_post_process_layer_info.xhtml#a6eaedc96f1e42852da9afbb0c33df4be", null ],
-    [ "DetectionPostProcessLayerInfo", "classarm__compute_1_1_detection_post_process_layer_info.xhtml#aede4f8793a2b46ae99ce26038449c0ea", null ],
+    [ "DetectionPostProcessLayerInfo", "classarm__compute_1_1_detection_post_process_layer_info.xhtml#ae90105aa70d36e539722ec84f94554cf", null ],
+    [ "dequantize_scores", "classarm__compute_1_1_detection_post_process_layer_info.xhtml#a9f94c4edaf37250de1a0403d0f929644", null ],
     [ "detection_per_class", "classarm__compute_1_1_detection_post_process_layer_info.xhtml#a36e65a7f80a07a2393e6a1cadd974740", null ],
     [ "iou_threshold", "classarm__compute_1_1_detection_post_process_layer_info.xhtml#a634bf1faedaec956983af4d41940239e", null ],
     [ "max_classes_per_detection", "classarm__compute_1_1_detection_post_process_layer_info.xhtml#ad54d768454ff1000504546898078d0de", null ],

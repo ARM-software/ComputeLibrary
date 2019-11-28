@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,8 @@
 #include "arm_compute/runtime/Scheduler.h"
 
 #include <list>
+#include <memory>
+#include <vector>
 
 namespace arm_compute
 {
@@ -36,6 +38,26 @@ namespace test
 {
 namespace framework
 {
+/** Scheduler user interface  */
+class ISchedulerUser
+{
+public:
+    /** Default Destructor */
+    virtual ~ISchedulerUser() = default;
+    /** Intercept the scheduler used by
+     *
+     * @param interceptor Intercept the scheduler used by the scheduler user.
+     */
+    virtual void intercept_scheduler(std::unique_ptr<IScheduler> interceptor) = 0;
+    /** Restore the original scheduler */
+    virtual void restore_scheduler() = 0;
+    /** Real scheduler accessor
+     *
+     * @return The real scheduler
+     */
+    virtual IScheduler *scheduler() = 0;
+};
+
 /** Instrument creating measurements based on the information returned by clGetEventProfilingInfo for each OpenCL kernel executed*/
 template <bool output_timestamps>
 class SchedulerClock : public Instrument
@@ -46,7 +68,6 @@ public:
      * @param[in] scale_factor Measurement scale factor.
      */
     SchedulerClock(ScaleFactor scale_factor);
-
     /** Prevent instances of this class from being copy constructed */
     SchedulerClock(const SchedulerClock &) = delete;
     /** Prevent instances of this class from being copied */
@@ -58,6 +79,7 @@ public:
     /** Use the default destructor */
     ~SchedulerClock() = default;
 
+    // Inherited overridden methods
     std::string                 id() const override;
     void                        test_start() override;
     void                        start() override;
@@ -79,6 +101,7 @@ private:
     std::function<decltype(graph::execute_task)> _real_graph_function;
     ScaleFactor                                  _scale_factor;
     std::shared_ptr<IScheduler>                  _interceptor;
+    std::vector<ISchedulerUser *>                _scheduler_users;
 };
 
 using SchedulerTimer      = SchedulerClock<false>;

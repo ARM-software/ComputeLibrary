@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,9 @@
 
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 
-using namespace arm_compute;
-
-GCTensor::GCTensor()
+namespace arm_compute
+{
+GCTensor::GCTensor(IRuntimeContext *)
     : _allocator(this)
 {
 }
@@ -56,6 +56,11 @@ GLuint GCTensor::gc_buffer() const
     return _allocator.get_gl_ssbo_name();
 }
 
+void GCTensor::associate_memory_group(arm_compute::IMemoryGroup *memory_group)
+{
+    _allocator.set_associated_memory_group(memory_group);
+}
+
 void GCTensor::map(bool blocking)
 {
     IGCTensor::map(blocking);
@@ -75,3 +80,4 @@ void GCTensor::do_unmap()
 {
     _allocator.unmap();
 }
+} // namespace arm_compute

@@ -67,7 +67,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                     _memory_group;
+    MemoryGroup                       _memory_group;
     std::vector<CLReductionOperation> _reduction_kernels;
     std::vector<CLTensor>             _reduced_outs;
     CLReshapeLayer                    _reshape;

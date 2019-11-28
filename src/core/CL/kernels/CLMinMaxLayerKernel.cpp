@@ -157,7 +157,7 @@ void CLMinMaxLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         // Set inputs
         add_3D_tensor_argument(idx, _input, slice);
         add_1D_tensor_argument(idx, _output, output_slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window_collapsed.slide_window_slice_3D(slice));
 }

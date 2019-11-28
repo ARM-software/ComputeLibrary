@@ -3,6 +3,7 @@ var activation__float__helpers_8h =
     [ "abs_op", "activation__float__helpers_8h.xhtml#ad241c192445437657f18094735135acf", null ],
     [ "ACTIVATION", "activation__float__helpers_8h.xhtml#abbc420da5dec17216bb014c05ad65304", null ],
     [ "brelu_op", "activation__float__helpers_8h.xhtml#aeb0c28c03d603cec5c2cffb551bbf6a9", null ],
+    [ "elu_op", "activation__float__helpers_8h.xhtml#a3d828b57d03a6109bdc4719408927179", null ],
     [ "identity_op", "activation__float__helpers_8h.xhtml#a8853785c268f7591f3905d46c3fe4c58", null ],
     [ "linear_op", "activation__float__helpers_8h.xhtml#a91058d13f14608c2063a412c0af025c4", null ],
     [ "logistic_op", "activation__float__helpers_8h.xhtml#aa8b474faaa6062c728201ed39edd2446", null ],

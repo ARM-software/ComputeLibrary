@@ -37,6 +37,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #if defined(__GNUG__) && __GNUG__ >= 8
 #pragma GCC diagnostic ignored "-Wcatch-value"
 #endif // defined(__GNUG__) && __GNUG__ >= 8
@@ -59,11 +60,14 @@ bool opencl_is_available();
 /** Class for loading OpenCL symbols. */
 class CLSymbols final
 {
-private:
-    CLSymbols() = default;
-    void load_symbols(void *handle);
-
 public:
+    /** Default Constructor */
+    CLSymbols() = default;
+    /** Load OpenCL symbols from handle
+     *
+     * @param[in] handle Handle to load symbols from
+     */
+    void load_symbols(void *handle);
     /** Get the static instance of CLSymbols.
      *
      * @return The static instance of CLSymbols.

@@ -32,6 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/reference/DequantizationLayer.h"
 
 #include <random>
@@ -47,10 +48,10 @@ class DequantizationValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType src_data_type, DataType dst_datatype)
+    void setup(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
-        _quantization_info = generate_quantization_info(src_data_type);
-        _target            = compute_target(shape, src_data_type, dst_datatype);
+        _quantization_info = generate_quantization_info(src_data_type, shape.z());
+        _target            = compute_target(shape, src_data_type, dst_datatype, data_layout);
         _reference         = compute_reference(shape, src_data_type);
     }
 
@@ -61,11 +62,16 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType src_data_type, DataType dst_datatype)
+    TensorType compute_target(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, src_data_type, 1, _quantization_info);
-        TensorType dst = create_tensor<TensorType>(shape, dst_datatype);
+        TensorType src = create_tensor<TensorType>(shape, src_data_type, 1, _quantization_info, data_layout);
+        TensorType dst = create_tensor<TensorType>(shape, dst_datatype, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType dequantization_layer;
@@ -92,32 +98,34 @@ protected:
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType src_data_type)
     {
-        if(src_data_type == DataType::QASYMM8)
+        switch(src_data_type)
         {
-            SimpleTensor<uint8_t> src{ shape, src_data_type, 1, _quantization_info };
-            fill(src);
-            return reference::dequantization_layer<T>(src);
-        }
-        else if(src_data_type == DataType::QSYMM8)
-        {
-            SimpleTensor<int8_t> src{ shape, src_data_type, 1, _quantization_info };
-            fill(src);
-            return reference::dequantization_layer<T>(src);
-        }
-        else if(src_data_type == DataType::QSYMM16)
-        {
-            SimpleTensor<int16_t> src{ shape, src_data_type, 1, _quantization_info };
-            fill(src);
-            return reference::dequantization_layer<T>(src);
-        }
-        else
-        {
-            ARM_COMPUTE_ERROR("Unsupported data type");
+            case DataType::QASYMM8:
+            {
+                SimpleTensor<uint8_t> src{ shape, src_data_type, 1, _quantization_info };
+                fill(src);
+                return reference::dequantization_layer<T>(src);
+            }
+            case DataType::QSYMM8_PER_CHANNEL:
+            case DataType::QSYMM8:
+            {
+                SimpleTensor<int8_t> src{ shape, src_data_type, 1, _quantization_info };
+                fill(src);
+                return reference::dequantization_layer<T>(src);
+            }
+            case DataType::QSYMM16:
+            {
+                SimpleTensor<int16_t> src{ shape, src_data_type, 1, _quantization_info };
+                fill(src);
+                return reference::dequantization_layer<T>(src);
+            }
+            default:
+                ARM_COMPUTE_ERROR("Unsupported data type");
         }
     }
 
 protected:
-    QuantizationInfo generate_quantization_info(DataType data_type)
+    QuantizationInfo generate_quantization_info(DataType data_type, int32_t num_channels)
     {
         std::mt19937                    gen(library.get()->seed());
         std::uniform_int_distribution<> distribution_scale_q8(1, 255);
@@ -130,6 +138,15 @@ protected:
                 return QuantizationInfo(1.f / distribution_scale_q16(gen));
             case DataType::QSYMM8:
                 return QuantizationInfo(1.f / distribution_scale_q8(gen));
+            case DataType::QSYMM8_PER_CHANNEL:
+            {
+                std::vector<float> scale(num_channels);
+                for(int32_t i = 0; i < num_channels; ++i)
+                {
+                    scale[i] = 1.f / distribution_offset_q8(gen);
+                }
+                return QuantizationInfo(scale);
+            }
             case DataType::QASYMM8:
                 return QuantizationInfo(1.f / distribution_scale_q8(gen), distribution_offset_q8(gen));
             default:

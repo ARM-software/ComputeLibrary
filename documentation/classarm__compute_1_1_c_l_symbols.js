@@ -1,7 +1,9 @@
 var classarm__compute_1_1_c_l_symbols =
 [
+    [ "CLSymbols", "classarm__compute_1_1_c_l_symbols.xhtml#a84e896a56d39a3d9f0e42fbd86103a0c", null ],
     [ "load", "classarm__compute_1_1_c_l_symbols.xhtml#a32db0706b9c174ef7238a15760e232fe", null ],
     [ "load_default", "classarm__compute_1_1_c_l_symbols.xhtml#a7d9b5b93ad5e6018700fa36de6e1e279", null ],
+    [ "load_symbols", "classarm__compute_1_1_c_l_symbols.xhtml#a2e0acc4ac5f76aae0e86ccea551e85ca", null ],
     [ "clBuildProgram_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#ad35af0d314615874e570540e9853668c", null ],
     [ "clCreateBuffer_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a301b84af701238b357de87434d0327a9", null ],
     [ "clCreateCommandQueue_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a9edd71637c165f39e1913b22bdafcd67", null ],

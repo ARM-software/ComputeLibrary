@@ -75,7 +75,7 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
     }
     catch(const std::ifstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
     }
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 
@@ -161,7 +161,9 @@ const std::string &arm_compute::string_from_data_type(DataType dt)
         { DataType::QSYMM8, "QSYMM8" },
         { DataType::QSYMM8_PER_CHANNEL, "QSYMM8_PER_CHANNEL" },
         { DataType::QASYMM8, "QASYMM8" },
+        { DataType::QASYMM8_SIGNED, "QASYMM8_SIGNED" },
         { DataType::QSYMM16, "QSYMM16" },
+        { DataType::QASYMM16, "QASYMM16" },
     };
 
     return dt_map[dt];
@@ -179,6 +181,7 @@ const std::string &arm_compute::string_from_activation_func(ActivationLayerInfo:
         { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, "LU_BRELU" },
         { ActivationLayerInfo::ActivationFunction::LEAKY_RELU, "LRELU" },
         { ActivationLayerInfo::ActivationFunction::SOFT_RELU, "SRELU" },
+        { ActivationLayerInfo::ActivationFunction::ELU, "ELU" },
         { ActivationLayerInfo::ActivationFunction::SQRT, "SQRT" },
         { ActivationLayerInfo::ActivationFunction::SQUARE, "SQUARE" },
         { ActivationLayerInfo::ActivationFunction::TANH, "TANH" },
@@ -288,11 +291,14 @@ std::string arm_compute::string_from_pixel_value(const PixelValue &value, const 
             converted_string = ss.str();
             break;
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8_PER_CHANNEL:
             // Needs conversion to 32 bit, otherwise interpreted as ASCII values
             ss << int32_t(value.get<int8_t>());
             converted_string = ss.str();
             break;
         case DataType::U16:
+        case DataType::QASYMM16:
             ss << value.get<uint16_t>();
             converted_string = ss.str();
             break;
@@ -334,13 +340,15 @@ std::string arm_compute::lower_string(const std::string &val)
 PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout, const Size2D &dilation,
                                               const DimensionRoundingType &rounding_type)
 {
+    const auto &strides = conv_info.stride();
+    ARM_COMPUTE_ERROR_ON_MSG((strides.first < 1 || strides.second < 1), "Stride values should be greater than or equal to 1.");
+
     const unsigned int width_idx     = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx    = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const unsigned int in_width      = input_shape[width_idx];
     const unsigned int in_height     = input_shape[height_idx];
     const unsigned int kernel_width  = weights_shape[width_idx];
     const unsigned int kernel_height = weights_shape[height_idx];
-    const auto        &strides       = conv_info.stride();
 
     // Calculate output dimensions
     const auto         is_ceil    = static_cast<unsigned int>(rounding_type == DimensionRoundingType::CEIL);
@@ -371,15 +379,22 @@ PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorSha
     return same_info;
 }
 
-std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(
-    unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady,
-    unsigned int stride_x, unsigned int stride_y)
+std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
+                                                                                   unsigned int kernel_width, unsigned int kernel_height,
+                                                                                   const PadStrideInfo &pad_stride_info)
 {
+    const unsigned int pad_left   = pad_stride_info.pad_left();
+    const unsigned int pad_top    = pad_stride_info.pad_top();
+    const unsigned int pad_right  = pad_stride_info.pad_right();
+    const unsigned int pad_bottom = pad_stride_info.pad_bottom();
+    const unsigned int stride_x   = pad_stride_info.stride().first;
+    const unsigned int stride_y   = pad_stride_info.stride().second;
+
     ARM_COMPUTE_ERROR_ON(in_width < 1 || in_height < 1);
-    ARM_COMPUTE_ERROR_ON(((in_width - 1) * stride_x + kernel_width) < 2 * padx);
-    ARM_COMPUTE_ERROR_ON(((in_height - 1) * stride_y + kernel_height) < 2 * pady);
-    const int w = stride_x * (in_width - 1) + kernel_width - 2 * padx;
-    const int h = stride_y * (in_height - 1) + kernel_height - 2 * pady;
+    ARM_COMPUTE_ERROR_ON(((in_width - 1) * stride_x + kernel_width) < (pad_left + pad_right));
+    ARM_COMPUTE_ERROR_ON(((in_height - 1) * stride_y + kernel_height) < (pad_top + pad_bottom));
+    const int w = stride_x * (in_width - 1) + kernel_width - (pad_left + pad_right);
+    const int h = stride_y * (in_height - 1) + kernel_height - (pad_top + pad_bottom);
 
     return std::make_pair<unsigned int, unsigned int>(w, h);
 }
@@ -414,19 +429,32 @@ std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned in
     return std::make_pair(w, h);
 }
 
+bool arm_compute::needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis)
+{
+    const bool is_arg_min_max    = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN);
+    const bool is_min_max        = (op == ReductionOperation::MAX || op == ReductionOperation::MIN);
+    const bool is_quantized_type = is_data_type_quantized(dt);
+    const bool is_first_dim      = (axis == 0);
+
+    return !is_first_dim || is_arg_min_max || is_min_max || is_quantized_type;
+}
+
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
 {
     switch(dt)
     {
-        case DataType::QASYMM8:
         case DataType::U8:
+        case DataType::QASYMM8:
             print_consecutive_elements_impl<uint8_t>(s, ptr, n, stream_width, element_delim);
             break;
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8_PER_CHANNEL:
             print_consecutive_elements_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n, stream_width, element_delim);
             break;
         case DataType::U16:
+        case DataType::QASYMM16:
             print_consecutive_elements_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n, stream_width, element_delim);
             break;
         case DataType::S16:
@@ -454,12 +482,15 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
 {
     switch(dt)
     {
-        case DataType::QASYMM8:
         case DataType::U8:
+        case DataType::QASYMM8:
             return max_consecutive_elements_display_width_impl<uint8_t>(s, ptr, n);
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8_PER_CHANNEL:
             return max_consecutive_elements_display_width_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n);
         case DataType::U16:
+        case DataType::QASYMM16:
             return max_consecutive_elements_display_width_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n);
         case DataType::S16:
         case DataType::QSYMM16:

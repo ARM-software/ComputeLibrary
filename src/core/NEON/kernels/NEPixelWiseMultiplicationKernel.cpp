@@ -191,7 +191,7 @@ inline uint16x8_t scale255_U16_U16(uint16x8_t in)
     return vreinterpretq_u16_s16(vcombine_s16(vmovn_s32(tmp_s2), vmovn_s32(tmp_s1)));
 }
 
-inline void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
+inline void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr,
                                                        float32x4_t input1_vscale, int32x4_t input1_voffset, float32x4_t input2_vscale, int32x4_t input2_voffset, float32x4_t output_voffset, float32x4_t vinvscale)
 {
     const auto input1 = static_cast<const qasymm8_t *__restrict>(input1_ptr);
@@ -739,7 +739,7 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
 
             execute_window_loop(collapsed, [&](const Coordinates &)
             {
-                mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(input1.ptr(), input2.ptr(), output.ptr(), _scale,
+                mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(input1.ptr(), input2.ptr(), output.ptr(),
                                                            input1_vscale, input1_voffset, input2_vscale, input2_voffset, output_voffset, vinvscale);
                 ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
                 ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));

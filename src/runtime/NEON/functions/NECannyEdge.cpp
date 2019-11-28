@@ -37,6 +37,7 @@
 #include "support/ToolchainSupport.h"
 
 #include <cstring>
+#include <inttypes.h>
 #include <utility>
 
 using namespace arm_compute;
@@ -118,7 +119,7 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     }
     else
     {
-        ARM_COMPUTE_ERROR("Gradient size %d not supported\n", gradient_size);
+        ARM_COMPUTE_ERROR_VAR("Gradient size %+" PRId32 " not supported\n", gradient_size);
     }
 
     // Manage intermediate buffers

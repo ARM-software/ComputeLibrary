@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,10 +26,6 @@
 #include <arm_neon.h>
 
 #include "../../asmlib.hpp"
-
-#ifdef NO_DOT_IN_TOOLCHAIN
-#include "dot_toolchain_support.h"
-#endif
 
 namespace arm_gemm {
 
@@ -62,11 +58,6 @@ void a64_gemm_u8_12x8_a55r1(const uint8_t *Apanel, const uint8_t *Bpanel, uint32
             register int32x4_t a1a asm("v6");
 
             __asm __volatile (
-#ifdef NO_DOT_IN_TOOLCHAIN
-                _DECLARE_UDOT
-#else
-                ".arch armv8.2-a+dotprod\n"
-#endif
                 // Initialize result registers, load initial operands, prime prefetches.
                 "movi   v8.4s, #0x0\n"
                 "ldr    %q[a0], [%[a_ptr]]\n"
@@ -112,245 +103,245 @@ void a64_gemm_u8_12x8_a55r1(const uint8_t *Apanel, const uint8_t *Bpanel, uint32
 
                 // The loop is offset by these two instructions which must
                 // always be executed.
-                "udot   v8.4s , %[b0].16b, %[a0].4b[0]\n"
+                ".word 0x6f80e048 // udot v8.4s , %[b0].16b, %[a0].4b[0]\n"
                 "ldr    %d[b2], [%[b_ptr], #32]\n"
 
                 // Skip loop if we are doing zero iterations of it.
                 "cbz    %w[k], 4f\n"
 
                 "1:\n"
-                "udot  	v9.4s , %[b0].16b, %[a0].4b[1]\n"
+                ".word 0x6fa0e049 // udot v9.4s , %[b0].16b, %[a0].4b[1]\n"
                 "ldr	x20, [%[b_ptr], #40]\n"
-                "udot	v10.4s, %[b0].16b, %[a0].4b[2]\n"
+                ".word 0x6f80e84a // udot v10.4s, %[b0].16b, %[a0].4b[2]\n"
                 "subs	%w[k], %w[k], #1\n"
-                "udot	v11.4s, %[b0].16b, %[a0].4b[3]\n"
+                ".word 0x6fa0e84b // udot v11.4s, %[b0].16b, %[a0].4b[3]\n"
                 "ldr	%d[a0a], [%[a_ptr], #32]\n"
 
-                "udot 	v12.4s, %[b0].16b, %[a1].4b[0]\n"
+                ".word 0x6f81e04c // udot v12.4s, %[b0].16b, %[a1].4b[0]\n"
                 "ins    %[b2].d[1], x20\n"
-                "udot	v13.4s, %[b0].16b, %[a1].4b[1]\n"
+                ".word 0x6fa1e04d // udot v13.4s, %[b0].16b, %[a1].4b[1]\n"
                 "ldr    x20, [%[a_ptr], #40]\n"
-                "udot	v14.4s, %[b0].16b, %[a1].4b[2]\n"
-                "udot	v15.4s, %[b0].16b, %[a1].4b[3]\n"
+                ".word 0x6f81e84e // udot v14.4s, %[b0].16b, %[a1].4b[2]\n"
+                ".word 0x6fa1e84f // udot v15.4s, %[b0].16b, %[a1].4b[3]\n"
                 "ldr	%d[a1a], [%[a_ptr], #48]\n"
 
-                "udot	v16.4s, %[b1].16b, %[a0].4b[0]\n"
+                ".word 0x6f80e070 // udot v16.4s, %[b1].16b, %[a0].4b[0]\n"
                 "ins    %[a0a].d[1], x20\n"
-                "udot	v17.4s, %[b1].16b, %[a0].4b[1]\n"
+                ".word 0x6fa0e071 // udot v17.4s, %[b1].16b, %[a0].4b[1]\n"
                 "ldr    x20, [%[a_ptr], #56]\n"
-                "udot	v18.4s, %[b1].16b, %[a0].4b[2]\n"
-                "udot	v19.4s, %[b1].16b, %[a0].4b[3]\n"
+                ".word 0x6f80e872 // udot v18.4s, %[b1].16b, %[a0].4b[2]\n"
+                ".word 0x6fa0e873 // udot v19.4s, %[b1].16b, %[a0].4b[3]\n"
                 "ldr	%d[b0], [%[b_ptr], #48]\n"
 
-                "udot	v20.4s, %[b1].16b, %[a1].4b[0]\n"
+                ".word 0x6f81e074 // udot v20.4s, %[b1].16b, %[a1].4b[0]\n"
                 "ins    %[a1a].d[1], x20\n"
-                "udot	v21.4s, %[b1].16b, %[a1].4b[1]\n"
+                ".word 0x6fa1e075 // udot v21.4s, %[b1].16b, %[a1].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #56]\n"
-                "udot	v22.4s, %[b1].16b, %[a1].4b[2]\n"
-                "udot	v23.4s, %[b1].16b, %[a1].4b[3]\n"
+                ".word 0x6f81e876 // udot v22.4s, %[b1].16b, %[a1].4b[2]\n"
+                ".word 0x6fa1e877 // udot v23.4s, %[b1].16b, %[a1].4b[3]\n"
                 "ldr	%d[b1], [%[b_ptr], #64]\n"
 
-                "udot	v24.4s, %[b2].16b, %[a0].4b[0]\n"
+                ".word 0x6f80e098 // udot v24.4s, %[b2].16b, %[a0].4b[0]\n"
                 "ins    %[b0].d[1], x20\n"
-                "udot	v25.4s, %[b2].16b, %[a0].4b[1]\n"
+                ".word 0x6fa0e099 // udot v25.4s, %[b2].16b, %[a0].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #72]\n"
-                "udot	v26.4s, %[b2].16b, %[a0].4b[2]\n"
-                "udot	v27.4s, %[b2].16b, %[a0].4b[3]\n"
+                ".word 0x6f80e89a // udot v26.4s, %[b2].16b, %[a0].4b[2]\n"
+                ".word 0x6fa0e89b // udot v27.4s, %[b2].16b, %[a0].4b[3]\n"
                 ASM_PREFETCH("[%[a_ptr], #448]")
 
-                "udot	v28.4s, %[b2].16b, %[a1].4b[0]\n"
-                "udot	v29.4s, %[b2].16b, %[a1].4b[1]\n"
+                ".word 0x6f81e09c // udot v28.4s, %[b2].16b, %[a1].4b[0]\n"
+                ".word 0x6fa1e09d // udot v29.4s, %[b2].16b, %[a1].4b[1]\n"
                 ASM_PREFETCH("[%[b_ptr], #576]")
-                "udot	v30.4s, %[b2].16b, %[a1].4b[2]\n"
-                "udot	v31.4s, %[b2].16b, %[a1].4b[3]\n"
+                ".word 0x6f81e89e // udot v30.4s, %[b2].16b, %[a1].4b[2]\n"
+                ".word 0x6fa1e89f // udot v31.4s, %[b2].16b, %[a1].4b[3]\n"
 
 		// Unroll 1
                 "ldr	%d[b2], [%[b_ptr], #80]\n"
 
-                "udot	v8.4s , %[b0].16b, %[a0a].4b[0]\n"
+                ".word 0x6f85e048 // udot v8.4s , %[b0].16b, %[a0a].4b[0]\n"
                 "ins    %[b1].d[1], x20\n"
-                "udot	v9.4s , %[b0].16b, %[a0a].4b[1]\n"
+                ".word 0x6fa5e049 // udot v9.4s , %[b0].16b, %[a0a].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #88]\n"
-                "udot	v10.4s, %[b0].16b, %[a0a].4b[2]\n"
-                "udot	v11.4s, %[b0].16b, %[a0a].4b[3]\n"
+                ".word 0x6f85e84a // udot v10.4s, %[b0].16b, %[a0a].4b[2]\n"
+                ".word 0x6fa5e84b // udot v11.4s, %[b0].16b, %[a0a].4b[3]\n"
                 "ldr	%d[a0], [%[a_ptr], #64]\n"
 
-                "udot 	v12.4s, %[b0].16b, %[a1a].4b[0]\n"
+                ".word 0x6f86e04c // udot v12.4s, %[b0].16b, %[a1a].4b[0]\n"
                 "ins    %[b2].d[1], x20\n"
-                "udot   v13.4s, %[b0].16b, %[a1a].4b[1]\n"
+                ".word 0x6fa6e04d // udot v13.4s, %[b0].16b, %[a1a].4b[1]\n"
                 "ldr    x20, [%[a_ptr], #72]\n"
-                "udot	v14.4s, %[b0].16b, %[a1a].4b[2]\n"
-                "udot	v15.4s, %[b0].16b, %[a1a].4b[3]\n"
+                ".word 0x6f86e84e // udot v14.4s, %[b0].16b, %[a1a].4b[2]\n"
+                ".word 0x6fa6e84f // udot v15.4s, %[b0].16b, %[a1a].4b[3]\n"
                 "ldr	%d[a1], [%[a_ptr], #80]\n"
 
-                "udot	v16.4s, %[b1].16b, %[a0a].4b[0]\n"
+                ".word 0x6f85e070 // udot v16.4s, %[b1].16b, %[a0a].4b[0]\n"
                 "ins    %[a0].d[1], x20\n"
-                "udot	v17.4s, %[b1].16b, %[a0a].4b[1]\n"
+                ".word 0x6fa5e071 // udot v17.4s, %[b1].16b, %[a0a].4b[1]\n"
                 "ldr    x20, [%[a_ptr], #88]\n"
-                "udot	v18.4s, %[b1].16b, %[a0a].4b[2]\n"
-                "udot	v19.4s, %[b1].16b, %[a0a].4b[3]\n"
+                ".word 0x6f85e872 // udot v18.4s, %[b1].16b, %[a0a].4b[2]\n"
+                ".word 0x6fa5e873 // udot v19.4s, %[b1].16b, %[a0a].4b[3]\n"
                 "ldr	%d[b0], [%[b_ptr], #96]\n"
 
-                "udot	v20.4s, %[b1].16b, %[a1a].4b[0]\n"
+                ".word 0x6f86e074 // udot v20.4s, %[b1].16b, %[a1a].4b[0]\n"
                 "ins    %[a1].d[1], x20\n"
-                "udot	v21.4s, %[b1].16b, %[a1a].4b[1]\n"
+                ".word 0x6fa6e075 // udot v21.4s, %[b1].16b, %[a1a].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #104]\n"
-                "udot	v22.4s, %[b1].16b, %[a1a].4b[2]\n"
-                "udot	v23.4s, %[b1].16b, %[a1a].4b[3]\n"
+                ".word 0x6f86e876 // udot v22.4s, %[b1].16b, %[a1a].4b[2]\n"
+                ".word 0x6fa6e877 // udot v23.4s, %[b1].16b, %[a1a].4b[3]\n"
                 "ldr	%d[b1], [%[b_ptr], #112]\n"
 
-                "udot	v24.4s, %[b2].16b, %[a0a].4b[0]\n"
+                ".word 0x6f85e098 // udot v24.4s, %[b2].16b, %[a0a].4b[0]\n"
                 "ins    %[b0].d[1], x20\n"
-                "udot	v25.4s, %[b2].16b, %[a0a].4b[1]\n"
+                ".word 0x6fa5e099 // udot v25.4s, %[b2].16b, %[a0a].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #120]\n"
-                "udot	v26.4s, %[b2].16b, %[a0a].4b[2]\n"
-                "udot	v27.4s, %[b2].16b, %[a0a].4b[3]\n"
+                ".word 0x6f85e89a // udot v26.4s, %[b2].16b, %[a0a].4b[2]\n"
+                ".word 0x6fa5e89b // udot v27.4s, %[b2].16b, %[a0a].4b[3]\n"
                 "add	%[a_ptr], %[a_ptr], #64\n"
 
-                "udot	v28.4s, %[b2].16b, %[a1a].4b[0]\n"
+                ".word 0x6f86e09c // udot v28.4s, %[b2].16b, %[a1a].4b[0]\n"
                 ASM_PREFETCH("[%[b_ptr], #640]")
-                "udot	v29.4s, %[b2].16b, %[a1a].4b[1]\n"
+                ".word 0x6fa6e09d // udot v29.4s, %[b2].16b, %[a1a].4b[1]\n"
                 "add	%[b_ptr], %[b_ptr], #96\n"
-                "udot	v30.4s, %[b2].16b, %[a1a].4b[2]\n"
+                ".word 0x6f86e89e // udot v30.4s, %[b2].16b, %[a1a].4b[2]\n"
                 "ins    %[b1].d[1], x20\n"
-                "udot	v31.4s, %[b2].16b, %[a1a].4b[3]\n"
+                ".word 0x6fa6e89f // udot v31.4s, %[b2].16b, %[a1a].4b[3]\n"
                 "ldr    %d[b2], [%[b_ptr], #32]\n"
 
-                "udot   v8.4s , %[b0].16b, %[a0].4b[0]\n"
+                ".word 0x6f80e048 // udot v8.4s , %[b0].16b, %[a0].4b[0]\n"
                 "b.ne	1b\n"
 
                 // Branch here if K=1 or 2.  Do the right thing for odd/even at the end.
                 "4:\n"
 
                 // Start final iteration - branch off to "odd" code before we load a0a.
-                "udot   v9.4s , %[b0].16b, %[a0].4b[1]\n"
+                ".word 0x6fa0e049 // udot v9.4s , %[b0].16b, %[a0].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #40]\n"
-                "udot   v10.4s, %[b0].16b, %[a0].4b[2]\n"
+                ".word 0x6f80e84a // udot v10.4s, %[b0].16b, %[a0].4b[2]\n"
                 "cbnz   %w[oddk], 2f\n"
 
                 // Even K continuation
-                "udot	v11.4s, %[b0].16b, %[a0].4b[3]\n"
+                ".word 0x6fa0e84b // udot v11.4s, %[b0].16b, %[a0].4b[3]\n"
                 "ldr	%d[a0a], [%[a_ptr], #32]\n"
 
-                "udot 	v12.4s, %[b0].16b, %[a1].4b[0]\n"
+                ".word 0x6f81e04c // udot v12.4s, %[b0].16b, %[a1].4b[0]\n"
                 "ins    %[b2].d[1], x20\n"
-                "udot   v13.4s, %[b0].16b, %[a1].4b[1]\n"
+                ".word 0x6fa1e04d // udot v13.4s, %[b0].16b, %[a1].4b[1]\n"
                 "ldr    x20, [%[a_ptr], #40]\n"
-                "udot	v14.4s, %[b0].16b, %[a1].4b[2]\n"
+                ".word 0x6f81e84e // udot v14.4s, %[b0].16b, %[a1].4b[2]\n"
                 ASM_PREFETCHW("[%[c_ptr]]")
-                "udot	v15.4s, %[b0].16b, %[a1].4b[3]\n"
+                ".word 0x6fa1e84f // udot v15.4s, %[b0].16b, %[a1].4b[3]\n"
                 "ldr	%d[a1a], [%[a_ptr], #48]\n"
 
-                "udot	v16.4s, %[b1].16b, %[a0].4b[0]\n"
+                ".word 0x6f80e070 // udot v16.4s, %[b1].16b, %[a0].4b[0]\n"
                 "ins    %[a0a].d[1], x20\n"
-                "udot	v17.4s, %[b1].16b, %[a0].4b[1]\n"
+                ".word 0x6fa0e071 // udot v17.4s, %[b1].16b, %[a0].4b[1]\n"
                 "ldr    x20, [%[a_ptr], #56]\n"
-                "udot	v18.4s, %[b1].16b, %[a0].4b[2]\n"
-                "udot	v19.4s, %[b1].16b, %[a0].4b[3]\n"
+                ".word 0x6f80e872 // udot v18.4s, %[b1].16b, %[a0].4b[2]\n"
+                ".word 0x6fa0e873 // udot v19.4s, %[b1].16b, %[a0].4b[3]\n"
                 "ldr	%d[b0], [%[b_ptr], #48]\n"
 
-                "udot	v20.4s, %[b1].16b, %[a1].4b[0]\n"
+                ".word 0x6f81e074 // udot v20.4s, %[b1].16b, %[a1].4b[0]\n"
                 "ins    %[a1a].d[1], x20\n"
-                "udot	v21.4s, %[b1].16b, %[a1].4b[1]\n"
+                ".word 0x6fa1e075 // udot v21.4s, %[b1].16b, %[a1].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #56]\n"
-                "udot	v22.4s, %[b1].16b, %[a1].4b[2]\n"
+                ".word 0x6f81e876 // udot v22.4s, %[b1].16b, %[a1].4b[2]\n"
                 ASM_PREFETCHW("[%[c_ptr], #64]")
-                "udot	v23.4s, %[b1].16b, %[a1].4b[3]\n"
+                ".word 0x6fa1e877 // udot v23.4s, %[b1].16b, %[a1].4b[3]\n"
 
-                "udot	v24.4s, %[b2].16b, %[a0].4b[0]\n"
-                "udot	v25.4s, %[b2].16b, %[a0].4b[1]\n"
+                ".word 0x6f80e098 // udot v24.4s, %[b2].16b, %[a0].4b[0]\n"
+                ".word 0x6fa0e099 // udot v25.4s, %[b2].16b, %[a0].4b[1]\n"
                 ASM_PREFETCHW("[%[c_ptr], #128]")
-                "udot	v26.4s, %[b2].16b, %[a0].4b[2]\n"
-                "udot	v27.4s, %[b2].16b, %[a0].4b[3]\n"
+                ".word 0x6f80e89a // udot v26.4s, %[b2].16b, %[a0].4b[2]\n"
+                ".word 0x6fa0e89b // udot v27.4s, %[b2].16b, %[a0].4b[3]\n"
                 "ldr	%d[b1], [%[b_ptr], #64]\n"
 
-                "udot	v28.4s, %[b2].16b, %[a1].4b[0]\n"
+                ".word 0x6f81e09c // udot v28.4s, %[b2].16b, %[a1].4b[0]\n"
                 "ins    %[b0].d[1], x20\n"
-                "udot	v29.4s, %[b2].16b, %[a1].4b[1]\n"
+                ".word 0x6fa1e09d // udot v29.4s, %[b2].16b, %[a1].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #72]\n"
-                "udot	v30.4s, %[b2].16b, %[a1].4b[2]\n"
+                ".word 0x6f81e89e // udot v30.4s, %[b2].16b, %[a1].4b[2]\n"
                 ASM_PREFETCHW("[%[c_ptr], #192]")
-                "udot	v31.4s, %[b2].16b, %[a1].4b[3]\n"
+                ".word 0x6fa1e89f // udot v31.4s, %[b2].16b, %[a1].4b[3]\n"
                 "ldr	%d[b2], [%[b_ptr], #80]\n"
 
-                "udot	v8.4s , %[b0].16b, %[a0a].4b[0]\n"
+                ".word 0x6f85e048 // udot v8.4s , %[b0].16b, %[a0a].4b[0]\n"
                 "ins    %[b1].d[1], x20\n"
-                "udot   v9.4s , %[b0].16b, %[a0a].4b[1]\n"
+                ".word 0x6fa5e049 // udot v9.4s , %[b0].16b, %[a0a].4b[1]\n"
                 "ldr    x20, [%[b_ptr], #88]\n"
-                "udot	v10.4s, %[b0].16b, %[a0a].4b[2]\n"
+                ".word 0x6f85e84a // udot v10.4s, %[b0].16b, %[a0a].4b[2]\n"
                 "ins    %[b2].d[1], x20\n"
 
-                "udot   v11.4s, %[b0].16b, %[a0a].4b[3]\n"
+                ".word 0x6fa5e84b // udot v11.4s, %[b0].16b, %[a0a].4b[3]\n"
                 ASM_PREFETCHW("[%[c_ptr], #256]")
-                "udot   v12.4s, %[b0].16b, %[a1a].4b[0]\n"
-                "udot   v13.4s, %[b0].16b, %[a1a].4b[1]\n"
-                "udot   v14.4s, %[b0].16b, %[a1a].4b[2]\n"
+                ".word 0x6f86e04c // udot v12.4s, %[b0].16b, %[a1a].4b[0]\n"
+                ".word 0x6fa6e04d // udot v13.4s, %[b0].16b, %[a1a].4b[1]\n"
+                ".word 0x6f86e84e // udot v14.4s, %[b0].16b, %[a1a].4b[2]\n"
                 ASM_PREFETCHW("[%[c_ptr], #320]")
-                "udot   v15.4s, %[b0].16b, %[a1a].4b[3]\n"
-                "udot   v16.4s, %[b1].16b, %[a0a].4b[0]\n"
+                ".word 0x6fa6e84f // udot v15.4s, %[b0].16b, %[a1a].4b[3]\n"
+                ".word 0x6f85e070 // udot v16.4s, %[b1].16b, %[a0a].4b[0]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #384]")
-                "udot   v17.4s, %[b1].16b, %[a0a].4b[1]\n"
-                "udot   v18.4s, %[b1].16b, %[a0a].4b[2]\n"
+                ".word 0x6fa5e071 // udot v17.4s, %[b1].16b, %[a0a].4b[1]\n"
+                ".word 0x6f85e872 // udot v18.4s, %[b1].16b, %[a0a].4b[2]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #448]")
-                "udot   v19.4s, %[b1].16b, %[a0a].4b[3]\n"
-                "udot   v20.4s, %[b1].16b, %[a1a].4b[0]\n"
-                "udot   v21.4s, %[b1].16b, %[a1a].4b[1]\n"
+                ".word 0x6fa5e873 // udot v19.4s, %[b1].16b, %[a0a].4b[3]\n"
+                ".word 0x6f86e074 // udot v20.4s, %[b1].16b, %[a1a].4b[0]\n"
+                ".word 0x6fa6e075 // udot v21.4s, %[b1].16b, %[a1a].4b[1]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #512]")
-                "udot   v22.4s, %[b1].16b, %[a1a].4b[2]\n"
-                "udot   v23.4s, %[b1].16b, %[a1a].4b[3]\n"
+                ".word 0x6f86e876 // udot v22.4s, %[b1].16b, %[a1a].4b[2]\n"
+                ".word 0x6fa6e877 // udot v23.4s, %[b1].16b, %[a1a].4b[3]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #576]")
-                "udot   v24.4s, %[b2].16b, %[a0a].4b[0]\n"
-                "udot   v25.4s, %[b2].16b, %[a0a].4b[1]\n"
-                "udot   v26.4s, %[b2].16b, %[a0a].4b[2]\n"
+                ".word 0x6f85e098 // udot v24.4s, %[b2].16b, %[a0a].4b[0]\n"
+                ".word 0x6fa5e099 // udot v25.4s, %[b2].16b, %[a0a].4b[1]\n"
+                ".word 0x6f85e89a // udot v26.4s, %[b2].16b, %[a0a].4b[2]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #640]")
-                "udot   v27.4s, %[b2].16b, %[a0a].4b[3]\n"
-                "udot   v28.4s, %[b2].16b, %[a1a].4b[0]\n"
+                ".word 0x6fa5e89b // udot v27.4s, %[b2].16b, %[a0a].4b[3]\n"
+                ".word 0x6f86e09c // udot v28.4s, %[b2].16b, %[a1a].4b[0]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #704]")
-                "udot   v29.4s, %[b2].16b, %[a1a].4b[1]\n"
+                ".word 0x6fa6e09d // udot v29.4s, %[b2].16b, %[a1a].4b[1]\n"
                 "add    %[a_ptr], %[a_ptr], #64\n"
-                "udot   v30.4s, %[b2].16b, %[a1a].4b[2]\n"
+                ".word 0x6f86e89e // udot v30.4s, %[b2].16b, %[a1a].4b[2]\n"
                 "add    %[b_ptr], %[b_ptr], #96\n"
-                "udot   v31.4s, %[b2].16b, %[a1a].4b[3]\n"
+                ".word 0x6fa6e89f // udot v31.4s, %[b2].16b, %[a1a].4b[3]\n"
                 "b      3f\n"
 
                 // Odd K continuation
                 "2:\n"
-                "udot   v11.4s, %[b0].16b, %[a0].4b[3]\n"
+                ".word 0x6fa0e84b // udot v11.4s, %[b0].16b, %[a0].4b[3]\n"
                 ASM_PREFETCHW("[%[c_ptr]]")
-                "udot   v12.4s, %[b0].16b, %[a1].4b[0]\n"
+                ".word 0x6f81e04c // udot v12.4s, %[b0].16b, %[a1].4b[0]\n"
                 "ins    %[b2].d[1], x20\n"
-                "udot   v13.4s, %[b0].16b, %[a1].4b[1]\n"
+                ".word 0x6fa1e04d // udot v13.4s, %[b0].16b, %[a1].4b[1]\n"
                 ASM_PREFETCHW("[%[c_ptr], #64]")
-                "udot   v14.4s, %[b0].16b, %[a1].4b[2]\n"
+                ".word 0x6f81e84e // udot v14.4s, %[b0].16b, %[a1].4b[2]\n"
                 "add    %[a_ptr], %[a_ptr], #32\n"
-                "udot   v15.4s, %[b0].16b, %[a1].4b[3]\n"
+                ".word 0x6fa1e84f // udot v15.4s, %[b0].16b, %[a1].4b[3]\n"
                 ASM_PREFETCHW("[%[c_ptr], #128]")
-                "udot   v16.4s, %[b1].16b, %[a0].4b[0]\n"
+                ".word 0x6f80e070 // udot v16.4s, %[b1].16b, %[a0].4b[0]\n"
                 "add    %[b_ptr], %[b_ptr], #48\n"
-                "udot   v17.4s, %[b1].16b, %[a0].4b[1]\n"
+                ".word 0x6fa0e071 // udot v17.4s, %[b1].16b, %[a0].4b[1]\n"
                 ASM_PREFETCHW("[%[c_ptr], #192]")
-                "udot   v18.4s, %[b1].16b, %[a0].4b[2]\n"
-                "udot   v19.4s, %[b1].16b, %[a0].4b[3]\n"
+                ".word 0x6f80e872 // udot v18.4s, %[b1].16b, %[a0].4b[2]\n"
+                ".word 0x6fa0e873 // udot v19.4s, %[b1].16b, %[a0].4b[3]\n"
                 ASM_PREFETCHW("[%[c_ptr], #256]")
-                "udot   v20.4s, %[b1].16b, %[a1].4b[0]\n"
-                "udot   v21.4s, %[b1].16b, %[a1].4b[1]\n"
+                ".word 0x6f81e074 // udot v20.4s, %[b1].16b, %[a1].4b[0]\n"
+                ".word 0x6fa1e075 // udot v21.4s, %[b1].16b, %[a1].4b[1]\n"
                 ASM_PREFETCHW("[%[c_ptr], #320]")
-                "udot   v22.4s, %[b1].16b, %[a1].4b[2]\n"
-                "udot   v23.4s, %[b1].16b, %[a1].4b[3]\n"
+                ".word 0x6f81e876 // udot v22.4s, %[b1].16b, %[a1].4b[2]\n"
+                ".word 0x6fa1e877 // udot v23.4s, %[b1].16b, %[a1].4b[3]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #384]")
-                "udot   v24.4s, %[b2].16b, %[a0].4b[0]\n"
-                "udot   v25.4s, %[b2].16b, %[a0].4b[1]\n"
+                ".word 0x6f80e098 // udot v24.4s, %[b2].16b, %[a0].4b[0]\n"
+                ".word 0x6fa0e099 // udot v25.4s, %[b2].16b, %[a0].4b[1]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #448]")
-                "udot   v26.4s, %[b2].16b, %[a0].4b[2]\n"
-                "udot   v27.4s, %[b2].16b, %[a0].4b[3]\n"
+                ".word 0x6f80e89a // udot v26.4s, %[b2].16b, %[a0].4b[2]\n"
+                ".word 0x6fa0e89b // udot v27.4s, %[b2].16b, %[a0].4b[3]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #512]")
-                "udot   v28.4s, %[b2].16b, %[a1].4b[0]\n"
+                ".word 0x6f81e09c // udot v28.4s, %[b2].16b, %[a1].4b[0]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #576]")
-                "udot   v29.4s, %[b2].16b, %[a1].4b[1]\n"
+                ".word 0x6fa1e09d // udot v29.4s, %[b2].16b, %[a1].4b[1]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #640]")
-                "udot   v30.4s, %[b2].16b, %[a1].4b[2]\n"
+                ".word 0x6f81e89e // udot v30.4s, %[b2].16b, %[a1].4b[2]\n"
                 ASM_PREFETCHWL2("[%[c_ptr], #704]")
-                "udot   v31.4s, %[b2].16b, %[a1].4b[3]\n"
+                ".word 0x6fa1e89f // udot v31.4s, %[b2].16b, %[a1].4b[3]\n"
 
                 // Common tail
                 "3:\n"
@@ -379,10 +370,6 @@ void a64_gemm_u8_12x8_a55r1(const uint8_t *Apanel, const uint8_t *Bpanel, uint32
                 "str    q23,  [%[c_ptr], #352]\n"
                 "str    q31,  [%[c_ptr], #368]\n"
                 "add    %[c_ptr], %[c_ptr], #384\n"
-
-#ifdef NO_DOT_IN_TOOLCHAIN
-                ".purgem udot\n"
-#endif
             :
               [a_ptr] "+r" (a_ptr), [b_ptr] "+r" (b_ptr), [c_ptr] "+r" (c_ptr),
               [a0] "+w" (a0), [a1] "+w" (a1), [a0a] "+w" (a0a), [a1a] "+w" (a1a),

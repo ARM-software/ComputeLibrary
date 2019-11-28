@@ -1,6 +1,7 @@
 var reference_2_r_o_i_align_layer_8cpp =
 [
-    [ "roi_align_layer", "reference_2_r_o_i_align_layer_8cpp.xhtml#ae10aca11c62e91fcb01059cc7849ada6", null ],
-    [ "roi_align_layer", "reference_2_r_o_i_align_layer_8cpp.xhtml#ade5dbd67630e7e979b7f2c24c1fa1fa3", null ],
-    [ "roi_align_layer", "reference_2_r_o_i_align_layer_8cpp.xhtml#a4a4d037e9f0f69fde36a5ca107aa587a", null ]
+    [ "roi_align_layer", "reference_2_r_o_i_align_layer_8cpp.xhtml#a9bbd156793389376a90cd4f1f8ea2a9b", null ],
+    [ "roi_align_layer", "reference_2_r_o_i_align_layer_8cpp.xhtml#ab06381fbe6e1527607e2786753d93a2c", null ],
+    [ "roi_align_layer", "reference_2_r_o_i_align_layer_8cpp.xhtml#aaea6754c563c202b0cf1b0733a8d5e31", null ],
+    [ "roi_align_layer", "reference_2_r_o_i_align_layer_8cpp.xhtml#a0f5cccbb4934a1409f09b402769be9ad", null ]
 ];

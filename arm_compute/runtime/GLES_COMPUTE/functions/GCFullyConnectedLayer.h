@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,10 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCIm2ColKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
+#include "arm_compute/runtime/IWeightsManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -64,7 +65,7 @@ class GCFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCFullyConnectedLayer(const GCFullyConnectedLayer &) = delete;
     /** Default move constructor */
@@ -92,7 +93,8 @@ private:
     void configure_fc_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
     void configure_conv_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
 
-    GCMemoryGroup                       _memory_group;
+    MemoryGroup                         _memory_group;
+    IWeightsManager                    *_weights_manager;
     GCIm2ColKernel                      _im2col_kernel;
     GCFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
     GCGEMMMatrixMultiplyKernel          _mm_kernel;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,8 @@ SimpleTensor<T> warp_perspective(const SimpleTensor<T> &src, SimpleTensor<T> &va
     const int width  = src.shape().x();
     const int height = src.shape().y();
 
-    for(int element_idx = 0; element_idx < src.num_elements(); ++element_idx)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t element_idx = 0; element_idx < num_elements; ++element_idx)
     {
         valid_mask[element_idx] = 1;
         Coordinates id          = index2coord(src.shape(), element_idx);

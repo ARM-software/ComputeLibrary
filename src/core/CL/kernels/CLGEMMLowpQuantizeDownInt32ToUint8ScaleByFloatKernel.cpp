@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "support/ToolchainSupport.h"
-
-using namespace arm_compute;
 
 namespace arm_compute
 {
@@ -101,8 +99,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 class Coordinates;
-} // namespace arm_compute
-
 CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel()
     : _input(nullptr), _bias(nullptr), _output(nullptr)
 {
@@ -173,7 +169,8 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel::run(const Window &win
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx1, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

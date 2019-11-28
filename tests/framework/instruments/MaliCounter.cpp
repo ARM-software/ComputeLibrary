@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -401,7 +401,7 @@ void MaliCounter::stop()
     const int frag_index    = find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_SHADER, "FRAG_ACTIVE");
 
     // Shader core counters can be averaged if desired, but here we don't.
-    for(int core = 0; core < _num_cores; ++core)
+    for(uint32_t core = 0; core < _num_cores; ++core)
     {
         const uint32_t *sc_counter = get_counters(mali_userspace::MALI_NAME_BLOCK_SHADER, core);
 

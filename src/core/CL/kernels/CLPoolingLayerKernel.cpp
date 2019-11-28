@@ -236,6 +236,12 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
 
     build_opts.add_option_if(data_type == DataType::F16, "-DFP16");
 
+    const auto use_fp_mixed_precision = (data_type == DataType::F16) && pool_info.fp_mixed_precision();
+    const auto use_wider_accumulator  = use_fp_mixed_precision && (pool_type != PoolingType::MAX);
+    const auto acc_data_type          = get_cl_type_from_data_type(use_wider_accumulator ? DataType::F32 : data_type);
+    build_opts.add_option("-DACC_DATA_TYPE=" + acc_data_type);
+    build_opts.add_option_if(use_wider_accumulator, "-DFP_MIXED_PRECISION");
+
     // Create kernel
     switch(data_layout)
     {

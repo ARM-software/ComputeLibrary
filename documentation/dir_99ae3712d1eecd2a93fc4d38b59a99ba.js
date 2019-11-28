@@ -18,6 +18,7 @@ var dir_99ae3712d1eecd2a93fc4d38b59a99ba =
     ] ],
     [ "GraphContext.h", "_graph_context_8h.xhtml", [
       [ "MemoryManagerContext", "structarm__compute_1_1graph_1_1_memory_manager_context.xhtml", "structarm__compute_1_1graph_1_1_memory_manager_context" ],
+      [ "WeightsManagerContext", "structarm__compute_1_1graph_1_1_weights_manager_context.xhtml", "structarm__compute_1_1graph_1_1_weights_manager_context" ],
       [ "GraphContext", "classarm__compute_1_1graph_1_1_graph_context.xhtml", "classarm__compute_1_1graph_1_1_graph_context" ]
     ] ],
     [ "GraphManager.h", "_graph_manager_8h.xhtml", [

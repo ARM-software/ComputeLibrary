@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,22 +47,19 @@ using CLWeightsReshape = CLSynthetizeFunction<CLWeightsReshapeKernel>;
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::U8),      // Unsupported data type
-                                                       TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),     // Mismatching data type
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),     // Mismatching data type
                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::QASYMM8), // Bias not supported with QASYMM8
                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("BiasesInfo", { TensorInfo(TensorShape(4U), 1, DataType::U8),
-                                                        TensorInfo(TensorShape(4U), 1, DataType::F16),
+               framework::dataset::make("BiasesInfo", { TensorInfo(TensorShape(4U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(4U), 1, DataType::QASYMM8),
                                                         TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                       })),
-               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(4U, 19U), 1, DataType::U8),
-                                                        TensorInfo(TensorShape(4U, 19U), 1, DataType::F16),
+               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(4U, 19U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(4U, 19U), 1, DataType::QASYMM8),
                                                         TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, true })),
+               framework::dataset::make("Expected", { false, false, true })),
                input_info, biases_info, output_info, expected)
 {
     bool status = bool(CLWeightsReshape::validate(&input_info, &biases_info, &output_info));

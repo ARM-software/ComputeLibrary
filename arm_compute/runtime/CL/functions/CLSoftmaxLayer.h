@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -43,16 +43,20 @@ class ICLTensor;
  * Softmax is calculated by :
  * @f[ out = exp((x - max(x)) * beta) / sum(exp((x - max(x)) * beta)) @f]
  *
+ * Log Softmax is calculated by :
+ * @f[ out = (x - max(x) * beta) - \sum{e^{x - max(x) * beta}} @f]
+ *
  * This function runs the following kernels:
  * -# @ref CLLogits1DMaxKernel
  * -# @ref CLLogits1DShiftExpSumKernel
  * -# @ref CLLogits1DNormKernel
  */
-class CLSoftmaxLayer : public IFunction
+template <bool IS_LOG = false>
+class CLSoftmaxLayerGeneric : public IFunction
 {
 public:
     /** Constructor */
-    CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32
@@ -94,7 +98,7 @@ private:
      */
     void configure_reshape_input_kernel(const ICLTensor *input, const ICLTensor *output, size_t axis);
 
-    CLMemoryGroup                  _memory_group;
+    MemoryGroup                    _memory_group;
     CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;
     CLLogits1DNormKernel           _norm_kernel;
     std::unique_ptr<ICLKernel>     _flatten_kernel_ptr;
@@ -106,5 +110,8 @@ private:
     CLTensor                       _output_flattened;
     bool                           _needs_flattening;
 };
-}
+
+using CLSoftmaxLayer    = CLSoftmaxLayerGeneric<false>;
+using CLLogSoftmaxLayer = CLSoftmaxLayerGeneric<true>;
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLSOFTMAXLAYER_H__ */

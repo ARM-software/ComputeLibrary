@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/validation/reference/LogSoftmaxLayer.h"
 #include "tests/validation/reference/SoftmaxLayer.h"
 
 #include <random>
@@ -42,7 +43,7 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool IS_LOG = false>
 class SoftmaxValidationGenericFixture : public framework::Fixture
 {
 public:
@@ -110,7 +111,14 @@ protected:
         // Fill reference
         fill(src);
 
-        return reference::softmax_layer<T>(src, beta, axis);
+        if(IS_LOG)
+        {
+            return reference::log_softmax_layer<T>(src, beta, axis);
+        }
+        else
+        {
+            return reference::softmax_layer<T>(src, beta, axis);
+        }
     }
 
     TensorType       _target{};
@@ -118,33 +126,33 @@ protected:
     QuantizationInfo _quantization_info{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class SoftmaxValidationFixture : public SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool IS_LOG = false>
+class SoftmaxValidationFixture : public SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T, IS_LOG>
 {
 public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type, float beta, size_t axis)
     {
-        SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                          data_type,
-                                                                                          QuantizationInfo(),
-                                                                                          beta,
-                                                                                          axis);
+        SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T, IS_LOG>::setup(shape,
+                                                                                                  data_type,
+                                                                                                  QuantizationInfo(),
+                                                                                                  beta,
+                                                                                                  axis);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class SoftmaxValidationQuantizedFixture : public SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool IS_LOG = false>
+class SoftmaxValidationQuantizedFixture : public SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T, IS_LOG>
 {
 public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta, size_t axis)
     {
-        SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                          data_type,
-                                                                                          quantization_info,
-                                                                                          beta,
-                                                                                          axis);
+        SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T, IS_LOG>::setup(shape,
+                                                                                                  data_type,
+                                                                                                  quantization_info,
+                                                                                                  beta,
+                                                                                                  axis);
     }
 };
 } // namespace validation

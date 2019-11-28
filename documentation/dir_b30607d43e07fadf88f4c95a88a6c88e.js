@@ -27,6 +27,9 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     [ "DepthwiseConvolutionLayerNode.h", "_depthwise_convolution_layer_node_8h.xhtml", [
       [ "DepthwiseConvolutionLayerNode", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node" ]
     ] ],
+    [ "DequantizationLayerNode.h", "_dequantization_layer_node_8h.xhtml", [
+      [ "DequantizationLayerNode", "classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml", "classarm__compute_1_1graph_1_1_dequantization_layer_node" ]
+    ] ],
     [ "DetectionOutputLayerNode.h", "_detection_output_layer_node_8h.xhtml", [
       [ "DetectionOutputLayerNode", "classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml", "classarm__compute_1_1graph_1_1_detection_output_layer_node" ]
     ] ],

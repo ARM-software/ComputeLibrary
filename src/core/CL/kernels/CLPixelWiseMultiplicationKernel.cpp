@@ -274,7 +274,7 @@ void CLPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue
         add_3D_tensor_argument(idx, _input1, slice_input1);
         add_3D_tensor_argument(idx, _input2, slice_input2);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
 
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
@@ -409,7 +409,7 @@ void CLComplexPixelWiseMultiplicationKernel::run(const Window &window, cl::Comma
         add_3D_tensor_argument(idx, _input1, slice_input1);
         add_3D_tensor_argument(idx, _input2, slice_input2);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
 
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
         ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));

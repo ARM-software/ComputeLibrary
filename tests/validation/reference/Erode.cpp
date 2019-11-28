@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,8 @@ SimpleTensor<T> erode(const SimpleTensor<T> &src, BorderMode border_mode, T cons
     */
     SimpleTensor<T> dst(src.shape(), src.data_type());
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         Coordinates coord = index2coord(src.shape(), i);
         const int   x     = coord.x();

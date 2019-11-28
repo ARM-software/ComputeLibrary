@@ -35,6 +35,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEBitwiseXorKernel.h", "_n_e_bitwise_xor_kernel_8h.xhtml", [
       [ "NEBitwiseXorKernel", "classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml", "classarm__compute_1_1_n_e_bitwise_xor_kernel" ]
     ] ],
+    [ "NEBoundingBoxTransformKernel.h", "_n_e_bounding_box_transform_kernel_8h.xhtml", [
+      [ "NEBoundingBoxTransformKernel", "classarm__compute_1_1_n_e_bounding_box_transform_kernel.xhtml", "classarm__compute_1_1_n_e_bounding_box_transform_kernel" ]
+    ] ],
     [ "NEBox3x3Kernel.h", "_n_e_box3x3_kernel_8h.xhtml", "_n_e_box3x3_kernel_8h" ],
     [ "NECannyEdgeKernel.h", "_n_e_canny_edge_kernel_8h.xhtml", [
       [ "NEGradientKernel", "classarm__compute_1_1_n_e_gradient_kernel.xhtml", "classarm__compute_1_1_n_e_gradient_kernel" ],
@@ -58,6 +61,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NEConvertFullyConnectedWeightsKernel.h", "_n_e_convert_fully_connected_weights_kernel_8h.xhtml", [
       [ "NEConvertFullyConnectedWeightsKernel", "classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml", "classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel" ]
+    ] ],
+    [ "NEConvertQuantizedSignednessKernel.h", "_n_e_convert_quantized_signedness_kernel_8h.xhtml", [
+      [ "NEConvertQuantizedSignednessKernel", "classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml", "classarm__compute_1_1_n_e_convert_quantized_signedness_kernel" ]
     ] ],
     [ "NEConvolutionKernel.h", "_n_e_convolution_kernel_8h.xhtml", "_n_e_convolution_kernel_8h" ],
     [ "NECopyKernel.h", "_n_e_copy_kernel_8h.xhtml", [
@@ -83,15 +89,6 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NEDepthwiseConvolutionLayerNativeKernel.h", "_n_e_depthwise_convolution_layer_native_kernel_8h.xhtml", [
       [ "NEDepthwiseConvolutionLayerNativeKernel", "classarm__compute_1_1_n_e_depthwise_convolution_layer_native_kernel.xhtml", "classarm__compute_1_1_n_e_depthwise_convolution_layer_native_kernel" ]
-    ] ],
-    [ "NEDepthwiseIm2ColKernel.h", "_n_e_depthwise_im2_col_kernel_8h.xhtml", [
-      [ "NEDepthwiseIm2ColKernel", "classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml", "classarm__compute_1_1_n_e_depthwise_im2_col_kernel" ]
-    ] ],
-    [ "NEDepthwiseVectorToTensorKernel.h", "_n_e_depthwise_vector_to_tensor_kernel_8h.xhtml", [
-      [ "NEDepthwiseVectorToTensorKernel", "classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel.xhtml", "classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel" ]
-    ] ],
-    [ "NEDepthwiseWeightsReshapeKernel.h", "_n_e_depthwise_weights_reshape_kernel_8h.xhtml", [
-      [ "NEDepthwiseWeightsReshapeKernel", "classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml", "classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel" ]
     ] ],
     [ "NEDequantizationLayerKernel.h", "_n_e_dequantization_layer_kernel_8h.xhtml", [
       [ "NEDequantizationLayerKernel", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml", "classarm__compute_1_1_n_e_dequantization_layer_kernel" ]
@@ -209,6 +206,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEGEMMTranspose1xWKernel.h", "_n_e_g_e_m_m_transpose1x_w_kernel_8h.xhtml", [
       [ "NEGEMMTranspose1xWKernel", "classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel" ]
     ] ],
+    [ "NEGenerateProposalsLayerKernel.h", "_n_e_generate_proposals_layer_kernel_8h.xhtml", [
+      [ "NEComputeAllAnchorsKernel", "classarm__compute_1_1_n_e_compute_all_anchors_kernel.xhtml", "classarm__compute_1_1_n_e_compute_all_anchors_kernel" ]
+    ] ],
     [ "NEHarrisCornersKernel.h", "_n_e_harris_corners_kernel_8h.xhtml", [
       [ "INEHarrisScoreKernel", "classarm__compute_1_1_i_n_e_harris_score_kernel.xhtml", "classarm__compute_1_1_i_n_e_harris_score_kernel" ],
       [ "NEHarrisScoreKernel", "classarm__compute_1_1_n_e_harris_score_kernel.xhtml", "classarm__compute_1_1_n_e_harris_score_kernel" ]
@@ -228,6 +228,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NEIm2ColKernel.h", "_n_e_im2_col_kernel_8h.xhtml", [
       [ "NEIm2ColKernel", "classarm__compute_1_1_n_e_im2_col_kernel.xhtml", "classarm__compute_1_1_n_e_im2_col_kernel" ]
+    ] ],
+    [ "NEInstanceNormalizationLayerKernel.h", "_n_e_instance_normalization_layer_kernel_8h.xhtml", [
+      [ "NEInstanceNormalizationLayerKernel", "classarm__compute_1_1_n_e_instance_normalization_layer_kernel.xhtml", "classarm__compute_1_1_n_e_instance_normalization_layer_kernel" ]
     ] ],
     [ "NEIntegralImageKernel.h", "_n_e_integral_image_kernel_8h.xhtml", [
       [ "NEIntegralImageKernel", "classarm__compute_1_1_n_e_integral_image_kernel.xhtml", "classarm__compute_1_1_n_e_integral_image_kernel" ]
@@ -268,6 +271,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NENormalizationLayerKernel.h", "_n_e_normalization_layer_kernel_8h.xhtml", [
       [ "NENormalizationLayerKernel", "classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml", "classarm__compute_1_1_n_e_normalization_layer_kernel" ]
     ] ],
+    [ "NEPadLayerKernel.h", "_n_e_pad_layer_kernel_8h.xhtml", [
+      [ "NEPadLayerKernel", "classarm__compute_1_1_n_e_pad_layer_kernel.xhtml", "classarm__compute_1_1_n_e_pad_layer_kernel" ]
+    ] ],
     [ "NEPermuteKernel.h", "_n_e_permute_kernel_8h.xhtml", [
       [ "NEPermuteKernel", "classarm__compute_1_1_n_e_permute_kernel.xhtml", "classarm__compute_1_1_n_e_permute_kernel" ]
     ] ],
@@ -301,6 +307,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NEReverseKernel.h", "_n_e_reverse_kernel_8h.xhtml", [
       [ "NEReverseKernel", "classarm__compute_1_1_n_e_reverse_kernel.xhtml", "classarm__compute_1_1_n_e_reverse_kernel" ]
+    ] ],
+    [ "NEROIAlignLayerKernel.h", "_n_e_r_o_i_align_layer_kernel_8h.xhtml", [
+      [ "NEROIAlignLayerKernel", "classarm__compute_1_1_n_e_r_o_i_align_layer_kernel.xhtml", "classarm__compute_1_1_n_e_r_o_i_align_layer_kernel" ]
     ] ],
     [ "NEROIPoolingLayerKernel.h", "_n_e_r_o_i_pooling_layer_kernel_8h.xhtml", [
       [ "NEROIPoolingLayerKernel", "classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel.xhtml", "classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel" ]

@@ -67,12 +67,13 @@ public:
     std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
     Status validate_node(INode &node) override;
     std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
+    std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() override;
 
 private:
-    int                                _context_count; /**< Counts how many contexts are currently using the backend */
-    CLTuner                            _tuner;         /**< CL kernel tuner */
-    std::unique_ptr<CLBufferAllocator> _allocator;     /**< CL buffer affinity allocator */
-    std::string                        _tuner_file;    /**< Filename to load/store the tuner's values from */
+    int                                   _context_count; /**< Counts how many contexts are currently using the backend */
+    CLTuner                               _tuner;         /**< CL kernel tuner */
+    std::unique_ptr<CLBufferAllocator>    _allocator;     /**< CL buffer affinity allocator */
+    std::string                           _tuner_file;    /**< Filename to load/store the tuner's values from */
 };
 } // namespace backends
 } // namespace graph

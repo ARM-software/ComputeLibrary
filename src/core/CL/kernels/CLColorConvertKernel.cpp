@@ -98,9 +98,9 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
         default:
             break;
     }
-    ARM_COMPUTE_ERROR_ON_MSG(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
-                             string_from_format(input->info()->format()).c_str(),
-                             string_from_format(output->info()->format()).c_str());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
+                                 string_from_format(input->info()->format()).c_str(),
+                                 string_from_format(output->info()->format()).c_str());
 
     std::stringstream kernel_name;
 
@@ -164,9 +164,9 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *outpu
         default:
             break;
     }
-    ARM_COMPUTE_ERROR_ON_MSG(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
-                             string_from_format(input->info()->format()).c_str(),
-                             string_from_format(output->info()->format()).c_str());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
+                                 string_from_format(input->info()->format()).c_str(),
+                                 string_from_format(output->info()->format()).c_str());
 
     std::stringstream kernel_name;
 
@@ -274,9 +274,9 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
             break;
     }
 
-    ARM_COMPUTE_ERROR_ON_MSG(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
-                             string_from_format(input->info()->format()).c_str(),
-                             string_from_format(output->info()->format()).c_str());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
+                                 string_from_format(input->info()->format()).c_str(),
+                                 string_from_format(output->info()->format()).c_str());
 
     std::stringstream kernel_name;
 
@@ -365,9 +365,9 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *
         default:
             break;
     }
-    ARM_COMPUTE_ERROR_ON_MSG(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
-                             string_from_format(input->info()->format()).c_str(),
-                             string_from_format(output->info()->format()).c_str());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
+                                 string_from_format(input->info()->format()).c_str(),
+                                 string_from_format(output->info()->format()).c_str());
 
     std::stringstream kernel_name;
 

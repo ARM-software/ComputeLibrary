@@ -38,7 +38,7 @@ namespace
 {
 constexpr int max_input_tensor_dim = 3;
 } // namespace
-    
+
 CLL2NormalizeLayer::CLL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _reduce_func(), _normalize_kernel(), _sumsq()
 {
@@ -46,6 +46,9 @@ CLL2NormalizeLayer::CLL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_ma
 
 void CLL2NormalizeLayer::configure(ICLTensor *input, ICLTensor *output, int axis, float epsilon)
 {
+    // Reset auxiliary tensor
+    _sumsq.allocator()->init(TensorInfo());
+
     // Manage intermediate buffers
     _memory_group.manage(&_sumsq);
 

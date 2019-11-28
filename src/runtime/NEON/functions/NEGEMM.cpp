@@ -34,7 +34,6 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "support/ToolchainSupport.h"
 
 #include <cmath>
 
@@ -42,9 +41,10 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace arm_compute
 {
-NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(memory_manager), _ma_kernel(), _tmp_a(), _tmp_b(), _original_b(nullptr),
-      _run_vector_matrix_multiplication(false), _run_addition(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
+NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
+    : _memory_group(memory_manager), _weights_manager(weights_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(memory_manager, weights_manager), _ma_kernel(),
+      _alpha_scale_func(nullptr), _add_bias_kernel(), _activation_func(), _tmp_a(), _tmp_b(), _tmp_d(), _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_alpha_scale(false),
+      _run_addition(false), _run_bias_addition(false), _run_activation(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
 
@@ -52,34 +52,55 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 {
     ARM_COMPUTE_ERROR_THROW_ON(NEGEMM::validate(a->info(), b->info(), (c != nullptr) ? c->info() : nullptr, d->info(), alpha, beta, gemm_info));
 
+    const bool is_c_bias     = gemm_info.reshape_b_only_on_first_run();
+    bool       run_optimised = bool(NEGEMMAssemblyDispatch::validate(a->info(), b->info(), (is_c_bias && c != nullptr) ? c->info() : nullptr, d->info(), gemm_info));
+
     // Check if we need to reshape the matrix B only on the first run
     _is_prepared                      = false;
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
     _original_b                       = b;
-
-    bool run_optimised = c == nullptr && bool(NEGEMMAssemblyDispatch::validate(a->info(), b->info(), c != nullptr ? c->info() : nullptr, d->info(), alpha, beta, gemm_info));
+    _run_alpha_scale                  = alpha != 1.f;
+    _run_bias_addition                = c != nullptr && gemm_info.reshape_b_only_on_first_run();
+    _run_addition                     = beta != 0 && c != nullptr && !gemm_info.reshape_b_only_on_first_run();
+    _run_activation                   = gemm_info.activation_info().enabled() && (!run_optimised || (run_optimised && !NEGEMMAssemblyDispatch::is_activation_supported(gemm_info.activation_info())));
 
     if(run_optimised)
     {
+        const ITensor *c_to_use = is_c_bias ? c : nullptr;
         if(MEMInfo::get_policy() == MemoryPolicy::MINIMIZE)
         {
             GEMMInfo gemm_info_ntb = gemm_info;
             gemm_info_ntb.set_pretranpose_B(false);
-            _asm_glue.configure(a, b, c, d, alpha, beta, gemm_info_ntb);
+            _asm_glue.configure(a, b, c_to_use, d, gemm_info_ntb);
         }
         else
         {
-            _asm_glue.configure(a, b, c, d, alpha, beta, gemm_info);
+            _asm_glue.configure(a, b, c_to_use, d, gemm_info);
         }
         ARM_COMPUTE_ERROR_ON(!_asm_glue.is_configured());
+
+        // Scale product by alpha
+        if(_run_alpha_scale)
+        {
+            _alpha_scale_func.configure(d, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, alpha, 0.f));
+        }
     }
     else
     {
+        // Pick output tensor in case bias addition should be performed
+        ITensor *gemm_output_to_use = d;
+        if(_run_bias_addition)
+        {
+            gemm_output_to_use = &_tmp_d;
+            _memory_group.manage(&_tmp_d);
+        }
+
+        // Select between GEMV and GEMM
         if(_run_vector_matrix_multiplication)
         {
             // Configure the matrix multiply kernel
-            _mm_kernel.configure(a, b, d, alpha, false);
+            _mm_kernel.configure(a, b, gemm_output_to_use, alpha, false);
         }
         else
         {
@@ -117,7 +138,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             _transpose_kernel.configure(b, &_tmp_b);
 
             // Configure matrix multiplication kernel
-            _mm_kernel.configure(&_tmp_a, &_tmp_b, d, alpha, true, GEMMReshapeInfo(m, n, k));
+            _mm_kernel.configure(&_tmp_a, &_tmp_b, gemm_output_to_use, alpha, true, GEMMReshapeInfo(m, n, k));
 
             // Allocate once the all configure methods have been called
             _tmp_a.allocator()->allocate();
@@ -127,18 +148,31 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             }
         }
 
-        // Configure matrix addition kernel
-        if(beta != 0 && c != nullptr)
+        if(_run_bias_addition)
         {
-            _ma_kernel.configure(c, d, beta);
-            _run_addition = true;
+            _add_bias_kernel.configure(gemm_output_to_use, c, d, ConvertPolicy::SATURATE);
+            _tmp_d.allocator()->allocate();
         }
+    }
+
+    // Configure matrix addition kernel
+    if(_run_addition)
+    {
+        _ma_kernel.configure(c, d, beta);
+    }
+
+    // Configure activation
+    const ActivationLayerInfo &activation = gemm_info.activation_info();
+    if(_run_activation)
+    {
+        _activation_func.configure(d, nullptr, activation);
     }
 }
 
 Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
+    const bool is_c_bias = gemm_info.reshape_b_only_on_first_run();
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F16, DataType::F32);
@@ -147,7 +181,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
 
-    if(c != nullptr)
+    if(c != nullptr && !is_c_bias)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.depth_output_gemm3d() != 0);
         ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.reinterpret_input_as_3d());
@@ -178,7 +212,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     }
 
     // Check if we need to run the optimized assembly kernel
-    const bool run_optimised = c == nullptr && bool(NEGEMMAssemblyDispatch::validate(a, b, c, output, alpha, beta, gemm_info));
+    const bool run_optimised = bool(NEGEMMAssemblyDispatch::validate(a, b, is_c_bias ? c : nullptr, output, gemm_info));
 
     if(!run_optimised)
     {
@@ -225,12 +259,24 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         // Validate matrix multiply
         auto_init_if_empty(tmp_output_info, matrix_a_info->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, run_interleave_transpose, reshape_info)));
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info));
+
+        if(c != nullptr && gemm_info.reshape_b_only_on_first_run())
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&tmp_output_info, c, output, ConvertPolicy::SATURATE));
+        }
     }
 
     // Validate matrix addition kernel
-    if(beta != 0 && c != nullptr)
+    if(beta != 0 && c != nullptr && !is_c_bias)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixAdditionKernel::validate(c, output, beta));
+    }
+
+    // Validate activation
+    const ActivationLayerInfo &activation = gemm_info.activation_info();
+    if(activation.enabled())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, activation));
     }
 
     return Status{};
@@ -245,6 +291,10 @@ void NEGEMM::run()
     if(_asm_glue.is_configured())
     {
         _asm_glue.run();
+        if(_run_alpha_scale)
+        {
+            _alpha_scale_func.run();
+        }
     }
     else
     {
@@ -262,11 +312,23 @@ void NEGEMM::run()
 
         NEScheduler::get().schedule(&_mm_kernel, _run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
 
-        // Run matrix addition kernel
-        if(_run_addition)
+        // Run bias addition kernel
+        if(_run_bias_addition)
         {
-            NEScheduler::get().schedule(&_ma_kernel, Window::DimY);
+            NEScheduler::get().schedule(&_add_bias_kernel, Window::DimY);
         }
+    }
+
+    // Run matrix addition kernel
+    if(_run_addition)
+    {
+        NEScheduler::get().schedule(&_ma_kernel, Window::DimY);
+    }
+
+    // Run activation function
+    if(_run_activation)
+    {
+        _activation_func.run();
     }
 }
 
@@ -276,13 +338,19 @@ void NEGEMM::prepare()
     {
         if(_asm_glue.is_configured())
         {
-            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+            if(!_weights_manager || !_weights_manager->are_weights_managed(_original_b))
+            {
+                ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+            }
 
             _asm_glue.prepare();
         }
         else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue.is_configured())
         {
-            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+            if(!_weights_manager || !_weights_manager->are_weights_managed(_original_b))
+            {
+                ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+            }
 
             _tmp_b.allocator()->allocate();
             NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);

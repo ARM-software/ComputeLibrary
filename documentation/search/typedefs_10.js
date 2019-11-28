@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['qasymm16_5ft',['qasymm16_t',['../namespacearm__compute.xhtml#a7f2ec1184355233865bad39063cfa1c5',1,'arm_compute']]],
   ['qasymm8_5ft',['qasymm8_t',['../namespacearm__compute.xhtml#ab8938bcb3ec0f5f8d93285eb3a28b701',1,'arm_compute']]],
   ['qasymm8x16_5ft',['qasymm8x16_t',['../namespacearm__compute.xhtml#ac7e1832b8c58f07a98fc8d390b16ac27',1,'arm_compute']]],
   ['qasymm8x8_5ft',['qasymm8x8_t',['../namespacearm__compute.xhtml#a70ecc99f2f6b646579b58463dc026671',1,'arm_compute']]],

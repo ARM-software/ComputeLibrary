@@ -58,12 +58,13 @@ Status NENodeValidator::validate(INode *node)
                    NEGEMMConvolutionLayer,
                    NEWinogradConvolutionLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
-            return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer,
-                   NEDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+            return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::DequantizationLayer:
+            return detail::validate_dequantization_layer<NEDequantizationLayer>(*polymorphic_downcast<DequantizationLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
             return detail::validate_detection_output_layer<CPPDetectionOutputLayer>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::DetectionPostProcessLayer:
-            return detail::validate_detection_post_process_layer<CPPDetectionPostProcessLayer>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
+            return detail::validate_detection_post_process_layer<NEDetectionPostProcessLayer>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::GenerateProposalsLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : GenerateProposalsLayer");
         case NodeType::NormalizePlanarYUVLayer:

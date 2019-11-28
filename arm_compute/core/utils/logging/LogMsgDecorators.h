@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,13 +24,16 @@
 #ifndef __ARM_COMPUTE_LOGGING_LOG_MSG_DECORATORS_H__
 #define __ARM_COMPUTE_LOGGING_LOG_MSG_DECORATORS_H__
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/logging/Helpers.h"
 #include "arm_compute/core/utils/logging/Types.h"
 
 #include <chrono>
 #include <ctime>
 #include <string>
+#ifndef NO_MULTI_THREADING
 #include <thread>
+#endif /* NO_MULTI_THREADING */
 
 namespace arm_compute
 {
@@ -118,6 +121,8 @@ public:
     {
 #ifndef NO_MULTI_THREADING
         log_msg.raw_ += angle_wrap_value(std::this_thread::get_id());
+#else  /* NO_MULTI_THREADING */
+        ARM_COMPUTE_UNUSED(log_msg);
 #endif /* NO_MULTI_THREADING */
     }
 };

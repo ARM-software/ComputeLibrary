@@ -57,13 +57,15 @@ public:
     /** Set the input, output.
      *
      * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: F32/F16.
-     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8.
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM16.
+     *
+     * @note Output auto initialization is not supported by this kernel
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEQuantizationLayerKernel
      *
      * @param[in] input  Input tensor info. Data types supported: F32/F16.
-     * @param[in] output Output tensor info. Data types supported: QASYMM8.
+     * @param[in] output Output tensor info. Data types supported: QASYMM8/QASYMM16.
      *
      * @return a status
      */
@@ -73,11 +75,28 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
+    /** Common signature for all the specialised @ref NEQuantizationLayerKernel functions
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using QuantizationFunctionExecutorPtr = void (NEQuantizationLayerKernel::*)(const Window &window);
+    /** Function to apply QASYMM8 quantization on a tensor.
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
     template <typename T>
-    void quantize(const Window &window, const QuantizationInfo &qinfo);
+    void run_quantize_qasymm8(const Window &window);
+    /** Function to apply QASYMM16 quantization on a tensor.
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    template <typename T>
+    void run_quantize_qasymm16(const Window &window);
 
     const ITensor *_input;
     ITensor       *_output;
+
+    QuantizationFunctionExecutorPtr _func;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__ */

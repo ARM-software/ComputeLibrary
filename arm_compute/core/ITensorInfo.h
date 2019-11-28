@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -148,7 +148,7 @@ public:
      *
      * @return Offset in bytes from the beginning of the memory allocation to access the element (x, y, z, ...)
      */
-    virtual size_t offset_element_in_bytes(const Coordinates &pos) const = 0;
+    virtual int32_t offset_element_in_bytes(const Coordinates &pos) const = 0;
 
     /** Element size in bytes calculated as data_size() * num_channels()
      *
@@ -200,6 +200,11 @@ public:
      * @return True if the tensor size can be changed.
      */
     virtual bool is_resizable() const = 0;
+    /** Flag indicating whether the shape of the tensor is dynamic, meaning that it can change on kernel/function execution.
+     *
+     * @return True if its dynamic else false
+     */
+    virtual bool is_dynamic() const = 0;
     /** Set the flag whether the tensor size can be changed.
      *
      * @param[in] is_resizable Flag that marks the tensor if it can be changed or not.
@@ -207,6 +212,13 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_is_resizable(bool is_resizable) = 0;
+    /** Set the flag whether the tensor size is dynamic.
+     *
+     * @param[in] is_dynamic Flag that marks the tensor if it's dynamic.
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_is_dynamic(bool is_dynamic) = 0;
     /** Valid region of the tensor. All elements in the valid region have defined values, i.e. are not undefined.
      *
      * @return The valid region.
@@ -274,5 +286,5 @@ public:
         return std::pair<TensorShape, ValidRegion>(bc_shape, bc_valid_region);
     }
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

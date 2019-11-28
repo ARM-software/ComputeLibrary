@@ -205,6 +205,15 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_elementwise_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, EltwiseOperation operation);
+    /** Adds a dequantization node to the graph
+     *
+     * @param[in] g      Graph to add the node to
+     * @param[in] params Common node parameters
+     * @param[in] input  Input to the dequantization node as a NodeID-Index pair
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_dequantization_node(Graph &g, NodeParams params, NodeIdxPair input);
     /** Adds a detection output layer node to the graph
      *
      * @param[in] g              Graph to add the node to

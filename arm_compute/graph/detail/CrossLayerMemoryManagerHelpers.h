@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@ namespace graph
 // Forward declarations
 class Graph;
 class GraphContext;
-class ExecutionWorkload;
+struct ExecutionWorkload;
 class ITransMemoryManager;
 class ITensorHandle;
 

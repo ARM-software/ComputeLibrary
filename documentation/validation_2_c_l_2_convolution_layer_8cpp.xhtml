@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -126,7 +126,7 @@ $(document).ready(function(){initNavTree('validation_2_c_l_2_convolution_layer_8
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2018 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -138,6 +138,9 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a94a15057a0ff4d88b074dbd787507bfe"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a94a15057a0ff4d88b074dbd787507bfe"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a94a15057a0ff4d88b074dbd787507bfe">CLGEMMConvolutionLayerFixture</a> = ConvolutionValidationFixture&lt; CLTensor, CLAccessor, CLGEMMConvolutionLayer, T &gt;</td></tr>
 <tr class="separator:a94a15057a0ff4d88b074dbd787507bfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c57d7b691ce9bdaf3585fd21a98b6e2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a9c57d7b691ce9bdaf3585fd21a98b6e2"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9c57d7b691ce9bdaf3585fd21a98b6e2">CLGEMMConvolutionLayerQuantizedPerChannelFixture</a> = ConvolutionValidationQuantizedPerChannelFixture&lt; CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, int8_t &gt;</td></tr>
+<tr class="separator:a9c57d7b691ce9bdaf3585fd21a98b6e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -182,6 +185,10 @@ Functions</h2></td></tr>
 <tr class="separator:abe5e0e78a9dd187bc1caa2fbf168c06c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad53b8d93423976287977600d94aec48"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aad53b8d93423976287977600d94aec48">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLGEMMConvolutionLayerQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()), framework::dataset::make(&quot;ReshapeWeights&quot;, { true })), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })), QuantizationData), QuantizedActivationFunctionsDataset))</td></tr>
 <tr class="separator:aad53b8d93423976287977600d94aec48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40f270c60152eb62592ad7e2211c30e1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a40f270c60152eb62592ad7e2211c30e1">combine</a> (combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true })), framework::dataset::make(&quot;DataType&quot;, { DataType::QASYMM8 })), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })), QuantizationData), QuantizedActivationFunctionsSmallDataset), framework::dataset::make(&quot;WeightsDataType&quot;, { DataType::QSYMM8_PER_CHANNEL })))</td></tr>
+<tr class="separator:a40f270c60152eb62592ad7e2211c30e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a077dfc7fd780409742c9ee17b4025617"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a077dfc7fd780409742c9ee17b4025617">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLGEMMConvolutionLayerQuantizedPerChannelFixture&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true })), framework::dataset::make(&quot;DataType&quot;, { DataType::QASYMM8 })), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW, DataLayout::NHWC })), QuantizationData), QuantizedActivationFunctionsDataset), framework::dataset::make(&quot;WeightsDataType&quot;, { DataType::QSYMM8_PER_CHANNEL })))</td></tr>
+<tr class="separator:a077dfc7fd780409742c9ee17b4025617"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb065a41d5c0bce8f2e6434d622d1b0d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#abb065a41d5c0bce8f2e6434d622d1b0d">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallGroupedConvolutionLayerDataset(), GroupedCNNDataTypes), ActivationFunctionsDataset), input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, act_info)</td></tr>
 <tr class="separator:abb065a41d5c0bce8f2e6434d622d1b0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4285021da4d786c03f562fa4e0f8cc0d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4285021da4d786c03f562fa4e0f8cc0d">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLGEMMGroupedConvolutionLayerFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallGroupedConvolutionLayerDataset(), framework::dataset::make(&quot;ReshapeWeights&quot;, { true })), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW })), ActivationFunctionsSmallDataset))</td></tr>
@@ -195,14 +202,14 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a865514e30baa11b11c8fa65f944532fb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a865514e30baa11b11c8fa65f944532fb">input_shape</a></td></tr>
-<tr class="separator:a865514e30baa11b11c8fa65f944532fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae59e3cf27216b7361c71cbd2830ec4c2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae59e3cf27216b7361c71cbd2830ec4c2">input_shape</a> { input_size, batch_size }</td></tr>
+<tr class="separator:ae59e3cf27216b7361c71cbd2830ec4c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8f0126f051c787279a8c9ee3c3a5d55"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae8f0126f051c787279a8c9ee3c3a5d55">weights_shape</a></td></tr>
 <tr class="separator:ae8f0126f051c787279a8c9ee3c3a5d55"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4cbf408f2927f0d1b7d1353b9d06dcfb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4cbf408f2927f0d1b7d1353b9d06dcfb">bias_shape</a></td></tr>
-<tr class="separator:a4cbf408f2927f0d1b7d1353b9d06dcfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fc93f37dac131a1a40b7921f9df3a9a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">output_shape</a></td></tr>
-<tr class="separator:a7fc93f37dac131a1a40b7921f9df3a9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79820c7442073b8eb22fb3eaef6fd6ba"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a79820c7442073b8eb22fb3eaef6fd6ba">bias_shape</a> { output_size }</td></tr>
+<tr class="separator:a79820c7442073b8eb22fb3eaef6fd6ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1806bf0c5a41f674fb9d2dc6af644f5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab1806bf0c5a41f674fb9d2dc6af644f5">output_shape</a> { output_size, batch_size}</td></tr>
+<tr class="separator:ab1806bf0c5a41f674fb9d2dc6af644f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f4125dba5283887b34f889b1c615c0c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4f4125dba5283887b34f889b1c615c0c">info</a></td></tr>
 <tr class="separator:a4f4125dba5283887b34f889b1c615c0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3fd4136244e42ad89b01c02b904336d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad3fd4136244e42ad89b01c02b904336d">dilation</a></td></tr>
@@ -232,6 +239,8 @@ Variables</h2></td></tr>
 <tr class="separator:a0c4de6fef335f27d37630b6f16ed0f24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35ac9eed0f8401a833752c2c56c5041c"><td class="memItemLeft" align="right" valign="top">const auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a35ac9eed0f8401a833752c2c56c5041c">QuantizationData</a></td></tr>
 <tr class="separator:a35ac9eed0f8401a833752c2c56c5041c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e002f978c99fcafee4b61ce8bd05924"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7e002f978c99fcafee4b61ce8bd05924">CLGEMMConvolutionLayerQuantizedPerChannelFixture&lt; uint8_t &gt;</a></td></tr>
+<tr class="separator:a7e002f978c99fcafee4b61ce8bd05924"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adda980a6f6ff459cb9b0a1720cd8fbe8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adda980a6f6ff459cb9b0a1720cd8fbe8">CLGEMMGroupedConvolutionLayerFixture&lt; half &gt;</a></td></tr>
 <tr class="separator:adda980a6f6ff459cb9b0a1720cd8fbe8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -241,7 +250,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="validation_2_c_l_2_convolution_layer_8cpp.xhtml">ConvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:08 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

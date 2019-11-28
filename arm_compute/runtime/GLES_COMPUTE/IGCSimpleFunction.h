@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCRuntimeContext.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
@@ -36,8 +37,19 @@ namespace arm_compute
 class IGCSimpleFunction : public IFunction
 {
 public:
-    /** Default constructor */
-    IGCSimpleFunction();
+    /** Default Constructor
+     *
+     * @param[in] ctx Runtime context to be used by the function
+     */
+    IGCSimpleFunction(GCRuntimeContext *ctx = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    IGCSimpleFunction(const IGCSimpleFunction &) = delete;
+    /** Default move constructor */
+    IGCSimpleFunction(IGCSimpleFunction &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    IGCSimpleFunction &operator=(const IGCSimpleFunction &) = delete;
+    /** Default move assignment operator */
+    IGCSimpleFunction &operator=(IGCSimpleFunction &&) = default;
 
     // Inherited methods overridden:
     void run() override final;
@@ -45,6 +57,7 @@ public:
 protected:
     std::unique_ptr<IGCKernel> _kernel;         /**< Kernel to run */
     GCFillBorderKernel         _border_handler; /**< Kernel to handle  borders */
+    GCRuntimeContext          *_ctx;            /**< Context to use */
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_IGCSIMPLEFUNCTION_H__ */

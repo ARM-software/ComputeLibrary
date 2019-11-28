@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -134,6 +134,9 @@ Data Fields</h2></td></tr>
 <tr class="memitem:aab96468aedb59e7a2a19c6eea2f4b055"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#aab96468aedb59e7a2a19c6eea2f4b055">broadcast_bias</a> { false }</td></tr>
 <tr class="memdesc:aab96468aedb59e7a2a19c6eea2f4b055"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag used to broadcase the bias addition.  <a href="#aab96468aedb59e7a2a19c6eea2f4b055">More...</a><br /></td></tr>
 <tr class="separator:aab96468aedb59e7a2a19c6eea2f4b055"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31ff0f4153b53a0abfc96250b18b15f1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#a31ff0f4153b53a0abfc96250b18b15f1">fp_mixed_precision</a> { false }</td></tr>
+<tr class="memdesc:a31ff0f4153b53a0abfc96250b18b15f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag used to indicate wider accumulators (32 bit instead of 16 for FP16).  <a href="#a31ff0f4153b53a0abfc96250b18b15f1">More...</a><br /></td></tr>
+<tr class="separator:a31ff0f4153b53a0abfc96250b18b15f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5f55d98fbe268b4eb6225aca14a2403"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#ad5f55d98fbe268b4eb6225aca14a2403">activation_info</a> {}</td></tr>
 <tr class="memdesc:ad5f55d98fbe268b4eb6225aca14a2403"><td class="mdescLeft">&#160;</td><td class="mdescRight">Activation function to perform after the matrix multiplication.  <a href="#ad5f55d98fbe268b4eb6225aca14a2403">More...</a><br /></td></tr>
 <tr class="separator:ad5f55d98fbe268b4eb6225aca14a2403"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -157,7 +160,7 @@ Data Fields</h2></td></tr>
 
 <p>Activation function to perform after the matrix multiplication. </p>
 
-<p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00063">63</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00064">64</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
 
 </div>
 </div>
@@ -177,7 +180,7 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00062">62</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_g_e_m_m_matrix_multiply_native_kernel_8cpp_source.xhtml#l00212">CLGEMMMatrixMultiplyNativeKernel::configure()</a>, <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel_8cpp_source.xhtml#l00215">CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure()</a>, and <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_kernel_8cpp_source.xhtml#l00214">CLGEMMMatrixMultiplyReshapedKernel::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_g_e_m_m_matrix_multiply_native_kernel_8cpp_source.xhtml#l00213">CLGEMMMatrixMultiplyNativeKernel::configure()</a>, and <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel_8cpp_source.xhtml#l00216">CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure()</a>.</p>
 
 </div>
 </div>
@@ -197,7 +200,25 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00060">60</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00897">arm_compute::misc::shape_calculator::compute_mm_shape()</a>, <a class="el" href="_c_l_g_e_m_m_matrix_multiply_native_kernel_8cpp_source.xhtml#l00212">CLGEMMMatrixMultiplyNativeKernel::configure()</a>, <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel_8cpp_source.xhtml#l00215">CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure()</a>, and <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_kernel_8cpp_source.xhtml#l00214">CLGEMMMatrixMultiplyReshapedKernel::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00898">arm_compute::misc::shape_calculator::compute_mm_shape()</a>, <a class="el" href="_c_l_g_e_m_m_matrix_multiply_native_kernel_8cpp_source.xhtml#l00213">CLGEMMMatrixMultiplyNativeKernel::configure()</a>, and <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel_8cpp_source.xhtml#l00216">CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure()</a>.</p>
+
+</div>
+</div>
+<a id="a31ff0f4153b53a0abfc96250b18b15f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31ff0f4153b53a0abfc96250b18b15f1">&#9670;&nbsp;</a></span>fp_mixed_precision</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool fp_mixed_precision { false }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). </p>
+
+<p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00063">63</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
 
 </div>
 </div>
@@ -217,8 +238,6 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00059">59</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_kernel_8cpp_source.xhtml#l00214">CLGEMMMatrixMultiplyReshapedKernel::configure()</a>.</p>
-
 </div>
 </div>
 <a id="a4033037df26775dd60840e66d38a08ba"></a>
@@ -237,7 +256,7 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00057">57</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00897">arm_compute::misc::shape_calculator::compute_mm_shape()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00898">arm_compute::misc::shape_calculator::compute_mm_shape()</a>.</p>
 
 </div>
 </div>
@@ -257,7 +276,7 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00058">58</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00897">arm_compute::misc::shape_calculator::compute_mm_shape()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00898">arm_compute::misc::shape_calculator::compute_mm_shape()</a>.</p>
 
 </div>
 </div>
@@ -277,7 +296,7 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_kernel_descriptors_8h_source.xhtml#l00061">61</a> of file <a class="el" href="_kernel_descriptors_8h_source.xhtml">KernelDescriptors.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00897">arm_compute::misc::shape_calculator::compute_mm_shape()</a>, <a class="el" href="_c_l_g_e_m_m_matrix_multiply_native_kernel_8cpp_source.xhtml#l00212">CLGEMMMatrixMultiplyNativeKernel::configure()</a>, and <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel_8cpp_source.xhtml#l00215">CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00898">arm_compute::misc::shape_calculator::compute_mm_shape()</a>, <a class="el" href="_c_l_g_e_m_m_matrix_multiply_native_kernel_8cpp_source.xhtml#l00213">CLGEMMMatrixMultiplyNativeKernel::configure()</a>, and <a class="el" href="_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel_8cpp_source.xhtml#l00216">CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure()</a>.</p>
 
 </div>
 </div>
@@ -290,7 +309,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1_g_e_m_m_kernel_info.xhtml">GEMMKernelInfo</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:35 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:14 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

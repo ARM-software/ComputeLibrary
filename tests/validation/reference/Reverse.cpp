@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,8 @@ SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<uint32_t>
         to_reverse[axis[i]] = true;
     }
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates  src_coord = index2coord(src.shape(), i);
         const unsigned int dst_x     = to_reverse[0] ? width - src_coord[0] - 1 : src_coord[0];

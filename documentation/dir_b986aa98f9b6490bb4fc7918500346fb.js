@@ -23,7 +23,6 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
     [ "CLMemory.h", "_c_l_memory_8h.xhtml", [
       [ "CLMemory", "classarm__compute_1_1_c_l_memory.xhtml", "classarm__compute_1_1_c_l_memory" ]
     ] ],
-    [ "CLMemoryGroup.h", "_c_l_memory_group_8h.xhtml", "_c_l_memory_group_8h" ],
     [ "CLMemoryRegion.h", "_c_l_memory_region_8h.xhtml", [
       [ "ICLMemoryRegion", "classarm__compute_1_1_i_c_l_memory_region.xhtml", "classarm__compute_1_1_i_c_l_memory_region" ],
       [ "CLBufferMemoryRegion", "classarm__compute_1_1_c_l_buffer_memory_region.xhtml", "classarm__compute_1_1_c_l_buffer_memory_region" ],
@@ -40,6 +39,9 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
     [ "CLPyramid.h", "_c_l_pyramid_8h.xhtml", [
       [ "CLPyramid", "classarm__compute_1_1_c_l_pyramid.xhtml", "classarm__compute_1_1_c_l_pyramid" ]
     ] ],
+    [ "CLRuntimeContext.h", "_c_l_runtime_context_8h.xhtml", [
+      [ "CLRuntimeContext", "classarm__compute_1_1_c_l_runtime_context.xhtml", "classarm__compute_1_1_c_l_runtime_context" ]
+    ] ],
     [ "CLScheduler.h", "_c_l_scheduler_8h.xhtml", [
       [ "CLScheduler", "classarm__compute_1_1_c_l_scheduler.xhtml", "classarm__compute_1_1_c_l_scheduler" ]
     ] ],
@@ -48,7 +50,6 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
     ] ],
     [ "CLTensor.h", "_c_l_tensor_8h.xhtml", "_c_l_tensor_8h" ],
     [ "CLTensorAllocator.h", "_c_l_tensor_allocator_8h.xhtml", [
-      [ "MemoryGroupBase", "classarm__compute_1_1_memory_group_base.xhtml", "classarm__compute_1_1_memory_group_base" ],
       [ "CLTensorAllocator", "classarm__compute_1_1_c_l_tensor_allocator.xhtml", "classarm__compute_1_1_c_l_tensor_allocator" ]
     ] ],
     [ "CLTuner.h", "_c_l_tuner_8h.xhtml", [

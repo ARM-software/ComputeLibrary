@@ -147,13 +147,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFixture, framework:
 
 using NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
 TEST_SUITE(FusedOffsetOutput)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpFusedOffsetOutputDataset())
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpFusedOffsetOutputDataset(),
+                       framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpFusedOffsetOutputDataset())
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpFusedOffsetOutputDataset(),
+                       framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -417,6 +419,17 @@ const auto quantize_down_int32_to_int16_scale_by_fixedpoint_cases = framework::d
 const auto quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                          2)
                                                                          * framework::dataset::make("min", -2, 0) * framework::dataset::make("max", 1, 3) * framework::dataset::make("addBias", { false, true });
+const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases = framework::dataset::make("result_fixedpoint_multiplier", 1073741823,
+                                                                                                        1073741825)
+                                                                               * framework::dataset::make("result_shift", -3,
+                                                                                                          -2)
+                                                                               * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+
+const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600,
+                                                                                                             254601602)
+                                                                                    * framework::dataset::make("result_shift", -3,
+                                                                                                               -1)
+                                                                                    * framework::dataset::make("min", -2, 0) * framework::dataset::make("max", 1, 3) * framework::dataset::make("addBias", { false, true });
 
 using NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture =
     GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture<Tensor, Accessor, NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint>;
@@ -499,27 +512,44 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
         validate(bias.info()->padding(), padding);
     }
 }
-
+TEST_SUITE(NoRelu)
+TEST_SUITE(MultSmallerEq1)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
                        quantize_down_int32_to_int16_scale_by_fixedpoint_cases))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-
+TEST_SUITE_END() // MultSmallerEq1
+TEST_SUITE(MultGreater1)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+                       quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // MultGreater1
+TEST_SUITE_END() // NoRelu
 TEST_SUITE(BoundedReLu)
+TEST_SUITE(MultSmallerEq1)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
                        quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
+TEST_SUITE_END() // MultSmallerEq1
+TEST_SUITE(MultGreater1)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+                       quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // MultGreater1
 TEST_SUITE_END() // BoundedReLu
-
 TEST_SUITE_END() // QuantizeDownInt32ToInt16ScaleByFixedPoint
-
 TEST_SUITE_END() // OutputStage
-
 TEST_SUITE_END() // GEMMLowp
 TEST_SUITE_END() // NEON
 } // namespace validation

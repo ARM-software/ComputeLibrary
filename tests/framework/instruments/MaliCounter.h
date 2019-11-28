@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,7 +86,7 @@ private:
     const char *const  _device
     { "/dev/mali0"
     };
-    int                _num_cores{ 0 };
+    uint32_t           _num_cores{ 0 };
     uint32_t           _hw_ver{ 0 };
     int                _buffer_count{ 16 };
     size_t             _buffer_size{ 0 };

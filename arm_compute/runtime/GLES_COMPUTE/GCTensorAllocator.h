@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,23 +28,20 @@
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCMemory.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
-#include "arm_compute/runtime/MemoryGroupBase.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
 namespace arm_compute
 {
 class GCTensor;
-template <typename>
-class MemoryGroupBase;
-using GCMemoryGroup = MemoryGroupBase<GCTensor>;
 
 /** Basic implementation of a GLES memory tensor allocator. */
 class GCTensorAllocator : public ITensorAllocator
 {
 public:
     /** Default constructor. */
-    GCTensorAllocator(GCTensor *owner = nullptr);
+    GCTensorAllocator(IMemoryManageable *owner = nullptr);
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCTensorAllocator(const GCTensorAllocator &) = delete;
@@ -109,7 +106,7 @@ public:
      *
      * @param[in] associated_memory_group Memory group to associate the tensor with
      */
-    void set_associated_memory_group(GCMemoryGroup *associated_memory_group);
+    void set_associated_memory_group(IMemoryGroup *associated_memory_group);
 
 protected:
     /** Call map() on the SSBO.
@@ -122,10 +119,10 @@ protected:
     void unlock() override;
 
 private:
-    GCMemoryGroup *_associated_memory_group; /**< Registered memory group */
-    GCMemory       _memory;                  /**< OpenGL ES memory */
-    uint8_t       *_mapping;                 /**< Pointer to the CPU mapping of the OpenGL ES buffer. */
-    GCTensor      *_owner;                   /**< Owner of the allocator */
+    IMemoryManageable *_owner;                   /**< Owner of the allocator */
+    IMemoryGroup      *_associated_memory_group; /**< Registered memory group */
+    GCMemory           _memory;                  /**< OpenGL ES memory */
+    uint8_t           *_mapping;                 /**< Pointer to the CPU mapping of the OpenGL ES buffer. */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCTENSORALLOCATOR_H__ */

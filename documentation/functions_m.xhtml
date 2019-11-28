@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -103,6 +103,10 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 : <a class="el" href="structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#a4033037df26775dd60840e66d38a08ba">GEMMKernelInfo</a>
 , <a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a137948e04c296b448be2c0de97c6adcb">GEMMReshapeInfo</a>
 </li>
+<li>M
+: <a class="el" href="classgemm__tuner_1_1_common_gemm_example_options.xhtml#ac454f986dddc4ac01a91e71b2ffe1cb2">CommonGemmExampleOptions</a>
+, <a class="el" href="structgemm__tuner_1_1_common_gemm_example_params.xhtml#af0337b6054d4462adeb69c1b2a5387e6">CommonGemmExampleParams</a>
+</li>
 <li>m0
 : <a class="el" href="structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml#a41618231c7d7b990c42fe6846b4dde27">GEMMLHSMatrixInfo</a>
 </li>
@@ -130,7 +134,9 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a3e897744121bd6636c451767aeef2cdb">NESubTensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#a3e897744121bd6636c451767aeef2cdb">NETensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml#af17dc1b0465b99d816e5eb3e099cc2f2">ITensorHandle</a>
-, <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#ac1f67376afb7822f262a0174ef4a3104">MemoryGroupBase&lt; TensorType &gt;</a>
+, <a class="el" href="classarm__compute_1_1_i_memory_group.xhtml#a3050be2d3604b3c2fc3c3a0d6cb49392">IMemoryGroup</a>
+, <a class="el" href="classarm__compute_1_1_i_weights_manager.xhtml#a18bd2d54155972d4d740fbba8337a27e">IWeightsManager</a>
+, <a class="el" href="classarm__compute_1_1_memory_group.xhtml#a6fc0a49304c152c20a0f6df0634fb3cd">MemoryGroup</a>
 </li>
 <li>mantissa()
 : <a class="el" href="unionarm__compute_1_1helpers_1_1float__ops_1_1_raw_float.xhtml#a2331cafeb7bdfe99da1a767ce41d550d">RawFloat</a>
@@ -179,14 +185,10 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 </li>
 <li>mappings()
 : <a class="el" href="classarm__compute_1_1_i_memory_group.xhtml#aa4f0ba2c065527f486249f37350a235c">IMemoryGroup</a>
-, <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#a0a9171fb9c729a0a08b1d0ff3a5e3309">MemoryGroupBase&lt; TensorType &gt;</a>
-</li>
-<li>mark_as_reshaped()
-: <a class="el" href="classarm__compute_1_1_i_buffer_manager.xhtml#a5d04fd48130e6eb9863efd81f0b1e361">IBufferManager</a>
+, <a class="el" href="classarm__compute_1_1_memory_group.xhtml#a0a9171fb9c729a0a08b1d0ff3a5e3309">MemoryGroup</a>
 </li>
 <li>mark_as_unused()
-: <a class="el" href="classarm__compute_1_1_i_buffer_manager.xhtml#a69eeef30ae577be80ee40fa9d3274702">IBufferManager</a>
-, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a9bc00234de9adf8c99a21eb1d7d494c2">ITensor</a>
+: <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a9bc00234de9adf8c99a21eb1d7d494c2">ITensor</a>
 </li>
 <li>max
 : <a class="el" href="structarm__compute_1_1_min_max_location_values.xhtml#a4b7ee8a31f634f28eb1d4d97f6159ccd">MinMaxLocationValues&lt; MinMaxType &gt;</a>
@@ -239,7 +241,7 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_m_e_m_info.xhtml#a8e6211e81e33a09af138b842ab4d8534">MEMInfo</a>
 </li>
 <li>Memory()
-: <a class="el" href="classarm__compute_1_1_memory.xhtml#a3820126b0751b4da40f870ee7a3e188c">Memory</a>
+: <a class="el" href="classarm__compute_1_1_memory.xhtml#afcdc02b530141f84c98459ac4408376d">Memory</a>
 </li>
 <li>memory_barrier()
 : <a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a2dcf87458fcfdfb5e9fdd369e0320d78">GCScheduler</a>
@@ -247,14 +249,17 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 <li>memory_management_ctx()
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml#a65394a2dba58e82644502daf2c29c663">GraphContext</a>
 </li>
+<li>memory_manager()
+: <a class="el" href="classarm__compute_1_1_i_asset_manager.xhtml#a6ec8d861e25d3fde1a46b16654aedaf5">IAssetManager</a>
+</li>
 <li>memory_managers()
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml#a764b116846c97f7657a86c22583575ac">GraphContext</a>
 </li>
-<li>MemoryGroupBase()
-: <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#a65925c6cf4ee7a89e05557dfb2138c47">MemoryGroupBase&lt; TensorType &gt;</a>
+<li>MemoryGroup()
+: <a class="el" href="classarm__compute_1_1_memory_group.xhtml#aa33537f4c44c5f70da88344b7175a89c">MemoryGroup</a>
 </li>
 <li>MemoryGroupResourceScope()
-: <a class="el" href="classarm__compute_1_1_memory_group_resource_scope.xhtml#a4b173d900c8f147613ec73f6c3dbb31d">MemoryGroupResourceScope</a>
+: <a class="el" href="classarm__compute_1_1_memory_group_resource_scope.xhtml#a17a9e92a2c60aaa9e037faedc17e8be5">MemoryGroupResourceScope</a>
 </li>
 <li>MemoryImageFeeder()
 : <a class="el" href="classarm__compute_1_1utils_1_1_memory_image_feeder.xhtml#a364ebbb0c2f56d789b5bf14308784282">MemoryImageFeeder</a>
@@ -263,11 +268,11 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_memory_manager_on_demand.xhtml#ad61f5da57995738b717da9e1fb53c25b">MemoryManagerOnDemand</a>
 </li>
 <li>MemoryRegion()
-: <a class="el" href="classarm__compute_1_1_memory_region.xhtml#a32d4629fe7aa6093bbe54599319d08fa">MemoryRegion</a>
+: <a class="el" href="classarm__compute_1_1_memory_region.xhtml#aee98ba000578ad694264595385997304">MemoryRegion</a>
 </li>
 <li>Merge()
-: <a class="el" href="classarm__gemm_1_1_std_transforms_fixed.xhtml#aaecd166dc5d1163768d1553a013c30f8">StdTransformsFixed&lt; TOperand, TResult, height, width, block &gt;</a>
-, <a class="el" href="classarm__gemm_1_1_std_transforms_s_v_e.xhtml#aaecd166dc5d1163768d1553a013c30f8">StdTransformsSVE&lt; TOperand, TResult, height, width_vectors, block, mmla &gt;</a>
+: <a class="el" href="classarm__gemm_1_1_std_transforms_fixed.xhtml#af1a6738212fc10bde3bf8c5bf679350a">StdTransformsFixed&lt; TOperand, TResult, height, width, block &gt;</a>
+, <a class="el" href="classarm__gemm_1_1_std_transforms_s_v_e.xhtml#af1a6738212fc10bde3bf8c5bf679350a">StdTransformsSVE&lt; TOperand, TResult, height, width_vectors, block, mmla &gt;</a>
 </li>
 <li>method
 : <a class="el" href="structarm__gemm_1_1_gemm_implementation.xhtml#a211779127e0aa2bd8edde522d7edf572">GemmImplementation&lt; Top, Tret, OutputStage &gt;</a>
@@ -294,15 +299,16 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_prior_box_layer_info.xhtml#a147b1e13f347e7b995de58f8fafd6723">PriorBoxLayerInfo</a>
 </li>
 <li>MMappedFile()
-: <a class="el" href="classarm__compute_1_1utils_1_1mmap__io_1_1_m_mapped_file.xhtml#a7e00f03be4604efcbd29a3d015f9411b">MMappedFile</a>
+: <a class="el" href="classarm__compute_1_1utils_1_1mmap__io_1_1_m_mapped_file.xhtml#a6dcb9ad4d9d3220e157846dbd80383e8">MMappedFile</a>
 </li>
 <li>mode()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a7a45c67d3c31de477d1a54c8dea7caa4">TestCaseFactory</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml#aadbc5003f5cc399930b16ddb89b16cdc">TestInfo</a>
+, <a class="el" href="structarm__compute_1_1utils_1_1_convolution_params.xhtml#a816aa7a286e811e2cdeaf06d1cee5876">ConvolutionParams</a>
 </li>
 <li>model()
-: <a class="el" href="classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml#a6b7b27202983e6c2aadffae4527aea78">ICLMultiHOG</a>
-, <a class="el" href="classarm__compute_1_1_i_multi_h_o_g.xhtml#a75e828c2dc5a300d224761a410c0925f">IMultiHOG</a>
+: <a class="el" href="classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml#a0b94b2a32f6f318bcb58b100b7d0f229">ICLMultiHOG</a>
+, <a class="el" href="classarm__compute_1_1_i_multi_h_o_g.xhtml#a71394cddbab548690b314af51be472f0">IMultiHOG</a>
 , <a class="el" href="classarm__compute_1_1_multi_h_o_g.xhtml#a6b7b27202983e6c2aadffae4527aea78">MultiHOG</a>
 </li>
 <li>moveblock_1x1()
@@ -344,7 +350,7 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

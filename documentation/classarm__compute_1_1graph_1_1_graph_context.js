@@ -7,9 +7,12 @@ var classarm__compute_1_1graph_1_1_graph_context =
     [ "config", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a9c24c14abfd0ab9d1f4ce8cd5cc20819", null ],
     [ "finalize", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a32d626626eee0bc4ade146973f6abb1c", null ],
     [ "insert_memory_management_ctx", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a5bd2719563383b341ad9d1186c2e9847", null ],
+    [ "insert_weights_management_ctx", "classarm__compute_1_1graph_1_1_graph_context.xhtml#abfcc032b313fa67dc2c55d198948c5a0", null ],
     [ "memory_management_ctx", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a65394a2dba58e82644502daf2c29c663", null ],
     [ "memory_managers", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a764b116846c97f7657a86c22583575ac", null ],
     [ "operator=", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a486c42cfea65bf964404f77404dba8da", null ],
     [ "operator=", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a52ee8d390e25147e776bfcb39b010947", null ],
-    [ "set_config", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a22acc02bd87a26f9a08eb821bb35e75f", null ]
+    [ "set_config", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a22acc02bd87a26f9a08eb821bb35e75f", null ],
+    [ "weights_management_ctx", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a2679316ea176b4760fc085c87179360b", null ],
+    [ "weights_managers", "classarm__compute_1_1graph_1_1_graph_context.xhtml#a14a4ced5d519c182c59976f08077da4a", null ]
 ];

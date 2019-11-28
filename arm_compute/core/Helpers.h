@@ -766,6 +766,20 @@ inline T wrap_around(T x, T m)
     return x >= 0 ? x % m : (x % m + m) % m;
 }
 
+/** Convert negative coordinates to positive in the range [0, num_dims_input]
+ *
+ * @param[out] coords    Array of coordinates to be converted.
+ * @param[in]  max_value Maximum value to be used when wrapping the negative values in coords
+ */
+inline Coordinates &convert_negative_axis(Coordinates &coords, int max_value)
+{
+    for(unsigned int i = 0; i < coords.num_dimensions(); ++i)
+    {
+        coords[i] = wrap_around(coords[i], max_value);
+    }
+    return coords;
+}
+
 /** Given an integer value, this function returns the next power of two
  *
  * @param[in] x Input value

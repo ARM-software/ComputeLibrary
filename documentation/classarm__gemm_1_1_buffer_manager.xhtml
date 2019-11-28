@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -309,7 +309,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="buffer__manager_8hpp_source.xhtml#l00218">218</a> of file <a class="el" href="buffer__manager_8hpp_source.xhtml">buffer_manager.hpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;                                                                                                {</div><div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;        <span class="keywordflow">return</span> buffersize * ((maxthreads == 1) ? 1 : 3);</div><div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="gemm__interleaved_8hpp_source.xhtml#l00407">GemmInterleaved&lt; strategy, To, Tr &gt;::get_working_size()</a>, and <a class="el" href="gemm__interleaved_8hpp_source.xhtml#l00422">GemmInterleaved&lt; strategy, To, Tr &gt;::set_working_space()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gemm__interleaved_8hpp_source.xhtml#l00411">GemmInterleaved&lt; strategy, To, Tr &gt;::get_working_size()</a>, and <a class="el" href="gemm__interleaved_8hpp_source.xhtml#l00426">GemmInterleaved&lt; strategy, To, Tr &gt;::set_working_space()</a>.</p>
 
 </div>
 </div>
@@ -393,7 +393,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="buffer__manager_8hpp_source.xhtml#l00278">278</a> of file <a class="el" href="buffer__manager_8hpp_source.xhtml">buffer_manager.hpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;                                   {</div><div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;        <span class="keywordflow">if</span> (_maxthreads==1) {</div><div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;            <span class="keywordflow">return</span>;</div><div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;        }</div><div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;</div><div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;        <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i=0; i&lt;_buffers.size(); i++) {</div><div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;            _buffers[i]-&gt;set_numusers(threads);</div><div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;        }</div><div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;    }</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="gemm__interleaved_8hpp_source.xhtml#l00390">GemmInterleaved&lt; strategy, To, Tr &gt;::set_nthreads()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="gemm__interleaved_8hpp_source.xhtml#l00394">GemmInterleaved&lt; strategy, To, Tr &gt;::set_nthreads()</a>.</p>
 
 </div>
 </div>
@@ -444,7 +444,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__gemm.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="classarm__gemm_1_1_buffer_manager.xhtml">BufferManager</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

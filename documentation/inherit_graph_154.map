@@ -1,4 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1traits_1_1is__contained.xhtml" title=" " alt="" coords="5,5,157,47"/>
-<area shape="rect" id="node2" href="$structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_01_u_00_01_ts_8_8_8_01_4_01_4.xhtml" title=" " alt="" coords="205,5,357,47"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_memory_manager.xhtml" title="Memory manager interface to handle allocations of backing memory." alt="" coords="5,5,139,32"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_memory_manager_on_demand.xhtml" title="On&#45;demand memory manager." alt="" coords="187,5,389,32"/>
 </map>

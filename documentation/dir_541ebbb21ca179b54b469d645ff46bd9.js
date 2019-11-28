@@ -1,7 +1,10 @@
 var dir_541ebbb21ca179b54b469d645ff46bd9 =
 [
     [ "kernels", "dir_b19d819d13c0f52aff9af701145a9252.xhtml", "dir_b19d819d13c0f52aff9af701145a9252" ],
-    [ "GCHelpers.h", "_g_c_helpers_8h.xhtml", "_g_c_helpers_8h" ],
+    [ "GCCoreRuntimeContext.h", "_g_c_core_runtime_context_8h.xhtml", [
+      [ "GCCoreRuntimeContext", "classarm__compute_1_1_g_c_core_runtime_context.xhtml", "classarm__compute_1_1_g_c_core_runtime_context" ]
+    ] ],
+    [ "GCHelpers.h", "core_2_g_l_e_s___c_o_m_p_u_t_e_2_g_c_helpers_8h.xhtml", "core_2_g_l_e_s___c_o_m_p_u_t_e_2_g_c_helpers_8h" ],
     [ "GCKernelLibrary.h", "_g_c_kernel_library_8h.xhtml", [
       [ "GCProgram", "classarm__compute_1_1_g_c_program.xhtml", "classarm__compute_1_1_g_c_program" ],
       [ "GCKernel", "classarm__compute_1_1_g_c_kernel.xhtml", "classarm__compute_1_1_g_c_kernel" ],

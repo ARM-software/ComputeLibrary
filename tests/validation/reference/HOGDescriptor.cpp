@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,7 +69,7 @@ void hog_orientation_compute(const SimpleTensor<T> &mag, const SimpleTensor<T> &
 }
 
 template <typename T>
-void hog_block_normalization_compute(SimpleTensor<T> &block, SimpleTensor<T> &desc, const HOGInfo &hog_info, size_t block_idx)
+void hog_block_normalization_compute(SimpleTensor<T> &block, SimpleTensor<T> &desc, const HOGInfo &hog_info, uint32_t block_idx)
 {
     const int         num_bins_per_block = desc.num_channels();
     const HOGNormType norm_type          = hog_info.normalization_type();
@@ -186,8 +186,8 @@ void hog_block_normalization(SimpleTensor<T> &desc, const SimpleTensor<T> &hog_s
     // Tensor representing single block
     SimpleTensor<T> block(TensorShape{ 1u, 1u }, DataType::F32, cells_per_block.area() * num_bins);
 
-    int block_idx      = 0;
-    int block_y_offset = 0;
+    uint32_t block_idx      = 0;
+    int      block_y_offset = 0;
 
     // Traverse shape
     for(auto sy = block_size.height; sy <= shape_height; sy += block_stride.height)

@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Basic function to run @ref NEActivationLayerKernel
@@ -39,6 +40,20 @@ class ITensor;
 class NEActivationLayer : public INESimpleFunctionNoBorder
 {
 public:
+    /** Constructor
+     *
+     * @param[in] ctx Runtime context to be used by the function
+     */
+    NEActivationLayer(IRuntimeContext *ctx = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEActivationLayer(const NEActivationLayer &) = delete;
+    /** Default move constructor */
+    NEActivationLayer(NEActivationLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEActivationLayer &operator=(const NEActivationLayer &) = delete;
+    /** Default move assignment operator */
+    NEActivationLayer &operator=(NEActivationLayer &&) = default;
+    /** [NEActivationLayer snippet] **/
     /** Set the input and output tensor.
      *
      * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
@@ -49,6 +64,7 @@ public:
      * @param[in]      activation_info Activation layer parameters.
      */
     void configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info);
+    /** [NEActivationLayer snippet] **/
     /** Static function to check if given info will lead to a valid configuration of @ref NEActivationLayer
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result

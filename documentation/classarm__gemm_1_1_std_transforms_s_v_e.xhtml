@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -113,9 +113,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aedba4df70219eb533eb0149b60ab182e"><td class="memTemplParams" colspan="2">template&lt;typename TIn &gt; </td></tr>
 <tr class="memitem:aedba4df70219eb533eb0149b60ab182e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__gemm_1_1_std_transforms_s_v_e.xhtml#aedba4df70219eb533eb0149b60ab182e">PrepareB</a> (TOperand *out, const TIn *in, const int stride, const int x0, const int xmax, const int k0, const int kmax, bool transposed)</td></tr>
 <tr class="separator:aedba4df70219eb533eb0149b60ab182e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaecd166dc5d1163768d1553a013c30f8"><td class="memTemplParams" colspan="2">template&lt;typename TOut &gt; </td></tr>
-<tr class="memitem:aaecd166dc5d1163768d1553a013c30f8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__gemm_1_1_std_transforms_s_v_e.xhtml#aaecd166dc5d1163768d1553a013c30f8">Merge</a> (TOut *out, const TResult *in, int stride, int y0, int ymax, int x0, int xmax, const TOut alpha, const TOut beta)</td></tr>
-<tr class="separator:aaecd166dc5d1163768d1553a013c30f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1a6738212fc10bde3bf8c5bf679350a"><td class="memTemplParams" colspan="2">template&lt;typename TOut &gt; </td></tr>
+<tr class="memitem:af1a6738212fc10bde3bf8c5bf679350a"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__gemm_1_1_std_transforms_s_v_e.xhtml#af1a6738212fc10bde3bf8c5bf679350a">Merge</a> (TOut *out, const TResult *in, int stride, int y0, int ymax, int x0, int xmax, const TOut *bias, const Activation act, bool append)</td></tr>
+<tr class="separator:af1a6738212fc10bde3bf8c5bf679350a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename TOperand, typename TResult, unsigned int height, unsigned int width_vectors, unsigned int block = 1, unsigned int mmla = 1&gt;<br />
@@ -124,8 +124,8 @@ class arm_gemm::StdTransformsSVE&lt; TOperand, TResult, height, width_vectors, b
 
 <p class="definition">Definition at line <a class="el" href="std__transforms__sve_8hpp_source.xhtml#l00042">42</a> of file <a class="el" href="std__transforms__sve_8hpp_source.xhtml">std_transforms_sve.hpp</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="aaecd166dc5d1163768d1553a013c30f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaecd166dc5d1163768d1553a013c30f8">&#9670;&nbsp;</a></span>Merge()</h2>
+<a id="af1a6738212fc10bde3bf8c5bf679350a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1a6738212fc10bde3bf8c5bf679350a">&#9670;&nbsp;</a></span>Merge()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -178,14 +178,20 @@ class arm_gemm::StdTransformsSVE&lt; TOperand, TResult, height, width_vectors, b
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const TOut&#160;</td>
-          <td class="paramname"><em>alpha</em>, </td>
+          <td class="paramtype">const TOut *&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const TOut&#160;</td>
-          <td class="paramname"><em>beta</em>&#160;</td>
+          <td class="paramtype">const Activation&#160;</td>
+          <td class="paramname"><em>act</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>append</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -201,10 +207,10 @@ class arm_gemm::StdTransformsSVE&lt; TOperand, TResult, height, width_vectors, b
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="std__transforms__sve_8hpp_source.xhtml#l00066">66</a> of file <a class="el" href="std__transforms__sve_8hpp_source.xhtml">std_transforms_sve.hpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                                                                                                                                {</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <a class="code" href="namespacearm__gemm.xhtml#a4c160021f8ceaa70922f23cafd6b3c99">MergeResults</a>&lt;width_vectors / mmla, height, <span class="keyword">true</span>&gt;(out, in, stride, y0, ymax, x0, xmax, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">alpha</a>, beta);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a3161c2c93c655dd30953372064ec627b"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">arm_compute::test::validation::alpha</a></div><div class="ttdeci">const float alpha</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00103">Accumulate.cpp:103</a></div></div>
-<div class="ttc" id="namespacearm__gemm_xhtml_a4c160021f8ceaa70922f23cafd6b3c99"><div class="ttname"><a href="namespacearm__gemm.xhtml#a4c160021f8ceaa70922f23cafd6b3c99">arm_gemm::MergeResults</a></div><div class="ttdeci">void MergeResults(Tout *out, const Tin *in, int ldc, int y0, int ymax, int x0, int xmax, const Tout alpha, const Tout beta)</div><div class="ttdef"><b>Definition:</b> <a href="mergeresults_8hpp_source.xhtml#l00036">mergeresults.hpp:36</a></div></div>
+<div class="fragment"><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                                                                                                                                                  {</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <a class="code" href="namespacearm__gemm.xhtml#aa2ed1c3595c8114064e8170b00df37c5">MergeResults</a>&lt;width_vectors / mmla, height, <span class="keyword">true</span>&gt;(out, in, stride, y0, ymax, x0, xmax, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3a77be8aebd8e00522b32061d46ccdbd">bias</a>, act, append);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a3a77be8aebd8e00522b32061d46ccdbd"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a3a77be8aebd8e00522b32061d46ccdbd">arm_compute::test::validation::bias</a></div><div class="ttdeci">CLTensor bias</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00181">ConvolutionLayer.cpp:181</a></div></div>
+<div class="ttc" id="namespacearm__gemm_xhtml_aa2ed1c3595c8114064e8170b00df37c5"><div class="ttname"><a href="namespacearm__gemm.xhtml#aa2ed1c3595c8114064e8170b00df37c5">arm_gemm::MergeResults</a></div><div class="ttdeci">void MergeResults(Tout *out, const Tin *in, int ldc, int y0, int ymax, int x0, int xmax, const Tout *bias, Activation act, bool append)</div><div class="ttdef"><b>Definition:</b> <a href="mergeresults_8cpp_source.xhtml#l00038">mergeresults.cpp:38</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00103">arm_compute::test::validation::alpha</a>, and <a class="el" href="mergeresults_8hpp_source.xhtml#l00036">arm_gemm::MergeResults()</a>.</p>
+<p class="reference">References <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00181">arm_compute::test::validation::bias</a>, and <a class="el" href="mergeresults_8cpp_source.xhtml#l00038">arm_gemm::MergeResults()</a>.</p>
 
 </div>
 </div>
@@ -365,7 +371,7 @@ class arm_gemm::StdTransformsSVE&lt; TOperand, TResult, height, width_vectors, b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__gemm.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="classarm__gemm_1_1_std_transforms_s_v_e.xhtml">StdTransformsSVE</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

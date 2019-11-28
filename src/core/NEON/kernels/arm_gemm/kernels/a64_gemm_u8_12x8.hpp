@@ -25,8 +25,6 @@
 
 #ifdef __aarch64__
 
-#include "arm_gemm.hpp"
-
 #include "../std_transforms_fixed.hpp"
 
 namespace arm_gemm {
@@ -71,7 +69,9 @@ public:
     kern_type kernel = a64_gemm_u8_12x8;
 
     gemm_u8_12x8(const CPUInfo *ci) {
-        if (ci->get_cpu_model() == CPUModel::A55r1) {
+        auto mod = ci->get_cpu_model();
+
+        if (mod == CPUModel::A55r1) {
             kernel = a64_gemm_u8_12x8_a55r1;
         }
     }

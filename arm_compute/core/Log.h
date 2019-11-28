@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,11 +96,11 @@
  * @param[in] fmt String format (printf style)
  * @param[in] ... Message arguments
  */
-#define ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE(fmt, ...)                                           \
-    do                                                                                                \
-    {                                                                                                 \
-        ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                                                     \
-        ARM_COMPUTE_LOG_MSG_WITH_FORMAT_CORE(arm_compute::logging::LogLevel::INFO, fmt, __VA_ARGS__); \
+#define ARM_COMPUTE_LOG_INFO_MSG_WITH_FORMAT_CORE(fmt, ...)                                            \
+    do                                                                                                 \
+    {                                                                                                  \
+        ARM_COMPUTE_CREATE_DEFAULT_CORE_LOGGER();                                                      \
+        ARM_COMPUTE_LOG_MSG_WITH_FORMAT_CORE(arm_compute::logging::LogLevel::INFO, #fmt, __VA_ARGS__); \
     } while(false)
 
 /** Log information level stream to the core system logger

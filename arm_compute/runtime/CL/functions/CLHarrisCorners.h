@@ -31,10 +31,10 @@
 #include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <cstdint>
 #include <memory>
@@ -87,7 +87,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                  _memory_group;          /**< Function's memory group */
+    MemoryGroup                    _memory_group;          /**< Function's memory group */
     std::unique_ptr<IFunction>     _sobel;                 /**< Sobel function */
     CLHarrisScoreKernel            _harris_score;          /**< Harris score kernel */
     CLNonMaximaSuppression3x3      _non_max_suppr;         /**< Non-maxima suppression function */

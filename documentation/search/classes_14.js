@@ -1,7 +1,7 @@
 var searchData=
 [
   ['taskexecutor',['TaskExecutor',['../classarm__compute_1_1graph_1_1_task_executor.xhtml',1,'arm_compute::graph']]],
-  ['tensor',['Tensor',['../classarm__compute_1_1_tensor.xhtml',1,'Tensor'],['../classarm__compute_1_1graph_1_1_tensor.xhtml',1,'Tensor']]],
+  ['tensor',['Tensor',['../classarm__compute_1_1graph_1_1_tensor.xhtml',1,'Tensor'],['../classarm__compute_1_1_tensor.xhtml',1,'Tensor']]],
   ['tensor3d',['Tensor3D',['../struct_tensor3_d.xhtml',1,'']]],
   ['tensor4d',['Tensor4D',['../struct_tensor4_d.xhtml',1,'']]],
   ['tensoraccessor',['TensorAccessor',['../classarm__compute_1_1_tensor_accessor.xhtml',1,'arm_compute']]],
@@ -9,6 +9,7 @@ var searchData=
   ['tensorcache',['TensorCache',['../classarm__compute_1_1test_1_1_tensor_cache.xhtml',1,'arm_compute::test']]],
   ['tensordescriptor',['TensorDescriptor',['../structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml',1,'arm_compute::graph']]],
   ['tensorinfo',['TensorInfo',['../classarm__compute_1_1_tensor_info.xhtml',1,'arm_compute']]],
+  ['tensorparams',['TensorParams',['../structarm__compute_1_1utils_1_1_tensor_params.xhtml',1,'arm_compute::utils']]],
   ['tensorshape',['TensorShape',['../classarm__compute_1_1_tensor_shape.xhtml',1,'arm_compute']]],
   ['testcase',['TestCase',['../classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml',1,'arm_compute::test::framework']]],
   ['testcasefactory',['TestCaseFactory',['../classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml',1,'arm_compute::test::framework']]],

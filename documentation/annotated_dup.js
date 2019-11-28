@@ -2,6 +2,8 @@ var annotated_dup =
 [
     [ "arm_compute", "namespacearm__compute.xhtml", "namespacearm__compute" ],
     [ "arm_gemm", "namespacearm__gemm.xhtml", "namespacearm__gemm" ],
+    [ "gemm_tuner", "namespacegemm__tuner.xhtml", "namespacegemm__tuner" ],
+    [ "GemmTuner", "namespace_gemm_tuner.xhtml", "namespace_gemm_tuner" ],
     [ "Coordinates2D", "struct_coordinates2_d.xhtml", "struct_coordinates2_d" ],
     [ "DetectionWindow", "struct_detection_window.xhtml", "struct_detection_window" ],
     [ "Image", "struct_image.xhtml", "struct_image" ],

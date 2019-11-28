@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,13 +32,18 @@ namespace arm_compute
 {
 class ITensorAllocator;
 class ITensorInfo;
+class IRuntimeContext;
 
 /** Interface for OpenGL ES tensor */
-class GCTensor : public IGCTensor
+class GCTensor : public IGCTensor, public IMemoryManageable
 {
 public:
-    /** Default constructor */
-    GCTensor();
+    /** Default constructor
+     *
+     * @param[in] ctx (Optional) Pointer to the runtime context.
+     *
+     */
+    GCTensor(IRuntimeContext *ctx = nullptr);
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCTensor(const GCTensor &) = delete;
@@ -84,6 +89,7 @@ public:
     TensorInfo *info() override;
     uint8_t    *buffer() const override;
     GLuint      gc_buffer() const override;
+    void associate_memory_group(IMemoryGroup *memory_group) override;
 
 protected:
     // Inherited methods overridden:
@@ -96,6 +102,5 @@ private:
 
 /** OpenGL ES Image */
 using GCImage = GCTensor;
-}
-
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_GCTENSOR_H__ */

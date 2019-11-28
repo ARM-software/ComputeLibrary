@@ -151,8 +151,8 @@ Status CLGEMMDeconvolutionLayer::validate(const ITensorInfo *input, const ITenso
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(&input->clone()->set_tensor_shape(nhwc_input_shape).set_is_resizable(true), &reshaped_t_info, nullptr, &gemm_output_info, 1.0f, 0.0f, gemm_info));
     }
 
-    auto out_dims = deconvolution_output_dimensions(input->dimension(idx_w), input->dimension(idx_h), weights->dimension(idx_w), weights->dimension(idx_h),
-                                                    0, 0, deconv_info.stride().first, deconv_info.stride().second);
+    const PadStrideInfo stride_info(deconv_info.stride().first, deconv_info.stride().second);
+    auto out_dims = deconvolution_output_dimensions(input->dimension(idx_w), input->dimension(idx_h), weights->dimension(idx_w), weights->dimension(idx_h), stride_info);
     const TensorShape deconv_shape       = misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input, *weights);
     TensorInfo        col2im_output_info = gemm_output_info.clone()->set_tensor_shape(deconv_shape).set_is_resizable(true);
 
@@ -279,7 +279,7 @@ void CLGEMMDeconvolutionLayer::configure(const ICLTensor *input, const ICLTensor
     {
         const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
         const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = _gemmlowp_final.info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
         float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
         int   output_multiplier(0);

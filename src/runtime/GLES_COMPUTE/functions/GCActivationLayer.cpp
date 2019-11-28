@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,19 @@
 #include "arm_compute/core/Helpers.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+GCActivationLayer::GCActivationLayer(GCRuntimeContext *ctx)
+    : IGCSimpleFunction(ctx)
+{
+}
 
 void GCActivationLayer::configure(IGCTensor *input, IGCTensor *output, ActivationLayerInfo act_info)
 {
-    auto k = arm_compute::support::cpp14::make_unique<GCActivationLayerKernel>();
+    auto core_ctx = _ctx ? _ctx->core_runtime_context() : /* Legacy */ nullptr;
+
+    auto k = arm_compute::support::cpp14::make_unique<GCActivationLayerKernel>(core_ctx);
     k->configure(input, output, act_info);
     _kernel = std::move(k);
 }
+} // namespace arm_compute

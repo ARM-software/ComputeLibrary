@@ -42,15 +42,13 @@ CLGEMMReshapedKernelConfigurationBifrost::CLGEMMReshapedKernelConfigurationBifro
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    ARM_COMPUTE_ERROR_ON(data_type != DataType::F32 && data_type != DataType::QASYMM8);
-    ARM_COMPUTE_UNUSED(data_type);
-
     using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMReshapedKernelConfigurationBifrost::*)(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 
     // Configurations for Mali-G76
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G76 =
     {
         { DataType::F32, &CLGEMMReshapedKernelConfigurationBifrost::configure_G76_f32 },
+        { DataType::F16, &CLGEMMReshapedKernelConfigurationBifrost::configure_G76_f16 },
         { DataType::QASYMM8, &CLGEMMReshapedKernelConfigurationBifrost::configure_G76_u8 }
     };
 
@@ -58,15 +56,30 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G7x =
     {
         { DataType::F32, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_f32 },
+        { DataType::F16, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_f16 },
         { DataType::QASYMM8, &CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_u8 }
     };
 
     switch(_target)
     {
         case GPUTarget::G76:
-            return (this->*gemm_configs_G76[data_type])(m, n, k, b);
+            if (gemm_configs_G76.find(data_type) != gemm_configs_G76.end())
+            {
+                return (this->*gemm_configs_G76[data_type])(m, n, k, b);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Not supported data type");
+            }
         default:
-            return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
+            if (gemm_configs_G7x.find(data_type) != gemm_configs_G7x.end())
+            {
+                return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Not supported data type");
+            }
     }
 }
 
@@ -82,6 +95,21 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     else
     {
         return configure_lhs_rhs_info(m, n, 5, 4, 4, 2, 16, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure_G7x_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(n <= 4)
+    {
+        return configure_lhs_rhs_info(m, n, 4, 2, 8, 8, 2, true, true, true, false);
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 8, 4, 4, 2, true, true, true, false);
     }
 }
 
@@ -126,6 +154,21 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     else
     {
         return configure_lhs_rhs_info(m, n, 4, 4, 2, 8, 16, false, false, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfigurationBifrost::configure_G76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(n <= 4)
+    {
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 8, 2, true, true, true, false);
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 4, 8, true, true, true, false);
     }
 }
 

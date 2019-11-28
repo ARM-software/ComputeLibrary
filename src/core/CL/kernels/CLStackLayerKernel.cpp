@@ -132,5 +132,5 @@ void CLStackLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     unsigned int idx = 0;
     add_4D_tensor_argument(idx, _input, slice_in);
     add_4D_tensor_argument(idx, _output, slice_out);
-    enqueue(queue, *this, slice_in);
+    enqueue(queue, *this, slice_in, lws_hint());
 }

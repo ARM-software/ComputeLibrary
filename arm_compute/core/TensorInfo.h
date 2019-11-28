@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,6 +98,15 @@ public:
      * @param[in] data_type    Data type to use for each tensor element
      */
     TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type);
+
+    /** Constructor
+     *
+     * @param[in] tensor_shape It specifies the size for each dimension of the tensor in number of elements.
+     * @param[in] num_channels It indicates the number of channels for each tensor element
+     * @param[in] data_type    Data type to use for each tensor element
+     * @param[in] data_layout  The data layout setting for the tensor data.
+     */
+    TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, DataLayout data_layout);
 
     /** Constructor
      *
@@ -236,7 +245,7 @@ public:
     {
         return _offset_first_element_in_bytes;
     }
-    size_t offset_element_in_bytes(const Coordinates &pos) const override;
+    int32_t offset_element_in_bytes(const Coordinates &pos) const override;
     size_t element_size() const override
     {
         return data_size_from_type(_data_type) * _num_channels;
@@ -277,9 +286,18 @@ public:
     {
         return _is_resizable;
     }
+    bool is_dynamic() const override
+    {
+        return _is_dynamic;
+    }
     ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         _is_resizable = is_resizable;
+        return *this;
+    }
+    ITensorInfo &set_is_dynamic(bool is_dynamic) override
+    {
+        _is_dynamic = is_dynamic;
         return *this;
     }
     ValidRegion valid_region() const override
@@ -314,10 +332,11 @@ private:
     DataType         _data_type;
     Format           _format;
     bool             _is_resizable;
+    bool             _is_dynamic;
     ValidRegion      _valid_region;
     PaddingSize      _padding;
     QuantizationInfo _quantization_info;
     DataLayout       _data_layout;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

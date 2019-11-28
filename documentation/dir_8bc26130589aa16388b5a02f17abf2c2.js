@@ -17,6 +17,9 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
       [ "BlobMemoryPool", "classarm__compute_1_1_blob_memory_pool.xhtml", "classarm__compute_1_1_blob_memory_pool" ]
     ] ],
     [ "CPUUtils.h", "_c_p_u_utils_8h.xhtml", "_c_p_u_utils_8h" ],
+    [ "DeviceProperties.h", "_device_properties_8h.xhtml", [
+      [ "DeviceProperties", "structarm__compute_1_1_device_properties.xhtml", "structarm__compute_1_1_device_properties" ]
+    ] ],
     [ "Distribution1D.h", "_distribution1_d_8h.xhtml", [
       [ "Distribution1D", "classarm__compute_1_1_distribution1_d.xhtml", "classarm__compute_1_1_distribution1_d" ]
     ] ],
@@ -26,6 +29,9 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     ] ],
     [ "IAllocator.h", "_i_allocator_8h.xhtml", [
       [ "IAllocator", "classarm__compute_1_1_i_allocator.xhtml", "classarm__compute_1_1_i_allocator" ]
+    ] ],
+    [ "IAssetManager.h", "_i_asset_manager_8h.xhtml", [
+      [ "IAssetManager", "classarm__compute_1_1_i_asset_manager.xhtml", "classarm__compute_1_1_i_asset_manager" ]
     ] ],
     [ "IFunction.h", "_i_function_8h.xhtml", [
       [ "IFunction", "classarm__compute_1_1_i_function.xhtml", "classarm__compute_1_1_i_function" ]
@@ -41,6 +47,7 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     ] ],
     [ "IMemoryGroup.h", "_i_memory_group_8h.xhtml", [
       [ "IMemoryGroup", "classarm__compute_1_1_i_memory_group.xhtml", "classarm__compute_1_1_i_memory_group" ],
+      [ "IMemoryManageable", "classarm__compute_1_1_i_memory_manageable.xhtml", "classarm__compute_1_1_i_memory_manageable" ],
       [ "MemoryGroupResourceScope", "classarm__compute_1_1_memory_group_resource_scope.xhtml", "classarm__compute_1_1_memory_group_resource_scope" ]
     ] ],
     [ "IMemoryManager.h", "_i_memory_manager_8h.xhtml", [
@@ -55,6 +62,9 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     [ "IPoolManager.h", "_i_pool_manager_8h.xhtml", [
       [ "IPoolManager", "classarm__compute_1_1_i_pool_manager.xhtml", "classarm__compute_1_1_i_pool_manager" ]
     ] ],
+    [ "IRuntimeContext.h", "_i_runtime_context_8h.xhtml", [
+      [ "IRuntimeContext", "classarm__compute_1_1_i_runtime_context.xhtml", "classarm__compute_1_1_i_runtime_context" ]
+    ] ],
     [ "IScheduler.h", "_i_scheduler_8h.xhtml", [
       [ "IScheduler", "classarm__compute_1_1_i_scheduler.xhtml", "classarm__compute_1_1_i_scheduler" ],
       [ "Hints", "classarm__compute_1_1_i_scheduler_1_1_hints.xhtml", "classarm__compute_1_1_i_scheduler_1_1_hints" ]
@@ -65,6 +75,12 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     [ "ITensorAllocator.h", "_i_tensor_allocator_8h.xhtml", [
       [ "ITensorAllocator", "classarm__compute_1_1_i_tensor_allocator.xhtml", "classarm__compute_1_1_i_tensor_allocator" ]
     ] ],
+    [ "ITransformWeights.h", "_i_transform_weights_8h.xhtml", [
+      [ "ITransformWeights", "classarm__compute_1_1_i_transform_weights.xhtml", "classarm__compute_1_1_i_transform_weights" ]
+    ] ],
+    [ "IWeightsManager.h", "_i_weights_manager_8h.xhtml", [
+      [ "IWeightsManager", "classarm__compute_1_1_i_weights_manager.xhtml", "classarm__compute_1_1_i_weights_manager" ]
+    ] ],
     [ "Lut.h", "_lut_8h.xhtml", [
       [ "Lut", "classarm__compute_1_1_lut.xhtml", "classarm__compute_1_1_lut" ]
     ] ],
@@ -74,9 +90,8 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     [ "Memory.h", "_memory_8h.xhtml", [
       [ "Memory", "classarm__compute_1_1_memory.xhtml", "classarm__compute_1_1_memory" ]
     ] ],
-    [ "MemoryGroup.h", "_memory_group_8h.xhtml", "_memory_group_8h" ],
-    [ "MemoryGroupBase.h", "_memory_group_base_8h.xhtml", [
-      [ "MemoryGroupBase", "classarm__compute_1_1_memory_group_base.xhtml", "classarm__compute_1_1_memory_group_base" ]
+    [ "MemoryGroup.h", "_memory_group_8h.xhtml", [
+      [ "MemoryGroup", "classarm__compute_1_1_memory_group.xhtml", "classarm__compute_1_1_memory_group" ]
     ] ],
     [ "MemoryManagerOnDemand.h", "_memory_manager_on_demand_8h.xhtml", [
       [ "MemoryManagerOnDemand", "classarm__compute_1_1_memory_manager_on_demand.xhtml", "classarm__compute_1_1_memory_manager_on_demand" ]
@@ -102,8 +117,14 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     [ "Pyramid.h", "_pyramid_8h.xhtml", [
       [ "Pyramid", "classarm__compute_1_1_pyramid.xhtml", "classarm__compute_1_1_pyramid" ]
     ] ],
+    [ "RuntimeContext.h", "_runtime_context_8h.xhtml", [
+      [ "RuntimeContext", "classarm__compute_1_1_runtime_context.xhtml", "classarm__compute_1_1_runtime_context" ]
+    ] ],
     [ "Scheduler.h", "_scheduler_8h.xhtml", [
       [ "Scheduler", "classarm__compute_1_1_scheduler.xhtml", "classarm__compute_1_1_scheduler" ]
+    ] ],
+    [ "SchedulerFactory.h", "_scheduler_factory_8h.xhtml", [
+      [ "SchedulerFactory", "classarm__compute_1_1_scheduler_factory.xhtml", "classarm__compute_1_1_scheduler_factory" ]
     ] ],
     [ "SingleThreadScheduler.h", "_single_thread_scheduler_8h.xhtml", [
       [ "SingleThreadScheduler", "classarm__compute_1_1_single_thread_scheduler.xhtml", "classarm__compute_1_1_single_thread_scheduler" ]
@@ -113,7 +134,6 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     ] ],
     [ "Tensor.h", "runtime_2_tensor_8h.xhtml", "runtime_2_tensor_8h" ],
     [ "TensorAllocator.h", "_tensor_allocator_8h.xhtml", [
-      [ "MemoryGroupBase", "classarm__compute_1_1_memory_group_base.xhtml", "classarm__compute_1_1_memory_group_base" ],
       [ "TensorAllocator", "classarm__compute_1_1_tensor_allocator.xhtml", "classarm__compute_1_1_tensor_allocator" ]
     ] ],
     [ "Types.h", "arm__compute_2runtime_2_types_8h.xhtml", "arm__compute_2runtime_2_types_8h" ],

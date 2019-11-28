@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_NEGEMM_H__
 #define __ARM_COMPUTE_NEGEMM_H__
 
+#include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
@@ -31,27 +32,35 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
-
-#include <memory>
 
 namespace arm_compute
 {
 /** Basic function to execute GEMM on NEON. This function calls the following NEON kernels:
  *
+ * If optimized assembly is available:
+ *  -# @ref NEGEMMAssemblyDispatch
+ *  -# @ref NEActivationLayer (if alpha != 1.0)
+ * Else:
  *  -# @ref NEGEMMInterleave4x4Kernel (if the output tensor is a matrix)
  *  -# @ref NEGEMMTranspose1xWKernel (if the output tensor is a matrix)
  *  -# @ref NEGEMMMatrixMultiplyKernel
- *  -# @ref NEGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0)
+ * In both cases:
+ *  -# @ref NEGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0 and is not reshaped once)
+ * Else:
+ *  -# @ref NEArithmeticAdditionKernel (if c != nullptr and is reshaped once and not optimized assembly in place)
  *
+ *  -# @ref NEActivationLayer (if activation is specified in GEMMInfo)
  */
 class NEGEMM : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMM(const NEGEMM &) = delete;
     /** Default move constructor */
@@ -96,18 +105,27 @@ public:
 
 private:
     MemoryGroup                _memory_group;
+    IWeightsManager           *_weights_manager;
     NEGEMMInterleave4x4Kernel  _interleave_kernel;
     NEGEMMTranspose1xWKernel   _transpose_kernel;
     NEGEMMMatrixMultiplyKernel _mm_kernel;
     NEGEMMAssemblyDispatch     _asm_glue;
     NEGEMMMatrixAdditionKernel _ma_kernel;
-    Tensor                     _tmp_a;
-    Tensor                     _tmp_b;
-    const ITensor             *_original_b;
-    bool                       _run_vector_matrix_multiplication;
-    bool                       _run_addition;
-    bool                       _reshape_b_only_on_first_run;
-    bool                       _is_prepared;
+    NEActivationLayer          _alpha_scale_func;
+    NEArithmeticAdditionKernel _add_bias_kernel;
+    NEActivationLayer          _activation_func;
+
+    Tensor         _tmp_a;
+    Tensor         _tmp_b;
+    Tensor         _tmp_d;
+    const ITensor *_original_b;
+    bool           _run_vector_matrix_multiplication;
+    bool           _run_alpha_scale;
+    bool           _run_addition;
+    bool           _run_bias_addition;
+    bool           _run_activation;
+    bool           _reshape_b_only_on_first_run;
+    bool           _is_prepared;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMM_H__ */

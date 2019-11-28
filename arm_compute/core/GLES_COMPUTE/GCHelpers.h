@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,13 +24,20 @@
 #ifndef __ARM_COMPUTE_GCHELPERS_H__
 #define __ARM_COMPUTE_GCHELPERS_H__
 
+#include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/Helpers.h"
 #include "support/ToolchainSupport.h"
 
+#include <set>
+#include <string>
+
 namespace arm_compute
 {
+// Forward declarations
+class GCCoreRuntimeContext;
+
 /** Max vector width of an GLES vector */
 static constexpr unsigned int max_gc_vector_width = 16;
 
@@ -39,5 +46,14 @@ static constexpr unsigned int max_gc_vector_width = 16;
  * @return the GPU target
  */
 GPUTarget get_target_from_device();
+/** Creates an GLES kernel
+ *
+ * @param[in] ctx         A context to be used to create the GLES kernel.
+ * @param[in] kernel_name The kernel name.
+ * @param[in] build_opts  The build options to be used for the GLES kernel compilation.
+ *
+ * @return A GLES kernel
+ */
+GCKernel create_opengl_kernel(GCCoreRuntimeContext *ctx, const std::string &kernel_name, const std::set<std::string> &build_opts);
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCHELPERS_H__ */

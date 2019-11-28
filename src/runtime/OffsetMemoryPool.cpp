@@ -32,13 +32,18 @@
 #include "arm_compute/runtime/Types.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 OffsetMemoryPool::OffsetMemoryPool(IAllocator *allocator, BlobInfo blob_info)
     : _allocator(allocator), _blob(), _blob_info(blob_info)
 {
     ARM_COMPUTE_ERROR_ON(!allocator);
     _blob = _allocator->make_region(blob_info.size, blob_info.alignment);
+}
+
+const BlobInfo &OffsetMemoryPool::info() const
+{
+    return _blob_info;
 }
 
 void OffsetMemoryPool::acquire(MemoryMappings &handles)
@@ -72,3 +77,4 @@ std::unique_ptr<IMemoryPool> OffsetMemoryPool::duplicate()
     ARM_COMPUTE_ERROR_ON(!_allocator);
     return support::cpp14::make_unique<OffsetMemoryPool>(_allocator, _blob_info);
 }
+} // namespace arm_compute

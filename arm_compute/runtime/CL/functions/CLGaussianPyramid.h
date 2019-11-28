@@ -40,8 +40,7 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Common interface for all Gaussian pyramid functions
- */
+/** Common interface for all Gaussian pyramid functions */
 class CLGaussianPyramid : public IFunction
 {
 public:

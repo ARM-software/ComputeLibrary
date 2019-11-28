@@ -109,7 +109,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 NEActivationLayerKernel::NEActivationLayerKernel()
-    : _input(nullptr), _output(nullptr), _func(nullptr), _act_info(ActivationFunction::LOGISTIC)
+    : _input(nullptr), _output(nullptr), _func(nullptr), _act_info()
 {
 }
 
@@ -121,9 +121,16 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     _act_info = activation_info;
     _output   = input;
 
+    // Out-of-place calculation
     if(output != nullptr)
     {
         _output = output;
+    }
+
+    // Disabled activation, thus no operation needed
+    if(!activation_info.enabled())
+    {
+        _func = nullptr;
     }
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, activation_info));
@@ -139,6 +146,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float> },
         { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float> },
+        { ActivationFunction::ELU, &NEActivationLayerKernel::activation<ActivationFunction::ELU, float> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float> },
@@ -157,6 +165,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float16_t> },
         { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float16_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float16_t> },
+        { ActivationFunction::ELU, &NEActivationLayerKernel::activation<ActivationFunction::ELU, float16_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float16_t> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float16_t> },
@@ -226,6 +235,7 @@ NEActivationLayerKernel::activation(const Window &window)
     Iterator input(_input, win_collapsed);
     Iterator output(_output, win_collapsed);
 
+    const auto epsilon = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType{});
     const auto const_1 = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
     const auto const_0 = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
     const auto va      = wrapper::vdup_n(static_cast<T>(_act_info.a()), ExactTagType{});
@@ -271,8 +281,11 @@ NEActivationLayerKernel::activation(const Window &window)
                 case ActivationFunction::SOFT_RELU:
                     tmp = wrapper::vlog(wrapper::vadd(const_1, wrapper::vexpq(vin)));
                     break;
+                case ActivationFunction::ELU:
+                    tmp = wrapper::vbsl(wrapper::vcge(vin, const_0), vin, wrapper::vmul(va, wrapper::vsub(wrapper::vexpq(vin), const_1)));
+                    break;
                 case ActivationFunction::SQRT:
-                    tmp = wrapper::vinv(wrapper::vinvsqrt(vin));
+                    tmp = wrapper::vinv(wrapper::vinvsqrt(vin + epsilon));
                     break;
                 case ActivationFunction::SQUARE:
                     tmp = wrapper::vmul(vin, vin);
@@ -319,6 +332,9 @@ NEActivationLayerKernel::activation(const Window &window)
                     break;
                 case ActivationFunction::SOFT_RELU:
                     tmp = std::log(static_cast<T>(1) + std::exp(in));
+                    break;
+                case ActivationFunction::ELU:
+                    tmp = (in >= 0) ? in : a * (std::exp(in) - 1);
                     break;
                 case ActivationFunction::SQRT:
                     tmp = std::sqrt(in);
@@ -601,6 +617,12 @@ Status NEActivationLayerKernel::validate(const ITensorInfo *input, const ITensor
 
 void NEActivationLayerKernel::run(const Window &window, const ThreadInfo &info)
 {
+    // Early exit on disabled activation
+    if(!_act_info.enabled())
+    {
+        return;
+    }
+
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);

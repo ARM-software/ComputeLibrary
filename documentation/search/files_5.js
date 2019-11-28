@@ -25,6 +25,7 @@ var searchData=
   ['eltwiselayernode_2eh',['EltwiseLayerNode.h',['../_eltwise_layer_node_8h.xhtml',1,'']]],
   ['enumlistoption_2eh',['EnumListOption.h',['../_enum_list_option_8h.xhtml',1,'']]],
   ['enumoption_2eh',['EnumOption.h',['../_enum_option_8h.xhtml',1,'']]],
+  ['eor_2eh',['eor.h',['../eor_8h.xhtml',1,'']]],
   ['equalizehistogram_2ecpp',['EqualizeHistogram.cpp',['../benchmark_2_c_l_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2reference_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)']]],
   ['equalizehistogram_2eh',['EqualizeHistogram.h',['../_equalize_histogram_8h.xhtml',1,'']]],
   ['erode_2ecl',['erode.cl',['../erode_8cl.xhtml',1,'']]],

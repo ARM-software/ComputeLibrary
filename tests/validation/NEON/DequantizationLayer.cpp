@@ -48,6 +48,31 @@ const auto data_types = framework::dataset::make("DataType", { DataType::F16, Da
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
+const auto dataset_quant_f32 = combine(combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
+                                               framework::dataset::make("DataType", DataType::F32)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW }));
+const auto dataset_quant_f16 = combine(combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
+                                               framework::dataset::make("DataType", DataType::F16)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW }));
+const auto dataset_quant_per_channel_f32 = combine(combine(combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes()),
+                                                           framework::dataset::make("DataType", DataType::F32)),
+                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+const auto dataset_quant_per_channel_f16 = combine(combine(combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes()),
+                                                           framework::dataset::make("DataType", DataType::F16)),
+                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+const auto dataset_quant_nightly_f32 = combine(combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
+                                                       framework::dataset::make("DataType", DataType::F32)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW }));
+const auto dataset_quant_nightly_f16 = combine(combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
+                                                       framework::dataset::make("DataType", DataType::F16)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW }));
+const auto dataset_quant_per_channel_nightly_f32 = combine(combine(combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes()),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+const auto dataset_quant_per_channel_nightly_f16 = combine(combine(combine(datasets::LargeShapes(), datasets::QuantizedPerChannelTypes()),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -107,14 +132,12 @@ using NEDequantizationLayerFixture = DequantizationValidationFixture<Tensor, Acc
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
-                                                                                                                framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, concat(dataset_quant_f16, dataset_quant_per_channel_f16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
-                                                                                                              framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, concat(dataset_quant_nightly_f16, dataset_quant_per_channel_nightly_f16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -123,14 +146,12 @@ TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, concat(dataset_quant_f32, dataset_quant_per_channel_f32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
-                                                                                                               framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, concat(dataset_quant_nightly_f32, dataset_quant_per_channel_nightly_f32))
 {
     // Validate output
     validate(Accessor(_target), _reference);

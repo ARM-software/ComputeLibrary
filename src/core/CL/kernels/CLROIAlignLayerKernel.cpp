@@ -45,11 +45,10 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, rois);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(0) != 5);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC, DataLayout::NCHW);
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 
@@ -58,6 +57,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, ITe
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(compute_roi_align_shape(*input, *rois, pool_info), output->tensor_shape());
+    }
+
+    if(input->data_type() == DataType::QASYMM8)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(rois, 1, DataType::QASYMM16);
+
+        const UniformQuantizationInfo rois_qinfo = rois->quantization_info().uniform();
+        ARM_COMPUTE_RETURN_ERROR_ON(rois_qinfo.scale != 0.125f);
+        ARM_COMPUTE_RETURN_ERROR_ON(rois_qinfo.offset != 0);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, rois);
     }
     return Status{};
 }
@@ -104,9 +116,12 @@ void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *r
     _rois      = rois;
     _pool_info = pool_info;
 
+    const DataType data_type = input->info()->data_type();
+    const bool     is_qasymm = is_data_type_quantized_asymmetric(data_type);
+
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DMAX_DIM_X=" + support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH))));
     build_opts.add_option("-DMAX_DIM_Y=" + support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT))));
@@ -117,9 +132,23 @@ void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *r
     build_opts.add_option_if(input->info()->data_layout() == DataLayout::NHWC, "-DNHWC");
     build_opts.add_option_if(pool_info.sampling_ratio() > 0, "-DSAMPLING_RATIO=" + support::cpp11::to_string(pool_info.sampling_ratio()));
 
+    if(is_qasymm)
+    {
+        const UniformQuantizationInfo iq_info    = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo roisq_info = rois->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info    = output->info()->quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN=" + float_to_string_with_full_precision(iq_info.offset));
+        build_opts.add_option("-DSCALE_IN=" + float_to_string_with_full_precision(iq_info.scale));
+        build_opts.add_option("-DOFFSET_ROIS=" + float_to_string_with_full_precision(roisq_info.offset));
+        build_opts.add_option("-DSCALE_ROIS=" + float_to_string_with_full_precision(roisq_info.scale));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oq_info.offset));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oq_info.scale));
+    }
+
     // Create kernel
-    std::string kernel_name = "roi_align_layer";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    const std::string kernel_name = (is_qasymm) ? "roi_align_layer_quantized" : "roi_align_layer";
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     ICLKernel::configure_internal(win_config.second);
 }
@@ -149,6 +178,6 @@ void CLROIAlignLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     add_argument<cl_uint>(idx, _input->info()->strides_in_bytes()[3]);
     add_argument<cl_uint>(idx, _output->info()->strides_in_bytes()[3]);
 
-    enqueue(queue, *this, slice);
+    enqueue(queue, *this, slice, lws_hint());
 }
 } // namespace arm_compute

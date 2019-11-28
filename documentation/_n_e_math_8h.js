@@ -1,5 +1,6 @@
 var _n_e_math_8h =
 [
+    [ "rounding_divide_by_pow2", "_n_e_math_8h.xhtml#a77e02c19b498c3ff4ee373b0825cfd19", null ],
     [ "rounding_divide_by_pow2", "_n_e_math_8h.xhtml#a5e28a3911204ac952601f512c82b48f1", null ],
     [ "rounding_divide_by_pow2", "_n_e_math_8h.xhtml#afe3908fe41d9f2559f4a9eab1997fe61", null ],
     [ "vexpq_f32", "_n_e_math_8h.xhtml#ab55486f1153a4c5f507d4923b59fc6a0", null ],

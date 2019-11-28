@@ -379,6 +379,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
             os << "LU_BOUNDED_RELU";
             break;
+        case ActivationLayerInfo::ActivationFunction::ELU:
+            os << "ELU";
+            break;
         case ActivationLayerInfo::ActivationFunction::SQUARE:
             os << "SQUARE";
             break;
@@ -639,6 +642,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
             break;
         case DataType::QSYMM16:
             os << "QSYMM16";
+            break;
+        case DataType::QASYMM16:
+            os << "QASYMM16";
             break;
         case DataType::U32:
             os << "U32";

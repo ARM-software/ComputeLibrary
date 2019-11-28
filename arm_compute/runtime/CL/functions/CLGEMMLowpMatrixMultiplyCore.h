@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
 #define __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
 
+#include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
@@ -31,9 +32,9 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -49,6 +50,7 @@ class ICLTensor;
  *  -# @ref CLGEMMLowpMatrixBReductionKernel (if the offset of matrix A is not 0)
  *  -# @ref CLGEMMLowpOffsetContributionKernel (if gemm_info.gemmlowp_output_stage == NONE)
  *  -# @ref CLGEMMLowpOffsetContributionOutputStageKernel (if gemm_info.gemmlowp_output_stage != NONE)
+ *  -# @ref CLDepthConvertLayerKernel
  *
 */
 class CLGEMMLowpMatrixMultiplyCore : public IFunction
@@ -84,10 +86,10 @@ public:
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyCore
      *
-     * @param[in] a         First input tensor  (Matrix A). Data type supported: QASYMM8.
-     * @param[in] b         Second input tensor (Matrix B). Data type supported: same as @p a
-     * @param[in] c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
-     * @param[in] output    Output tensor. Data type supported: S32 or QASYMM8 if gemm_info.gemmlowp_output_stage != NONE
+     * @param[in] a         First input tensor info (Matrix A). Data type supported: QASYMM8.
+     * @param[in] b         Second input tensor info (Matrix B). Data type supported: same as @p a
+     * @param[in] c         Third input tensor info (Matrix C). It can be a nullptr. Data type supported: S32
+     * @param[in] output    Output tensor info. Data type supported: S32 or QASYMM8 if gemm_info.gemmlowp_output_stage != NONE
      * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                      if the reshape of matrix B should be executed only for the first run
      *
@@ -100,7 +102,10 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup                                 _memory_group;
+    MemoryGroup _memory_group;
+
+    // Kernels used
+    CLDepthConvertLayerKernel                     _weights_to_qasymm8;
     CLGEMMLowpMatrixMultiplyKernel                _mm_midgard_kernel;
     CLGEMMLowpMatrixMultiplyNativeKernel          _mm_native_kernel;
     CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel _mm_reshaped_only_rhs_kernel;
@@ -109,18 +114,29 @@ private:
     CLGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;
     CLGEMMLowpOffsetContributionKernel            _offset_contribution_kernel;
     CLGEMMLowpOffsetContributionOutputStageKernel _offset_contribution_output_stage_kernel;
-    CLTensor                                      _vector_sum_col;
-    CLTensor                                      _vector_sum_row;
-    CLTensor                                      _tmp_b;
-    CLTensor                                      _mm_result_s32;
-    const ICLTensor                              *_original_b;
-    int32_t                                       _a_offset;
-    int32_t                                       _b_offset;
-    bool                                          _is_gemm_reshaped;
-    bool                                          _is_midgard;
-    bool                                          _reshape_b_only_on_first_run;
-    bool                                          _is_prepared;
-    bool                                          _fuse_output_stage;
+
+    // Temporary tensors
+    CLTensor _qasymm8_weights;
+    CLTensor _vector_sum_col;
+    CLTensor _vector_sum_row;
+    CLTensor _tmp_b;
+    CLTensor _mm_result_s32;
+    CLTensor _gemm_output_stage_multipliers;
+    CLTensor _gemm_output_stage_shifts;
+
+    // Tensor pointers
+    const ICLTensor *_matrix_a;
+    const ICLTensor *_original_b;
+    const ICLTensor *_output;
+
+    int32_t _a_offset;
+    int32_t _b_offset;
+    bool    _is_gemm_reshaped;
+    bool    _is_midgard;
+    bool    _reshape_b_only_on_first_run;
+    bool    _is_prepared;
+    bool    _fuse_output_stage;
+    bool    _convert_to_qasymm8;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__ */

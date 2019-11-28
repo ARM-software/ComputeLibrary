@@ -98,7 +98,7 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
 
     for(unsigned int n = 0; n < info->num_dimensions(); ++n)
     {
-        offset_first_element += window[n].start() * strides[n];
+        offset_first_element += (window.is_broadcasted(n) ? 0 : window[n].start()) * strides[n];
     }
 
     unsigned int idx_start = idx;
@@ -112,8 +112,8 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
 
     _kernel.setArg<cl_uint>(idx++, offset_first_element);
 
-    ARM_COMPUTE_ERROR_ON_MSG(idx_start + num_arguments_per_tensor<dimension_size>() != idx,
-                             "add_%dD_tensor_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_tensor<dimension_size>());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(idx_start + num_arguments_per_tensor<dimension_size>() != idx,
+                                 "add_%dD_tensor_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_tensor<dimension_size>());
     ARM_COMPUTE_UNUSED(idx_start);
 }
 

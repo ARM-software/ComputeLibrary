@@ -123,11 +123,11 @@ bool SubTensorInfo::extend_padding(const PaddingSize &padding)
     return _parent->extend_padding(padding);
 }
 
-size_t SubTensorInfo::offset_element_in_bytes(const Coordinates &pos) const
+int32_t SubTensorInfo::offset_element_in_bytes(const Coordinates &pos) const
 {
     ARM_COMPUTE_ERROR_ON_COORDINATES_DIMENSIONS_GTE(pos, _tensor_shape.num_dimensions());
 
-    size_t         offset  = offset_first_element_in_bytes();
+    int32_t         offset  = offset_first_element_in_bytes();
     const Strides &strides = strides_in_bytes();
 
     for(size_t i = 0; i < _tensor_shape.num_dimensions(); ++i)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ IMemoryPool *PoolManager::lock_pool()
     ARM_COMPUTE_ERROR_ON_MSG(_free_pools.empty() && _occupied_pools.empty(), "Haven't setup any pools!");
 
     _sem->wait();
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
     ARM_COMPUTE_ERROR_ON_MSG(_free_pools.empty(), "Empty pool must exist as semaphore has been signalled");
     _occupied_pools.splice(std::begin(_occupied_pools), _free_pools, std::begin(_free_pools));
     return _occupied_pools.front().get();
@@ -51,7 +51,7 @@ void PoolManager::unlock_pool(IMemoryPool *pool)
 {
     ARM_COMPUTE_ERROR_ON_MSG(_free_pools.empty() && _occupied_pools.empty(), "Haven't setup any pools!");
 
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
     auto it = std::find_if(std::begin(_occupied_pools), std::end(_occupied_pools), [pool](const std::unique_ptr<IMemoryPool> &pool_it)
     {
         return pool_it.get() == pool;
@@ -63,7 +63,7 @@ void PoolManager::unlock_pool(IMemoryPool *pool)
 
 void PoolManager::register_pool(std::unique_ptr<IMemoryPool> pool)
 {
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
     ARM_COMPUTE_ERROR_ON_MSG(!_occupied_pools.empty(), "All pools should be free in order to register a new one!");
 
     // Set pool
@@ -75,7 +75,7 @@ void PoolManager::register_pool(std::unique_ptr<IMemoryPool> pool)
 
 std::unique_ptr<IMemoryPool> PoolManager::release_pool()
 {
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
     ARM_COMPUTE_ERROR_ON_MSG(!_occupied_pools.empty(), "All pools should be free in order to release one!");
 
     if(!_free_pools.empty())
@@ -95,7 +95,7 @@ std::unique_ptr<IMemoryPool> PoolManager::release_pool()
 
 void PoolManager::clear_pools()
 {
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
     ARM_COMPUTE_ERROR_ON_MSG(!_occupied_pools.empty(), "All pools should be free in order to clear the PoolManager!");
     _free_pools.clear();
 
@@ -105,7 +105,7 @@ void PoolManager::clear_pools()
 
 size_t PoolManager::num_pools() const
 {
-    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    arm_compute::lock_guard<arm_compute::Mutex> lock(_mtx);
 
     return _free_pools.size() + _occupied_pools.size();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,7 @@ void PMU::open(const perf_event_attr &perf_config)
     const int result = ioctl(_fd, PERF_EVENT_IOC_ENABLE, 0);
     if(result == -1)
     {
-        ARM_COMPUTE_ERROR("Failed to enable PMU counter: %d", errno);
+        ARM_COMPUTE_ERROR_VAR("Failed to enable PMU counter: %d", errno);
     }
 }
 
@@ -94,7 +94,7 @@ void PMU::reset()
     const int result = ioctl(_fd, PERF_EVENT_IOC_RESET, 0);
     if(result == -1)
     {
-        ARM_COMPUTE_ERROR("Failed to reset PMU counter: %d", errno);
+        ARM_COMPUTE_ERROR_VAR("Failed to reset PMU counter: %d", errno);
     }
 }
 } // namespace framework

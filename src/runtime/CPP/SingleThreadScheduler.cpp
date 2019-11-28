@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,12 +29,6 @@
 
 namespace arm_compute
 {
-SingleThreadScheduler &SingleThreadScheduler::get()
-{
-    static SingleThreadScheduler scheduler;
-    return scheduler;
-}
-
 void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
 {
     ARM_COMPUTE_UNUSED(num_threads);

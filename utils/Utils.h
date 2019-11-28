@@ -30,7 +30,11 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/Tensor.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 #include "libnpy/npy.hpp"
+#pragma GCC diagnostic pop
 #include "support/ToolchainSupport.h"
 
 #ifdef ARM_COMPUTE_CL
@@ -79,6 +83,7 @@ public:
      */
     virtual bool do_setup(int argc, char **argv)
     {
+        ARM_COMPUTE_UNUSED(argc, argv);
         return true;
     };
     /** Run the example. */
@@ -172,6 +177,7 @@ inline std::string get_typestring(DataType data_type)
         case DataType::QSYMM8_PER_CHANNEL:
             return no_endianness + "i" + support::cpp11::to_string(sizeof(int8_t));
         case DataType::U16:
+        case DataType::QASYMM16:
             return endianness + "u" + support::cpp11::to_string(sizeof(uint16_t));
         case DataType::S16:
         case DataType::QSYMM16:
@@ -338,7 +344,7 @@ public:
         try
         {
             _fs.open(npy_filename, std::ios::in | std::ios::binary);
-            ARM_COMPUTE_EXIT_ON_MSG(!_fs.good(), "Failed to load binary data from %s", npy_filename.c_str());
+            ARM_COMPUTE_EXIT_ON_MSG_VAR(!_fs.good(), "Failed to load binary data from %s", npy_filename.c_str());
             _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _file_layout = file_layout;
 
@@ -346,7 +352,7 @@ public:
         }
         catch(const std::ifstream::failure &e)
         {
-            ARM_COMPUTE_ERROR("Accessing %s: %s", npy_filename.c_str(), e.what());
+            ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", npy_filename.c_str(), e.what());
         }
     }
     /** Return true if a NPY file is currently open */
@@ -399,7 +405,7 @@ public:
     void fill_tensor(T &tensor)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::QASYMM8, arm_compute::DataType::S32, arm_compute::DataType::F32);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::QASYMM8, arm_compute::DataType::S32, arm_compute::DataType::F32, arm_compute::DataType::F16);
         try
         {
             // Map buffer if creating a CLTensor
@@ -515,7 +521,7 @@ public:
         }
         catch(const std::ifstream::failure &e)
         {
-            ARM_COMPUTE_ERROR("Loading NPY file: %s", e.what());
+            ARM_COMPUTE_ERROR_VAR("Loading NPY file: %s", e.what());
         }
     }
 
@@ -568,7 +574,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
                 arm_compute::Iterator in(&tensor, window);
 
-                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
+                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
                 {
                     const unsigned char value = *in.ptr();
 
@@ -586,7 +592,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 
                 arm_compute::Iterator in(&tensor, window);
 
-                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
+                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
                 {
                     fs.write(reinterpret_cast<std::fstream::char_type *>(in.ptr()), width * tensor.info()->element_size());
                 },
@@ -603,7 +609,7 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
     }
     catch(const std::ofstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Writing %s: (%s)", ppm_filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", ppm_filename.c_str(), e.what());
     }
 }
 
@@ -651,7 +657,7 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 
         arm_compute::Iterator in(&tensor, window);
 
-        arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
+        arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates &)
         {
             stream.write(reinterpret_cast<const char *>(in.ptr()), sizeof(typestring_type));
         },
@@ -662,7 +668,7 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
     }
     catch(const std::ofstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Writing %s: (%s)", npy_filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", npy_filename.c_str(), e.what());
     }
 }
 
@@ -703,7 +709,7 @@ void load_trained_data(T &tensor, const std::string &filename)
 
         arm_compute::Iterator in(&tensor, window);
 
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             fs.read(reinterpret_cast<std::fstream::char_type *>(in.ptr()), tensor.info()->tensor_shape()[0] * tensor.info()->element_size());
         },
@@ -714,7 +720,7 @@ void load_trained_data(T &tensor, const std::string &filename)
     }
     catch(const std::ofstream::failure &e)
     {
-        ARM_COMPUTE_ERROR("Writing %s: (%s)", filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Writing %s: (%s)", filename.c_str(), e.what());
     }
 }
 
@@ -737,7 +743,7 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
         {
             std::uniform_real_distribution<float> dist(lower_bound, upper_bound);
 
-            execute_window_loop(window, [&](const Coordinates & id)
+            execute_window_loop(window, [&](const Coordinates &)
             {
                 *reinterpret_cast<half *>(it.ptr()) = (half)dist(gen);
             },
@@ -749,7 +755,7 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
         {
             std::uniform_real_distribution<float> dist(lower_bound, upper_bound);
 
-            execute_window_loop(window, [&](const Coordinates & id)
+            execute_window_loop(window, [&](const Coordinates &)
             {
                 *reinterpret_cast<float *>(it.ptr()) = dist(gen);
             },
@@ -801,7 +807,7 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2, T tolerance)
     Iterator itensor1(&tensor1, window);
     Iterator itensor2(&tensor2, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         if(std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > tolerance)
         {

@@ -1,6 +1,8 @@
 var searchData=
 [
+  ['qasymm16',['QASYMM16',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a3b989c6b5398b3b9538ad103a324205e',1,'arm_compute']]],
   ['qasymm8',['QASYMM8',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6af14462d71aa842202c3e4b272c7ec924',1,'arm_compute']]],
+  ['qasymm8_5fsigned',['QASYMM8_SIGNED',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a329f5d0c4b0c80e3474951d2c4435dd9',1,'arm_compute']]],
   ['qsymm16',['QSYMM16',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a3ca8a4ea8f992df3b462bc7b24d097c6',1,'arm_compute']]],
   ['qsymm8',['QSYMM8',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a5f007421a4becd11c0666c2058b0b36c',1,'arm_compute']]],
   ['qsymm8_5fper_5fchannel',['QSYMM8_PER_CHANNEL',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a34f500e941c4df30b870126ec868ebd5',1,'arm_compute']]],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,9 +29,11 @@
 namespace arm_compute
 {
 /** Pool of threads to automatically split a kernel's execution among several threads. */
-class SingleThreadScheduler : public IScheduler
+class SingleThreadScheduler final : public IScheduler
 {
 public:
+    /** Constructor. */
+    SingleThreadScheduler() = default;
     /** Sets the number of threads the scheduler will use to run the kernels.
      *
      * @param[in] num_threads This is ignored for this scheduler as the number of threads is always one.
@@ -42,11 +44,6 @@ public:
      * @return Number of threads available in SingleThreadScheduler.
      */
     unsigned int num_threads() const override;
-    /** Access the scheduler singleton
-     *
-     * @return The scheduler
-     */
-    static SingleThreadScheduler &get();
     /** Runs the kernel in the same thread as the caller synchronously.
      *
      * @param[in] kernel Kernel to execute.
@@ -60,10 +57,6 @@ protected:
      * @param[in] workloads Workloads to run
      */
     void run_workloads(std::vector<Workload> &workloads) override;
-
-private:
-    /** Constructor. */
-    SingleThreadScheduler() = default;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_SINGLETHREADSCHEDULER_H__ */

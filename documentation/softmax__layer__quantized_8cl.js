@@ -7,6 +7,7 @@ var softmax__layer__quantized_8cl =
     [ "GRID_SIZE", "softmax__layer__quantized_8cl.xhtml#a08246606c233e7785a497c09672f366f", null ],
     [ "LOG_VECTOR_SIZE", "softmax__layer__quantized_8cl.xhtml#a372393c380805985b813dbb16d589a64", null ],
     [ "MAX_OP", "softmax__layer__quantized_8cl.xhtml#abaa48ad818c44e415fd3f9dd0f27bf01", null ],
+    [ "SUB_OP", "softmax__layer__quantized_8cl.xhtml#ac3af2d18008cbbf7247ae48fcd6e0c4e", null ],
     [ "VEC_INT", "softmax__layer__quantized_8cl.xhtml#aee190caf3b3571e939ac129e12c368cd", null ],
     [ "VEC_UCHAR", "softmax__layer__quantized_8cl.xhtml#af5987b09a234231612b2b1eded343025", null ],
     [ "VEC_UINT", "softmax__layer__quantized_8cl.xhtml#a16110bd2b92003141dbaf8a44498ff82", null ],

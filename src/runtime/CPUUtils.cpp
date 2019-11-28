@@ -30,13 +30,8 @@
 #include <array>
 #include <cstdlib>
 #include <cstring>
-#include <fcntl.h>
 #include <fstream>
 #include <map>
-#include <sched.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #ifndef BARE_METAL
 /* C++ std::regex takes up a lot of space in the standalone builds */

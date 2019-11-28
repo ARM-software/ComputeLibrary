@@ -24,7 +24,10 @@
 #ifndef __ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H__
 #define __ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H__
 
+#include "NEActivationLayer.h"
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
@@ -46,6 +49,7 @@ class ITensor;
  *  -# @ref NEGEMMTranspose1xWKernel
  *  -# @ref NEGEMMLowpMatrixMultiplyKernel
  *  -# @ref NEGEMMLowpOffsetContributionKernel
+ *  -# @ref NEActivationLayer
  *
  * otherwise if the DOT product instruction is available:
  *
@@ -74,24 +78,24 @@ public:
      *  -# Convert b values from QASYMM8 to int32 add b_offset to each of them.
      *  -# Compute the matrix product of the resulting a * b in int32.
      *
-     * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8 otherwise
+     * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8/QASYMM8_SIGNED otherwise
      *
-     * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8.
+     * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
      * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
      * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
-     * @param[out] output    Output tensor. Data type supported: Data type supported: S32/QASYMM8
+     * @param[out] output    Output tensor. Data type supported: Data type supported: S32/QASYMM8/QASYMM8_SIGNED
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */
     void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyCore
      *
-     * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8 otherwise
+     * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8/QASYMM8_SIGNED otherwise
      *
-     * @param[in] a         First input tensor info  (Matrix A). Data type supported: QASYMM8.
+     * @param[in] a         First input tensor info  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
      * @param[in] b         Second input tensor info (Matrix B). Data type supported: same as @p a
      * @param[in] c         Third input tensor  info (Matrix C). It can be a nullptr. Data type supported: S32
-     * @param[in] output    Output tensor info. Data type supported: Data type supported: S32/QASYMM8
+     * @param[in] output    Output tensor info. Data type supported: Data type supported: S32/QASYMM8/QASYMM8_SIGNED
      * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                      if the reshape of matrix B should be executed only for the first run
      *
@@ -113,20 +117,29 @@ private:
     NEGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;
     NEGEMMLowpOffsetContributionKernel            _offset_contribution_kernel;
     NEGEMMLowpOffsetContributionOutputStageKernel _offset_contribution_output_stage_kernel;
-    Tensor                                        _vector_sum_col;
-    Tensor                                        _vector_sum_row;
-    Tensor                                        _tmp_a;
-    Tensor                                        _tmp_b;
-    Tensor                                        _mm_result_s32;
-    const ITensor                                *_original_b;
-    int32_t                                       _a_offset;
-    int32_t                                       _b_offset;
-    bool                                          _run_vector_matrix_multiplication;
-    bool                                          _assembly_path;
-    bool                                          _fused_assembly_path;
-    bool                                          _reshape_b_only_on_first_run;
-    bool                                          _is_prepared;
-    bool                                          _fuse_output_stage;
+    NEActivationLayer                             _activation_func;
+    NEConvertQuantizedSignednessKernel            _convert_to_signed_asymm;
+    NEConvertQuantizedSignednessKernel            _convert_from_signed_asymm;
+
+    Tensor         _vector_sum_col;
+    Tensor         _vector_sum_row;
+    Tensor         _tmp_a;
+    Tensor         _tmp_b;
+    Tensor         _mm_result_s32;
+    Tensor         _signed_a;
+    Tensor         _signed_output;
+    const ITensor *_original_b;
+    int32_t        _a_offset;
+    int32_t        _b_offset;
+
+    bool _run_vector_matrix_multiplication;
+    bool _assembly_path;
+    bool _fused_assembly_path;
+    bool _reshape_b_only_on_first_run;
+    bool _is_prepared;
+    bool _fuse_output_stage;
+    bool _run_activation;
+    bool _flip_signedness;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H__ */

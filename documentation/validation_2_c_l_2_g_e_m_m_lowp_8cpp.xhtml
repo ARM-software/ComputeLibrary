@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -127,7 +127,7 @@ $(document).ready(function(){initNavTree('validation_2_c_l_2_g_e_m_m_lowp_8cpp.x
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2018 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -144,13 +144,17 @@ Typedefs</h2></td></tr>
 <tr class="separator:a527c6fecbfe2c655c29481170eeee85a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71106ae8df0196a319680b32270fd757"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a71106ae8df0196a319680b32270fd757">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture</a> = GEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointValidationFixture&lt; CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint &gt;</td></tr>
 <tr class="separator:a71106ae8df0196a319680b32270fd757"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15c6506e30173db40a20ba12ffbd3e47"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a15c6506e30173db40a20ba12ffbd3e47">CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture</a> = GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture&lt; CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint &gt;</td></tr>
-<tr class="separator:a15c6506e30173db40a20ba12ffbd3e47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0155a800a4994d6df688cf73502aa1ea"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0155a800a4994d6df688cf73502aa1ea">CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture</a> = GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture&lt; CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint &gt;</td></tr>
+<tr class="separator:a0155a800a4994d6df688cf73502aa1ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a4b2e02f12273c1b7a724328e3912a9cc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4b2e02f12273c1b7a724328e3912a9cc">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset(), shape_a, shape_b, shape_c, a_offset, b_offset)</td></tr>
 <tr class="separator:a4b2e02f12273c1b7a724328e3912a9cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac502b3f18b51ddd9d32b0baed35fbc43"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac502b3f18b51ddd9d32b0baed35fbc43">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpFusedOffsetOutputDataset(), framework::dataset::make(&quot;DataType&quot;, { DataType::QASYMM8 })))</td></tr>
+<tr class="separator:ac502b3f18b51ddd9d32b0baed35fbc43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6124ab8c244464c06fcd33c25bfad8f2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6124ab8c244464c06fcd33c25bfad8f2">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpFusedOffsetOutputDataset(), framework::dataset::make(&quot;DataType&quot;, { DataType::QASYMM8 })))</td></tr>
+<tr class="separator:a6124ab8c244464c06fcd33c25bfad8f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2ed31007ae463a3cec24a581f3651f6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ed31007ae463a3cec24a581f3651f6">TEST_SUITE_END</a> () const auto Int16QuantizedActivationFunctionsDataset = ActivationValidationQuantizedFixture&lt;CLTensor, CLAccessor, CLActivationLayer, T&gt;</td></tr>
 <tr class="memdesc:ac2ed31007ae463a3cec24a581f3651f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input data sets.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ed31007ae463a3cec24a581f3651f6">More...</a><br /></td></tr>
 <tr class="separator:ac2ed31007ae463a3cec24a581f3651f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -178,8 +182,12 @@ Functions</h2></td></tr>
 <tr class="separator:a90ac4c27e9f0e7cf32c410de2437e69a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae33a3f780710827b7489cbc235807c7d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae33a3f780710827b7489cbc235807c7d">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_int16_scale_by_fixedpoint_cases))</td></tr>
 <tr class="separator:ae33a3f780710827b7489cbc235807c7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53b700a52c7fd9e562aa710e53c730a1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a53b700a52c7fd9e562aa710e53c730a1">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases))</td></tr>
-<tr class="separator:a53b700a52c7fd9e562aa710e53c730a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a967401eccbdb2138e16cb65e97fa0620"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a967401eccbdb2138e16cb65e97fa0620">combine</a> (datasets::SmallShapes(), quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases))</td></tr>
+<tr class="separator:a967401eccbdb2138e16cb65e97fa0620"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11e72b50d7160d79cbfd225903ef9242"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a11e72b50d7160d79cbfd225903ef9242">combine</a> (datasets::SmallShapes(), quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases))</td></tr>
+<tr class="separator:a11e72b50d7160d79cbfd225903ef9242"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adee78274a83ccdab2afd88e064f08613"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adee78274a83ccdab2afd88e064f08613">combine</a> (datasets::SmallShapes(), quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases))</td></tr>
+<tr class="separator:adee78274a83ccdab2afd88e064f08613"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -189,6 +197,10 @@ Variables</h2></td></tr>
 <tr class="separator:a78f0db008369b524e9f0f7c5f43ae7e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5417547010c7470eaeaca18aafb9b806"><td class="memItemLeft" align="right" valign="top">const auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5417547010c7470eaeaca18aafb9b806">quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases</a></td></tr>
 <tr class="separator:a5417547010c7470eaeaca18aafb9b806"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe0dff37a9f21afa7d32fb8a08a111c0"><td class="memItemLeft" align="right" valign="top">const auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#abe0dff37a9f21afa7d32fb8a08a111c0">quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases</a></td></tr>
+<tr class="separator:abe0dff37a9f21afa7d32fb8a08a111c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a222bcc3667f364855906f66baeb67b00"><td class="memItemLeft" align="right" valign="top">const auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a222bcc3667f364855906f66baeb67b00">quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases</a></td></tr>
+<tr class="separator:a222bcc3667f364855906f66baeb67b00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -196,7 +208,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="validation_2_c_l_2_g_e_m_m_lowp_8cpp.xhtml">GEMMLowp.cpp</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:08 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

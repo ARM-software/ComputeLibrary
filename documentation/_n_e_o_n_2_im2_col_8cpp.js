@@ -1,7 +1,7 @@
 var _n_e_o_n_2_im2_col_8cpp =
 [
     [ "NEIm2ColFixture", "_n_e_o_n_2_im2_col_8cpp.xhtml#a98e842c5ec1ebd662aac57677eb97913", null ],
-    [ "allocator", "_n_e_o_n_2_im2_col_8cpp.xhtml#a817d7768d04140a832d2cb27f83edb12", null ],
+    [ "allocator", "_n_e_o_n_2_im2_col_8cpp.xhtml#a3d45498be87235b5165d9972b2d0644d", null ],
     [ "ARM_COMPUTE_EXPECT", "_n_e_o_n_2_im2_col_8cpp.xhtml#a7139545f7f5f8b854c5686666b675c69", null ],
     [ "ARM_COMPUTE_EXPECT", "_n_e_o_n_2_im2_col_8cpp.xhtml#ad0e8b54fa7d5f2a8bef9a5bb885fbc05", null ],
     [ "ARM_COMPUTE_EXPECT", "_n_e_o_n_2_im2_col_8cpp.xhtml#a6156fbd59d76d25d00110c4d3ad02277", null ],
@@ -15,7 +15,7 @@ var _n_e_o_n_2_im2_col_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_im2_col_8cpp.xhtml#af766c13b011461fa84ff211ba977cd1b", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_im2_col_8cpp.xhtml#a55f69c92eea255f3ff356b01efb8edc4", null ],
     [ "info", "_n_e_o_n_2_im2_col_8cpp.xhtml#aa49dc5afff07b86be9d319b2947a10cd", null ],
-    [ "run", "_n_e_o_n_2_im2_col_8cpp.xhtml#aae8f98973dd49e5afd7309bb34d4e3c3", null ],
+    [ "run", "_n_e_o_n_2_im2_col_8cpp.xhtml#a06403ad5596b5405787cfca12e5b815e", null ],
     [ "set_data_layout", "_n_e_o_n_2_im2_col_8cpp.xhtml#ae59cb3ec4cae7835d0a0283be56ef789", null ],
     [ "TEST_SUITE_END", "_n_e_o_n_2_im2_col_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "validate", "_n_e_o_n_2_im2_col_8cpp.xhtml#aea4fae7ef15224e4e967d269c1b4588e", null ],

@@ -30,16 +30,21 @@
 #include "arm_compute/runtime/SubTensor.h"
 
 #include "arm_compute/core/NEON/kernels/NECopyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEMemsetKernel.h"
+#include "arm_compute/core/NEON/kernels/NEPadLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
 {
-/** Basic function to pad a tensor. This function calls the following NEON kernels:
+/** Basic function to pad a tensor. This function calls the following NEON functions/kernels:
  *
- *  -# @ref NEMemsetKernel
- *  -# @ref NECopyKernel
+ *  - For padding mode = PaddingMode::CONSTANT:
+ *      -# @ref NEPadLayerKernel
+ *  - Otherwise:
+ *      -# @ref NECopyKernel
+ *      -# @ref NEStridedSlice
+ *      -# @ref NEConcatenateLayer
+ *
  */
 class NEPadLayer : public IFunction
 {
@@ -93,15 +98,14 @@ private:
 
 private:
     NECopyKernel                    _copy_kernel;
+    NEPadLayerKernel                _pad_kernel;
     PaddingMode                     _mode;
     PaddingList                     _padding;
-    NEMemsetKernel                  _memset_kernel;
     uint32_t                        _num_dimensions;
     std::vector<NEStridedSlice>     _slice_functions;
     std::vector<NEConcatenateLayer> _concat_functions;
     std::vector<Tensor>             _slice_results;
     std::vector<Tensor>             _concat_results;
-    SubTensor                       _output_subtensor;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEPADLAYER_H__ */

@@ -1,6 +1,7 @@
 var searchData=
 [
   ['eltwiselayer',['EltwiseLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16ad1b3837fe6a80018e7002c7f7905439d',1,'arm_compute::graph']]],
+  ['elu',['ELU',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa5b44c930bf0ddeef48b50ef11e5ddd58',1,'arm_compute::ActivationLayerInfo']]],
   ['enabled',['Enabled',['../namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11a00d23a76e43b46dae9ec7aa9dcbebb32',1,'arm_compute::graph']]],
   ['equal',['Equal',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58caf5f286e73bda105e538310b3190f75c5',1,'arm_compute']]],
   ['error',['ERROR',['../namespacearm__compute_1_1logging.xhtml#aca1fd1d8935433e6ba2e3918214e07f9abb1ca97ec761fc37101737ba0aa2e7c5',1,'arm_compute::logging']]],

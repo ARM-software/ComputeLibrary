@@ -49,6 +49,11 @@ OffsetLifetimeManager::OffsetLifetimeManager()
 {
 }
 
+const OffsetLifetimeManager::info_type &OffsetLifetimeManager::info() const
+{
+    return _blob;
+}
+
 std::unique_ptr<IMemoryPool> OffsetLifetimeManager::create_pool(IAllocator *allocator)
 {
     ARM_COMPUTE_ERROR_ON(allocator == nullptr);

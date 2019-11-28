@@ -145,7 +145,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELocallyConnectedFixture<float>, framework::Da
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NELocallyConnectedFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::LargeLocallyConnectedDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NELocallyConnectedFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeLocallyConnectedDataset(),
                                                                                                               framework::dataset::make("DataType",
                                                                                                                       DataType::F32)))
 {

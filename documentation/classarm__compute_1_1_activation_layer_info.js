@@ -8,6 +8,7 @@ var classarm__compute_1_1_activation_layer_info =
       [ "LU_BOUNDED_RELU", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaaab1d4411a9e7f5e82002512cddfdc33a", null ],
       [ "LEAKY_RELU", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaac7e80a3de04936f4e423e1b564fdca10", null ],
       [ "SOFT_RELU", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaadcc44a50c791a591c74e00ecdda7c58d", null ],
+      [ "ELU", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa5b44c930bf0ddeef48b50ef11e5ddd58", null ],
       [ "ABS", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa7d8a220d2262f9d6c658d549ee12cf2c", null ],
       [ "SQUARE", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa12dec4e1f7ec620651b2b95c440ffac0", null ],
       [ "SQRT", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa36875f2500a09ee35d0bb7eb8c0b91b0", null ],

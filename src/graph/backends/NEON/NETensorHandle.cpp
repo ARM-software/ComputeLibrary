@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,8 +52,7 @@ void NETensorHandle::manage(IMemoryGroup *mg)
 {
     if(mg != nullptr)
     {
-        auto *ne_mg = arm_compute::utils::cast::polymorphic_downcast<MemoryGroup *>(mg);
-        ne_mg->manage(&_tensor);
+        mg->manage(&_tensor);
     }
 }
 

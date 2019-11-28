@@ -60,7 +60,27 @@ struct GEMMKernelInfo
     unsigned int        depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
     bool                reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
     bool                broadcast_bias{ false };          /**< Flag used to broadcase the bias addition */
+    bool                fp_mixed_precision{ false };      /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
     ActivationLayerInfo activation_info{};                /**< Activation function to perform after the matrix multiplication */
+};
+
+/** Descriptor used by the depthwise convolution kernels */
+struct DWCKernelInfo
+{
+    ActivationLayerInfo activation_info{}; /**< Activation function to perform after the depthwise convolution */
+};
+
+/** Descriptor used by the depthwise convolution kernels to retrieve the number of output elements processed by each thread */
+struct DWCWeightsKernelInfo
+{
+    unsigned int n0{ 0 }; /**< Number of columns processed by each thread */
+};
+
+/** Descriptor used by the softmax kernels */
+struct SoftmaxKernelInfo
+{
+    float beta{ 1.f };     /**< A scaling factor for the exponent with default value 1.0 */
+    bool  is_log{ false }; /**< Flag used to perform Log Softmax operation */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__ */

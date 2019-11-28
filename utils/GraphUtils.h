@@ -70,6 +70,9 @@ public:
     void preprocess(ITensor &tensor) override;
 
 private:
+    template <typename T>
+    void preprocess_typed(ITensor &tensor);
+
     std::array<float, 3> _mean;
     bool  _bgr;
     float _scale;
@@ -90,6 +93,9 @@ public:
     void preprocess(ITensor &tensor) override;
 
 private:
+    template <typename T>
+    void preprocess_typed(ITensor &tensor);
+
     float _min_range;
     float _max_range;
 };
@@ -191,6 +197,33 @@ public:
 private:
     const std::string _npy_name;
     const bool        _is_fortran;
+};
+
+/** Print accessor class
+ *  @note The print accessor will print only when asserts are enabled.
+ *  */
+class PrintAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[out] output_stream (Optional) Output stream
+     * @param[in]  io_fmt        (Optional) Format information
+     */
+    PrintAccessor(std::ostream &output_stream = std::cout, IOFormatInfo io_fmt = IOFormatInfo());
+    /** Allow instances of this class to be move constructed */
+    PrintAccessor(PrintAccessor &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    PrintAccessor(const PrintAccessor &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    PrintAccessor &operator=(const PrintAccessor &) = delete;
+
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
+private:
+    std::ostream &_output_stream;
+    IOFormatInfo  _io_fmt;
 };
 
 /** Image accessor class */
@@ -480,7 +513,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const arm_comp
         const std::string &image_file_lower = lower_string(image_file);
         if(arm_compute::utility::endswith(image_file_lower, ".npy"))
         {
-            return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(image_file);
+            return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(image_file, graph_parameters.data_layout);
         }
         else if(arm_compute::utility::endswith(image_file_lower, ".jpeg")
                 || arm_compute::utility::endswith(image_file_lower, ".jpg")
@@ -512,6 +545,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const arm_com
                                                                    bool                                         is_validation = false,
                                                                    std::ostream                                &output_stream = std::cout)
 {
+    ARM_COMPUTE_UNUSED(is_validation);
     if(!graph_parameters.validation_file.empty())
     {
         return arm_compute::support::cpp14::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file,
@@ -545,6 +579,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_detection_output_accessor(con
                                                                              bool                                         is_validation = false,
                                                                              std::ostream                                &output_stream = std::cout)
 {
+    ARM_COMPUTE_UNUSED(is_validation);
     if(!graph_parameters.validation_file.empty())
     {
         return arm_compute::support::cpp14::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file,
@@ -605,6 +640,17 @@ inline std::unique_ptr<graph::ITensorAccessor> get_save_npy_output_accessor(cons
     {
         return arm_compute::support::cpp14::make_unique<SaveNumPyAccessor>(npy_name, is_fortran);
     }
+}
+
+/** Generates print tensor accessor
+ *
+ * @param[out] output_stream (Optional) Output stream
+ *
+ * @return A print tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_print_output_accessor(std::ostream &output_stream = std::cout)
+{
+    return arm_compute::support::cpp14::make_unique<PrintAccessor>(output_stream);
 }
 
 /** Permutes a given tensor shape given the input and output data layout

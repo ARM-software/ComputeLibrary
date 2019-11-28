@@ -201,7 +201,7 @@ void CLSpaceToBatchLayerKernel::run(const Window &window, cl::CommandQueue &queu
 
         add_argument(idx, batch_id);
         add_3D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_out);
+        enqueue(queue, *this, slice_out, lws_hint());
         ++batch_id;
     }
     while(window.slide_window_slice_3D(slice_out));

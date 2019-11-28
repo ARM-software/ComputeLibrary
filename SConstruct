@@ -44,6 +44,7 @@ vars.AddVariables(
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
+    BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
     BoolVariable("opencl", "Enable OpenCL support", True),
@@ -126,11 +127,11 @@ if not env['exceptions']:
     env.Append(CPPDEFINES = ['ARM_COMPUTE_EXCEPTIONS_DISABLED'])
     env.Append(CXXFLAGS = ['-fno-exceptions'])
 
-env.Append(CXXFLAGS = ['-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
-         '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
+env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
+         '-Wextra','-pedantic','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
-         '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
-         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow'])
+         '-fpermissive','-std=gnu++11','-Woverloaded-virtual', '-Wformat-security',
+         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings'])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
@@ -143,9 +144,11 @@ if env['os'] == 'android' and ( 'clang++' not in cpp_compiler or 'clang' not in 
     print( "WARNING: Only clang is officially supported to build the Compute Library for Android")
 
 if 'clang++' in cpp_compiler:
-    env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
+    env.Append(CXXFLAGS = ['-Wno-vla-extension'])
+elif 'armclang' in cpp_compiler:
+    pass
 else:
-    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel', '-Wno-redundant-move'])
+    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
 
 if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])
@@ -159,6 +162,7 @@ if env['openmp']:
     env.Append(CXXFLAGS = ['-fopenmp'])
     env.Append(LINKFLAGS = ['-fopenmp'])
 
+# Add architecture specific flags
 prefix = ""
 if env['arch'] == 'armv7a':
     env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
@@ -174,15 +178,13 @@ if env['arch'] == 'armv7a':
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
 elif env['arch'] == 'arm64-v8a':
     env.Append(CXXFLAGS = ['-march=armv8-a'])
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8A','NO_DOT_IN_TOOLCHAIN'])
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8A'])
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':
         prefix = "aarch64-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
-    if 'clang++' in cpp_compiler:
-        env.Append(CXXFLAGS = ['-no-integrated-as'])
 elif 'arm64-v8.2-a' in env['arch']:
     if env['arch'] == 'arm64-v8.2-a-sve':
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
@@ -194,9 +196,7 @@ elif 'arm64-v8.2-a' in env['arch']:
         prefix = "aarch64-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2','NO_DOT_IN_TOOLCHAIN'])
-    if 'clang++' in cpp_compiler:
-        env.Append(CXXFLAGS = ['-no-integrated-as'])
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
 elif env['arch'] == 'x86_32':
     env.Append(CCFLAGS = ['-m32'])
     env.Append(LINKFLAGS = ['-m32'])
@@ -225,7 +225,9 @@ if not GetOption("help"):
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
 
-    if 'clang++' not in cpp_compiler:
+    if 'armclang' in cpp_compiler:
+        pass
+    elif 'clang++' not in cpp_compiler:
         if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
             print("GCC 6.2.1 or newer is required to compile armv8.2-a code")
             Exit(1)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2018-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_gemm
 {
 
 // Actual kernel implementations
-void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *, int, const uint8_t *, uint32_t *, int, uint32_t, int, int, int);
+void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *, int, const uint8_t *, uint32_t *, int, int, int, int, const uint32_t *, Activation, bool);
 
 class hybrid_u8u32_dot_4VLx4
 {
@@ -40,7 +40,7 @@ public:
     typedef uint8_t operand_type;
     typedef uint32_t result_type;
 
-    typedef void (*kern_type)(const uint8_t *, int, const uint8_t *, uint32_t *, int, uint32_t, int, int, int);
+    typedef void (*kern_type)(const uint8_t *, int, const uint8_t *, uint32_t *, int, int, int, int, const uint32_t *, Activation, bool);
 
     /* Kernel blocking parameters */
     static constexpr unsigned int out_height()
@@ -53,9 +53,24 @@ public:
         return get_vector_length<uint32_t>() * 4;
     }
 
-    static unsigned int k_unroll()
+    static constexpr unsigned int k_unroll()
     {
         return 4;
+    }
+
+    static constexpr bool supports_append()
+    {
+        return true;
+    }
+
+    static constexpr bool supports_bias()
+    {
+        return false;
+    }
+
+    static constexpr bool supports_activation()
+    {
+        return false;
     }
 
     StdTransformsSVE<operand_type, result_type, 4, 4, 4> transforms = {};
@@ -63,10 +78,7 @@ public:
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_u8u32_dot_4VLx4;
 
-    hybrid_u8u32_dot_4VLx4(const CPUInfo *ci)
-    {
-
-    }
+    hybrid_u8u32_dot_4VLx4(const CPUInfo *ci) { UNUSED(ci); }
 };
 
 } // namespace arm_gemm

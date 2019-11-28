@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -128,7 +128,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Thread ID Decorator. </p>
 <p>Appends the thread ID in the log message </p>
 
-<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00113">113</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00116">116</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a7cc31af1c60cf2317350fca65ba16597"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7cc31af1c60cf2317350fca65ba16597">&#9670;&nbsp;</a></span>decorate()</h2>
@@ -164,10 +164,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1logging_1_1_i_decorator.xhtml#af7e99677086f647b50a1b4e4248f78f6">IDecorator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00117">117</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    {</div><div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;<span class="preprocessor">#ifndef NO_MULTI_THREADING</span></div><div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        log_msg.raw_ += <a class="code" href="namespacearm__compute_1_1logging.xhtml#a369e0192e9a39349e4f7b8eca465ac60">angle_wrap_value</a>(std::this_thread::get_id());</div><div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* NO_MULTI_THREADING */</span><span class="preprocessor"></span></div><div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1logging_xhtml_a369e0192e9a39349e4f7b8eca465ac60"><div class="ttname"><a href="namespacearm__compute_1_1logging.xhtml#a369e0192e9a39349e4f7b8eca465ac60">arm_compute::logging::angle_wrap_value</a></div><div class="ttdeci">std::string angle_wrap_value(const T &amp;val)</div><div class="ttdoc">Wraps a value with angles and returns the string.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2utils_2logging_2_helpers_8h_source.xhtml#l00062">Helpers.h:62</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00120">120</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    {</div><div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="preprocessor">#ifndef NO_MULTI_THREADING</span></div><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        log_msg.raw_ += <a class="code" href="namespacearm__compute_1_1logging.xhtml#a369e0192e9a39349e4f7b8eca465ac60">angle_wrap_value</a>(std::this_thread::get_id());</div><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="preprocessor">#else  </span><span class="comment">/* NO_MULTI_THREADING */</span><span class="preprocessor"></span></div><div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        <a class="code" href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a>(log_msg);</div><div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* NO_MULTI_THREADING */</span><span class="preprocessor"></span></div><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1logging_xhtml_a369e0192e9a39349e4f7b8eca465ac60"><div class="ttname"><a href="namespacearm__compute_1_1logging.xhtml#a369e0192e9a39349e4f7b8eca465ac60">arm_compute::logging::angle_wrap_value</a></div><div class="ttdeci">std::string angle_wrap_value(const T &amp;val)</div><div class="ttdoc">Wraps a value with angles and returns the string.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2utils_2logging_2_helpers_8h_source.xhtml#l00062">Helpers.h:62</a></div></div>
+<div class="ttc" id="_error_8h_xhtml_a6dc630a6ae9cc063b3924bcea8dee9d6"><div class="ttname"><a href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(...)</div><div class="ttdoc">To avoid unused variables warnings.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00152">Error.h:152</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="arm__compute_2core_2utils_2logging_2_helpers_8h_source.xhtml#l00062">arm_compute::logging::angle_wrap_value()</a>, and <a class="el" href="arm__compute_2core_2utils_2logging_2_types_8h_source.xhtml#l00062">LogMsg::raw_</a>.</p>
+<p class="reference">References <a class="el" href="arm__compute_2core_2utils_2logging_2_helpers_8h_source.xhtml#l00062">arm_compute::logging::angle_wrap_value()</a>, <a class="el" href="_error_8h_source.xhtml#l00152">ARM_COMPUTE_UNUSED</a>, and <a class="el" href="arm__compute_2core_2utils_2logging_2_types_8h_source.xhtml#l00062">LogMsg::raw_</a>.</p>
 
 </div>
 </div>
@@ -180,7 +181,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1logging.xhtml">logging</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1logging_1_1_thread_id_decorator.xhtml">ThreadIdDecorator</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:40 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:18 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,6 +1,6 @@
 var classarm__compute_1_1_g_c_activation_layer_kernel =
 [
-    [ "GCActivationLayerKernel", "classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#a678f75dfd5cfe14614f8072ebe1cc67d", null ],
+    [ "GCActivationLayerKernel", "classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#a842bcad7cc493cbd6e0e7d367c0d6e48", null ],
     [ "GCActivationLayerKernel", "classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#aba37d1d891d61ad845e34039dc07e16d", null ],
     [ "GCActivationLayerKernel", "classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#aeb9ff5ac3ff4549fee88c59c71f0c912", null ],
     [ "~GCActivationLayerKernel", "classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#ac58e8dd752e9e27d70b62fbba39b78e8", null ],

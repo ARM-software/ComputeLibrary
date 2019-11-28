@@ -23,13 +23,19 @@
  */
 #include "arm_compute/runtime/CL/CLTensor.h"
 
+#include "arm_compute/runtime/CL/CLRuntimeContext.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-using namespace arm_compute;
-
-CLTensor::CLTensor()
-    : _allocator(this)
+namespace arm_compute
 {
+CLTensor::CLTensor(IRuntimeContext *ctx)
+    : _allocator(this, static_cast<CLRuntimeContext *>(ctx)), _ctx(static_cast<CLRuntimeContext *>(ctx))
+{
+}
+
+CLRuntimeContext *CLTensor::context()
+{
+    return _ctx;
 }
 
 TensorInfo *CLTensor::info() const
@@ -59,12 +65,12 @@ CLTensorAllocator *CLTensor::allocator()
 
 void CLTensor::map(bool blocking)
 {
-    ICLTensor::map(CLScheduler::get().queue(), blocking);
+    ICLTensor::map(_ctx == nullptr ? CLScheduler::get().queue() : _ctx->gpu_scheduler()->queue(), blocking);
 }
 
 void CLTensor::unmap()
 {
-    ICLTensor::unmap(CLScheduler::get().queue());
+    ICLTensor::unmap(_ctx == nullptr ? CLScheduler::get().queue() : _ctx->gpu_scheduler()->queue());
 }
 
 uint8_t *CLTensor::do_map(cl::CommandQueue &q, bool blocking)
@@ -76,3 +82,9 @@ void CLTensor::do_unmap(cl::CommandQueue &q)
 {
     _allocator.unmap(q, buffer());
 }
+
+void CLTensor::associate_memory_group(arm_compute::IMemoryGroup *memory_group)
+{
+    _allocator.set_associated_memory_group(memory_group);
+}
+} // namespace arm_compute

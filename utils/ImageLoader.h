@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-default"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 #include "stb/stb_image.h"
 #pragma GCC diagnostic pop
 
@@ -203,7 +204,7 @@ public:
                     unsigned char green = 0;
                     unsigned char blue  = 0;
 
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         red   = _feeder->get();
                         green = _feeder->get();
@@ -225,7 +226,7 @@ public:
                     Iterator out(&image, window);
                     size_t   row_size = _width * image.info()->element_size();
 
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         _feeder->get_row(out.ptr(), row_size);
                     },
@@ -242,21 +243,21 @@ public:
         }
         catch(const std::ifstream::failure &e)
         {
-            ARM_COMPUTE_ERROR("Loading image file: %s", e.what());
+            ARM_COMPUTE_ERROR_VAR("Loading image file: %s", e.what());
         }
     }
     /** Fill a tensor with 3 planes (one for each channel) with the content of the currently open image file.
      *
      * @note If the image is a CLImage, the function maps and unmaps the image
      *
-     * @param[in,out] tensor Tensor with 3 planes to fill (Must be allocated, and of matching dimensions with the opened image). Data types supported: U8/F32
+     * @param[in,out] tensor Tensor with 3 planes to fill (Must be allocated, and of matching dimensions with the opened image). Data types supported: U8/F16/F32
      * @param[in]     bgr    (Optional) Fill the first plane with blue channel (default = false)
      */
     template <typename T>
     void fill_planar_tensor(T &tensor, bool bgr = false)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::F32);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::QASYMM8, DataType::F32, DataType::F16);
 
         const DataLayout  data_layout  = tensor.info()->data_layout();
         const TensorShape tensor_shape = tensor.info()->tensor_shape();
@@ -302,7 +303,7 @@ public:
             unsigned char green = 0;
             unsigned char blue  = 0;
 
-            execute_window_loop(window, [&](const Coordinates & id)
+            execute_window_loop(window, [&](const Coordinates &)
             {
                 red   = _feeder->get();
                 green = _feeder->get();
@@ -311,6 +312,7 @@ public:
                 switch(tensor.info()->data_type())
                 {
                     case DataType::U8:
+                    case DataType::QASYMM8:
                     {
                         *(out.ptr() + 0 * stride_z) = bgr ? blue : red;
                         *(out.ptr() + 1 * stride_z) = green;
@@ -322,6 +324,13 @@ public:
                         *reinterpret_cast<float *>(out.ptr() + 0 * stride_z) = static_cast<float>(bgr ? blue : red);
                         *reinterpret_cast<float *>(out.ptr() + 1 * stride_z) = static_cast<float>(green);
                         *reinterpret_cast<float *>(out.ptr() + 2 * stride_z) = static_cast<float>(bgr ? red : blue);
+                        break;
+                    }
+                    case DataType::F16:
+                    {
+                        *reinterpret_cast<half *>(out.ptr() + 0 * stride_z) = static_cast<half>(bgr ? blue : red);
+                        *reinterpret_cast<half *>(out.ptr() + 1 * stride_z) = static_cast<half>(green);
+                        *reinterpret_cast<half *>(out.ptr() + 2 * stride_z) = static_cast<half>(bgr ? red : blue);
                         break;
                     }
                     default:
@@ -337,7 +346,7 @@ public:
         }
         catch(const std::ifstream::failure &e)
         {
-            ARM_COMPUTE_ERROR("Loading image file: %s", e.what());
+            ARM_COMPUTE_ERROR_VAR("Loading image file: %s", e.what());
         }
     }
 
@@ -345,6 +354,7 @@ protected:
     /** Validate metadata */
     virtual void validate_info(const ITensorInfo *tensor_info)
     {
+        ARM_COMPUTE_UNUSED(tensor_info);
     }
 
 protected:
@@ -379,14 +389,14 @@ public:
             unsigned int max_val = 0;
             std::tie(_width, _height, max_val) = parse_ppm_header(_fs);
 
-            ARM_COMPUTE_ERROR_ON_MSG(max_val >= 256, "2 bytes per colour channel not supported in file %s",
-                                     filename.c_str());
+            ARM_COMPUTE_ERROR_ON_MSG_VAR(max_val >= 256, "2 bytes per colour channel not supported in file %s",
+                                         filename.c_str());
 
             _feeder = support::cpp14::make_unique<FileImageFeeder>(_fs);
         }
         catch(std::runtime_error &e)
         {
-            ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
+            ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
         }
     }
     void close() override
@@ -411,7 +421,7 @@ protected:
 
         ARM_COMPUTE_ERROR_ON_MSG((end_position - current_position) < tensor_info->tensor_shape().total_size(),
                                  "Not enough data in file");
-        ARM_COMPUTE_UNUSED(end_position);
+        ARM_COMPUTE_UNUSED(end_position, tensor_info);
     }
 
 private:
@@ -449,7 +459,7 @@ public:
         uint8_t *rgb_image = stbi_load(filename.c_str(), &width, &height, &bpp, 3);
         if(rgb_image == NULL)
         {
-            ARM_COMPUTE_ERROR("Accessing %s failed", filename.c_str());
+            ARM_COMPUTE_ERROR_VAR("Accessing %s failed", filename.c_str());
         }
         else
         {

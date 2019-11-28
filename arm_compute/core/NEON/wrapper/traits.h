@@ -112,6 +112,22 @@ template <> struct neon_bitvector<float16_t, BitWidth::W128>{ using type = float
 template <typename T, BitWidth BW> using neon_bitvector_t = typename neon_bitvector<T, BW>::type;
 /**  Helper type template to get the tag type of a neon vector */
 template <typename T, BitWidth BW> using neon_bitvector_tag_t = typename neon_bitvector<T, BW>::tag_type;
+
+/** Promote a type */
+template <typename T> struct promote { };
+template <> struct promote<uint8_t> { using type = uint16_t; };
+template <> struct promote<int8_t> { using type = int16_t; };
+template <> struct promote<uint16_t> { using type = uint32_t; };
+template <> struct promote<int16_t> { using type = int32_t; };
+template <> struct promote<uint32_t> { using type = uint64_t; };
+template <> struct promote<int32_t> { using type = int64_t; };
+template <> struct promote<float> { using type = float; };
+template <> struct promote<half> { using type = half; };
+
+/** Get promoted type */
+template <typename T>
+using promote_t = typename promote<T>::type;
+
 // clang-format on
 // *INDENT-ON*
 } // namespace traits

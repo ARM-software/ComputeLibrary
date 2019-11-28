@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -131,7 +131,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>String Decorator. </p>
 <p>Appends a user defined string in the log message </p>
 
-<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00056">56</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00059">59</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a771c01048077563edb8c5bfe596cd5e6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a771c01048077563edb8c5bfe596cd5e6">&#9670;&nbsp;</a></span>StringDecorator()</h2>
@@ -165,8 +165,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00063">63</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        : _str(str)</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    {</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        _str = <a class="code" href="namespacearm__compute_1_1logging.xhtml#a369e0192e9a39349e4f7b8eca465ac60">angle_wrap_value</a>(str);</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1logging_xhtml_a369e0192e9a39349e4f7b8eca465ac60"><div class="ttname"><a href="namespacearm__compute_1_1logging.xhtml#a369e0192e9a39349e4f7b8eca465ac60">arm_compute::logging::angle_wrap_value</a></div><div class="ttdeci">std::string angle_wrap_value(const T &amp;val)</div><div class="ttdoc">Wraps a value with angles and returns the string.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2utils_2logging_2_helpers_8h_source.xhtml#l00062">Helpers.h:62</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00066">66</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        : _str(str)</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    {</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        _str = <a class="code" href="namespacearm__compute_1_1logging.xhtml#a369e0192e9a39349e4f7b8eca465ac60">angle_wrap_value</a>(str);</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1logging_xhtml_a369e0192e9a39349e4f7b8eca465ac60"><div class="ttname"><a href="namespacearm__compute_1_1logging.xhtml#a369e0192e9a39349e4f7b8eca465ac60">arm_compute::logging::angle_wrap_value</a></div><div class="ttdeci">std::string angle_wrap_value(const T &amp;val)</div><div class="ttdoc">Wraps a value with angles and returns the string.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2utils_2logging_2_helpers_8h_source.xhtml#l00062">Helpers.h:62</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="arm__compute_2core_2utils_2logging_2_helpers_8h_source.xhtml#l00062">arm_compute::logging::angle_wrap_value()</a>.</p>
 
@@ -207,8 +207,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1logging_1_1_i_decorator.xhtml#af7e99677086f647b50a1b4e4248f78f6">IDecorator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00070">70</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    {</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        log_msg.raw_ += _str;</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_log_msg_decorators_8h_source.xhtml#l00073">73</a> of file <a class="el" href="_log_msg_decorators_8h_source.xhtml">LogMsgDecorators.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    {</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        log_msg.raw_ += _str;</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    }</div></div><!-- fragment -->
 <p class="reference">References <a class="el" href="arm__compute_2core_2utils_2logging_2_types_8h_source.xhtml#l00062">LogMsg::raw_</a>.</p>
 
 </div>
@@ -222,7 +222,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1logging.xhtml">logging</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1logging_1_1_string_decorator.xhtml">StringDecorator</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:40 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:18 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -114,11 +114,13 @@ inline size_t data_size_from_type(DataType data_type)
         case DataType::S8:
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             return 1;
         case DataType::U16:
         case DataType::S16:
         case DataType::QSYMM16:
+        case DataType::QASYMM16:
         case DataType::F16:
             return 2;
         case DataType::F32:
@@ -189,11 +191,13 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::U8:
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             return 1;
         case DataType::U16:
         case DataType::S16:
         case DataType::QSYMM16:
+        case DataType::QASYMM16:
         case DataType::F16:
             return 2;
         case DataType::U32:
@@ -530,8 +534,10 @@ inline DataType get_promoted_data_type(DataType dt)
             return DataType::S32;
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QSYMM16:
+        case DataType::QASYMM16:
         case DataType::F16:
         case DataType::U32:
         case DataType::S32:
@@ -848,21 +854,17 @@ PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_sh
 
 /** Returns expected width and height of the deconvolution's output tensor.
  *
- * @param[in] in_width      Width of input tensor (Number of columns)
- * @param[in] in_height     Height of input tensor (Number of rows)
- * @param[in] kernel_width  Kernel width.
- * @param[in] kernel_height Kernel height.
- * @param[in] padx          X axis padding.
- * @param[in] pady          Y axis padding.
- * @param[in] stride_x      X axis input stride.
- * @param[in] stride_y      Y axis input stride.
+ * @param[in] in_width        Width of input tensor (Number of columns)
+ * @param[in] in_height       Height of input tensor (Number of rows)
+ * @param[in] kernel_width    Kernel width.
+ * @param[in] kernel_height   Kernel height.
+ * @param[in] pad_stride_info Pad and stride information.
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
 std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
                                                                       unsigned int kernel_width, unsigned int kernel_height,
-                                                                      unsigned int padx, unsigned int pady,
-                                                                      unsigned int stride_x, unsigned int stride_y);
+                                                                      const PadStrideInfo &pad_stride_info);
 
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.
  *
@@ -879,6 +881,16 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsi
                                                         unsigned int kernel_width, unsigned int kernel_height,
                                                         const PadStrideInfo &pad_stride_info,
                                                         const Size2D        &dilation = Size2D(1U, 1U));
+
+/** Check if the given reduction operation should be handled in a serial way.
+ *
+ * @param[in] op   Reduction operation to perform
+ * @param[in] dt   Data type
+ * @param[in] axis Axis along which to reduce
+ *
+ * @return True if the given reduction operation should be handled in a serial way.
+ */
+bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis);
 
 /** Convert a tensor format into a string.
  *
@@ -1013,8 +1025,10 @@ inline bool is_data_type_quantized(DataType dt)
     {
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QSYMM16:
+        case DataType::QASYMM16:
             return true;
         default:
             return false;
@@ -1032,6 +1046,8 @@ inline bool is_data_type_quantized_asymmetric(DataType dt)
     switch(dt)
     {
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QASYMM16:
             return true;
         default:
             return false;
@@ -1051,6 +1067,23 @@ inline bool is_data_type_quantized_symmetric(DataType dt)
         case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QSYMM16:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/** Check if a given data type is of per channel type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of per channel type, else false.
+ */
+inline bool is_data_type_quantized_per_channel(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QSYMM8_PER_CHANNEL:
             return true;
         default:
             return false;
@@ -1105,7 +1138,10 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
     switch(dt)
     {
         case DataType::U8:
-            return ((static_cast<uint8_t>(val) == val) && val >= std::numeric_limits<uint8_t>::lowest() && val <= std::numeric_limits<uint8_t>::max());
+        {
+            const auto val_u8 = static_cast<uint8_t>(val);
+            return ((val_u8 == val) && val_u8 >= std::numeric_limits<uint8_t>::lowest() && val_u8 <= std::numeric_limits<uint8_t>::max());
+        }
         case DataType::QASYMM8:
         {
             double min = static_cast<double>(dequantize_qasymm8(0, qinfo));
@@ -1113,27 +1149,34 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
             return ((double)val >= min && (double)val <= max);
         }
         case DataType::S8:
-            return ((static_cast<int8_t>(val) == val) && val >= std::numeric_limits<int8_t>::lowest() && val <= std::numeric_limits<int8_t>::max());
+        {
+            const auto val_s8 = static_cast<int8_t>(val);
+            return ((val_s8 == val) && val_s8 >= std::numeric_limits<int8_t>::lowest() && val_s8 <= std::numeric_limits<int8_t>::max());
+        }
         case DataType::U16:
-            return ((static_cast<uint16_t>(val) == val) && val >= std::numeric_limits<uint16_t>::lowest() && val <= std::numeric_limits<uint16_t>::max());
+        {
+            const auto val_u16 = static_cast<uint16_t>(val);
+            return ((val_u16 == val) && val_u16 >= std::numeric_limits<uint16_t>::lowest() && val_u16 <= std::numeric_limits<uint16_t>::max());
+        }
         case DataType::S16:
-            return ((static_cast<int16_t>(val) == val) && val >= std::numeric_limits<int16_t>::lowest() && val <= std::numeric_limits<int16_t>::max());
+        {
+            const auto val_s16 = static_cast<int16_t>(val);
+            return ((val_s16 == val) && val_s16 >= std::numeric_limits<int16_t>::lowest() && val_s16 <= std::numeric_limits<int16_t>::max());
+        }
         case DataType::U32:
-            return ((static_cast<uint32_t>(val) == val) && val >= std::numeric_limits<uint32_t>::lowest() && val <= std::numeric_limits<uint32_t>::max());
+        {
+            const auto val_u32 = static_cast<uint32_t>(val);
+            return ((val_u32 == val) && val_u32 >= std::numeric_limits<uint32_t>::lowest() && val_u32 <= std::numeric_limits<uint32_t>::max());
+        }
         case DataType::S32:
-            return ((static_cast<int32_t>(val) == val) && val >= std::numeric_limits<int32_t>::lowest() && val <= std::numeric_limits<int32_t>::max());
-        case DataType::U64:
-            return (val >= std::numeric_limits<uint64_t>::lowest() && val <= std::numeric_limits<uint64_t>::max());
-        case DataType::S64:
-            return (val >= std::numeric_limits<int64_t>::lowest() && val <= std::numeric_limits<int64_t>::max());
+        {
+            const auto val_s32 = static_cast<int32_t>(val);
+            return ((val_s32 == val) && val_s32 >= std::numeric_limits<int32_t>::lowest() && val_s32 <= std::numeric_limits<int32_t>::max());
+        }
         case DataType::F16:
             return (val >= std::numeric_limits<half>::lowest() && val <= std::numeric_limits<half>::max());
         case DataType::F32:
             return (val >= std::numeric_limits<float>::lowest() && val <= std::numeric_limits<float>::max());
-        case DataType::F64:
-            return (val >= std::numeric_limits<double>::lowest() && val <= std::numeric_limits<double>::max());
-        case DataType::SIZET:
-            return ((static_cast<size_t>(val) == val) && val >= std::numeric_limits<size_t>::lowest() && val <= std::numeric_limits<size_t>::max());
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
             return false;

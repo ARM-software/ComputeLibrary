@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -124,6 +124,8 @@ Macros</h2></td></tr>
 <tr class="separator:a6d28176cdf4fe5f1b39245907d5ca7b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ac4f206b54438676f70075b6d9e4a1a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="activation__float__helpers_8h.xhtml#a7ac4f206b54438676f70075b6d9e4a1a">srelu_op</a>(<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>,  x,  A_VAL,  B_VAL)&#160;&#160;&#160;(log((<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>)1.0 + exp(x)))</td></tr>
 <tr class="separator:a7ac4f206b54438676f70075b6d9e4a1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d828b57d03a6109bdc4719408927179"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="activation__float__helpers_8h.xhtml#a3d828b57d03a6109bdc4719408927179">elu_op</a>(<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>,  x,  A_VAL,  B_VAL)&#160;&#160;&#160;(select(((<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>)A_VAL * (exp(x) - (<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>)1.0)), x, isgreaterequal(x, (<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>)0.0)))</td></tr>
+<tr class="separator:a3d828b57d03a6109bdc4719408927179"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad241c192445437657f18094735135acf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="activation__float__helpers_8h.xhtml#ad241c192445437657f18094735135acf">abs_op</a>(<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>,  x,  A_VAL,  B_VAL)&#160;&#160;&#160;(fabs(x))</td></tr>
 <tr class="separator:ad241c192445437657f18094735135acf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fbe1c283cc8c5e8bd79623c760b498d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="activation__float__helpers_8h.xhtml#a3fbe1c283cc8c5e8bd79623c760b498d">square_op</a>(<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>,  x,  A_VAL,  B_VAL)&#160;&#160;&#160;(x * x)</td></tr>
@@ -178,7 +180,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00054">54</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00057">57</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
 
 </div>
 </div>
@@ -226,7 +228,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00070">70</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00073">73</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
 
 </div>
 </div>
@@ -272,6 +274,48 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a id="a3d828b57d03a6109bdc4719408927179"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d828b57d03a6109bdc4719408927179">&#9670;&nbsp;</a></span>elu_op</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define elu_op</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">A_VAL, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">B_VAL&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;(select(((<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>)A_VAL * (exp(x) - (<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>)1.0)), x, isgreaterequal(x, (<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>)0.0)))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00054">54</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
+
+</div>
+</div>
 <a id="a8853785c268f7591f3905d46c3fe4c58"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8853785c268f7591f3905d46c3fe4c58">&#9670;&nbsp;</a></span>identity_op</h2>
 
@@ -310,7 +354,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00066">66</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00069">69</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
 
 </div>
 </div>
@@ -352,7 +396,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00063">63</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00066">66</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
 
 </div>
 </div>
@@ -562,7 +606,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00068">68</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00071">71</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
 
 </div>
 </div>
@@ -646,7 +690,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00060">60</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00063">63</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
 
 </div>
 </div>
@@ -688,7 +732,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00057">57</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="activation__float__helpers_8h_source.xhtml#l00060">60</a> of file <a class="el" href="activation__float__helpers_8h_source.xhtml">activation_float_helpers.h</a>.</p>
 
 </div>
 </div>
@@ -782,7 +826,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="activation__float__helpers_8h.xhtml">activation_float_helpers.h</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:07 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

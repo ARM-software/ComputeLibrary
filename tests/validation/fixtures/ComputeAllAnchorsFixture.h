@@ -41,14 +41,14 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ComputeAllAnchorsFixture : public framework::Fixture
+class ComputeAllAnchorsGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type)
+    void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type, QuantizationInfo qinfo)
     {
-        _target    = compute_target(num_anchors, data_type, info);
-        _reference = compute_reference(num_anchors, data_type, info);
+        _target    = compute_target(num_anchors, data_type, info, qinfo);
+        _reference = compute_reference(num_anchors, data_type, info, qinfo);
     }
 
 protected:
@@ -58,11 +58,11 @@ protected:
         library->fill_tensor_uniform(tensor, 0, T(0), T(100));
     }
 
-    TensorType compute_target(size_t num_anchors, DataType data_type, const ComputeAnchorsInfo &info)
+    TensorType compute_target(size_t num_anchors, DataType data_type, const ComputeAnchorsInfo &info, QuantizationInfo qinfo)
     {
         // Create tensors
         TensorShape anchors_shape(4, num_anchors);
-        TensorType  anchors = create_tensor<TensorType>(anchors_shape, data_type);
+        TensorType  anchors = create_tensor<TensorType>(anchors_shape, data_type, 1, qinfo);
         TensorType  all_anchors;
 
         // Create and configure function
@@ -78,7 +78,7 @@ protected:
         ARM_COMPUTE_EXPECT(!all_anchors.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(CLAccessor(anchors));
+        fill(AccessorType(anchors));
 
         // Compute function
         compute_all_anchors.run();
@@ -88,10 +88,11 @@ protected:
 
     SimpleTensor<T> compute_reference(size_t                    num_anchors,
                                       DataType                  data_type,
-                                      const ComputeAnchorsInfo &info)
+                                      const ComputeAnchorsInfo &info,
+                                      QuantizationInfo          qinfo)
     {
         // Create reference tensor
-        SimpleTensor<T> anchors(TensorShape(4, num_anchors), data_type);
+        SimpleTensor<T> anchors(TensorShape(4, num_anchors), data_type, 1, qinfo);
 
         // Fill reference tensor
         fill(anchors);
@@ -100,6 +101,28 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ComputeAllAnchorsFixture : public ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type)
+    {
+        ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(num_anchors, info, data_type, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ComputeAllAnchorsQuantizedFixture : public ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(size_t num_anchors, const ComputeAnchorsInfo &info, DataType data_type, QuantizationInfo qinfo)
+    {
+        ComputeAllAnchorsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(num_anchors, info, data_type, qinfo);
+    }
 };
 } // namespace validation
 } // namespace test

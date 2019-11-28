@@ -25,9 +25,14 @@
 #define __ARM_COMPUTE_CL_HELPERS_H__
 
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/IScheduler.h"
 
 namespace arm_compute
 {
+// Forward declarations
+class CLRuntimeContext;
+class ICLKernel;
+
 /** This function creates an OpenCL context and a device.
  *
  * @note In debug builds, the function will automatically enable cl_arm_printf if the driver/device supports it.
@@ -37,5 +42,12 @@ namespace arm_compute
  *         a value telling why the function failed.
  */
 std::tuple<cl::Context, cl::Device, cl_int> create_opencl_context_and_device();
+/** Schedules a kernel using the context if not nullptr else uses the legacy scheduling flow.
+ *
+ * @param[in] ctx    Context to use.
+ * @param[in] kernel Kernel to schedule.
+ * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
+ */
+void schedule_kernel_on_ctx(CLRuntimeContext *ctx, ICLKernel *kernel, bool flush = true);
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CL_HELPERS_H__ */

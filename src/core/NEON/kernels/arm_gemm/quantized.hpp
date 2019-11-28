@@ -37,6 +37,6 @@ void compute_row_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned
 template<typename T>
 void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned int height,
                       const T *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth,
-                      unsigned int first_col);
+                      unsigned int multi, unsigned int first_col);
 
 } // namespace arm_gemm

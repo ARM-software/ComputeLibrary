@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -150,5 +150,5 @@ void CLWinogradFilterTransformKernel::run(const Window &window, cl::CommandQueue
     unsigned int idx = 0;
     add_4D_tensor_argument(idx, _input, window);
     add_3D_tensor_argument(idx, _output, window_out);
-    enqueue(queue, *this, window);
+    enqueue(queue, *this, window, lws_hint());
 }

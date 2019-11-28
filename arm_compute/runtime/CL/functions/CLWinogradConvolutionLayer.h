@@ -102,7 +102,7 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup                   _memory_group;
+    MemoryGroup                     _memory_group;
     CLGEMM                          _batched_mm;
     CLWinogradInputTransform        _input_transform;
     CLWinogradFilterTransformKernel _filter_transform;

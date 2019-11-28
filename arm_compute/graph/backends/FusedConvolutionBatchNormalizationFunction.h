@@ -42,8 +42,8 @@ public:
     using TensorType         = typename TargetInfo::TensorType;
     using TensorConcreteType = typename TargetInfo::TensorConcreteType;
 
-    FusedConvolutionBatchNormalizationFunction()
-        : _conv_layer(), _fused_batch_norm_layer(), _fused_bias(), _is_prepared(false)
+    FusedConvolutionBatchNormalizationFunction(std::shared_ptr<IMemoryManager> memory_manager = nullptr)
+        : _conv_layer(memory_manager), _fused_batch_norm_layer(), _fused_bias(), _is_prepared(false)
     {
     }
 

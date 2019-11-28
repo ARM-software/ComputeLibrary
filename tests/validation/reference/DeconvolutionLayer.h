@@ -46,7 +46,8 @@ namespace reference
  *
  */
 template <typename T, typename TB>
-SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info);
+SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
+                                    QuantizationInfo out_qinfo = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test

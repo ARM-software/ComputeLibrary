@@ -89,8 +89,8 @@
 <!-- Node6 -->
 <g id="node7" class="node"><title>Node6</title>
 <g id="a_node7"><a xlink:href="classarm__compute_1_1_dimensions.xhtml" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="335,-134.5 335,-153.5 458,-153.5 458,-134.5 335,-134.5"/>
-<text text-anchor="middle" x="396.5" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">Dimensions&lt; size_t &gt;</text>
+<polygon fill="white" stroke="black" points="329.5,-134.5 329.5,-153.5 463.5,-153.5 463.5,-134.5 329.5,-134.5"/>
+<text text-anchor="middle" x="396.5" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">Dimensions&lt; uint32_t &gt;</text>
 </a>
 </g>
 </g>
@@ -111,7 +111,7 @@
 <g id="edge7" class="edge"><title>Node7&#45;&gt;Node6</title>
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M396.5,-191.037C396.5,-178.67 396.5,-163.12 396.5,-153.627"/>
 <polygon fill="orange" stroke="orange" points="393,-191.234 396.5,-201.234 400,-191.234 393,-191.234"/>
-<text text-anchor="middle" x="423.5" y="-175" font-family="Helvetica,sans-Serif" font-size="10.00"> &lt; size_t &gt;</text>
+<text text-anchor="middle" x="429" y="-175" font-family="Helvetica,sans-Serif" font-size="10.00"> &lt; uint32_t &gt;</text>
 </g>
 <!-- Node8 -->
 <g id="node9" class="node"><title>Node8</title>

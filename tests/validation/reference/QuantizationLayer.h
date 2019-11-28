@@ -35,8 +35,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src, const QuantizationInfo &quantization_info);
+template <typename Tin, typename Tout>
+SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

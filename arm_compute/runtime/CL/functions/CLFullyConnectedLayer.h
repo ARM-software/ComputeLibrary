@@ -28,13 +28,14 @@
 
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
+#include "arm_compute/runtime/IWeightsManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -63,6 +64,54 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 
+namespace weights_transformations
+{
+/** Basic function to manage the reshape weights generated from @ref CLFullyConnectedLayerReshapeWeights */
+class CLFullyConnectedLayerReshapeWeightsManaged : public ITransformWeights
+{
+public:
+    //Inherited method override
+    void run() override
+    {
+        _output.allocator()->allocate();
+        _func.run();
+        _reshape_run = true;
+    }
+
+    //Inherited method override
+    void release() override
+    {
+        _output.allocator()->free();
+    }
+
+    //Inherited method override
+    ICLTensor *get_weights() override
+    {
+        return &_output;
+    }
+
+    //Inherited method override
+    uint32_t uid() override
+    {
+        return _uid;
+    }
+
+    /** Configures the @ref CLFullyConnectedLayerReshapeWeights function
+     *
+     * @param[in] input Source tensor. Data type supported: QASYMM8/F16/F32.
+     */
+    void configure(const ICLTensor *input)
+    {
+        _func.configure(input, &_output);
+    }
+
+private:
+    static constexpr uint32_t           _uid = 0x0;
+    CLTensor                            _output{};
+    CLFullyConnectedLayerReshapeWeights _func{};
+};
+} // namespace weights_transformations
+
 /** Basic function to compute a Fully Connected layer on OpenCL. This function calls the following OpenCL kernels:
  *
  *  -# @ref CLIm2ColKernel (called when the input comes from a convolutional layer)
@@ -76,7 +125,7 @@ class CLFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLFullyConnectedLayer(const CLFullyConnectedLayer &) = delete;
     /** Default move constructor */
@@ -125,29 +174,28 @@ public:
     void prepare() override;
 
 private:
-    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
-    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
+    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
+    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
 
-    CLMemoryGroup                                       _memory_group;
-    CLConvertFullyConnectedWeights                      _convert_weights;
-    CLFlattenLayer                                      _flatten_layer;
-    CLFullyConnectedLayerReshapeWeights                 _reshape_weights_kernel;
-    CLGEMM                                              _mm_gemm;
-    CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
-    CLGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel; // TODO(COMPMID-1889): Use CLGEMM to add bias in CLFullyConnectedLayer
-    CLTensor                                            _flatten_output;
-    CLTensor                                            _gemmlowp_output;
-    CLTensor                                            _converted_weights_output;
-    CLTensor                                            _reshape_weights_output;
-    bool                                                _are_weights_converted;
-    bool                                                _are_weights_reshaped;
-    bool                                                _is_fc_after_conv;
-    bool                                                _accumulate_biases;
-    bool                                                _is_quantized;
-    bool                                                _is_prepared;
-    const ICLTensor                                    *_original_weights;
+    MemoryGroup                                                         _memory_group;
+    IWeightsManager                                                    *_weights_manager;
+    CLConvertFullyConnectedWeights                                      _convert_weights;
+    weights_transformations::CLConvertFullyConnectedWeightsManaged      _convert_weights_managed;
+    weights_transformations::CLFullyConnectedLayerReshapeWeightsManaged _reshape_weights_managed_function;
+    CLFlattenLayer                                                      _flatten_layer;
+    CLFullyConnectedLayerReshapeWeights                                 _reshape_weights_function;
+    CLGEMM                                                              _mm_gemm;
+    CLGEMMLowpMatrixMultiplyCore                                        _mm_gemmlowp;
+    CLTensor                                                            _flatten_output;
+    CLTensor                                                            _converted_weights_output;
+    CLTensor                                                            _reshape_weights_output;
+    bool                                                                _are_weights_converted;
+    bool                                                                _are_weights_reshaped;
+    bool                                                                _is_fc_after_conv;
+    bool                                                                _is_quantized;
+    bool                                                                _is_prepared;
+    const ICLTensor                                                    *_original_weights;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__ */

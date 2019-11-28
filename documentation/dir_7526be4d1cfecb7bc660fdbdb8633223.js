@@ -9,6 +9,7 @@ var dir_7526be4d1cfecb7bc660fdbdb8633223 =
     [ "IStreamOperators.h", "_i_stream_operators_8h.xhtml", "_i_stream_operators_8h" ],
     [ "Layers.h", "_layers_8h.xhtml", [
       [ "InputLayer", "classarm__compute_1_1graph_1_1frontend_1_1_input_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_input_layer" ],
+      [ "ConstantLayer", "classarm__compute_1_1graph_1_1frontend_1_1_constant_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_constant_layer" ],
       [ "OutputLayer", "classarm__compute_1_1graph_1_1frontend_1_1_output_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_output_layer" ],
       [ "ActivationLayer", "classarm__compute_1_1graph_1_1frontend_1_1_activation_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_activation_layer" ],
       [ "BatchNormalizationLayer", "classarm__compute_1_1graph_1_1frontend_1_1_batch_normalization_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_batch_normalization_layer" ],
@@ -18,6 +19,7 @@ var dir_7526be4d1cfecb7bc660fdbdb8633223 =
       [ "ConvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_convolution_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_convolution_layer" ],
       [ "DeconvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_deconvolution_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_deconvolution_layer" ],
       [ "DepthwiseConvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_depthwise_convolution_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_depthwise_convolution_layer" ],
+      [ "DequantizationLayer", "classarm__compute_1_1graph_1_1frontend_1_1_dequantization_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_dequantization_layer" ],
       [ "DetectionOutputLayer", "classarm__compute_1_1graph_1_1frontend_1_1_detection_output_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_detection_output_layer" ],
       [ "DetectionPostProcessLayer", "classarm__compute_1_1graph_1_1frontend_1_1_detection_post_process_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_detection_post_process_layer" ],
       [ "DummyLayer", "classarm__compute_1_1graph_1_1frontend_1_1_dummy_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_dummy_layer" ],

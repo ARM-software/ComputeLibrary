@@ -31,11 +31,10 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
+#include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
 {
-class ITensor;
-
 /** Basic function to perform reduce operation */
 class NEReduceMean : public IFunction
 {
@@ -72,7 +71,7 @@ private:
     std::vector<NEReductionOperation> _reduction_kernels;
     std::vector<Tensor>               _reduced_outs;
     NEReshapeLayer                    _reshape;
-    unsigned int                      _reduction_ops;
+    int                               _reduction_ops;
     bool                              _keep_dims;
 };
 } // namespace arm_compute

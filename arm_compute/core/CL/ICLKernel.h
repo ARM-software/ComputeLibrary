@@ -379,8 +379,8 @@ void ICLKernel::add_array_argument(unsigned &idx, const ICLArray<T> *array, cons
 
     _kernel.setArg<cl_uint>(idx++, offset_first_element);
 
-    ARM_COMPUTE_ERROR_ON_MSG(idx_start + num_arguments_per_array<dimension_size>() != idx,
-                             "add_%dD_array_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_array<dimension_size>());
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(idx_start + num_arguments_per_array<dimension_size>() != idx,
+                                 "add_%dD_array_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_array<dimension_size>());
     ARM_COMPUTE_UNUSED(idx_start);
 }
 }

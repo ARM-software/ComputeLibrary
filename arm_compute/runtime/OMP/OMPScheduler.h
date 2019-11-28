@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,9 +29,11 @@
 namespace arm_compute
 {
 /** Pool of threads to automatically split a kernel's execution among several threads. */
-class OMPScheduler : public IScheduler
+class OMPScheduler final : public IScheduler
 {
 public:
+    /** Constructor. */
+    OMPScheduler();
     /** Sets the number of threads the scheduler will use to run the kernels.
      *
      * @param[in] num_threads If set to 0, then the number returned by omp_get_max_threads() will be used, otherwise the number of threads specified.
@@ -42,11 +44,6 @@ public:
      * @return Number of threads available in OMPScheduler.
      */
     unsigned int num_threads() const override;
-    /** Access the scheduler singleton
-     *
-     * @return The scheduler
-     */
-    static OMPScheduler &get();
     /** Multithread the execution of the passed kernel if possible.
      *
      * The kernel will run on a single thread if any of these conditions is true:
@@ -68,10 +65,7 @@ protected:
     void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
-    /** Constructor. */
-    OMPScheduler();
-
     unsigned int _num_threads;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_OMPSCHEDULER_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@
 namespace arm_compute
 {
 /** Shape of a tensor */
-class TensorShape : public Dimensions<size_t>
+class TensorShape : public Dimensions<uint32_t>
 {
 public:
     /** Constructor to initialize the tensor shape.

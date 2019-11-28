@@ -26,6 +26,10 @@
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#include <arm_neon.h>
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 namespace arm_compute
 {
 // Forward declarations
@@ -53,9 +57,11 @@ public:
      *
      * @note Supported data layouts: NHWC
      *
-     * @param[in]  input            Source tensor. DataType supported: F32.
-     * @param[in]  weights          Weights tensor. This is a 3D tensor with dimensions [IFM, W, H]. Data type supported: Same as @p input.
-     * @param[in]  biases           Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed. Data type supported: Same as @p input.
+     * @param[in]  input            Source tensor. DataType supported: QASYMM8/F16/F32.
+     * @param[in]  weights          Weights tensor. This is a 3D tensor with dimensions [IFM, W, H].
+     *                              Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     * @param[in]  biases           Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                              Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[out] output           Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info        Padding and stride information to use for the convolution.
      * @param[in]  depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -68,9 +74,11 @@ public:
      *
      * @note Supported data layouts: NHWC
      *
-     * @param[in] input            Source tensor info. DataType supported: F32.
-     * @param[in] weights          Weights tensor info. This is a 3D tensor with dimensions [IFM, W, H]. Data type supported: Same as @p input.
-     * @param[in] biases           Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed. Data type supported: Same as @p input.
+     * @param[in] input            Source tensor info. DataType supported: QASYMM8/F16/F32.
+     * @param[in] weights          Weights tensor info. This is a 3D tensor with dimensions [IFM, W, H].
+     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     * @param[in] biases           Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in] output           Destination tensor info. Data type supported: Same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -86,7 +94,15 @@ public:
     BorderSize border_size() const override;
 
 private:
-    template <typename T, int S, bool has_biases>
+    template < typename T, typename TW, int S, bool has_biases, bool is_per_channel, typename std::enable_if < std::is_same<T, float>::value
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                                                                                               || std::is_same<T, float16_t>::value
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                                                                                               ,
+                                                                                                               int >::type = 0 >
+    void run_depthwise(const Window &window);
+
+    template <typename T, typename TW, int S, bool has_biases, bool is_per_channel, typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type = 0>
     void run_depthwise(const Window &window);
 
     /** Common signature for all the specialised depthwise convolution native functions
@@ -104,6 +120,8 @@ private:
     PadStrideInfo        _conv_info;
     unsigned int         _depth_multiplier;
     Size2D               _dilation;
+    std::vector<int>     _output_multiplier;
+    std::vector<int>     _output_shift;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H__ */

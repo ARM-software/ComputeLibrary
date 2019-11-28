@@ -31,7 +31,7 @@ namespace arm_gemm
 {
 
 // Actual kernel implementations
-void sve_smallK_hybrid_s8s32_dot_1VLx8(const int8_t *, int, const int8_t *, int32_t *, int, int32_t, int, int, int);
+void sve_smallK_hybrid_s8s32_dot_1VLx8(const int8_t *, int, const int8_t *, int32_t *, int, int, int, int, const int32_t *, Activation, bool);
 
 class smallK_hybrid_s8s32_dot_1VLx8
 {
@@ -39,7 +39,7 @@ public:
     typedef int8_t operand_type;
     typedef int32_t result_type;
 
-    typedef void (*kern_type)(const int8_t *, int, const int8_t *, int32_t *, int, int32_t, int, int, int);
+    typedef void (*kern_type)(const int8_t *, int, const int8_t *, int32_t *, int, int, int, int, const int32_t *, Activation, bool);
 
     /* Kernel blocking parameters */
     static constexpr unsigned int out_height()
@@ -57,15 +57,27 @@ public:
         return 4;
     }
 
+    static constexpr bool supports_append()
+    {
+        return false;
+    }
+
+    static constexpr bool supports_bias()
+    {
+        return false;
+    }
+
+    static constexpr bool supports_activation()
+    {
+        return false;
+    }
+
     StdTransformsSVE<operand_type, result_type, 8, 1, 4> transforms = {};
 
     // Default to the generic kernel
     kern_type kernel=sve_smallK_hybrid_s8s32_dot_1VLx8;
 
-    smallK_hybrid_s8s32_dot_1VLx8(const CPUInfo *ci)
-    {
-
-    }
+    smallK_hybrid_s8s32_dot_1VLx8(const CPUInfo *ci) { UNUSED(ci); }
 };
 
 } // namespace arm_gemm

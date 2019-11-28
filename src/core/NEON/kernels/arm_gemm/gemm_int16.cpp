@@ -38,7 +38,7 @@ static const GemmImplementation<int16_t, int32_t> gemm_s16_methods[] = {
     "gemm_s16_12x8",
     nullptr,
     nullptr,
-    [](const GemmArgs<int32_t> &args) { return new GemmInterleaved<gemm_s16_12x8, int16_t, int32_t>(args); }
+    [](const GemmArgs &args) { return new GemmInterleaved<gemm_s16_12x8, int16_t, int32_t>(args); }
 },
 {
     GemmMethod::DEFAULT,
@@ -55,9 +55,9 @@ const GemmImplementation<int16_t, int32_t> *gemm_implementation_list<int16_t, in
 }
 
 /* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<int16_t, int32_t> gemm<int16_t, int32_t, Nothing>(const GemmArgs<int32_t> &args, const Nothing &);
-template KernelDescription get_gemm_method<int16_t, int32_t, Nothing>(const GemmArgs<int32_t> &args, const Nothing &);
-template std::vector<KernelDescription> get_compatible_kernels<int16_t, int32_t, Nothing> (const GemmArgs<int32_t> &args, const Nothing &);
+template UniqueGemmCommon<int16_t, int32_t> gemm<int16_t, int32_t, Nothing>(const GemmArgs &args, const Nothing &);
+template KernelDescription get_gemm_method<int16_t, int32_t, Nothing>(const GemmArgs &args, const Nothing &);
+template std::vector<KernelDescription> get_compatible_kernels<int16_t, int32_t, Nothing> (const GemmArgs &args, const Nothing &);
 
 } // namespace arm_gemm
 

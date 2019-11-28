@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Log.h"
@@ -41,8 +43,10 @@ std::string get_cl_type_from_data_type(const DataType &dt)
             return "uchar";
         case DataType::S8:
         case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return "char";
         case DataType::U16:
+        case DataType::QASYMM16:
             return "ushort";
         case DataType::S16:
         case DataType::QSYMM16:
@@ -65,6 +69,53 @@ std::string get_cl_type_from_data_type(const DataType &dt)
     }
 }
 
+std::string get_cl_promoted_type_from_data_type(const DataType &dt)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+            return "ushort";
+        case DataType::S8:
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+            return "short";
+        case DataType::U16:
+        case DataType::QASYMM16:
+            return "uint";
+        case DataType::S16:
+        case DataType::QSYMM16:
+            return "int";
+        case DataType::U32:
+            return "ulong";
+        case DataType::S32:
+            return "long";
+        case DataType::F16:
+            return "float";
+        default:
+            ARM_COMPUTE_ERROR("Cannot get promoted OpenCL type for the input data type.");
+            return "";
+    }
+}
+
+std::string get_cl_unsigned_type_from_element_size(size_t element_size)
+{
+    switch(element_size)
+    {
+        case 1:
+            return "uchar";
+        case 2:
+            return "ushort";
+        case 4:
+            return "uint";
+        case 8:
+            return "ulong";
+        default:
+            ARM_COMPUTE_ERROR("Data type not supported");
+            return "";
+    }
+}
+
 std::string get_cl_select_type_from_data_type(const DataType &dt)
 {
     switch(dt)
@@ -74,8 +125,10 @@ std::string get_cl_select_type_from_data_type(const DataType &dt)
             return "uchar";
         case DataType::S8:
         case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return "char";
         case DataType::U16:
+        case DataType::QASYMM16:
             return "ushort";
         case DataType::F16:
         case DataType::S16:
@@ -104,10 +157,12 @@ std::string get_data_size_from_data_type(const DataType &dt)
         case DataType::S8:
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return "8";
         case DataType::U16:
         case DataType::S16:
         case DataType::QSYMM16:
+        case DataType::QASYMM16:
         case DataType::F16:
             return "16";
         case DataType::U32:
@@ -246,10 +301,12 @@ size_t preferred_vector_width(const cl::Device &device, const DataType dt)
         case DataType::S8:
         case DataType::QASYMM8:
         case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR>();
         case DataType::U16:
         case DataType::S16:
         case DataType::QSYMM16:
+        case DataType::QASYMM16:
             return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT>();
         case DataType::U32:
         case DataType::S32:
@@ -270,5 +327,19 @@ bool preferred_dummy_work_items_support(const cl::Device &device)
     ARM_COMPUTE_UNUSED(device);
     // TODO (COMPMID-2044)
     return true;
+}
+
+cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts)
+{
+    if(ctx && ctx->kernel_library())
+    {
+        // New api going through the core context
+        return static_cast<cl::Kernel>(ctx->kernel_library()->create_kernel(kernel_name, build_opts.options()));
+    }
+    else
+    {
+        // Legacy code through the singleton
+        return static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    }
 }
 } // namespace arm_compute

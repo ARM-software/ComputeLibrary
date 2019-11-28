@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,9 @@ void OutputTransform<1, 5, 1, 8, float, float, WinogradRoots::Integers>::transfo
   const float* bptr,
   float* const output,
   const int,  // No need to stride across rows
-  const int output_col_stride
+  const int output_col_stride,
+  const float output_min,
+  const float output_max
 )
 {
   // Construct a map to the output cells
@@ -74,7 +76,10 @@ void OutputTransform<1, 5, 1, 8, float, float, WinogradRoots::Integers>::transfo
     }
     for (int j = 0; j < output_tile_cols; j++)
     {
-      vst1q_f32(outptrs[j], f[j] + b);
+      const auto y =
+          vmaxq_f32(vminq_f32(vaddq_f32(f[j], b), vdupq_n_f32(output_max)),
+                    vdupq_n_f32(output_min));
+      vst1q_f32(outptrs[j], y);
       outptrs[j] += 4;
     }
   }
@@ -103,7 +108,10 @@ void OutputTransform<1, 5, 1, 8, float, float, WinogradRoots::Integers>::transfo
     }
     for (int j = 0; j < output_tile_cols; j++)
     {
-      vst1_f32(outptrs[j], f[j] + b);
+      const auto y =
+          vmax_f32(vmin_f32(vadd_f32(f[j], b), vdup_n_f32(output_max)),
+                   vdup_n_f32(output_min));
+      vst1_f32(outptrs[j], y);
       outptrs[j] += 2;
     }
   }
@@ -132,7 +140,8 @@ void OutputTransform<1, 5, 1, 8, float, float, WinogradRoots::Integers>::transfo
     }
     for (int j = 0; j < output_tile_cols; j++)
     {
-      *(outptrs[j]++) = f[j] + b;
+      const auto y = std::max(std::min(f[j] + b, output_max), output_min);
+      *(outptrs[j]++) = y;
     }
   }
 }

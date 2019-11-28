@@ -22,19 +22,36 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "arm_compute/core/Helpers.h"
 
 #include <cmath>
 #include <limits>
 #include <numeric>
 
-using namespace arm_compute::quantization;
-
+namespace arm_compute
+{
+namespace quantization
+{
 constexpr int64_t fixed_point_one_Q0 = (1LL << 31);
 constexpr float   epsilon            = 0.00001f;
 
-arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_less_than_one(float multiplier,
-                                                                                            int *quant_multiplier,
-                                                                                            int *right_shift)
+Status calculate_quantized_multiplier(float multiplier, int *quant_multiplier, int *shift)
+{
+    if(multiplier > 1.f)
+    {
+        Status status = calculate_quantized_multiplier_greater_than_one(multiplier, quant_multiplier, shift);
+        *shift *= -1;
+        return status;
+    }
+    else
+    {
+        return calculate_quantized_multiplier_less_than_one(multiplier, quant_multiplier, shift);
+    }
+}
+
+Status calculate_quantized_multiplier_less_than_one(float multiplier,
+                                                    int *quant_multiplier,
+                                                    int *right_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quant_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(right_shift == nullptr);
@@ -44,19 +61,19 @@ arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_le
     {
         *quant_multiplier = 1;
         *right_shift      = 0;
-        return arm_compute::Status{};
+        return Status{};
     }
 
     if(std::fabs(0.0f - multiplier) < epsilon)
     {
         *quant_multiplier = 0;
         *right_shift      = 0;
-        return arm_compute::Status{};
+        return Status{};
     }
 
     const double q = std::frexp(multiplier, right_shift);
     *right_shift *= -1;
-    auto q_fixed = static_cast<int64_t>(round(q * fixed_point_one_Q0));
+    auto q_fixed = static_cast<int64_t>(support::cpp11::round(q * fixed_point_one_Q0));
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > fixed_point_one_Q0);
     if(q_fixed == fixed_point_one_Q0)
     {
@@ -67,18 +84,18 @@ arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_le
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > std::numeric_limits<int32_t>::max());
     *quant_multiplier = static_cast<int32_t>(q_fixed);
 
-    return arm_compute::Status{};
+    return Status{};
 }
 
-arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_greater_than_one(float multiplier,
-                                                                                               int *quantized_multiplier,
-                                                                                               int *left_shift)
+Status calculate_quantized_multiplier_greater_than_one(float multiplier,
+                                                       int *quantized_multiplier,
+                                                       int *left_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quantized_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(left_shift == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(multiplier < 1.f);
     const double q       = std::frexp(multiplier, left_shift);
-    auto         q_fixed = static_cast<int64_t>(round(q * fixed_point_one_Q0));
+    auto         q_fixed = static_cast<int64_t>(support::cpp11::round(q * fixed_point_one_Q0));
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > fixed_point_one_Q0);
     if(q_fixed == fixed_point_one_Q0)
     {
@@ -89,5 +106,97 @@ arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_gr
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > std::numeric_limits<int32_t>::max());
     *quantized_multiplier = static_cast<int32_t>(q_fixed);
 
-    return arm_compute::Status{};
+    return Status{};
 }
+
+arm_compute::Status calculate_quantized_multipliers_less_than_one(const QuantizationInfo &iq_info,
+                                                                  const QuantizationInfo &wq_info,
+                                                                  const QuantizationInfo &oq_info,
+                                                                  GEMMLowpOutputStageInfo &stage_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON(iq_info.scale().empty());
+    ARM_COMPUTE_RETURN_ERROR_ON(wq_info.scale().empty());
+    ARM_COMPUTE_RETURN_ERROR_ON(oq_info.scale().empty());
+
+    const unsigned int size = wq_info.scale().size();
+
+    auto &quant_multipliers = stage_info.gemmlowp_multipliers;
+    auto &quant_shifts      = stage_info.gemmlowp_shifts;
+    quant_multipliers.resize(size);
+    quant_shifts.resize(size);
+
+    const auto &w_scales = wq_info.scale();
+    const float i_scale  = iq_info.scale().at(0);
+    const float o_scale  = oq_info.scale().at(0);
+
+    for(unsigned int i = 0; i < size; ++i)
+    {
+        const float multiplier       = i_scale * w_scales[i] / o_scale;
+        int         quant_multiplier = 0;
+        int         quant_shift      = 0;
+        ARM_COMPUTE_RETURN_ON_ERROR(calculate_quantized_multiplier_less_than_one(multiplier, &quant_multiplier, &quant_shift));
+        quant_multipliers[i] = quant_multiplier;
+        quant_shifts[i]      = quant_shift;
+    }
+
+    // Legacy part
+    stage_info.gemmlowp_shift      = quant_shifts[0];
+    stage_info.gemmlowp_multiplier = quant_multipliers[0];
+
+    return Status{};
+}
+
+std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_type)
+{
+    int min_quant_val = 0;
+    int max_quant_val = 0;
+    switch(data_type)
+    {
+        case DataType::QASYMM8:
+            min_quant_val = std::numeric_limits<uint8_t>::min();
+            max_quant_val = std::numeric_limits<uint8_t>::max();
+            break;
+        case DataType::QSYMM8:
+            min_quant_val = std::numeric_limits<int8_t>::min();
+            max_quant_val = std::numeric_limits<int8_t>::max();
+            break;
+        case DataType::QASYMM16:
+            min_quant_val = std::numeric_limits<uint16_t>::min();
+            max_quant_val = std::numeric_limits<uint16_t>::max();
+            break;
+        case DataType::QSYMM16:
+            min_quant_val = std::numeric_limits<int16_t>::min();
+            max_quant_val = std::numeric_limits<int16_t>::max();
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type");
+    }
+    return std::make_pair(min_quant_val, max_quant_val);
+}
+void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
+                                              const ITensorInfo *weights,
+                                              const ITensorInfo *output,
+                                              unsigned int       idx_ofms,
+                                              int32_t           *output_multipliers_ptr,
+                                              int32_t           *output_shifts_ptr)
+{
+    const unsigned int num_filters = is_data_type_quantized_per_channel(weights->data_type()) ? weights->dimension(idx_ofms) : 1;
+
+    const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+    const QuantizationInfo        wq_info = weights->quantization_info();
+    const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+
+    for(unsigned int i = 0; i < num_filters; ++i)
+    {
+        int         output_multiplier = 0;
+        int         output_shift      = 0;
+        const float multiplier        = iq_info.scale * wq_info.scale()[i] / oq_info.scale;
+        ARM_COMPUTE_ERROR_ON(multiplier > 1.0f);
+        calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+        output_multipliers_ptr[i] = output_multiplier;
+        output_shifts_ptr[i]      = output_shift;
+    }
+}
+} // quantization
+} // arm_compute

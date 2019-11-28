@@ -1,5 +1,6 @@
 var dir_d28a4824dc47e487b107a5db32ef43c4 =
 [
+    [ "gemm_tuner", "dir_9a60f706a5aff86a468215c27fa011b2.xhtml", "dir_9a60f706a5aff86a468215c27fa011b2" ],
     [ "cl_cache.cpp", "cl__cache_8cpp.xhtml", "cl__cache_8cpp" ],
     [ "cl_convolution.cpp", "cl__convolution_8cpp.xhtml", "cl__convolution_8cpp" ],
     [ "cl_events.cpp", "cl__events_8cpp.xhtml", "cl__events_8cpp" ],
@@ -14,6 +15,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "graph_inception_v3.cpp", "graph__inception__v3_8cpp.xhtml", "graph__inception__v3_8cpp" ],
     [ "graph_inception_v4.cpp", "graph__inception__v4_8cpp.xhtml", "graph__inception__v4_8cpp" ],
     [ "graph_lenet.cpp", "graph__lenet_8cpp.xhtml", "graph__lenet_8cpp" ],
+    [ "graph_mnist.cpp", "graph__mnist_8cpp.xhtml", "graph__mnist_8cpp" ],
     [ "graph_mobilenet.cpp", "graph__mobilenet_8cpp.xhtml", "graph__mobilenet_8cpp" ],
     [ "graph_mobilenet_v2.cpp", "graph__mobilenet__v2_8cpp.xhtml", "graph__mobilenet__v2_8cpp" ],
     [ "graph_resnet12.cpp", "graph__resnet12_8cpp.xhtml", "graph__resnet12_8cpp" ],

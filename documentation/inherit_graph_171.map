@@ -1,3 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1detail_1_1linear.xhtml" title="Linear activation object." alt="" coords="5,5,116,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_runtime_context.xhtml" title="Context interface." alt="" coords="5,31,132,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_runtime_context.xhtml" title="Runtime context." alt="" coords="180,31,304,57"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_runtime_context.xhtml" title="Runtime context." alt="" coords="353,5,493,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_g_c_runtime_context.xhtml" title="Runtime context." alt="" coords="352,56,495,83"/>
 </map>

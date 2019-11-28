@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,13 @@ namespace arm_compute
 {
 class ITensor;
 
-/** NEON kernel to perform a reduction operation */
+/** NEON kernel to perform a reduction operation
+ *
+ * @note For ARG_MIN/ARG_MAX reduction, the default data type for an uninitialized
+ *       output tensor is signed 32-bit integer (S32). It is the user's responsibility
+ *       to check that the results do not overflow because the indices are computed
+ *       in unsigned 32-bit (U32).
+ */
 class NEReductionOperationKernel : public INEKernel
 {
 public:
@@ -54,7 +60,7 @@ public:
     /** Set the source, destination of the kernel
      *
      * @param[in]  input  Source tensor. Data type supported: QASYMM8/F16/F32. Data layouts supported: NCHW.
-     * @param[out] output Destination tensor.Data types and data layouts supported: same as @p input.
+     * @param[out] output Destination tensor.Data types and data layouts supported: same as @p input, S32 for ARG_MIX/ARG_MAX.
      *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0
      * @param[in]  op     Reduction operation to perform.
@@ -64,7 +70,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEReductionOperationKernel.
      *
      * @param[in] input  Source tensor info. Data type supported: QASYMM8/F16/F32. Data layouts supported: NCHW.
-     * @param[in] output Destination tensor info.Data types and data layouts supported: same as @p input.
+     * @param[in] output Destination tensor info.Data types and data layouts supported: same as @p input, S32 for ARG_MIX/ARG_MAX.
      *                   Output will have the same number of dimensions as input.
      * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0
      * @param[in] op     Reduction operation to perform.

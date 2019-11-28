@@ -42,16 +42,22 @@ CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::CLGEMMReshapedOnlyRHSKernelConf
 
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type)
 {
-    ARM_COMPUTE_ERROR_ON(data_type != DataType::F32 && data_type != DataType::QASYMM8);
-    ARM_COMPUTE_UNUSED(data_type);
-
     using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
+
+    // Configurations for Mali-G51
+    static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G51 =
+    {
+        { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f32 },
+        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f16 },
+        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8 }
+    };
 
     // Configurations for Mali-G76
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G76 =
     {
         { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_f32 },
+        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_f16 },
         { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_u8 }
     };
 
@@ -59,15 +65,39 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G7x =
     {
         { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_f32 },
+        { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_f16 },
         { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_u8 }
     };
 
     switch(_target)
     {
         case GPUTarget::G76:
-            return (this->*gemm_configs_G76[data_type])(m, n, k, b);
+            if (gemm_configs_G76.find(data_type) != gemm_configs_G76.end())
+            {
+                return (this->*gemm_configs_G76[data_type])(m, n, k, b);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Not supported data type");
+            }
+        case GPUTarget::G51:
+            if (gemm_configs_G51.find(data_type) != gemm_configs_G51.end())
+            {
+                return (this->*gemm_configs_G51[data_type])(m, n, k, b);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Not supported data type");
+            }
         default:
-            return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
+            if (gemm_configs_G7x.find(data_type) != gemm_configs_G7x.end())
+            {
+                return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Not supported data type");
+            }
     }
 }
 
@@ -80,12 +110,12 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     {
         if(n > 2048)
         {
-            const unsigned int h0 = std::max(n / 4, static_cast<unsigned int>(1));
+            const unsigned int h0 = std::max(n / 4, 1U);
             return configure_lhs_rhs_info(m, n, 1, 4, 4, 1, h0, false, true, false, true);
         }
         else
         {
-            const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
+            const unsigned int h0 = std::max(n / 2, 1U);
             return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, h0, false, true, false, true);
         }
     }
@@ -102,8 +132,82 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
 
     if(m == 1)
     {
-        const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
+        const unsigned int h0 = std::max(n / 2, 1U);
         return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, h0, false, true, false, true);
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 2, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(m == 1)
+    {
+        const unsigned int n0 = n < 1280? 2 : 4;
+        const unsigned int h0 = std::max(n / n0, 1U);
+        return configure_lhs_rhs_info(m, n, 1, n0, 4, 1, h0, false, true, false, true);
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 2, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G7x_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(m == 1)
+    {
+        if(n > 2048)
+        {
+            const unsigned int h0 = std::max(n / 4, 1U);
+            return configure_lhs_rhs_info(m, n, 1, 4, 4, 1, h0, false, true, false, true);
+        }
+        else
+        {
+            const unsigned int h0 = std::max(n / 2, 1U);
+            return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, h0, false, true, false, true);
+        }
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 4, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G76_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(m == 1)
+    {
+        const unsigned int h0 = std::max(n / 2, 1U);
+        return configure_lhs_rhs_info(m, n, 1, 2, 8, 1, h0, false, true, false, true);
+    }
+    else
+    {
+        return configure_lhs_rhs_info(m, n, 4, 4, 4, 1, 2, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(m == 1)
+    {
+        const unsigned int n0 = n < 1280? 2 : 4;
+        const unsigned int h0 = std::max(n / n0, 1U);
+        return configure_lhs_rhs_info(m, n, 1, n0, 8, 1, h0, false, true, false, true);
     }
     else
     {
@@ -120,12 +224,12 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     {
         if(m == 1)
         {
-            const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
+            const unsigned int h0 = std::max(n / 2, 1U);
             return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, h0, false, true, false, true);
         }
         else
         {
-            const unsigned int h0 = std::max(n / 4, static_cast<unsigned int>(1));
+            const unsigned int h0 = std::max(n / 4, 1U);
             return configure_lhs_rhs_info(m, n, 4, 4, 16, 1, h0, false, true, false, true);
         }
     }
@@ -133,12 +237,12 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     {
         if(m == 1)
         {
-            const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
+            const unsigned int h0 = std::max(n / 2, 1U);
             return configure_lhs_rhs_info(m, n, 1, 2, 4, 1, h0, false, true, false, true);
         }
         else
         {
-            const unsigned int h0 = std::max(n / 4, static_cast<unsigned int>(1));
+            const unsigned int h0 = std::max(n / 4, 1U);
             return configure_lhs_rhs_info(m, n, 2, 2, 16, 1, h0, false, true, false, true);
         }
     }
@@ -151,12 +255,29 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
 
     if(m == 1)
     {
-        const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
+        const unsigned int h0 = std::max(n / 2, 1U);
         return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, h0, false, true, false, true);
     }
     else
     {
         return configure_lhs_rhs_info(m, n, 4, 4, 16, 1, 2, false, true, false, true);
+    }
+}
+
+std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::configure_G51_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b)
+{
+    ARM_COMPUTE_UNUSED(k);
+    ARM_COMPUTE_UNUSED(b);
+
+    if(m == 1)
+    {
+        const unsigned int h0 = std::max(n / 2, 1U);
+        return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, h0, false, true, false, true);
+    }
+    else
+    {
+        const unsigned int h0 = std::max(n / 2, 1U);
+        return configure_lhs_rhs_info(m, n, 4, 2, 16, 1, h0, false, true, false, true);
     }
 }
 } // namespace cl_gemm

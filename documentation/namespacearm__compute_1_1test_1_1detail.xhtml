@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -134,8 +134,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_assets_library_8h_source.xhtml#l00444">444</a> of file <a class="el" href="_assets_library_8h_source.xhtml">AssetsLibrary.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;{</div><div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;    std::vector&lt;std::pair&lt;T, T&gt;&gt; converted;</div><div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;    std::transform(excluded_range_pairs.begin(),</div><div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;                   excluded_range_pairs.end(),</div><div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;                   std::back_inserter(converted),</div><div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;                   [](<span class="keyword">const</span> AssetsLibrary::RangePair &amp; p)</div><div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;    {</div><div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;        <span class="keywordflow">return</span> std::pair&lt;T, T&gt;(static_cast&lt;T&gt;(p.first), static_cast&lt;T&gt;(p.second));</div><div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    });</div><div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;    <span class="keywordflow">return</span> converted;</div><div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_assets_library_8h_source.xhtml#l00460">460</a> of file <a class="el" href="_assets_library_8h_source.xhtml">AssetsLibrary.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;{</div><div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;    std::vector&lt;std::pair&lt;T, T&gt;&gt; converted;</div><div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;    std::transform(excluded_range_pairs.begin(),</div><div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;                   excluded_range_pairs.end(),</div><div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;                   std::back_inserter(converted),</div><div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;                   [](<span class="keyword">const</span> AssetsLibrary::RangePair &amp; p)</div><div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;    {</div><div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;        <span class="keywordflow">return</span> std::pair&lt;T, T&gt;(static_cast&lt;T&gt;(p.first), static_cast&lt;T&gt;(p.second));</div><div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;    });</div><div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;    <span class="keywordflow">return</span> converted;</div><div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 </div><!-- contents -->
@@ -144,7 +144,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1detail.xhtml">detail</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:40 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:19 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

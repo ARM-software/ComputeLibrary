@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -214,6 +214,6 @@ void CLPriorBoxLayerKernel::run(const Window &window, cl::CommandQueue &queue)
 
     unsigned int idx = 0;
     add_2D_tensor_argument(idx, _output, slice);
-    enqueue(queue, *this, slice);
+    enqueue(queue, *this, slice, lws_hint());
 }
 } // namespace arm_compute

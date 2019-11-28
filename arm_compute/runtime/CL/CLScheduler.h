@@ -25,7 +25,6 @@
 #define __ARM_COMPUTE_CLSCHEDULER_H__
 
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
@@ -35,21 +34,21 @@
 namespace arm_compute
 {
 class ICLKernel;
-
+class ICLTuner;
 /** Provides global access to a CL context and command queue. */
-class CLScheduler
+class CLScheduler final
 {
-private:
+public:
     /** Constructor */
     CLScheduler();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLScheduler(const CLScheduler &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLScheduler &operator=(const CLScheduler &) = delete;
-
-public:
+    /** Default destructor */
+    ~CLScheduler() = default;
     /** Access the scheduler singleton.
-     *
+     * This method has been deprecated and will be removed in future releases
      * @return The scheduler
      */
     static CLScheduler &get();
@@ -88,31 +87,19 @@ public:
      *
      * @return A CL context.
      */
-    cl::Context &context()
-    {
-        ARM_COMPUTE_ERROR_ON(!_is_initialised);
-        _context = CLKernelLibrary::get().context();
-        return _context;
-    }
+    cl::Context &context();
 
     /** Accessor for the associated CL command queue.
      *
      * @return A CL command queue.
      */
-    cl::CommandQueue &queue()
-    {
-        ARM_COMPUTE_ERROR_ON(!_is_initialised);
-        return _queue;
-    }
+    cl::CommandQueue &queue();
 
     /** Get the target GPU.
      *
      * @return The target GPU.
      */
-    GPUTarget target() const
-    {
-        return _target;
-    }
+    GPUTarget target() const;
 
     /** Accessor to set the CL context to be used by the scheduler.
      *
@@ -124,63 +111,36 @@ public:
      *
      * @param[in] queue A CL command queue.
      */
-    void set_queue(cl::CommandQueue queue)
-    {
-        _queue = std::move(queue);
-    }
+    void set_queue(cl::CommandQueue queue);
 
     /** Accessor to set target GPU to be used by the scheduler.
      *
      * @param[in] target The target GPU.
      */
-    void set_target(GPUTarget target)
-    {
-        _target = target;
-    }
+    void set_target(GPUTarget target);
 
     /** Accessor to set the CL tuner to be used by the scheduler.
      *
      * @param[in] tuner A CL tuner
      */
-    void set_tuner(ICLTuner *tuner)
-    {
-        _cl_tuner = tuner;
-    }
+    void set_tuner(ICLTuner *tuner);
 
     /** Blocks until all commands in the associated command queue have finished. */
-    void sync()
-    {
-        _queue.finish();
-    }
+    void sync();
 
     /** Enqueues a marker into the associated command queue and return the event.
      *
      * @return An event that can be waited on to block the executing thread.
      */
-    cl::Event enqueue_sync_event()
-    {
-        cl::Event event;
-        _queue.enqueueMarker(&event);
-
-        return event;
-    }
+    cl::Event enqueue_sync_event();
 
     /** Tunes OpenCL kernel
      *
      * @param[in] kernel Kernel to tune
      */
-    void tune_kernel_static(ICLKernel &kernel)
-    {
-        if(_cl_tuner != nullptr)
-        {
-            _cl_tuner->tune_kernel_static(kernel);
-        }
-    }
+    void tune_kernel_static(ICLKernel &kernel);
 
-    bool is_initialised() const
-    {
-        return _is_initialised;
-    }
+    bool is_initialised() const;
 
 private:
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
@@ -193,5 +153,5 @@ private:
     ICLTuner                 *_cl_tuner;
     std::unique_ptr<ICLTuner> _cl_default_static_tuner;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLSCHEDULER_H__ */

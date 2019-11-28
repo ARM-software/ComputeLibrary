@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -113,7 +113,7 @@ $(document).ready(function(){initNavTree('validation_2reference_2_pooling_layer_
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2018 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -124,16 +124,26 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a3b52199c8ae7d55f1ff18412c8cd2edb"><td class="memTemplParams" colspan="2">template&lt;typename T , typename ACC_T , typename std::enable_if&lt; is_floating_point&lt; T &gt;::value, int &gt;::type &gt; </td></tr>
+<tr class="memitem:a3b52199c8ae7d55f1ff18412c8cd2edb"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a3b52199c8ae7d55f1ff18412c8cd2edb">pooling_layer_internal</a> (const SimpleTensor&lt; T &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
+<tr class="separator:a3b52199c8ae7d55f1ff18412c8cd2edb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18073566fd7c8a1d119374a6077f0eba"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a18073566fd7c8a1d119374a6077f0eba">pooling_layer_internal&lt; float &gt;</a> (const SimpleTensor&lt; float &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
+<tr class="separator:a18073566fd7c8a1d119374a6077f0eba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22bdd7084faff7d5827025e483754ee9"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a22bdd7084faff7d5827025e483754ee9">pooling_layer_internal&lt; half &gt;</a> (const SimpleTensor&lt; half &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
+<tr class="separator:a22bdd7084faff7d5827025e483754ee9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8af886518da8d53de7dea6cd11d21570"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a8af886518da8d53de7dea6cd11d21570">pooling_layer_internal&lt; half, float &gt;</a> (const SimpleTensor&lt; half &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
+<tr class="separator:a8af886518da8d53de7dea6cd11d21570"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa38db3b299b350b91320f4e3a39ee437"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:aa38db3b299b350b91320f4e3a39ee437"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aa38db3b299b350b91320f4e3a39ee437">pooling_layer</a> (const SimpleTensor&lt; T &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
 <tr class="separator:aa38db3b299b350b91320f4e3a39ee437"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a917e9b0539263f775435cac95a8836a9"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
 <tr class="memitem:a917e9b0539263f775435cac95a8836a9"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a917e9b0539263f775435cac95a8836a9">pooling_layer&lt; uint8_t &gt;</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
 <tr class="separator:a917e9b0539263f775435cac95a8836a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2babe4794cd5ebb985a9e309f3f66380"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
+<tr class="memitem:a2babe4794cd5ebb985a9e309f3f66380"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; half &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a2babe4794cd5ebb985a9e309f3f66380">pooling_layer</a> (const SimpleTensor&lt; half &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
+<tr class="separator:a2babe4794cd5ebb985a9e309f3f66380"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0beab02ef175107dcfd9dc3611d3f2ac"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a0beab02ef175107dcfd9dc3611d3f2ac">pooling_layer</a> (const SimpleTensor&lt; float &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
 <tr class="separator:a0beab02ef175107dcfd9dc3611d3f2ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ac7877012c2099a41b4d916ddf71505"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a5ac7877012c2099a41b4d916ddf71505">pooling_layer</a> (const SimpleTensor&lt; half &gt; &amp;src, const PoolingLayerInfo &amp;info, const QuantizationInfo &amp;output_qinfo)</td></tr>
-<tr class="separator:a5ac7877012c2099a41b4d916ddf71505"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -141,7 +151,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="validation_2reference_2_pooling_layer_8cpp.xhtml">PoolingLayer.cpp</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:08 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

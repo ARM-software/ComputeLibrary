@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,11 +30,11 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCIm2ColKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCGEMM.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <memory>
 
@@ -130,7 +130,7 @@ private:
     static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output);
 
 private:
-    GCMemoryGroup                    _memory_group;
+    MemoryGroup                      _memory_group;
     GCConvolutionLayerReshapeWeights _reshape_weights;
     GCIm2ColKernel                   _input_im2col_kernel;
     GCGEMM                           _mm_gemm;

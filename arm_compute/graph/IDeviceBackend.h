@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 
 #include <memory>
 
@@ -112,6 +113,11 @@ public:
      * @return Memory manager
      */
     virtual std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) = 0;
+    /** Create a backend weights manager
+     *
+     * @return Weights manager
+     */
+    virtual std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() = 0;
 };
 } // namespace backends
 } // namespace graph

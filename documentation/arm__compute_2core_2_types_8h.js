@@ -107,10 +107,12 @@ var arm__compute_2core_2_types_8h =
       [ "S8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aafb0fced528eaac5fe170b763cda5975", null ],
       [ "QSYMM8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a5f007421a4becd11c0666c2058b0b36c", null ],
       [ "QASYMM8", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6af14462d71aa842202c3e4b272c7ec924", null ],
+      [ "QASYMM8_SIGNED", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a329f5d0c4b0c80e3474951d2c4435dd9", null ],
       [ "QSYMM8_PER_CHANNEL", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a34f500e941c4df30b870126ec868ebd5", null ],
       [ "U16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aef9ef3ebca4d2b64b6ec83808bafa5f2", null ],
       [ "S16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a6e0b0886efb94aec797f6b830329b72c", null ],
       [ "QSYMM16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a3ca8a4ea8f992df3b462bc7b24d097c6", null ],
+      [ "QASYMM16", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a3b989c6b5398b3b9538ad103a324205e", null ],
       [ "U32", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6ac8bd5bedff8ef192d39a962afc0e19ee", null ],
       [ "S32", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aa1e28eee0339658d39a8b4d325b56e9c", null ],
       [ "U64", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a31d65cccd6593e4101db93fb878abcaa", null ],
@@ -123,6 +125,10 @@ var arm__compute_2core_2_types_8h =
     [ "DeconvolutionMethod", "arm__compute_2core_2_types_8h.xhtml#a6f66ec167e002c7c0549ff6c8a8939ad", [
       [ "GEMM", "arm__compute_2core_2_types_8h.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada5174aac3927faa9ee34befb7fc87a9e3", null ],
       [ "DIRECT", "arm__compute_2core_2_types_8h.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada4c5d06b02c97731aaa976179c62dcf76", null ]
+    ] ],
+    [ "DepthwiseConvolutionFunction", "arm__compute_2core_2_types_8h.xhtml#a0255421478a6f5ab8a2596d966411a5b", [
+      [ "OPTIMIZED", "arm__compute_2core_2_types_8h.xhtml#a0255421478a6f5ab8a2596d966411a5ba90190a007b4cd58a842970e987761079", null ],
+      [ "GENERIC", "arm__compute_2core_2_types_8h.xhtml#a0255421478a6f5ab8a2596d966411a5bac942dc2a9f958acddc67e11472d3ca0b", null ]
     ] ],
     [ "DetectionOutputLayerCodeType", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830", [
       [ "CORNER", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830ac411afd31d32cec664d372acc12f404a", null ],

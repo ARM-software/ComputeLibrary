@@ -1,10 +1,11 @@
 var classarm__compute_1_1_g_c_tensor =
 [
-    [ "GCTensor", "classarm__compute_1_1_g_c_tensor.xhtml#a4f2f38059311cf163fde21d2414048ee", null ],
+    [ "GCTensor", "classarm__compute_1_1_g_c_tensor.xhtml#a93806fce8ea03359d37ec010a07216ef", null ],
     [ "GCTensor", "classarm__compute_1_1_g_c_tensor.xhtml#a16786bbce187082569ebbc297143ec99", null ],
     [ "GCTensor", "classarm__compute_1_1_g_c_tensor.xhtml#a9a7fad2ddfb9132875b8f119c14dd32e", null ],
     [ "~GCTensor", "classarm__compute_1_1_g_c_tensor.xhtml#ac4a7cca5d7e6a0028379b9fa874ce338", null ],
     [ "allocator", "classarm__compute_1_1_g_c_tensor.xhtml#a44d1d7d909047fe63f5f6c11a9849986", null ],
+    [ "associate_memory_group", "classarm__compute_1_1_g_c_tensor.xhtml#ad702fefc10e889efafeab8a514aee30b", null ],
     [ "buffer", "classarm__compute_1_1_g_c_tensor.xhtml#a24954cca5108a24706441fd99a7fb04c", null ],
     [ "gc_buffer", "classarm__compute_1_1_g_c_tensor.xhtml#acccf4173f8c67e6f93ea3353c9590c9e", null ],
     [ "info", "classarm__compute_1_1_g_c_tensor.xhtml#ad45f0c01a0713dfb6bd7232c7f396fc4", null ],

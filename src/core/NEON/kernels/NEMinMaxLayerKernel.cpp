@@ -212,7 +212,7 @@ void NEMinMaxLayerKernel::reset()
 
 void NEMinMaxLayerKernel::update_min_max(float *out_ptr, float min, float max)
 {
-    std::lock_guard<Mutex> lock(_mtx);
+    arm_compute::lock_guard<Mutex> lock(_mtx);
 
     const float32x2_t old_min = vld1_dup_f32(out_ptr);
     const float32x2_t old_max = vld1_dup_f32(out_ptr + 1);

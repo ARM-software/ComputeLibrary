@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,7 @@
  */
 #include "arm_compute/graph/backends/GLES/GCTensorHandle.h"
 
-#include "arm_compute/core/utils/misc/Cast.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
+#include "arm_compute/runtime/IMemoryGroup.h"
 
 namespace arm_compute
 {
@@ -52,8 +51,7 @@ void GCTensorHandle::manage(IMemoryGroup *mg)
 {
     if(mg != nullptr)
     {
-        auto *gc_mg = arm_compute::utils::cast::polymorphic_downcast<GCMemoryGroup *>(mg);
-        gc_mg->manage(&_tensor);
+        mg->manage(&_tensor);
     }
 }
 

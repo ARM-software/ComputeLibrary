@@ -34,11 +34,13 @@
 #include "arm_compute/graph/backends/CL/CLSubTensorHandle.h"
 #include "arm_compute/graph/backends/CL/CLTensorHandle.h"
 
+#include "arm_compute/core/CL/CLCoreRuntimeContext.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/IWeightsManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
 
@@ -90,9 +92,8 @@ void CLDeviceBackend::initialize_backend()
 {
     // Setup Scheduler
     CLScheduler::get().default_init(&_tuner);
-
     // Create allocator with new context
-    _allocator = support::cpp14::make_unique<CLBufferAllocator>();
+    _allocator = support::cpp14::make_unique<CLBufferAllocator>(nullptr /* legacy path for CLCoreRuntimeContext */);
 }
 
 void CLDeviceBackend::release_backend_context(GraphContext &ctx)
@@ -132,10 +133,20 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
         mm_ctx.target      = Target::CL;
         mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
         mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
-        mm_ctx.cross_group = std::make_shared<CLMemoryGroup>(mm_ctx.cross_mm);
+        mm_ctx.cross_group = std::make_shared<MemoryGroup>(mm_ctx.cross_mm);
         mm_ctx.allocator   = _allocator.get();
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));
+    }
+
+    // Create function level weights manager
+    if(ctx.weights_management_ctx(Target::CL) == nullptr)
+    {
+        WeightsManagerContext wm_ctx;
+        wm_ctx.target = Target::CL;
+        wm_ctx.wm     = create_weights_manager();
+
+        ctx.insert_weights_management_ctx(std::move(wm_ctx));
     }
 }
 
@@ -203,6 +214,12 @@ std::shared_ptr<arm_compute::IMemoryManager> CLDeviceBackend::create_memory_mana
     auto mm           = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
 
     return mm;
+}
+
+std::shared_ptr<arm_compute::IWeightsManager> CLDeviceBackend::create_weights_manager()
+{
+    auto weights_mgr = std::make_shared<IWeightsManager>();
+    return weights_mgr;
 }
 } // namespace backends
 } // namespace graph

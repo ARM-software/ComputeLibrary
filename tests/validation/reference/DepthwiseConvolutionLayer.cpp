@@ -40,7 +40,9 @@ namespace validation
 {
 namespace reference
 {
-/** Perform a depthwise convolution
+namespace
+{
+/** Perform a depthwise convolution for floating-point types
  *
  * - Three dimensions tensors
  * - Third dimention is number of channels
@@ -48,9 +50,9 @@ namespace reference
  * - Padding, stride and output shape "match"
  *
  */
-template <typename T, typename TB>
-SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
-                                      unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
+template <typename T>
+SimpleTensor<T> depthwise_convolution_fp(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
+                                         unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
 {
     ARM_COMPUTE_UNUSED(out_quant_info);
 
@@ -114,7 +116,7 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
                             }
                         }
 
-                        dst[out_pos++] = saturate_cast<T>(val + *static_cast<const TB *>(biases(Coordinates(out_z))));
+                        dst[out_pos++] = saturate_cast<T>(val + *static_cast<const T *>(biases(Coordinates(out_z))));
                     }
                 }
             }
@@ -124,26 +126,32 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
     return dst;
 }
 
-template <>
-SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
-                                            const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
+/** Perform a quantized depthwise convolution
+ *
+ * - Three dimensions tensors
+ * - Third dimention is number of channels
+ * - Depths of input tensor and filter are equals
+ * - Padding, stride and output shape "match"
+ * - QASYMM8 input, output
+ * - QASYMM8 or QSYMM8_PER_CHANNEL filter
+ *
+ */
+template <typename T, typename TW, typename TB>
+SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, const SimpleTensor<TW> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
+                                                const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
 {
     // if no explicit quantization has been set you the same as src
     const QuantizationInfo &dst_qinfo = out_quant_info.uniform().empty() ? src.quantization_info() : out_quant_info;
-    SimpleTensor<uint8_t>   dst{ dst_shape, src.data_type(), 1, dst_qinfo };
+    SimpleTensor<T>         dst{ dst_shape, src.data_type(), 1, dst_qinfo };
 
     // Create reference
     const int   input_offset   = -src.quantization_info().uniform().offset;
     const float input_scale    = src.quantization_info().uniform().scale;
     const int   weights_offset = -weights.quantization_info().uniform().offset;
-    const float weights_scale  = weights.quantization_info().uniform().scale;
     const int   output_offset  = dst_qinfo.uniform().offset;
     const float output_scale   = dst_qinfo.uniform().scale;
 
-    int         output_multiplier = 0;
-    int         output_shift      = 0;
-    const float multiplier        = input_scale * weights_scale / output_scale;
-    arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+    const std::vector<float> weights_scale_vec = weights.quantization_info().scale();
 
     // Compute reference
     const int filter_width  = weights.shape().x();
@@ -173,6 +181,8 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
     const int maximum_x = input_width + pad_left + pad_right - static_cast<int>(patch_width);
     const int maximum_y = input_height + pad_top + pad_bottom - static_cast<int>(patch_height);
 
+    const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights.data_type());
+
     int out_pos = 0;
     for(int r = 0; r < num_batches; ++r)
     {
@@ -182,6 +192,12 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
             {
                 const int     out_z    = z * depth_multiplier + m;
                 const int32_t bias_val = *static_cast<const int32_t *>(biases(Coordinates(out_z)));
+
+                int         output_multiplier = 0;
+                int         output_shift      = 0;
+                const float weights_scale     = (is_quantized_per_channel) ? weights_scale_vec[out_z] : weights_scale_vec[0];
+                const float multiplier        = input_scale * weights_scale / output_scale;
+                arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
                 for(int y = minimum_y; y <= minimum_y + maximum_y; y += conv_info.stride().second)
                 {
@@ -197,8 +213,8 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
                             {
                                 coords.set(0, i);
                                 coords.set(1, j);
-                                const auto    in_val = tensor_elem_at<uint8_t>(src, coords, BorderMode::CONSTANT, -input_offset);
-                                const uint8_t w_val  = *(weights.data() + filter_offset);
+                                const auto in_val = tensor_elem_at<T>(src, coords, BorderMode::CONSTANT, -input_offset);
+                                const TW   w_val  = *(weights.data() + filter_offset);
                                 val += (in_val + input_offset) * (w_val + weights_offset);
                                 ++filter_offset;
                             }
@@ -206,8 +222,7 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
                         val += bias_val;
                         val = asymm_rounding_divide_by_pow2(asymm_int_mult(val, output_multiplier), output_shift);
                         val += output_offset;
-                        val = std::max<int32_t>(val, 0);
-                        val = std::min<int32_t>(val, 255);
+                        val = utility::clamp<int32_t>(val, 0, 255);
 
                         // Store the result
                         dst[out_pos++] = val;
@@ -219,12 +234,35 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
 
     return dst;
 }
+} // namespace
 
-template SimpleTensor<float> depthwise_convolution(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &biases, const TensorShape &dst_shape,
-                                                   const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info);
+template <>
+SimpleTensor<float> depthwise_convolution(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &biases, const TensorShape &dst_shape,
+                                          const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
+{
+    return depthwise_convolution_fp(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation, out_quant_info);
+}
 
-template SimpleTensor<half> depthwise_convolution(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &biases, const TensorShape &dst_shape,
-                                                  const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info);
+template <>
+SimpleTensor<half> depthwise_convolution(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &biases, const TensorShape &dst_shape,
+                                         const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
+{
+    return depthwise_convolution_fp(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation, out_quant_info);
+}
+
+template <>
+SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
+                                            const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
+{
+    return depthwise_convolution_quantized<uint8_t, uint8_t, int32_t>(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation, out_quant_info);
+}
+
+template <>
+SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
+                                            const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
+{
+    return depthwise_convolution_quantized<uint8_t, int8_t, int32_t>(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation, out_quant_info);
+}
 } // namespace reference
 } // namespace validation
 } // namespace test

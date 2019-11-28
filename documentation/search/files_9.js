@@ -6,6 +6,7 @@ var searchData=
   ['iallocator_2eh',['IAllocator.h',['../_i_allocator_8h.xhtml',1,'']]],
   ['iarray_2eh',['IArray.h',['../_i_array_8h.xhtml',1,'']]],
   ['iarrayaccessor_2eh',['IArrayAccessor.h',['../_i_array_accessor_8h.xhtml',1,'']]],
+  ['iassetmanager_2eh',['IAssetManager.h',['../_i_asset_manager_8h.xhtml',1,'']]],
   ['iclarray_2eh',['ICLArray.h',['../_i_c_l_array_8h.xhtml',1,'']]],
   ['icldepthwiseconvolutionlayer3x3kernel_2eh',['ICLDepthwiseConvolutionLayer3x3Kernel.h',['../_i_c_l_depthwise_convolution_layer3x3_kernel_8h.xhtml',1,'']]],
   ['icldistribution1d_2ecpp',['ICLDistribution1D.cpp',['../_i_c_l_distribution1_d_8cpp.xhtml',1,'']]],
@@ -94,6 +95,9 @@ var searchData=
   ['inplaceoperationmutator_2eh',['InPlaceOperationMutator.h',['../_in_place_operation_mutator_8h.xhtml',1,'']]],
   ['inputnode_2ecpp',['InputNode.cpp',['../_input_node_8cpp.xhtml',1,'']]],
   ['inputnode_2eh',['InputNode.h',['../_input_node_8h.xhtml',1,'']]],
+  ['instance_5fnormalization_2ecl',['instance_normalization.cl',['../instance__normalization_8cl.xhtml',1,'']]],
+  ['instancenormalizationlayer_2ecpp',['InstanceNormalizationLayer.cpp',['../_c_l_2_instance_normalization_layer_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_instance_normalization_layer_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_instance_normalization_layer_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['instancenormalizationlayer_2eh',['InstanceNormalizationLayer.h',['../_instance_normalization_layer_8h.xhtml',1,'']]],
   ['instrument_2eh',['Instrument.h',['../_instrument_8h.xhtml',1,'']]],
   ['instruments_2ecpp',['Instruments.cpp',['../_instruments_8cpp.xhtml',1,'']]],
   ['instruments_2eh',['Instruments.h',['../_instruments_8h.xhtml',1,'']]],
@@ -108,6 +112,7 @@ var searchData=
   ['ipoolmanager_2eh',['IPoolManager.h',['../_i_pool_manager_8h.xhtml',1,'']]],
   ['iprinter_2eh',['IPrinter.h',['../_i_printer_8h.xhtml',1,'']]],
   ['ipyramid_2eh',['IPyramid.h',['../_i_pyramid_8h.xhtml',1,'']]],
+  ['iruntimecontext_2eh',['IRuntimeContext.h',['../_i_runtime_context_8h.xhtml',1,'']]],
   ['ischeduler_2ecpp',['IScheduler.cpp',['../_i_scheduler_8cpp.xhtml',1,'']]],
   ['ischeduler_2eh',['IScheduler.h',['../_i_scheduler_8h.xhtml',1,'']]],
   ['isimplelifetimemanager_2ecpp',['ISimpleLifetimeManager.cpp',['../_i_simple_lifetime_manager_8cpp.xhtml',1,'']]],
@@ -121,5 +126,8 @@ var searchData=
   ['itensorallocator_2eh',['ITensorAllocator.h',['../_i_tensor_allocator_8h.xhtml',1,'']]],
   ['itensorhandle_2eh',['ITensorHandle.h',['../_i_tensor_handle_8h.xhtml',1,'']]],
   ['itensorinfo_2eh',['ITensorInfo.h',['../_i_tensor_info_8h.xhtml',1,'']]],
-  ['iterable_2eh',['Iterable.h',['../_iterable_8h.xhtml',1,'']]]
+  ['iterable_2eh',['Iterable.h',['../_iterable_8h.xhtml',1,'']]],
+  ['itransformweights_2eh',['ITransformWeights.h',['../_i_transform_weights_8h.xhtml',1,'']]],
+  ['iweightsmanager_2ecpp',['IWeightsManager.cpp',['../_i_weights_manager_8cpp.xhtml',1,'']]],
+  ['iweightsmanager_2eh',['IWeightsManager.h',['../_i_weights_manager_8h.xhtml',1,'']]]
 ];

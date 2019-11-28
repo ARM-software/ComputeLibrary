@@ -11,9 +11,9 @@
 <polygon fill="white" stroke="none" points="-4,4 -4,-24 83,-24 83,4 -4,4"/>
 <!-- Node0 -->
 <g id="node1" class="node"><title>Node0</title>
-<g id="a_node1"><a xlink:href="classarm__compute_1_1graph_1_1_graph_builder.xhtml" target="_top" xlink:title="Graph builder class.">
+<g id="a_node1"><a xlink:href="classarm__compute_1_1_g_c_scheduler.xhtml" target="_top" xlink:title="Provides global access to a OpenGL ES context and command queue.">
 <polygon fill="white" stroke="black" points="-7.10543e-15,-0.5 -7.10543e-15,-19.5 79,-19.5 79,-0.5 -7.10543e-15,-0.5"/>
-<text text-anchor="middle" x="39.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">GraphBuilder</text>
+<text text-anchor="middle" x="39.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">GCScheduler</text>
 </a>
 </g>
 </g>

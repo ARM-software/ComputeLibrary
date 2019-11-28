@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,19 +26,25 @@
 
 #include "arm_compute/runtime/IAllocator.h"
 
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-
 #include <cstddef>
 
 namespace arm_compute
 {
+class CLCoreRuntimeContext;
 /** Default OpenCL cl buffer allocator implementation */
 class CLBufferAllocator final : public IAllocator
 {
 public:
-    /** Default constructor */
-    explicit CLBufferAllocator(cl::Context context = CLScheduler::get().context());
+    /** Default constructor
+     *
+     * @param[in] ctx A runtime context.
+     */
+    CLBufferAllocator(CLCoreRuntimeContext *ctx = nullptr);
+
+    /** Default copy constructor */
+    CLBufferAllocator(const CLBufferAllocator &) = default;
+    /** Default copy assignment operator */
+    CLBufferAllocator &operator=(const CLBufferAllocator &) = default;
 
     // Inherited methods overridden:
     void *allocate(size_t size, size_t alignment) override;
@@ -46,7 +52,7 @@ public:
     std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) override;
 
 private:
-    cl::Context _context;
+    CLCoreRuntimeContext *_ctx;
 };
 } // arm_compute
 #endif /*__ARM_COMPUTE_CLBUFFERALLOCATOR_H__ */

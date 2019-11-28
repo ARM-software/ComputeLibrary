@@ -41,6 +41,7 @@ public:
      *
      * Valid conversions Input -> Output :
      *
+     *   - QSYMM8_PER_CHANNEL -> QASYMM8 (ATTENTION: it is the user's responsibility to keep track of the quantization info in the TensorInfo meta-data)
      *   - U8  -> S8, U16, S16, U32, S32, F16, F32
      *   - U16 -> U8, S8, S16, U32, S32, F16, F32
      *   - S16 -> U8, S8, U16, U32, S32, F16, F32
@@ -49,16 +50,16 @@ public:
      *   - F16 -> U8, S8, U16, S16, U32, F32
      *   - F32 -> U8, S8, U16, S16, U32, F16
      *
-     * @param[in]  input  The input tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
-     * @param[out] output The output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input  The input tensor to convert. Data types supported: U8/S8/QSYMM8_PER_CHANNEL/U16/S16/U32/S32/F16/F32.
+     * @param[out] output The output tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy
      * @param[in]  shift  Value for down/up conversions. Must be 0 <= shift < 8.
      */
     void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConvertLayerKernel
      *
-     * @param[in] input  Source tensor info. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
-     * @param[in] output Destination tensor info. Data type supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: U8/S8/QSYMM8_PER_CHANNEL/U16/S16/U32/S32/F16/F32.
+     * @param[in] output Destination tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
      * @param[in] policy Conversion policy
      * @param[in] shift  Value for down/up conversions. Must be 0 <= shift < 8.
      *

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -141,6 +141,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_bitwise_not_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEBitwiseNotKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEBitwiseOrKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEBitwiseXorKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_bounding_box_transform_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEBoundingBoxTransformKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_box3x3_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEBox3x3Kernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEChannelCombineKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_channel_extract_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEChannelExtractKernel</a>
@@ -148,7 +149,9 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_col2_im_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NECol2ImKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_color_convert_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEColorConvertKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_complex_pixel_wise_multiplication_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEComplexPixelWiseMultiplicationKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_compute_all_anchors_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEComputeAllAnchorsKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEConvertFullyConnectedWeightsKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEConvertQuantizedSignednessKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEConvolutionKernel&lt; matrix_size &gt;</a>
 , <a class="el" href="classarm__compute_1_1_n_e_convolution_rectangle_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEConvolutionRectangleKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_copy_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NECopyKernel</a>
@@ -159,9 +162,6 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_depth_to_space_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDepthToSpaceLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDepthwiseConvolutionLayer3x3Kernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer_native_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDepthwiseConvolutionLayerNativeKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDepthwiseIm2ColKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDepthwiseVectorToTensorKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDepthwiseWeightsReshapeKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDequantizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_derivative_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDerivativeKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_dilate_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEDilateKernel</a>
@@ -211,12 +211,13 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEHOGDetectorKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEHOGOrientationBinningKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEIm2ColKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_instance_normalization_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEInstanceNormalizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_integral_image_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEIntegralImageKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEL2NormalizeLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_l_k_tracker_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NELKTrackerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NELocallyConnectedMatrixMultiplyKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NELogits1DMaxKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NELogits1DSoftmaxKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NELogits1DSoftmaxKernel&lt; IS_LOG &gt;</a>
 , <a class="el" href="classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEMagnitudePhaseKernel&lt; mag_type, phase_type &gt;</a>
 , <a class="el" href="classarm__compute_1_1_n_e_mean_std_dev_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEMeanStdDevKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_mean_std_dev_normalization_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEMeanStdDevNormalizationKernel</a>
@@ -228,6 +229,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_non_linear_filter_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NENonLinearFilterKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NENonMaximaSuppression3x3Kernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NENormalizationLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_pad_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEPadLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_permute_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEPermuteKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEPixelWiseMultiplicationKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEPoolingLayerKernel</a>
@@ -239,6 +241,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_reorg_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEReorgLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_reshape_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEReshapeLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_reverse_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEReverseKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_r_o_i_align_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEROIAlignLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEROIPoolingLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEScaleKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">NEScharr3x3Kernel</a>
@@ -286,6 +289,9 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <li>NEAccumulateWeightedKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_accumulate_weighted_kernel.xhtml#a044d704971675daa53757df82be00583">NEAccumulateWeightedKernel</a>
 </li>
+<li>NEActivationLayer()
+: <a class="el" href="classarm__compute_1_1_n_e_activation_layer.xhtml#a450310db68f69275e126f53a819fa6aa">NEActivationLayer</a>
+</li>
 <li>NEActivationLayerKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#af5c940969e40e1ae12411bb025a117f2">NEActivationLayerKernel</a>
 </li>
@@ -325,6 +331,9 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <li>NEBitwiseXorKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml#aa5786af8781e59574815a07c6746943a">NEBitwiseXorKernel</a>
 </li>
+<li>NEBoundingBoxTransformKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_bounding_box_transform_kernel.xhtml#acdc92ea7317e15a912733b815be5f457">NEBoundingBoxTransformKernel</a>
+</li>
 <li>NECannyEdge()
 : <a class="el" href="classarm__compute_1_1_n_e_canny_edge.xhtml#ae8ba206ac7ec00eb2f4a1624c047faaa">NECannyEdge</a>
 </li>
@@ -349,6 +358,9 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <li>NEComplexPixelWiseMultiplicationKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_complex_pixel_wise_multiplication_kernel.xhtml#a52fda24e424ef4df1254f5249a9988fa">NEComplexPixelWiseMultiplicationKernel</a>
 </li>
+<li>NEComputeAllAnchorsKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_compute_all_anchors_kernel.xhtml#a065d950035075ca64538f2e06035238b">NEComputeAllAnchorsKernel</a>
+</li>
 <li>NEConcatenateLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_concatenate_layer.xhtml#a323553c0bffc8dda63242a297512d151">NEConcatenateLayer</a>
 </li>
@@ -358,6 +370,9 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <li>NEConvertFullyConnectedWeightsKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a90b1dc1d6e41461530a27a0b98cff105">NEConvertFullyConnectedWeightsKernel</a>
 </li>
+<li>NEConvertQuantizedSignednessKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#ab4dc7fea753e4770dda96bee4f1cc194">NEConvertQuantizedSignednessKernel</a>
+</li>
 <li>NEConvolutionKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#a230a4894adf8380eca9e8c2aac03e9b8">NEConvolutionKernel&lt; matrix_size &gt;</a>
 </li>
@@ -365,7 +380,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml#a3dbdd29f4f94dc9d6089ce4a57d3809f">NEConvolutionLayer</a>
 </li>
 <li>NEConvolutionLayerReshapeWeights()
-: <a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#a0b04a8831ea6ef4d064055ddbb2d4d8f">NEConvolutionLayerReshapeWeights</a>
+: <a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#aa8fa55bed22e2f7b2686ae4a0b065806">NEConvolutionLayerReshapeWeights</a>
 </li>
 <li>NEConvolutionRectangleKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_convolution_rectangle_kernel.xhtml#a437bfa972bdb089215368c344cce05d3">NEConvolutionRectangleKernel</a>
@@ -383,7 +398,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_crop_resize.xhtml#a6a94720cb2462585bbc08fab0cc7b8b9">NECropResize</a>
 </li>
 <li>NECumulativeDistributionKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml#afa30a9b7652a405442adaed49119a323">NECumulativeDistributionKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml#a6fa25b9f56915d8a179725e5bab75640">NECumulativeDistributionKernel</a>
 </li>
 <li>NEDeconvolutionLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_deconvolution_layer.xhtml#a7eed3415cae42b9a35a5ffa5267281d9">NEDeconvolutionLayer</a>
@@ -404,10 +419,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_assembly_dispatch.xhtml#a4e3fd833ab574a3299997f4a4faf83df">NEDepthwiseConvolutionAssemblyDispatch</a>
 </li>
 <li>NEDepthwiseConvolutionLayer()
-: <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml#aaa71284f868a7571de11d6230081a008">NEDepthwiseConvolutionLayer</a>
-</li>
-<li>NEDepthwiseConvolutionLayer3x3()
-: <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3.xhtml#aaae1ef44e59de27d8f2889df03444b7e">NEDepthwiseConvolutionLayer3x3</a>
+: <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml#aceb582e096b2871c92271876223eb7b6">NEDepthwiseConvolutionLayer</a>
 </li>
 <li>NEDepthwiseConvolutionLayer3x3Kernel()
 : <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#abf0a671d5f84d64b22c1baacbc30d42c">NEDepthwiseConvolutionLayer3x3Kernel</a>
@@ -418,18 +430,6 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <li>NEDepthwiseConvolutionLayerOptimized()
 : <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer_optimized.xhtml#afbb9307112fea2f5f71a94702bc104d7">NEDepthwiseConvolutionLayerOptimized</a>
 </li>
-<li>NEDepthwiseIm2ColKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#abedec4a789c5ce275d17d458810e9fac">NEDepthwiseIm2ColKernel</a>
-</li>
-<li>NEDepthwiseSeparableConvolutionLayer()
-: <a class="el" href="classarm__compute_1_1_n_e_depthwise_separable_convolution_layer.xhtml#aafa2f3a8b43b033f84032a4082984d8c">NEDepthwiseSeparableConvolutionLayer</a>
-</li>
-<li>NEDepthwiseVectorToTensorKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel.xhtml#a45211656df43f2757693a69f39c175da">NEDepthwiseVectorToTensorKernel</a>
-</li>
-<li>NEDepthwiseWeightsReshapeKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml#ae357794bb7bc6e3053d54fc62f5c4db0">NEDepthwiseWeightsReshapeKernel</a>
-</li>
 <li>NEDequantizationLayerKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#afb04616ade20ec68717dde3bbfca541b">NEDequantizationLayerKernel</a>
 </li>
@@ -438,6 +438,9 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 </li>
 <li>NEDerivativeKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_derivative_kernel.xhtml#ac317d66b746c86ea136eb7996c897b22">NEDerivativeKernel</a>
+</li>
+<li>NEDetectionPostProcessLayer()
+: <a class="el" href="classarm__compute_1_1_n_e_detection_post_process_layer.xhtml#a87d98ddc562f7a1278d1f44dc8a2d653">NEDetectionPostProcessLayer</a>
 </li>
 <li>NEDeviceBackend()
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_device_backend.xhtml#a66234bec4278ca60b7efb8ac0ab1bd09">NEDeviceBackend</a>
@@ -509,7 +512,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_flatten_layer_kernel.xhtml#a866e6e56f9c8dd44ad3968ba45989bb7">NEFlattenLayerKernel</a>
 </li>
 <li>NEFullyConnectedLayer()
-: <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml#a7998301359e064aa20ce967b45301d3b">NEFullyConnectedLayer</a>
+: <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml#a9845f83f6f3bc45f9fb57ea1345e3dd3">NEFullyConnectedLayer</a>
 </li>
 <li>NEFuseBatchNormalization()
 : <a class="el" href="classarm__compute_1_1_n_e_fuse_batch_normalization.xhtml#a8c9f3b1b8b437c75f10a29c6464c7f57">NEFuseBatchNormalization</a>
@@ -539,25 +542,22 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_orb.xhtml#a944408035fc5125bab445b8241abcd90">NEGaussianPyramidOrb</a>
 </li>
 <li>NEGaussianPyramidVertKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml#a6b7eabb7f21234ba4224ccd58f31759b">NEGaussianPyramidVertKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml#a7d7c6bdf235be21dd5c0dd0c17182248">NEGaussianPyramidVertKernel</a>
 </li>
 <li>NEGEMM()
-: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m.xhtml#abaa70c8f86d580a791200678388d0073">NEGEMM</a>
+: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m.xhtml#a545e2af1971b9885b46f0f58b5893628">NEGEMM</a>
 </li>
 <li>NEGEMMAssemblyBaseKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_assembly_base_kernel.xhtml#a9338ccd0c5c5d67fbeb450d8d3c492c6">NEGEMMAssemblyBaseKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_assembly_base_kernel.xhtml#a4f6114633a022d4829db101eed792843">NEGEMMAssemblyBaseKernel</a>
 </li>
 <li>NEGEMMAssemblyDispatch()
-: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch.xhtml#a68a390745d5de400e5903b1c8a9648af">NEGEMMAssemblyDispatch</a>
+: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch.xhtml#adc86c010924ead52170436db51eb00e1">NEGEMMAssemblyDispatch</a>
 </li>
 <li>NEGEMMConvolutionLayer()
-: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml#a24fed20754466c50bb2c823444556a6d">NEGEMMConvolutionLayer</a>
+: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml#a627cee3df543519d4a134291189a3b9e">NEGEMMConvolutionLayer</a>
 </li>
 <li>NEGEMMInterleave4x4Kernel()
 : <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml#ae05d4514f4b8415dbd21e900cffb2fbc">NEGEMMInterleave4x4Kernel</a>
-</li>
-<li>NEGEMMInterleavedWrapper()
-: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_interleaved_wrapper.xhtml#a088148055d3bdf42760f8dddcc7ba662">NEGEMMInterleavedWrapper</a>
 </li>
 <li>NEGEMMLowpAssemblyMatrixMultiplyCore()
 : <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_assembly_matrix_multiply_core.xhtml#af5f476de0574e0225a55db44447c48f4">NEGEMMLowpAssemblyMatrixMultiplyCore</a>
@@ -581,7 +581,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml#a3d0b72df579c39f4559d541ffce740bd">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a>
 </li>
 <li>NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml#aebd10c830cc69f661d0f6a7fdcf5d00c">NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml#a06e91bfbbc6c1e8ad7260f62986eeb79">NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a>
 </li>
 <li>NEGEMMMatrixAccumulateBiasesKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml#aa84ecb564c5f8946e017ca8af72f96c8">NEGEMMMatrixAccumulateBiasesKernel</a>
@@ -593,7 +593,10 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml#aeef5692e383060fe73ee1eb989b96ad4">NEGEMMMatrixMultiplyKernel</a>
 </li>
 <li>NEGEMMMatrixVectorMultiplyKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml#a985536222215388a62670c8d57b05736">NEGEMMMatrixVectorMultiplyKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml#a65033b645497768758fcf14d4d25eede">NEGEMMMatrixVectorMultiplyKernel</a>
+</li>
+<li>NEGenerateProposalsLayer()
+: <a class="el" href="classarm__compute_1_1_n_e_generate_proposals_layer.xhtml#aa8a63b506d3595a5897d61a01084d9e2">NEGenerateProposalsLayer</a>
 </li>
 <li>NEGradientKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_gradient_kernel.xhtml#a7da52d0627026b852dc51dbab82a978b">NEGradientKernel</a>
@@ -605,16 +608,16 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_harris_score_kernel.xhtml#a18cf8876acac9c6c2b35e38d9beabe9d">NEHarrisScoreKernel&lt; block_size &gt;</a>
 </li>
 <li>NEHeightConcatenateLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_height_concatenate_layer_kernel.xhtml#af0910be59a50b6932abeb71587cbfa0a">NEHeightConcatenateLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_height_concatenate_layer_kernel.xhtml#a09d00fda145fac585e8791da2298d56e">NEHeightConcatenateLayerKernel</a>
 </li>
 <li>NEHistogram()
 : <a class="el" href="classarm__compute_1_1_n_e_histogram.xhtml#a15d0892c4a1aa404f5a6967b8bc49fa8">NEHistogram</a>
 </li>
 <li>NEHistogramKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_histogram_kernel.xhtml#ad671a80d59ee10144e810003ead8fb57">NEHistogramKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_histogram_kernel.xhtml#a13563fca453f4925820f84d182294b9d">NEHistogramKernel</a>
 </li>
 <li>NEHOGBlockNormalizationKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#a2326d9458e2047eef9b26745db76ad79">NEHOGBlockNormalizationKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#a3f9eda786b67908885c93faf5eb55594">NEHOGBlockNormalizationKernel</a>
 </li>
 <li>NEHOGDescriptor()
 : <a class="el" href="classarm__compute_1_1_n_e_h_o_g_descriptor.xhtml#acd99c8cb08517ab807be56293aac5bec">NEHOGDescriptor</a>
@@ -629,7 +632,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_h_o_g_multi_detection.xhtml#ab89e2f74cd1d706e49bfe182c2923789">NEHOGMultiDetection</a>
 </li>
 <li>NEHOGOrientationBinningKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml#a5a1b3543ffcd941a0f3b5bc2b058c92e">NEHOGOrientationBinningKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml#af2fb5e2868809c6b7e1e472dd34ddbea">NEHOGOrientationBinningKernel</a>
 </li>
 <li>NEIm2Col()
 : <a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#a6f08d8bba859372d8979b0e4b09ddb56">NEIm2Col</a>
@@ -637,11 +640,17 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <li>NEIm2ColKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#aec5fb874227c941e8ac14de3d29e543b">NEIm2ColKernel</a>
 </li>
+<li>NEInstanceNormalizationLayer()
+: <a class="el" href="classarm__compute_1_1_n_e_instance_normalization_layer.xhtml#ab8236e1d2a1a1598abeec2a2756d1be0">NEInstanceNormalizationLayer</a>
+</li>
+<li>NEInstanceNormalizationLayerKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_instance_normalization_layer_kernel.xhtml#a1fc16e4c5f99a212c59540cf259c9827">NEInstanceNormalizationLayerKernel</a>
+</li>
 <li>NEL2NormalizeLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer.xhtml#ad15dc31c9ce02a1afd5762b64a11c1c4">NEL2NormalizeLayer</a>
 </li>
 <li>NEL2NormalizeLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer_kernel.xhtml#a074123c53d349a9f418a7a269e331230">NEL2NormalizeLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer_kernel.xhtml#a82265061e07c888085faad1ec861d507">NEL2NormalizeLayerKernel</a>
 </li>
 <li>NELaplacianPyramid()
 : <a class="el" href="classarm__compute_1_1_n_e_laplacian_pyramid.xhtml#a4b03c61f02f3e0119fa71877abb9b4b8">NELaplacianPyramid</a>
@@ -656,37 +665,37 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_locally_connected_layer.xhtml#a0115186dd4cd64fcca9f32216f5d6639">NELocallyConnectedLayer</a>
 </li>
 <li>NELocallyConnectedMatrixMultiplyKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#ad23c1537e7f95401ebb2a7850e6dd25f">NELocallyConnectedMatrixMultiplyKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#aa8d683f010979a37439e67bf189b34d3">NELocallyConnectedMatrixMultiplyKernel</a>
 </li>
 <li>NELogits1DMaxKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml#a7dcfcda37359d31c2510ad865f4ca051">NELogits1DMaxKernel</a>
 </li>
 <li>NELogits1DSoftmaxKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml#a6c27f2243845b964e4cefe5e9d5937a4">NELogits1DSoftmaxKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml#ac180b8dbfc8b27e0085571efe18510e5">NELogits1DSoftmaxKernel&lt; IS_LOG &gt;</a>
 </li>
 <li>NELSTMLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_l_s_t_m_layer.xhtml#a8d8d5b5c66b732b3fc9494b0e743ed3f">NELSTMLayer</a>
 </li>
 <li>NELSTMLayerQuantized()
-: <a class="el" href="classarm__compute_1_1_n_e_l_s_t_m_layer_quantized.xhtml#a806ae351d9c6988ec1743791661c001f">NELSTMLayerQuantized</a>
+: <a class="el" href="classarm__compute_1_1_n_e_l_s_t_m_layer_quantized.xhtml#a68100f1cb07de79a0915c747e52c325d">NELSTMLayerQuantized</a>
 </li>
 <li>NEMagnitudePhaseKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#ac0a5198310dfa51fb02e28e2594e1d53">NEMagnitudePhaseKernel&lt; mag_type, phase_type &gt;</a>
+: <a class="el" href="classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#a53c147feec3c6f2912779194fa2b5513">NEMagnitudePhaseKernel&lt; mag_type, phase_type &gt;</a>
 </li>
 <li>NEMeanStdDev()
 : <a class="el" href="classarm__compute_1_1_n_e_mean_std_dev.xhtml#a08ebd3b5f0e06c72c512d799cd9fccd2">NEMeanStdDev</a>
 </li>
 <li>NEMeanStdDevKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_mean_std_dev_kernel.xhtml#a6d25c4a312717de480c27bdf6c4937ce">NEMeanStdDevKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_mean_std_dev_kernel.xhtml#a6a85f552b312ad2560ae02676db95f9e">NEMeanStdDevKernel</a>
 </li>
 <li>NEMeanStdDevNormalizationKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_mean_std_dev_normalization_kernel.xhtml#a7d923d3b84fa30f73b1656d5b2bb3ec0">NEMeanStdDevNormalizationKernel</a>
 </li>
 <li>NEMemsetKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_memset_kernel.xhtml#a510e13f4340a3b266c20334084d8acef">NEMemsetKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_memset_kernel.xhtml#abb0abf7cae549eaef4a4f2e9ed1ad57a">NEMemsetKernel</a>
 </li>
 <li>NEMinMaxKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_min_max_kernel.xhtml#a14c484d0c1759b7163e3691ea1bb8bb5">NEMinMaxKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_min_max_kernel.xhtml#a86b4a121baa6da0124df90f08436eb30">NEMinMaxKernel</a>
 </li>
 <li>NEMinMaxLayerKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_min_max_layer_kernel.xhtml#a7595e6658a34d7fea57ae6b7e9df9753">NEMinMaxLayerKernel</a>
@@ -698,16 +707,16 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#a41c506659961dcf1f935ae6e349f0d54">NEMinMaxLocationKernel</a>
 </li>
 <li>NENonLinearFilterKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_non_linear_filter_kernel.xhtml#aa8b392e0f9752f58bad0899fbf05062d">NENonLinearFilterKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_non_linear_filter_kernel.xhtml#af7d8f3eac26e577c2c1754a7c2dab402">NENonLinearFilterKernel</a>
 </li>
 <li>NENonMaximaSuppression3x3Kernel()
-: <a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml#ae4b41758a959cb874f3d8a179fd37a7e">NENonMaximaSuppression3x3Kernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml#aef9f048495848c9d8af9939009c363fc">NENonMaximaSuppression3x3Kernel</a>
 </li>
 <li>NENormalizationLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_normalization_layer.xhtml#ab9fb64464b613c8dfb660ce8adda169e">NENormalizationLayer</a>
 </li>
 <li>NENormalizationLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#a0a9583248b18a4ac65987cd5adebc6ed">NENormalizationLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#ab3498b8beb89599cee12a9e2ac083d88">NENormalizationLayerKernel</a>
 </li>
 <li>NEOpticalFlow()
 : <a class="el" href="classarm__compute_1_1_n_e_optical_flow.xhtml#ad5dfdcf45ad38c48cd725b0fdc675b34">NEOpticalFlow</a>
@@ -715,8 +724,11 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <li>NEPadLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_pad_layer.xhtml#a79ddca98792472ac497d7acc81933398">NEPadLayer</a>
 </li>
+<li>NEPadLayerKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_pad_layer_kernel.xhtml#a618832801e40d5fbade6782b35608688">NEPadLayerKernel</a>
+</li>
 <li>NEPermuteKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_permute_kernel.xhtml#acba877f622a9b909a592f5a43ed26863">NEPermuteKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_permute_kernel.xhtml#ac041b093bce44d5969166685832c21d7">NEPermuteKernel</a>
 </li>
 <li>NEPixelWiseMultiplicationKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a75e09a8ec40fb21b0f71421960b540a6">NEPixelWiseMultiplicationKernel</a>
@@ -725,19 +737,19 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_pooling_layer.xhtml#adfb415099e7d78f4444e0fb45e405091">NEPoolingLayer</a>
 </li>
 <li>NEPoolingLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#a580a7925065fd33f5e7e12425769edd1">NEPoolingLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#ab35670d771933fa900a8cccae52cc0dd">NEPoolingLayerKernel</a>
 </li>
 <li>NEPowerOperationKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_power_operation_kernel.xhtml#a8fa201bf255c597c74656ebba8f9ac44">NEPowerOperationKernel</a>
 </li>
 <li>NEPriorBoxLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_prior_box_layer_kernel.xhtml#a624fa89170ccad67d61dc520cc2992bc">NEPriorBoxLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_prior_box_layer_kernel.xhtml#a58becea6aa8b26797d861f1ca4c2cab2">NEPriorBoxLayerKernel</a>
 </li>
 <li>NEQuantizationLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_quantization_layer.xhtml#a3f25412d98888fd34c42e9d22708c73b">NEQuantizationLayer</a>
 </li>
 <li>NEQuantizationLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml#ad62e17aadd5912b41857bdbc15730268">NEQuantizationLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml#af016debab1ceae65a136232e68c17617">NEQuantizationLayerKernel</a>
 </li>
 <li>NERange()
 : <a class="el" href="classarm__compute_1_1_n_e_range.xhtml#a1676ab701fe81cd955c7430a235e6f98">NERange</a>
@@ -749,10 +761,10 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_reduce_mean.xhtml#a1f208adec0739b6ce732abb5cc8e5a58">NEReduceMean</a>
 </li>
 <li>NEReductionOperation()
-: <a class="el" href="classarm__compute_1_1_n_e_reduction_operation.xhtml#a20574f46cffa32ed112fcffa4e3af223">NEReductionOperation</a>
+: <a class="el" href="classarm__compute_1_1_n_e_reduction_operation.xhtml#a86a20d6d15876935dd8999ef0c26d216">NEReductionOperation</a>
 </li>
 <li>NEReductionOperationKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml#a2a4e88f09df046635e88b16c8ec387a7">NEReductionOperationKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml#a2a7bcbc502be4512dfb95500af4bd5e1">NEReductionOperationKernel</a>
 </li>
 <li>NERemapKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_remap_kernel.xhtml#aca07bf938309c22c50104ed93b7d3d1e">NERemapKernel</a>
@@ -766,6 +778,9 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <li>NERNNLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_r_n_n_layer.xhtml#ab6231543c4071f67f7acd1b868017185">NERNNLayer</a>
 </li>
+<li>NEROIAlignLayerKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_r_o_i_align_layer_kernel.xhtml#a6bbbb888bcf91f66817689ba78cb6ada">NEROIAlignLayerKernel</a>
+</li>
 <li>NEROIPoolingLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_r_o_i_pooling_layer.xhtml#a25e24d127134f9fd599195250c19444b">NEROIPoolingLayer</a>
 </li>
@@ -776,13 +791,13 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_scale.xhtml#a30a0363a371ac59877079c6ec1962657">NEScale</a>
 </li>
 <li>NEScaleKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#afaad06478be3721ab81bb31303e3036d">NEScaleKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#ae1d7843aaf1b5e13bf8403e44249b97a">NEScaleKernel</a>
 </li>
 <li>NEScharr3x3Kernel()
-: <a class="el" href="classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#a625e12a0c7ab061154b39f47a4a11309">NEScharr3x3Kernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#aa92e67ceef8ce3ddbee234f9f3a28220">NEScharr3x3Kernel</a>
 </li>
 <li>NESelectKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_select_kernel.xhtml#a28e79640a392e4574acaca0481d4a45f">NESelectKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_select_kernel.xhtml#a97b2954539ea17a9b037562fc0033352">NESelectKernel</a>
 </li>
 <li>NESeparableConvolutionHorKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_separable_convolution_hor_kernel.xhtml#a965a154580e00968b45aa6268986cd51">NESeparableConvolutionHorKernel&lt; matrix_size &gt;</a>
@@ -794,7 +809,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_simple_assembly_function.xhtml#afb07b1dea50f174ccf0d67a2eb8416a2">NESimpleAssemblyFunction</a>
 </li>
 <li>NESobel3x3Kernel()
-: <a class="el" href="classarm__compute_1_1_n_e_sobel3x3_kernel.xhtml#a517dc6cf8dd14439b40ba8c06ead5810">NESobel3x3Kernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_sobel3x3_kernel.xhtml#a4bc884b1fc83db1d51ed40243d8c4be8">NESobel3x3Kernel</a>
 </li>
 <li>NESobel5x5()
 : <a class="el" href="classarm__compute_1_1_n_e_sobel5x5.xhtml#a60dc311f2ae26bf9447df0e95ad631de">NESobel5x5</a>
@@ -803,22 +818,22 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#ab3fe9be760d9e2faa8cb36872889fc98">NESobel5x5HorKernel</a>
 </li>
 <li>NESobel5x5VertKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml#ab46cf54e2df5a20b634660a06e48e9d5">NESobel5x5VertKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml#aefe5ee52a24df017a67c5fe79ac0d19f">NESobel5x5VertKernel</a>
 </li>
 <li>NESobel7x7()
 : <a class="el" href="classarm__compute_1_1_n_e_sobel7x7.xhtml#a999f68b754259bb7c0a1003e51a31c99">NESobel7x7</a>
 </li>
 <li>NESobel7x7HorKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_sobel7x7_hor_kernel.xhtml#ac9d0ac2c616250612ac3835839480cc3">NESobel7x7HorKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_sobel7x7_hor_kernel.xhtml#ad408b442a132acdbcf1e6c28100d2c2e">NESobel7x7HorKernel</a>
 </li>
 <li>NESobel7x7VertKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_sobel7x7_vert_kernel.xhtml#a667242192107c5f9fb8368eaccca2103">NESobel7x7VertKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_sobel7x7_vert_kernel.xhtml#a685552a5f91d30d8f5b4ce2003771d18">NESobel7x7VertKernel</a>
 </li>
-<li>NESoftmaxLayer()
-: <a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml#a302bd66eed7126e9c7b0eb6bc3314ac3">NESoftmaxLayer</a>
+<li>NESoftmaxLayerGeneric()
+: <a class="el" href="classarm__compute_1_1_n_e_softmax_layer_generic.xhtml#a9bec0916cfb2b6eaa1bb206eb3f46137">NESoftmaxLayerGeneric&lt; IS_LOG &gt;</a>
 </li>
 <li>NESpaceToBatchLayer()
-: <a class="el" href="classarm__compute_1_1_n_e_space_to_batch_layer.xhtml#aa79672e846ddb4ba5ad8cb3ec4b8eece">NESpaceToBatchLayer</a>
+: <a class="el" href="classarm__compute_1_1_n_e_space_to_batch_layer.xhtml#ae38c9a24129778ff49c13ddd144471de">NESpaceToBatchLayer</a>
 </li>
 <li>NESpaceToBatchLayerKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_space_to_batch_layer_kernel.xhtml#aedb1c41f5e14dd99721674caeed12949">NESpaceToBatchLayerKernel</a>
@@ -827,7 +842,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_space_to_depth_layer.xhtml#af771c237b3c5f2f77650b00ef479c35e">NESpaceToDepthLayer</a>
 </li>
 <li>NESpaceToDepthLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_space_to_depth_layer_kernel.xhtml#ab9479e0ff82d3c799216aa08650ac41e">NESpaceToDepthLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_space_to_depth_layer_kernel.xhtml#a7d4b4ea27f254a82697370cf4a68dd72">NESpaceToDepthLayerKernel</a>
 </li>
 <li>NESplit()
 : <a class="el" href="classarm__compute_1_1_n_e_split.xhtml#ad89d8795f247b61e5aeba5f12ae1fd15">NESplit</a>
@@ -836,28 +851,28 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_stack_layer.xhtml#a8ca90468cf9e830f73ba50ed7bbb9d53">NEStackLayer</a>
 </li>
 <li>NEStackLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_stack_layer_kernel.xhtml#a61e7e4d2e16442301bd4c3ed327ef67a">NEStackLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_stack_layer_kernel.xhtml#a1b3396255401298dd2a89721a0ea07ad">NEStackLayerKernel</a>
 </li>
 <li>NEStridedSliceKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_strided_slice_kernel.xhtml#a9299a63e228836ebfbb387a28a813dd4">NEStridedSliceKernel</a>
 </li>
 <li>NESubTensorHandle()
-: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a2f55bff8083e46405832ce52c9a92a91">NESubTensorHandle</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#aba3a7c20ba3c19a5f3db801dd49b0c2c">NESubTensorHandle</a>
 </li>
 <li>NETableLookupKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_table_lookup_kernel.xhtml#afb1345d81a7ee915ca9b2b4c1e84bb0b">NETableLookupKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_table_lookup_kernel.xhtml#a74990bcb63bbbc6042000a9fb7207507">NETableLookupKernel</a>
 </li>
 <li>NETensorHandle()
-: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#a7589aedeac35ee91015d3dd625a9abcd">NETensorHandle</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#a63371c7bf5bea4ba7c5822bd5067124d">NETensorHandle</a>
 </li>
 <li>NEThresholdKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_threshold_kernel.xhtml#a5d0259c161d942ed6ed833206c643e45">NEThresholdKernel</a>
 </li>
 <li>NETileKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_tile_kernel.xhtml#a158e0205c27d5d36f5353f7ade72040d">NETileKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_tile_kernel.xhtml#a32733ae7a20e85a071a80feee1964952">NETileKernel</a>
 </li>
 <li>NETransposeKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml#ae24f3159088ed25c27231fe58e43c424">NETransposeKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml#a46381b755f709be78595e61225c71afe">NETransposeKernel</a>
 </li>
 <li>NEUnstack()
 : <a class="el" href="classarm__compute_1_1_n_e_unstack.xhtml#a9fe1c034f87de9f4f8f123df10aa624b">NEUnstack</a>
@@ -869,10 +884,10 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_upsample_layer_kernel.xhtml#a87f2137855e502092ba24bc0505ae5db">NEUpsampleLayerKernel</a>
 </li>
 <li>NEWeightsReshapeKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml#a81a65e6e29f1484740df2b1e60e82a6d">NEWeightsReshapeKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml#a4d7fc5f87332371306c0b2bf907c7603">NEWeightsReshapeKernel</a>
 </li>
 <li>NEWidthConcatenateLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer_kernel.xhtml#ac2eb49b445e8e3cc413572adebb1719e">NEWidthConcatenateLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer_kernel.xhtml#a080d64d53708f5342742ff62444f4d18">NEWidthConcatenateLayerKernel</a>
 </li>
 <li>NEWinogradConvolutionLayer()
 : <a class="el" href="classarm__compute_1_1_n_e_winograd_convolution_layer.xhtml#a83d886e7456d6a5d67ca145efd4c1aff">NEWinogradConvolutionLayer</a>
@@ -881,10 +896,10 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml#a975ca7003dae590387fdf8546e1b08fd">NEWinogradLayerTransformInputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
 </li>
 <li>NEWinogradLayerTransformOutputKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#a938350d536f0350fd2fd9eacf5d5f243">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
+: <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#a40aff3f958efb262a020826b1d1026bd">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
 </li>
 <li>NEWinogradLayerTransformWeightsKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#aba37abbbb60c14dfc48462c988f201de">NEWinogradLayerTransformWeightsKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
+: <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#ad25daf413f7dd45f084ae22a25b8bbe5">NEWinogradLayerTransformWeightsKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
 </li>
 <li>NEYOLOLayerKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_y_o_l_o_layer_kernel.xhtml#acd649bd63405fe6c83f5b2b491cfd177">NEYOLOLayerKernel</a>
@@ -902,10 +917,10 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_detection_output_layer_info.xhtml#af14fc4cf24dfb69a0f225a582ef01d54">DetectionOutputLayerInfo</a>
 </li>
 <li>node()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#af03a199882fdad91c9d20fc3e6ee2a57">Graph</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#af8baf1f3da6d42a94d0569395ece882a">Graph</a>
 </li>
 <li>nodes()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#ade14fa2a9cfc10e208ef2ebfeb0f8ba1">Graph</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a8a979250f01a5edba059a02748b10ea3">Graph</a>
 </li>
 <li>norm_size()
 : <a class="el" href="classarm__compute_1_1_normalization_layer_info.xhtml#a7c3edc4b354dda6c7285541f4f0e5c43">NormalizationLayerInfo</a>
@@ -958,9 +973,6 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 </li>
 <li>num_block_positions_per_image()
 : <a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml#a576ef6e002aae702e9c619a1afd31ddb">HOGInfo</a>
-</li>
-<li>num_buffers()
-: <a class="el" href="classarm__compute_1_1_i_buffer_manager.xhtml#ad4bcb73f9fec73d00bccf07845c5a16f">IBufferManager</a>
 </li>
 <li>num_cells_per_block()
 : <a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml#a79b522bd4aa0d5533649e60ef7f5f42f">HOGInfo</a>
@@ -1064,7 +1076,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 : <a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml#ad12e8048537cfc3c0d1935aa0e63a1ee">NumPyAccessor</a>
 </li>
 <li>NumPyBinLoader()
-: <a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml#a4f32ab9a631e79fe364fed57a1d0145b">NumPyBinLoader</a>
+: <a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml#abf92dad7656a4a25c3aa3d1112ef06e5">NumPyBinLoader</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -1072,7 +1084,7 @@ $(document).ready(function(){initNavTree('functions_func_n.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

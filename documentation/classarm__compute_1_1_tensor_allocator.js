@@ -1,6 +1,6 @@
 var classarm__compute_1_1_tensor_allocator =
 [
-    [ "TensorAllocator", "classarm__compute_1_1_tensor_allocator.xhtml#a20c11f37f59a434b1dd0b69f62771ac6", null ],
+    [ "TensorAllocator", "classarm__compute_1_1_tensor_allocator.xhtml#a10ccec9a08d4c97e4d90d9a1771cbfe8", null ],
     [ "~TensorAllocator", "classarm__compute_1_1_tensor_allocator.xhtml#a27f8b115e4571d52d83419aaea4eeee1", null ],
     [ "TensorAllocator", "classarm__compute_1_1_tensor_allocator.xhtml#a1f7d6251f7bd7834128664d851986e6a", null ],
     [ "TensorAllocator", "classarm__compute_1_1_tensor_allocator.xhtml#aa5d534fb1ab7a62ef81d80f47af1679b", null ],
@@ -12,5 +12,5 @@ var classarm__compute_1_1_tensor_allocator =
     [ "init", "classarm__compute_1_1_tensor_allocator.xhtml#a3fc6adad84b23f10d54d5a7b6928f872", null ],
     [ "operator=", "classarm__compute_1_1_tensor_allocator.xhtml#a943854ce6f3aafac2714340e0915de75", null ],
     [ "operator=", "classarm__compute_1_1_tensor_allocator.xhtml#ace0f71b15cbb5b468070f5a2fd4110ad", null ],
-    [ "set_associated_memory_group", "classarm__compute_1_1_tensor_allocator.xhtml#a89ee265e94df4e8aaf4f465649d4e065", null ]
+    [ "set_associated_memory_group", "classarm__compute_1_1_tensor_allocator.xhtml#a34177e00ce3d627e8a6a9ca215aaddfb", null ]
 ];

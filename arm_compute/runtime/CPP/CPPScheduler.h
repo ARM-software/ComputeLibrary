@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,14 +26,18 @@
 
 #include "arm_compute/runtime/IScheduler.h"
 
-#include <list>
+#include <memory>
 
 namespace arm_compute
 {
 /** C++11 implementation of a pool of threads to automatically split a kernel's execution among several threads. */
-class CPPScheduler : public IScheduler
+class CPPScheduler final : public IScheduler
 {
 public:
+    /** Constructor: create a pool of threads. */
+    CPPScheduler();
+    /** Default destructor */
+    ~CPPScheduler();
     /** Sets the number of threads the scheduler will use to run the kernels.
      *
      * @param[in] num_threads If set to 0, then the maximum number of threads supported by C++11 will be used, otherwise the number of threads specified.
@@ -47,6 +51,7 @@ public:
 
     /** Access the scheduler singleton
      *
+     * @note this method has been deprecated and will be remover in the upcoming releases
      * @return The scheduler
      */
     static CPPScheduler &get();
@@ -69,12 +74,8 @@ protected:
     void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
-    class Thread;
-    /** Constructor: create a pool of threads. */
-    CPPScheduler();
-
-    unsigned int      _num_threads;
-    std::list<Thread> _threads;
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPPSCHEDULER_H__ */

@@ -160,7 +160,7 @@ void CLUpsampleLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_3D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_out);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(collapsed_window.slide_window_slice_3D(slice_out) && collapsed_window.slide_window_slice_3D(slice_in));
 }

@@ -35,13 +35,32 @@ namespace arm_compute
 // Forward declarations
 class ITensorAllocator;
 class ITensorInfo;
-
+class IRuntimeContext;
+class CLRuntimeContext;
 /** Basic implementation of the OpenCL tensor interface */
-class CLTensor : public ICLTensor
+class CLTensor : public ICLTensor, public IMemoryManageable
 {
 public:
-    /** Constructor */
-    CLTensor();
+    /** Constructor.
+     *
+     * @param[in] ctx (Optional)  Pointer to a @ref CLRuntimeContext.
+     *                            If nullptr is passed in, the legacy api using the singletons will be used. Otherwise the memory for the
+     *                            tensor will allocate on the context passed in.
+     *                            The singletons legacy api has been deprecated and will be removed.
+     */
+    CLTensor(IRuntimeContext *ctx = nullptr);
+
+    /** Destructor */
+    ~CLTensor() = default;
+    /** Default copy constructor */
+    CLTensor(const CLTensor &) = default;
+    /** Default move constructor */
+    CLTensor(CLTensor &&) = default;
+    /** Default copy assignment */
+    CLTensor &operator=(const CLTensor &) = default;
+    /** Default move assignment operator */
+    CLTensor &operator=(CLTensor &&) = default;
+
     /** Return a pointer to the tensor's allocator
      *
      * @return A pointer to the tensor's allocator
@@ -68,6 +87,8 @@ public:
     TensorInfo       *info() override;
     const cl::Buffer &cl_buffer() const override;
     CLQuantization    quantization() const override;
+    void associate_memory_group(IMemoryGroup *memory_group) override;
+    CLRuntimeContext *context();
 
 protected:
     // Inherited methods overridden:
@@ -76,9 +97,10 @@ protected:
 
 private:
     mutable CLTensorAllocator _allocator; /**< Instance of the OpenCL tensor allocator */
+    CLRuntimeContext         *_ctx{ nullptr };
 };
 
 /** OpenCL Image */
 using CLImage = CLTensor;
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLTENSOR_H__ */

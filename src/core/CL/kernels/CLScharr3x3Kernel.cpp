@@ -118,7 +118,7 @@ void CLScharr3x3Kernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument_if((_run_scharr_x), idx, _output_x, slice);
         add_2D_tensor_argument_if((_run_scharr_y), idx, _output_y, slice);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

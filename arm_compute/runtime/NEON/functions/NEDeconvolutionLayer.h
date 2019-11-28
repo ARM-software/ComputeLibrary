@@ -73,7 +73,7 @@ namespace arm_compute
 class NEDeconvolutionLayer : public IFunction
 {
 public:
-    /** Default constructor */
+    /** Constructor */
     NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */

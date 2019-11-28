@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,22 +24,109 @@
 #ifndef __ARM_COMPUTE_MEMORYGROUP_H__
 #define __ARM_COMPUTE_MEMORYGROUP_H__
 
-#include "arm_compute/runtime/MemoryGroupBase.h"
+#include "arm_compute/runtime/IMemoryGroup.h"
 
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/utils/misc/Macros.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IMemoryPool.h"
+
+#include <cstddef>
+#include <memory>
 
 namespace arm_compute
 {
-/** Memory Group */
-using MemoryGroup = MemoryGroupBase<Tensor>;
+// Forward declarations
+class IMemory;
 
-template <>
-inline void MemoryGroupBase<Tensor>::associate_memory_group(Tensor *obj)
+/** Memory group */
+class MemoryGroup final : public IMemoryGroup
 {
-    ARM_COMPUTE_ERROR_ON(obj == nullptr);
-    auto allocator = dynamic_cast<TensorAllocator *>(obj->allocator());
-    ARM_COMPUTE_ERROR_ON(allocator == nullptr);
-    allocator->set_associated_memory_group(this);
+public:
+    /** Default Constructor */
+    MemoryGroup(IMemoryManager *memory_manager);
+    /** Default Constructor */
+    MemoryGroup(std::shared_ptr<IMemoryManager> = nullptr);
+    /** Default destructor */
+    ~MemoryGroup() = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    MemoryGroup(const MemoryGroup &) = delete;
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
+    MemoryGroup &operator=(const MemoryGroup &) = delete;
+    /** Allow instances of this class to be moved */
+    MemoryGroup(MemoryGroup &&) = default;
+    /** Allow instances of this class to be moved */
+    MemoryGroup &operator=(MemoryGroup &&) = default;
+
+    // Inherited methods overridden:
+    void manage(IMemoryManageable *obj) override;
+    void finalize_memory(IMemoryManageable *obj, IMemory &obj_memory, size_t size, size_t alignment) override;
+    void            acquire() override;
+    void            release() override;
+    MemoryMappings &mappings() override;
+
+private:
+    std::shared_ptr<IMemoryManager> _memory_manager; /**< Memory manager to be used by the group */
+    IMemoryPool                    *_pool;           /**< Memory pool that the group is scheduled with */
+    MemoryMappings                  _mappings;       /**< Memory mappings of the group */
+};
+
+inline MemoryGroup::MemoryGroup(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_manager(memory_manager), _pool(nullptr), _mappings()
+{
+}
+
+inline void MemoryGroup::manage(IMemoryManageable *obj)
+{
+    if(_memory_manager && (obj != nullptr))
+    {
+        ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
+
+        // Defer registration to the first managed object
+        _memory_manager->lifetime_manager()->register_group(this);
+
+        // Associate this memory group with the tensor
+        obj->associate_memory_group(this);
+
+        // Start object lifetime
+        _memory_manager->lifetime_manager()->start_lifetime(obj);
+    }
+}
+
+inline void MemoryGroup::finalize_memory(IMemoryManageable *obj, IMemory &obj_memory, size_t size, size_t alignment)
+{
+    if(_memory_manager)
+    {
+        ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
+        _memory_manager->lifetime_manager()->end_lifetime(obj, obj_memory, size, alignment);
+    }
+}
+
+inline void MemoryGroup::acquire()
+{
+    if(!_mappings.empty())
+    {
+        ARM_COMPUTE_ERROR_ON(!_memory_manager->pool_manager());
+        _pool = _memory_manager->pool_manager()->lock_pool();
+        _pool->acquire(_mappings);
+    }
+}
+
+inline void MemoryGroup::release()
+{
+    if(_pool != nullptr)
+    {
+        ARM_COMPUTE_ERROR_ON(!_memory_manager->pool_manager());
+        ARM_COMPUTE_ERROR_ON(_mappings.empty());
+        _pool->release(_mappings);
+        _memory_manager->pool_manager()->unlock_pool(_pool);
+        _pool = nullptr;
+    }
+}
+
+inline MemoryMappings &MemoryGroup::mappings()
+{
+    return _mappings;
 }
 } // arm_compute
 #endif /*__ARM_COMPUTE_MEMORYGROUP_H__ */

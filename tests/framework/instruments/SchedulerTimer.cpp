@@ -23,6 +23,7 @@
  */
 #include "SchedulerTimer.h"
 
+#include "Instruments.h"
 #include "WallClockTimer.h"
 #include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/core/utils/misc/Cast.h"
@@ -75,7 +76,7 @@ public:
     void schedule(ICPPKernel *kernel, const Hints &hints) override
     {
         _timer.start();
-        _real_scheduler.schedule(kernel, hints.split_dimension());
+        _real_scheduler.schedule(kernel, hints);
         _timer.stop();
 
         typename SchedulerClock<output_timestamps>::kernel_info info;
@@ -114,8 +115,12 @@ private:
 
 template <bool output_timestamps>
 SchedulerClock<output_timestamps>::SchedulerClock(ScaleFactor scale_factor)
-    : _kernels(), _real_scheduler(nullptr), _real_scheduler_type(), _real_graph_function(nullptr), _scale_factor(scale_factor), _interceptor(nullptr)
+    : _kernels(), _real_scheduler(nullptr), _real_scheduler_type(), _real_graph_function(nullptr), _scale_factor(scale_factor), _interceptor(nullptr), _scheduler_users()
 {
+    if(instruments_info != nullptr)
+    {
+        _scheduler_users = instruments_info->_scheduler_users;
+    }
 }
 
 template <bool output_timestamps>
@@ -157,6 +162,17 @@ void           SchedulerClock<output_timestamps>::test_start()
         _interceptor    = std::make_shared<Interceptor<output_timestamps>>(_kernels, *_real_scheduler, _scale_factor);
         Scheduler::set(std::static_pointer_cast<IScheduler>(_interceptor));
         graph::TaskExecutor::get().execute_function = task_interceptor;
+
+        // Create an interceptor for each scheduler
+        // TODO(COMPID-2638) : Allow multiple schedulers, now it assumes the same scheduler is used.
+        std::for_each(std::begin(_scheduler_users), std::end(_scheduler_users),
+                      [&](ISchedulerUser * user)
+        {
+            if(user != nullptr && user->scheduler() != nullptr)
+            {
+                user->intercept_scheduler(support::cpp14::make_unique<Interceptor<output_timestamps>>(_kernels, *user->scheduler(), _scale_factor));
+            }
+        });
     }
 }
 
@@ -175,6 +191,16 @@ void           SchedulerClock<output_timestamps>::test_stop()
     _interceptor                                = nullptr;
     graph::TaskExecutor::get().execute_function = _real_graph_function;
     _real_graph_function                        = nullptr;
+
+    // Restore schedulers
+    std::for_each(std::begin(_scheduler_users), std::end(_scheduler_users),
+                  [&](ISchedulerUser * user)
+    {
+        if(user != nullptr)
+        {
+            user->restore_scheduler();
+        }
+    });
 }
 
 template <bool              output_timestamps>

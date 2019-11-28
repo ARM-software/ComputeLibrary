@@ -13,5 +13,6 @@ var classarm__compute_1_1_g_e_m_m_info =
     [ "reinterpret_input_as_3d", "classarm__compute_1_1_g_e_m_m_info.xhtml#a00330b8913cac3b07029ac0c3350e806", null ],
     [ "reshape_b_only_on_first_run", "classarm__compute_1_1_g_e_m_m_info.xhtml#a4c8f9fa843de1086c27c86a6b8cf4582", null ],
     [ "retain_internal_weights", "classarm__compute_1_1_g_e_m_m_info.xhtml#ac9e7f8fc8a688fd119d3fb2892cce6b9", null ],
+    [ "set_gemmlowp_output_stage", "classarm__compute_1_1_g_e_m_m_info.xhtml#ae081b85ce44f2ec7cfe875afabcdfcc3", null ],
     [ "set_pretranpose_B", "classarm__compute_1_1_g_e_m_m_info.xhtml#adfd4c40b75cbb4b1b2b2c2bac0051891", null ]
 ];

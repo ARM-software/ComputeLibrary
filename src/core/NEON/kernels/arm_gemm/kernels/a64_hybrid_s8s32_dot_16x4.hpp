@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2018-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,8 @@ namespace arm_gemm
 {
 
 // Actual kernel implementations
-void a64_hybrid_s8s32_dot_16x4(const int8_t *, int, const int8_t *, int32_t *, int, int32_t, int, int, int);
-void a64_hybrid_s8s32_dot_16x4_a55(const int8_t *, int, const int8_t *, int32_t *, int, int32_t, int, int, int);
+void a64_hybrid_s8s32_dot_16x4(const int8_t *, int, const int8_t *, int32_t *, int, int, int, int, const int32_t *, Activation, bool);
+void a64_hybrid_s8s32_dot_16x4_a55(const int8_t *, int, const int8_t *, int32_t *, int, int, int, int, const int32_t *, Activation, bool);
 
 class hybrid_s8s32_dot_16x4
 {
@@ -41,10 +41,10 @@ public:
     typedef int8_t operand_type;
     typedef int32_t result_type;
 
-    typedef void (*kern_type)(const int8_t *, int, const int8_t *, int32_t *, int, int32_t, int, int, int);
+    typedef void (*kern_type)(const int8_t *, int, const int8_t *, int32_t *, int, int, int, int, const int32_t *, Activation, bool);
 
     /* Kernel blocking parameters */
-    static unsigned int out_height()
+    static constexpr unsigned int out_height()
     {
         return 4;
     }
@@ -54,9 +54,24 @@ public:
         return 16;
     }
 
-    static unsigned int k_unroll()
+    static constexpr unsigned int k_unroll()
     {
         return 4;
+    }
+
+    static constexpr bool supports_append()
+    {
+        return false;
+    }
+
+    static constexpr bool supports_bias()
+    {
+        return false;
+    }
+
+    static constexpr bool supports_activation()
+    {
+        return false;
     }
 
     StdTransformsFixed<operand_type, result_type, 4, 16, 4> transforms = {};

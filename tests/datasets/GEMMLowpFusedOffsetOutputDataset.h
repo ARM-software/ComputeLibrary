@@ -69,10 +69,22 @@ public:
             description << "b_offset=" << *_b_offset_it << ":";
             description << "output_type=" << string_from_gemmlowp_output_stage((*_output_stage_it).type) << ":";
             description << "output_offset=" << (*_output_stage_it).gemmlowp_offset << ":";
-            description << "output_multiplier=" << (*_output_stage_it).gemmlowp_multiplier << ":";
-            description << "output_shift=" << (*_output_stage_it).gemmlowp_shift << ":";
+            description << "output_multiplier={";
+            for(auto it = (*_output_stage_it).gemmlowp_multipliers.begin(); it != (*_output_stage_it).gemmlowp_multipliers.end(); ++it)
+            {
+                description << (*it) << ", ";
+            }
+            description << "}:";
+            description << "output_shift={";
+
+            for(auto it = (*_output_stage_it).gemmlowp_shifts.begin(); it != (*_output_stage_it).gemmlowp_shifts.end(); ++it)
+            {
+                description << (*it) << ", ";
+            }
+            description << "}:";
             description << "output_min=" << (*_output_stage_it).gemmlowp_min_bound << ":";
             description << "output_max=" << (*_output_stage_it).gemmlowp_max_bound << ":";
+            description << "is_quantized_per_channel=" << (*_output_stage_it).is_quantized_per_channel << ":";
 
             return description.str();
         }
@@ -132,6 +144,8 @@ public:
         output_stage.gemmlowp_shift          = shift;
         output_stage.gemmlowp_min_bound      = min;
         output_stage.gemmlowp_max_bound      = max;
+        output_stage.gemmlowp_multipliers.push_back(multiplier);
+        output_stage.gemmlowp_shifts.push_back(shift);
         return output_stage;
     }
 
@@ -172,12 +186,24 @@ public:
     }
 };
 
+class SmallGEMMLowpFusedOffsetOutputPerChannelDataset final : public GEMMLowpFusedOffsetOutputDataset
+{
+public:
+    SmallGEMMLowpFusedOffsetOutputPerChannelDataset()
+    {
+        add_config(TensorShape(21U, 1U, 6U), TensorShape(43U, 21U, 6U), TensorShape(43U, 1U, 6U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -200, 2, 13, 10, 210));
+        add_config(TensorShape(21U, 13U, 3U), TensorShape(33U, 21U, 3U), TensorShape(33U, 13U, 3U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -100, 2, 13, 10, 210));
+        add_config(TensorShape(31U, 3U, 2U), TensorShape(72U, 31U, 2U), TensorShape(72U, 3U, 2U), -2, 13, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 0, 2, 13, 10, 210));
+        add_config(TensorShape(52U, 13U, 7U), TensorShape(33U, 52U, 7U), TensorShape(33U, 13U, 7U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 100, 2, 13, 10, 210));
+        add_config(TensorShape(52U, 26U, 8U), TensorShape(33U, 52U, 8U), TensorShape(33U, 26U, 8U), -2, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 0, 2, 13, 10, 210));
+    }
+};
 class LargeGEMMLowpFusedOffsetOutputDataset final : public GEMMLowpFusedOffsetOutputDataset
 {
 public:
     LargeGEMMLowpFusedOffsetOutputDataset()
     {
-        add_config(TensorShape(923U, 1U), TensorShape(871U, 923U), TensorShape(871U, 1U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -200, 2, 18, 10, 210));
+        add_config(TensorShape(923U, 1U, 15U), TensorShape(871U, 923U, 15U), TensorShape(871U, 1U, 15U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -200, 2, 18, 10, 210));
         add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 429U), 0, 0, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, -100, 2, 18, 10, 210));
         add_config(TensorShape(873U, 7U), TensorShape(784U, 873U), TensorShape(784U, 7U), -1, 3, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 0, 2, 18, 10, 210));
         add_config(TensorShape(873U, 513U), TensorShape(784U, 873U), TensorShape(784U, 513U), 0, 4, OutputStageInfo(GEMMLowpOutputStageType::QUANTIZE_DOWN, 100, 2, 18, 10, 210));

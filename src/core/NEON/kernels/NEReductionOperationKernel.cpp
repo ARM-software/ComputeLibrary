@@ -1186,7 +1186,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
         }
         else
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32, DataType::S32);
         }
 
         const TensorShape output_shape         = arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis);
@@ -1204,7 +1204,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
 
     // Output auto initialization if not yet initialized
     const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
-    DataType   output_data_type = is_arg_min_max ? DataType::U32 : input->data_type();
+    DataType   output_data_type = is_arg_min_max ? DataType::S32 : input->data_type();
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
 
     unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->data_type());

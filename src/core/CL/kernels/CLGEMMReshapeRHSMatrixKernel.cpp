@@ -37,7 +37,8 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
@@ -54,9 +55,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON((rhs_info.k0 == 1) && (rhs_info.transpose));
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::U8, DataType::S8,
-                                                         DataType::U16, DataType::S16, DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     if(output->total_size() != 0)
     {
@@ -118,21 +117,7 @@ void CLGEMMReshapeRHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *
     build_opts.add_option_if(rhs_info.transpose, "-DTRANSPOSE");
     build_opts.add_option_if(rhs_info.interleave, "-DINTERLEAVE");
     build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
-
-    switch(input->info()->element_size())
-    {
-        case 1:
-            build_opts.add_option("-DDATA_TYPE=uchar");
-            break;
-        case 2:
-            build_opts.add_option("-DDATA_TYPE=ushort");
-            break;
-        case 4:
-            build_opts.add_option("-DDATA_TYPE=uint");
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Data type not supported");
-    }
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
 
     std::string kernel_name("gemm_reshape_rhs_matrix_");
     kernel_name += rhs_info.transpose ? "t" : "nt";
@@ -166,7 +151,8 @@ void CLGEMMReshapeRHSMatrixKernel::run(const Window &window, cl::CommandQueue &q
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

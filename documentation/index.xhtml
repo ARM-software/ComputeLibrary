@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -155,14 +155,14 @@ Pre-built binaries</h1>
 <p>These binaries have been built using the following toolchains:</p><ul>
 <li>Linux armv7a: gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf</li>
 <li>Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu</li>
-<li>Android armv7a: clang++ / libc++ NDK r17b</li>
-<li>Android am64-v8a: clang++ / libc++ NDK r17b</li>
+<li>Android armv7a: clang++ / libc++ NDK r17c</li>
+<li>Android am64-v8a: clang++ / libc++ NDK r17c</li>
 </ul>
 <dl class="section warning"><dt>Warning</dt><dd>Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.</dd></dl>
 <h1><a class="anchor" id="S1_file_organisation"></a>
 File organisation</h1>
 <p>This archive contains:</p><ul>
-<li>The <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a> header and source files</li>
+<li>The <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> header and source files</li>
 <li>The latest Khronos OpenCL 1.2 C headers from the <a href="https://www.khronos.org/registry/cl/">Khronos OpenCL registry</a></li>
 <li>The latest Khronos cl2.hpp from the <a href="https://www.khronos.org/registry/cl/">Khronos OpenCL registry</a> (API version 2.1 when this document was written)</li>
 <li>The latest Khronos OpenGL ES 3.1 C headers from the <a href="https://www.khronos.org/registry/gles/">Khronos OpenGL ES registry</a></li>
@@ -331,6 +331,95 @@ v17.04 (First release of April 2017)
 </pre><dl class="section note"><dt>Note</dt><dd>We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.</dd></dl>
 <h2><a class="anchor" id="S2_2_changelog"></a>
 Changelog</h2>
+<p>v19.11 Public major release</p><ul>
+<li>Various bug fixes.</li>
+<li>Various optimisations.</li>
+<li>Updated recommended NDK version to r17c.</li>
+<li>Deprecated OpenCL kernels / functions:<ul>
+<li>CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel</li>
+<li>CLDepthwiseIm2ColKernel</li>
+<li>CLDepthwiseSeparableConvolutionLayer</li>
+<li>CLDepthwiseVectorToTensorKernel</li>
+<li>CLDirectConvolutionLayerOutputStageKernel</li>
+</ul>
+</li>
+<li>Deprecated NEON kernels / functions:<ul>
+<li>NEDepthwiseWeightsReshapeKernel</li>
+<li>NEDepthwiseIm2ColKernel</li>
+<li>NEDepthwiseSeparableConvolutionLayer</li>
+<li>NEDepthwiseVectorToTensorKernel</li>
+<li>NEDepthwiseConvolutionLayer3x3</li>
+</ul>
+</li>
+<li>New OpenCL kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_instance_normalization_layer_kernel.xhtml">CLInstanceNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_instance_normalization_layer.xhtml">CLInstanceNormalizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer_native_kernel.xhtml">CLDepthwiseConvolutionLayerNativeKernel</a> to replace the old generic depthwise convolution (see Deprecated OpenCL kernels / functions)</li>
+<li><a class="el" href="namespacearm__compute.xhtml#aa02883dd85b75a6eb0d4878f266908dd">CLLogSoftmaxLayer</a></li>
+</ul>
+</li>
+<li>New NEON kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_n_e_bounding_box_transform_kernel.xhtml">NEBoundingBoxTransformKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_bounding_box_transform.xhtml">NEBoundingBoxTransform</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_compute_all_anchors_kernel.xhtml">NEComputeAllAnchorsKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_compute_all_anchors.xhtml">NEComputeAllAnchors</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_detection_post_process_layer.xhtml">NEDetectionPostProcessLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_generate_proposals_layer.xhtml">NEGenerateProposalsLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_instance_normalization_layer_kernel.xhtml">NEInstanceNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_instance_normalization_layer.xhtml">NEInstanceNormalizationLayer</a></li>
+<li><a class="el" href="namespacearm__compute.xhtml#a4478c830368ed024dc47a2bf48978616">NELogSoftmaxLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_r_o_i_align_layer_kernel.xhtml">NEROIAlignLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_r_o_i_align_layer.xhtml">NEROIAlignLayer</a></li>
+</ul>
+</li>
+<li>Added QASYMM8 support for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_generate_proposals_layer.xhtml">CLGenerateProposalsLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_r_o_i_align_layer.xhtml">CLROIAlignLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_p_p_box_with_non_maxima_suppression_limit.xhtml">CPPBoxWithNonMaximaSuppressionLimit</a></li>
+</ul>
+</li>
+<li>Added QASYMM16 support for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_bounding_box_transform.xhtml">CLBoundingBoxTransform</a></li>
+</ul>
+</li>
+<li>Added FP16 support for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel.xhtml">CLGEMMMatrixMultiplyReshapedKernel</a></li>
+</ul>
+</li>
+<li>Added new data type QASYMM8_PER_CHANNEL support for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_dequantization_layer.xhtml">CLDequantizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml">NEDequantizationLayer</a></li>
+</ul>
+</li>
+<li>Added new data type QSYMM8_PER_CHANNEL support for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">NEConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
+</ul>
+</li>
+<li>Added FP16 mixed-precision support for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel.xhtml">CLGEMMMatrixMultiplyReshapedKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml">CLPoolingLayerKernel</a></li>
+</ul>
+</li>
+<li>Added FP32 and FP16 ELU activation for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_activation_layer.xhtml">NEActivationLayer</a></li>
+</ul>
+</li>
+<li>Added asymmetric padding support for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_direct_deconvolution_layer.xhtml">CLDirectDeconvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_deconvolution_layer.xhtml">CLGEMMDeconvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_deconvolution_layer.xhtml">NEDeconvolutionLayer</a></li>
+</ul>
+</li>
+<li>Added SYMMETRIC and REFLECT modes for <a class="el" href="classarm__compute_1_1_c_l_pad_layer_kernel.xhtml">CLPadLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_pad_layer.xhtml">CLPadLayer</a>.</li>
+<li>Replaced the calls to <a class="el" href="classarm__compute_1_1_n_e_copy_kernel.xhtml">NECopyKernel</a> and <a class="el" href="classarm__compute_1_1_n_e_memset_kernel.xhtml">NEMemsetKernel</a> with <a class="el" href="classarm__compute_1_1_n_e_pad_layer.xhtml">NEPadLayer</a> in <a class="el" href="classarm__compute_1_1_n_e_generate_proposals_layer.xhtml">NEGenerateProposalsLayer</a>.</li>
+<li>Replaced the calls to <a class="el" href="classarm__compute_1_1_c_l_copy_kernel.xhtml">CLCopyKernel</a> and <a class="el" href="classarm__compute_1_1_c_l_memset_kernel.xhtml">CLMemsetKernel</a> with <a class="el" href="classarm__compute_1_1_c_l_pad_layer.xhtml">CLPadLayer</a> in <a class="el" href="classarm__compute_1_1_c_l_generate_proposals_layer.xhtml">CLGenerateProposalsLayer</a>.</li>
+<li>Improved performance for CL Inception V3 - FP16.</li>
+<li>Improved accuracy for CL Inception V3 - FP16 by enabling FP32 accumulator (mixed-precision).</li>
+<li>Improved NEON performance by enabling fusing batch normalization with convolution and depth-wise convolution layer.</li>
+<li>Improved NEON performance for MobileNet-SSD by improving the output detection performance.</li>
+<li>Optimized <a class="el" href="classarm__compute_1_1_c_l_pad_layer.xhtml">CLPadLayer</a>.</li>
+<li>Optimized CL generic depthwise convolution layer by introducing <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer_native_kernel.xhtml">CLDepthwiseConvolutionLayerNativeKernel</a>.</li>
+<li>Reduced memory consumption by implementing weights sharing.</li>
+</ul>
 <p>v19.08 Public major release</p><ul>
 <li>Various bug fixes.</li>
 <li>Various optimisations.</li>
@@ -395,7 +484,8 @@ Changelog</h2>
 <li>Added an optimized depthwise convolution layer kernel for 5x5 filters (NEON only)</li>
 <li>Added support to enable OpenCL kernel cache. Added example showing how to load the prebuilt OpenCL kernels from a binary cache file</li>
 <li>Altered <a class="el" href="classarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> interface to support per-channel quantization.</li>
-<li>The <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3.xhtml">NEDepthwiseConvolutionLayer3x3</a> will be replaced by <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer_optimized.xhtml">NEDepthwiseConvolutionLayerOptimized</a> to accommodate for future optimizations.</li>
+<li>The <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a> will be included by <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a> to accommodate for future optimizations.</li>
+<li>The <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer_optimized.xhtml">NEDepthwiseConvolutionLayerOptimized</a> will be included by <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a> to accommodate for future optimizations.</li>
 <li>Removed inner_border_right and inner_border_top parameters from <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer.xhtml">CLDeconvolutionLayer</a> interface</li>
 <li>Removed inner_border_right and inner_border_top parameters from <a class="el" href="classarm__compute_1_1_n_e_deconvolution_layer.xhtml">NEDeconvolutionLayer</a> interface</li>
 <li>Optimized the NEON assembly kernel for GEMMLowp. The new implementation fuses the output stage and quantization with the matrix multiplication kernel</li>
@@ -546,7 +636,7 @@ Changelog</h2>
 </ul>
 </li>
 <li>Add 4D tensors support to<ul>
-<li><a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">NESoftmaxLayer</a></li>
+<li><a class="el" href="namespacearm__compute.xhtml#a4df2143ca0a3bdbbbc54b440a52541cd">NESoftmaxLayer</a></li>
 </ul>
 </li>
 <li>Fused activation in <a class="el" href="classarm__compute_1_1_c_l_winograd_convolution_layer.xhtml">CLWinogradConvolutionLayer</a></li>
@@ -630,7 +720,7 @@ Changelog</h2>
 <li>Add 4D tensors support to<ul>
 <li>CLWidthConcatenateLayer</li>
 <li><a class="el" href="classarm__compute_1_1_c_l_flatten_layer.xhtml">CLFlattenLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_softmax_layer.xhtml">CLSoftmaxLayer</a></li>
+<li><a class="el" href="namespacearm__compute.xhtml#a30ce3b40394b4f2d1e4cc31db7183425">CLSoftmaxLayer</a></li>
 </ul>
 </li>
 <li>Add dot product support for <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel.xhtml">CLDepthwiseConvolutionLayer3x3NHWCKernel</a> non-unit stride</li>
@@ -783,7 +873,7 @@ Changelog</h2>
 <li><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">NESoftmaxLayer</a></li>
+<li><a class="el" href="namespacearm__compute.xhtml#a4df2143ca0a3bdbbbc54b440a52541cd">NESoftmaxLayer</a></li>
 </ul>
 </li>
 <li>Added FP16 support to:<ul>
@@ -795,7 +885,7 @@ Changelog</h2>
 <li>Added fused batched normalization and activation to <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">CLBatchNormalizationLayer</a> and <a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer.xhtml">NEBatchNormalizationLayer</a></li>
 <li>Added support for non-square pooling to <a class="el" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">NEPoolingLayer</a> and <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">CLPoolingLayer</a></li>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml">CLDirectConvolutionLayerOutputStageKernel</a></li>
+<li>CLDirectConvolutionLayerOutputStageKernel</li>
 </ul>
 </li>
 <li>New NEON kernels / functions<ul>
@@ -815,7 +905,7 @@ Changelog</h2>
 </ul>
 <p>v18.01 Public maintenance release</p><ul>
 <li>Various bug fixes</li>
-<li>Added some of the missing <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae02c6fc90d9c60c634bfa258049eb46b">validate()</a> methods</li>
+<li>Added some of the missing <a class="el" href="namespacearm__compute.xhtml#a4feaaa70771629f4b5dcf3b219c8b647">validate()</a> methods</li>
 <li>Added <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml">CLDeconvolutionLayerUpsampleKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer.xhtml">CLDeconvolutionLayer</a> <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml">CLDeconvolutionLayerUpsample</a></li>
 <li>Added <a class="el" href="classarm__compute_1_1_c_l_permute_kernel.xhtml">CLPermuteKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_permute.xhtml">CLPermute</a></li>
 <li>Added method to clean the programs cache in the CL <a class="el" href="classarm__compute_1_1_kernel.xhtml" title="Kernel class.">Kernel</a> library.</li>
@@ -882,7 +972,7 @@ Changelog</h2>
 <li>New NEON kernels / functions<ul>
 <li>arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_assembly_matrix_multiply_core.xhtml" title="Basic function to execute matrix multiply assembly kernels.">arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore</a></li>
 <li>arm_compute::NEHGEMMAArch64FP16Kernel</li>
-<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml">NEDepthwiseIm2ColKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml">NEGEMMMatrixVectorMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel.xhtml">NEDepthwiseVectorToTensorKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a> / NEDepthwiseIm2ColKernel / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml">NEGEMMMatrixVectorMultiplyKernel</a> / NEDepthwiseVectorToTensorKernel / <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_kernel.xhtml">NEGEMMLowpOffsetContributionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_a_reduction_kernel.xhtml">NEGEMMLowpMatrixAReductionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_b_reduction_kernel.xhtml">NEGEMMLowpMatrixBReductionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_core.xhtml">NEGEMMLowpMatrixMultiplyCore</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8Scale</a></li>
@@ -936,7 +1026,7 @@ Changelog</h2>
 </ul>
 </li>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_c_h_w_kernel.xhtml">CLDepthwiseConvolutionLayer3x3NCHWKernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel.xhtml">CLDepthwiseConvolutionLayer3x3NHWCKernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml">CLDepthwiseIm2ColKernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_vector_to_tensor_kernel.xhtml">CLDepthwiseVectorToTensorKernel</a> CLDepthwiseWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_separable_convolution_layer.xhtml">CLDepthwiseSeparableConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_c_h_w_kernel.xhtml">CLDepthwiseConvolutionLayer3x3NCHWKernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel.xhtml">CLDepthwiseConvolutionLayer3x3NHWCKernel</a> CLDepthwiseIm2ColKernel CLDepthwiseVectorToTensorKernel CLDepthwiseWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a> CLDepthwiseSeparableConvolutionLayer</li>
 <li><a class="el" href="classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml">CLDequantizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_dequantization_layer.xhtml">CLDequantizationLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml">CLDirectConvolutionLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer.xhtml">CLDirectConvolutionLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_flatten_layer.xhtml">CLFlattenLayer</a></li>
@@ -1010,7 +1100,7 @@ Changelog</h2>
 <li><a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml">NENonMaximaSuppression3x3Kernel</a></li>
 </ul>
 <p>v17.03.1 First Major public release of the sources</p><ul>
-<li>Renamed the library to <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a></li>
+<li>Renamed the library to <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a></li>
 <li>New CPP target introduced for C++ kernels shared between NEON and CL functions.</li>
 <li>New padding calculation interface introduced and ported most kernels / functions to use it.</li>
 <li>New OpenCL kernels / functions:<ul>
@@ -1020,7 +1110,7 @@ Changelog</h2>
 <li>New NEON kernels / functions:<ul>
 <li><a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml">NENormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_normalization_layer.xhtml">NENormalizationLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml">NETransposeKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_transpose.xhtml">NETranspose</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">NELogits1DMaxKernel</a>, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / <a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">NESoftmaxLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">NELogits1DMaxKernel</a>, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / <a class="el" href="namespacearm__compute.xhtml#a4df2143ca0a3bdbbbc54b440a52541cd">NESoftmaxLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_col2_im_kernel.xhtml">NECol2ImKernel</a>, NEConvolutionLayerWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">NEConvolutionLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">NEGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml">NEGEMMLowpMatrixMultiplyKernel</a> / NEGEMMLowp</li>
@@ -1030,7 +1120,7 @@ Changelog</h2>
 <p>v17.03 Sources preview</p><ul>
 <li>New OpenCL kernels / functions:<ul>
 <li><a class="el" href="classarm__compute_1_1_c_l_gradient_kernel.xhtml">CLGradientKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml">CLEdgeNonMaxSuppressionKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_edge_trace_kernel.xhtml">CLEdgeTraceKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a></li>
-<li>GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_addition_kernel.xhtml">CLGEMMMatrixAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a></li>
+<li>GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a>, CLGEMMMatrixAdditionKernel / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">CLGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml">CLFullyConnectedLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_transpose_kernel.xhtml">CLTransposeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_transpose.xhtml">CLTranspose</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_init_kernel.xhtml">CLLKTrackerInitKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_stage0_kernel.xhtml">CLLKTrackerStage0Kernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_stage1_kernel.xhtml">CLLKTrackerStage1Kernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_finalize_kernel.xhtml">CLLKTrackerFinalizeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_optical_flow.xhtml">CLOpticalFlow</a></li>
@@ -1047,7 +1137,7 @@ Changelog</h2>
 </ul>
 <p>v17.02.1 Sources preview</p><ul>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_logits1_d_max_kernel.xhtml">CLLogits1DMaxKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_shift_exp_sum_kernel.xhtml">CLLogits1DShiftExpSumKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_norm_kernel.xhtml">CLLogits1DNormKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_softmax_layer.xhtml">CLSoftmaxLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_logits1_d_max_kernel.xhtml">CLLogits1DMaxKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_shift_exp_sum_kernel.xhtml">CLLogits1DShiftExpSumKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_norm_kernel.xhtml">CLLogits1DNormKernel</a> / <a class="el" href="namespacearm__compute.xhtml#a30ce3b40394b4f2d1e4cc31db7183425">CLSoftmaxLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml">CLPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">CLPoolingLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml">CLIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml">CLCol2ImKernel</a>, CLConvolutionLayerWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_remap_kernel.xhtml">CLRemapKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_remap.xhtml">CLRemap</a></li>
@@ -1216,7 +1306,7 @@ scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=armv7a build=native
 <h3><a class="anchor" id="S3_2_2_examples"></a>
 How to manually build the examples ?</h3>
 <p>The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.</p>
-<dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a> binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
 <p>To cross compile a NEON example for Linux 32bit: </p><pre class="fragment">arm-linux-gnueabihf-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>To cross compile a NEON example for Linux 64bit: </p><pre class="fragment">aarch64-linux-gnu-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)</p>
@@ -1230,7 +1320,7 @@ How to manually build the examples ?</h3>
 <p>i.e. to cross compile the "graph_lenet" example for Linux 32bit: </p><pre class="fragment">arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 </pre><p>i.e. to cross compile the "graph_lenet" example for Linux 64bit: </p><pre class="fragment">aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)</p>
-<dl class="section note"><dt>Note</dt><dd>If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a>, arm_compute_core</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a>, arm_compute_core</dd></dl>
 <p>To compile natively (i.e directly on an ARM device) for NEON for Linux 32bit: </p><pre class="fragment">g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>To compile natively (i.e directly on an ARM device) for NEON for Linux 64bit: </p><pre class="fragment">g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option)</p>
@@ -1240,7 +1330,7 @@ How to manually build the examples ?</h3>
 <p>i.e. to natively compile the "graph_lenet" example for Linux 32bit: </p><pre class="fragment">g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 </pre><p>i.e. to natively compile the "graph_lenet" example for Linux 64bit: </p><pre class="fragment">g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option)</p>
-<dl class="section note"><dt>Note</dt><dd>If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a>, arm_compute_core</dd>
+<dl class="section note"><dt>Note</dt><dd>If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a>, arm_compute_core</dd>
 <dd>
 These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L</dd></dl>
 <p>To run the built executable simply run: </p><pre class="fragment">LD_LIBRARY_PATH=build ./neon_convolution
@@ -1273,7 +1363,7 @@ How to build the library ?</h3>
 </pre><h3><a class="anchor" id="S3_3_2_examples"></a>
 How to manually build the examples ?</h3>
 <p>The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.</p>
-<dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a> binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
 <p>Once you've got your Android standalone toolchain built and added to your path you can do the following:</p>
 <p>To cross compile a NEON example: </p><pre class="fragment">#32 bit:
 arm-linux-androideabi-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_arm -static-libstdc++ -pie
@@ -1291,7 +1381,7 @@ aarch64-linux-android-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iincl
 arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
 #64 bit:
 aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
-</pre><dl class="section note"><dt>Note</dt><dd>Due to some issues in older versions of the Mali OpenCL DDK (&lt;= r13p0), we recommend to link <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a> statically on Android. </dd>
+</pre><dl class="section note"><dt>Note</dt><dd>Due to some issues in older versions of the Mali OpenCL DDK (&lt;= r13p0), we recommend to link <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> statically on Android. </dd>
 <dd>
 When linked statically the arm_compute_graph library currently needs the &ndash;whole-archive linker flag in order to work properly</dd></dl>
 <p>Then you need to do is upload the executable and the shared library to the device using ADB: </p><pre class="fragment">adb push neon_convolution_arm /data/local/tmp/
@@ -1336,9 +1426,9 @@ Cygwin</h3>
 <p>If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a> can be used to install and run <code>scons</code>, the minimum Cygwin version must be 3.0.7 or later. In addition to the default packages installed by Cygwin <code>scons</code> has to be selected in the installer. (<code>git</code> might also be useful but is not strictly required if you already have got the source code of the library.) Linaro provides pre-built versions of <a href="http://releases.linaro.org/components/toolchain/binaries/">GCC cross-compilers</a> that can be used from the Cygwin terminal. When building for Android the compiler is included in the Android standalone toolchain. After everything has been set up in the Cygwin terminal the general guide on building the library can be followed.</p>
 <h2><a class="anchor" id="S3_6_cl_stub_library"></a>
 The OpenCL stub library</h2>
-<p>In the opencl-1.2-stubs folder you will find the sources to build a stub OpenCL library which then can be used to link your application or <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a> against.</p>
+<p>In the opencl-1.2-stubs folder you will find the sources to build a stub OpenCL library which then can be used to link your application or <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> against.</p>
 <p>If you preferred you could retrieve the OpenCL library from your device and link against this one but often this library will have dependencies on a range of system libraries forcing you to link your application against those too even though it is not using them.</p>
-<dl class="section warning"><dt>Warning</dt><dd>This OpenCL library provided is a stub and <em>not</em> a real implementation. You can use it to resolve OpenCL's symbols in <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a> while building the example but you must make sure the real libOpenCL.so is in your PATH when running the example or it will not work.</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This OpenCL library provided is a stub and <em>not</em> a real implementation. You can use it to resolve OpenCL's symbols in <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> while building the example but you must make sure the real libOpenCL.so is in your PATH when running the example or it will not work.</dd></dl>
 <p>To cross-compile the stub OpenCL library simply run: </p><pre class="fragment">&lt;target-prefix&gt;-gcc -o libOpenCL.so -Iinclude opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
 </pre><p>For example: </p><pre class="fragment">#Linux 32bit
 arm-linux-gnueabihf-gcc -o libOpenCL.so -Iinclude opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
@@ -1350,7 +1440,7 @@ arm-linux-androideabi-clang -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/o
 aarch64-linux-android-clang -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
 </pre><h2><a class="anchor" id="S3_7_gles_stub_library"></a>
 The Linux OpenGLES and EGL stub libraries</h2>
-<p>In the opengles-3.1-stubs folder you will find the sources to build stub EGL and OpenGLES libraries which then can be used to link your Linux application of <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2018 ARM Limited.">arm_compute</a> against.</p>
+<p>In the opengles-3.1-stubs folder you will find the sources to build stub EGL and OpenGLES libraries which then can be used to link your Linux application of <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> against.</p>
 <dl class="section note"><dt>Note</dt><dd>The stub libraries are only needed on Linux. For Android, the NDK toolchains already provide the meta-EGL and meta-GLES libraries.</dd></dl>
 <p>To cross-compile the stub OpenGLES and EGL libraries simply run: </p><pre class="fragment">&lt;target-prefix&gt;-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
 &lt;target-prefix&gt;-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
@@ -1407,7 +1497,7 @@ How to use it</h3>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

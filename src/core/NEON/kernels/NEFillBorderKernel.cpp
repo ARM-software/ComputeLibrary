@@ -195,7 +195,7 @@ void NEFillBorderKernel::fill_replicate_single_channel(const Window &window)
         for(int i = -_border_size.top; i < 0; ++i)
         {
             // Copy top rows including left/right borders
-            std::memcpy(base_addr + i * _tensor->info()->strides_in_bytes()[1] - _border_size.left * element_size,
+            std::memcpy(base_addr + i * static_cast<int>(_tensor->info()->strides_in_bytes()[1]) - _border_size.left * element_size,
                         base_addr - _border_size.left * element_size, (_border_size.left + width + _border_size.right) * element_size);
         }
 

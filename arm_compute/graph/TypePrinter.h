@@ -83,6 +83,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::DeconvolutionLayer:
             os << "DeconvolutionLayer";
             break;
+        case NodeType::DequantizationLayer:
+            os << "DequantizationLayer";
+            break;
         case NodeType::DetectionOutputLayer:
             os << "DetectionOutputLayer";
             break;
@@ -250,9 +253,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DepthwiseConvolution
     {
         case DepthwiseConvolutionMethod::Default:
             os << "DEFAULT";
-            break;
-        case DepthwiseConvolutionMethod::GEMV:
-            os << "GEMV";
             break;
         case DepthwiseConvolutionMethod::Optimized3x3:
             os << "Optimized3x3";

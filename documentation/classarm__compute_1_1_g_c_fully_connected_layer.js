@@ -1,6 +1,6 @@
 var classarm__compute_1_1_g_c_fully_connected_layer =
 [
-    [ "GCFullyConnectedLayer", "classarm__compute_1_1_g_c_fully_connected_layer.xhtml#ac0ce422247b7eae1a1931b9717c86ba5", null ],
+    [ "GCFullyConnectedLayer", "classarm__compute_1_1_g_c_fully_connected_layer.xhtml#a9a413ba9ad1a976d6241f24069650ae6", null ],
     [ "GCFullyConnectedLayer", "classarm__compute_1_1_g_c_fully_connected_layer.xhtml#ae0f01ba4f5cc1a098a555552e2316b58", null ],
     [ "GCFullyConnectedLayer", "classarm__compute_1_1_g_c_fully_connected_layer.xhtml#a840ecacfbb054d2245e1864e61178421", null ],
     [ "configure", "classarm__compute_1_1_g_c_fully_connected_layer.xhtml#a0effb36388142226203c802f31614634", null ],

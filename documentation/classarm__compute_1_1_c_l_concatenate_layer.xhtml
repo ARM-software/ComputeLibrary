@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -312,10 +312,10 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <p>Implements <a class="el" href="classarm__compute_1_1_i_function.xhtml#a18954417d3124a8095783ea13dc6d00b">IFunction</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_concatenate_layer_8cpp_source.xhtml#l00243">243</a> of file <a class="el" href="_c_l_concatenate_layer_8cpp_source.xhtml">CLConcatenateLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;{</div><div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    <span class="keywordflow">for</span>(<span class="keyword">auto</span> &amp;kernel : _concat_kernels)</div><div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    {</div><div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;        <a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">enqueue</a>(*kernel, <span class="keyword">true</span>);</div><div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    }</div><div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler.cpp:41</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_ae1a643e517f50bf0392fb6516dd7cf67"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">arm_compute::CLScheduler::enqueue</a></div><div class="ttdeci">void enqueue(ICLKernel &amp;kernel, bool flush=true)</div><div class="ttdoc">Schedule the execution of the passed kernel if possible.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00095">CLScheduler.cpp:95</a></div></div>
+<div class="fragment"><div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;{</div><div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;    <span class="keywordflow">for</span>(<span class="keyword">auto</span> &amp;kernel : _concat_kernels)</div><div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    {</div><div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;        <a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">enqueue</a>(*kernel, <span class="keyword">true</span>);</div><div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    }</div><div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00099">CLScheduler.cpp:99</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_ae1a643e517f50bf0392fb6516dd7cf67"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#ae1a643e517f50bf0392fb6516dd7cf67">arm_compute::CLScheduler::enqueue</a></div><div class="ttdeci">void enqueue(ICLKernel &amp;kernel, bool flush=true)</div><div class="ttdoc">Schedule the execution of the passed kernel if possible.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00154">CLScheduler.cpp:154</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00095">CLScheduler::enqueue()</a>, and <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00041">CLScheduler::get()</a>.</p>
+<p class="reference">References <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00154">CLScheduler::enqueue()</a>, and <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00099">CLScheduler::get()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_c_l_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00512">CLLSTMLayerQuantized::prepare()</a>, <a class="el" href="_c_l_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00465">CLLSTMLayerQuantized::run()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00619">CLLSTMLayer::run()</a>.</p>
 
@@ -380,7 +380,7 @@ Preconditions can be found respectively at <a class="el" href="classarm__compute
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_n_e_o_n_2_stack_layer_8cpp_source.xhtml#l00226">arm_compute::test::validation::axis</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00257">CLLSTMLayerQuantized::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00256">CLLSTMLayerQuantized::validate()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00388">CLLSTMLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -441,7 +441,7 @@ Preconditions can be found respectively at <a class="el" href="classarm__compute
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_concatenate_layer.xhtml">CLConcatenateLayer</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:31 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:10 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,22 +26,92 @@
 
 #include "helpers.h"
 
+/** Convert the given vector with round to nearest even rounding mode
+ *
+ * @param[in] x    The target to be converted
+ * @param[in] type The target type
+ *
+ * @return The converted vector
+ */
+#define CONVERT_DOWN_RTE_STR(x, type) (convert_##type##_rte((x)))
+#define CONVERT_DOWN_RTE(x, type) CONVERT_DOWN_RTE_STR(x, type)
+
+/** Quantize a floating-point scalar value to 8-bit asymmetric
+ *
+ * @param[in] input  Input value to quantize
+ * @param[in] offset Quantization offset
+ * @param[in] scale  Quantization scale
+ *
+ * @return quantized value
+ */
+inline uchar quantize_qasymm8(float input, float offset, float scale)
+{
+    float out_f32 = input / scale + offset;
+    uchar res_u8  = CONVERT_SAT(CONVERT_DOWN_RTE(out_f32, int), uchar);
+    return res_u8;
+}
+
+/** Dequantize a scalar value from 8-bit asymmetric to floating-point
+ *
+ * @param[in] input  Input value to quantize
+ * @param[in] offset Quantization offset
+ * @param[in] scale  Quantization scale
+ *
+ * @return quantized value
+ */
+inline float dequantize_qasymm8(uchar input, float offset, float scale)
+{
+    return ((float)input - offset) * scale;
+}
+
+/** Quantize a vector of values from floating-point
+ *
+ * @param[in] type Output data type.
+ * @param[in] size Size of vector.
+ *
+ * @return quantized values
+ */
+#define QUANTIZE_IMPL(type, size)                                                                                       \
+    inline VEC_DATA_TYPE(type, size) quantize_##type##size(VEC_DATA_TYPE(float, size) input, float offset, float scale) \
+    {                                                                                                                   \
+        VEC_DATA_TYPE(float, size)                                                                                      \
+        out_f32 = input / (VEC_DATA_TYPE(float, size))(scale) + (VEC_DATA_TYPE(float, size))(offset);                   \
+        VEC_DATA_TYPE(type, size)                                                                                       \
+        res = CONVERT_SAT(CONVERT_DOWN_RTE(out_f32, VEC_DATA_TYPE(int, size)), VEC_DATA_TYPE(type, size));              \
+        return res;                                                                                                     \
+    }
+
+/** Dequantize a vector of values to floating-point
+ *
+ * @param[in] type Input data type.
+ * @param[in] size Size of vector.
+ *
+ * @return dequantized values in floating point
+ */
+#define DEQUANTIZE_IMPL(type, size)                                                                                       \
+    inline VEC_DATA_TYPE(float, size) dequantize_##type##size(VEC_DATA_TYPE(type, size) input, float offset, float scale) \
+    {                                                                                                                     \
+        return (CONVERT(input, VEC_DATA_TYPE(float, 4)) - offset) * scale;                                                \
+    }
+
 /** Correctly-rounded-to-nearest division by a power-of-two.
  *
  * @param[in] size Size of vector.
  *
  * @return Correctly-rounded-to-nearest division by a power-of-two.
  */
-#define ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(size)                                                                   \
-    inline VEC_DATA_TYPE(int, size) asymm_rounding_divide_by_POW2_##size(VEC_DATA_TYPE(int, size) x, int exponent) \
-    {                                                                                                              \
-        VEC_DATA_TYPE(int, size)                                                                                   \
-        mask = (1 << exponent) - 1;                                                                                \
-        const VEC_DATA_TYPE(int, size) zero = 0;                                                                   \
-        const VEC_DATA_TYPE(int, size) one  = 1;                                                                   \
-        VEC_DATA_TYPE(int, size)                                                                                   \
-        threshold = (mask >> 1) + select(zero, one, x < 0);                                                        \
-        return (x >> exponent) + select(zero, one, (x & mask) > threshold);                                        \
+#define ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(size)                                                                                        \
+    inline VEC_DATA_TYPE(int, size) asymm_rounding_divide_by_POW2_##size(VEC_DATA_TYPE(int, size) x, VEC_DATA_TYPE(int, size) exponent) \
+    {                                                                                                                                   \
+        const VEC_DATA_TYPE(int, size)                                                                                                  \
+        zero = (VEC_DATA_TYPE(int, size))0;                                                                                         \
+        const VEC_DATA_TYPE(int, size)                                                                                                  \
+        one = (VEC_DATA_TYPE(int, size))1;                                                                                          \
+        VEC_DATA_TYPE(int, size)                                                                                                        \
+        mask = (one << exponent) - one;                                                                                                 \
+        VEC_DATA_TYPE(int, size)                                                                                                        \
+        threshold = (mask >> 1) + select(zero, one, x < 0);                                                                             \
+        return (x >> exponent) + select(zero, one, (x & mask) > threshold);                                                             \
     }
 
 /** Product of two numbers, interpreting them as fixed-point values in the interval [-1, 1),
@@ -292,6 +362,11 @@
         return ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(value, exponent, size);                                                       \
     }
 
+#define QUANTIZE_STR(input, offset, scale, type, size) quantize_##type##size(input, offset, scale)
+#define QUANTIZE(input, offset, scale, type, size) QUANTIZE_STR(input, offset, scale, type, size)
+#define DEQUANTIZE_STR(input, offset, scale, type, size) dequantize_##type##size(input, offset, scale)
+#define DEQUANTIZE(input, offset, scale, type, size) DEQUANTIZE_STR(input, offset, scale, type, size)
+
 #define ASYMM_ROUNDING_DIVIDE_BY_POW2(x, exponent, size) asymm_rounding_divide_by_POW2_##size(x, exponent)
 #define ASYMM_MULT(a, b, size) asymm_mult##size(a, b)
 #define ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(x, quantized_multiplier, right_shift, size) \
@@ -307,11 +382,21 @@
 #define ASYMM_ROUNDING_HALF_SUM(a, b, size) asymm_rounding_half_sum##size(a, b)
 #define ASYMM_RESCALE(value, src_integer_bits, dst_integer_bits, size) asymm_rescale##size(value, src_integer_bits, dst_integer_bits)
 
+QUANTIZE_IMPL(uchar, 4)
+QUANTIZE_IMPL(ushort, 4)
+QUANTIZE_IMPL(short, 4)
+
+DEQUANTIZE_IMPL(uchar, 4)
+DEQUANTIZE_IMPL(ushort, 4)
+DEQUANTIZE_IMPL(short, 4)
+
+ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(1)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(2)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(4)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(8)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(16)
 
+ASYMM_MULT_IMPL(1)
 ASYMM_MULT_IMPL(2)
 ASYMM_MULT_IMPL(4)
 ASYMM_MULT_IMPL(8)

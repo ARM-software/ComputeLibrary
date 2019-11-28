@@ -28,6 +28,7 @@ var searchData=
   ['io',['io',['../namespacearm__compute_1_1io.xhtml',1,'arm_compute']]],
   ['iterable',['iterable',['../namespacearm__compute_1_1utils_1_1iterable.xhtml',1,'arm_compute::utils']]],
   ['logging',['logging',['../namespacearm__compute_1_1logging.xhtml',1,'arm_compute']]],
+  ['math',['math',['../namespacearm__compute_1_1utils_1_1math.xhtml',1,'arm_compute::utils']]],
   ['misc',['misc',['../namespacearm__compute_1_1misc.xhtml',1,'arm_compute']]],
   ['mmap_5fio',['mmap_io',['../namespacearm__compute_1_1utils_1_1mmap__io.xhtml',1,'arm_compute::utils']]],
   ['nightlysuite',['NIGHTLYSuite',['../namespacearm__compute_1_1test_1_1benchmark_1_1_c_l_suite_1_1_n_i_g_h_t_l_y_suite.xhtml',1,'arm_compute::test::benchmark::CLSuite']]],
@@ -46,5 +47,6 @@ var searchData=
   ['utility',['utility',['../namespacearm__compute_1_1utility.xhtml',1,'arm_compute']]],
   ['utils',['utils',['../namespacearm__compute_1_1utils.xhtml',1,'arm_compute::utils'],['../namespacearm__gemm_1_1utils.xhtml',1,'arm_gemm::utils']]],
   ['validation',['validation',['../namespacearm__compute_1_1test_1_1validation.xhtml',1,'arm_compute::test']]],
+  ['weights_5ftransformations',['weights_transformations',['../namespacearm__compute_1_1weights__transformations.xhtml',1,'arm_compute']]],
   ['wrapper',['wrapper',['../namespacearm__compute_1_1wrapper.xhtml',1,'arm_compute']]]
 ];

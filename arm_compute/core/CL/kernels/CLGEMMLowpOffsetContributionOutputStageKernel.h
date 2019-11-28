@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,39 +51,47 @@ public:
     CLGEMMLowpOffsetContributionOutputStageKernel &operator=(CLGEMMLowpOffsetContributionOutputStageKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mm_result      Input tensor containing the result of @ref CLGEMMLowpMatrixMultiplyKernel. Data type supported: S32
-     * @param[in]  vector_sum_col Input row-vector of sums of all the entries in each column of matrix B.
-     *                            Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
-     * @param[in]  vector_sum_row Input row-vector of sums of all the entries in each row of matrix A.
-     *                            Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
-     * @param[in]  bias           Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-     *                            Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[out] output         Output tensor. Data type supported: QASYMM8
-     * @param[in]  k              Number of matrix A columns or Matrix B rows
-     * @param[in]  a_offset       Offset to be added to each element of the matrix A.
-     * @param[in]  b_offset       Offset to be added to each element of the matrix B.
-     * @param[in]  output_stage   GEMMLowp output stage info
+     * @param[in]  mm_result          Input tensor containing the result of @ref CLGEMMLowpMatrixMultiplyKernel. Data type supported: S32
+     * @param[in]  vector_sum_col     Input row-vector of sums of all the entries in each column of matrix B.
+     *                                Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
+     * @param[in]  vector_sum_row     Input row-vector of sums of all the entries in each row of matrix A.
+     *                                Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
+     * @param[in]  bias               Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
+     *                                Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[out] output             Output tensor. Data type supported: QASYMM8.
+     * @param[in]  k                  Number of matrix A columns or Matrix B rows
+     * @param[in]  a_offset           Offset to be added to each element of the matrix A.
+     * @param[in]  b_offset           Offset to be added to each element of the matrix B.
+     * @param[in]  output_stage       GEMMLowp output stage info
+     * @param[in]  output_multipliers Output multipliers tensor. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
+     *                                Supported data types: S32
+     * @param[in]  output_shifts      Output shifts tensor. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
+     *                                Supported data types: S32
      */
     void configure(const ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, ICLTensor *output, int32_t k, int32_t a_offset, int32_t b_offset,
-                   const GEMMLowpOutputStageInfo &output_stage);
+                   const GEMMLowpOutputStageInfo &output_stage, const ICLTensor *output_multipliers, const ICLTensor *output_shifts);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpOffsetContributionKernel
      *
-     * @param[in] mm_result      Input tensor containing the result of @ref CLGEMMLowpOffsetContributionKernel. Data type supported: S32 or QASYMM8 if output_stage != NONE
-     * @param[in] vector_sum_col Input row-vector of sums of all the entries in each column of matrix B.
-     *                           Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
-     * @param[in] vector_sum_row Input row-vector of sums of all the entries in each row of matrix A.
-     *                           Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
-     * @param[in] bias           Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
-     *                           Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[in] output         Output tensor. Data type supported: QASYMM8
-     * @param[in] a_offset       Offset to be added to each element of the matrix A.
-     * @param[in] b_offset       Offset to be added to each element of the matrix B.
-     * @param[in] output_stage   GEMMLowp output stage info
+     * @param[in] mm_result          Input tensor containing the result of @ref CLGEMMLowpOffsetContributionKernel. Data type supported: S32 or QASYMM8 if output_stage != NONE
+     * @param[in] vector_sum_col     Input row-vector of sums of all the entries in each column of matrix B.
+     *                               Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
+     * @param[in] vector_sum_row     Input row-vector of sums of all the entries in each row of matrix A.
+     *                               Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
+     * @param[in] bias               Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
+     *                               Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[in] output             Output tensor. Data type supported: QASYMM8.
+     * @param[in] a_offset           Offset to be added to each element of the matrix A.
+     * @param[in] b_offset           Offset to be added to each element of the matrix B.
+     * @param[in] output_stage       GEMMLowp output stage info
+     * @param[in] output_multipliers Output multipliers tensor info. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
+     *                               Supported data types: S32
+     * @param[in] output_shifts      Output shifts tensor info. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
+     *                               Supported data types: S32
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *output, int32_t a_offset,
-                           int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage);
+                           int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage, const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -94,6 +102,9 @@ private:
     const ICLTensor *_vector_sum_row;
     const ICLTensor *_bias;
     ICLTensor       *_output;
+    const ICLTensor *_output_multipliers;
+    const ICLTensor *_output_shifts;
+    bool             _is_quantized_per_channel;
 };
 } // namespace arm_compute
 

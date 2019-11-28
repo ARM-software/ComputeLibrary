@@ -27,8 +27,8 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 Status NEQuantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
@@ -46,3 +46,4 @@ void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
     k->configure(input, output);
     _kernel = std::move(k);
 }
+} // namespace arm_compute

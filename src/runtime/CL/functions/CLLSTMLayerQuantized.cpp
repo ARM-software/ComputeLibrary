@@ -159,8 +159,7 @@ void CLLSTMLayerQuantized::configure(const ICLTensor *input,
     const float multiplier        = 4096.f * qasymm.uniform().scale * qweights.uniform().scale;
     int         output_multiplier = 0;
     int         output_shift      = 0;
-
-    quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+    quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
     _memory_group.manage(&_output_lowp);
     _output_stage.configure(&_output_highp, &_bias, &_output_lowp, output_multiplier, output_shift);
@@ -361,12 +360,13 @@ Status CLLSTMLayerQuantized::validate(const ITensorInfo *input,
     input_concatenated.set_quantization_info(QuantizationInfo(qasymm.uniform().scale, qasymm.uniform().offset));
     weights_transposed.set_quantization_info(QuantizationInfo(qweights.uniform().scale, qweights.uniform().offset));
 
-    // multiplier = (input_scale * weights_scale) / output_scale (2 ^ (-12))
     const TensorInfo output_lowp(output_highp.tensor_shape(), 1, DataType::QSYMM16, qsymm_3);
 
-    const float multiplier = 4096.f * qasymm.uniform().scale * qweights.uniform().scale;
-    ARM_COMPUTE_UNUSED(multiplier);
-    ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
+    const float multiplier        = 4096.f * qasymm.uniform().scale * qweights.uniform().scale;
+    int         output_multiplier = 0;
+    int         output_shift      = 0;
+    ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
+
     // _output_stage
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(&output_highp, &bias_concatenated, &output_lowp));
 
@@ -504,7 +504,7 @@ void CLLSTMLayerQuantized::run()
     _tanh_output_state.run();
     _mul_output_state_tmp_output_gate.run();
 
-    // Requantize output state from QSYMM16 to QASYMM16
+    // Requantize output state from QSYMM16 to QASYMM8
     _dequantize.run();
     _quantize.run();
 }

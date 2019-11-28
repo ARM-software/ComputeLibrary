@@ -18,6 +18,7 @@ var arm__compute_2core_2_helpers_8h =
     [ "compute_strides", "arm__compute_2core_2_helpers_8h.xhtml#ac56739a30823647f7d86a0380a2ff62e", null ],
     [ "compute_strides", "arm__compute_2core_2_helpers_8h.xhtml#a8c35748731709927597cb5a2c227e682", null ],
     [ "compute_winograd_convolution_tiles", "arm__compute_2core_2_helpers_8h.xhtml#a3b0c016b53e97663b39c2f3875f46c24", null ],
+    [ "convert_negative_axis", "arm__compute_2core_2_helpers_8h.xhtml#a519df47124aa903c7de8be2624640c1b", null ],
     [ "coords2index", "arm__compute_2core_2_helpers_8h.xhtml#ad95e1c14c3007ca18950bf8f4c5a5c93", null ],
     [ "create_configure_kernel", "arm__compute_2core_2_helpers_8h.xhtml#a6f698fa1629f7f800b3c8cd77a3d4b4a", null ],
     [ "create_kernel", "arm__compute_2core_2_helpers_8h.xhtml#abc72c95941485d8a068fa38372308574", null ],

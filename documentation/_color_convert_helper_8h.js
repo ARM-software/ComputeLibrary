@@ -1,7 +1,7 @@
 var _color_convert_helper_8h =
 [
-    [ "colorconvert_iyuv_to_rgb", "_color_convert_helper_8h.xhtml#a25d7f2c57b459786569343aaebebf126", null ],
-    [ "colorconvert_nv12_to_rgb", "_color_convert_helper_8h.xhtml#acf1754f190ec91422cc75d43333da520", null ],
+    [ "colorconvert_iyuv_to_rgb", "_color_convert_helper_8h.xhtml#ae5035a982d39c4905c9ed3ac150f9917", null ],
+    [ "colorconvert_nv12_to_rgb", "_color_convert_helper_8h.xhtml#aa7f62a47d22df7af67294e743f2dd3da", null ],
     [ "colorconvert_nv_to_iyuv", "_color_convert_helper_8h.xhtml#a31c5dd66341f73cd38ae96d876c9d2a3", null ],
     [ "colorconvert_nv_to_yuv4", "_color_convert_helper_8h.xhtml#aca7296d0c60571db65670528b8e088c4", null ],
     [ "colorconvert_rgb_to_iyuv", "_color_convert_helper_8h.xhtml#a54c4999e22c2e329278b62088e78bd42", null ],

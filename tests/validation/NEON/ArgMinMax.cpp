@@ -24,9 +24,11 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/runtime/NEON/functions/NEArgMinMaxLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/SplitDataset.h"
@@ -54,7 +56,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         }),
         framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
                                                  TensorInfo(TensorShape(27U, 3U, 1U, 2U), 1, DataType::F32),
-                                                 TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::U32),
+                                                 TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::S32),
                                                  TensorInfo(TensorShape(32U, 16U, 1U, 2U), 1, DataType::F32)
         })),
         framework::dataset::make("Axis", { 4, 0, 2, 0 })),
@@ -74,17 +76,17 @@ DATA_TEST_CASE(Configuration,
                shape, data_type)
 {
     // Create tensors
-    Tensor ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst;
+    Tensor    ref_src = create_tensor<Tensor>(shape, data_type);
+    Tensor    dst;
+    const int axis = 1;
 
     // Create and Configure function
     NEArgMinMaxLayer arg_min_max_layer;
-    arg_min_max_layer.configure(&ref_src, 1, &dst, ReductionOperation::ARG_IDX_MAX);
+    arg_min_max_layer.configure(&ref_src, axis, &dst, ReductionOperation::ARG_IDX_MAX);
 
     // Validate valid region
-    TensorShape output_shape = shape;
-    output_shape.set(1, 1);
-    const ValidRegion valid_region = shape_to_valid_region(output_shape);
+    const auto        expected_output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(shape, axis, false);
+    const ValidRegion valid_region          = shape_to_valid_region(expected_output_shape);
     validate(dst.info()->valid_region(), valid_region);
 }
 

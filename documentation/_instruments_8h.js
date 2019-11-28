@@ -1,5 +1,6 @@
 var _instruments_8h =
 [
+    [ "InstrumentsInfo", "structarm__compute_1_1test_1_1framework_1_1_instruments_info.xhtml", "structarm__compute_1_1test_1_1framework_1_1_instruments_info" ],
     [ "InstrumentsDescription", "_instruments_8h.xhtml#a2a9beba9ddfcbb1d1d7f695c9d86296e", null ],
     [ "InstrumentType", "_instruments_8h.xhtml#aac6b258eb313f96447f4f0e273431005", [
       [ "ALL", "_instruments_8h.xhtml#aac6b258eb313f96447f4f0e273431005a5fb1f955b45e38e31789286a1790398d", null ],

@@ -48,6 +48,17 @@ public:
     {
     }
 };
+class QuantizedPerChannelTypes final : public framework::dataset::ContainerDataset<std::vector<DataType>>
+{
+public:
+    QuantizedPerChannelTypes()
+        : ContainerDataset("QuantizedPerChannelTypes",
+    {
+        DataType::QSYMM8_PER_CHANNEL
+    })
+    {
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

@@ -13,6 +13,7 @@ var dir_43c3fdbf778d1fd99e2e38f09fddd920 =
     [ "CLMultiHOG.cpp", "_c_l_multi_h_o_g_8cpp.xhtml", null ],
     [ "CLMultiImage.cpp", "_c_l_multi_image_8cpp.xhtml", null ],
     [ "CLPyramid.cpp", "_c_l_pyramid_8cpp.xhtml", null ],
+    [ "CLRuntimeContext.cpp", "_c_l_runtime_context_8cpp.xhtml", null ],
     [ "CLScheduler.cpp", "_c_l_scheduler_8cpp.xhtml", null ],
     [ "CLSubTensor.cpp", "_c_l_sub_tensor_8cpp.xhtml", null ],
     [ "CLTensor.cpp", "_c_l_tensor_8cpp.xhtml", null ],

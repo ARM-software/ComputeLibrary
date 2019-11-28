@@ -58,7 +58,6 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     // TODO (geopin01) : Switch when validation is implemented
     // Validate function
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->tensor_shape().x() != 3 && weights->tensor_shape().y() != 3, "Unsupported depthwise convolution");
-    node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::Optimized3x3);
 
     return Status{};
 }
@@ -111,6 +110,8 @@ Status GCNodeValidator::validate(INode *node)
             return validate_convolution_layer(*polymorphic_downcast<ConvolutionLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return validate_depthwise_convolution_layer(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::DequantizationLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : DequantizationLayer");
         case NodeType::DetectionOutputLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : DetectionOutputLayer");
         case NodeType::DetectionPostProcessLayer:

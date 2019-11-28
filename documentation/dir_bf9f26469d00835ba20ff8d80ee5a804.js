@@ -9,12 +9,14 @@ var dir_bf9f26469d00835ba20ff8d80ee5a804 =
     [ "BlobLifetimeManager.cpp", "_blob_lifetime_manager_8cpp.xhtml", null ],
     [ "BlobMemoryPool.cpp", "_blob_memory_pool_8cpp.xhtml", null ],
     [ "CPUUtils.cpp", "_c_p_u_utils_8cpp.xhtml", "_c_p_u_utils_8cpp" ],
+    [ "DeviceProperties.cpp", "_device_properties_8cpp.xhtml", null ],
     [ "Distribution1D.cpp", "_distribution1_d_8cpp.xhtml", null ],
     [ "HOG.cpp", "_h_o_g_8cpp.xhtml", null ],
     [ "ILutAllocator.cpp", "_i_lut_allocator_8cpp.xhtml", null ],
     [ "IScheduler.cpp", "_i_scheduler_8cpp.xhtml", null ],
     [ "ISimpleLifetimeManager.cpp", "_i_simple_lifetime_manager_8cpp.xhtml", null ],
     [ "ITensorAllocator.cpp", "_i_tensor_allocator_8cpp.xhtml", null ],
+    [ "IWeightsManager.cpp", "_i_weights_manager_8cpp.xhtml", null ],
     [ "Lut.cpp", "_lut_8cpp.xhtml", null ],
     [ "LutAllocator.cpp", "_lut_allocator_8cpp.xhtml", null ],
     [ "Memory.cpp", "_memory_8cpp.xhtml", null ],
@@ -26,9 +28,11 @@ var dir_bf9f26469d00835ba20ff8d80ee5a804 =
     [ "OffsetMemoryPool.cpp", "_offset_memory_pool_8cpp.xhtml", null ],
     [ "PoolManager.cpp", "_pool_manager_8cpp.xhtml", null ],
     [ "Pyramid.cpp", "_pyramid_8cpp.xhtml", null ],
+    [ "RuntimeContext.cpp", "src_2runtime_2_runtime_context_8cpp.xhtml", null ],
     [ "Scheduler.cpp", "_scheduler_8cpp.xhtml", null ],
+    [ "SchedulerFactory.cpp", "_scheduler_factory_8cpp.xhtml", null ],
     [ "SubTensor.cpp", "_sub_tensor_8cpp.xhtml", null ],
     [ "Tensor.cpp", "runtime_2_tensor_8cpp.xhtml", null ],
     [ "TensorAllocator.cpp", "src_2runtime_2_tensor_allocator_8cpp.xhtml", null ],
-    [ "Utils.cpp", "src_2runtime_2_utils_8cpp.xhtml", null ]
+    [ "Utils.cpp", "src_2runtime_2_utils_8cpp.xhtml", "src_2runtime_2_utils_8cpp" ]
 ];

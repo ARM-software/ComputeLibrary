@@ -32,7 +32,10 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Random.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "libnpy/npy.hpp"
+#pragma GCC diagnostic pop
 #include "tests/RawTensor.h"
 #include "tests/TensorCache.h"
 #include "tests/Utils.h"
@@ -209,6 +212,19 @@ public:
 
     template <typename T, typename D>
     void fill_boxes(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const;
+
+    /** Fills the specified @p raw tensor with random values drawn from @p
+     * distribution.
+     *
+     * @param[in, out] vec          To be filled vector.
+     * @param[in]      distribution Distribution used to fill the tensor.
+     * @param[in]      seed_offset  The offset will be added to the global seed before initialising the random generator.
+     *
+     * @note The @p distribution has to provide operator(Generator &) which
+     *       will be used to draw samples.
+     */
+    template <typename T, typename D>
+    void fill(std::vector<T> &vec, D &&distribution, std::random_device::result_type seed_offset) const;
 
     /** Fills the specified @p raw tensor with random values drawn from @p
      * distribution.
@@ -467,7 +483,7 @@ void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std:
         window.set(1, Window::Dimension(-padding_size.top, tensor.shape()[1] + padding_size.bottom, 1));
     }
 
-    std::mt19937 gen(_seed);
+    std::mt19937 gen(_seed + seed_offset);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -488,12 +504,12 @@ template <typename T, typename D>
 void AssetsLibrary::fill_boxes(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
 {
     using ResultType = typename std::remove_reference<D>::type::result_type;
-    std::mt19937 gen(_seed + seed_offset);
-    TensorShape  shape(tensor.shape());
-    const int    num_boxes = tensor.num_elements() / 4;
+    std::mt19937   gen(_seed + seed_offset);
+    TensorShape    shape(tensor.shape());
+    const uint32_t num_boxes = tensor.num_elements() / 4;
     // Iterate over all elements
     std::uniform_real_distribution<> size_dist(0.f, 1.f);
-    for(int element_idx = 0; element_idx < num_boxes * 4; element_idx += 4)
+    for(uint32_t element_idx = 0; element_idx < num_boxes * 4; element_idx += 4)
     {
         const ResultType delta   = size_dist(gen);
         const ResultType epsilon = size_dist(gen);
@@ -519,6 +535,22 @@ void AssetsLibrary::fill_boxes(T &&tensor, D &&distribution, std::random_device:
 }
 
 template <typename T, typename D>
+void AssetsLibrary::fill(std::vector<T> &vec, D &&distribution, std::random_device::result_type seed_offset) const
+{
+    ARM_COMPUTE_ERROR_ON_MSG(vec.empty(), "Vector must not be empty");
+
+    using ResultType = typename std::remove_reference<D>::type::result_type;
+
+    std::mt19937 gen(_seed + seed_offset);
+    for(size_t i = 0; i < vec.size(); ++i)
+    {
+        const ResultType value = distribution(gen);
+
+        vec[i] = value;
+    }
+}
+
+template <typename T, typename D>
 void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
 {
     using ResultType = typename std::remove_reference<D>::type::result_type;
@@ -535,7 +567,8 @@ void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::resul
     }
 
     // Iterate over all elements
-    for(int element_idx = 0; element_idx < tensor.num_elements(); ++element_idx)
+    const uint32_t num_elements = tensor.num_elements();
+    for(uint32_t element_idx = 0; element_idx < num_elements; ++element_idx)
     {
         Coordinates id = index2coord(shape, element_idx);
 
@@ -635,6 +668,8 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         }
         case DataType::S8:
         case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+        case DataType::QASYMM8_SIGNED:
         {
             std::uniform_int_distribution<int8_t> distribution_s8(std::numeric_limits<int8_t>::lowest(), std::numeric_limits<int8_t>::max());
             fill(tensor, distribution_s8, seed_offset);

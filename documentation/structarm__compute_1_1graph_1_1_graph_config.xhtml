@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -119,6 +119,9 @@ Data Fields</h2></td></tr>
 <tr class="memitem:a20ed0cdea50eeeabdb8f4673b37802e9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a20ed0cdea50eeeabdb8f4673b37802e9">use_function_memory_manager</a> { true }</td></tr>
 <tr class="memdesc:a20ed0cdea50eeeabdb8f4673b37802e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use a memory manager to manage per-funcion auxilary memory.  <a href="#a20ed0cdea50eeeabdb8f4673b37802e9">More...</a><br /></td></tr>
 <tr class="separator:a20ed0cdea50eeeabdb8f4673b37802e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8548fe89a1f2560508c8caf987c07410"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a8548fe89a1f2560508c8caf987c07410">use_function_weights_manager</a> { true }</td></tr>
+<tr class="memdesc:a8548fe89a1f2560508c8caf987c07410"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use a weights manager to manage transformed weights.  <a href="#a8548fe89a1f2560508c8caf987c07410">More...</a><br /></td></tr>
+<tr class="separator:a8548fe89a1f2560508c8caf987c07410"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1930adfaf721b59d516d41cce63746cc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a1930adfaf721b59d516d41cce63746cc">use_transition_memory_manager</a> { true }</td></tr>
 <tr class="memdesc:a1930adfaf721b59d516d41cce63746cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use a memory manager to manager transition buffer memory.  <a href="#a1930adfaf721b59d516d41cce63746cc">More...</a><br /></td></tr>
 <tr class="separator:a1930adfaf721b59d516d41cce63746cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,9 +157,9 @@ Data Fields</h2></td></tr>
 
 <p>Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00084">84</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00085">85</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_device_backend_8cpp_source.xhtml#l00073">NEDeviceBackend::setup_backend_context()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="graph__validate__utils_8h_source.xhtml#l00640">GraphValidateExample&lt; DepthwiseConvolutionLayer, DepthConvolutionOptions, DepthConvolutionVerifyAccessor &gt;::do_setup()</a>, and <a class="el" href="_n_e_device_backend_8cpp_source.xhtml#l00074">NEDeviceBackend::setup_backend_context()</a>.</p>
 
 </div>
 </div>
@@ -174,9 +177,9 @@ Data Fields</h2></td></tr>
 
 <p>File to load/store tuning values from. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00085">85</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00086">86</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_device_backend_8cpp_source.xhtml#l00108">CLDeviceBackend::setup_backend_context()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_device_backend_8cpp_source.xhtml#l00109">CLDeviceBackend::setup_backend_context()</a>.</p>
 
 </div>
 </div>
@@ -194,9 +197,9 @@ Data Fields</h2></td></tr>
 
 <p>Tuner mode to be used by the CL tuner. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00083">83</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00084">84</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_device_backend_8cpp_source.xhtml#l00108">CLDeviceBackend::setup_backend_context()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_device_backend_8cpp_source.xhtml#l00109">CLDeviceBackend::setup_backend_context()</a>.</p>
 
 </div>
 </div>
@@ -216,7 +219,27 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00080">80</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00088">arm_compute::graph::backends::get_memory_manager()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00089">arm_compute::graph::backends::get_memory_manager()</a>.</p>
+
+</div>
+</div>
+<a id="a8548fe89a1f2560508c8caf987c07410"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8548fe89a1f2560508c8caf987c07410">&#9670;&nbsp;</a></span>use_function_weights_manager</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool use_function_weights_manager { true }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Use a weights manager to manage transformed weights. </p>
+
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00081">81</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00102">arm_compute::graph::backends::get_weights_manager()</a>.</p>
 
 </div>
 </div>
@@ -234,7 +257,7 @@ Data Fields</h2></td></tr>
 
 <p>Use a memory manager to manager transition buffer memory. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00081">81</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00082">82</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_graph_manager_8cpp_source.xhtml#l00046">GraphManager::finalize_graph()</a>.</p>
 
@@ -254,9 +277,9 @@ Data Fields</h2></td></tr>
 
 <p>Use a tuner in tunable backends. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00082">82</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00083">83</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_c_l_device_backend_8cpp_source.xhtml#l00108">CLDeviceBackend::setup_backend_context()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_device_backend_8cpp_source.xhtml#l00109">CLDeviceBackend::setup_backend_context()</a>.</p>
 
 </div>
 </div>
@@ -269,7 +292,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml">GraphConfig</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:17 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

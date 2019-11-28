@@ -54,6 +54,9 @@
 #include <type_traits>
 #include <vector>
 
+#include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "arm_compute/runtime/RuntimeContext.h"
+
 namespace arm_compute
 {
 #ifdef ARM_COMPUTE_CL
@@ -355,11 +358,13 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
             *reinterpret_cast<uint8_t *>(ptr) = value;
             break;
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             *reinterpret_cast<int8_t *>(ptr) = value;
             break;
         case DataType::U16:
+        case DataType::QASYMM16:
             *reinterpret_cast<uint16_t *>(ptr) = value;
             break;
         case DataType::S16:
@@ -515,14 +520,15 @@ inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coor
  * @param[in] num_channels      (Optional) Number of channels.
  * @param[in] quantization_info (Optional) Quantization info for asymmetric quantized types.
  * @param[in] data_layout       (Optional) Data layout. Default is NCHW.
+ * @param[in] ctx               (Optional) Pointer to the runtime context.
  *
  * @return Initialized tensor of given type.
  */
 template <typename T>
 inline T create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1,
-                       QuantizationInfo quantization_info = QuantizationInfo(), DataLayout data_layout = DataLayout::NCHW)
+                       QuantizationInfo quantization_info = QuantizationInfo(), DataLayout data_layout = DataLayout::NCHW, IRuntimeContext *ctx = nullptr)
 {
-    T          tensor;
+    T          tensor(ctx);
     TensorInfo info(shape, num_channels, data_type);
     info.set_quantization_info(quantization_info);
     info.set_data_layout(data_layout);
@@ -535,15 +541,16 @@ inline T create_tensor(const TensorShape &shape, DataType data_type, int num_cha
  *
  * @param[in] shape  Tensor shape.
  * @param[in] format Format type.
+ * @param[in] ctx    (Optional) Pointer to the runtime context.
  *
  * @return Initialized tensor of given type.
  */
 template <typename T>
-inline T create_tensor(const TensorShape &shape, Format format)
+inline T create_tensor(const TensorShape &shape, Format format, IRuntimeContext *ctx = nullptr)
 {
     TensorInfo info(shape, format);
 
-    T tensor;
+    T tensor(ctx);
     tensor.allocator()->init(info);
 
     return tensor;
@@ -626,8 +633,8 @@ inline void init_separable_conv(int16_t *conv, unsigned int width, unsigned int 
     // Set it between -128 and 127 to ensure the matrix does not overflow
     std::uniform_int_distribution<int16_t> distribution_int16(-128, 127);
 
-    int16_t conv_row[width];
-    int16_t conv_col[height];
+    int16_t *conv_row = new int16_t[width];
+    int16_t *conv_col = new int16_t[height];
 
     conv_row[0] = conv_col[0] = 1;
     for(unsigned int i = 1; i < width; ++i)
@@ -648,6 +655,9 @@ inline void init_separable_conv(int16_t *conv, unsigned int width, unsigned int 
             conv[i * width + j] = conv_col[i] * conv_row[j];
         }
     }
+
+    delete[] conv_row;
+    delete[] conv_col;
 }
 
 /** Create a vector with a uniform distribution of floating point values across the specified range.
@@ -800,6 +810,8 @@ inline void sync_tensor_if_necessary(TensorType &tensor)
         t.map();
         t.unmap();
     }
+#else  /* ARM_COMPUTE_GC */
+    ARM_COMPUTE_UNUSED(tensor);
 #endif /* ARM_COMPUTE_GC */
 }
 } // namespace test

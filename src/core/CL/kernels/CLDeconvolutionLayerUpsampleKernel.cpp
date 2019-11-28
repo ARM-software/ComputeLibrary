@@ -42,6 +42,7 @@ CLDeconvolutionLayerUpsampleKernel::CLDeconvolutionLayerUpsampleKernel()
 Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, const ITensorInfo *output,
                                                     const PadStrideInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
@@ -56,7 +57,6 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
 
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_w) == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_h) == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());
 
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_c) != output->dimension(idx_c));
     for(size_t i = 3; i < Coordinates::num_max_dimensions; ++i)
@@ -104,12 +104,12 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
     const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
-    const int out_start_x = _info.pad().first;
-    const int out_end_x   = _output->info()->dimension(idx_w) - _info.pad().first + _info.stride().first - 1;
+    const int out_start_x = _info.pad_left();
+    const int out_end_x   = _output->info()->dimension(idx_w) - _info.pad_right() + _info.stride().first - 1;
     const int out_step_x  = _info.stride().first;
 
-    const int out_start_y = _info.pad().second;
-    const int out_end_y   = _output->info()->dimension(idx_h) - _info.pad().second + _info.stride().second - 1;
+    const int out_start_y = _info.pad_top();
+    const int out_end_y   = _output->info()->dimension(idx_h) - _info.pad_bottom() + _info.stride().second - 1;
     const int out_step_y  = _info.stride().second;
 
     switch(data_layout)
@@ -129,7 +129,7 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
                 unsigned int idx = 0;
                 add_3D_tensor_argument(idx, _input, slice_in);
                 add_3D_tensor_argument(idx, _output, slice_out);
-                enqueue(queue, *this, slice_out);
+                enqueue(queue, *this, slice_out, lws_hint());
             }
             while(collapsed.slide_window_slice_3D(slice_in) && collapsed.slide_window_slice_3D(slice_out));
             break;
@@ -148,7 +148,7 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
                 unsigned int idx = 0;
                 add_3D_tensor_argument(idx, _input, slice_in);
                 add_3D_tensor_argument(idx, _output, slice_out);
-                enqueue(queue, *this, slice_out);
+                enqueue(queue, *this, slice_out, lws_hint());
             }
             while(window.slide_window_slice_3D(slice_in) && window.slide_window_slice_3D(slice_out));
             break;

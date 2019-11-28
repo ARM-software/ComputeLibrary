@@ -29,13 +29,13 @@
 namespace arm_compute
 {
 class ICLTensor;
-
+class CLCoreRuntimeContext;
 /** Interface for the activation layer kernel. */
 class CLActivationLayerKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    CLActivationLayerKernel();
+    CLActivationLayerKernel(CLCoreRuntimeContext *ctx = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLActivationLayerKernel(const CLActivationLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -71,9 +71,10 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    ICLTensor *_input;
-    ICLTensor *_output;
-    bool       _run_in_place;
+    ICLTensor            *_input;
+    ICLTensor            *_output;
+    bool                  _run_in_place;
+    CLCoreRuntimeContext *_ctx;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__ */

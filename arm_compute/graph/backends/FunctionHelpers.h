@@ -83,6 +83,7 @@ void validate_node(const INode &node, size_t num_expected_inputs, size_t num_exp
     ARM_COMPUTE_ERROR_ON(TargetInfo::TargetType != node.assigned_target());
     ARM_COMPUTE_ERROR_ON(node.num_inputs() != num_expected_inputs);
     ARM_COMPUTE_ERROR_ON(node.num_outputs() != num_expected_outputs);
+    ARM_COMPUTE_UNUSED(node, num_expected_inputs, num_expected_outputs);
 }
 
 /** Creates a backend activation layer function
@@ -173,11 +174,12 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
  * @tparam TargetInfo                      Target-specific information
  *
  * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
  *
  * @return Backend batch normalization layer function
  */
 template <typename FusedLayerTypes, typename TargetInfo>
-std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(FusedConvolutionBatchNormalizationNode &node)
+std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(FusedConvolutionBatchNormalizationNode &node, GraphContext &ctx)
 {
     validate_node<TargetInfo>(node, 7 /* expected inputs */, 1 /* expected outputs */);
 
@@ -198,9 +200,16 @@ std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(Fu
     const ActivationLayerInfo fused_act  = node.fused_activation();
     const float               epsilon    = node.epsilon();
 
+    // Create and configure function (we assume that functions have been validated before creation)
+    std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, TargetInfo::TargetType);
+    std::unique_ptr<IFunction>      func;
+    std::string                     func_name;
+
+    using FType = FusedConvolutionBatchNormalizationFunction<TargetInfo, FusedLayerTypes>;
+
     // Create and configure function
-    auto func = support::cpp14::make_unique<FusedConvolutionBatchNormalizationFunction<TargetInfo, FusedLayerTypes>>();
-    func->configure(input, weights, biases, output, mean, var, beta, gamma, epsilon, conv_info, num_groups, fast_math, fused_act);
+    std::tie(func, func_name) = create_named_memory_managed_function<FType>(
+                                    std::string("FusedConvolutionBatchNormalizationLayer"), mm, input, weights, biases, output, mean, var, beta, gamma, epsilon, conv_info, num_groups, fast_math, fused_act);
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -213,7 +222,7 @@ std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(Fu
                                << " Output shape: " << output->info()->tensor_shape()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend fused depthwise convolution batch normalization layer function
@@ -222,11 +231,12 @@ std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(Fu
  * @tparam TargetInfo                  Target-specific information
  *
  * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
  *
  * @return Backend fused depthwise convolution batch normalization layer function
  */
 template <typename FusedLayerTypes, typename TargetInfo>
-std::unique_ptr<IFunction> create_fused_depthwise_convolution_batch_normalization_layer(FusedDepthwiseConvolutionBatchNormalizationNode &node)
+std::unique_ptr<IFunction> create_fused_depthwise_convolution_batch_normalization_layer(FusedDepthwiseConvolutionBatchNormalizationNode &node, GraphContext &ctx)
 {
     validate_node<TargetInfo>(node, 7 /* expected inputs */, 1 /* expected outputs */);
 
@@ -246,9 +256,16 @@ std::unique_ptr<IFunction> create_fused_depthwise_convolution_batch_normalizatio
     const ActivationLayerInfo fused_act        = node.fused_activation();
     const float               epsilon          = node.epsilon();
 
+    // Create and configure function (we assume that functions have been validated before creation)
+    std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, TargetInfo::TargetType);
+    std::unique_ptr<IFunction>      func;
+    std::string                     func_name;
+
+    using FType = FusedDepthwiseConvolutionBatchNormalizationFunction<TargetInfo, FusedLayerTypes>;
+
     // Create and configure function
-    auto func = support::cpp14::make_unique<FusedDepthwiseConvolutionBatchNormalizationFunction<TargetInfo, FusedLayerTypes>>();
-    func->configure(input, weights, biases, output, mean, var, beta, gamma, epsilon, conv_info, depth_multiplier, fused_act);
+    std::tie(func, func_name) = create_named_memory_managed_function<FType>(
+                                    std::string("FusedDepthwiseConvolutionBatchNormalizationLayer"), mm, input, weights, biases, output, mean, var, beta, gamma, epsilon, conv_info, depth_multiplier, fused_act);
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
@@ -261,7 +278,7 @@ std::unique_ptr<IFunction> create_fused_depthwise_convolution_batch_normalizatio
                                << " Output shape: " << output->info()->tensor_shape()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
-    return std::move(func);
+    return func;
 }
 
 /** Create a backend bounding box transform layer function
@@ -537,7 +554,7 @@ std::unique_ptr<IFunction> create_deconvolution_layer(DeconvolutionLayerNode &no
  *
  * @return Backend depth-wise convolution layer function
  */
-template <typename DepthwiseConvolutionLayerFunctions, typename TargetInfo>
+template <typename DepthwiseConvolutionLayer, typename TargetInfo>
 std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 {
     validate_node<TargetInfo>(node, 3 /* expected inputs */, 1 /* expected outputs */);
@@ -555,26 +572,17 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
         biases->info()->set_data_type(DataType::S32);
     }
 
-    const PadStrideInfo              conv_info        = node.convolution_info();
-    const DepthwiseConvolutionMethod dwc_algorithm    = node.depthwise_convolution_method();
-    const unsigned int               depth_multiplier = node.depth_multiplier();
-    const ActivationLayerInfo        fused_act        = node.fused_activation();
+    const PadStrideInfo       conv_info        = node.convolution_info();
+    const unsigned int        depth_multiplier = node.depth_multiplier();
+    const ActivationLayerInfo fused_act        = node.fused_activation();
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::unique_ptr<IFunction> func;
     std::string                func_name;
-    if(dwc_algorithm == DepthwiseConvolutionMethod::Optimized3x3)
-    {
-        std::tie(func, func_name) = create_named_function<typename DepthwiseConvolutionLayerFunctions::OptimizedDepthwiseConvolutionLayer>(
-                                        std::string("DepthwiseConvolutionLayer3x3"),
-                                        input, weights, biases, output, conv_info, depth_multiplier, fused_act);
-    }
-    else
-    {
-        std::tie(func, func_name) = create_named_function<typename DepthwiseConvolutionLayerFunctions::GenericDepthwiseConvolutionLayer>(
-                                        std::string("DepthwiseConvolutionLayer"),
-                                        input, weights, biases, output, conv_info, depth_multiplier, fused_act);
-    }
+
+    std::tie(func, func_name) = create_named_function<DepthwiseConvolutionLayer>(
+                                    std::string("DepthwiseConvolutionLayer"),
+                                    input, weights, biases, output, conv_info, depth_multiplier, fused_act);
 
     // Log info
     std::ostringstream qss;
@@ -599,6 +607,44 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
     return func;
 }
 
+/** Create a backend dequantize layer function
+ *
+ * @tparam DequantizationLayer Function Backend dequantize function
+ * @tparam TargetInfo          Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend dequantize layer function
+ */
+template <typename DequantizationLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_dequantization_layer(DequantizationLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<DequantizationLayerFunction>();
+    func->configure(input, output);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Input quantization info: " << output->info()->quantization_info()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(func);
+}
 /** Create a backend detection output layer function
  *
  * @tparam DetectionOutputLayer Function Backend detection output function
@@ -827,7 +873,9 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
-    auto func = support::cpp14::make_unique<FullyConnectedLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    auto wm   = get_weights_manager(ctx, TargetInfo::TargetType);
+    auto mm   = get_memory_manager(ctx, TargetInfo::TargetType);
+    auto func = support::cpp14::make_unique<FullyConnectedLayerFunction>(mm, wm.get());
     func->configure(input, weights, biases, output, fc_info);
 
     const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
@@ -1469,6 +1517,7 @@ std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
 template <typename UpsampleLayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_upsample_layer(UpsampleLayerNode &node, GraphContext &ctx)
 {
+    ARM_COMPUTE_UNUSED(ctx);
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info
@@ -1512,6 +1561,7 @@ std::unique_ptr<IFunction> create_upsample_layer(UpsampleLayerNode &node, GraphC
 template <typename YOLOlayerFunction, typename TargetInfo>
 std::unique_ptr<IFunction> create_yolo_layer(YOLOLayerNode &node, GraphContext &ctx)
 {
+    ARM_COMPUTE_UNUSED(ctx);
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info

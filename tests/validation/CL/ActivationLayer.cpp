@@ -25,6 +25,7 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/RuntimeContext.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/ActivationFunctionsDataset.h"
@@ -67,6 +68,7 @@ AbsoluteTolerance<float> tolerance(ActivationLayerInfo::ActivationFunction activ
         case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
             return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.00001f : epsilon);
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+        case ActivationLayerInfo::ActivationFunction::ELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
             return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.01f : 0.00001f);
         case ActivationLayerInfo::ActivationFunction::TANH:
@@ -93,15 +95,18 @@ TEST_SUITE(ActivationLayer)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
                shape, data_type, in_place)
 {
+    // Create context
+    auto ctx = parameters->get_ctx<CLTensor>();
+
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1);
+    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, QuantizationInfo(), DataLayout::NCHW, ctx);
+    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, QuantizationInfo(), DataLayout::NCHW, ctx);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    CLActivationLayer act_layer;
+    CLActivationLayer act_layer(ctx);
 
     if(in_place)
     {

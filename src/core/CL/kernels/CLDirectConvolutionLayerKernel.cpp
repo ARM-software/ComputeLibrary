@@ -62,7 +62,17 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 1) && std::get<0>(conv_info.stride()) > 3, "Strides larger than 3 not supported for 1x1 convolution.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 3 || weights->dimension(width_idx) == 5) && std::get<0>(conv_info.stride()) > 2,
                                     "Strides larger than 2 not supported for 3x3 convolution.");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((weights->dimension(width_idx) == 9) && data_layout == DataLayout::NCHW, "Only NHWC layout is supported for 9x9 convolution.");
+
+    const auto data_type = input->data_type();
+
+    if(weights->dimension(width_idx) == 9)
+    {
+        const auto supported_data_layout = is_data_type_quantized(data_type) ? DataLayout::NCHW : DataLayout::NHWC;
+        const auto error_message         = std::string("Only " + string_from_data_layout(supported_data_layout) + " layout is supported for 9x9 convolution with " + string_from_data_type(
+                                                           data_type) + " type");
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((supported_data_layout != data_layout), error_message.c_str());
+    }
 
     if(biases != nullptr)
     {
@@ -220,6 +230,19 @@ inline void setup_num_elems(unsigned int &num_elems_read_per_iteration_x, unsign
                         break;
                     case 2:
                         num_elems_read_per_iteration_x = 20;
+                        break;
+                    default:
+                        ARM_COMPUTE_ERROR("Invalid convolution stride X");
+                }
+                break;
+            case 9:
+                switch(conv_stride_x)
+                {
+                    case 1:
+                        num_elems_read_per_iteration_x = 16;
+                        break;
+                    case 2:
+                        num_elems_read_per_iteration_x = 24;
                         break;
                     default:
                         ARM_COMPUTE_ERROR("Invalid convolution stride X");
@@ -486,7 +509,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         }
         build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(data_type)));
         // Create kernel
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(is_quantized_asymm ? "direct_convolution_1x1_3x3_5x5_quantized" : kernel_name.str(),
+        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(is_quantized_asymm ? "direct_convolution_quantized" : kernel_name.str(),
                                                                                build_options.options()));
     }
 

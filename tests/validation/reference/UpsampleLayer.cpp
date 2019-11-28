@@ -93,7 +93,7 @@ SimpleTensor<uint8_t> upsample_layer(const SimpleTensor<uint8_t> &src, const Siz
     {
         SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
         SimpleTensor<float> dst_tmp = upsample_function<float>(src_tmp, info, policy);
-        dst                         = convert_to_asymmetric(dst_tmp, src.quantization_info());
+        dst                         = convert_to_asymmetric<uint8_t>(dst_tmp, src.quantization_info());
     }
     else
     {

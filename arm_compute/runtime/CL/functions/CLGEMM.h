@@ -24,20 +24,69 @@
 #ifndef __ARM_COMPUTE_CLGEMM_H__
 #define __ARM_COMPUTE_CLGEMM_H__
 
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
 class ICLTensor;
+
+namespace weights_transformations
+{
+/** Basic function to manage the reshape weights generated from @ref CLGEMMReshapeRHSMatrixKernel */
+class CLGEMMReshapeRHSMatrixKernelManaged : public ITransformWeights
+{
+public:
+    //Inherited method override
+    void run() override
+    {
+        _output.allocator()->allocate();
+        CLScheduler::get().enqueue(_kernel, false);
+        _reshape_run = true;
+    }
+
+    //Inherited method override
+    void release() override
+    {
+        _output.allocator()->free();
+    }
+
+    //Inherited method override
+    ICLTensor *get_weights() override
+    {
+        return &_output;
+    }
+
+    //Inherited method override
+    uint32_t uid() override
+    {
+        return _uid;
+    }
+
+    /** Configures the @ref CLGEMMReshapeRHSMatrixKernel kernel
+     *
+     * @param[in] input Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] info  RHS matrix information to be used for reshaping.
+     */
+    void configure(const ICLTensor *input, GEMMRHSMatrixInfo info)
+    {
+        _kernel.configure(input, &_output, info);
+    }
+
+private:
+    static constexpr uint32_t    _uid = 0x15;
+    CLTensor                     _output{};
+    CLGEMMReshapeRHSMatrixKernel _kernel{};
+};
+} // namespace weights_transformations
 
 /** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
@@ -46,7 +95,6 @@ class ICLTensor;
  *  -# @ref CLGEMMMatrixMultiplyKernel (only if either the NATIVE or RESHAPED_V1 is selected by the select_gemm_type method())
  *  -# @ref CLGEMMMatrixMultiplyReshapedKernel (only if RESHAPED_V1 is selected by the select_gemm_type method())
  *  -# @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel (only if RESHAPED_ONLY_RHS is selected by the select_gemm_type method())
- *  -# @ref CLGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0)
  *
  */
 class CLGEMM : public IFunction
@@ -54,9 +102,10 @@ class CLGEMM : public IFunction
 public:
     /** Default constructor.
      *
-     * @param[in] memory_manager (Optional) Memory manager.
+     * @param[in] memory_manager  (Optional) Memory manager.
+     * @param[in] weights_manager (Optional) Weights manager.
      */
-    CLGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    CLGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLGEMM(const CLGEMM &) = delete;
     /** Default move constructor */
@@ -125,18 +174,20 @@ private:
     static Status validate_reshaped_v2(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
     static Status validate_reshaped_only_rhs(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
 
-    CLMemoryGroup                             _memory_group;
-    CLGEMMMatrixMultiplyKernel                _mm_kernel;
-    CLGEMMReshapeLHSMatrixKernel              _reshape_lhs_kernel;
-    CLGEMMReshapeRHSMatrixKernel              _reshape_rhs_kernel;
-    CLGEMMMatrixMultiplyReshapedKernel        _mm_reshaped_kernel;
-    CLGEMMMatrixMultiplyReshapedOnlyRHSKernel _mm_reshaped_only_rhs_kernel;
-    CLTensor                                  _tmp_a;
-    CLTensor                                  _tmp_b;
-    const ICLTensor                          *_original_b;
-    bool                                      _reshape_b_only_on_first_run;
-    bool                                      _is_prepared;
-    GEMMType                                  _gemm_type;
+    MemoryGroup                                                  _memory_group;
+    IWeightsManager                                             *_weights_manager;
+    CLGEMMMatrixMultiplyKernel                                   _mm_kernel;
+    CLGEMMReshapeLHSMatrixKernel                                 _reshape_lhs_kernel;
+    CLGEMMReshapeRHSMatrixKernel                                 _reshape_rhs_kernel;
+    weights_transformations::CLGEMMReshapeRHSMatrixKernelManaged _reshape_rhs_kernel_managed;
+    CLGEMMMatrixMultiplyReshapedKernel                           _mm_reshaped_kernel;
+    CLGEMMMatrixMultiplyReshapedOnlyRHSKernel                    _mm_reshaped_only_rhs_kernel;
+    CLTensor                                                     _tmp_a;
+    CLTensor                                                     _tmp_b;
+    const ICLTensor                                             *_original_b;
+    bool                                                         _reshape_b_only_on_first_run;
+    bool                                                         _is_prepared;
+    GEMMType                                                     _gemm_type;
 };
 } // namespace arm_compute
 

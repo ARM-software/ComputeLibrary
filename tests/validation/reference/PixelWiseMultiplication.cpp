@@ -160,7 +160,7 @@ SimpleTensor<uint8_t> pixel_wise_multiplication(const SimpleTensor<uint8_t> &src
         SimpleTensor<float> src1_tmp = convert_from_asymmetric(src1);
         SimpleTensor<float> src2_tmp = convert_from_asymmetric(src2);
         SimpleTensor<float> dst_tmp  = pixel_wise_multiplication<float>(src1_tmp, src2_tmp, scale, convert_policy, rounding_policy, qout);
-        dst                          = convert_to_asymmetric(dst_tmp, qout);
+        dst                          = convert_to_asymmetric<uint8_t>(dst_tmp, qout);
     }
     else
     {

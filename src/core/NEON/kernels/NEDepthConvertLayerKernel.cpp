@@ -49,7 +49,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
     ARM_COMPUTE_RETURN_ERROR_ON(shift >= 8);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8 && (output->data_type() != DataType::S16 && output->data_type() != DataType::U16
-                                                                           && output->data_type() != DataType::S32 && output->data_type() != DataType::F16 && output->data_type() != DataType::F32),
+                                                                                && output->data_type() != DataType::S32 && output->data_type() != DataType::F16 && output->data_type() != DataType::F32),
                                     "Only data_types supported [in] QASYMM8 -> [out] U16, S16, S32, F16, F32");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::U8 && (output->data_type() != DataType::S16 && output->data_type() != DataType::U16
@@ -62,13 +62,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S16 && (output->data_type() != DataType::U8 && output->data_type() != DataType::S32),
                                     "Only data_types supported [in] S16 ->  [out] U8, S32");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F16 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::U8 && output->data_type() != DataType::F32 && output->data_type() != DataType::S32),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F16 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::U8 && output->data_type() != DataType::F32
+                                                                            && output->data_type() != DataType::S32),
                                     "Only data_types supported [in] F16 ->  [out] QASYMM8, F32, S32, U8");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F32 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::F16 && output->data_type() != DataType::S32 && output->data_type() != DataType::U8),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F32 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::F16 && output->data_type() != DataType::S32
+                                                                            && output->data_type() != DataType::U8),
                                     "Only data_types supported [in] F32 ->  [out] QASYMM8, F16, S32, U8");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S32 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::F16 && output->data_type() != DataType::F32 && output->data_type() != DataType::U8),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S32 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::F16 && output->data_type() != DataType::F32
+                                                                            && output->data_type() != DataType::U8),
                                     "Only data_types supported [in] S32 ->  [out] QASYMM8, F16, F32, U8");
 
     // Validate in case of configured output
@@ -427,7 +430,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const float16x8_t scale = vdupq_n_f16(1 << _shift);
 
                     /* Up-conversion F16 -> U8 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const float16x8x2_t texels =
                         {
@@ -447,7 +450,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const float32x4_t scale = vdupq_n_f32(1 << _shift);
 
                     /* Up-conversion F16 -> F32 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const float16x8x2_t texels =
                         {
@@ -470,7 +473,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const float32x4_t scale = vdupq_n_f32(1 << _shift);
 
                     /* Up-conversion F16 -> S32 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const float16x8x2_t texels =
                         {
@@ -565,12 +568,11 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                         };
 
                         vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vqmovn_u16(vcombine_u16(vqmovun_s32(vcvtq_s32_f32(texels.val[0])), vqmovun_s32(vcvtq_s32_f32(texels.val[1])))));
-                        vst1_u8(reinterpret_cast<uint8_t *>(output.ptr())+8, vqmovn_u16(vcombine_u16(vqmovun_s32(vcvtq_s32_f32(texels.val[2])), vqmovun_s32(vcvtq_s32_f32(texels.val[3])))));
+                        vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()) + 8, vqmovn_u16(vcombine_u16(vqmovun_s32(vcvtq_s32_f32(texels.val[2])), vqmovun_s32(vcvtq_s32_f32(texels.val[3])))));
                     },
                     input, output);
                     break;
                 }
-
 
                 default:
                     ARM_COMPUTE_ERROR("Output data type not supported");
@@ -650,7 +652,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                                 }
                             };
                             vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[0]), vqmovun_s32(texels.val[1]))));
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr())+8, vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[2]), vqmovun_s32(texels.val[3]))));
+                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()) + 8, vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[2]), vqmovun_s32(texels.val[3]))));
                         },
                         input, output);
                     }
@@ -668,8 +670,8 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                                 }
                             };
 
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vmovn_u16(vcombine_u16(vmovn_u32(vreinterpretq_u32_s32(texels.val[0])),vmovn_u32(vreinterpretq_u32_s32(texels.val[1])))));
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr())+8, vmovn_u16(vcombine_u16(vmovn_u32(vreinterpretq_u32_s32(texels.val[2])),vmovn_u32(vreinterpretq_u32_s32(texels.val[3])))));
+                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vmovn_u16(vcombine_u16(vmovn_u32(vreinterpretq_u32_s32(texels.val[0])), vmovn_u32(vreinterpretq_u32_s32(texels.val[1])))));
+                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()) + 8, vmovn_u16(vcombine_u16(vmovn_u32(vreinterpretq_u32_s32(texels.val[2])), vmovn_u32(vreinterpretq_u32_s32(texels.val[3])))));
                         },
                         input, output);
                     }

@@ -178,7 +178,7 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
                 add_2D_tensor_argument(idx, _input, in_slice);
                 add_2D_tensor_argument(idx, _sum, sum_slice);
                 add_2D_tensor_argument(idx, _output, in_slice);
-                enqueue(queue, *this, in_slice);
+                enqueue(queue, *this, in_slice, lws_hint());
             }
             while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(sum_slice));
         }
@@ -194,7 +194,7 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
                 add_2D_tensor_argument(idx, _input, in_slice);
                 add_2D_tensor_argument(idx, _sum, sum_slice);
                 add_2D_tensor_argument(idx, _output, in_slice);
-                enqueue(queue, *this, in_slice);
+                enqueue(queue, *this, in_slice, lws_hint());
             }
             while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(sum_slice));
         }
@@ -210,7 +210,7 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
                 add_3D_tensor_argument(idx, _input, in_slice);
                 add_3D_tensor_argument(idx, _sum, sum_slice);
                 add_3D_tensor_argument(idx, _output, in_slice);
-                enqueue(queue, *this, in_slice);
+                enqueue(queue, *this, in_slice, lws_hint());
             }
             while(window.slide_window_slice_3D(in_slice) && window.slide_window_slice_3D(sum_slice));
         }

@@ -1,6 +1,6 @@
 var dir_8f7fe1d9d655d949f37b90c9cd0a7992 =
 [
-    [ "CPPBoxWithNonMaximaSuppressionLimit.cpp", "_c_p_p_box_with_non_maxima_suppression_limit_8cpp.xhtml", null ],
+    [ "CPPBoxWithNonMaximaSuppressionLimit.cpp", "_c_p_p_box_with_non_maxima_suppression_limit_8cpp.xhtml", "_c_p_p_box_with_non_maxima_suppression_limit_8cpp" ],
     [ "CPPDetectionOutputLayer.cpp", "_c_p_p_detection_output_layer_8cpp.xhtml", null ],
     [ "CPPDetectionPostProcessLayer.cpp", "_c_p_p_detection_post_process_layer_8cpp.xhtml", null ],
     [ "CPPNonMaximumSuppression.cpp", "_c_p_p_non_maximum_suppression_8cpp.xhtml", null ],

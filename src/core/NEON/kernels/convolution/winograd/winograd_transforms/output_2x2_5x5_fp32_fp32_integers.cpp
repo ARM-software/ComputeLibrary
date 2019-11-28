@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,9 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
   const float* bptr,
   float* const output,
   const int output_row_stride,
-  const int output_col_stride
+  const int output_col_stride,
+  const float output_min,
+  const float output_max
 )
 {
   // Construct a map to the output cells
@@ -101,7 +103,10 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     {
       for (int j = 0; j < output_tile_cols; j++)
       {
-        vst1q_f32(outptrs[i][j], vaddq_f32(f[i][j], b));
+        const auto y =
+            vmaxq_f32(vminq_f32(vaddq_f32(f[i][j], b), vdupq_n_f32(output_max)),
+                      vdupq_n_f32(output_min));
+        vst1q_f32(outptrs[i][j], y);
         outptrs[i][j] += 4;
       }
     }
@@ -157,7 +162,10 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     {
       for (int j = 0; j < output_tile_cols; j++)
       {
-        vst1_f32(outptrs[i][j], vadd_f32(f[i][j], b));
+        const auto y =
+            vmax_f32(vmin_f32(vadd_f32(f[i][j], b), vdup_n_f32(output_max)),
+                     vdup_n_f32(output_min));
+        vst1_f32(outptrs[i][j], y);
         outptrs[i][j] += 2;
       }
     }
@@ -205,7 +213,8 @@ void OutputTransform<5, 5, 6, 6, float, float, WinogradRoots::Integers>::transfo
     {
       for (int j = 0; j < output_tile_cols; j++)
       {
-        *(outptrs[i][j]++) = f[i][j] + b;
+        const auto y = std::max(std::min(f[i][j] + b, output_max), output_min);
+        *(outptrs[i][j]++) = y;
       }
     }
   }

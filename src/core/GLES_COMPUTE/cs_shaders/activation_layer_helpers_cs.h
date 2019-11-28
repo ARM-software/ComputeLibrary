@@ -97,6 +97,11 @@ float srelu_op(float x)
 {
     return LOG_OP(ADD_OP(CONST_ONE, EXP_OP(x)));
 }
+// ELU Activation
+float elu_op(float x)
+{
+    return (x >= float(0.0)) ? x : MUL_OP(float(A_VAL), SUB_OP(EXP_OP(x), CONST_ONE));
+}
 // Absolute Activation
 float abs_op(float x)
 {

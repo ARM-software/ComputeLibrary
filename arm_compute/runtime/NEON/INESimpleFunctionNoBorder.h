@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IRuntimeContext.h"
 
 #include <memory>
 
@@ -35,14 +36,26 @@ namespace arm_compute
 class INESimpleFunctionNoBorder : public IFunction
 {
 public:
-    /** Constructor */
-    INESimpleFunctionNoBorder();
+    /** Constructor
+     *
+     * @param[in] ctx Runtime context to be used by the function
+     */
+    INESimpleFunctionNoBorder(IRuntimeContext *ctx = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INESimpleFunctionNoBorder(const INESimpleFunctionNoBorder &) = delete;
+    /** Default move constructor */
+    INESimpleFunctionNoBorder(INESimpleFunctionNoBorder &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INESimpleFunctionNoBorder &operator=(const INESimpleFunctionNoBorder &) = delete;
+    /** Default move assignment operator */
+    INESimpleFunctionNoBorder &operator=(INESimpleFunctionNoBorder &&) = default;
 
     // Inherited methods overridden:
     void run() override final;
 
 protected:
     std::unique_ptr<INEKernel> _kernel; /**< Kernel to run */
+    IRuntimeContext           *_ctx;    /**< Context to use */
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H__ */

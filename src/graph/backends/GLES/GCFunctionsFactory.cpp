@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/backends/FunctionHelpers.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCFunctions.h"
 

@@ -131,6 +131,6 @@ void CLGatherKernel::run(const Window &window, cl::CommandQueue &queue)
     add_4D_tensor_argument(idx, _input, window_collapsed);
     add_1D_tensor_argument(idx, _indices, window_collapsed);
     add_4D_tensor_argument(idx, _output, window_collapsed);
-    enqueue(queue, *this, window_collapsed);
+    enqueue(queue, *this, window_collapsed, lws_hint());
 }
 } // namespace arm_compute

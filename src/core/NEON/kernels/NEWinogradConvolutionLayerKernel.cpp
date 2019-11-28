@@ -28,6 +28,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
@@ -233,7 +234,7 @@ unsigned int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTile
     const KernelShape shape(num_output_channels, KernelRows, KernelCols, num_input_channels);
     return static_cast<unsigned int>(
                // WinogradConv returns the size in bytes, we divide by `sizeof(T)` to express that in units of T
-               WinogradConv::get_kernel_storage_size(shape) / sizeof(T));
+               WinogradConv::get_kernel_storage_size(num_input_channels, num_output_channels) / sizeof(T));
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -243,9 +244,9 @@ NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelR
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_matrix_stride(const KernelShape &kernel_shape) const
+int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_matrix_stride(int num_output_channels, int num_input_channels) const
 {
-    return WinogradConv::get_kernel_matrix_stride(kernel_shape);
+    return WinogradConv::get_kernel_matrix_stride(num_input_channels, num_output_channels);
 }
 
 #ifndef DOXYGEN_SKIP_THIS
@@ -325,9 +326,8 @@ unsigned int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCo
     // Construct shapes for the input and kernel tensors.
     const Tensor4DShape input_shape(num_batches, num_rows, num_cols, num_channels);
     const KernelShape   kern_shape(1, KernelRows, KernelCols, num_channels);
-    const PaddingType   padding = (same_padding) ? PADDING_SAME : PADDING_VALID;
     // Return the size, converted into units of TIn
-    return static_cast<unsigned int>(WinogradConv::get_input_storage_size(kern_shape, input_shape, padding) / sizeof(T));
+    return static_cast<unsigned int>(WinogradConv::get_input_storage_size(num_batches, num_rows, num_cols, num_channels, same_padding) / sizeof(T));
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -338,9 +338,13 @@ unsigned int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCo
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_matrix_stride(
-    const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const
+    int  num_batches,  /* Number of batches in the input tensor. */
+    int  num_channels, /* Number of feature maps in the input tensor. */
+    int  num_rows,     /* Number of rows in each feature map. */
+    int  num_cols,     /* Number of columns in each feature map. */
+    bool same_padding /* Use "SAME" padding, otherwise use "VALID". */) const
 {
-    return WinogradConv::get_input_matrix_stride(kernel_shape, input_shape, padding_type);
+    return WinogradConv::get_input_matrix_stride(num_batches, num_rows, num_cols, num_channels, same_padding);
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -446,21 +450,18 @@ template class NEWinogradLayerTransformInputKernel<float, 2, 1, 7, 1>;
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 unsigned int NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_output_storage_size(
-    int  num_batches,         /* Number of batches in the output tensor. */
-    int  num_rows,            /* Number of rows in each feature map of the input tensor. */
-    int  num_cols,            /* Number of columns in each feature map of the input tensor. */
-    int  num_output_channels, /* Number of feature maps in the output tensor. */
-    bool same_padding         /* Use "SAME" padding, otherwise use "VALID". */
+    int num_batches,        /* Number of batches in the output tensor. */
+    int num_rows,           /* Number of rows in each feature map of the input tensor. */
+    int num_cols,           /* Number of columns in each feature map of the input tensor. */
+    int num_output_channels /* Number of feature maps in the output tensor. */
 ) const
 {
     // Construct shapes for the input and kernel tensors.
     const Tensor4DShape input_shape(num_batches, num_rows, num_cols, 1);
     const KernelShape   kern_shape(num_output_channels, KernelRows, KernelCols, 1);
-    const PaddingType   padding = (same_padding) ? PADDING_SAME : PADDING_VALID;
-
     // Return the size, converted into units of TOut
     return static_cast<unsigned int>(
-               WinogradConv::get_output_storage_size(kern_shape, input_shape, padding) / sizeof(T));
+               WinogradConv::get_output_storage_size(num_batches, num_rows, num_cols, num_output_channels) / sizeof(T));
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -478,28 +479,36 @@ unsigned int NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileC
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 int NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_matrix_stride(
-    const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const
+    int num_batches,        /* Number of batches in the output tensor. */
+    int num_rows,           /* Number of rows in each feature map of the input tensor. */
+    int num_cols,           /* Number of columns in each feature map of the input tensor. */
+    int num_output_channels /* Number of feature maps in the output tensor. */
+) const
 {
-    return WinogradConv::get_output_matrix_stride(kernel_shape, input_shape, padding_type);
+    return WinogradConv::get_output_matrix_stride(num_batches, num_rows, num_cols, num_output_channels);
 }
+
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-Tensor4DShape NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_output_shape(
-    const KernelShape &kernel_shape, const Tensor4DShape &in_shape, const PaddingType padding) const
+std::pair<unsigned int, unsigned int> NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_output_shape(
+    int  num_rows, /* Number of rows in each feature map of the input tensor. */
+    int  num_cols, /* Number of columns in each feature map of the input tensor. */
+    bool padding_same) const
 {
-    return WinogradConv::get_output_shape(kernel_shape, in_shape, padding);
+    return WinogradConv::get_output_shape(std::make_pair<unsigned int, unsigned int>(num_rows, num_cols), padding_same);
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
-    const ITensor *biases,
-    const ITensor *transformed_output,
-    const int      matrix_stride,
-    ITensor       *output_nhwc,
-    const int      num_batches,
-    const int      num_rows,
-    const int      num_cols,
-    const int      num_channels,
-    ITensor       *workspace)
+    const ITensor              *biases,
+    const ITensor              *transformed_output,
+    const int                   matrix_stride,
+    ITensor                    *output_nhwc,
+    const int                   num_batches,
+    const int                   num_rows,
+    const int                   num_cols,
+    const int                   num_channels,
+    ITensor                    *workspace,
+    const arm_gemm::Activation &activation)
 {
     _biases             = biases;
     _workspace          = workspace;
@@ -512,7 +521,7 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     _num_cols           = num_cols;
     _num_channels       = num_channels;
     // We don't have the biases buffer at this stage as it hasn't been allocated, we pass in nullptr OutputTransform is only used here to compute the window
-    _transform = arm_compute::support::cpp14::make_unique<OutputTransform>(num_batches, num_rows, num_cols, num_channels);
+    _transform = arm_compute::support::cpp14::make_unique<OutputTransform>(num_batches, num_rows, num_cols, num_channels, activation);
     Window win;
     auto   win_last = _transform->get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));

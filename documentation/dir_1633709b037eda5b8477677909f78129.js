@@ -2,6 +2,9 @@ var dir_1633709b037eda5b8477677909f78129 =
 [
     [ "gemm", "dir_2d287d0b1a82c88d991f218c8bb4dd9a.xhtml", "dir_2d287d0b1a82c88d991f218c8bb4dd9a" ],
     [ "kernels", "dir_f906bbebc596bc606d589ccb705e6595.xhtml", "dir_f906bbebc596bc606d589ccb705e6595" ],
+    [ "CLCoreRuntimeContext.h", "_c_l_core_runtime_context_8h.xhtml", [
+      [ "CLCoreRuntimeContext", "classarm__compute_1_1_c_l_core_runtime_context.xhtml", "classarm__compute_1_1_c_l_core_runtime_context" ]
+    ] ],
     [ "CLHelpers.h", "core_2_c_l_2_c_l_helpers_8h.xhtml", "core_2_c_l_2_c_l_helpers_8h" ],
     [ "CLKernelLibrary.h", "_c_l_kernel_library_8h.xhtml", [
       [ "CLBuildOptions", "classarm__compute_1_1_c_l_build_options.xhtml", "classarm__compute_1_1_c_l_build_options" ],

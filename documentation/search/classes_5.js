@@ -14,6 +14,7 @@ var searchData=
   ['enumoption_3c_20logformat_20_3e',['EnumOption&lt; LogFormat &gt;',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
   ['enumoption_3c_20loglevel_20_3e',['EnumOption&lt; LogLevel &gt;',['../classarm__compute_1_1utils_1_1_enum_option.xhtml',1,'arm_compute::utils']]],
   ['example',['Example',['../classarm__compute_1_1utils_1_1_example.xhtml',1,'arm_compute::utils']]],
+  ['exampleparams',['ExampleParams',['../structarm__compute_1_1utils_1_1_example_params.xhtml',1,'arm_compute::utils']]],
   ['executiontask',['ExecutionTask',['../structarm__compute_1_1graph_1_1_execution_task.xhtml',1,'arm_compute::graph']]],
   ['executionworkload',['ExecutionWorkload',['../structarm__compute_1_1graph_1_1_execution_workload.xhtml',1,'arm_compute::graph']]]
 ];

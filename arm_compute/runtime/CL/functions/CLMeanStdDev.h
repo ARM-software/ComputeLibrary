@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,10 +27,10 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
@@ -75,7 +75,7 @@ private:
     void run_float();
     void run_int();
 
-    CLMemoryGroup        _memory_group;               /**< Function's memory group */
+    MemoryGroup          _memory_group;               /**< Function's memory group */
     DataType             _data_type;                  /**< Input data type. */
     unsigned int         _num_pixels;                 /**< Number of image's pixels. */
     bool                 _run_stddev;                 /**< Flag for knowing if we should run stddev reduction function. */

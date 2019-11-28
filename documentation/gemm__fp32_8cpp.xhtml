@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -114,16 +114,15 @@ $(document).ready(function(){initNavTree('gemm__fp32_8cpp.xhtml','');});
 <code>#include &quot;<a class="el" href="gemv__pretransposed_8hpp_source.xhtml">gemv_pretransposed.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a32__sgemm__8x6_8hpp_source.xhtml">kernels/a32_sgemm_8x6.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a64__hybrid__fp32__mla__16x4_8hpp_source.xhtml">kernels/a64_hybrid_fp32_mla_16x4.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="a64__native__fp32__mla__16x4_8hpp_source.xhtml">kernels/a64_native_fp32_mla_16x4.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="a64__small_k__hybrid__fp32__mla__4x6_8hpp_source.xhtml">kernels/a64_smallK_hybrid_fp32_mla_4x6.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="a64__small_k__hybrid__fp32__mla__4x8_8hpp_source.xhtml">kernels/a64_smallK_hybrid_fp32_mla_4x8.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a64__sgemm__12x8_8hpp_source.xhtml">kernels/a64_sgemm_12x8.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="a64__sgemm__native__16x4_8hpp_source.xhtml">kernels/a64_sgemm_native_16x4.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="a64__sgemm__native_a__pretranspose_b__16x4_8hpp_source.xhtml">kernels/a64_sgemm_nativeA_pretransposeB_16x4.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a64__sgemv__pretransposed_8hpp_source.xhtml">kernels/a64_sgemv_pretransposed.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a64__sgemv__trans_8hpp_source.xhtml">kernels/a64_sgemv_trans.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="sve__hybrid__fp32__mla__4_v_lx4_8hpp_source.xhtml">kernels/sve_hybrid_fp32_mla_4VLx4.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="sve__interleaved__fp32__mla__3_v_lx8_8hpp_source.xhtml">kernels/sve_interleaved_fp32_mla_3VLx8.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="sve__native__fp32__mla__4_v_lx4_8hpp_source.xhtml">kernels/sve_native_fp32_mla_4VLx4.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="sve__small_k__fp32__mla__1_v_lx4_8hpp_source.xhtml">kernels/sve_smallK_fp32_mla_1VLx4.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="sve__small_k__hybrid__fp32__mla__1_v_lx4_8hpp_source.xhtml">kernels/sve_smallK_hybrid_fp32_mla_1VLx4.hpp</a>&quot;</code><br />
 </div>
 <p><a href="gemm__fp32_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -137,12 +136,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a60b1162856ab084a3588fc2d5fdec539"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
 <tr class="memitem:a60b1162856ab084a3588fc2d5fdec539"><td class="memTemplItemLeft" align="right" valign="top">const GemmImplementation&lt; float, float &gt; *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a60b1162856ab084a3588fc2d5fdec539">gemm_implementation_list&lt; float, float &gt;</a> ()</td></tr>
 <tr class="separator:a60b1162856ab084a3588fc2d5fdec539"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab98c2935f5bb60c9a4add6c3e9de53e4"><td class="memItemLeft" align="right" valign="top">template UniqueGemmCommon&lt; float, float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#ab98c2935f5bb60c9a4add6c3e9de53e4">gemm&lt; float, float, Nothing &gt;</a> (const GemmArgs&lt; float &gt; &amp;args, const Nothing &amp;)</td></tr>
-<tr class="separator:ab98c2935f5bb60c9a4add6c3e9de53e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd013457d4280a12045a79c201bf25e0"><td class="memItemLeft" align="right" valign="top">template KernelDescription&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#abd013457d4280a12045a79c201bf25e0">get_gemm_method&lt; float, float, Nothing &gt;</a> (const GemmArgs&lt; float &gt; &amp;args, const Nothing &amp;)</td></tr>
-<tr class="separator:abd013457d4280a12045a79c201bf25e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9194360a5ba6924c83f0269ade8608f5"><td class="memItemLeft" align="right" valign="top">template std::vector&lt; KernelDescription &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a9194360a5ba6924c83f0269ade8608f5">get_compatible_kernels&lt; float, float, Nothing &gt;</a> (const GemmArgs&lt; float &gt; &amp;args, const Nothing &amp;)</td></tr>
-<tr class="separator:a9194360a5ba6924c83f0269ade8608f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fb5776f35967c7173f432cb096de217"><td class="memItemLeft" align="right" valign="top">template UniqueGemmCommon&lt; float, float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a4fb5776f35967c7173f432cb096de217">gemm&lt; float, float, Nothing &gt;</a> (const GemmArgs &amp;args, const Nothing &amp;)</td></tr>
+<tr class="separator:a4fb5776f35967c7173f432cb096de217"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeaa8a3f397520dca43d1dabb3774e2c9"><td class="memItemLeft" align="right" valign="top">template KernelDescription&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#aeaa8a3f397520dca43d1dabb3774e2c9">get_gemm_method&lt; float, float, Nothing &gt;</a> (const GemmArgs &amp;args, const Nothing &amp;)</td></tr>
+<tr class="separator:aeaa8a3f397520dca43d1dabb3774e2c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ac39db987b3fbd8e8a6e971961b41f4"><td class="memItemLeft" align="right" valign="top">template std::vector&lt; KernelDescription &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a4ac39db987b3fbd8e8a6e971961b41f4">get_compatible_kernels&lt; float, float, Nothing &gt;</a> (const GemmArgs &amp;args, const Nothing &amp;)</td></tr>
+<tr class="separator:a4ac39db987b3fbd8e8a6e971961b41f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -150,7 +149,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_1ce938f580a6f304b99685e2c1dd19db.xhtml">kernels</a></li><li class="navelem"><a class="el" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="gemm__fp32_8cpp.xhtml">gemm_fp32.cpp</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:07 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

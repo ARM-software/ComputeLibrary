@@ -45,7 +45,8 @@ SimpleTensor<T> permute(const SimpleTensor<T> &src, PermutationVector perm)
     SimpleTensor<T> dst{ dst_shape, src.data_type(), src.num_channels(), src.quantization_info() };
 
     // Compute reference
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates src_coords = index2coord(src.shape(), i);
         Coordinates       dst_coords = src_coords;

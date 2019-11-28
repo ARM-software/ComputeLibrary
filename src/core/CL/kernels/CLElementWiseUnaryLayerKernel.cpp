@@ -128,7 +128,7 @@ void CLElementWiseUnaryLayerKernel::run(const Window &window, cl::CommandQueue &
         unsigned int idx = 0;
         add_1D_tensor_argument(idx, _input, collapsed);
         add_1D_tensor_argument(idx, _output, collapsed);
-        enqueue(queue, *this, collapsed);
+        enqueue(queue, *this, collapsed, lws_hint());
     }
     while(window.slide_window_slice_1D(collapsed));
 }

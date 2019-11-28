@@ -33,7 +33,7 @@
 using namespace arm_compute;
 
 TensorInfo::TensorInfo()
-    : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true },
+    : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true }, _is_dynamic{ false },
       _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW)
 {
 }
@@ -49,6 +49,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _data_type                     = info.data_type();
     _format                        = info.format();
     _is_resizable                  = info.is_resizable();
+    _is_dynamic                    = info.is_dynamic();
     _valid_region                  = info.valid_region();
     _padding                       = info.padding();
     _quantization_info             = info.quantization_info();
@@ -88,6 +89,13 @@ TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, Dat
 {
     init(tensor_shape, num_channels, data_type);
     _quantization_info = std::move(quantization_info);
+}
+
+TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, DataLayout data_layout)
+    : TensorInfo()
+{
+    init(tensor_shape, num_channels, data_type);
+    _data_layout = data_layout;
 }
 
 TensorInfo::TensorInfo(const HOGInfo &hog_info, unsigned int width, unsigned int height)
@@ -383,11 +391,11 @@ ITensorInfo &TensorInfo::reset_padding()
     return *this;
 }
 
-size_t TensorInfo::offset_element_in_bytes(const Coordinates &pos) const
+int32_t TensorInfo::offset_element_in_bytes(const Coordinates &pos) const
 {
     ARM_COMPUTE_ERROR_ON_COORDINATES_DIMENSIONS_GTE(pos, _tensor_shape.num_dimensions());
 
-    size_t offset = _offset_first_element_in_bytes;
+    int32_t offset = _offset_first_element_in_bytes;
 
     for(size_t i = 0; i < _tensor_shape.num_dimensions(); ++i)
     {

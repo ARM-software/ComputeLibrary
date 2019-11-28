@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -109,7 +109,7 @@ $(document).ready(function(){initNavTree('activation__quant__helpers_8h.xhtml','
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a5a392548f2df67370cb15d2a5d75cd7b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">TYPE</a>&#160;&#160;&#160;<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, VEC_SIZE)</td></tr>
+<tr class="memitem:a5a392548f2df67370cb15d2a5d75cd7b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">TYPE</a>&#160;&#160;&#160;<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, <a class="el" href="depthwise__convolution__quantized_8cl.xhtml#a3fffea119c04c7680f2e9cf3fadf63b4">VEC_SIZE</a>)</td></tr>
 <tr class="separator:a5a392548f2df67370cb15d2a5d75cd7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab13ec269b92f52bb2f1f6dcf12956704"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="activation__quant__helpers_8h.xhtml#ab13ec269b92f52bb2f1f6dcf12956704">ACTIVATION_OP2</a>(op,  x)&#160;&#160;&#160;op##_op(x)</td></tr>
 <tr class="separator:ab13ec269b92f52bb2f1f6dcf12956704"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -226,7 +226,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define TYPE&#160;&#160;&#160;<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, VEC_SIZE)</td>
+          <td class="memname">#define TYPE&#160;&#160;&#160;<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="el" href="convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, <a class="el" href="depthwise__convolution__quantized_8cl.xhtml#a3fffea119c04c7680f2e9cf3fadf63b4">VEC_SIZE</a>)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -261,7 +261,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="activation__quant__helpers_8h_source.xhtml#l00042">42</a> of file <a class="el" href="activation__quant__helpers_8h_source.xhtml">activation_quant_helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordflow">return</span> min((<a class="code" href="activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">TYPE</a>)A_VAL, max(CONST_0, x));</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div><div class="ttc" id="activation__quant__helpers_8h_xhtml_a5a392548f2df67370cb15d2a5d75cd7b"><div class="ttname"><a href="activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">TYPE</a></div><div class="ttdeci">#define TYPE</div><div class="ttdef"><b>Definition:</b> <a href="activation__quant__helpers_8h_source.xhtml#l00027">activation_quant_helpers.h:27</a></div></div>
+<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordflow">return</span> min((<a class="code" href="activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">TYPE</a>)A_VAL, max((<a class="code" href="activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">TYPE</a>)CONST_0, x));</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div><div class="ttc" id="activation__quant__helpers_8h_xhtml_a5a392548f2df67370cb15d2a5d75cd7b"><div class="ttname"><a href="activation__quant__helpers_8h.xhtml#a5a392548f2df67370cb15d2a5d75cd7b">TYPE</a></div><div class="ttdeci">#define TYPE</div><div class="ttdef"><b>Definition:</b> <a href="activation__quant__helpers_8h_source.xhtml#l00027">activation_quant_helpers.h:27</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="activation__quant__helpers_8h_source.xhtml#l00027">TYPE</a>.</p>
 
@@ -335,7 +335,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="activation__quant__helpers_8h.xhtml">activation_quant_helpers.h</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:07 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

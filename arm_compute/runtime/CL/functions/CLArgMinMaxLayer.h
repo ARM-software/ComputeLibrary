@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,36 +24,58 @@
 #ifndef __ARM_COMPUTE_CLARGMINMAXLAYER_H__
 #define __ARM_COMPUTE_CLARGMINMAXLAYER_H__
 
-#include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 namespace arm_compute
 {
+class ITensorInfo;
 class ICLTensor;
+class CLReductionOperation;
 
-/** Function to calculate the index of the minimum or maximum values in a tensor based on an axis. */
-class CLArgMinMaxLayer : public ICLSimpleFunction
+/** Function to calculate the index of the minimum or maximum values in a
+ *  tensor based on an axis.
+ *
+ * @note The default data type for an uninitialized output tensor is
+ *       signed 32-bit integer (S32). It is the user's responsibility to check
+ *       that the results do not overflow because the indices are computed
+ *       in unsigned 32-bit (U32).
+ */
+class CLArgMinMaxLayer : public IFunction
 {
 public:
+    /** Default Constructor.
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
+    CLArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Input source tensor. Data types supported: F16/F32.
+     * @param[in]  input  Input source tensor, this could be written if @ref CLReductionOperation
+     *                    manipulates its border for better performance. Data types supported: F16/F32.
      * @param[in]  axis   Axis to find max/min index.
-     * @param[out] output Output source tensor. Data types supported: U32.
+     * @param[out] output Output source tensor. Data types supported: U32/S32.
      * @param[in]  op     Operation to perform: min or max
      */
-    void configure(const ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op);
+    void configure(ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op);
     /** Static function to check if given info will lead to a valid configuration of @ref CLArgMinMaxLayer
      *
      * @param[in] input  Input source tensor info. Data types supported: F16/F32.
      * @param[in] axis   Axis to find max/min index.
-     * @param[in] output Output source tensor info. Data types supported: U32.
+     * @param[in] output Output source tensor info. Data types supported: U32/S32.
      * @param[in] op     Operation to perform: min or max
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, int axis, const ITensorInfo *output, const ReductionOperation &op);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    std::unique_ptr<CLReductionOperation> _reduction_function;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLARGMINMAXLAYER_H__ */

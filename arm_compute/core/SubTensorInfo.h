@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -136,7 +136,7 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->offset_element_in_bytes(_coords);
     }
-    size_t offset_element_in_bytes(const Coordinates &pos) const override;
+    int32_t offset_element_in_bytes(const Coordinates &pos) const override;
     size_t element_size() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
@@ -186,10 +186,21 @@ public:
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->is_resizable();
     }
+    bool is_dynamic() const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return _parent->is_dynamic();
+    }
     ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         _parent->set_is_resizable(is_resizable);
+        return *this;
+    }
+    ITensorInfo &set_is_dynamic(bool is_dynamic) override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        _parent->set_is_dynamic(is_dynamic);
         return *this;
     }
     ValidRegion valid_region() const override
@@ -224,5 +235,5 @@ private:
     ValidRegion  _valid_region;
     bool         _extend_parent;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_SUBTENSORINFO_H__ */

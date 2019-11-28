@@ -31,7 +31,13 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the reduction operation kernel */
+/** Interface for the reduction operation kernel
+ *
+ * @note For ARG_MIN/ARG_MAX reduction, the default data type for an uninitialized
+ *       output tensor is signed 32-bit integer (S32). It is the user's responsibility
+ *       to check that the results do not overflow because the indices are computed
+ *       in unsigned 32-bit (U32).
+ */
 class CLReductionOperationKernel : public ICLKernel
 {
 public:
@@ -51,7 +57,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/S32/F16/F32.
-     * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
+     * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input, U32/S32 for ARG_MIX/ARG_MAX.
      *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0,1,2,3
      * @param[in]  op     Reduction operation to perform.
@@ -62,7 +68,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
      *
      * @param[in] input  Source tensor info. Data types supported: QASYMM8/S32/F16/F32.
-     * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
+     * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input, U32/S32 for ARG_MIX/ARG_MAX.
      *                   Output will have the same number of dimensions as input.
      * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0,1,2,3
      * @param[in] op     Reduction operation to perform.

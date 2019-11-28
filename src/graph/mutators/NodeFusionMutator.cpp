@@ -71,11 +71,10 @@ void fuse_convolution_with_batch_normalization(Graph &g, const Edge *output_edge
         FastMathHint fast_math_hint  = conv_node->fast_math_hint();
 
         // Extract bn inputs
-        const auto bn_mean_id  = bn_node->input_edge(1)->producer_id();
-        const auto bn_var_id   = bn_node->input_edge(2)->producer_id();
-        const auto bn_beta_id  = bn_node->input_edge(3)->producer_id();
-        const auto bn_gamma_id = bn_node->input_edge(4)->producer_id();
-        const auto epsilon     = bn_node->epsilon();
+        const auto bn_mean_id = bn_node->input_edge(1)->producer_id();
+        const auto bn_var_id  = bn_node->input_edge(2)->producer_id();
+
+        const auto epsilon = bn_node->epsilon();
 
         // Create the fused node
         const NodeID fused_id = g.add_node<FusedConvolutionBatchNormalizationNode>(epsilon, conv_info, num_groups, conv_method, fast_math_hint, act_info);
@@ -91,8 +90,18 @@ void fuse_convolution_with_batch_normalization(Graph &g, const Edge *output_edge
         g.add_connection(conv_weights_id, 0, fused_id, 1);
         g.add_connection(bn_mean_id, 0, fused_id, 3);
         g.add_connection(bn_var_id, 0, fused_id, 4);
-        g.add_connection(bn_beta_id, 0, fused_id, 5);
-        g.add_connection(bn_gamma_id, 0, fused_id, 6);
+
+        if(bn_node->input_edge(3) != nullptr)
+        {
+            const auto bn_beta_id = bn_node->input_edge(3)->producer_id();
+            g.add_connection(bn_beta_id, 0, fused_id, 5);
+        }
+
+        if(bn_node->input_edge(4) != nullptr)
+        {
+            const auto bn_gamma_id = bn_node->input_edge(4)->producer_id();
+            g.add_connection(bn_gamma_id, 0, fused_id, 6);
+        }
 
         auto                     fused_node       = g.node(fused_id);
         std::vector<NodeIdxPair> bn_driving_nodes = get_driving_nodes(*bn_node);
@@ -300,22 +309,12 @@ void NodeFusionMutator::mutate(Graph &g)
         return (output_qasymm8 && same_qinfo) || !output_qasymm8;
     };
 
-    Target target = g.nodes()[0].get()->output(0)->desc().target;
-
     // Fusion mutations
     detail::fuse_layer<BatchNormalizationLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<BatchNormalizationLayerNode>, supported_fused_activations);
     detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations);
-
-    // Currently fuse batch normalization brings performance uplift only on OpenCL with FP32 data type
-    // TODO (COMPMID-2524): Fuse batch normalization with convolution and depthwise convolution at graph level for NEON - FP32
-    // TODO (COMPMID-2581): Fuse batch normalization with convolution and depthwise convolution at graph level for OpenCL - FP16
-    if(target == Target::CL && (g.nodes()[0].get()->output(0)->desc().data_type == DataType::F32))
-    {
-        //Depthwise Convolution and Batch Normalization Fusion active only for CL
-        detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
-        detail::fuse_layer<DepthwiseConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_depthwise_convolution_with_batch_normalization);
-    }
+    detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
+    detail::fuse_layer<DepthwiseConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_depthwise_convolution_with_batch_normalization);
 }
 } // namespace graph
 } // namespace arm_compute

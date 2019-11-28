@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/IWeightsManager.h"
 
 namespace arm_compute
 {
@@ -89,6 +90,19 @@ inline std::shared_ptr<IMemoryManager> get_memory_manager(GraphContext &ctx, Tar
 {
     bool enabled = ctx.config().use_function_memory_manager && (ctx.memory_management_ctx(target) != nullptr);
     return enabled ? ctx.memory_management_ctx(target)->intra_mm : nullptr;
+}
+
+/** Returns the weights manager for a given target
+ *
+ * @param[in] ctx    Graph context containing weight management metadata
+ * @param[in] target Target to retrieve the weights manager from
+ *
+ * @return The weights manager for the given target else false
+ */
+inline std::shared_ptr<IWeightsManager> get_weights_manager(GraphContext &ctx, Target target)
+{
+    bool enabled = ctx.config().use_function_weights_manager && (ctx.weights_management_ctx(target) != nullptr);
+    return enabled ? ctx.weights_management_ctx(target)->wm : nullptr;
 }
 } // namespace backends
 } // namespace graph

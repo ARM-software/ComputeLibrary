@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -103,11 +103,7 @@ $(document).ready(function(){initNavTree('mergeresults_8hpp.xhtml','');});
 <div class="title">mergeresults.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;arm_neon.h&gt;</code><br />
-<code>#include &quot;<a class="el" href="asmlib_8hpp_source.xhtml">asmlib.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="utils_8hpp_source.xhtml">utils.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="merges_2list_8hpp_source.xhtml">merges/list.hpp</a>&quot;</code><br />
-</div>
+
 <p><a href="mergeresults_8hpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
@@ -117,9 +113,9 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a4c160021f8ceaa70922f23cafd6b3c99"><td class="memTemplParams" colspan="2">template&lt;unsigned int twidth, unsigned int height, bool sve = false, typename Tin , typename Tout &gt; </td></tr>
-<tr class="memitem:a4c160021f8ceaa70922f23cafd6b3c99"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a4c160021f8ceaa70922f23cafd6b3c99">MergeResults</a> (Tout *out, const Tin *in, int ldc, int y0, int ymax, int x0, int xmax, const Tout alpha, const Tout beta)</td></tr>
-<tr class="separator:a4c160021f8ceaa70922f23cafd6b3c99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2ed1c3595c8114064e8170b00df37c5"><td class="memTemplParams" colspan="2">template&lt;unsigned int twidth, unsigned int height, bool sve = false, typename Tin , typename Tout &gt; </td></tr>
+<tr class="memitem:aa2ed1c3595c8114064e8170b00df37c5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#aa2ed1c3595c8114064e8170b00df37c5">MergeResults</a> (Tout *out, const Tin *in, int ldc, int y0, int ymax, int x0, int xmax, const Tout *bias, Activation act, bool append)</td></tr>
+<tr class="separator:aa2ed1c3595c8114064e8170b00df37c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -127,7 +123,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_1ce938f580a6f304b99685e2c1dd19db.xhtml">kernels</a></li><li class="navelem"><a class="el" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="mergeresults_8hpp.xhtml">mergeresults.hpp</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:07 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -21,8 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include <cmath>
+
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif // M_PI
 
 namespace arm_compute
 {
@@ -290,6 +293,14 @@ inline float32x2_t vsin_f32(float32x2_t val)
 }
 
 #endif /* DOXYGEN_SKIP_THIS */
+
+inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int32x4_t exponent)
+{
+    const int32x4_t shift_vec  = vnegq_s32(exponent);
+    const int32x4_t fixup      = vshrq_n_s32(vandq_s32(x, shift_vec), 31);
+    const int32x4_t fixed_up_x = vqaddq_s32(x, fixup);
+    return vrshlq_s32(fixed_up_x, shift_vec);
+}
 
 inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent)
 {

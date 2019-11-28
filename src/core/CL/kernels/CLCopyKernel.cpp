@@ -259,7 +259,7 @@ void CLCopyKernel::run(const Window &window, cl::CommandQueue &queue)
             unsigned int idx = 0;
             add_3D_tensor_argument(idx, _input, slice);
             add_3D_tensor_argument(idx, _output, out_slice);
-            enqueue(queue, *this, slice);
+            enqueue(queue, *this, slice, lws_hint());
         }
         while(window.slide_window_slice_3D(slice) && _output_window.slide_window_slice_3D(out_slice));
     }
@@ -272,7 +272,7 @@ void CLCopyKernel::run(const Window &window, cl::CommandQueue &queue)
             unsigned int idx = 0;
             add_3D_tensor_argument(idx, _input, slice);
             add_3D_tensor_argument(idx, _output, slice);
-            enqueue(queue, *this, slice);
+            enqueue(queue, *this, slice, lws_hint());
         }
         while(collapsed.slide_window_slice_3D(slice));
     }

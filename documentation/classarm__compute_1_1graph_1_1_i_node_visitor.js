@@ -8,6 +8,7 @@ var classarm__compute_1_1graph_1_1_i_node_visitor =
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a9dca296fbf52dcc2c58a0664998e68de", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a1621b973252298e5cefe802320955c40", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a6b39c0c7a4b6470717ce846e797a19d9", null ],
+    [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a0806f63df03f2f9b34177bcf8ce439bd", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a372f8556dcb66d7cda58db4a5f331e1f", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#aed9a139dded6f97aae3005bf3e33ff8c", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a3a831d8fbe701e51eba638465496244f", null ],

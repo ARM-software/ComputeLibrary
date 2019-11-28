@@ -29,11 +29,11 @@
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLArray.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLScharr3x3.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -96,7 +96,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                              _memory_group;
+    MemoryGroup                                _memory_group;
     std::vector<CLLKTrackerInitKernel>         _tracker_init_kernel;
     std::vector<CLLKTrackerStage0Kernel>       _tracker_stage0_kernel;
     std::vector<CLLKTrackerStage1Kernel>       _tracker_stage1_kernel;

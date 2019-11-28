@@ -64,7 +64,8 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLConcatenateLayer", "classarm__compute_1_1_c_l_concatenate_layer.xhtml", "classarm__compute_1_1_c_l_concatenate_layer" ]
     ] ],
     [ "CLConvertFullyConnectedWeights.h", "_c_l_convert_fully_connected_weights_8h.xhtml", [
-      [ "CLConvertFullyConnectedWeights", "classarm__compute_1_1_c_l_convert_fully_connected_weights.xhtml", "classarm__compute_1_1_c_l_convert_fully_connected_weights" ]
+      [ "CLConvertFullyConnectedWeights", "classarm__compute_1_1_c_l_convert_fully_connected_weights.xhtml", "classarm__compute_1_1_c_l_convert_fully_connected_weights" ],
+      [ "CLConvertFullyConnectedWeightsManaged", "classarm__compute_1_1weights__transformations_1_1_c_l_convert_fully_connected_weights_managed.xhtml", "classarm__compute_1_1weights__transformations_1_1_c_l_convert_fully_connected_weights_managed" ]
     ] ],
     [ "CLConvolution.h", "_c_l_convolution_8h.xhtml", "_c_l_convolution_8h" ],
     [ "CLConvolutionLayer.h", "_c_l_convolution_layer_8h.xhtml", [
@@ -89,11 +90,8 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLDepthToSpaceLayer", "classarm__compute_1_1_c_l_depth_to_space_layer.xhtml", "classarm__compute_1_1_c_l_depth_to_space_layer" ]
     ] ],
     [ "CLDepthwiseConvolutionLayer.h", "_c_l_depthwise_convolution_layer_8h.xhtml", [
-      [ "CLDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3" ],
-      [ "CLDepthwiseConvolutionLayer", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer" ]
-    ] ],
-    [ "CLDepthwiseSeparableConvolutionLayer.h", "_c_l_depthwise_separable_convolution_layer_8h.xhtml", [
-      [ "CLDepthwiseSeparableConvolutionLayer", "classarm__compute_1_1_c_l_depthwise_separable_convolution_layer.xhtml", "classarm__compute_1_1_c_l_depthwise_separable_convolution_layer" ]
+      [ "CLDepthwiseConvolutionLayer", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer" ],
+      [ "CLDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3" ]
     ] ],
     [ "CLDequantizationLayer.h", "_c_l_dequantization_layer_8h.xhtml", [
       [ "CLDequantizationLayer", "classarm__compute_1_1_c_l_dequantization_layer.xhtml", "classarm__compute_1_1_c_l_dequantization_layer" ]
@@ -157,6 +155,7 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLFullyConnectedLayer.h", "_c_l_fully_connected_layer_8h.xhtml", [
       [ "CLFullyConnectedLayerReshapeWeights", "classarm__compute_1_1_c_l_fully_connected_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_fully_connected_layer_reshape_weights" ],
+      [ "CLFullyConnectedLayerReshapeWeightsManaged", "classarm__compute_1_1weights__transformations_1_1_c_l_fully_connected_layer_reshape_weights_managed.xhtml", "classarm__compute_1_1weights__transformations_1_1_c_l_fully_connected_layer_reshape_weights_managed" ],
       [ "CLFullyConnectedLayer", "classarm__compute_1_1_c_l_fully_connected_layer.xhtml", "classarm__compute_1_1_c_l_fully_connected_layer" ]
     ] ],
     [ "CLFuseBatchNormalization.h", "_c_l_fuse_batch_normalization_8h.xhtml", [
@@ -177,10 +176,12 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLGaussianPyramidOrb", "classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml", "classarm__compute_1_1_c_l_gaussian_pyramid_orb" ]
     ] ],
     [ "CLGEMM.h", "_c_l_g_e_m_m_8h.xhtml", [
+      [ "CLGEMMReshapeRHSMatrixKernelManaged", "classarm__compute_1_1weights__transformations_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel_managed.xhtml", "classarm__compute_1_1weights__transformations_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel_managed" ],
       [ "CLGEMM", "classarm__compute_1_1_c_l_g_e_m_m.xhtml", "classarm__compute_1_1_c_l_g_e_m_m" ]
     ] ],
     [ "CLGEMMConvolutionLayer.h", "_c_l_g_e_m_m_convolution_layer_8h.xhtml", [
       [ "CLConvolutionLayerReshapeWeights", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights" ],
+      [ "CLConvolutionLayerReshapeWeightsTransform", "classarm__compute_1_1weights__transformations_1_1_c_l_convolution_layer_reshape_weights_transform.xhtml", "classarm__compute_1_1weights__transformations_1_1_c_l_convolution_layer_reshape_weights_transform" ],
       [ "CLGEMMConvolutionLayer", "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer" ]
     ] ],
     [ "CLGEMMDeconvolutionLayer.h", "_c_l_g_e_m_m_deconvolution_layer_8h.xhtml", [
@@ -215,6 +216,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLHOGMultiDetection.h", "_c_l_h_o_g_multi_detection_8h.xhtml", [
       [ "CLHOGMultiDetection", "classarm__compute_1_1_c_l_h_o_g_multi_detection.xhtml", "classarm__compute_1_1_c_l_h_o_g_multi_detection" ]
+    ] ],
+    [ "CLInstanceNormalizationLayer.h", "_c_l_instance_normalization_layer_8h.xhtml", [
+      [ "CLInstanceNormalizationLayer", "classarm__compute_1_1_c_l_instance_normalization_layer.xhtml", "classarm__compute_1_1_c_l_instance_normalization_layer" ]
     ] ],
     [ "CLIntegralImage.h", "_c_l_integral_image_8h.xhtml", [
       [ "CLIntegralImage", "classarm__compute_1_1_c_l_integral_image.xhtml", "classarm__compute_1_1_c_l_integral_image" ]
@@ -341,9 +345,7 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLSobel7x7.h", "_c_l_sobel7x7_8h.xhtml", [
       [ "CLSobel7x7", "classarm__compute_1_1_c_l_sobel7x7.xhtml", "classarm__compute_1_1_c_l_sobel7x7" ]
     ] ],
-    [ "CLSoftmaxLayer.h", "_c_l_softmax_layer_8h.xhtml", [
-      [ "CLSoftmaxLayer", "classarm__compute_1_1_c_l_softmax_layer.xhtml", "classarm__compute_1_1_c_l_softmax_layer" ]
-    ] ],
+    [ "CLSoftmaxLayer.h", "_c_l_softmax_layer_8h.xhtml", "_c_l_softmax_layer_8h" ],
     [ "CLSpaceToBatchLayer.h", "_c_l_space_to_batch_layer_8h.xhtml", [
       [ "CLSpaceToBatchLayer", "classarm__compute_1_1_c_l_space_to_batch_layer.xhtml", "classarm__compute_1_1_c_l_space_to_batch_layer" ]
     ] ],

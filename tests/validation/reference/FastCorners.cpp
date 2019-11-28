@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -167,7 +167,8 @@ std::vector<KeyPoint> fast_corners(const SimpleTensor<T> &src, float input_thres
     SimpleTensor<uint8_t>    scores(src.shape(), DataType::U8);
     ValidRegion              valid_region = shape_to_valid_region(src.shape(), BorderMode::UNDEFINED == border_mode, BorderSize(bresenham_radius));
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         Coordinates candidate = index2coord(src.shape(), i);
         scores[i]             = 0;

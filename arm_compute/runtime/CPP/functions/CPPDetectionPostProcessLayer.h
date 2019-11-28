@@ -103,21 +103,13 @@ private:
     unsigned int       _num_boxes;
     unsigned int       _num_classes_with_background;
     unsigned int       _num_max_detected_boxes;
+    bool               _dequantize_scores;
 
     Tensor         _decoded_boxes;
     Tensor         _decoded_scores;
     Tensor         _selected_indices;
     Tensor         _class_scores;
     const ITensor *_input_scores_to_use;
-
-    // Intermediate results
-    std::vector<int>          _result_idx_boxes_after_nms;
-    std::vector<int>          _result_classes_after_nms;
-    std::vector<float>        _result_scores_after_nms;
-    std::vector<unsigned int> _sorted_indices;
-
-    // Temporary values
-    std::vector<float> _box_scores;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H__ */

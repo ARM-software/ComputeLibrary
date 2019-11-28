@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -183,7 +183,8 @@ void validate(const IAccessor &tensor, const void *reference_value)
     const size_t channel_size   = element_size_from_data_type(tensor.data_type());
 
     // Iterate over all elements, e.g. U8, S16, RGB888, ...
-    for(int element_idx = 0; element_idx < tensor.num_elements(); ++element_idx)
+    const uint32_t tensor_num_elements = tensor.num_elements();
+    for(uint32_t element_idx = 0; element_idx < tensor_num_elements; ++element_idx)
     {
         const Coordinates id = index2coord(tensor.shape(), element_idx);
 

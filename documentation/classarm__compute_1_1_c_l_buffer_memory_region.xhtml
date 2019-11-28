@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -116,12 +116,12 @@ Collaboration diagram for CLBufferMemoryRegion:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a00a579607975f161cbe7a5b499b7b8d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml#a00a579607975f161cbe7a5b499b7b8d5">CLBufferMemoryRegion</a> (cl::Context ctx, cl_mem_flags flags, size_t <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>)</td></tr>
-<tr class="memdesc:a00a579607975f161cbe7a5b499b7b8d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a00a579607975f161cbe7a5b499b7b8d5">More...</a><br /></td></tr>
-<tr class="separator:a00a579607975f161cbe7a5b499b7b8d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f7c7937af50d414b7aa85c97f188fdf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml#a2f7c7937af50d414b7aa85c97f188fdf">CLBufferMemoryRegion</a> (const cl::Buffer &amp;<a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">buffer</a>)</td></tr>
-<tr class="memdesc:a2f7c7937af50d414b7aa85c97f188fdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a2f7c7937af50d414b7aa85c97f188fdf">More...</a><br /></td></tr>
-<tr class="separator:a2f7c7937af50d414b7aa85c97f188fdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae02bf3101c5b7b86d983130ff4ae268"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml#aae02bf3101c5b7b86d983130ff4ae268">CLBufferMemoryRegion</a> (<a class="el" href="classarm__compute_1_1_c_l_core_runtime_context.xhtml">CLCoreRuntimeContext</a> *ctx, cl_mem_flags flags, size_t <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>)</td></tr>
+<tr class="memdesc:aae02bf3101c5b7b86d983130ff4ae268"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#aae02bf3101c5b7b86d983130ff4ae268">More...</a><br /></td></tr>
+<tr class="separator:aae02bf3101c5b7b86d983130ff4ae268"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9dd7189b8eb0e9df75177652791966de"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml#a9dd7189b8eb0e9df75177652791966de">CLBufferMemoryRegion</a> (const cl::Buffer &amp;<a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">buffer</a>, <a class="el" href="classarm__compute_1_1_c_l_core_runtime_context.xhtml">CLCoreRuntimeContext</a> *ctx)</td></tr>
+<tr class="memdesc:a9dd7189b8eb0e9df75177652791966de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a9dd7189b8eb0e9df75177652791966de">More...</a><br /></td></tr>
+<tr class="separator:a9dd7189b8eb0e9df75177652791966de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a567fad71aedc47306dbf7b0c020257d8"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml#a567fad71aedc47306dbf7b0c020257d8">ptr</a> () final</td></tr>
 <tr class="memdesc:a567fad71aedc47306dbf7b0c020257d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Host/SVM pointer accessor.  <a href="#a567fad71aedc47306dbf7b0c020257d8">More...</a><br /></td></tr>
 <tr class="separator:a567fad71aedc47306dbf7b0c020257d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -132,9 +132,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a14c7c495a1add2aec81bc886462efe89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enqueue an unmap operation of the allocated buffer on the given queue.  <a href="#a14c7c495a1add2aec81bc886462efe89">More...</a><br /></td></tr>
 <tr class="separator:a14c7c495a1add2aec81bc886462efe89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_c_l_memory_region')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml">ICLMemoryRegion</a></td></tr>
-<tr class="memitem:a7cdcf7d89e4815422fcb3843e4ffbb4b inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a7cdcf7d89e4815422fcb3843e4ffbb4b">ICLMemoryRegion</a> (cl::Context ctx, size_t <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>)</td></tr>
-<tr class="memdesc:a7cdcf7d89e4815422fcb3843e4ffbb4b inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a7cdcf7d89e4815422fcb3843e4ffbb4b">More...</a><br /></td></tr>
-<tr class="separator:a7cdcf7d89e4815422fcb3843e4ffbb4b inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad33012b9ddb4aaac187d62989dfb91d4 inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#ad33012b9ddb4aaac187d62989dfb91d4">ICLMemoryRegion</a> (<a class="el" href="classarm__compute_1_1_c_l_core_runtime_context.xhtml">CLCoreRuntimeContext</a> *ctx, size_t <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>)</td></tr>
+<tr class="memdesc:ad33012b9ddb4aaac187d62989dfb91d4 inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#ad33012b9ddb4aaac187d62989dfb91d4">More...</a><br /></td></tr>
+<tr class="separator:ad33012b9ddb4aaac187d62989dfb91d4 inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04ae87317614a2332dea02ad30eaced5 inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a04ae87317614a2332dea02ad30eaced5">~ICLMemoryRegion</a> ()=default</td></tr>
 <tr class="memdesc:a04ae87317614a2332dea02ad30eaced5 inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Destructor.  <a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a04ae87317614a2332dea02ad30eaced5">More...</a><br /></td></tr>
 <tr class="separator:a04ae87317614a2332dea02ad30eaced5 inherit pub_methods_classarm__compute_1_1_i_c_l_memory_region"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -179,10 +179,10 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>OpenCL buffer memory region implementation. </p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8h_source.xhtml#l00095">95</a> of file <a class="el" href="_c_l_memory_region_8h_source.xhtml">CLMemoryRegion.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8h_source.xhtml#l00097">97</a> of file <a class="el" href="_c_l_memory_region_8h_source.xhtml">CLMemoryRegion.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a00a579607975f161cbe7a5b499b7b8d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a00a579607975f161cbe7a5b499b7b8d5">&#9670;&nbsp;</a></span>CLBufferMemoryRegion() <span class="overload">[1/2]</span></h2>
+<a id="aae02bf3101c5b7b86d983130ff4ae268"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae02bf3101c5b7b86d983130ff4ae268">&#9670;&nbsp;</a></span>CLBufferMemoryRegion() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -190,7 +190,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml">CLBufferMemoryRegion</a> </td>
           <td>(</td>
-          <td class="paramtype">cl::Context&#160;</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_c_l_core_runtime_context.xhtml">CLCoreRuntimeContext</a> *&#160;</td>
           <td class="paramname"><em>ctx</em>, </td>
         </tr>
         <tr>
@@ -216,21 +216,25 @@ Public Member Functions</h2></td></tr>
 <p>Constructor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td>OpenCL context </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td>Runtime context </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">flags</td><td><a class="el" href="classarm__compute_1_1_memory.xhtml" title="CPU implementation of memory object.">Memory</a> flags </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Region size </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00057">57</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    : <a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a7cdcf7d89e4815422fcb3843e4ffbb4b">ICLMemoryRegion</a>(std::move(ctx), <a class="code" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>)</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;{</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keywordflow">if</span>(_size != 0)</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    {</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        _mem = cl::Buffer(_ctx, flags, _size);</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    }</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_c_l_memory_region_xhtml_a7cdcf7d89e4815422fcb3843e4ffbb4b"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a7cdcf7d89e4815422fcb3843e4ffbb4b">arm_compute::ICLMemoryRegion::ICLMemoryRegion</a></div><div class="ttdeci">ICLMemoryRegion(cl::Context ctx, size_t size)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_memory_region_8cpp_source.xhtml#l00031">CLMemoryRegion.cpp:31</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00062">62</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    : <a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#ad33012b9ddb4aaac187d62989dfb91d4">ICLMemoryRegion</a>(ctx, <a class="code" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>)</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;{</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <span class="keywordflow">if</span>(_size != 0)</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    {</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        _mem = cl::Buffer((ctx != <span class="keyword">nullptr</span>) ? ctx-&gt;context() : <a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a86409f541991c3ac377c2a6b7d1f832d">context</a>(), flags, _size);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    }</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00099">CLScheduler.cpp:99</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_i_c_l_memory_region_xhtml_ad33012b9ddb4aaac187d62989dfb91d4"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#ad33012b9ddb4aaac187d62989dfb91d4">arm_compute::ICLMemoryRegion::ICLMemoryRegion</a></div><div class="ttdeci">ICLMemoryRegion(CLCoreRuntimeContext *ctx, size_t size)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_memory_region_8cpp_source.xhtml#l00032">CLMemoryRegion.cpp:32</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a86409f541991c3ac377c2a6b7d1f832d"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a86409f541991c3ac377c2a6b7d1f832d">arm_compute::CLScheduler::context</a></div><div class="ttdeci">cl::Context &amp; context()</div><div class="ttdoc">Accessor for the associated CL context.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00034">CLScheduler.cpp:34</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_memory_region_xhtml_a259cb5a711406a8c3e5d937eb9350cca"><div class="ttname"><a href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">arm_compute::IMemoryRegion::size</a></div><div class="ttdeci">size_t size() const</div><div class="ttdoc">Memory region size accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_memory_region_8h_source.xhtml#l00073">IMemoryRegion.h:73</a></div></div>
 </div><!-- fragment -->
+<p class="reference">References <a class="el" href="_c_l_core_runtime_context_8cpp_source.xhtml#l00028">CLCoreRuntimeContext::context()</a>, <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00034">CLScheduler::context()</a>, and <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00099">CLScheduler::get()</a>.</p>
+
 </div>
 </div>
-<a id="a2f7c7937af50d414b7aa85c97f188fdf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f7c7937af50d414b7aa85c97f188fdf">&#9670;&nbsp;</a></span>CLBufferMemoryRegion() <span class="overload">[2/2]</span></h2>
+<a id="a9dd7189b8eb0e9df75177652791966de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dd7189b8eb0e9df75177652791966de">&#9670;&nbsp;</a></span>CLBufferMemoryRegion() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -239,8 +243,18 @@ Public Member Functions</h2></td></tr>
           <td class="memname"><a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml">CLBufferMemoryRegion</a> </td>
           <td>(</td>
           <td class="paramtype">const cl::Buffer &amp;&#160;</td>
-          <td class="paramname"><em>buffer</em></td><td>)</td>
+          <td class="paramname"><em>buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_c_l_core_runtime_context.xhtml">CLCoreRuntimeContext</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -249,15 +263,16 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">buffer</td><td>Buffer to be used as a memory region </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td>Runtime context </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00066">66</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    : <a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a7cdcf7d89e4815422fcb3843e4ffbb4b">ICLMemoryRegion</a>(<a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">buffer</a>.getInfo&lt;CL_MEM_CONTEXT&gt;(), <a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">buffer</a>.getInfo&lt;CL_MEM_SIZE&gt;())</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;{</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    _mem = <a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">buffer</a>;</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_c_l_memory_region_xhtml_a7cdcf7d89e4815422fcb3843e4ffbb4b"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a7cdcf7d89e4815422fcb3843e4ffbb4b">arm_compute::ICLMemoryRegion::ICLMemoryRegion</a></div><div class="ttdeci">ICLMemoryRegion(cl::Context ctx, size_t size)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_memory_region_8cpp_source.xhtml#l00031">CLMemoryRegion.cpp:31</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_i_c_l_memory_region_xhtml_a3d9d196240e9b0062c953c3abd534187"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">arm_compute::ICLMemoryRegion::buffer</a></div><div class="ttdeci">void * buffer() override</div><div class="ttdoc">Returns the pointer to the allocated data.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_memory_region_8cpp_source.xhtml#l00041">CLMemoryRegion.cpp:41</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00071">71</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    : <a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#ad33012b9ddb4aaac187d62989dfb91d4">ICLMemoryRegion</a>(ctx, <a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">buffer</a>.getInfo&lt;CL_MEM_SIZE&gt;())</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;{</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    _mem = <a class="code" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">buffer</a>;</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_c_l_memory_region_xhtml_ad33012b9ddb4aaac187d62989dfb91d4"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#ad33012b9ddb4aaac187d62989dfb91d4">arm_compute::ICLMemoryRegion::ICLMemoryRegion</a></div><div class="ttdeci">ICLMemoryRegion(CLCoreRuntimeContext *ctx, size_t size)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_memory_region_8cpp_source.xhtml#l00032">CLMemoryRegion.cpp:32</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_i_c_l_memory_region_xhtml_a3d9d196240e9b0062c953c3abd534187"><div class="ttname"><a href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">arm_compute::ICLMemoryRegion::buffer</a></div><div class="ttdeci">void * buffer() override</div><div class="ttdoc">Returns the pointer to the allocated data.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_memory_region_8cpp_source.xhtml#l00046">CLMemoryRegion.cpp:46</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00041">ICLMemoryRegion::buffer()</a>.</p>
+<p class="reference">References <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00046">ICLMemoryRegion::buffer()</a>.</p>
 
 </div>
 </div>
@@ -308,10 +323,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a929af627a6a0430539998d12024d6c69">ICLMemoryRegion</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00077">77</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;{</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(_mem.get() == <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    _mapping = q.enqueueMapBuffer(_mem, blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, _size);</div><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keywordflow">return</span> _mapping;</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00082">82</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;{</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(_mem.get() == <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    _mapping = q.enqueueMapBuffer(_mem, blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, _size);</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="keywordflow">return</span> _mapping;</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00466">Error.h:466</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00466">ARM_COMPUTE_ERROR_ON</a>.</p>
 
 </div>
 </div>
@@ -343,8 +358,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#ab8777d03065e8c7146157148a5355dd1">ICLMemoryRegion</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00072">72</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;{</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00077">77</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;{</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a14c7c495a1add2aec81bc886462efe89"></a>
@@ -382,10 +397,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a0ee6b952accaff0f7e8e61bda7889102">ICLMemoryRegion</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00084">84</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;{</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(_mem.get() == <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    q.enqueueUnmapMemObject(_mem, _mapping);</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    _mapping = <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_memory_region_8cpp_source.xhtml#l00089">89</a> of file <a class="el" href="_c_l_memory_region_8cpp_source.xhtml">CLMemoryRegion.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;{</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(_mem.get() == <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    q.enqueueUnmapMemObject(_mem, _mapping);</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    _mapping = <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00466">Error.h:466</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00466">ARM_COMPUTE_ERROR_ON</a>.</p>
 
 </div>
 </div>
@@ -399,7 +414,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml">CLBufferMemoryRegion</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:31 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:09 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

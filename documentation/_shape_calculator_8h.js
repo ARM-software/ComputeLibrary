@@ -23,7 +23,7 @@ var _shape_calculator_8h =
     [ "compute_permutation_output_shape", "_shape_calculator_8h.xhtml#a593fb7ecc281425b190cd6f20164b1a3", null ],
     [ "compute_pool_shape", "_shape_calculator_8h.xhtml#ad242bedd6845b8fc13ade41cfc062c83", null ],
     [ "compute_prior_box_shape", "_shape_calculator_8h.xhtml#ae3f672f124e4228db364bb811e770226", null ],
-    [ "compute_reduced_shape", "_shape_calculator_8h.xhtml#a0b0f2e38b65473f68561e0598c3107ff", null ],
+    [ "compute_reduced_shape", "_shape_calculator_8h.xhtml#aff7ab3043f63660295d229ebc9e6c2b1", null ],
     [ "compute_reductionA_shape", "_shape_calculator_8h.xhtml#a60ce6c017f70d978b48b101ce314969e", null ],
     [ "compute_reductionB_shape", "_shape_calculator_8h.xhtml#a69f9b3191aafc4905f9d029ff9d48fea", null ],
     [ "compute_reorg_output_shape", "_shape_calculator_8h.xhtml#afbc83cd4145d161da4c026e1f5743e1d", null ],

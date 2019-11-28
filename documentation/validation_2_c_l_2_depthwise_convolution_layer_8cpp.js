@@ -1,12 +1,15 @@
 var validation_2_c_l_2_depthwise_convolution_layer_8cpp =
 [
     [ "CLDepthwiseConvolutionLayerFixture", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#ae133c0063d4112703d30b7f7ae485fce", null ],
+    [ "CLDepthwiseConvolutionLayerQuantizedPerChannelFixture", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a9ff8ac2db6fee50706a654768d9f85a7", null ],
     [ "combine", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#aa2610374027f2e967a291bd532942dd8", null ],
     [ "combine", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a741d89a89433d9975363d4404a06c43b", null ],
     [ "combine", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#ad586fbe518e36bb13dcea2c4b353c80f", null ],
     [ "combine", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a2dcd6383242254a7b48e1973606865bc", null ],
     [ "combine", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a78bf32187286a070d6347f31439d6515", null ],
     [ "combine", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a3090ca48ca34344dae54defd8d8c271d", null ],
+    [ "combine", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a4a6a055160e47dfa48206ab62dc6c981", null ],
+    [ "combine", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#ab30d568dc3f2be7644a21b8f08a1ea67", null ],
     [ "DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#aed5f7a9b1bde3cc3a789cd674974e254", null ],
     [ "DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a1746a40504c1600cad5df8b24c2c928e", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#ac862dd7e549bd566454cc7cfb3579dae", null ],
@@ -35,8 +38,15 @@ var validation_2_c_l_2_depthwise_convolution_layer_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a365f0a80773e2e848500ba0b9b384d0d", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#ae07e593738cd99ab0bd7e8834ab21ece", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#ac3df3c875e8c507e1f1e6ecd9f95cd3c", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#adfcc31d26b089320e60ba9e92a8775ba", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a27ebda2159723d58027fb21496998982", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a6dd5afbb0b1f021a701e55fd20a77882", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#aa7b6ed5453aa05422b00177bd128404a", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a6bb4c9a34023d65c1e7abcf9bd83d3f0", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#adc1b95600f0afb4518f1cd89ef2dc00d", null ],
     [ "TEST_SUITE_END", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#ac2ed31007ae463a3cec24a581f3651f6", null ],
     [ "CLDepthwiseConvolutionLayerFixture< float >", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a98594c5ca9886c14365d813714611c79", null ],
     [ "CLDepthwiseConvolutionLayerFixture< half >", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a2437c44063526d22feb88404f431c5c8", null ],
-    [ "CLDepthwiseConvolutionLayerQuantizedFixture< uint8_t >", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a46215efb57d85d73b814e3a5b3f987c2", null ]
+    [ "CLDepthwiseConvolutionLayerQuantizedFixture< uint8_t >", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a46215efb57d85d73b814e3a5b3f987c2", null ],
+    [ "CLDepthwiseConvolutionLayerQuantizedPerChannelFixture< uint8_t >", "validation_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml#a860cb13f725aff473482655e08e7a783", null ]
 ];

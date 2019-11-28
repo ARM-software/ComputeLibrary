@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,8 +38,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const SimpleTensor<T> &deltas, const BoundingBoxTransformInfo &info);
+template <typename T, typename TDeltas>
+SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const SimpleTensor<TDeltas> &deltas, const BoundingBoxTransformInfo &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

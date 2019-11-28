@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,14 +58,12 @@ public:
             constant_border_value = distribution_u8(gen);
         }
 
-        const TensorShape vmask_shape(input_shape);
-
         // Create the matrix
         std::array<float, 9> matrix = { { 0 } };
         fill_warp_matrix<9>(matrix);
 
-        _target    = compute_target(input_shape, vmask_shape, matrix, policy, border_mode, constant_border_value, data_type);
-        _reference = compute_reference(input_shape, vmask_shape, matrix, policy, border_mode, constant_border_value, data_type);
+        _target    = compute_target(input_shape, matrix, policy, border_mode, constant_border_value, data_type);
+        _reference = compute_reference(input_shape, matrix, policy, border_mode, constant_border_value, data_type);
     }
 
 protected:
@@ -75,7 +73,7 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, const TensorShape &vmask_shape, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
+    TensorType compute_target(const TensorShape &shape, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
                               uint8_t  constant_border_value,
                               DataType data_type)
     {
@@ -106,7 +104,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &vmask_shape, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
+    SimpleTensor<T> compute_reference(const TensorShape &shape, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
                                       uint8_t  constant_border_value,
                                       DataType data_type)
     {

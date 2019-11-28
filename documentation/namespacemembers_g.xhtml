@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -166,6 +166,9 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 <li>GCDropoutLayerFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0c2f7b5216c2624e314047c6d6eeefe0">arm_compute::test::validation</a>
 </li>
+<li>GCDynamicTensorType3SingleFunction
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4d55f30676dc9e072cf0300341448438">arm_compute::test::validation</a>
+</li>
 <li>GCFullyConnectedLayerFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a24e2d47432cc0b346147bbbc3964e6c8">arm_compute::test::benchmark</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6fc1224b860967d39b81310781441491">arm_compute::test::validation</a>
@@ -179,9 +182,6 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 </li>
 <li>GCImage
 : <a class="el" href="namespacearm__compute.xhtml#a0b1d72d612fb6f33393ea6cd6cbcf523">arm_compute</a>
-</li>
-<li>GCMemoryGroup
-: <a class="el" href="namespacearm__compute.xhtml#abb079bea3cd2a65a7018eab99392747e">arm_compute</a>
 </li>
 <li>GCNormalizationLayerFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1fefec9092294491e98390796f4adb12">arm_compute::test::validation</a>
@@ -210,10 +210,16 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 </li>
 <li>gemm()
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aa8bf3ead30905547609084db58ee70de">arm_compute::test::validation::reference</a>
-, <a class="el" href="namespacearm__gemm.xhtml#a3cf8a3a8f4c31d116db5013daa6d83d9">arm_gemm</a>
+, <a class="el" href="namespacearm__gemm.xhtml#a64b2f658fb34f894449e0279747a6390">arm_gemm</a>
 </li>
 <li>gemm&lt; float, float, Nothing &gt;()
-: <a class="el" href="namespacearm__gemm.xhtml#ab98c2935f5bb60c9a4add6c3e9de53e4">arm_gemm</a>
+: <a class="el" href="namespacearm__gemm.xhtml#a4fb5776f35967c7173f432cb096de217">arm_gemm</a>
+</li>
+<li>GEMM_CONFIG_FACTORY
+: <a class="el" href="namespace_gemm_tuner.xhtml#a3c0f164b66e196f940f4b9e206d586d5">GemmTuner</a>
+</li>
+<li>GEMM_EXAMPLE_ARGS_FACTORY
+: <a class="el" href="namespace_gemm_tuner.xhtml#abfd6c8b5e818f3a2a5dac6717b853018">GemmTuner</a>
 </li>
 <li>gemm_implementation_list()
 : <a class="el" href="namespacearm__gemm.xhtml#aafbf874fc03cb6d5e6d79e93f5dc1d76">arm_gemm</a>
@@ -227,8 +233,11 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 <li>gemm_interleave_blocked()
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a10d3d399b4d9f8f031db4cab7cf1d5a6">arm_compute::test::validation::reference</a>
 </li>
+<li>gemm_mixed_precision()
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a9951841d11d9fcb8e7ecd45f9bba4c60">arm_compute::test::validation::reference</a>
+</li>
 <li>gemm_reshape_lhs_matrix()
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a24b8e6a6c01dc309d0f4e6c7b882c9f0">arm_compute::test::validation::reference</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a7da8e015c6426ba7a9d756d3cd12e248">arm_compute::test::validation::reference</a>
 </li>
 <li>gemm_reshape_rhs_matrix()
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#af33c441c06448d09c4562780d09f5f6f">arm_compute::test::validation::reference</a>
@@ -236,20 +245,32 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 <li>gemm_transpose_1xW()
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a5cc178cdce0a90f66bba02b5e985f1ad">arm_compute::test::validation::reference</a>
 </li>
+<li>GEMMConfigT
+: <a class="el" href="namespace_gemm_tuner.xhtml#a696b6940cef01d03e1fc064d8be3727b">GemmTuner</a>
+</li>
 <li>gemmlowp()
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#af18f21173e19d772347089a2839351b8">arm_compute::test::validation::reference</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6f53995c189821e40cefceb87513ffa4">arm_compute::test::validation::reference</a>
+</li>
+<li>gemmlowp&lt; int32_t, int8_t, int8_t &gt;()
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a487791e3341381ea63f13b6fa49cab31">arm_compute::test::validation::reference</a>
+</li>
+<li>gemmlowp&lt; int32_t, uint8_t, int8_t &gt;()
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a1314a167983a67f7d439771b183434ee">arm_compute::test::validation::reference</a>
+</li>
+<li>gemmlowp&lt; int32_t, uint8_t, uint8_t &gt;()
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#abdab47b801c5215fae4062f415c69095">arm_compute::test::validation::reference</a>
 </li>
 <li>gemmlowp_matrix_multiply_core()
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a74776be88be65092fe631a3313f46ab5">arm_compute::test::validation::reference</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a855559383c5926d018e2f780a63050a8">arm_compute::test::validation::reference</a>
 </li>
 <li>gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint()
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a344296b0ad06f8e867f95658d59ecdeb">arm_compute::test::validation::reference</a>
 </li>
 <li>gemmlowp_quantize_down_int32_to_uint8_scale()
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aa74f872dcd4daaaa3ef53e8ab628b606">arm_compute::test::validation::reference</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6d6844085db8ca5e627404f7b6e6d25b">arm_compute::test::validation::reference</a>
 </li>
 <li>gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint()
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a43a9895cb024f65fd294a76b51a16092">arm_compute::test::validation::reference</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a409c80c6f4b9ad31362435e61b9c82d4">arm_compute::test::validation::reference</a>
 </li>
 <li>GEMMLowpOutputStageType
 : <a class="el" href="namespacearm__compute.xhtml#a5558e2cc22f7f4771653d992c8ad8864">arm_compute</a>
@@ -259,6 +280,9 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 </li>
 <li>generate_random_real()
 : <a class="el" href="namespacearm__compute_1_1test.xhtml#a000a9b9acb976222ee72275cf8852a3f">arm_compute::test</a>
+</li>
+<li>get_accessor()
+: <a class="el" href="namespacearm__compute_1_1utils.xhtml#ac71977d367133149be76363b0915c3af">arm_compute::utils</a>
 </li>
 <li>get_activation_layer_test_bounds()
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9a1aa7d40588cbc644eb7d45d008b1f0">arm_compute::test::validation</a>
@@ -275,20 +299,26 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 <li>get_channel_format()
 : <a class="el" href="namespacearm__compute_1_1test.xhtml#ac7dbe33793790fc37a5eda11ed6b0273">arm_compute::test</a>
 </li>
+<li>get_cl_promoted_type_from_data_type()
+: <a class="el" href="namespacearm__compute.xhtml#ad090aabdbbec665e3704af55ba7bd563">arm_compute</a>
+</li>
 <li>get_cl_select_type_from_data_type()
 : <a class="el" href="namespacearm__compute.xhtml#a70d221fbff7bff840ef4d3fdc701cf53">arm_compute</a>
 </li>
 <li>get_cl_type_from_data_type()
 : <a class="el" href="namespacearm__compute.xhtml#a545eeda2eaa3f5a54345ce8169e21184">arm_compute</a>
 </li>
+<li>get_cl_unsigned_type_from_element_size()
+: <a class="el" href="namespacearm__compute.xhtml#a237044b76803b058edd1b23d599bcc6d">arm_compute</a>
+</li>
 <li>get_cl_version()
 : <a class="el" href="namespacearm__compute.xhtml#a0e62ce01a7a7af6c3d059bb8534cad45">arm_compute</a>
 </li>
 <li>get_compatible_kernels()
-: <a class="el" href="namespacearm__gemm.xhtml#a8eb5d997d45efbbdaa4374f45e541d86">arm_gemm</a>
+: <a class="el" href="namespacearm__gemm.xhtml#abce3ed84b7a8f5c6e45809ca1089b1cf">arm_gemm</a>
 </li>
 <li>get_compatible_kernels&lt; float, float, Nothing &gt;()
-: <a class="el" href="namespacearm__gemm.xhtml#a9194360a5ba6924c83f0269ade8608f5">arm_gemm</a>
+: <a class="el" href="namespacearm__gemm.xhtml#a4ac39db987b3fbd8e8a6e971961b41f4">arm_gemm</a>
 </li>
 <li>get_cpu_configuration()
 : <a class="el" href="namespacearm__compute.xhtml#a92d01d03db1530581737484c1290ca16">arm_compute</a>
@@ -318,10 +348,10 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1test.xhtml#aa337ab76176f3c4193642ac6de3a61cf">arm_compute::test</a>
 </li>
 <li>get_gemm_method()
-: <a class="el" href="namespacearm__gemm.xhtml#a777476ec2693309861bef88dbef2d23f">arm_gemm</a>
+: <a class="el" href="namespacearm__gemm.xhtml#ad35cfe7c388edeac570fb9e01180dda6">arm_gemm</a>
 </li>
 <li>get_gemm_method&lt; float, float, Nothing &gt;()
-: <a class="el" href="namespacearm__gemm.xhtml#abd013457d4280a12045a79c201bf25e0">arm_gemm</a>
+: <a class="el" href="namespacearm__gemm.xhtml#aeaa8a3f397520dca43d1dabb3774e2c9">arm_gemm</a>
 </li>
 <li>get_image_type_from_file()
 : <a class="el" href="namespacearm__compute_1_1utils.xhtml#a779702024b509e6797b2d526d382cf65">arm_compute::utils</a>
@@ -333,7 +363,7 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ab14324184f90f342227699c161654b1b">arm_compute::graph_utils</a>
 </li>
 <li>get_input_num_elems_processed()
-: <a class="el" href="namespacearm__compute_1_1detail.xhtml#a30f6368deaea5f10f9dd1bbaa28c24e6">arm_compute::detail</a>
+: <a class="el" href="namespacearm__compute_1_1detail.xhtml#a17a8ccb1f281296a0ee7eb00693febbd">arm_compute::detail</a>
 </li>
 <li>get_input_num_elems_processed&lt; 1 &gt;()
 : <a class="el" href="namespacearm__compute_1_1detail.xhtml#a7a08a003e6ce7ea86cb7d8f4523c0eb5">arm_compute::detail</a>
@@ -350,6 +380,9 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 <li>get_memory_manager()
 : <a class="el" href="namespacearm__compute_1_1graph_1_1backends.xhtml#a8919c520c1cb9086dd1116de509bd481">arm_compute::graph::backends</a>
 </li>
+<li>get_min_max_values_from_quantized_data_type()
+: <a class="el" href="namespacearm__compute_1_1quantization.xhtml#ab8860c9932b57a5066c460ea310e1bc4">arm_compute::quantization</a>
+</li>
 <li>get_next_power_two()
 : <a class="el" href="namespacearm__compute.xhtml#a7c3d8e17b509d0d18cc7c94b7e0a993d">arm_compute</a>
 </li>
@@ -361,6 +394,9 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 </li>
 <li>get_output_accessor()
 : <a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ae3d177d243f5fb34544105a4ee4e1f58">arm_compute::graph_utils</a>
+</li>
+<li>get_print_output_accessor()
+: <a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a655bfc2ace1def9f00aab1c9356abb53">arm_compute::graph_utils</a>
 </li>
 <li>get_promoted_data_type()
 : <a class="el" href="namespacearm__compute.xhtml#a5e4254e9c71fffafb79b99d972df8f81">arm_compute</a>
@@ -374,8 +410,11 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 <li>get_save_npy_output_accessor()
 : <a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a6207a1b742579b07b8f4b14e542a7b3a">arm_compute::graph_utils</a>
 </li>
+<li>get_symm_quantized_per_channel_bounds()
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae7075ff9f78b0d90bbe428f1406d669b">arm_compute::test::validation</a>
+</li>
 <li>get_target_from_device()
-: <a class="el" href="namespacearm__compute.xhtml#a281384aa081efe5819eedd6a7c2a429b">arm_compute</a>
+: <a class="el" href="namespacearm__compute.xhtml#a786b9d823a527bb1e30d38f4dbe52d4b">arm_compute</a>
 </li>
 <li>get_target_from_name()
 : <a class="el" href="namespacearm__compute.xhtml#a0dc6fb54ac0bbc7bf512fe0ca7414076">arm_compute</a>
@@ -387,7 +426,7 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 : <a class="el" href="namespacearm__compute.xhtml#a9a9fa44b29bc17746a0b486626a76e0a">arm_compute</a>
 </li>
 <li>get_tile()
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7159671a452710595f7d01e69aef7a13">arm_compute::test::validation</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab9399f3f1910e0f236cd6f4613bd4397">arm_compute::test::validation</a>
 </li>
 <li>get_typestring()
 : <a class="el" href="namespacearm__compute_1_1test.xhtml#ae47155d6186155ec4da9295764b3c05a">arm_compute::test</a>
@@ -399,8 +438,14 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 <li>get_vector_length()
 : <a class="el" href="namespacearm__gemm_1_1utils.xhtml#aa7ef5562f876812256212715f49ef569">arm_gemm::utils</a>
 </li>
+<li>get_verify_accessor()
+: <a class="el" href="namespacearm__compute_1_1utils.xhtml#ae55aa860d1d119bc2a2812ef0391b9ae">arm_compute::utils</a>
+</li>
 <li>get_weights_accessor()
 : <a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a30bee0b52a919bbcb1dc48b1b6546a16">arm_compute::graph_utils</a>
+</li>
+<li>get_weights_manager()
+: <a class="el" href="namespacearm__compute_1_1graph_1_1backends.xhtml#a32d8fea34ca818386a078939a03e3cb8">arm_compute::graph::backends</a>
 </li>
 <li>gpu_target_is_in()
 : <a class="el" href="namespacearm__compute.xhtml#a1da498e9b2c2d24883087f62c6bbe75d">arm_compute</a>
@@ -429,7 +474,7 @@ $(document).ready(function(){initNavTree('namespacemembers_g.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:42 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

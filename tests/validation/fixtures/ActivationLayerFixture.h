@@ -31,6 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/framework/ParametersLibrary.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
 
@@ -46,6 +47,11 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ActivationValidationGenericFixture : public framework::Fixture
 {
 public:
+    ActivationValidationGenericFixture()
+        : _target(parameters->get_ctx<TensorType>())
+    {
+    }
+
     template <typename...>
     void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
     {
@@ -89,12 +95,13 @@ protected:
 
     TensorType compute_target(const TensorShape &shape, ActivationLayerInfo info)
     {
+        auto ctx = parameters->get_ctx<TensorType>();
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, _input_quantization_info);
-        TensorType dst = create_tensor<TensorType>(shape, _data_type, 1, _output_quantization_info);
+        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, _input_quantization_info, DataLayout::NCHW, ctx);
+        TensorType dst = create_tensor<TensorType>(shape, _data_type, 1, _output_quantization_info, DataLayout::NCHW, ctx);
 
         // Create and configure function
-        FunctionType act_layer;
+        FunctionType act_layer(ctx);
 
         TensorType *dst_ptr = _in_place ? nullptr : &dst;
 

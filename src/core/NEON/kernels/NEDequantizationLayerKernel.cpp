@@ -43,7 +43,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QSYMM8, DataType::QSYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::QSYMM8, DataType::QSYMM16);
 
     if(output->tensor_shape().total_size() > 0)
     {
@@ -160,6 +160,97 @@ void run_dequantization_qasymm8(const ITensor *input, ITensor *output, const Win
 }
 
 template <typename T>
+void run_dequantization_qsymm8_per_channel_nchw(const ITensor *input, ITensor *output, const Window &window)
+{
+    const auto scale = input->info()->quantization_info().scale();
+
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    // Reset first dimension to handle tail calculations manually
+    Window win(window);
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    // Create iterators
+    Iterator in(input, win);
+    Iterator out(output, win);
+
+    execute_window_loop(win, [&](const Coordinates & id)
+    {
+        const auto in_ptr  = reinterpret_cast<const int8_t *>(in.ptr());
+        const auto out_ptr = reinterpret_cast<T *>(out.ptr());
+
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const auto vin  = wrapper::vloadq(in_ptr + x);
+            const auto vdeq = vdequantize(vin, scale[id.z()]);
+
+            store_result<T>(reinterpret_cast<T *>(out_ptr + x), vdeq);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            int8_t val     = *(in_ptr + x);
+            *(out_ptr + x) = static_cast<T>(dequantize(val, scale[id.z()]));
+        }
+    },
+    in, out);
+}
+
+template <typename T>
+void run_dequantization_qsymm8_per_channel_nhwc(const ITensor *input, ITensor *output, const Window &window)
+{
+    const auto scale = input->info()->quantization_info().scale();
+
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    // Reset first dimension to handle tail calculations manually
+    Window win(window);
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    // Create iterators
+    Iterator in(input, win);
+    Iterator out(output, win);
+
+    execute_window_loop(win, [&](const Coordinates &)
+    {
+        const auto in_ptr  = reinterpret_cast<const int8_t *>(in.ptr());
+        const auto out_ptr = reinterpret_cast<T *>(out.ptr());
+
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const float32x4x4_t vscale =
+            {
+                {
+                    scale[x + 0], scale[x + 1], scale[x + 2], scale[x + 3],
+                    scale[x + 4], scale[x + 5], scale[x + 6], scale[x + 7],
+                    scale[x + 8], scale[x + 9], scale[x + 10], scale[x + 11],
+                    scale[x + 12], scale[x + 13], scale[x + 14], scale[x + 15]
+                }
+            };
+            const auto vin  = wrapper::vloadq(in_ptr + x);
+            const auto vdeq = vdequantize(vin, vscale);
+
+            store_result<T>(reinterpret_cast<T *>(out_ptr + x), vdeq);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            int8_t val     = *(in_ptr + x);
+            *(out_ptr + x) = static_cast<T>(dequantize(val, scale[x]));
+        }
+    },
+    in, out);
+}
+
+template <typename T>
 void run_dequantization_qsymm8(const ITensor *input, ITensor *output, const Window &window)
 {
     const UniformQuantizationInfo &qinfo = input->info()->quantization_info().uniform();
@@ -250,6 +341,9 @@ void run_dequantization_core(const ITensor *input, ITensor *output, const Window
     {
         case DataType::QASYMM8:
             run_dequantization_qasymm8<T>(input, output, window);
+            break;
+        case DataType::QSYMM8_PER_CHANNEL:
+            input->info()->data_layout() == DataLayout::NHWC ? run_dequantization_qsymm8_per_channel_nhwc<T>(input, output, window) : run_dequantization_qsymm8_per_channel_nchw<T>(input, output, window);
             break;
         case DataType::QSYMM8:
             run_dequantization_qsymm8<T>(input, output, window);

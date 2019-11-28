@@ -46,6 +46,8 @@ AbsoluteTolerance<float> absolute_tolerance_f32(0.001f);
 RelativeTolerance<half>  relative_tolerance_f16(half(0.2));
 AbsoluteTolerance<float> absolute_tolerance_f16(half(0.02f));
 
+constexpr AbsoluteTolerance<uint16_t> tolerance_qasymm16(1);
+
 // *INDENT-OFF*
 // clang-format off
 const auto BboxInfoDataset = framework::dataset::make("BboxInfo", { BoundingBoxTransformInfo(20U, 20U, 2U, true),
@@ -127,6 +129,21 @@ FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformFixture<half>, framewo
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
+
+template <typename T>
+using CLBoundingBoxTransformQuantizedFixture = BoundingBoxTransformQuantizedFixture<CLTensor, CLAccessor, CLBoundingBoxTransform, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM16)
+FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformQuantizedFixture<uint16_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::QASYMM16 })),
+                               framework::dataset::make("DeltasQuantInfo", { QuantizationInfo(1.f / 255.f, 127) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm16);
+}
+TEST_SUITE_END() // QASYMM16
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // BBoxTransform
 TEST_SUITE_END() // CL

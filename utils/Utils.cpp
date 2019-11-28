@@ -24,6 +24,7 @@
 #include "Utils.h"
 
 #ifdef ARM_COMPUTE_CL
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
 
@@ -34,6 +35,8 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-default"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #pragma GCC diagnostic pop
@@ -184,7 +187,7 @@ ImageType get_image_type_from_file(const std::string &filename)
     }
     catch(std::runtime_error &e)
     {
-        ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
+        ARM_COMPUTE_ERROR_VAR("Accessing %s: %s", filename.c_str(), e.what());
     }
 
     return type;
@@ -313,6 +316,8 @@ void restore_program_cache_from_file(const std::string &filename)
         }
         cache_file.close();
     }
+#else  /* ARM_COMPUTE_CL */
+    ARM_COMPUTE_UNUSED(filename);
 #endif /* ARM_COMPUTE_CL */
 }
 
@@ -347,6 +352,8 @@ void save_program_cache_to_file(const std::string &filename)
             ARM_COMPUTE_ERROR("Cannot open cache file");
         }
     }
+#else  /* ARM_COMPUTE_CL */
+    ARM_COMPUTE_UNUSED(filename);
 #endif /* ARM_COMPUTE_CL */
 }
 } // namespace utils

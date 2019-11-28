@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include <algorithm>
 
 #include "arm_gemm.hpp"
+#include "bias_adder.hpp"
 #include "ndrange.hpp"
 #include "utils.hpp"
 
@@ -58,7 +59,7 @@ class GemmHybrid : public GemmCommon<To, Tr> {
 
     const bool _trB;
 
-    const Tr _beta;
+    const Activation _act;
 
     /* Blocking info */
     const unsigned int _k_block;
@@ -70,7 +71,12 @@ class GemmHybrid : public GemmCommon<To, Tr> {
 
     const NDRange<4> _window_range;
 
-    static unsigned int compute_k_block(const GemmArgs<Tr> &args) {
+    static unsigned int compute_k_block(const GemmArgs &args) {
+        // Some kernels don't support append mode - these can't do K blocking at all.
+        if (!strategy::supports_append()) {
+            return args._Ksize;
+        }
+
         if (args._cfg && args._cfg->inner_block_size) {
             return args._cfg->inner_block_size;
         }
@@ -97,7 +103,7 @@ class GemmHybrid : public GemmCommon<To, Tr> {
         return k_block;
     }
 
-    static unsigned int compute_n_block(const GemmArgs<Tr> &args) {
+    static unsigned int compute_n_block(const GemmArgs &args) {
         if (args._cfg && args._cfg->outer_block_size) {
             return args._cfg->outer_block_size;
         }
@@ -127,9 +133,10 @@ public:
     GemmHybrid & operator= (GemmHybrid &) = delete;
 
     /* Constructor */
-    GemmHybrid(const GemmArgs<Tr> &args)
+    GemmHybrid(const GemmArgs &args)
               : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
-                _nbatches(args._nbatches), _nmulti(args._nmulti), _trB(args._trB), _beta(args._beta),
+                _nbatches(args._nbatches), _nmulti(args._nmulti), _trB(args._trB),
+                _act(args._act),
                 _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmulti) { }
@@ -146,6 +153,7 @@ public:
 
     // Execute
     void execute(unsigned int start, unsigned int end, int threadid) override {
+        UNUSED(threadid);
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -162,6 +170,9 @@ public:
         for (unsigned int k0=0; k0<_Ksize; k0+=_k_block) {
             unsigned int kmax   = std::min(k0 + _k_block, _Ksize);
             unsigned int kern_k = roundup(kmax-k0, strategy::k_unroll());
+
+            const bool first_pass = (k0 == 0);
+            const bool last_pass = (kmax == _Ksize);
 
             auto p = _window_range.iterator(start, end);
 
@@ -189,8 +200,17 @@ public:
                 strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda) + k0, this->_lda,
                              b_panel,
                              this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
-                             (k0 == 0) ? _beta : static_cast<Tr>(1),
-                             (m_end - m_start), (nmax - n0), kmax-k0);
+                             (m_end - m_start), (nmax - n0), kmax-k0,
+                             (strategy::supports_bias() && first_pass && this->_bias) ? this->_bias + (multi * this->_bias_multi_stride) + n0 : nullptr,
+                             last_pass ? _act : Activation(), !first_pass);
+
+                // Add bias externally if needed
+                if (!strategy::supports_bias() && this->_bias && first_pass) {
+                    bias_adder(this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
+                               this->_bias + (multi * this->_bias_multi_stride) + n0,
+                               (m_end - m_start), (nmax - n0));
+                }
+
             } while (p.next_dim1());
         }
     }

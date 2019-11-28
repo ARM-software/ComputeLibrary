@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2018 ARM Limited.
+/// Copyright (c) 2017-2019 ARM Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -28,7 +28,7 @@ namespace arm_compute
 
 @tableofcontents
 
-@section S4_1 Core vs Runtime libraries
+@section S4_1_1 Core vs Runtime libraries
 
 The Core library is a low level collection of algorithms implementations, it is designed to be embedded in existing projects and applications:
 
@@ -42,6 +42,12 @@ The Runtime library is a very basic wrapper around the Core library which can be
 - For OpenCL it uses the default CLScheduler command queue for all mapping operations and kernels.
 
 For maximum performance, it is expected that the users would re-implement an equivalent to the runtime library which suits better their needs (With a more clever multi-threading strategy, load-balancing between NEON and OpenCL, etc.)
+
+@section S4_1_2 Thread-safety
+
+Although the library supports multi-threading during workload dispatch, thus parallelizing the execution of the workload at multiple threads, the current runtime module implementation is not thread-safe in the sense of executing different functions from separate threads.
+This lies to the fact that the provided scheduling mechanism wasn't designed with thread-safety in mind.
+As it is true with the rest of the runtime library a custom scheduling mechanism can be re-implemented to account for thread-safety if needed and be injected as the library's default scheduler.
 
 @section S4_2_windows_kernels_mt_functions Windows, kernels, multi-threading and functions
 
@@ -349,10 +355,6 @@ MemoryGroup binds a number of objects to a bucket of memory requirements that ne
 
 Requesting backing memory for a specific group can be done using @ref IMemoryGroup::acquire and releasing the memory back using @ref IMemoryGroup::release.
 
-@note Two types of memory groups are currently implemented:
-- @ref MemoryGroup that manages @ref Tensor objects
-- @ref CLMemoryGroup that manages @ref CLTensor objects.
-
 @subsubsection S4_7_1_2_memory_pool MemoryPool
 
 @ref IMemoryPool defines a pool of memory that can be used to provide backing memory to a memory group.
@@ -421,6 +423,7 @@ operation2.run();       // Run operation2
 memory_group.release(); // Release memory so that it can be reused
 @endcode
 @note Execution of a pipeline can be done in a multi-threading environment as memory acquisition/release are thread safe.
+@note If you are handling sensitive data and it's required to zero out the memory buffers before freeing, make sure to also zero out the intermediate buffers. You can access the buffers through the memory group's mappings.
 
 @subsection S4_7_3_memory_manager_function_support Function support
 
@@ -487,5 +490,41 @@ However this process takes quite a lot of time, which is why it cannot be enable
 
 But, when the @ref CLTuner is disabled ( Target = 1 for the graph examples), the @ref graph::Graph will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not.
 
+@section S4_10_weights_manager Weights Manager
+
+@ref IWeightsManager is a weights managing interface that can be used to reduce the memory requirements of a given pipeline by reusing transformed weights across multiple function executions.
+@ref IWeightsManager is responsible for managing weight tensors alongside with their transformations.
+@ref ITransformWeights provides an interface for running the desired transform function. This interface is used by the weights manager.
+
+@subsection S4_10_1_working_with_weights_manager Working with the Weights Manager
+Following is a simple example that uses the weights manager:
+
+Initially a weights manager must be set-up:
+@code{.cpp}
+auto  wm = std::make_shared<IWeightsManager>(); // Create a weights manager
+@endcode
+
+Once done, weights can be managed, configured and run:
+@code{.cpp}
+wm->manage(weights); // Manage the weights
+wm->acquire(weights, &_reshape_weights_managed_function); // Acquire the address of the transformed weights based on the transform function
+wm->run(weights, &_reshape_weights_managed_function);     // Run the transpose function
+@endcode
+
+@section S5_0_experimental Experimental Features
+
+@subsection S5_1_run_time_context Run-time Context
+
+Some of the Compute Library components are modelled as singletons thus posing limitations to supporting some use-cases and ensuring a more client-controlled API.
+Thus, we are introducing an aggregate service interface @ref IRuntimeContext which will encapsulate the services that the singletons were providing and allow better control of these by the client code.
+Run-time context encapsulates a list of mechanisms, some of them are: scheduling, memory management, kernel caching and others.
+Consequently, this will allow better control of these services among pipelines when Compute Library is integrated in higher level frameworks.
+
+This feature introduces some changes to our API.
+All the kernels/functions will now accept a Runtime Context object which will allow the function to use the mentioned services.
+Moreover, all the objects will require to be created using the context to have access to these services.
+Note that these will apply to the runtime components as the core ones do not need access to such services. The only exception is the kernel caching mechanism which will need to be passed down at kernel level.
+
+Finally, we will try to adapt our code-base progressively to use the new mechanism but will continue supporting the legacy mechanism to allow a smooth transition. Changes will apply to all our three backends: NEON, OpenCL and OpenGL ES.
 */
 } // namespace arm_compute

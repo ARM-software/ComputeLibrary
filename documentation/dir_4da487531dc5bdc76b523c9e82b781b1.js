@@ -8,7 +8,6 @@ var dir_4da487531dc5bdc76b523c9e82b781b1 =
     [ "ConvolutionLayer.cpp", "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml", "benchmark_2_c_l_2_convolution_layer_8cpp" ],
     [ "DepthConcatenateLayer.cpp", "benchmark_2_c_l_2_depth_concatenate_layer_8cpp.xhtml", "benchmark_2_c_l_2_depth_concatenate_layer_8cpp" ],
     [ "DepthwiseConvolutionLayer.cpp", "benchmark_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml", "benchmark_2_c_l_2_depthwise_convolution_layer_8cpp" ],
-    [ "DepthwiseSeparableConvolutionLayer.cpp", "benchmark_2_c_l_2_depthwise_separable_convolution_layer_8cpp.xhtml", "benchmark_2_c_l_2_depthwise_separable_convolution_layer_8cpp" ],
     [ "DequantizationLayer.cpp", "benchmark_2_c_l_2_dequantization_layer_8cpp.xhtml", "benchmark_2_c_l_2_dequantization_layer_8cpp" ],
     [ "DirectConvolutionLayer.cpp", "benchmark_2_c_l_2_direct_convolution_layer_8cpp.xhtml", "benchmark_2_c_l_2_direct_convolution_layer_8cpp" ],
     [ "EqualizeHistogram.cpp", "benchmark_2_c_l_2_equalize_histogram_8cpp.xhtml", "benchmark_2_c_l_2_equalize_histogram_8cpp" ],

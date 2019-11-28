@@ -1160,9 +1160,9 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
 
 #if defined(K_OFFSET)
 
-/* Helper function used to calculate the offset contribution after @ref CLGEMMLowpMatrixMultiplyKernel.
+/* Helper function used to calculate the offset contribution after matrix multiplication.
  *
- * This kernel takes a final int32 accumulator value (the output of @CLGEMMLowpMatrixMultiplyKernel),
+ * This kernel takes a final int32 accumulator value (the output of matrix multiplication),
  * and calculates the offset contribution of matrix A and matrix B.
  *
  * @attention The k_offset = a_offset * b_offset * k (where k is the number of matrix A columns) needs to be passed at compile time using -DK_OFFSET (i.e. -DK_OFFSET=1200)
@@ -1254,9 +1254,9 @@ inline int4 offset_contribution(
     return (int4)K_OFFSET + a_offset_s32 + b_offset_s32;
 }
 
-/* OpenCL kernel used to add the offset contribution after @ref CLGEMMLowpMatrixMultiplyKernel. The computation is performed in-place
+/* OpenCL kernel used to add the offset contribution after matrix multiplication. The computation is performed in-place
  *
- * This kernel takes a final int32 accumulator value (the output of @CLGEMMLowpMatrixMultiplyKernel),
+ * This kernel takes a final int32 accumulator value (the output of matrix multiplication),
  * and adds to it the offset contribution of matrix A and matrix B in-place.
  *
  * @attention The k_offset = a_offset * b_offset * k (where k is the number of matrix A columns) needs to be passed at compile time using -DK_OFFSET (i.e. -DK_OFFSET=1200)
@@ -1389,38 +1389,46 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
  *
- * @param[in]  mm_result_ptr                           Pointer to the source tensor. Supported data type: S32
- * @param[in]  mm_result_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  mm_result_step_x                        mm_result_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  mm_result_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  mm_result_step_y                        mm_result_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  mm_result_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  mm_result_step_z                        mm_result_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  mm_result_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in]  sum_col_ptr                             (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
- * @param[in]  sum_col_stride_x                        (Optional) Stride of the source tensor in X dimension (in bytes)
- * @param[in]  sum_col_step_x                          (Optional) sum_col_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  sum_col_stride_y                        (Optional) Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  sum_col_step_y                          (Optional) sum_col_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  sum_col_offset_first_element_in_bytes   (Optional) The offset of the first element in the source tensor
- * @param[in]  sum_row_ptr                             (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
- * @param[in]  sum_row_stride_x                        (Optional) Stride of the source tensor in X dimension (in bytes)
- * @param[in]  sum_row_step_x                          (Optional) sum_row_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  sum_row_stride_y                        (Optional) Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  sum_row_step_y                          (Optional) sum_row_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  sum_row_offset_first_element_in_bytes   (Optional) The offset of the first element in the source tensor
- * @param[in]  biases_ptr                              (Optional) Pointer to the biases tensor. Supported data type: same as @p src_ptr
- * @param[in]  biases_stride_x                         (Optional) Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                           (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes    (Optional) The offset of the first element in the biases tensor
- * @param[out] dst_ptr                                 Pointer to the destination tensor Supported data type: QASYMM8
- * @param[in]  dst_stride_x                            Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                              dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                            Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                              dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                            Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                              src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes       The offset of the first element in the destination tensor
+ * @param[in]  mm_result_ptr                                    Pointer to the source tensor. Supported data type: S32
+ * @param[in]  mm_result_stride_x                               Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  mm_result_step_x                                 mm_result_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  mm_result_stride_y                               Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  mm_result_step_y                                 mm_result_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  mm_result_stride_z                               Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  mm_result_step_z                                 mm_result_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  mm_result_offset_first_element_in_bytes          The offset of the first element in the source tensor
+ * @param[in]  sum_col_ptr                                      (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
+ * @param[in]  sum_col_stride_x                                 (Optional) Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  sum_col_step_x                                   (Optional) sum_col_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  sum_col_stride_y                                 (Optional) Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  sum_col_step_y                                   (Optional) sum_col_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  sum_col_offset_first_element_in_bytes            (Optional) The offset of the first element in the source tensor
+ * @param[in]  sum_row_ptr                                      (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
+ * @param[in]  sum_row_stride_x                                 (Optional) Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  sum_row_step_x                                   (Optional) sum_row_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  sum_row_stride_y                                 (Optional) Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  sum_row_step_y                                   (Optional) sum_row_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  sum_row_offset_first_element_in_bytes            (Optional) The offset of the first element in the source tensor
+ * @param[in]  biases_ptr                                       (Optional) Pointer to the biases tensor. Supported data type: same as @p src_ptr
+ * @param[in]  biases_stride_x                                  (Optional) Stride of the biases tensor in X dimension (in bytes)
+ * @param[in]  biases_step_x                                    (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  biases_offset_first_element_in_bytes             (Optional) The offset of the first element in the biases tensor
+ * @param[out] dst_ptr                                          Pointer to the destination tensor Supported data type: QASYMM8
+ * @param[in]  dst_stride_x                                     Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                                       dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                                     Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                                       dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                                     Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                                       src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes                The offset of the first element in the destination tensor
+ * @param[in]  result_multipliers_ptr                           (Optional) Pointer to the output multipliers vector for per-channel quantization. Supported data types: S32
+ * @param[in]  result_multipliers_stride_x                      (Optional) Stride of the output multipliers vector in X dimension (in bytes)
+ * @param[in]  result_multipliers_step_x                        (Optional) output_multipliers_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  result_multipliers_offset_first_element_in_bytes (Optional) The offset of the first element in the output multipliers vector
+ * @param[in]  result_shifts_ptr                                (Optional) Pointer to the output shifts vector for per-channel quantization. Supported data types: S32
+ * @param[in]  result_shifts_stride_x                           (Optional) Stride of the output shifts vector in X dimension (in bytes)
+ * @param[in]  result_shifts_step_x                             (Optional) output_shifts_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  result_shifts_offset_first_element_in_bytes      (Optional) The offset of the first element in the output shifts vector
  */
 __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm_result)
 #if defined(A_OFFSET)
@@ -1435,7 +1443,13 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
 #if defined(ADD_BIAS)
                                                          VECTOR_DECLARATION(biases),
 #endif // defined(ADD_BIAS)
-                                                         TENSOR3D_DECLARATION(dst))
+                                                         TENSOR3D_DECLARATION(dst)
+#if defined(PER_CHANNEL_QUANTIZATION)
+                                                         ,
+                                                         VECTOR_DECLARATION(result_multipliers),
+                                                         VECTOR_DECLARATION(result_shifts)
+#endif // defined(PER_CHANNEL_QUANTIZATION)
+                                                        )
 {
     const int x = get_global_id(0) * 4;
     const int y = get_global_id(1);
@@ -1486,9 +1500,19 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
     in_s32 += (int4)RESULT_OFFSET;
 
     // Multiply by result_mult_int and shift
+#if defined(PER_CHANNEL_QUANTIZATION)
+    __global uchar *result_multipliers_addr   = result_multipliers_ptr + result_multipliers_offset_first_element_in_bytes + x * sizeof(int);
+    __global uchar *result_shifts_addr        = result_shifts_ptr + result_shifts_offset_first_element_in_bytes + x * sizeof(int);
+    int4            result_multipliers_values = vload4(0, (__global int *)result_multipliers_addr);
+    int4            result_shifts_values      = vload4(0, (__global int *)result_shifts_addr);
+
+    in_s32 *= result_multipliers_values;
+    in_s32 >>= result_shifts_values;
+#else  // defined(PER_CHANNEL_QUANTIZATION)
     in_s32 *= RESULT_MULTIPLIER;
 
     in_s32 >>= RESULT_SHIFT;
+#endif // defined(PER_CHANNEL_QUANTIZATION)
 
     uchar4 res = convert_uchar4_sat(in_s32);
 
@@ -1503,9 +1527,9 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
     vstore4(res, 0, dst_addr);
 }
 
-/* OpenCL kernel used to add the offset contribution after @ref CLGEMMLowpMatrixMultiplyKernel and it quantizes down to uint8.
+/* OpenCL kernel used to add the offset contribution after matrix multiplication and it quantizes down to uint8.
  *
- * This kernel takes a final int32 accumulator value (the output of @CLGEMMLowpMatrixMultiplyKernel), adds to it the offset contribution of matrix A and matrix B and quantizes to uint8 through the output stage.
+ * This kernel takes a final int32 accumulator value (the output of matrix multiplication), adds to it the offset contribution of matrix A and matrix B and quantizes to uint8 through the output stage.
  *
  *
  * @attention The k_offset = a_offset * b_offset * k (where k is the number of matrix A columns) needs to be passed at compile time using -DK_OFFSET (i.e. -DK_OFFSET=1200)
@@ -1535,38 +1559,46 @@ __kernel void gemmlowp_offset_contribution_quantize_down(TENSOR3D_DECLARATION(mm
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
  *
- * @param[in]  mm_result_ptr                           Pointer to the source tensor. Supported data type: S32
- * @param[in]  mm_result_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  mm_result_step_x                        mm_result_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  mm_result_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  mm_result_step_y                        mm_result_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  mm_result_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  mm_result_step_z                        mm_result_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  mm_result_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in]  sum_col_ptr                             (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
- * @param[in]  sum_col_stride_x                        (Optional) Stride of the source tensor in X dimension (in bytes)
- * @param[in]  sum_col_step_x                          (Optional) sum_col_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  sum_col_stride_y                        (Optional) Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  sum_col_step_y                          (Optional) sum_col_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  sum_col_offset_first_element_in_bytes   (Optional) The offset of the first element in the source tensor
- * @param[in]  sum_row_ptr                             (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
- * @param[in]  sum_row_stride_x                        (Optional) Stride of the source tensor in X dimension (in bytes)
- * @param[in]  sum_row_step_x                          (Optional) sum_row_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  sum_row_stride_y                        (Optional) Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  sum_row_step_y                          (Optional) sum_row_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  sum_row_offset_first_element_in_bytes   (Optional) The offset of the first element in the source tensor
- * @param[in]  biases_ptr                              (Optional) Pointer to the biases tensor. Supported data type: same as @p src_ptr
- * @param[in]  biases_stride_x                         (Optional) Stride of the biases tensor in X dimension (in bytes)
- * @param[in]  biases_step_x                           (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  biases_offset_first_element_in_bytes    (Optional) The offset of the first element in the biases tensor
- * @param[out] dst_ptr                                 Pointer to the destination tensor Supported data type: QASYMM8
- * @param[in]  dst_stride_x                            Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                              dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                            Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                              dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                            Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                              src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes       The offset of the first element in the destination tensor
+ * @param[in]  mm_result_ptr                                    Pointer to the source tensor. Supported data type: S32
+ * @param[in]  mm_result_stride_x                               Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  mm_result_step_x                                 mm_result_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  mm_result_stride_y                               Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  mm_result_step_y                                 mm_result_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  mm_result_stride_z                               Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  mm_result_step_z                                 mm_result_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  mm_result_offset_first_element_in_bytes          The offset of the first element in the source tensor
+ * @param[in]  sum_col_ptr                                      (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
+ * @param[in]  sum_col_stride_x                                 (Optional) Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  sum_col_step_x                                   (Optional) sum_col_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  sum_col_stride_y                                 (Optional) Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  sum_col_step_y                                   (Optional) sum_col_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  sum_col_offset_first_element_in_bytes            (Optional) The offset of the first element in the source tensor
+ * @param[in]  sum_row_ptr                                      (Optional) Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
+ * @param[in]  sum_row_stride_x                                 (Optional) Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  sum_row_step_x                                   (Optional) sum_row_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  sum_row_stride_y                                 (Optional) Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  sum_row_step_y                                   (Optional) sum_row_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  sum_row_offset_first_element_in_bytes            (Optional) The offset of the first element in the source tensor
+ * @param[in]  biases_ptr                                       (Optional) Pointer to the biases tensor. Supported data type: same as @p src_ptr
+ * @param[in]  biases_stride_x                                  (Optional) Stride of the biases tensor in X dimension (in bytes)
+ * @param[in]  biases_step_x                                    (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  biases_offset_first_element_in_bytes             (Optional) The offset of the first element in the biases tensor
+ * @param[out] dst_ptr                                          Pointer to the destination tensor Supported data type: QASYMM8
+ * @param[in]  dst_stride_x                                     Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                                       dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                                     Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                                       dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                                     Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                                       src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes                The offset of the first element in the destination tensor
+ * @param[in]  result_multipliers_ptr                           (Optional) Pointer to the output multipliers vector for per-channel quantization. Supported data types: S32
+ * @param[in]  result_multipliers_stride_x                      (Optional) Stride of the output multipliers vector in X dimension (in bytes)
+ * @param[in]  result_multipliers_step_x                        (Optional) output_multipliers_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  result_multipliers_offset_first_element_in_bytes (Optional) The offset of the first element in the output multipliers vector
+ * @param[in]  result_shifts_ptr                                (Optional) Pointer to the output shifts vector for per-channel quantization. Supported data types: S32
+ * @param[in]  result_shifts_stride_x                           (Optional) Stride of the output shifts vector in X dimension (in bytes)
+ * @param[in]  result_shifts_step_x                             (Optional) output_shifts_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  result_shifts_offset_first_element_in_bytes      (Optional) The offset of the first element in the output shifts vector
  */
 __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DECLARATION(mm_result)
 #if defined(A_OFFSET)
@@ -1581,7 +1613,13 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
 #if defined(ADD_BIAS)
                                                                     VECTOR_DECLARATION(biases),
 #endif // defined(ADD_BIAS)
-                                                                    TENSOR3D_DECLARATION(dst))
+                                                                    TENSOR3D_DECLARATION(dst)
+#if defined(PER_CHANNEL_QUANTIZATION)
+                                                                    ,
+                                                                    VECTOR_DECLARATION(result_multipliers),
+                                                                    VECTOR_DECLARATION(result_shifts)
+#endif // defined(PER_CHANNEL_QUANTIZATION)
+                                                                   )
 {
     const int x = get_global_id(0) * 4;
     const int y = get_global_id(1);
@@ -1629,7 +1667,16 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
     // -------------- OUTPUT STAGE
 
     // Multiply by result_mult_int and shift
+#if defined(PER_CHANNEL_QUANTIZATION)
+    __global uchar *result_multipliers_addr   = result_multipliers_ptr + result_multipliers_offset_first_element_in_bytes + x * sizeof(int);
+    __global uchar *result_shifts_addr        = result_shifts_ptr + result_shifts_offset_first_element_in_bytes + x * sizeof(int);
+    int4            result_multipliers_values = vload4(0, (__global int *)result_multipliers_addr);
+    int4            result_shifts_values      = vload4(0, (__global int *)result_shifts_addr);
+
+    in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, result_multipliers_values, result_shifts_values, 4);
+#else  // !defined(PER_CHANNEL_QUANTIZATION)
     in_s32 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(in_s32, RESULT_MULTIPLIER, RESULT_SHIFT, 4);
+#endif // defined(PER_CHANNEL_QUANTIZATION)
 
     // Add the offset terms to GEMM's result
     in_s32 += (int4)RESULT_OFFSET;
@@ -1646,7 +1693,8 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
     // Store the result
     vstore4(res, 0, dst_addr);
 }
-#endif // defined(K_OFFSET) && defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT)
+#endif // defined(RESULT_OFFSET) && defined(RESULT_MULTIPLIER) && defined(RESULT_SHIFT)
+
 #endif // defined(K_OFFSET)
 
 #if defined(RESULT_OFFSET) && defined(RESULT_MULT_INT) && defined(RESULT_SHIFT)
@@ -1739,7 +1787,7 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
 #if defined(RESULT_OFFSET_AFTER_SHIFT) && defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8
  *
- * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QASYMM8 value.
+ * This kernel takes a final int32 accumulator value (the output of matrix multiplication), and processes it to obtain the final QASYMM8 value.
  * The following computations will be performed by the kernel:
  *
  *  -# Compute fixed point multiplication between each entry of input by result_fixedpoint_multiplier
@@ -1825,7 +1873,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
 
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QSYMM16
  *
- * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QSYMM16 value.
+ * This kernel takes a final int32 accumulator value (the output of matrix multiplication), and processes it to obtain the final QSYMM16 value.
  * The following computations will be performed by the kernel:
  *
  *  -# Compute fixed point multiplication between each entry of input by result_fixedpoint_multiplier
@@ -1888,7 +1936,11 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
 #endif // defined(ADD_BIAS)
 
     // Multiply by result_mult_int and shift
+#if RESULT_SHIFT < 0
+    input_values = ASYMM_MULT(input_values * (1 << (-RESULT_SHIFT)), RESULT_FIXEDPOINT_MULTIPLIER, 4);
+#else  // RESULT_SHIFT >= 0
     input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+#endif // RESULT_SHIFT < 0
 
     short4 res = convert_short4_sat(input_values);
 
@@ -1907,7 +1959,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
 #if defined(REAL_MULTIPLIER) && defined(OUTPUT_OFFSET)
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8
  *
- * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QASYMM8 value.
+ * This kernel takes a final int32 accumulator value (the output of matrix multiplication), and processes it to obtain the final QASYMM8 value.
  * The following computations will be performed by the kernel:
  *
  *  -# Compute fixed point multiplication between each entry of input by result_fixedpoint_multiplier

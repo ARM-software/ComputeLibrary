@@ -54,7 +54,8 @@ SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &padding
     SimpleTensor<T> dst(padded_shape, dst_data_type);
 
     // Reference algorithm: loop over the different dimension of the input.
-    for(int idx = 0; idx < dst.num_elements(); ++idx)
+    const uint32_t num_elements = dst.num_elements();
+    for(uint32_t idx = 0; idx < num_elements; ++idx)
     {
         const Coordinates coord = index2coord(padded_shape, idx);
 
@@ -115,11 +116,11 @@ SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &padding
                 case PaddingMode::REFLECT:
                 {
                     const Coordinates orig_coords{ orig_coord_reflect(0),
-                                             orig_coord_reflect(1),
-                                             orig_coord_reflect(2),
-                                             orig_coord_reflect(3),
-                                             orig_coord_reflect(4),
-                                             orig_coord_reflect(5) };
+                              orig_coord_reflect(1),
+                              orig_coord_reflect(2),
+                              orig_coord_reflect(3),
+                              orig_coord_reflect(4),
+                              orig_coord_reflect(5) };
 
                     const size_t idx_src = coord2index(orig_shape, orig_coords);
                     dst[idx]             = src[idx_src];
@@ -128,11 +129,11 @@ SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &padding
                 case PaddingMode::SYMMETRIC:
                 {
                     const Coordinates orig_coords{ orig_coord_symm(0),
-                                             orig_coord_symm(1),
-                                             orig_coord_symm(2),
-                                             orig_coord_symm(3),
-                                             orig_coord_symm(4),
-                                             orig_coord_symm(5) };
+                              orig_coord_symm(1),
+                              orig_coord_symm(2),
+                              orig_coord_symm(3),
+                              orig_coord_symm(4),
+                              orig_coord_symm(5) };
 
                     const size_t idx_src = coord2index(orig_shape, orig_coords);
                     dst[idx]             = src[idx_src];
@@ -147,12 +148,15 @@ SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &padding
         {
             // If the tuple[i,j,k,l,m] is not in the padding area, then copy the input into the output
 
-            const Coordinates orig_coords{ i - paddings_extended[0].first,
-                                     j - paddings_extended[1].first,
-                                     k - paddings_extended[2].first,
-                                     l - paddings_extended[3].first,
-                                     m - paddings_extended[4].first,
-                                     n - paddings_extended[5].first };
+            const Coordinates orig_coords
+            {
+                i - paddings_extended[0].first,
+                j - paddings_extended[1].first,
+                k - paddings_extended[2].first,
+                l - paddings_extended[3].first,
+                m - paddings_extended[4].first,
+                n - paddings_extended[5].first
+            };
 
             const size_t idx_src = coord2index(orig_shape, orig_coords);
             dst[idx]             = src[idx_src];
@@ -164,11 +168,12 @@ SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &padding
 
 template SimpleTensor<float> pad_layer(const SimpleTensor<float> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
 template SimpleTensor<half> pad_layer(const SimpleTensor<half> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
-template SimpleTensor<uint32_t> pad_layer(const SimpleTensor<uint32_t> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
 template SimpleTensor<uint8_t> pad_layer(const SimpleTensor<uint8_t> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
 template SimpleTensor<int8_t> pad_layer(const SimpleTensor<int8_t> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
 template SimpleTensor<uint16_t> pad_layer(const SimpleTensor<uint16_t> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
 template SimpleTensor<int16_t> pad_layer(const SimpleTensor<int16_t> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
+template SimpleTensor<uint32_t> pad_layer(const SimpleTensor<uint32_t> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
+template SimpleTensor<int32_t> pad_layer(const SimpleTensor<int32_t> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode);
 } // namespace reference
 } // namespace validation
 } // namespace test

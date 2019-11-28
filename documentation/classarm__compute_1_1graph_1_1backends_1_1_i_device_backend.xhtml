@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -143,11 +143,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa42b584f7715675c47b7ecb70d494e9c"><td class="memItemLeft" align="right" valign="top">virtual std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">arm_compute::IMemoryManager</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml#aa42b584f7715675c47b7ecb70d494e9c">create_memory_manager</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#ac866c81ec0f5526139dfc62ddc3f206e">MemoryManagerAffinity</a> affinity)=0</td></tr>
 <tr class="memdesc:aa42b584f7715675c47b7ecb70d494e9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a backend memory manager given its affinity.  <a href="#aa42b584f7715675c47b7ecb70d494e9c">More...</a><br /></td></tr>
 <tr class="separator:aa42b584f7715675c47b7ecb70d494e9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e70bd2e99ee6a4afd3bcc915bc9c4f7"><td class="memItemLeft" align="right" valign="top">virtual std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_weights_manager.xhtml">arm_compute::IWeightsManager</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml#a8e70bd2e99ee6a4afd3bcc915bc9c4f7">create_weights_manager</a> ()=0</td></tr>
+<tr class="memdesc:a8e70bd2e99ee6a4afd3bcc915bc9c4f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a backend weights manager.  <a href="#a8e70bd2e99ee6a4afd3bcc915bc9c4f7">More...</a><br /></td></tr>
+<tr class="separator:a8e70bd2e99ee6a4afd3bcc915bc9c4f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Device backend interface. </p>
 
-<p class="definition">Definition at line <a class="el" href="_i_device_backend_8h_source.xhtml#l00047">47</a> of file <a class="el" href="_i_device_backend_8h_source.xhtml">IDeviceBackend.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_i_device_backend_8h_source.xhtml#l00048">48</a> of file <a class="el" href="_i_device_backend_8h_source.xhtml">IDeviceBackend.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ac111996fd9affe37e5322ce1bcf2f497"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac111996fd9affe37e5322ce1bcf2f497">&#9670;&nbsp;</a></span>~IDeviceBackend()</h2>
@@ -398,6 +401,36 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a8e70bd2e99ee6a4afd3bcc915bc9c4f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e70bd2e99ee6a4afd3bcc915bc9c4f7">&#9670;&nbsp;</a></span>create_weights_manager()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::shared_ptr&lt;<a class="el" href="classarm__compute_1_1_i_weights_manager.xhtml">arm_compute::IWeightsManager</a>&gt; create_weights_manager </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a backend weights manager. </p>
+<dl class="section return"><dt>Returns</dt><dd>Weights manager </dd></dl>
+
+<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend.xhtml#afae4c74f4a8efc83d76cf56e661f3ebc">CLDeviceBackend</a>, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#afae4c74f4a8efc83d76cf56e661f3ebc">GCDeviceBackend</a>, and <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_device_backend.xhtml#afae4c74f4a8efc83d76cf56e661f3ebc">NEDeviceBackend</a>.</p>
+
+</div>
+</div>
 <a id="a06c1cd9b4e00e6c00365bfeab0ff7785"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a06c1cd9b4e00e6c00365bfeab0ff7785">&#9670;&nbsp;</a></span>initialize_backend()</h2>
 
@@ -581,7 +614,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1backends.xhtml">backends</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml">IDeviceBackend</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:18 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

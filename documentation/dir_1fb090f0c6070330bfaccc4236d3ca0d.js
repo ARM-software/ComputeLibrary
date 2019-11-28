@@ -61,7 +61,10 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
       [ "FFTScaleKernelInfo", "structarm__compute_1_1_f_f_t_scale_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_scale_kernel_info" ],
       [ "FFTDigitReverseKernelInfo", "structarm__compute_1_1_f_f_t_digit_reverse_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_digit_reverse_kernel_info" ],
       [ "FFTRadixStageKernelInfo", "structarm__compute_1_1_f_f_t_radix_stage_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_radix_stage_kernel_info" ],
-      [ "GEMMKernelInfo", "structarm__compute_1_1_g_e_m_m_kernel_info.xhtml", "structarm__compute_1_1_g_e_m_m_kernel_info" ]
+      [ "GEMMKernelInfo", "structarm__compute_1_1_g_e_m_m_kernel_info.xhtml", "structarm__compute_1_1_g_e_m_m_kernel_info" ],
+      [ "DWCKernelInfo", "structarm__compute_1_1_d_w_c_kernel_info.xhtml", "structarm__compute_1_1_d_w_c_kernel_info" ],
+      [ "DWCWeightsKernelInfo", "structarm__compute_1_1_d_w_c_weights_kernel_info.xhtml", "structarm__compute_1_1_d_w_c_weights_kernel_info" ],
+      [ "SoftmaxKernelInfo", "structarm__compute_1_1_softmax_kernel_info.xhtml", "structarm__compute_1_1_softmax_kernel_info" ]
     ] ],
     [ "Log.h", "_log_8h.xhtml", "_log_8h" ],
     [ "MultiImageInfo.h", "_multi_image_info_8h.xhtml", [

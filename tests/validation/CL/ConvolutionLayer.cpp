@@ -271,6 +271,8 @@ TEST_SUITE_END() // Float
 
 template <typename T>
 using CLGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
+template <typename T>
+using CLGEMMConvolutionLayerQuantizedPerChannelFixture = ConvolutionValidationQuantizedPerChannelFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T, int8_t>;
 
 const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
@@ -285,7 +287,6 @@ const auto QuantizedActivationFunctionsSmallDataset = framework::dataset::make("
 });
 
 TEST_SUITE(Quantized)
-TEST_SUITE(QASYMM8)
 
 const auto QuantizationData = framework::dataset::make("QuantizationInfo",
 {
@@ -293,6 +294,7 @@ const auto QuantizationData = framework::dataset::make("QuantizationInfo",
     QuantizationInfo(0.3f, 3),
     QuantizationInfo(1.f, 10),
 });
+TEST_SUITE(QASYMM8)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
@@ -317,6 +319,33 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QSYMM8_PER_CHANNEL)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
+                                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                                               framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                               QuantizationData),
+                                       QuantizedActivationFunctionsSmallDataset),
+                               framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                                               framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                               QuantizationData),
+                                       QuantizedActivationFunctionsDataset),
+                               framework::dataset::make("WeightsDataType", { DataType::QSYMM8_PER_CHANNEL })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QSYMM8_PER_CHANNEL
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // GEMMConvolutionLayer

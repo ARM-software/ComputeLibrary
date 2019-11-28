@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,8 +44,8 @@ SimpleTensor<T> convolution(const SimpleTensor<uint8_t> &src, DataType output_da
 
     SimpleTensor<T>       dst(src.shape(), output_data_type);
     SimpleTensor<int32_t> sum(src.shape(), output_data_type);
-
-    for(int element_idx = 0; element_idx < src.num_elements(); ++element_idx)
+    const uint32_t        num_elements = src.num_elements();
+    for(uint32_t element_idx = 0; element_idx < num_elements; ++element_idx)
     {
         const Coordinates id = index2coord(src.shape(), element_idx);
         apply_2d_spatial_filter(id, src, sum, TensorShape(width, height), conv, 1, border_mode, constant_border_value);

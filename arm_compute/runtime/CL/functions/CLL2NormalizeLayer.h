@@ -26,11 +26,11 @@
 
 #include "arm_compute/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 
 #include <cstdint>
 #include <memory>
@@ -75,7 +75,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup            _memory_group;
+    MemoryGroup              _memory_group;
     CLReductionOperation     _reduce_func;
     CLL2NormalizeLayerKernel _normalize_kernel;
     CLTensor                 _sumsq;

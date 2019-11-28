@@ -127,6 +127,6 @@ void CLCropKernel::run(const Window &window, cl::CommandQueue &queue)
     add_3D_tensor_argument(idx, _output, window);
     add_argument(idx, _start.x);
     add_argument(idx, _start.y);
-    enqueue(queue, *this, window);
+    enqueue(queue, *this, window, lws_hint());
 }
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2018-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,11 @@
 
 #ifdef __ARM_FEATURE_SVE
 
-
-
 namespace arm_gemm
 {
 
 // Actual kernel implementations
-void sve_native_fp32_mla_4VLx4(const float *, int, const float *, int ldb, float *, int, float, int, int, int);
+void sve_native_fp32_mla_4VLx4(const float *, int, const float *, int ldb, float *, int, int, int, int, const float *, Activation, bool);
 
 class native_fp32_mla_4VLx4
 {
@@ -39,10 +37,10 @@ public:
     typedef float operand_type;
     typedef float result_type;
 
-    typedef void (*kern_type)(const float *, int, const float *, int ldb, float *, int, float, int, int, int);
+    typedef void (*kern_type)(const float *, int, const float *, int ldb, float *, int, int, int, int, const float *, Activation, bool);
 
     /* Kernel blocking parameters */
-    static unsigned int out_height()
+    static constexpr unsigned int out_height()
     {
         return 4;
     }
@@ -52,9 +50,24 @@ public:
         return get_vector_length<float>() * 4;
     }
 
-    static unsigned int k_unroll()
+    static constexpr unsigned int k_unroll()
     {
         return 1;
+    }
+
+    static constexpr bool supports_append()
+    {
+        return false;
+    }
+
+    static constexpr bool supports_bias()
+    {
+        return true;
+    }
+
+    static constexpr bool supports_activation()
+    {
+        return true;
     }
 
 
@@ -62,10 +75,7 @@ public:
     // Default to the generic kernel
     kern_type kernel=sve_native_fp32_mla_4VLx4;
 
-    native_fp32_mla_4VLx4(const CPUInfo *ci)
-    {
-
-    }
+    native_fp32_mla_4VLx4(const CPUInfo *ci) { UNUSED(ci); }
 };
 
 } // namespace arm_gemm

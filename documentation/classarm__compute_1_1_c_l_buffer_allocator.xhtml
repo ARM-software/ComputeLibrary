@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -116,9 +116,15 @@ Collaboration diagram for CLBufferAllocator:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aec5d8d964344a3c27e5932148f9185cf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#aec5d8d964344a3c27e5932148f9185cf">CLBufferAllocator</a> (cl::Context context=<a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().context())</td></tr>
-<tr class="memdesc:aec5d8d964344a3c27e5932148f9185cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#aec5d8d964344a3c27e5932148f9185cf">More...</a><br /></td></tr>
-<tr class="separator:aec5d8d964344a3c27e5932148f9185cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5e3b6652914388cb82ab5aa6cb2cdf3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#ab5e3b6652914388cb82ab5aa6cb2cdf3">CLBufferAllocator</a> (<a class="el" href="classarm__compute_1_1_c_l_core_runtime_context.xhtml">CLCoreRuntimeContext</a> *ctx=nullptr)</td></tr>
+<tr class="memdesc:ab5e3b6652914388cb82ab5aa6cb2cdf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#ab5e3b6652914388cb82ab5aa6cb2cdf3">More...</a><br /></td></tr>
+<tr class="separator:ab5e3b6652914388cb82ab5aa6cb2cdf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada2337e1e3dcb59159c275c325b797a2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#ada2337e1e3dcb59159c275c325b797a2">CLBufferAllocator</a> (const <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a> &amp;)=default</td></tr>
+<tr class="memdesc:ada2337e1e3dcb59159c275c325b797a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default copy constructor.  <a href="#ada2337e1e3dcb59159c275c325b797a2">More...</a><br /></td></tr>
+<tr class="separator:ada2337e1e3dcb59159c275c325b797a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd76bafa07435ba819c4967d1c74f7fb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#acd76bafa07435ba819c4967d1c74f7fb">operator=</a> (const <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a> &amp;)=default</td></tr>
+<tr class="memdesc:acd76bafa07435ba819c4967d1c74f7fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default copy assignment operator.  <a href="#acd76bafa07435ba819c4967d1c74f7fb">More...</a><br /></td></tr>
+<tr class="separator:acd76bafa07435ba819c4967d1c74f7fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d12a487a34bbcc481147eac34c7a3a1"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#a4d12a487a34bbcc481147eac34c7a3a1">allocate</a> (size_t size, size_t alignment) override</td></tr>
 <tr class="memdesc:a4d12a487a34bbcc481147eac34c7a3a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to allocate bytes.  <a href="#a4d12a487a34bbcc481147eac34c7a3a1">More...</a><br /></td></tr>
 <tr class="separator:a4d12a487a34bbcc481147eac34c7a3a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,10 +142,38 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Default OpenCL cl buffer allocator implementation. </p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_c_l_buffer_allocator_8h_source.xhtml">CLBufferAllocator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8h_source.xhtml#l00035">35</a> of file <a class="el" href="_c_l_buffer_allocator_8h_source.xhtml">CLBufferAllocator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aec5d8d964344a3c27e5932148f9185cf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec5d8d964344a3c27e5932148f9185cf">&#9670;&nbsp;</a></span>CLBufferAllocator()</h2>
+<a id="ab5e3b6652914388cb82ab5aa6cb2cdf3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5e3b6652914388cb82ab5aa6cb2cdf3">&#9670;&nbsp;</a></span>CLBufferAllocator() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_c_l_core_runtime_context.xhtml">CLCoreRuntimeContext</a> *&#160;</td>
+          <td class="paramname"><em>ctx</em> = <code>nullptr</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Default constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td>A runtime context. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml#l00037">37</a> of file <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml">CLBufferAllocator.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    : _ctx(ctx)</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;}</div></div><!-- fragment -->
+</div>
+</div>
+<a id="ada2337e1e3dcb59159c275c325b797a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada2337e1e3dcb59159c275c325b797a2">&#9670;&nbsp;</a></span>CLBufferAllocator() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -150,22 +184,20 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a> </td>
           <td>(</td>
-          <td class="paramtype">cl::Context&#160;</td>
-          <td class="paramname"><em>context</em> = <code><a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().context()</code></td><td>)</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Default constructor. </p>
+<p>Default copy constructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml#l00035">35</a> of file <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml">CLBufferAllocator.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    : _context(std::move(context))</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -215,11 +247,13 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a6ce9dda753afa9abb498f3d6b673e595">IAllocator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml#l00040">40</a> of file <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml">CLBufferAllocator.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <a class="code" href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a>(alignment);</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    cl_mem buf = <a class="code" href="_open_c_l_8cpp.xhtml#af9a973de9b75e338812149043568dc20">clCreateBuffer</a>(_context.get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordflow">return</span> static_cast&lt;void *&gt;(buf);</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a6dc630a6ae9cc063b3924bcea8dee9d6"><div class="ttname"><a href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(...)</div><div class="ttdoc">To avoid unused variables warnings.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00160">Error.h:160</a></div></div>
-<div class="ttc" id="_open_c_l_8cpp_xhtml_af9a973de9b75e338812149043568dc20"><div class="ttname"><a href="_open_c_l_8cpp.xhtml#af9a973de9b75e338812149043568dc20">clCreateBuffer</a></div><div class="ttdeci">cl_mem clCreateBuffer(cl_context context, cl_mem_flags flags, size_t size, void *host_ptr, cl_int *errcode_ret)</div><div class="ttdef"><b>Definition:</b> <a href="_open_c_l_8cpp_source.xhtml#l00707">OpenCL.cpp:707</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml#l00042">42</a> of file <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml">CLBufferAllocator.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <a class="code" href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a>(alignment);</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    cl_mem buf;</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordflow">if</span>(_ctx == <span class="keyword">nullptr</span>)</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    {</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        buf = <a class="code" href="_open_c_l_8cpp.xhtml#af9a973de9b75e338812149043568dc20">clCreateBuffer</a>(<a class="code" href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">CLScheduler::get</a>().context().get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    {</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        buf = <a class="code" href="_open_c_l_8cpp.xhtml#af9a973de9b75e338812149043568dc20">clCreateBuffer</a>(_ctx-&gt;<a class="code" href="classarm__compute_1_1_c_l_core_runtime_context.xhtml#a5dba6b7439801bee0d196184774c7793">context</a>().get(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    }</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordflow">return</span> static_cast&lt;void *&gt;(buf);</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_core_runtime_context_xhtml_a5dba6b7439801bee0d196184774c7793"><div class="ttname"><a href="classarm__compute_1_1_c_l_core_runtime_context.xhtml#a5dba6b7439801bee0d196184774c7793">arm_compute::CLCoreRuntimeContext::context</a></div><div class="ttdeci">cl::Context context()</div><div class="ttdoc">OpenCL context accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_core_runtime_context_8cpp_source.xhtml#l00028">CLCoreRuntimeContext.cpp:28</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_scheduler_xhtml_a9b58d0eb9a2af8e6d7908695e1557d6c"><div class="ttname"><a href="classarm__compute_1_1_c_l_scheduler.xhtml#a9b58d0eb9a2af8e6d7908695e1557d6c">arm_compute::CLScheduler::get</a></div><div class="ttdeci">static CLScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_scheduler_8cpp_source.xhtml#l00099">CLScheduler.cpp:99</a></div></div>
+<div class="ttc" id="_error_8h_xhtml_a6dc630a6ae9cc063b3924bcea8dee9d6"><div class="ttname"><a href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(...)</div><div class="ttdoc">To avoid unused variables warnings.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00152">Error.h:152</a></div></div>
+<div class="ttc" id="_open_c_l_8cpp_xhtml_af9a973de9b75e338812149043568dc20"><div class="ttname"><a href="_open_c_l_8cpp.xhtml#af9a973de9b75e338812149043568dc20">clCreateBuffer</a></div><div class="ttdeci">cl_mem clCreateBuffer(cl_context context, cl_mem_flags flags, size_t size, void *host_ptr, cl_int *errcode_ret)</div><div class="ttdef"><b>Definition:</b> <a href="_open_c_l_8cpp_source.xhtml#l00713">OpenCL.cpp:713</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00160">ARM_COMPUTE_UNUSED</a>, and <a class="el" href="_open_c_l_8cpp_source.xhtml#l00707">clCreateBuffer()</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00152">ARM_COMPUTE_UNUSED</a>, <a class="el" href="_open_c_l_8cpp_source.xhtml#l00713">clCreateBuffer()</a>, <a class="el" href="_c_l_core_runtime_context_8cpp_source.xhtml#l00028">CLCoreRuntimeContext::context()</a>, and <a class="el" href="_c_l_scheduler_8cpp_source.xhtml#l00099">CLScheduler::get()</a>.</p>
 
 </div>
 </div>
@@ -251,11 +285,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a7dbeba9295a3f52ea54698c31e555dff">IAllocator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml#l00047">47</a> of file <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml">CLBufferAllocator.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;{</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(ptr == <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <a class="code" href="_open_c_l_8cpp.xhtml#aaa80bcf581a6eb2848468677b3f3cbd1">clReleaseMemObject</a>(static_cast&lt;cl_mem&gt;(ptr));</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
-<div class="ttc" id="_open_c_l_8cpp_xhtml_aaa80bcf581a6eb2848468677b3f3cbd1"><div class="ttname"><a href="_open_c_l_8cpp.xhtml#aaa80bcf581a6eb2848468677b3f3cbd1">clReleaseMemObject</a></div><div class="ttdeci">cl_int clReleaseMemObject(cl_mem memobj)</div><div class="ttdef"><b>Definition:</b> <a href="_open_c_l_8cpp_source.xhtml#l00375">OpenCL.cpp:375</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml#l00057">57</a> of file <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml">CLBufferAllocator.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;{</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(ptr == <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <a class="code" href="_open_c_l_8cpp.xhtml#aaa80bcf581a6eb2848468677b3f3cbd1">clReleaseMemObject</a>(static_cast&lt;cl_mem&gt;(ptr));</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00466">Error.h:466</a></div></div>
+<div class="ttc" id="_open_c_l_8cpp_xhtml_aaa80bcf581a6eb2848468677b3f3cbd1"><div class="ttname"><a href="_open_c_l_8cpp.xhtml#aaa80bcf581a6eb2848468677b3f3cbd1">clReleaseMemObject</a></div><div class="ttdeci">cl_int clReleaseMemObject(cl_mem memobj)</div><div class="ttdef"><b>Definition:</b> <a href="_open_c_l_8cpp_source.xhtml#l00381">OpenCL.cpp:381</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>, and <a class="el" href="_open_c_l_8cpp_source.xhtml#l00375">clReleaseMemObject()</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00466">ARM_COMPUTE_ERROR_ON</a>, and <a class="el" href="_open_c_l_8cpp_source.xhtml#l00381">clReleaseMemObject()</a>.</p>
 
 </div>
 </div>
@@ -305,10 +339,38 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a9cff197f588f77bba9055f0baa690370">IAllocator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml#l00053">53</a> of file <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml">CLBufferAllocator.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;{</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <a class="code" href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a>(alignment);</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;CLBufferMemoryRegion&gt;(_context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size);</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a6dc630a6ae9cc063b3924bcea8dee9d6"><div class="ttname"><a href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(...)</div><div class="ttdoc">To avoid unused variables warnings.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00160">Error.h:160</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml#l00063">63</a> of file <a class="el" href="_c_l_buffer_allocator_8cpp_source.xhtml">CLBufferAllocator.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;{</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <a class="code" href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a>(alignment);</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;CLBufferMemoryRegion&gt;(_ctx, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size);</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a6dc630a6ae9cc063b3924bcea8dee9d6"><div class="ttname"><a href="_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6">ARM_COMPUTE_UNUSED</a></div><div class="ttdeci">#define ARM_COMPUTE_UNUSED(...)</div><div class="ttdoc">To avoid unused variables warnings.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00152">Error.h:152</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00160">ARM_COMPUTE_UNUSED</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00152">ARM_COMPUTE_UNUSED</a>.</p>
+
+</div>
+</div>
+<a id="acd76bafa07435ba819c4967d1c74f7fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd76bafa07435ba819c4967d1c74f7fb">&#9670;&nbsp;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a>&amp; operator= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Default copy assignment operator. </p>
 
 </div>
 </div>
@@ -322,7 +384,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml">CLBufferAllocator</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:31 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:09 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

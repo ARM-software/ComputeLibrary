@@ -114,6 +114,7 @@ struct ForEachDimension<0>
     template <typename L, typename... Ts>
     static void unroll(const Window &w, Coordinates &id, L &&lambda_function, Ts &&... iterators)
     {
+        ARM_COMPUTE_UNUSED(w, iterators...);
         lambda_function(id);
     }
 };

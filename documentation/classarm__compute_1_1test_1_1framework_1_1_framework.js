@@ -23,6 +23,7 @@ var classarm__compute_1_1test_1_1framework_1_1_framework =
     [ "push_suite", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a3893bc1fbad02227b78bbce22bcff1ba", null ],
     [ "run", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a149ad6701e3e2414cb566bb414029841", null ],
     [ "set_error_on_missing_assets", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a46a0cefc3b9a13645548ec705f438ce9", null ],
+    [ "set_instruments_info", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a755837a8f4938f8013f4251014a958e4", null ],
     [ "set_num_iterations", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#ae0b69f2142100651d022d5af576f42cf", null ],
     [ "set_stop_on_error", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#ab4b7e9757ad7e9d23b608b617c5dffa6", null ],
     [ "set_test_result", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a4494f098cda45f40105c454d0ffa9147", null ],

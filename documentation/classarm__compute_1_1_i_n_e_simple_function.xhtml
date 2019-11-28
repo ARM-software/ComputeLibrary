@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -200,9 +200,9 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div class="fragment"><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <a class="code" href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">NEScheduler::get</a>().<a class="code" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">schedule</a>(&amp;_border_handler, <a class="code" href="classarm__compute_1_1_window.xhtml#a893d17b56b9abc4423ce26e9a24ac5dc">Window::DimZ</a>);</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <a class="code" href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">NEScheduler::get</a>().<a class="code" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">schedule</a>(_kernel.get(), <a class="code" href="classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9">Window::DimY</a>);</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_window_xhtml_ad2d402364fa822b0b7775081291eeca9"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9">arm_compute::Window::DimY</a></div><div class="ttdeci">static constexpr size_t DimY</div><div class="ttdoc">Alias for dimension 1 also known as Y dimension.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8h_source.xhtml#l00045">Window.h:45</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_scheduler_xhtml_a4e58f95544bd5ac6559a421671bd9842"><div class="ttname"><a href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">arm_compute::IScheduler::schedule</a></div><div class="ttdeci">virtual void schedule(ICPPKernel *kernel, const Hints &amp;hints)=0</div><div class="ttdoc">Runs the kernel in the same thread as the caller synchronously.</div></div>
 <div class="ttc" id="classarm__compute_1_1_window_xhtml_a893d17b56b9abc4423ce26e9a24ac5dc"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml#a893d17b56b9abc4423ce26e9a24ac5dc">arm_compute::Window::DimZ</a></div><div class="ttdeci">static constexpr size_t DimZ</div><div class="ttdoc">Alias for dimension 2 also known as Z dimension.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8h_source.xhtml#l00047">Window.h:47</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_scheduler_xhtml_a0d63ca713bab377aabcfb63c192b8429"><div class="ttname"><a href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">arm_compute::Scheduler::get</a></div><div class="ttdeci">static IScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_scheduler_8cpp_source.xhtml#l00096">Scheduler.cpp:96</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_scheduler_xhtml_a0d63ca713bab377aabcfb63c192b8429"><div class="ttname"><a href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">arm_compute::Scheduler::get</a></div><div class="ttdeci">static IScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_scheduler_8cpp_source.xhtml#l00095">Scheduler.cpp:95</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_window_8h_source.xhtml#l00045">Window::DimY</a>, <a class="el" href="_window_8h_source.xhtml#l00047">Window::DimZ</a>, <a class="el" href="_scheduler_8cpp_source.xhtml#l00096">Scheduler::get()</a>, and <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">IScheduler::schedule()</a>.</p>
+<p class="reference">References <a class="el" href="_window_8h_source.xhtml#l00045">Window::DimY</a>, <a class="el" href="_window_8h_source.xhtml#l00047">Window::DimZ</a>, <a class="el" href="_scheduler_8cpp_source.xhtml#l00095">Scheduler::get()</a>, and <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">IScheduler::schedule()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_n_e_harris_corners_8cpp_source.xhtml#l00183">NEHarrisCorners::run()</a>, <a class="el" href="_n_e_f_f_t_convolution_layer_8cpp_source.xhtml#l00296">NEFFTConvolutionLayer::run()</a>, <a class="el" href="_n_e_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00444">NELSTMLayerQuantized::run()</a>, and <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00611">NELSTMLayer::run()</a>.</p>
 
@@ -218,7 +218,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_n_e_simple_function.xhtml">INESimpleFunction</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:35 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:14 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

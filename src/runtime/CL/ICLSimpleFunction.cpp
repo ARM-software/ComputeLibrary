@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,20 +24,21 @@
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 using namespace arm_compute;
 
-ICLSimpleFunction::ICLSimpleFunction() // NOLINT
+ICLSimpleFunction::ICLSimpleFunction(CLRuntimeContext *ctx) // NOLINT
     : _kernel(),
-      _border_handler()
+      _border_handler(),
+      _ctx(ctx)
 {
 }
 
 void ICLSimpleFunction::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(!_kernel, "The child class didn't set the CL kernel or function isn't configured");
-
-    CLScheduler::get().enqueue(_border_handler, false);
-    CLScheduler::get().enqueue(*_kernel);
+    schedule_kernel_on_ctx(_ctx, &_border_handler, false);
+    schedule_kernel_on_ctx(_ctx, _kernel.get());
 }

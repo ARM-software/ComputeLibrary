@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.11</span>
    </div>
   </td>
  </tr>
@@ -180,6 +180,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a8919c520c1cb9086dd1116de509bd481"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">IMemoryManager</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends.xhtml#a8919c520c1cb9086dd1116de509bd481">get_memory_manager</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;ctx, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a> target)</td></tr>
 <tr class="memdesc:a8919c520c1cb9086dd1116de509bd481"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the memory manager for a given target.  <a href="#a8919c520c1cb9086dd1116de509bd481">More...</a><br /></td></tr>
 <tr class="separator:a8919c520c1cb9086dd1116de509bd481"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32d8fea34ca818386a078939a03e3cb8"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_weights_manager.xhtml">IWeightsManager</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends.xhtml#a32d8fea34ca818386a078939a03e3cb8">get_weights_manager</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;ctx, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a> target)</td></tr>
+<tr class="memdesc:a32d8fea34ca818386a078939a03e3cb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the weights manager for a given target.  <a href="#a32d8fea34ca818386a078939a03e3cb8">More...</a><br /></td></tr>
+<tr class="separator:a32d8fea34ca818386a078939a03e3cb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="a9cde842e940ccc18aa13ed538eaabceb"></a>
@@ -218,8 +221,11 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A configured backend function </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00044">44</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;{</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keyword">auto</span> f = arm_compute::support::cpp14::make_unique&lt;FunctionType&gt;();</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    f-&gt;configure(std::forward&lt;ParameterType&gt;(args)...);</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordflow">return</span> std::make_pair(std::move(f), name);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00045">45</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;{</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keyword">auto</span> f = arm_compute::support::cpp14::make_unique&lt;FunctionType&gt;();</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    f-&gt;configure(std::forward&lt;ParameterType&gt;(<a class="code" href="namespace_gemm_tuner.xhtml#a8187411843a6284ffb964ef3fb9fcab3">args</a>)...);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <span class="keywordflow">return</span> std::make_pair(std::move(f), name);</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;}</div><div class="ttc" id="namespace_gemm_tuner_xhtml_a8187411843a6284ffb964ef3fb9fcab3"><div class="ttname"><a href="namespace_gemm_tuner.xhtml#a8187411843a6284ffb964ef3fb9fcab3">GemmTuner.args</a></div><div class="ttdeci">args</div><div class="ttdef"><b>Definition:</b> <a href="_gemm_tuner_8py_source.xhtml#l00555">GemmTuner.py:555</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="_gemm_tuner_8py_source.xhtml#l00555">GemmTuner::args</a>.</p>
+
 </div>
 </div>
 <a id="a0f13948c8a09d6dc51cd78fccf3fe817"></a>
@@ -265,8 +271,11 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A configured backend function </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00060">60</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keyword">auto</span> f = arm_compute::support::cpp14::make_unique&lt;FunctionType&gt;(mm);</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    f-&gt;configure(std::forward&lt;ParameterType&gt;(args)...);</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keywordflow">return</span> std::make_pair(std::move(f), name);</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00061">61</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;{</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <span class="keyword">auto</span> f = arm_compute::support::cpp14::make_unique&lt;FunctionType&gt;(mm);</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    f-&gt;configure(std::forward&lt;ParameterType&gt;(<a class="code" href="namespace_gemm_tuner.xhtml#a8187411843a6284ffb964ef3fb9fcab3">args</a>)...);</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keywordflow">return</span> std::make_pair(std::move(f), name);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;}</div><div class="ttc" id="namespace_gemm_tuner_xhtml_a8187411843a6284ffb964ef3fb9fcab3"><div class="ttname"><a href="namespace_gemm_tuner.xhtml#a8187411843a6284ffb964ef3fb9fcab3">GemmTuner.args</a></div><div class="ttdeci">args</div><div class="ttdef"><b>Definition:</b> <a href="_gemm_tuner_8py_source.xhtml#l00555">GemmTuner.py:555</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="_gemm_tuner_8py_source.xhtml#l00555">GemmTuner::args</a>.</p>
+
 </div>
 </div>
 <a id="a8919c520c1cb9086dd1116de509bd481"></a>
@@ -313,11 +322,63 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The memory manager for the given target else false </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00088">88</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;{</div><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordtype">bool</span> enabled = ctx.config().use_function_memory_manager &amp;&amp; (ctx.memory_management_ctx(target) != <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keywordflow">return</span> enabled ? ctx.memory_management_ctx(target)-&gt;intra_mm : <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">References <a class="el" href="_graph_context_8cpp_source.xhtml#l00045">GraphContext::config()</a>, <a class="el" href="_graph_context_8h_source.xhtml#l00042">MemoryManagerContext::intra_mm</a>, <a class="el" href="_graph_context_8cpp_source.xhtml#l00067">GraphContext::memory_management_ctx()</a>, and <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00080">GraphConfig::use_function_memory_manager</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00089">89</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;{</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keywordtype">bool</span> enabled = ctx.config().use_function_memory_manager &amp;&amp; (ctx.memory_management_ctx(target) != <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keywordflow">return</span> enabled ? ctx.memory_management_ctx(target)-&gt;intra_mm : <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;}</div></div><!-- fragment -->
+<p class="reference">References <a class="el" href="_graph_context_8cpp_source.xhtml#l00046">GraphContext::config()</a>, <a class="el" href="_graph_context_8h_source.xhtml#l00043">MemoryManagerContext::intra_mm</a>, <a class="el" href="_graph_context_8cpp_source.xhtml#l00068">GraphContext::memory_management_ctx()</a>, and <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00080">GraphConfig::use_function_memory_manager</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00407">arm_compute::graph::backends::detail::create_convolution_layer()</a>, <a class="el" href="_g_c_functions_factory_8cpp_source.xhtml#l00072">arm_compute::graph::backends::detail::create_convolution_layer&lt; GCConvolutionLayerFunctions, GCTargetInfo &gt;()</a>, <a class="el" href="_n_e_function_factory_8cpp_source.xhtml#l00092">arm_compute::graph::backends::detail::create_convolution_layer&lt; NEConvolutionLayerFunctions, NETargetInfo &gt;()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00498">arm_compute::graph::backends::detail::create_deconvolution_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00814">arm_compute::graph::backends::detail::create_fully_connected_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00868">arm_compute::graph::backends::detail::create_generate_proposals_layer()</a>, <a class="el" href="_n_e_function_factory_8cpp_source.xhtml#l00162">arm_compute::graph::backends::detail::create_normalization_layer&lt; NENormalizationLayer, NETargetInfo &gt;()</a>, and <a class="el" href="_function_helpers_8h_source.xhtml#l01389">arm_compute::graph::backends::detail::create_softmax_layer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00424">arm_compute::graph::backends::detail::create_convolution_layer()</a>, <a class="el" href="_g_c_functions_factory_8cpp_source.xhtml#l00073">arm_compute::graph::backends::detail::create_convolution_layer&lt; GCConvolutionLayerFunctions, GCTargetInfo &gt;()</a>, <a class="el" href="_n_e_function_factory_8cpp_source.xhtml#l00085">arm_compute::graph::backends::detail::create_convolution_layer&lt; NEConvolutionLayerFunctions, NETargetInfo &gt;()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00515">arm_compute::graph::backends::detail::create_deconvolution_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00860">arm_compute::graph::backends::detail::create_fully_connected_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00182">arm_compute::graph::backends::detail::create_fused_convolution_batch_normalization_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00239">arm_compute::graph::backends::detail::create_fused_depthwise_convolution_batch_normalization_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00916">arm_compute::graph::backends::detail::create_generate_proposals_layer()</a>, <a class="el" href="_n_e_function_factory_8cpp_source.xhtml#l00156">arm_compute::graph::backends::detail::create_normalization_layer&lt; NENormalizationLayer, NETargetInfo &gt;()</a>, and <a class="el" href="_function_helpers_8h_source.xhtml#l01437">arm_compute::graph::backends::detail::create_softmax_layer()</a>.</p>
+
+</div>
+</div>
+<a id="a32d8fea34ca818386a078939a03e3cb8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32d8fea34ca818386a078939a03e3cb8">&#9670;&nbsp;</a></span>get_weights_manager()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt;<a class="el" href="classarm__compute_1_1_i_weights_manager.xhtml">IWeightsManager</a>&gt; arm_compute::graph::backends::get_weights_manager </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a>&#160;</td>
+          <td class="paramname"><em>target</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the weights manager for a given target. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class.">Graph</a> context containing weight management metadata </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">target</td><td>Target to retrieve the weights manager from</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The weights manager for the given target else false </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00102">102</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;{</div><div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keywordtype">bool</span> enabled = ctx.config().use_function_weights_manager &amp;&amp; (ctx.weights_management_ctx(target) != <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keywordflow">return</span> enabled ? ctx.weights_management_ctx(target)-&gt;wm : <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;}</div></div><!-- fragment -->
+<p class="reference">References <a class="el" href="_graph_context_8cpp_source.xhtml#l00046">GraphContext::config()</a>, <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00081">GraphConfig::use_function_weights_manager</a>, <a class="el" href="_graph_context_8cpp_source.xhtml#l00092">GraphContext::weights_management_ctx()</a>, and <a class="el" href="_graph_context_8h_source.xhtml#l00053">WeightsManagerContext::wm</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00860">arm_compute::graph::backends::detail::create_fully_connected_layer()</a>.</p>
 
 </div>
 </div>
@@ -365,9 +426,12 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if output is nullptr or input is equal to the output, else false </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00076">76</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;{</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="keywordflow">return</span> (output == <span class="keyword">nullptr</span>) || (input == output);</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00098">arm_compute::graph::backends::detail::create_activation_layer()</a>, and <a class="el" href="_function_helpers_8h_source.xhtml#l00136">arm_compute::graph::backends::detail::create_batch_normalization_layer()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00077">77</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;{</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordflow">return</span> (output == <span class="keyword">nullptr</span>) || (<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a> == output);</div><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00099">arm_compute::graph::backends::detail::create_activation_layer()</a>, and <a class="el" href="_function_helpers_8h_source.xhtml#l00137">arm_compute::graph::backends::detail::create_batch_normalization_layer()</a>.</p>
 
 </div>
 </div>
@@ -377,7 +441,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1backends.xhtml">backends</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:39 for Compute Library by
+    <li class="footer">Generated on Thu Nov 28 2019 16:53:18 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

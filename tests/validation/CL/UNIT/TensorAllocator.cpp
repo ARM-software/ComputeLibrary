@@ -24,9 +24,9 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 
 #include "arm_compute/core/utils/misc/MMappedFile.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
@@ -83,8 +83,8 @@ TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(t1.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Negative case : Import memory to a tensor that is memory managed
-    CLTensor      t2;
-    CLMemoryGroup mg;
+    CLTensor    t2;
+    MemoryGroup mg;
     t2.allocator()->set_associated_memory_group(&mg);
     ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t2.info()->is_resizable(), framework::LogLevel::ERRORS);

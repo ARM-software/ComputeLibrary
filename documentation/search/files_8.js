@@ -8,7 +8,7 @@ var searchData=
   ['heightconcatenatelayer_2ecpp',['HeightConcatenateLayer.cpp',['../_c_l_2_height_concatenate_layer_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_height_concatenate_layer_8cpp.xhtml',1,'(Global Namespace)']]],
   ['helper_2eh',['Helper.h',['../_c_l_2_helper_8h.xhtml',1,'(Global Namespace)'],['../_g_l_e_s___c_o_m_p_u_t_e_2_helper_8h.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_helper_8h.xhtml',1,'(Global Namespace)']]],
   ['helpers_2ecpp',['Helpers.cpp',['../src_2core_2_helpers_8cpp.xhtml',1,'(Global Namespace)'],['../src_2core_2utils_2logging_2_helpers_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2validation_2_helpers_8cpp.xhtml',1,'(Global Namespace)']]],
-  ['helpers_2eh',['Helpers.h',['../arm__compute_2core_2_helpers_8h.xhtml',1,'(Global Namespace)'],['../arm__compute_2core_2utils_2logging_2_helpers_8h.xhtml',1,'(Global Namespace)'],['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml',1,'(Global Namespace)'],['../tests_2validation_2_helpers_8h.xhtml',1,'(Global Namespace)']]],
+  ['helpers_2eh',['Helpers.h',['../arm__compute_2core_2_helpers_8h.xhtml',1,'(Global Namespace)'],['../arm__compute_2core_2utils_2logging_2_helpers_8h.xhtml',1,'(Global Namespace)'],['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml',1,'(Global Namespace)'],['../tests_2instruments_2_helpers_8h.xhtml',1,'(Global Namespace)'],['../tests_2validation_2_helpers_8h.xhtml',1,'(Global Namespace)']]],
   ['helpers_2einl',['Helpers.inl',['../_helpers_8inl.xhtml',1,'']]],
   ['helpers_5fasymm_2eh',['helpers_asymm.h',['../helpers__asymm_8h.xhtml',1,'']]],
   ['histogram_2ecl',['histogram.cl',['../histogram_8cl.xhtml',1,'']]],

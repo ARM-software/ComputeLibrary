@@ -73,11 +73,12 @@ constexpr NodeID EmptyNodeID = std::numeric_limits<NodeID>::max();
 constexpr EdgeID EmptyEdgeID = std::numeric_limits<EdgeID>::max();
 
 // Forward declarations
-class TensorDescriptor;
+struct TensorDescriptor;
 /** Graph configuration structure */
 struct GraphConfig
 {
     bool        use_function_memory_manager{ true };   /**< Use a memory manager to manage per-funcion auxilary memory */
+    bool        use_function_weights_manager{ true };  /**< Use a weights manager to manage transformed weights */
     bool        use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
     bool        use_tuner{ false };                    /**< Use a tuner in tunable backends */
     CLTunerMode tuner_mode{ CLTunerMode::EXHAUSTIVE }; /**< Tuner mode to be used by the CL tuner */
@@ -137,6 +138,7 @@ enum class NodeType
     ConvolutionLayer,
     DeconvolutionLayer,
     DepthwiseConvolutionLayer,
+    DequantizationLayer,
     DetectionOutputLayer,
     DetectionPostProcessLayer,
     EltwiseLayer,

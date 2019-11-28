@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['m_5fpi',['M_PI',['../_n_e_math_8inl.xhtml#ae71449b1cc6e6250b91f539153a7a0d3',1,'NEMath.inl']]],
   ['magnitude_5fop',['MAGNITUDE_OP',['../magnitude__phase_8cl.xhtml#a259a59d7a4f247119c457af235827a29',1,'magnitude_phase.cl']]],
   ['make_5farg_5fparam',['MAKE_ARG_PARAM',['../tests_2framework_2_macros_8h.xhtml#a79d59e55eaa189335dddf51c1e016d8b',1,'Macros.h']]],
   ['make_5farg_5fparams',['MAKE_ARG_PARAMS',['../tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931',1,'Macros.h']]],

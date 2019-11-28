@@ -42,8 +42,9 @@ using namespace arm_compute::misc::shape_calculator;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _asm_glue(memory_manager), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(),
-      _offset_contribution_kernel(), _offset_contribution_output_stage_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _mm_result_s32(), _original_b(nullptr), _a_offset(0), _b_offset(0),
-      _run_vector_matrix_multiplication(false), _assembly_path(false), _fused_assembly_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false), _fuse_output_stage(false)
+      _offset_contribution_kernel(), _offset_contribution_output_stage_kernel(), _activation_func(), _convert_to_signed_asymm(), _convert_from_signed_asymm(), _vector_sum_col(), _vector_sum_row(), _tmp_a(),
+      _tmp_b(), _mm_result_s32(), _signed_a(), _signed_output(), _original_b(nullptr), _a_offset(0), _b_offset(0), _run_vector_matrix_multiplication(false), _assembly_path(false),
+      _fused_assembly_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false), _fuse_output_stage(false), _run_activation(false), _flip_signedness(false)
 {
 }
 
@@ -55,6 +56,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
     const ITensor *matrix_a = a;
     const ITensor *matrix_b = b;
+    GEMMInfo       info     = gemm_info;
 
     // Clear state
     _mtx_a_reshape_kernel = nullptr;
@@ -64,13 +66,44 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     _a_offset                         = a->info()->quantization_info().uniform().offset;
     _b_offset                         = b->info()->quantization_info().uniform().offset;
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
-    _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
+    _reshape_b_only_on_first_run      = info.reshape_b_only_on_first_run();
     _is_prepared                      = false;
     _fused_assembly_path              = false;
+    _flip_signedness                  = is_data_type_quantized_per_channel(b->info()->data_type()) && (a->info()->data_type() == DataType::QASYMM8) && _reshape_b_only_on_first_run;
     _original_b                       = b;
 
+    const ITensor *a_to_use = a;
+
+    // Convert to QASYMM8 -> QASYMM8_SIGNED and back
+    if(_flip_signedness)
+    {
+        const int32_t                 offset_correction = 128;
+        const DataType                dt                = DataType::QASYMM8_SIGNED;
+        const UniformQuantizationInfo iqinfo            = a_to_use->info()->quantization_info().uniform();
+
+        _signed_a.allocator()->init(a_to_use->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction)));
+        _memory_group.manage(&_signed_a);
+        _convert_to_signed_asymm.configure(a_to_use, &_signed_a);
+        a_to_use  = &_signed_a;
+        _a_offset = _signed_a.info()->quantization_info().uniform().offset;
+
+        const UniformQuantizationInfo oqinfo = output->info()->quantization_info().uniform();
+        _memory_group.manage(&_signed_output);
+        _signed_output.allocator()->init(output->info()->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(oqinfo.scale, oqinfo.offset - offset_correction)));
+
+        // Output stage correction
+        GEMMLowpOutputStageInfo output_stage_corr = info.gemmlowp_output_stage();
+        output_stage_corr.gemmlowp_offset         = _signed_output.info()->quantization_info().uniform().offset;
+        output_stage_corr.gemmlowp_min_bound -= offset_correction;
+        output_stage_corr.gemmlowp_max_bound -= offset_correction;
+        info.set_gemmlowp_output_stage(output_stage_corr);
+
+        // Update matrix a
+        matrix_a = &_signed_a;
+    }
+
     // If GEMMLowpOutputStage != NONE, fuse the offset contribution with the output stage
-    if(gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE)
+    if(info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE)
     {
         _fuse_output_stage = true;
         _memory_group.manage(&_mm_result_s32);
@@ -82,17 +115,18 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     switch(a->info()->data_type())
     {
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::U8:
         case DataType::S8:
         {
-            if(a->info()->data_type() == DataType::QASYMM8 && gemm_info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
+            if(a_to_use->info()->data_type() == DataType::QASYMM8 && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
             {
-                _asm_glue.configure(a, b, c, output, 1.f, 0.f, gemm_info);
+                _asm_glue.configure(a_to_use, b, c, output, gemm_info);
                 _fused_assembly_path = _asm_glue.is_configured();
             }
             else
             {
-                _asm_glue.configure(a, b, nullptr, _fuse_output_stage ? &_mm_result_s32 : output, 1.f, 0.f, gemm_info);
+                _asm_glue.configure(a_to_use, b, nullptr, _fuse_output_stage ? &_mm_result_s32 : output, gemm_info);
             }
             _assembly_path = _asm_glue.is_configured();
             break;
@@ -110,7 +144,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         matrix_b = &_tmp_b;
 
         // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
-        TensorInfo a_info(compute_interleaved_shape(*a->info()), 1, a->info()->data_type(), a->info()->quantization_info());
+        TensorInfo a_info(compute_interleaved_shape(*a_to_use->info()), 1, a_to_use->info()->data_type(), a_to_use->info()->quantization_info());
         // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
         TensorInfo b_info(compute_transpose1xW_shape(*b->info()), 1, b->info()->data_type(), b->info()->quantization_info());
         _tmp_a.allocator()->init(a_info);
@@ -124,7 +158,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         // Configure interleave kernel
         {
             auto k = arm_compute::support::cpp14::make_unique<NEGEMMInterleave4x4Kernel>();
-            k->configure(a, &_tmp_a);
+            k->configure(a_to_use, &_tmp_a);
             _mtx_a_reshape_kernel = std::move(k);
         }
 
@@ -150,19 +184,19 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             }
 
             // Configure Matrix B reduction kernel
-            _mtx_b_reduction_kernel.configure(b, &_vector_sum_col, a->info()->dimension(0), false);
+            _mtx_b_reduction_kernel.configure(b, &_vector_sum_col, a_to_use->info()->dimension(0), false);
         }
 
         // Initialize Matrix A reduction kernel only if _b_offset is not equal to 0
         if(_b_offset != 0)
         {
-            TensorInfo info_vector_sum_row(compute_reductionB_shape(*a->info()), 1, DataType::S32);
+            TensorInfo info_vector_sum_row(compute_reductionB_shape(*a_to_use->info()), 1, DataType::S32);
 
             _vector_sum_row.allocator()->init(info_vector_sum_row);
             _memory_group.manage(&_vector_sum_row);
 
             // Configure matrix A reduction kernel
-            _mtx_a_reduction_kernel.configure(a, &_vector_sum_row, a->info()->dimension(0), false);
+            _mtx_a_reduction_kernel.configure(a_to_use, &_vector_sum_row, a_to_use->info()->dimension(0), false);
         }
 
         if(_fuse_output_stage)
@@ -175,8 +209,17 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
                 _mm_kernel = std::move(k);
             }
 
-            _offset_contribution_output_stage_kernel.configure(&_mm_result_s32, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, c, output, a->info()->dimension(0),
-                                                               _a_offset, _b_offset, gemm_info.gemmlowp_output_stage());
+            _offset_contribution_output_stage_kernel.configure(&_mm_result_s32,
+                                                               _a_offset == 0 ? nullptr : &_vector_sum_col,
+                                                               _b_offset == 0 ? nullptr : &_vector_sum_row, c,
+                                                               _flip_signedness ? &_signed_output : output,
+                                                               a->info()->dimension(0),
+                                                               _a_offset, _b_offset, info.gemmlowp_output_stage());
+
+            if(_flip_signedness)
+            {
+                _convert_from_signed_asymm.configure(&_signed_output, output);
+            }
         }
         else
         {
@@ -188,8 +231,16 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
                 _mm_kernel = std::move(k);
             }
             // Configure offset contribution kernel
-            _offset_contribution_kernel.configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a->info()->dimension(0), _a_offset, _b_offset);
+            _offset_contribution_kernel.configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a_to_use->info()->dimension(0), _a_offset, _b_offset);
         }
+    }
+
+    // Configure activation
+    const ActivationLayerInfo &activation = gemm_info.activation_info();
+    _run_activation                       = activation.enabled() && (!_assembly_path || (_assembly_path && !NEGEMMAssemblyDispatch::is_activation_supported(activation)));
+    if(_run_activation)
+    {
+        _activation_func.configure(output, nullptr, activation);
     }
 
     // Allocate tensors
@@ -219,21 +270,30 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     {
         _mm_result_s32.allocator()->allocate();
     }
+
+    if(_flip_signedness)
+    {
+        _signed_a.allocator()->allocate();
+        _signed_output.allocator()->allocate();
+    }
 }
 
 Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(c != nullptr && gemm_info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::NONE, "Bias addition not supported in NEGEMMLowpMatrixMultiplyCore for output S32");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((a)->dimension(0) != (b)->dimension(1),
                                     "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
 
+    GEMMInfo           info          = gemm_info;
     const ITensorInfo *matrix_a_info = a;
     const ITensorInfo *matrix_b_info = b;
+
+    const ITensorInfo *a_to_use = a;
 
     TensorInfo tmp_a_info{};
     TensorInfo tmp_b_info{};
@@ -242,31 +302,60 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     int32_t a_offset = a->quantization_info().uniform().offset;
     int32_t b_offset = b->quantization_info().uniform().offset;
 
-    bool fuse_output_stage = gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE;
+    bool fuse_output_stage = info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE;
     if(fuse_output_stage)
     {
         auto_init_if_empty(mm_result_s32_info, a->clone()->set_tensor_shape(output->tensor_shape()).set_data_type(DataType::S32));
     }
 
+    // Convert QASYMM8->QASYMM8_SIGNED
+    TensorInfo signed_a{};
+    TensorInfo signed_output{};
+    bool       flip_signedness = is_data_type_quantized_per_channel(b->data_type()) && (a->data_type() == DataType::QASYMM8) && info.reshape_b_only_on_first_run();
+    if(flip_signedness)
+    {
+        const int32_t                 offset_correction = 128;
+        const DataType                dt                = DataType::QASYMM8_SIGNED;
+        const UniformQuantizationInfo iqinfo            = a_to_use->quantization_info().uniform();
+
+        signed_a = a_to_use->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(iqinfo.scale, iqinfo.offset + offset_correction));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEConvertQuantizedSignednessKernel::validate(a_to_use, &signed_a));
+        a_to_use = &signed_a;
+        a_offset = signed_a.quantization_info().uniform().offset;
+
+        const UniformQuantizationInfo oqinfo = output->quantization_info().uniform();
+        signed_output                        = output->clone()->set_data_type(dt).set_quantization_info(QuantizationInfo(oqinfo.scale, oqinfo.offset - offset_correction));
+
+        // Output stage correction
+        GEMMLowpOutputStageInfo output_stage_corr = info.gemmlowp_output_stage();
+        output_stage_corr.gemmlowp_offset         = signed_output.quantization_info().uniform().offset;
+        output_stage_corr.gemmlowp_min_bound -= offset_correction;
+        output_stage_corr.gemmlowp_max_bound -= offset_correction;
+        info.set_gemmlowp_output_stage(output_stage_corr);
+
+        // Update matrix a
+        matrix_a_info = &signed_a;
+    }
+
     // Check if we need to run the optimized assembly kernel
     bool run_optimised             = false;
     bool run_optimised_requantized = false;
-    if(is_data_type_quantized_asymmetric(a->data_type()))
+    if(a_to_use->data_type() == DataType::QASYMM8 && info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
     {
-        run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a, b, c, output, 1.f, 0.f, gemm_info));
+        run_optimised             = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, c, output, gemm_info));
         run_optimised_requantized = run_optimised;
     }
     else
     {
-        run_optimised = bool(NEGEMMAssemblyDispatch::validate(a, b, nullptr, fuse_output_stage ? &mm_result_s32_info : output, 1.f, 0.f, gemm_info));
+        run_optimised = bool(NEGEMMAssemblyDispatch::validate(a_to_use, b, nullptr, fuse_output_stage ? &mm_result_s32_info : output, gemm_info));
     }
 
     if(run_optimised)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(b->dimension(0) != output->dimension(0));
-        if(gemm_info.depth_output_gemm3d() != 0)
+        if(info.depth_output_gemm3d() != 0)
         {
-            if(gemm_info.reinterpret_input_as_3d())
+            if(info.reinterpret_input_as_3d())
             {
                 ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(1) != output->dimension(1));
                 ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(2) != output->dimension(2));
@@ -283,8 +372,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.reinterpret_input_as_3d(), "NEGEMM cannot reinterpret the input tensor as 3D");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.depth_output_gemm3d() != 0, "NEGEMM cannot reinterpret the output tensor as 3D");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.reinterpret_input_as_3d(), "NEGEMM cannot reinterpret the input tensor as 3D");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.depth_output_gemm3d() != 0, "NEGEMM cannot reinterpret the output tensor as 3D");
 
         const bool run_vector_matrix_multiplication = a->dimension(1) < 2;
         if(!run_vector_matrix_multiplication)
@@ -303,10 +392,10 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
             shape_tmp_b.set(1, std::ceil(b->dimension(0) / 16.f));
 
             // Validate interleave kernel
-            auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(shape_tmp_a));
+            auto_init_if_empty(tmp_a_info, a_to_use->clone()->set_tensor_shape(shape_tmp_a));
             auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(shape_tmp_b));
 
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a, &tmp_a_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a_to_use, &tmp_a_info));
             ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &tmp_b_info));
         }
     }
@@ -331,7 +420,7 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
             info_vector_sum_row = TensorInfo(compute_reductionB_shape(*a), 1, DataType::S32);
 
             // Configure matrix A reduction kernel
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(a, &info_vector_sum_row, a->dimension(0), false));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(a_to_use, &info_vector_sum_row, a->dimension(0), false));
         }
 
         if(fuse_output_stage)
@@ -345,8 +434,10 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
             ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOffsetContributionOutputStageKernel::validate(&mm_result_s32_info,
                                                                                                 a_offset == 0 ? nullptr : &info_vector_sum_col,
                                                                                                 b_offset == 0 ? nullptr : &info_vector_sum_row,
-                                                                                                c, output, a_offset, b_offset,
-                                                                                                gemm_info.gemmlowp_output_stage()));
+                                                                                                c,
+                                                                                                flip_signedness ? &signed_output : output,
+                                                                                                a_offset, b_offset,
+                                                                                                info.gemmlowp_output_stage()));
         }
         else
         {
@@ -361,6 +452,14 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
                                                                                      a_offset, b_offset));
         }
     }
+
+    // Validate activation
+    const ActivationLayerInfo &activation = gemm_info.activation_info();
+    if(activation.enabled())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, activation));
+    }
+
     return Status{};
 }
 
@@ -369,6 +468,12 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     prepare();
 
     MemoryGroupResourceScope scope_mg(_memory_group);
+
+    // Convert QASYMM8->QASYMM8_SIGNED
+    if(_flip_signedness)
+    {
+        NEScheduler::get().schedule(&_convert_to_signed_asymm, Window::DimY);
+    }
 
     // Reshape inputs
     if(_mtx_a_reshape_kernel)
@@ -414,6 +519,18 @@ void NEGEMMLowpMatrixMultiplyCore::run()
             // Run offset contribution kernel
             NEScheduler::get().schedule(&_offset_contribution_kernel, Window::DimY);
         }
+    }
+
+    // Convert QASYMM8_SIGNED->QASYMM8
+    if(_flip_signedness)
+    {
+        NEScheduler::get().schedule(&_convert_from_signed_asymm, Window::DimY);
+    }
+
+    // Run fused activation
+    if(_run_activation)
+    {
+        _activation_func.run();
     }
 }
 

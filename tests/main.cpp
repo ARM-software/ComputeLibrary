@@ -27,10 +27,12 @@
 #include "tests/framework/Exceptions.h"
 #include "tests/framework/Framework.h"
 #include "tests/framework/Macros.h"
+#include "tests/framework/ParametersLibrary.h"
 #include "tests/framework/Profiler.h"
 #include "tests/framework/command_line/CommonOptions.h"
 #include "tests/framework/instruments/Instruments.h"
 #include "tests/framework/printers/Printers.h"
+#include "tests/instruments/Helpers.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
 
@@ -72,7 +74,8 @@ namespace arm_compute
 {
 namespace test
 {
-std::unique_ptr<AssetsLibrary> library;
+std::unique_ptr<AssetsLibrary>            library;
+extern std::unique_ptr<ParametersLibrary> parameters;
 } // namespace test
 } // namespace arm_compute
 
@@ -89,21 +92,6 @@ bool file_exists(const std::string &filename)
 
 int main(int argc, char **argv)
 {
-#ifdef ARM_COMPUTE_CL
-    CLTuner cl_tuner(false);
-    if(opencl_is_available())
-    {
-        auto ctx_dev_err = create_opencl_context_and_device();
-        ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
-        CLScheduler::get()
-        .default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner);
-    }
-#endif /* ARM_COMPUTE_CL */
-
-#ifdef ARM_COMPUTE_GC
-    GCScheduler::get().default_init();
-#endif /* ARM_COMPUTE_GC */
-
     framework::Framework &framework = framework::Framework::get();
 
     utils::CommandLineParser parser;
@@ -167,8 +155,43 @@ int main(int argc, char **argv)
 
         std::vector<std::unique_ptr<framework::Printer>> printers = options.create_printers();
 
+        // Setup CPU Scheduler
         Scheduler::get().set_num_threads(threads->value());
+
+        // Create CPU context
+        auto cpu_ctx = support::cpp14::make_unique<RuntimeContext>();
+        cpu_ctx->set_scheduler(&Scheduler::get());
+
+        // Track CPU context
+        auto cpu_ctx_track = support::cpp14::make_unique<ContextSchedulerUser>(cpu_ctx.get());
+
+        // Create parameters
+        parameters = support::cpp14::make_unique<ParametersLibrary>();
+        parameters->set_cpu_ctx(std::move(cpu_ctx));
+
+#ifdef ARM_COMPUTE_GC
+        // Setup OpenGL context
+        {
+            auto gles_ctx = support::cpp14::make_unique<GCRuntimeContext>();
+            ARM_COMPUTE_ERROR_ON(gles_ctx == nullptr);
+            {
+                // Legacy singletons API: This has been deprecated and the singletons will be removed
+                // Setup singleton for backward compatibility
+                GCScheduler::get().default_init();
+            }
+            parameters->set_gc_ctx(std::move(gles_ctx));
+        };
+#endif /* ARM_COMPUTE_GC */
+
 #ifdef ARM_COMPUTE_CL
+        CLTuner cl_tuner(false);
+        if(opencl_is_available())
+        {
+            auto ctx_dev_err = create_opencl_context_and_device();
+            ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
+            CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner);
+        }
+
         if(enable_tuner->is_set())
         {
             cl_tuner.set_tune_new_kernels(enable_tuner->value());
@@ -232,7 +255,19 @@ int main(int argc, char **argv)
             }
         }
 
-        framework.init(options.instruments->value(), options.iterations->value(), dataset_mode->value(), filter->value(), filter_id->value(), options.log_level->value());
+        // Setup instruments meta-data
+        framework::InstrumentsInfo instruments_info;
+        instruments_info._scheduler_users.push_back(cpu_ctx_track.get());
+        framework.set_instruments_info(instruments_info);
+
+        // Initialize framework
+        framework.init(options.instruments->value(),
+                       options.iterations->value(),
+                       dataset_mode->value(),
+                       filter->value(),
+                       filter_id->value(),
+                       options.log_level->value());
+
         for(auto &p : printers)
         {
             framework.add_printer(p.get());

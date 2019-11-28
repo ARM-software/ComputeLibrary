@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,6 +63,46 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 
+namespace weights_transformations
+{
+/** Basic function to manage the reshape weights generated from @ref NEFullyConnectedLayerReshapeWeights */
+class NEFullyConnectedLayerReshapeWeightsManaged : public ITransformWeights
+{
+public:
+    void run() override
+    {
+        _output.allocator()->allocate();
+        _func.run();
+        _reshape_run = true;
+    }
+
+    void release() override
+    {
+        _output.allocator()->free();
+    }
+
+    ITensor *get_weights() override
+    {
+        return &_output;
+    }
+
+    uint32_t uid() override
+    {
+        return _uid;
+    }
+
+    void configure(const ITensor *input)
+    {
+        _func.configure(input, &_output);
+    }
+
+private:
+    static constexpr uint32_t           _uid = 0x0;
+    Tensor                              _output{};
+    NEFullyConnectedLayerReshapeWeights _func{};
+};
+} // namespace weights_transformations
+
 /** Basic function to compute a Fully Connected layer on NEON. This function calls the following NEON kernels:
  *  -# @ref NEIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref NEFullyConnectedLayerReshapeWeights (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
@@ -75,7 +115,7 @@ class NEFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEFullyConnectedLayer(const NEFullyConnectedLayer &) = delete;
     /** Default move constructor */
@@ -128,25 +168,28 @@ private:
     void configure_conv_fc(const ITensor *input, const ITensor *weights, ITensor *output);
     void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output);
 
-    MemoryGroup                                         _memory_group;
-    NEFlattenLayerKernel                                _flatten_kernel;
-    NEConvertFullyConnectedWeights                      _convert_weights;
-    NEFullyConnectedLayerReshapeWeights                 _reshape_weights_function;
-    NEGEMM                                              _mm_gemm;
-    NEGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
-    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
-    NEGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel;
-    Tensor                                              _flatten_output;
-    Tensor                                              _gemmlowp_output;
-    Tensor                                              _converted_weights_output;
-    Tensor                                              _reshape_weights_output;
-    const ITensor                                      *_original_weights;
-    bool                                                _are_weights_converted;
-    bool                                                _are_weights_reshaped;
-    bool                                                _is_fc_after_conv;
-    bool                                                _accumulate_biases;
-    bool                                                _is_quantized;
-    bool                                                _is_prepared;
+    MemoryGroup                                                         _memory_group;
+    IWeightsManager                                                    *_weights_manager;
+    NEFlattenLayerKernel                                                _flatten_kernel;
+    NEConvertFullyConnectedWeights                                      _convert_weights;
+    weights_transformations::NEConvertFullyConnectedWeightsManaged      _convert_weights_managed;
+    NEFullyConnectedLayerReshapeWeights                                 _reshape_weights_function;
+    weights_transformations::NEFullyConnectedLayerReshapeWeightsManaged _reshape_weights_managed_function;
+    NEGEMM                                                              _mm_gemm;
+    NEGEMMLowpMatrixMultiplyCore                                        _mm_gemmlowp;
+    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint                 _gemmlowp_output_stage;
+    NEGEMMMatrixAccumulateBiasesKernel                                  _accumulate_biases_kernel;
+    Tensor                                                              _flatten_output;
+    Tensor                                                              _gemmlowp_output;
+    Tensor                                                              _converted_weights_output;
+    Tensor                                                              _reshape_weights_output;
+    const ITensor                                                      *_original_weights;
+    bool                                                                _are_weights_converted;
+    bool                                                                _are_weights_reshaped;
+    bool                                                                _is_fc_after_conv;
+    bool                                                                _accumulate_biases;
+    bool                                                                _is_quantized;
+    bool                                                                _is_prepared;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,6 +122,6 @@ void CLReshapeLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     unsigned int idx = 0;
     add_3D_tensor_argument(idx, _input, window_collapsed);
     add_3D_tensor_argument(idx, _output, window_collapsed);
-    enqueue(queue, *this, slice);
+    enqueue(queue, *this, slice, lws_hint());
 }
 /** [CLReshapeLayerKernel Kernel] **/

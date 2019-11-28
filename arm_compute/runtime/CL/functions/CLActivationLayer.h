@@ -39,6 +39,19 @@ class ICLTensor;
 class CLActivationLayer : public ICLSimpleFunction
 {
 public:
+    /** Constructor
+     *
+     * @param[in] ctx Runtime context to be used by the function
+     */
+    CLActivationLayer(CLRuntimeContext *ctx = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLActivationLayer(const CLActivationLayer &) = delete;
+    /** Default move constructor */
+    CLActivationLayer(CLActivationLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLActivationLayer &operator=(const CLActivationLayer &) = delete;
+    /** Default move assignment operator */
+    CLActivationLayer &operator=(CLActivationLayer &&) = default;
     /** Set the input and output tensor.
      *
      * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
@@ -60,5 +73,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLACTIVATIONLAYER_H__ */

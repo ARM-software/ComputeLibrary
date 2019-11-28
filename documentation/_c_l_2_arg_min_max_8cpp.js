@@ -3,7 +3,7 @@ var _c_l_2_arg_min_max_8cpp =
     [ "CLArgMinMaxValidationFixture", "_c_l_2_arg_min_max_8cpp.xhtml#af4a8e82108e6766942b7cc373cee6c49", null ],
     [ "combine", "_c_l_2_arg_min_max_8cpp.xhtml#a150501a0a590a12a4a486270841eb37f", null ],
     [ "combine", "_c_l_2_arg_min_max_8cpp.xhtml#a29391eb7c5b25fd49ac485564502edd9", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_arg_min_max_8cpp.xhtml#a849706f06089adc69a74d78ad6609474", null ],
+    [ "DATA_TEST_CASE", "_c_l_2_arg_min_max_8cpp.xhtml#a18d4b3db59b5a48e882653468bbaad13", null ],
     [ "DATA_TEST_CASE", "_c_l_2_arg_min_max_8cpp.xhtml#a9ae9207ebcb35e993edcc60ae989e28d", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arg_min_max_8cpp.xhtml#a16047439aa1ba70e7117280ec3349845", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arg_min_max_8cpp.xhtml#aa851094369dd694376f5f0cb9d33cc19", null ],

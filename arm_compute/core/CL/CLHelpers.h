@@ -34,6 +34,9 @@
 
 namespace arm_compute
 {
+class CLCoreRuntimeContext;
+class CLBuildOptions;
+
 enum class DataType;
 
 /** Max vector width of an OpenCL vector */
@@ -46,6 +49,22 @@ static constexpr unsigned int max_cl_vector_width = 16;
  * @return The string specifying the OpenCL type to be used.
  */
 std::string get_cl_type_from_data_type(const DataType &dt);
+
+/** Translates a tensor data type to the appropriate OpenCL promoted type.
+ *
+ * @param[in] dt @ref DataType to be used to get the promoted OpenCL type.
+ *
+ * @return The string specifying the OpenCL type to be used.
+ */
+std::string get_cl_promoted_type_from_data_type(const DataType &dt);
+
+/** Translates the element size to an unsigned integer data type
+ *
+ * @param[in] element_size Size in bytes of an element.
+ *
+ * @return The string specifying the OpenCL type to be used.
+ */
+std::string get_cl_unsigned_type_from_element_size(size_t element_size);
 
 /** Translates a tensor data type to the appropriate OpenCL select type.
  *
@@ -153,5 +172,15 @@ size_t preferred_vector_width(const cl::Device &device, DataType dt);
  * @return True if dummy work-items should be preferred to dispatch the NDRange
  */
 bool preferred_dummy_work_items_support(const cl::Device &device);
-}
+
+/** Creates an opencl kernel
+ *
+ * @param[in] ctx         A context to be used to create the opencl kernel.
+ * @param[in] kernel_name The kernel name.
+ * @param[in] build_opts  The build options to be used for the opencl kernel compilation.
+ *
+ * @return An opencl kernel
+ */
+cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts);
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,8 @@ SimpleTensor<T> transpose(const SimpleTensor<T> &src)
     SimpleTensor<T> dst{ dst_shape, src.data_type() };
 
     // Compute reference
-    for(int i = 0; i < src.num_elements(); ++i)
+    const uint32_t num_elements = src.num_elements();
+    for(uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates coord = index2coord(src.shape(), i);
         const Coordinates dst_coord{ coord.y(), coord.x() };
