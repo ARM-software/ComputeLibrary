@@ -36,8 +36,11 @@ namespace arm_compute
         - @ref NEAbsoluteDifference
         - @ref NEArithmeticAddition
         - @ref NEArithmeticSubtraction
+        - @ref NEBoundingBoxTransform
         - @ref NEBox3x3
         - @ref NECast
+        - @ref NEComplexPixelWiseMultiplication
+        - @ref NEComputeAllAnchors
         - @ref NEConvolution3x3
         - @ref NEConvolutionRectangle
         - @ref NEDilate
@@ -57,6 +60,8 @@ namespace arm_compute
         - @ref NEPixelWiseMultiplication
         - @ref NEPReluLayer
         - @ref NERemap
+        - @ref NEROIAlignLayer
+        - @ref NERoundLayer
         - @ref NERsqrtLayer
         - @ref NEScharr3x3
         - @ref NESelect
@@ -120,6 +125,7 @@ namespace arm_compute
     - @ref NEDepthwiseConvolutionLayerOptimized
     - @ref NEDequantizationLayer
     - @ref NEDerivative
+    - @ref NEDetectionPostProcessLayer
     - @ref NEDirectConvolutionLayer
     - @ref NEEqualizeHistogram
     - @ref NEFastCorners
@@ -139,12 +145,14 @@ namespace arm_compute
     - @ref NEGEMMConvolutionLayer
     - @ref NEGEMMLowpAssemblyMatrixMultiplyCore
     - @ref NEGEMMLowpMatrixMultiplyCore
+    - @ref NEGenerateProposalsLayer
     - @ref NEHarrisCorners
     - @ref NEHistogram
     - @ref NEHOGDescriptor
     - @ref NEHOGGradient
     - @ref NEHOGMultiDetection
     - @ref NEIm2Col
+    - @ref NEInstanceNormalizationLayer
     - @ref NEL2NormalizeLayer
     - @ref NELaplacianPyramid
     - @ref NELaplacianReconstruct
@@ -167,7 +175,7 @@ namespace arm_compute
     - @ref NESimpleAssemblyFunction
     - @ref NESobel5x5
     - @ref NESobel7x7
-    - @ref NESoftmaxLayer
+    - @ref NESoftmaxLayerGeneric &lt;IS_LOG&gt;
     - @ref NESpaceToBatchLayer
     - @ref NESpaceToDepthLayer
     - @ref NESplit
@@ -237,7 +245,7 @@ namespace arm_compute
     - @ref CLRNNLayer
     - @ref CLSobel5x5
     - @ref CLSobel7x7
-    - @ref CLSoftmaxLayer
+    - @ref CLSoftmaxLayerGeneric &lt;IS_LOG&gt;
     - @ref CLSpaceToBatchLayer
     - @ref CLSpaceToDepthLayer
     - @ref CLSplit
@@ -358,6 +366,7 @@ namespace arm_compute
 
  - @ref IFunction
     - @ref CPPDetectionOutputLayer
+    - @ref CPPDetectionPostProcessLayer
     - @ref ICPPSimpleFunction
         - @ref CPPBoxWithNonMaximaSuppressionLimit
         - @ref CPPPermute

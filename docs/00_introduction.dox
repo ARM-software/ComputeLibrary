@@ -237,16 +237,69 @@ If there is more than one release in a month then an extra sequential number is 
 @subsection S2_2_changelog Changelog
 
 v19.11 Public major release
- - Deprecated OpenCL kernels / functions
+ - Various bug fixes.
+ - Various optimisations.
+ - Deprecated OpenCL kernels / functions:
     - CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel
     - CLDepthwiseIm2ColKernel
+    - CLDepthwiseSeparableConvolutionLayer
     - CLDepthwiseVectorToTensorKernel
     - CLDirectConvolutionLayerOutputStageKernel
- - Deprecated NEON kernels / functions
+ - Deprecated NEON kernels / functions:
     - NEDepthwiseWeightsReshapeKernel
     - NEDepthwiseIm2ColKernel
+    - NEDepthwiseSeparableConvolutionLayer
     - NEDepthwiseVectorToTensorKernel
     - NEDepthwiseConvolutionLayer3x3
+ - New OpenCL kernels / functions:
+    - @ref CLInstanceNormalizationLayerKernel / @ref CLInstanceNormalizationLayer
+    - @ref CLDepthwiseConvolutionLayerNativeKernel to replace the old generic depthwise convolution (see Deprecated
+      OpenCL kernels / functions)
+    - @ref CLLogSoftmaxLayer
+ - New NEON kernels / functions:
+    - @ref NEBoundingBoxTransformKernel / @ref NEBoundingBoxTransform
+    - @ref NEComputeAllAnchorsKernel / @ref NEComputeAllAnchors
+    - @ref NEDetectionPostProcessLayer
+    - @ref NEGenerateProposalsLayer
+    - @ref NEInstanceNormalizationLayerKernel / @ref NEInstanceNormalizationLayer
+    - @ref NELogSoftmaxLayer
+    - @ref NEROIAlignLayerKernel / @ref NEROIAlignLayer
+ - Added QASYMM8 support for:
+    - @ref CLGenerateProposalsLayer
+    - @ref CLROIAlignLayer
+    - @ref CPPBoxWithNonMaximaSuppressionLimit
+ - Added QASYMM16 support for:
+    - @ref CLBoundingBoxTransform
+ - Added FP16 support for:
+    - @ref CLGEMMMatrixMultiplyReshapedKernel
+ - Added new data type QASYMM8_PER_CHANNEL support for:
+    - @ref CLDequantizationLayer
+    - @ref NEDequantizationLayer
+ - Added new data type QSYMM8_PER_CHANNEL support for:
+    - @ref CLConvolutionLayer
+    - @ref NEConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer
+    - @ref NEDepthwiseConvolutionLayer
+ - Added FP16 mixed-precision support for:
+    - @ref CLGEMMMatrixMultiplyReshapedKernel
+    - @ref CLPoolingLayerKernel
+ - Added FP32 and FP16 ELU activation for:
+    - @ref CLActivationLayer
+    - @ref NEActivationLayer
+ - Added asymmetric padding support for:
+    - @ref CLDirectDeconvolutionLayer
+    - @ref CLGEMMDeconvolutionLayer
+    - @ref NEDeconvolutionLayer
+ - Added SYMMETRIC and REFLECT modes for @ref CLPadLayerKernel / @ref CLPadLayer.
+ - Replaced the calls to @ref NECopyKernel and @ref NEMemsetKernel with @ref NEPadLayer in @ref NEGenerateProposalsLayer.
+ - Replaced the calls to @ref CLCopyKernel and @ref CLMemsetKernel with @ref CLPadLayer in @ref CLGenerateProposalsLayer.
+ - Improved performance for CL Inception V3 - FP16.
+ - Improved accuracy for CL Inception V3 - FP16 by enabling FP32 accumulator (mixed-precision).
+ - Improved NEON performance by enabling fusing batch normalization with convolution and depth-wise convolution layer.
+ - Improved NEON performance for MobileNet-SSD by improving the output detection performance.
+ - Optimized @ref CLPadLayer.
+ - Optimized CL generic depthwise convolution layer by introducing @ref CLDepthwiseConvolutionLayerNativeKernel.
+ - Reduced memory consumption by implementing weights sharing.
 
 v19.08 Public major release
  - Various bug fixes.

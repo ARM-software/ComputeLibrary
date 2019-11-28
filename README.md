@@ -25,12 +25,9 @@ Tutorials:
 - [Tutorial: Cartoonifying Images on Raspberry Pi with the Compute Library](https://community.arm.com/graphics/b/blog/posts/cartoonifying-images-on-raspberry-pi-with-the-compute-library)
 - [Tutorial: Running AlexNet on Raspberry Pi with Compute Library](https://community.arm.com/processors/b/blog/posts/running-alexnet-on-raspberry-pi-with-compute-library)
 
-Blogs:
-
-- [Happy Birthday ACL!](https://community.arm.com/developer/tools-software/graphics/b/blog/posts/arm-compute-library-19-05-is-coming)
-
 Documentation (API, changelogs, build guide, contribution guide, errata, etc.) available here:
 
+- [v19.11](https://arm-software.github.io/ComputeLibrary/v19.11/)
 - [v19.08](https://arm-software.github.io/ComputeLibrary/v19.08/)
 - [v19.05](https://arm-software.github.io/ComputeLibrary/v19.05/)
 - [v19.02](https://arm-software.github.io/ComputeLibrary/v19.02/)
@@ -50,6 +47,8 @@ Documentation (API, changelogs, build guide, contribution guide, errata, etc.) a
 
 Binaries available here:
 
+- [v19.11-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11/arm_compute-v19.11-bin-linux.tar.gz)
+- [v19.11-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11/arm_compute-v19.11-bin-android.tar.gz)
 - [v19.08-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.08/arm_compute-v19.08-bin-linux.tar.gz)
 - [v19.08-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.08/arm_compute-v19.08-bin-android.tar.gz)
 - [v19.05-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.05/arm_compute-v19.05-bin-linux.tar.gz)
