@@ -150,8 +150,9 @@ protected:
 private:
     QuantizationInfo calculate_output_quantization_info(DataType dt, const ActivationLayerInfo &act_info, const QuantizationInfo &default_qinfo)
     {
-        auto qasymm8_max = float(std::numeric_limits<uint8_t>::max()) + 1.f;
-        auto qsymm16_max = float(std::numeric_limits<int16_t>::max()) + 1.f;
+        auto qasymm8_max        = float(std::numeric_limits<uint8_t>::max()) + 1.f;
+        auto qasymm8_signed_max = float(std::numeric_limits<int8_t>::max()) + 1.f;
+        auto qsymm16_max        = float(std::numeric_limits<int16_t>::max()) + 1.f;
 
         switch(act_info.activation())
         {
@@ -163,6 +164,10 @@ private:
                 else if(dt == DataType::QASYMM8)
                 {
                     return QuantizationInfo(1.f / (0.5 * qasymm8_max), int(0.5 * qasymm8_max));
+                }
+                else if(dt == DataType::QASYMM8_SIGNED)
+                {
+                    return QuantizationInfo(1.f / qasymm8_signed_max, 0);
                 }
                 else
                 {
@@ -176,6 +181,10 @@ private:
                 else if(dt == DataType::QASYMM8)
                 {
                     return QuantizationInfo(1.f / qasymm8_max, 0);
+                }
+                else if(dt == DataType::QASYMM8_SIGNED)
+                {
+                    return QuantizationInfo(1.f / (2.f * qasymm8_signed_max), -int(qasymm8_signed_max));
                 }
                 else
                 {

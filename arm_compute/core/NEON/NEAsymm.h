@@ -35,6 +35,12 @@ using qasymm8x8x3_t = uint8x8x3_t; /**< 8 bit quantized asymmetric vector with 2
 using qasymm8x8x4_t = uint8x8x4_t; /**< 8 bit quantized asymmetric vector with 32 elements */
 using qasymm8x16_t  = uint8x16_t;  /**< 8 bit quantized asymmetric vector with 16 elements */
 
+using qasymm8x8_signed_t   = int8x8_t;   /**< 8 bit quantized signed asymmetric vector with 8 elements */
+using qasymm8x8x2_signed_t = int8x8x2_t; /**< 8 bit quantized signed asymmetric vector with 16 elements */
+using qasymm8x8x3_signed_t = int8x8x3_t; /**< 8 bit quantized signed asymmetric vector with 24 elements */
+using qasymm8x8x4_signed_t = int8x8x4_t; /**< 8 bit quantized signed asymmetric vector with 32 elements */
+using qasymm8x16_signed_t  = int8x16_t;  /**< 8 bit quantized signed asymmetric vector with 16 elements */
+
 /** Perform a multiply-accumulate on all 16 components of a QASYMM8 vector
  *
  * vd*vs + vo
@@ -46,6 +52,18 @@ using qasymm8x16_t  = uint8x16_t;  /**< 8 bit quantized asymmetric vector with 1
  * @return A 16-component vector in QASYMM8 format, saturated to fit
  */
 uint8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t vo);
+
+/** Perform a multiply-accumulate on all 16 components of a QASYMM8_SIGNED vector
+ *
+ * vd*vs + vo
+ *
+ * @param[in] vd Input vector value in QASYMM8_SIGNED format
+ * @param[in] vs Vector multiplier in F32 format. The multiplier value must be duplicated across all four lanes.
+ * @param[in] vo Vector addend in F32 format. The addend value must be duplicated across all four lanes.
+ *
+ * @return A 16-component vector in QASYMM8_SIGNED format, saturated to fit
+ */
+int8x16_t vmlaq_qasymm8_signed(qasymm8x16_signed_t vd, float32x4_t vs, float32x4_t vo);
 
 /** Performs final quantization step on 16 elements
  *
@@ -336,6 +354,29 @@ inline float32x4x2_t vdequantize(const uint8x8_t &qv, const UniformQuantizationI
     return vdequantized_input;
 }
 
+/** Dequantize a neon vector holding 8 singed quantized values.
+ *
+ * @param[in] qv Input values to be dequantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x2_t vdequantize(const int8x8_t &qv, const UniformQuantizationInfo &qi)
+{
+    const float         scale   = qi.scale;
+    const int           offset  = qi.offset;
+    const int32x4_t     voffset = vdupq_n_s32(offset);
+    const float32x4_t   vscale  = vdupq_n_f32(scale);
+    const float32x4x2_t vdequantized_input =
+    {
+        {
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(qv))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(qv))), voffset)), vscale),
+        }
+    };
+    return vdequantized_input;
+}
+
 /** Dequantize a neon vector holding 16 quantized values.
  *
  * @param[in] qv Input values to be dequantized.
@@ -356,6 +397,31 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantization
             vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(qv))))), voffset)), vscale),
             vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(qv))))), voffset)), vscale),
             vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(qv))))), voffset)), vscale),
+        }
+    };
+    return vdequantized_input;
+}
+
+/** Dequantize a neon vector holding 16 signed quantized values.
+ *
+ * @param[in] qv Input values to be dequantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x4_t vdequantize(const int8x16_t &qv, const UniformQuantizationInfo &qi)
+{
+    const float         scale   = qi.scale;
+    const int           offset  = qi.offset;
+    const int32x4_t     voffset = vdupq_n_s32(offset);
+    const float32x4_t   vscale  = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input =
+    {
+        {
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
         }
     };
     return vdequantized_input;
@@ -456,6 +522,34 @@ inline uint8x8_t vquantize(const float32x4x2_t &qv, const UniformQuantizationInf
     return vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
 }
 
+/** Quantize a neon vector holding 8 floating point values.
+ *
+ * @param[in] qv Input values to be quantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return A neon vector holding the singed quantized values
+ */
+inline int8x8_t vquantize_signed(const float32x4x2_t &qv, const UniformQuantizationInfo &qi)
+{
+    const float       scale     = qi.scale;
+    const int         offset    = qi.offset;
+    const float32x4_t voffset   = vdupq_n_f32(offset);
+    const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
+    const int32x4x4_t rf =
+    {
+        {
+#ifdef __aarch64__
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+#else  //__aarch64__
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+#endif //__aarch64__
+        }
+    };
+    return vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+}
+
 /** Quantize a neon vector holding 16 floating point values.
  *
  * @param[in] qv Input values to be quantized.
@@ -488,6 +582,42 @@ inline uint8x16_t vquantize(const float32x4x4_t &qv, const UniformQuantizationIn
     const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
     const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
     return vcombine_u8(pa, pb);
+}
+
+/** Signed quantize a neon vector holding 16 floating point values.
+ *
+ * @param[in] qv Input values to be quantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return A neon vector holding the quantized values
+ */
+
+inline int8x16_t vquantize_signed(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    const float       scale     = qi.scale;
+    const int         offset    = qi.offset;
+    const float32x4_t voffset   = vdupq_n_f32(offset);
+    const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
+    const int32x4x4_t rf =
+    {
+        {
+#ifdef __aarch64__
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[2], vinvscale)),
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[3], vinvscale)),
+#else  //__aarch64__
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[2], vinvscale)),
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[3], vinvscale)),
+#endif //__aarch64__
+
+        }
+    };
+    const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+    const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
+    return vcombine_s8(pa, pb);
 }
 
 /** Quantize to QASYMM16 a neon vector holding 16 floating point values.

@@ -33,9 +33,10 @@
 
 namespace arm_compute
 {
-using qasymm8_t  = uint8_t;  /**< 8 bit quantized asymmetric scalar value */
-using qsymm16_t  = int16_t;  /**< 16 bit quantized symmetric scalar value */
-using qasymm16_t = uint16_t; /**< 16 bit quantized asymmetric scalar value */
+using qasymm8_signed_t = int8_t;   /**< 8 bit signed quantized asymmetric scalar value */
+using qasymm8_t        = uint8_t;  /**< 8 bit quantized asymmetric scalar value */
+using qsymm16_t        = int16_t;  /**< 16 bit quantized symmetric scalar value */
+using qasymm16_t       = uint16_t; /**< 16 bit quantized asymmetric scalar value */
 
 /** Quantization info when assuming per layer quantization */
 struct UniformQuantizationInfo
