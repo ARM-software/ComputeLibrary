@@ -1824,11 +1824,14 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
  *  -# Round to nearest division by a power-of-two using result_shift
  *  -# Add offset to each result
  *  -# Clamp the value between the specified min and max bounds
- *  -# Clamp the resulting int32 values to the [0..255] range and cast to QASYMM8.
+ *  -# Clamp the resulting int32 values:
+ *      - to the [0..255] range and cast to QASYMM8.
+ *      - to the [-128..127] range and cast to QASYMM8_SIGNED.
  *
  * @attention The offset, scalar scale factor and number of bits to shift right of output tensor must be passed at compile time using -DRESULT_OFFSET_AFTER_SHIFT, -DRESULT_FIXEDPOINT_MULTIPLIER and -DRESULT_SHIFT
  *
  * @note In case the addition of int32 biases is required, -DADD_BIAS should be passed at compile time
+ * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
  *
@@ -1888,17 +1891,18 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
     // Add the offset terms to GEMM's result
     input_values += (int4)RESULT_OFFSET_AFTER_SHIFT;
 
-    uchar4 res = convert_uchar4_sat(input_values);
+    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
+    res = CONVERT_SAT(input_values, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
 
 #if defined(MIN_BOUND)
-    res = max(res, (uchar4)MIN_BOUND);
+    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (uchar4)MAX_BOUND);
+    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, dst_addr);
+    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
 }
 #endif // defined(RESULT_OFFSET_AFTER_SHIFT) && defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 

@@ -93,6 +93,7 @@ namespace arm_compute
         - @ref NEGEMMInterleave4x4
         - @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
         - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+        - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref NEGEMMTranspose1xW
         - @ref NEHOGDetector
         - @ref NEMagnitude
@@ -298,6 +299,7 @@ namespace arm_compute
         - @ref CLGaussian3x3
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+        - @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
         - @ref CLMagnitude
         - @ref CLMeanStdDevNormalizationLayer
