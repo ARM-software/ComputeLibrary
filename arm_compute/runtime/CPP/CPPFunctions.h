@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/CPP/functions/CPPDetectionPostProcessLayer.h"
 #include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
+#include "arm_compute/runtime/CPP/functions/CPPSplit.h"
 #include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 
