@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,29 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     const Status status = NESplit::validate(&input_info.clone()->set_is_resizable(false), outputs_info_ptr, axis);
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
+
+DATA_TEST_CASE(ValidateSplitShapes, framework::DatasetMode::ALL, zip(zip(zip(
+        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32)
+        }),
+        framework::dataset::make("Axis", { 2, 2 })),
+        framework::dataset::make("Splits", { std::vector<TensorInfo>{TensorInfo(TensorShape(27U, 3U, 4U,  2U), 1, DataType::F32),
+                                                                     TensorInfo(TensorShape(27U, 3U, 4U,  2U), 1, DataType::F32),
+                                                                     TensorInfo(TensorShape(27U, 3U, 8U,  2U), 1, DataType::F32)},
+                                             std::vector<TensorInfo>{TensorInfo(TensorShape(27U, 3U, 3U,  2U), 1, DataType::F32),
+                                                                     TensorInfo(TensorShape(27U, 3U, 13U, 2U), 1, DataType::F32)} })),
+        framework::dataset::make("Expected", { true, true })),
+        input_info, axis, splits, expected)
+{
+    std::vector<ITensorInfo*> outputs_info_ptr;
+
+    for(auto &split : splits)
+    {
+        outputs_info_ptr.emplace_back(const_cast<TensorInfo*>(&split));
+    }
+    const Status status = NESplit::validate(&input_info.clone()->set_is_resizable(false), outputs_info_ptr, axis);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
 // clang-format on
 // *INDENT-ON*
 
@@ -95,8 +118,44 @@ DATA_TEST_CASE(Configuration,
     }
 }
 
+DATA_TEST_CASE(ConfigurationSplitShapes,
+               framework::DatasetMode::ALL,
+               combine(datasets::SmallSplitShapesDataset(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
+               shape, axis, split_shapes, data_type)
+{
+    // Create tensors
+    Tensor              src = create_tensor<Tensor>(shape, data_type);
+    std::vector<Tensor> dsts;
+
+    for(const auto &split_shape : split_shapes)
+    {
+        Tensor dst = create_tensor<Tensor>(split_shape, data_type);
+        dsts.push_back(std::move(dst));
+    }
+
+    std::vector<ITensor *> dsts_ptrs;
+    for(auto &dst : dsts)
+    {
+        dsts_ptrs.emplace_back(&dst);
+    }
+
+    // Create and Configure function
+    NESplit split;
+    split.configure(&src, dsts_ptrs, axis);
+
+    // Validate valid regions
+    for(auto &dst : dsts)
+    {
+        const ValidRegion valid_region = shape_to_valid_region(dst.info()->tensor_shape());
+        validate(dst.info()->valid_region(), valid_region);
+    }
+}
+
 template <typename T>
 using NESplitFixture = SplitFixture<Tensor, ITensor, Accessor, NESplit, T>;
+
+template <typename T>
+using NESplitShapesFixture = SplitShapesFixture<Tensor, ITensor, Accessor, NESplit, T>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -144,6 +203,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        NESplitFixture<float>,
                        framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeSplitDataset(), framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate outputs
+    for(unsigned int i = 0; i < _target.size(); ++i)
+    {
+        validate(Accessor(_target[i]), _reference[i]);
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallSplitShapes,
+                       NESplitShapesFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallSplitShapesDataset(), framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate outputs
     for(unsigned int i = 0; i < _target.size(); ++i)
