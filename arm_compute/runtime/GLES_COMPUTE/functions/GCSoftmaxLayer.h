@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCSOFTMAXLAYER_H__
-#define __ARM_COMPUTE_GCSOFTMAXLAYER_H__
+#ifndef ARM_COMPUTE_GCSOFTMAXLAYER_H
+#define ARM_COMPUTE_GCSOFTMAXLAYER_H
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCSoftmaxLayerKernel.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
@@ -74,4 +74,4 @@ private:
     GCTensor                    _tmp;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GCSOFTMAXLAYER_H__ */
+#endif /* ARM_COMPUTE_GCSOFTMAXLAYER_H */

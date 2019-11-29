@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLROIALIGNLAYER_H__
-#define __ARM_COMPUTE_CLROIALIGNLAYER_H__
+#ifndef ARM_COMPUTE_CLROIALIGNLAYER_H
+#define ARM_COMPUTE_CLROIALIGNLAYER_H
 
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/kernels/CLROIPoolingLayerKernel.h"
@@ -74,4 +74,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLROIALIGNLAYER_H__ */
+#endif /* ARM_COMPUTE_CLROIALIGNLAYER_H */

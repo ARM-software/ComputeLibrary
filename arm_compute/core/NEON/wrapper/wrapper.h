@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_H__
-#define __ARM_COMPUTE_WRAPPER_H__
+#ifndef ARM_COMPUTE_WRAPPER_H
+#define ARM_COMPUTE_WRAPPER_H
 
 // Traits
 #include "arm_compute/core/NEON/wrapper/traits.h"
@@ -31,4 +31,4 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/intrinsics.h"
 #include "arm_compute/core/NEON/wrapper/scalar/scalar.h"
 
-#endif /* __ARM_COMPUTE_WRAPPER_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_H */

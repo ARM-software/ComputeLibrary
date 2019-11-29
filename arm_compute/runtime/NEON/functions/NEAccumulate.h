@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEACCUMULATE_H__
-#define __ARM_COMPUTE_NEACCUMULATE_H__
+#ifndef ARM_COMPUTE_NEACCUMULATE_H
+#define ARM_COMPUTE_NEACCUMULATE_H
 
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
@@ -71,4 +71,4 @@ public:
     void configure(const ITensor *input, uint32_t shift, ITensor *output);
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEACCUMULATE_H__ */
+#endif /*ARM_COMPUTE_NEACCUMULATE_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLSOBEL7X7_H__
-#define __ARM_COMPUTE_CLSOBEL7X7_H__
+#ifndef ARM_COMPUTE_CLSOBEL7X7_H
+#define ARM_COMPUTE_CLSOBEL7X7_H
 
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLSobel7x7Kernel.h"
@@ -78,4 +78,4 @@ protected:
     CLImage              _tmp_y;          /**< Temporary buffer for Sobel Y */
 };
 }
-#endif /*__ARM_COMPUTE_CLSOBEL7X7_H__ */
+#endif /*ARM_COMPUTE_CLSOBEL7X7_H */

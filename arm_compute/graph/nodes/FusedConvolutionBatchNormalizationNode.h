@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_NODE_H__
-#define __ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_NODE_H__
+#ifndef ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_NODE_H
+#define ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_NODE_H
 
 #include "arm_compute/graph/INode.h"
 
@@ -44,9 +44,9 @@ public:
      * @param[in] fused_activation (Optional) Fused activation layer. Disabled if not specified
      */
     FusedConvolutionBatchNormalizationNode(float epsilon, PadStrideInfo info,
-                                           unsigned int      num_groups     = 1,
-                                           ConvolutionMethod method         = ConvolutionMethod::Default,
-                                           FastMathHint      fast_math_hint = FastMathHint::Disabled,
+                                           unsigned int        num_groups       = 1,
+                                           ConvolutionMethod   method           = ConvolutionMethod::Default,
+                                           FastMathHint        fast_math_hint   = FastMathHint::Disabled,
                                            ActivationLayerInfo fused_activation = ActivationLayerInfo());
 
     /** Epsilon parameter accessor
@@ -139,4 +139,4 @@ private:
 
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_BATCH_NORMALIZATION_LAYER_NODE_H__ */
+#endif /* ARM_COMPUTE_GRAPH_BATCH_NORMALIZATION_LAYER_NODE_H */

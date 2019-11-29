@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H__
-#define __ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H__
+#ifndef ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H
+#define ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H
 
 #include "Utils.h"
 
@@ -875,4 +875,4 @@ inline void colorconvert_nv_to_yuv4(const std::vector<SimpleTensor<T>> src, cons
 } // color_convert_helper
 } // namespace test
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H__ */
+#endif /*ARM_COMPUTE_TEST_VALIDATION_COLOR_CONVERT_H */

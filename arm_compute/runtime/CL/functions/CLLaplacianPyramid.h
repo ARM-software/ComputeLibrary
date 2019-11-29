@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLLAPLACIANPYRAMID_H__
-#define __ARM_COMPUTE_CLLAPLACIANPYRAMID_H__
+#ifndef ARM_COMPUTE_CLLAPLACIANPYRAMID_H
+#define ARM_COMPUTE_CLLAPLACIANPYRAMID_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLPyramid.h"
@@ -82,4 +82,4 @@ private:
     CLPyramid                            _conv_pyr;
 };
 }
-#endif /*__ARM_COMPUTE_CLLAPLACIANPYRAMID_H__ */
+#endif /*ARM_COMPUTE_CLLAPLACIANPYRAMID_H */

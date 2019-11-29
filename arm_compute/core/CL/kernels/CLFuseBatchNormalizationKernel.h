@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFUSEBATCHNORMALIZATIONKERNEL_H__
-#define __ARM_COMPUTE_CLFUSEBATCHNORMALIZATIONKERNEL_H__
+#ifndef ARM_COMPUTE_CLFUSEBATCHNORMALIZATIONKERNEL_H
+#define ARM_COMPUTE_CLFUSEBATCHNORMALIZATIONKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -91,17 +91,17 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    const ICLTensor           *_input_weights;
-    const ICLTensor           *_input_bias;
-    const ICLTensor           *_bn_mean;
-    const ICLTensor           *_bn_var;
-    const ICLTensor           *_bn_gamma;
-    const ICLTensor           *_bn_beta;
-    ICLTensor                 *_fused_weights;
-    ICLTensor                 *_fused_bias;
-    float                      _epsilon;
-    bool                       _run_in_place_weights;
-    bool                       _run_in_place_bias;
+    const ICLTensor *_input_weights;
+    const ICLTensor *_input_bias;
+    const ICLTensor *_bn_mean;
+    const ICLTensor *_bn_var;
+    const ICLTensor *_bn_gamma;
+    const ICLTensor *_bn_beta;
+    ICLTensor       *_fused_weights;
+    ICLTensor       *_fused_bias;
+    float            _epsilon;
+    bool             _run_in_place_weights;
+    bool             _run_in_place_bias;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLFUSEBATCHNORMALIZATIONKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLFUSEBATCHNORMALIZATIONKERNEL_H */

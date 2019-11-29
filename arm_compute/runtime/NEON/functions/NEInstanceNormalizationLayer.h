@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H__
-#define __ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H__
+#ifndef ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H
+#define ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H
 
 #include "arm_compute/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -84,4 +84,4 @@ private:
     Tensor                             _permuted_output;
 };
 }
-#endif /* __ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H__ */
+#endif /* ARM_COMPUTE_NEINSTANCENORMALIZATIONLAYER_H */

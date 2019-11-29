@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESOBEL7x7_H__
-#define __ARM_COMPUTE_NESOBEL7x7_H__
+#ifndef ARM_COMPUTE_NESOBEL7x7_H
+#define ARM_COMPUTE_NESOBEL7x7_H
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NESobel7x7Kernel.h"
@@ -76,4 +76,4 @@ protected:
     NEFillBorderKernel   _border_handler; /**< Kernel to handle tensor borders */
 };
 }
-#endif /*__ARM_COMPUTE_NESOBEL7x7_H__ */
+#endif /*ARM_COMPUTE_NESOBEL7x7_H */

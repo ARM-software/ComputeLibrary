@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_DIV_H__
-#define __ARM_COMPUTE_WRAPPER_DIV_H__
+#ifndef ARM_COMPUTE_WRAPPER_DIV_H
+#define ARM_COMPUTE_WRAPPER_DIV_H
 
 #include "arm_compute/core/NEON/NEMath.h"
 #include <arm_neon.h>
@@ -70,4 +70,4 @@ VDIV_IMPL(float16x8_t, float16x8_t, vmulq, vinvq, f16)
 #undef VDIV_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_DIV_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_DIV_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_TYPE_PRINTER_H__
-#define __ARM_COMPUTE_GRAPH_TYPE_PRINTER_H__
+#ifndef ARM_COMPUTE_GRAPH_TYPE_PRINTER_H
+#define ARM_COMPUTE_GRAPH_TYPE_PRINTER_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
@@ -265,4 +265,4 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DepthwiseConvolution
 }
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_TYPE_PRINTER_H__ */
+#endif /* ARM_COMPUTE_GRAPH_TYPE_PRINTER_H */

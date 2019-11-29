@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLSUBTENSOR_H__
-#define __ARM_COMPUTE_CLSUBTENSOR_H__
+#ifndef ARM_COMPUTE_CLSUBTENSOR_H
+#define ARM_COMPUTE_CLSUBTENSOR_H
 
 #include "arm_compute/core/SubTensorInfo.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -100,4 +100,4 @@ private:
     mutable SubTensorInfo _info;
 };
 }
-#endif /*__ARM_COMPUTE_CLSUBTENSOR_H__ */
+#endif /*ARM_COMPUTE_CLSUBTENSOR_H */

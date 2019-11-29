@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_CPU_UTILS_H__
-#define __ARM_COMPUTE_RUNTIME_CPU_UTILS_H__
+#ifndef ARM_COMPUTE_RUNTIME_CPU_UTILS_H
+#define ARM_COMPUTE_RUNTIME_CPU_UTILS_H
 
 namespace arm_compute
 {
@@ -41,4 +41,4 @@ void get_cpu_configuration(CPUInfo &cpuinfo);
  */
 unsigned int get_threads_hint();
 }
-#endif /* __ARM_COMPUTE_RUNTIME_CPU_UTILS_H__ */
+#endif /* ARM_COMPUTE_RUNTIME_CPU_UTILS_H */

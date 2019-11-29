@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_TRAITS_H__
-#define __ARM_COMPUTE_WRAPPER_TRAITS_H__
+#ifndef ARM_COMPUTE_WRAPPER_TRAITS_H
+#define ARM_COMPUTE_WRAPPER_TRAITS_H
 
 #include <arm_neon.h>
 
@@ -133,4 +133,4 @@ using promote_t = typename promote<T>::type;
 } // namespace traits
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_TRAITS_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_TRAITS_H */

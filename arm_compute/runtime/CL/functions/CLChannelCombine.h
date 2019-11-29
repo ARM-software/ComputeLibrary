@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCHANNELCOMBINE_H__
-#define __ARM_COMPUTE_CLCHANNELCOMBINE_H__
+#ifndef ARM_COMPUTE_CLCHANNELCOMBINE_H
+#define ARM_COMPUTE_CLCHANNELCOMBINE_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -55,4 +55,4 @@ public:
     void configure(const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output);
 };
 }
-#endif /*__ARM_COMPUTE_CLCHANNELCOMBINE_H__*/
+#endif /*ARM_COMPUTE_CLCHANNELCOMBINE_H*/

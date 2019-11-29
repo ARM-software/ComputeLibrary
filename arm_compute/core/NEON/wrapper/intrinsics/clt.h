@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_CLT_H__
-#define __ARM_COMPUTE_WRAPPER_CLT_H__
+#ifndef ARM_COMPUTE_WRAPPER_CLT_H
+#define ARM_COMPUTE_WRAPPER_CLT_H
 
 #include <arm_neon.h>
 
@@ -61,4 +61,4 @@ VCLT_IMPL(uint16x8_t, float16x8_t, vcltq, f16)
 #undef VCLT_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_CLT_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_CLT_H */

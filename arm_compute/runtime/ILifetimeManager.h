@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ILIFETIMEMANAGER_H__
-#define __ARM_COMPUTE_ILIFETIMEMANAGER_H__
+#ifndef ARM_COMPUTE_ILIFETIMEMANAGER_H
+#define ARM_COMPUTE_ILIFETIMEMANAGER_H
 
 #include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
@@ -87,4 +87,4 @@ public:
     virtual MappingType mapping_type() const = 0;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_ILIFETIMEMANAGER_H__ */
+#endif /* ARM_COMPUTE_ILIFETIMEMANAGER_H */

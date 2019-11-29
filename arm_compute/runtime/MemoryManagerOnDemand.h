@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H__
-#define __ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H__
+#ifndef ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H
+#define ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H
 
 #include "arm_compute/runtime/IMemoryManager.h"
 
@@ -60,4 +60,4 @@ private:
     std::shared_ptr<IPoolManager>     _pool_mgr;     /**< Memory pool manager */
 };
 } // arm_compute
-#endif /*__ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H__ */
+#endif /*ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H */

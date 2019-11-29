@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLROIALIGNLAYERKERNEL_H__
-#define __ARM_COMPUTE_CLROIALIGNLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLROIALIGNLAYERKERNEL_H
+#define ARM_COMPUTE_CLROIALIGNLAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/ICLKernel.h"
@@ -91,4 +91,4 @@ private:
     ROIPoolingLayerInfo _pool_info;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLROIALIGNLAYERKERNEL_H__*/
+#endif /*ARM_COMPUTE_CLROIALIGNLAYERKERNEL_H*/

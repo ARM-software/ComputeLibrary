@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H__
-#define __ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H__
+#ifndef ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H
+#define ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -192,4 +192,4 @@ private:
     bool                                                                _is_prepared;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H__ */
+#endif /* ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H */

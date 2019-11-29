@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLTENSORALLOCATOR_H__
-#define __ARM_COMPUTE_CLTENSORALLOCATOR_H__
+#ifndef ARM_COMPUTE_CLTENSORALLOCATOR_H
+#define ARM_COMPUTE_CLTENSORALLOCATOR_H
 
 #include "arm_compute/runtime/CL/CLArray.h"
 #include "arm_compute/runtime/CL/CLMemory.h"
@@ -149,4 +149,4 @@ private:
     CLInt32Array       _offset;                  /**< Offsets array in case of quantized per channel data type */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLTENSORALLOCATOR_H__ */
+#endif /* ARM_COMPUTE_CLTENSORALLOCATOR_H */

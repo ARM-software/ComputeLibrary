@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECOL2IM_H__
-#define __ARM_COMPUTE_NECOL2IM_H__
+#ifndef ARM_COMPUTE_NECOL2IM_H
+#define ARM_COMPUTE_NECOL2IM_H
 
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
@@ -57,4 +57,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NECOL2IM_H__ */
+#endif /* ARM_COMPUTE_NECOL2IM_H */

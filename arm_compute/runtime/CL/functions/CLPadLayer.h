@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPADLAYER_H__
-#define __ARM_COMPUTE_CLPADLAYER_H__
+#ifndef ARM_COMPUTE_CLPADLAYER_H
+#define ARM_COMPUTE_CLPADLAYER_H
 
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
@@ -87,4 +87,4 @@ private:
     bool             _perform_pad;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_PADLAYER_H__ */
+#endif /*ARM_COMPUTE_PADLAYER_H */

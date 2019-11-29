@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESCALEIMAGE_H__
-#define __ARM_COMPUTE_NESCALEIMAGE_H__
+#ifndef ARM_COMPUTE_NESCALEIMAGE_H
+#define ARM_COMPUTE_NESCALEIMAGE_H
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
@@ -84,4 +84,4 @@ private:
     bool               _use_padding;    /**< Is padding used on the tensors */
 };
 }
-#endif /*__ARM_COMPUTE_NESCALEIMAGE_H__ */
+#endif /*ARM_COMPUTE_NESCALEIMAGE_H */

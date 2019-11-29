@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_OPENCL_H__
-#define __ARM_COMPUTE_OPENCL_H__
+#ifndef ARM_COMPUTE_OPENCL_H
+#define ARM_COMPUTE_OPENCL_H
 
 #include <string>
 #include <utility>
@@ -144,4 +144,4 @@ private:
     std::pair<bool, bool> _loaded{ false, false };
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_OPENCL_H__ */
+#endif /* ARM_COMPUTE_OPENCL_H */

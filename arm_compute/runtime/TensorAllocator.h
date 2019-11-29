@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TENSORALLOCATOR_H__
-#define __ARM_COMPUTE_TENSORALLOCATOR_H__
+#ifndef ARM_COMPUTE_TENSORALLOCATOR_H
+#define ARM_COMPUTE_TENSORALLOCATOR_H
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 #include "arm_compute/runtime/Memory.h"
@@ -127,4 +127,4 @@ private:
     Memory             _memory;                  /**< CPU memory */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TENSORALLOCATOR_H__ */
+#endif /* ARM_COMPUTE_TENSORALLOCATOR_H */

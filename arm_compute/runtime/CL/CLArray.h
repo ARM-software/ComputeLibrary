@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLARRAY_H__
-#define __ARM_COMPUTE_CLARRAY_H__
+#ifndef ARM_COMPUTE_CLARRAY_H
+#define ARM_COMPUTE_CLARRAY_H
 
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -124,4 +124,4 @@ using CLInt32Array = CLArray<cl_int>;
 /** OpenCL Array of floats. */
 using CLFloatArray = CLArray<cl_float>;
 }
-#endif /* __ARM_COMPUTE_CLARRAY_H__ */
+#endif /* ARM_COMPUTE_CLARRAY_H */

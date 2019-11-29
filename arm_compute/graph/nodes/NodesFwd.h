@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+#ifndef ARM_COMPUTE_GRAPH_NODES_FWD_H
+#define ARM_COMPUTE_GRAPH_NODES_FWD_H
 
 namespace arm_compute
 {
@@ -70,4 +70,4 @@ class UpsampleLayerNode;
 class YOLOLayerNode;
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* ARM_COMPUTE_GRAPH_NODES_FWD_H */

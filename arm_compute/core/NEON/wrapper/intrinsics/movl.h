@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_MOVL_H__
-#define __ARM_COMPUTE_WRAPPER_MOVL_H__
+#ifndef ARM_COMPUTE_WRAPPER_MOVL_H
+#define ARM_COMPUTE_WRAPPER_MOVL_H
 
 #include <arm_neon.h>
 
@@ -46,4 +46,4 @@ VMOVL_IMPL(int64x2_t, int32x2_t, vmovl, s32)
 #undef VMOVL_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_MOVL_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_MOVL_H */

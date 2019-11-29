@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_CLSTACKLAYERKERNEL_H__
-#define __ARM_COMPUTE_CLSTACKLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLSTACKLAYERKERNEL_H
+#define ARM_COMPUTE_CLSTACKLAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -84,4 +84,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLSTACKLAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLSTACKLAYERKERNEL_H */

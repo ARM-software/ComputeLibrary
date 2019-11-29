@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_OPTICAL_FLOW_H__
-#define __ARM_COMPUTE_TEST_OPTICAL_FLOW_H__
+#ifndef ARM_COMPUTE_TEST_OPTICAL_FLOW_H
+#define ARM_COMPUTE_TEST_OPTICAL_FLOW_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/Types.h"
@@ -46,4 +46,4 @@ std::vector<KeyPoint> optical_flow(const SimpleTensor<T> &old_input, const Simpl
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_OPTICAL_FLOW_H__ */
+#endif /* ARM_COMPUTE_TEST_OPTICAL_FLOW_H */

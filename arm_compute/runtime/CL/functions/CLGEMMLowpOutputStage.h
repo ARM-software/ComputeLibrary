@@ -308,4 +308,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H__ */
+#endif /*ARM_COMPUTE_CLGEMMLOWPOUTPUTSTAGE_H */

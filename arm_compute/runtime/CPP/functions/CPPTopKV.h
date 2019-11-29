@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPTOPKV_H__
-#define __ARM_COMPUTE_CPPTOPKV_H__
+#ifndef ARM_COMPUTE_CPPTOPKV_H
+#define ARM_COMPUTE_CPPTOPKV_H
 
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
@@ -57,4 +57,4 @@ public:
     static Status validate(const ITensorInfo *predictions, const ITensorInfo *targets, ITensorInfo *output, const unsigned int k);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CPPTOPKV_H__ */
+#endif /* ARM_COMPUTE_CPPTOPKV_H */

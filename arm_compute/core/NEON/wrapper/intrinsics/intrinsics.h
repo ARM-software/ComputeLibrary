@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
-#define __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
+#ifndef ARM_COMPUTE_WRAPPER_INTRINSICS_H
+#define ARM_COMPUTE_WRAPPER_INTRINSICS_H
 
 #include "arm_compute/core/NEON/wrapper/intrinsics/abs.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/add.h"
@@ -65,4 +65,4 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/sub.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/tanh.h"
 
-#endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_INTRINSICS_H */

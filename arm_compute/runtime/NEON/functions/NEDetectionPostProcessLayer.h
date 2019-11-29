@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H__
-#define __ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H__
+#ifndef ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H
+#define ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H
 
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
@@ -97,4 +97,4 @@ private:
     bool   _run_dequantize;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H__ */
+#endif /* ARM_COMPUTE_NE_DETECTION_POSTPROCESS_H */

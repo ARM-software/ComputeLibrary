@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFFT2D_H__
-#define __ARM_COMPUTE_NEFFT2D_H__
+#ifndef ARM_COMPUTE_NEFFT2D_H
+#define ARM_COMPUTE_NEFFT2D_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -73,4 +73,4 @@ protected:
     Tensor      _first_pass_tensor;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEFFT2D_H__ */
+#endif /*ARM_COMPUTE_NEFFT2D_H */

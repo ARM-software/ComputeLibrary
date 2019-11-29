@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_UTILS_H__
-#define __ARM_COMPUTE_UTILS_H__
+#ifndef ARM_COMPUTE_UTILS_H
+#define ARM_COMPUTE_UTILS_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
@@ -1362,4 +1362,4 @@ void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr
 int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n);
 #endif /* ARM_COMPUTE_ASSERTS_ENABLED */
 }
-#endif /*__ARM_COMPUTE_UTILS_H__ */
+#endif /*ARM_COMPUTE_UTILS_H */

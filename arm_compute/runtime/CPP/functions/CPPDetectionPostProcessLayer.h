@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H__
-#define __ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H__
+#ifndef ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H
+#define ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H
 
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
@@ -112,4 +112,4 @@ private:
     const ITensor *_input_scores_to_use;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H__ */
+#endif /* ARM_COMPUTE_CPP_DETECTION_POSTPROCESS_H */

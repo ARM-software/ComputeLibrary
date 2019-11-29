@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WINDOW_ITERATOR_H__
-#define __ARM_COMPUTE_WINDOW_ITERATOR_H__
+#ifndef ARM_COMPUTE_WINDOW_ITERATOR_H
+#define ARM_COMPUTE_WINDOW_ITERATOR_H
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
@@ -328,4 +328,4 @@ WindowIterator<L> create_window_iterator(const Window &w, const Coordinates &sta
     return WindowIterator<L>(w, start, end, std::move(lambda_function));
 }
 }
-#endif /*__ARM_COMPUTE_WINDOW_ITERATOR_H__*/
+#endif /*ARM_COMPUTE_WINDOW_ITERATOR_H*/

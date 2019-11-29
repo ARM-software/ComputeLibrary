@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_IDEVICEBACKEND_H__
-#define __ARM_COMPUTE_GRAPH_IDEVICEBACKEND_H__
+#ifndef ARM_COMPUTE_GRAPH_IDEVICEBACKEND_H
+#define ARM_COMPUTE_GRAPH_IDEVICEBACKEND_H
 
 #include "arm_compute/graph/ITensorHandle.h"
 #include "arm_compute/graph/Types.h"
@@ -122,4 +122,4 @@ public:
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute
-#endif //__ARM_COMPUTE_GRAPH_IDEVICEBACKEND_H__
+#endif //ARM_COMPUTE_GRAPH_IDEVICEBACKEND_H

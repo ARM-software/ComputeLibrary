@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GCCONVOLUTIONLAYER_H__
-#define __ARM_COMPUTE_GCCONVOLUTIONLAYER_H__
+#ifndef ARM_COMPUTE_GCCONVOLUTIONLAYER_H
+#define ARM_COMPUTE_GCCONVOLUTIONLAYER_H
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCCol2ImKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
@@ -152,4 +152,4 @@ private:
 };
 }
 
-#endif /* __ARM_COMPUTE_GCCONVOLUTIONLAYER_H__ */
+#endif /* ARM_COMPUTE_GCCONVOLUTIONLAYER_H */

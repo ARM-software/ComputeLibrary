@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MULTIHOG_H__
-#define __ARM_COMPUTE_MULTIHOG_H__
+#ifndef ARM_COMPUTE_MULTIHOG_H
+#define ARM_COMPUTE_MULTIHOG_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IMultiHOG.h"
@@ -55,4 +55,4 @@ private:
 };
 }
 
-#endif /* __ARM_COMPUTE_MULTIHOG_H__ */
+#endif /* ARM_COMPUTE_MULTIHOG_H */

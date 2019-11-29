@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_MAX_H__
-#define __ARM_COMPUTE_WRAPPER_MAX_H__
+#ifndef ARM_COMPUTE_WRAPPER_MAX_H
+#define ARM_COMPUTE_WRAPPER_MAX_H
 
 #include <arm_neon.h>
 
@@ -61,4 +61,4 @@ VMAX_IMPL(float16_t, float16x8_t, vmaxq, f16)
 #undef VMAX_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_MAX_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_MAX_H */

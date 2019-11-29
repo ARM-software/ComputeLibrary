@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_UTILS_H__
-#define __ARM_COMPUTE_GRAPH_UTILS_H__
+#ifndef ARM_COMPUTE_GRAPH_UTILS_H
+#define ARM_COMPUTE_GRAPH_UTILS_H
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/PassManager.h"
@@ -130,4 +130,4 @@ std::vector<NodeIdxPair> get_driving_nodes(const INode &node);
 void configure_tensor(Tensor *tensor);
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_UTILS_H__ */
+#endif /* ARM_COMPUTE_GRAPH_UTILS_H */

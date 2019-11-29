@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPFUNCTIONS_H__
-#define __ARM_COMPUTE_CPPFUNCTIONS_H__
+#ifndef ARM_COMPUTE_CPPFUNCTIONS_H
+#define ARM_COMPUTE_CPPFUNCTIONS_H
 
 /* Header regrouping all the CPP functions */
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
@@ -33,4 +33,4 @@
 #include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 
-#endif /* __ARM_COMPUTE_CPPFUNCTIONS_H__ */
+#endif /* ARM_COMPUTE_CPPFUNCTIONS_H */

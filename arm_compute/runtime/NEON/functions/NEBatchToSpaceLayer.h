@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEBATCHTOSPACELAYER_H__
-#define __ARM_COMPUTE_NEBATCHTOSPACELAYER_H__
+#ifndef ARM_COMPUTE_NEBATCHTOSPACELAYER_H
+#define ARM_COMPUTE_NEBATCHTOSPACELAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -74,4 +74,4 @@ public:
     static Status validate(const ITensorInfo *input, int32_t block_shape_x, int32_t block_shape_y, const ITensorInfo *output);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEBATCHTOSPACELAYER_H__ */
+#endif /* ARM_COMPUTE_NEBATCHTOSPACELAYER_H */

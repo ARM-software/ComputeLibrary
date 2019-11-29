@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__
-#define __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__
+#ifndef ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
+#define ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H
 #include <utility>
 
 namespace arm_compute
@@ -48,4 +48,4 @@ struct FFT2DInfo
     FFTDirection direction{ FFTDirection::Forward };    /**< Direction of the FFT. */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__ */
+#endif /* ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H */

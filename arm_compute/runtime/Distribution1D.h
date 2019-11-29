@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_DISTRIBUTION1D_H__
-#define __ARM_COMPUTE_DISTRIBUTION1D_H__
+#ifndef ARM_COMPUTE_DISTRIBUTION1D_H
+#define ARM_COMPUTE_DISTRIBUTION1D_H
 
 #include "arm_compute/core/IDistribution1D.h"
 
@@ -53,4 +53,4 @@ private:
     mutable std::vector<uint32_t> _data; /**< The distribution data. */
 };
 }
-#endif /* __ARM_COMPUTE_DISTRIBUTION1D_H__ */
+#endif /* ARM_COMPUTE_DISTRIBUTION1D_H */

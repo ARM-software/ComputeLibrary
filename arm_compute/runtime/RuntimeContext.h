@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_CONTEXT_H__
-#define __ARM_COMPUTE_RUNTIME_CONTEXT_H__
+#ifndef ARM_COMPUTE_RUNTIME_CONTEXT_H
+#define ARM_COMPUTE_RUNTIME_CONTEXT_H
 
 #include "arm_compute/runtime/DeviceProperties.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
@@ -61,4 +61,4 @@ private:
     DeviceProperties            _device_props{};
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_RUNTIME_CONTEXT_H__ */
+#endif /*ARM_COMPUTE_RUNTIME_CONTEXT_H */

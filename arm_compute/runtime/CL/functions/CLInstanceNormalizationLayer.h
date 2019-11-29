@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYER_H__
-#define __ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYER_H__
+#ifndef ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYER_H
+#define ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYER_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -64,4 +64,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, float gamma = 1.0f, float beta = 0.0f, float epsilon = 1e-12f);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYER_H__ */
+#endif /* ARM_COMPUTE_CLINSTANCENORMALIZATIONLAYER_H */

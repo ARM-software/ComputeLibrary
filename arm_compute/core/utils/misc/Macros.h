@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MISC_MACROS_H__
-#define __ARM_COMPUTE_MISC_MACROS_H__
+#ifndef ARM_COMPUTE_MISC_MACROS_H
+#define ARM_COMPUTE_MISC_MACROS_H
 
 #if defined(__cplusplus) && (__cplusplus >= 201402L)
 
@@ -44,4 +44,4 @@
 
 #endif // defined(__cplusplus) && (__cplusplus >= 201402L)
 
-#endif /* __ARM_COMPUTE_MISC_MACROS_H__ */
+#endif /* ARM_COMPUTE_MISC_MACROS_H */

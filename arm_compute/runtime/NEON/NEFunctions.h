@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFUNCTIONS_H__
-#define __ARM_COMPUTE_NEFUNCTIONS_H__
+#ifndef ARM_COMPUTE_NEFUNCTIONS_H
+#define ARM_COMPUTE_NEFUNCTIONS_H
 
 /* Header regrouping all the NEON functions */
 #include "arm_compute/runtime/NEON/functions/NEAbsoluteDifference.h"
@@ -156,4 +156,4 @@
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEYOLOLayer.h"
 
-#endif /* __ARM_COMPUTE_NEFUNCTIONS_H__ */
+#endif /* ARM_COMPUTE_NEFUNCTIONS_H */

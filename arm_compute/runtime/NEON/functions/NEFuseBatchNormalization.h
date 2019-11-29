@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFUSEBATCHNORMALIZATION_H__
-#define __ARM_COMPUTE_NEFUSEBATCHNORMALIZATION_H__
+#ifndef ARM_COMPUTE_NEFUSEBATCHNORMALIZATION_H
+#define ARM_COMPUTE_NEFUSEBATCHNORMALIZATION_H
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/kernels/NEFuseBatchNormalizationKernel.h"
@@ -97,4 +97,4 @@ private:
     NEFuseBatchNormalizationKernel _fuse_bn_kernel;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEFUSEBATCHNORMALIZATION_H__ */
+#endif /*ARM_COMPUTE_NEFUSEBATCHNORMALIZATION_H */

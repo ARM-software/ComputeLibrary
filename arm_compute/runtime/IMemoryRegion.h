@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H__
-#define __ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H__
+#ifndef ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H
+#define ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H
 
 #include <cstddef>
 #include <memory>
@@ -89,4 +89,4 @@ protected:
     size_t _size;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H__ */
+#endif /* ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H */

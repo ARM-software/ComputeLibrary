@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GCDEPTHCONCATENATEKERNEL_H__
-#define __ARM_COMPUTE_GCDEPTHCONCATENATEKERNEL_H__
+#ifndef ARM_COMPUTE_GCDEPTHCONCATENATEKERNEL_H
+#define ARM_COMPUTE_GCDEPTHCONCATENATEKERNEL_H
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 #include "arm_compute/core/Types.h"
@@ -71,4 +71,4 @@ private:
     int              _depth_offset;
 };
 }
-#endif /* __ARM_COMPUTE_GCDEPTHCONCATENATEKERNEL_H__ */
+#endif /* ARM_COMPUTE_GCDEPTHCONCATENATEKERNEL_H */

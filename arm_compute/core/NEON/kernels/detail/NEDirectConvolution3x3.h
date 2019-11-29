@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NECONVOLUTIONKERNEL3x3_H__
-#define __ARM_COMPUTE_NECONVOLUTIONKERNEL3x3_H__
+#ifndef ARM_COMPUTE_NECONVOLUTIONKERNEL3x3_H
+#define ARM_COMPUTE_NECONVOLUTIONKERNEL3x3_H
 
 #include <arm_neon.h>
 
@@ -167,4 +167,4 @@ int get_input_num_elems_processed<3>(unsigned int num_elems_written_per_iteratio
 }
 }
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NECONVOLUTIONKERNEL3x3_H__ */
+#endif /* ARM_COMPUTE_NECONVOLUTIONKERNEL3x3_H */

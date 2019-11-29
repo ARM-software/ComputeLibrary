@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H__
-#define __ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H__
+#ifndef ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H
+#define ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
@@ -73,4 +73,4 @@ private:
     bool _is_activationlayer_enabled;
 };
 }
-#endif /*__ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H__ */
+#endif /*ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ITENSORALLOCATOR_H__
-#define __ARM_COMPUTE_ITENSORALLOCATOR_H__
+#ifndef ARM_COMPUTE_ITENSORALLOCATOR_H
+#define ARM_COMPUTE_ITENSORALLOCATOR_H
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -97,4 +97,4 @@ private:
     size_t     _alignment; /**< Tensor's alignment in bytes */
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_ITENSORALLOCATOR_H__ */
+#endif /*ARM_COMPUTE_ITENSORALLOCATOR_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__
-#define __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__
+#ifndef ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H
+#define ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H
 
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
@@ -369,4 +369,4 @@ private:
     NEDepthwiseConvolutionLayer _func;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__ */
+#endif /* ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H */

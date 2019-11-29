@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NERANGEKERNEL_H__
-#define __ARM_COMPUTE_NERANGEKERNEL_H__
+#ifndef ARM_COMPUTE_NERANGEKERNEL_H
+#define ARM_COMPUTE_NERANGEKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -87,4 +87,4 @@ private:
     ITensor       *_output; /**< Destination tensor */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NERANGEKERNEL_H__ */
+#endif /* ARM_COMPUTE_NERANGEKERNEL_H */

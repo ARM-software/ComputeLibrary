@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPP_VALIDATE_H__
-#define __ARM_COMPUTE_CPP_VALIDATE_H__
+#ifndef ARM_COMPUTE_CPP_VALIDATE_H
+#define ARM_COMPUTE_CPP_VALIDATE_H
 
 #include "arm_compute/core/Validate.h"
 
@@ -71,4 +71,4 @@ inline arm_compute::Status error_on_unsupported_cpu_fp16(const char *function, c
 #define ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(tensor) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_cpu_fp16(__func__, __FILE__, __LINE__, tensor))
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CPP_VALIDATE_H__ */
+#endif /* ARM_COMPUTE_CPP_VALIDATE_H */

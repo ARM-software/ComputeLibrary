@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEHOGMULTIDETECTION_H__
-#define __ARM_COMPUTE_NEHOGMULTIDETECTION_H__
+#ifndef ARM_COMPUTE_NEHOGMULTIDETECTION_H
+#define ARM_COMPUTE_NEHOGMULTIDETECTION_H
 
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
 #include "arm_compute/core/IArray.h"
@@ -106,4 +106,4 @@ private:
     size_t                                       _num_hog_detect_kernel;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEHOGMULTIDETECTION_H__ */
+#endif /* ARM_COMPUTE_NEHOGMULTIDETECTION_H */

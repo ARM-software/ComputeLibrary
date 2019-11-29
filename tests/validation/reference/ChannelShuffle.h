@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_H__
-#define __ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_H__
+#ifndef ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_H
+#define ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_H
 
 #include "tests/SimpleTensor.h"
 
@@ -40,4 +40,4 @@ SimpleTensor<T> channel_shuffle(const SimpleTensor<T> &src, int num_groups);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_H__ */
+#endif /* ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_H */

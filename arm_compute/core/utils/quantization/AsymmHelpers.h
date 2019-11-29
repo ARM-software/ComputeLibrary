@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_QUANTIZATION_ASYMM_HELPERS_H__
-#define __ARM_COMPUTE_QUANTIZATION_ASYMM_HELPERS_H__
+#ifndef ARM_COMPUTE_QUANTIZATION_ASYMM_HELPERS_H
+#define ARM_COMPUTE_QUANTIZATION_ASYMM_HELPERS_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
@@ -101,4 +101,4 @@ void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
                                               int32_t           *output_shifts_ptr);
 } // namespace quantization
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_IO_FILE_HANDLER_H__ */
+#endif /* ARM_COMPUTE_IO_FILE_HANDLER_H */

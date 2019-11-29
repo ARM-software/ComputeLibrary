@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_WINOGRAD_H__
-#define __ARM_COMPUTE_TEST_WINOGRAD_H__
+#ifndef ARM_COMPUTE_TEST_WINOGRAD_H
+#define ARM_COMPUTE_TEST_WINOGRAD_H
 
 #include "arm_compute/core/TensorShape.h"
 
@@ -56,4 +56,4 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_WINOGRAD_H__ */
+#endif /* ARM_COMPUTE_TEST_WINOGRAD_H */

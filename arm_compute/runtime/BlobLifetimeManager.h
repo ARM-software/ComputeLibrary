@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__
-#define __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__
+#ifndef ARM_COMPUTE_BLOBLIFETIMEMANAGER_H
+#define ARM_COMPUTE_BLOBLIFETIMEMANAGER_H
 
 #include "arm_compute/runtime/ISimpleLifetimeManager.h"
 
@@ -72,4 +72,4 @@ private:
     std::vector<BlobInfo> _blobs; /**< Memory blobs */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__ */
+#endif /* ARM_COMPUTE_BLOBLIFETIMEMANAGER_H */

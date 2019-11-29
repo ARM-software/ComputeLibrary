@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H__
-#define __ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H__
+#ifndef ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H
+#define ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H
 
 #include "arm_compute/core/CL/kernels/CLFuseBatchNormalizationKernel.h"
 #include "arm_compute/core/Types.h"
@@ -96,4 +96,4 @@ private:
     CLFuseBatchNormalizationKernel _fuse_bn_kernel;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H__ */
+#endif /*ARM_COMPUTE_CLFUSEBATCHNORMALIZATION_H */

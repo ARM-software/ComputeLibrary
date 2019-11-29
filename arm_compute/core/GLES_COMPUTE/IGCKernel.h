@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_IGCKERNEL_H__
-#define __ARM_COMPUTE_IGCKERNEL_H__
+#ifndef ARM_COMPUTE_IGCKERNEL_H
+#define ARM_COMPUTE_IGCKERNEL_H
 
 #include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
@@ -162,4 +162,4 @@ protected:
  */
 void enqueue(IGCKernel &kernel, const Window &window, const gles::NDRange &lws = gles::NDRange(1U, 1U, 1U));
 }
-#endif /*__ARM_COMPUTE_IGCKERNEL_H__ */
+#endif /*ARM_COMPUTE_IGCKERNEL_H */

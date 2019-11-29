@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_HOG_H__
-#define __ARM_COMPUTE_HOG_H__
+#ifndef ARM_COMPUTE_HOG_H
+#define ARM_COMPUTE_HOG_H
 
 #include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/IHOG.h"
@@ -53,4 +53,4 @@ private:
     mutable std::vector<float> _descriptor;
 };
 }
-#endif /* __ARM_COMPUTE_HOG_H__ */
+#endif /* ARM_COMPUTE_HOG_H */

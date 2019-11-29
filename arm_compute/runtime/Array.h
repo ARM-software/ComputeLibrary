@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ARRAY_H__
-#define __ARM_COMPUTE_ARRAY_H__
+#ifndef ARM_COMPUTE_ARRAY_H
+#define ARM_COMPUTE_ARRAY_H
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
@@ -82,4 +82,4 @@ using Int32Array = Array<int32_t>;
 /** Array of floats. */
 using FloatArray = Array<float>;
 }
-#endif /* __ARM_COMPUTE_ARRAY_H__ */
+#endif /* ARM_COMPUTE_ARRAY_H */

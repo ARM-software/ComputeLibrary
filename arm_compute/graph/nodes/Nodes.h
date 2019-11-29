@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_H__
-#define __ARM_COMPUTE_GRAPH_NODES_H__
+#ifndef ARM_COMPUTE_GRAPH_NODES_H
+#define ARM_COMPUTE_GRAPH_NODES_H
 
 #include "arm_compute/graph/nodes/ActivationLayerNode.h"
 #include "arm_compute/graph/nodes/BatchNormalizationLayerNode.h"
@@ -63,4 +63,4 @@
 #include "arm_compute/graph/nodes/UpsampleLayerNode.h"
 #include "arm_compute/graph/nodes/YOLOLayerNode.h"
 
-#endif /* __ARM_COMPUTE_GRAPH_NODES_H__ */
+#endif /* ARM_COMPUTE_GRAPH_NODES_H */

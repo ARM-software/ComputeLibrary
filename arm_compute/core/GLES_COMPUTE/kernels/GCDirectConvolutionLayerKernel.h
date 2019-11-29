@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCDIRECTCONVOLUTIONLAYERKERNEL_H__
-#define __ARM_COMPUTE_GCDIRECTCONVOLUTIONLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_GCDIRECTCONVOLUTIONLAYERKERNEL_H
+#define ARM_COMPUTE_GCDIRECTCONVOLUTIONLAYERKERNEL_H
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
@@ -89,4 +89,4 @@ using GCDirectConvolutionLayer3x3Kernel = GCDirectConvolutionLayerKernel<3>;
 /** Interface for the 5x5 direct convolution kernel */
 using GCDirectConvolutionLayer5x5Kernel = GCDirectConvolutionLayerKernel<5>;
 }
-#endif /*__ARM_COMPUTE_GCDIRECTCONVOLUTIONLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_GCDIRECTCONVOLUTIONLAYERKERNEL_H */

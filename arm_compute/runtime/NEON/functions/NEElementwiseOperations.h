@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEELEMENTWISEOPERATIONS_H__
-#define __ARM_COMPUTE_NEELEMENTWISEOPERATIONS_H__
+#ifndef ARM_COMPUTE_NEELEMENTWISEOPERATIONS_H
+#define ARM_COMPUTE_NEELEMENTWISEOPERATIONS_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -230,4 +230,4 @@ using NELess = NEElementwiseComparisonStatic<ComparisonOperation::Less>;
 /** Basic function to run less-equal comparison. */
 using NELessEqual = NEElementwiseComparisonStatic<ComparisonOperation::LessEqual>;
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEELEMENTWISEOPERATIONS_H__ */
+#endif /* ARM_COMPUTE_NEELEMENTWISEOPERATIONS_H */

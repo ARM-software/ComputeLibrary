@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NEBATCHCONCATENATEKERNEL_H__
-#define __ARM_COMPUTE_NEBATCHCONCATENATEKERNEL_H__
+#ifndef ARM_COMPUTE_NEBATCHCONCATENATEKERNEL_H
+#define ARM_COMPUTE_NEBATCHCONCATENATEKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -87,4 +87,4 @@ private:
     unsigned int         _batch_offset;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEBATCHCONCATENATEKERNEL_H__ */
+#endif /* ARM_COMPUTE_NEBATCHCONCATENATEKERNEL_H */

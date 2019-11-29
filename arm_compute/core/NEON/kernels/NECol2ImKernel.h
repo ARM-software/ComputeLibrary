@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECOL2IMKERNEL_H__
-#define __ARM_COMPUTE_NECOL2IMKERNEL_H__
+#ifndef ARM_COMPUTE_NECOL2IMKERNEL_H
+#define ARM_COMPUTE_NECOL2IMKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -112,4 +112,4 @@ private:
     Size2D            _convolved_dims;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NECOL2IMKERNEL_H__ */
+#endif /*ARM_COMPUTE_NECOL2IMKERNEL_H */

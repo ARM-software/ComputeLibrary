@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __GRAPH_VALIDATE_UTILS_H__
-#define __GRAPH_VALIDATE_UTILS_H__
+#ifndef GRAPH_VALIDATE_UTILS_H
+#define GRAPH_VALIDATE_UTILS_H
 
 #include "arm_compute/graph.h"
 
@@ -694,4 +694,4 @@ public:
 
 } // graph_validate_utils
 } // arm_compute
-#endif //__GRAPH_VALIDATE_UTILS_H__
+#endif //GRAPH_VALIDATE_UTILS_H

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLRANGE_H__
-#define __ARM_COMPUTE_CLRANGE_H__
+#ifndef ARM_COMPUTE_CLRANGE_H
+#define ARM_COMPUTE_CLRANGE_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -59,4 +59,4 @@ public:
     static Status validate(const ITensorInfo *output, float start, float end, float step = 1.f);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLRANGE_H__ */
+#endif /* ARM_COMPUTE_CLRANGE_H */

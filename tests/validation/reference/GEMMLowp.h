@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_GEMMLOWP_H__
-#define __ARM_COMPUTE_TEST_GEMMLOWP_H__
+#ifndef ARM_COMPUTE_TEST_GEMMLOWP_H
+#define ARM_COMPUTE_TEST_GEMMLOWP_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -63,4 +63,4 @@ SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_fixedpoint(const SimpleTensor
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_GEMMLOWP_H__ */
+#endif /* ARM_COMPUTE_TEST_GEMMLOWP_H */

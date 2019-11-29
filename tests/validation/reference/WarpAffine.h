@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_WARP_AFFINE_H__
-#define __ARM_COMPUTE_TEST_WARP_AFFINE_H__
+#ifndef ARM_COMPUTE_TEST_WARP_AFFINE_H
+#define ARM_COMPUTE_TEST_WARP_AFFINE_H
 
 #include "tests/SimpleTensor.h"
 
@@ -40,4 +40,4 @@ SimpleTensor<T> warp_affine(const SimpleTensor<T> &src, SimpleTensor<T> &valid_m
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_WARP_AFFINE_H__ */
+#endif /* ARM_COMPUTE_TEST_WARP_AFFINE_H */

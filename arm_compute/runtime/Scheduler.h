@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_SCHEDULER_H__
-#define __ARM_COMPUTE_SCHEDULER_H__
+#ifndef ARM_COMPUTE_SCHEDULER_H
+#define ARM_COMPUTE_SCHEDULER_H
 
 #include "arm_compute/runtime/IScheduler.h"
 
@@ -81,4 +81,4 @@ private:
     Scheduler();
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_SCHEDULER_H__ */
+#endif /* ARM_COMPUTE_SCHEDULER_H */

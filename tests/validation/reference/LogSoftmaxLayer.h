@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_LOG_SOFTMAX_LAYER_H__
-#define __ARM_COMPUTE_TEST_LOG_SOFTMAX_LAYER_H__
+#ifndef ARM_COMPUTE_TEST_LOG_SOFTMAX_LAYER_H
+#define ARM_COMPUTE_TEST_LOG_SOFTMAX_LAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -44,4 +44,4 @@ SimpleTensor<T> log_softmax_layer(const SimpleTensor<T> &src, float beta, size_t
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_SOFTMAX_LAYER_H__ */
+#endif /* ARM_COMPUTE_TEST_SOFTMAX_LAYER_H */

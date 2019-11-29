@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_REINTERPRET_H__
-#define __ARM_COMPUTE_WRAPPER_REINTERPRET_H__
+#ifndef ARM_COMPUTE_WRAPPER_REINTERPRET_H
+#define ARM_COMPUTE_WRAPPER_REINTERPRET_H
 
 #include <arm_neon.h>
 
@@ -40,4 +40,4 @@ inline int32x4_t vreinterpret_s32(const int32x4_t &val)
 }
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_REINTERPRET_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_REINTERPRET_H */

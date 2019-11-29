@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEGEMMINTERLEAVE4x4KERNEL_H__
-#define __ARM_COMPUTE_NEGEMMINTERLEAVE4x4KERNEL_H__
+#ifndef ARM_COMPUTE_NEGEMMINTERLEAVE4x4KERNEL_H
+#define ARM_COMPUTE_NEGEMMINTERLEAVE4x4KERNEL_H
 
 #include "arm_compute/core/NEON/INESimpleKernel.h"
 
@@ -88,4 +88,4 @@ private:
     GEMMInterleaveFunction *_func; /**< GEMM interleave function to use for the particular tensor types passed to configure() */
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEGEMMINTERLEAVE4x4KERNEL_H__*/
+#endif /*ARM_COMPUTE_NEGEMMINTERLEAVE4x4KERNEL_H*/

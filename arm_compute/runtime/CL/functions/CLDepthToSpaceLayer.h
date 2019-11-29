@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHTOSPACELAYER_H__
-#define __ARM_COMPUTE_CLDEPTHTOSPACELAYER_H__
+#ifndef ARM_COMPUTE_CLDEPTHTOSPACELAYER_H
+#define ARM_COMPUTE_CLDEPTHTOSPACELAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -63,4 +63,4 @@ private:
     CLDepthToSpaceLayerKernel _depth_to_space_kernel; /**< CLDepthToSpaceLayerKernel to run */
 };
 }
-#endif /* __ARM_COMPUTE_CLDEPTHTOSPACELAYER_H__ */
+#endif /* ARM_COMPUTE_CLDEPTHTOSPACELAYER_H */

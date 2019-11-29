@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H__
-#define __ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H__
+#ifndef ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H
+#define ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
@@ -290,12 +290,12 @@ inline float32x4x2_t convolve_3x3<2>(const float *in_top, const float *in_mid, c
     const float32x4_t   vlow_end = vld1q_f32(in_low + 8);
 
     float32x4x2_t out =
+    {
         {
-            {
-              vmulq_f32(vtop.val[0], m0.val[0]),
-              vdupq_n_f32(0)
-            }
-        };
+            vmulq_f32(vtop.val[0], m0.val[0]),
+            vdupq_n_f32(0)
+        }
+    };
     out.val[0] = vmlaq_f32(out.val[0], vtop.val[1], m0.val[1]);
     out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vtop.val[0], vtop_end, 1), m0.val[2]);
 
@@ -869,12 +869,12 @@ inline float16x8x2_t convolve_3x3<2>(const float16_t *in_top, const float16_t *i
     const float16x8_t   vlow_end = vld1q_f16(in_low + 16);
 
     float16x8x2_t out =
+    {
         {
-            {
-              vmulq_f16(vtop.val[0], m0.val[0]),
-              vdupq_n_f16(0)
-            }
-        };
+            vmulq_f16(vtop.val[0], m0.val[0]),
+            vdupq_n_f16(0)
+        }
+    };
     out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vtop.val[1], m0.val[1]));
     out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vextq_f16(vtop.val[0], vtop_end, 1), m0.val[2]));
 
@@ -974,4 +974,4 @@ inline int get_input_num_elems_processed(unsigned int num_elems_written_per_iter
 }
 }
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H__ */
+#endif /* ARM_COMPUTE_NEDIRECTCONVOLUTIONDETAIL_H */

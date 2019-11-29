@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFILLARRAYKERNEL_H__
-#define __ARM_COMPUTE_NEFILLARRAYKERNEL_H__
+#ifndef ARM_COMPUTE_NEFILLARRAYKERNEL_H
+#define ARM_COMPUTE_NEFILLARRAYKERNEL_H
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/NEON/INEKernel.h"
@@ -74,4 +74,4 @@ private:
     uint8_t         _threshold;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEFILLARRAYKERNEL_H__*/
+#endif /* ARM_COMPUTE_NEFILLARRAYKERNEL_H*/

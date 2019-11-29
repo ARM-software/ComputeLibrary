@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NEGATHER_H__
-#define __ARM_COMPUTE_NEGATHER_H__
+#ifndef ARM_COMPUTE_NEGATHER_H
+#define ARM_COMPUTE_NEGATHER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
@@ -59,4 +59,4 @@ public:
 
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_NEGATHER_H__ */
+#endif /* ARM_COMPUTE_NEGATHER_H */

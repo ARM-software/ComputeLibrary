@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESPACETODEPTHLAYERKERNEL_H__
-#define __ARM_COMPUTE_NESPACETODEPTHLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NESPACETODEPTHLAYERKERNEL_H
+#define ARM_COMPUTE_NESPACETODEPTHLAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -77,4 +77,4 @@ private:
     int32_t        _block_shape; /**< Block shape */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NESPACETODEPTHLAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_NESPACETODEPTHLAYERKERNEL_H */

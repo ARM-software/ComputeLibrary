@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_DEVICE_PROPERTIES_H__
-#define __ARM_COMPUTE_DEVICE_PROPERTIES_H__
+#ifndef ARM_COMPUTE_DEVICE_PROPERTIES_H
+#define ARM_COMPUTE_DEVICE_PROPERTIES_H
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 
@@ -38,4 +38,4 @@ struct DeviceProperties
 };
 
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_DEVICE_PROPERTIES_H__ */
+#endif /*ARM_COMPUTE_DEVICE_PROPERTIES_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCFULLYCONNECTEDLAYER_H__
-#define __ARM_COMPUTE_GCFULLYCONNECTEDLAYER_H__
+#ifndef ARM_COMPUTE_GCFULLYCONNECTEDLAYER_H
+#define ARM_COMPUTE_GCFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixAccumulateBiasesKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixMultiplyKernel.h"
@@ -107,4 +107,4 @@ private:
     bool                                _accumulate_biases;
 };
 }
-#endif /* __ARM_COMPUTE_GCFULLYCONNECTEDLAYER_H__ */
+#endif /* ARM_COMPUTE_GCFULLYCONNECTEDLAYER_H */

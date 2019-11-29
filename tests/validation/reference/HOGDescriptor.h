@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__
-#define __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__
+#ifndef ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H
+#define ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H
 
 #include "tests/SimpleTensor.h"
 
@@ -46,4 +46,4 @@ SimpleTensor<T> hog_descriptor(const SimpleTensor<U> &src, BorderMode border_mod
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H__ */
+#endif /* ARM_COMPUTE_TEST_HOG_DESCRIPTOR_H */

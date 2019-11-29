@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEASYMM_H__
-#define __ARM_COMPUTE_NEASYMM_H__
+#ifndef ARM_COMPUTE_NEASYMM_H
+#define ARM_COMPUTE_NEASYMM_H
 
 #include "arm_compute/core/NEON/NEMath.h"
 #include <arm_neon.h>
@@ -525,4 +525,4 @@ inline uint16x8x2_t vquantize_qasymm16(const float32x4x4_t &qv, const UniformQua
 }
 } // namespace arm_compute
 #include "arm_compute/core/NEON/NEAsymm.inl"
-#endif // __ARM_COMPUTE_NEASYMM_H__
+#endif // ARM_COMPUTE_NEASYMM_H

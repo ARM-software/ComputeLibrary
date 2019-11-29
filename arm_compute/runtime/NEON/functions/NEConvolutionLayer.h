@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECONVOLUTIONLAYER_H__
-#define __ARM_COMPUTE_NECONVOLUTIONLAYER_H__
+#ifndef ARM_COMPUTE_NECONVOLUTIONLAYER_H
+#define ARM_COMPUTE_NECONVOLUTIONLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -149,5 +149,5 @@ private:
     std::shared_ptr<IMemoryManager> _memory_manager;
     std::unique_ptr<IFunction>      _function; /**< Function to run */
 };
-} // namespace arm_compute
-#endif /* __ARM_COMPUTE_NECONVOLUTIONLAYER_H__ */
+}
+#endif /* ARM_COMPUTE_NECONVOLUTIONLAYER_H */

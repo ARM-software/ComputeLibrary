@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_SCALAR_ADD_H__
-#define __ARM_COMPUTE_WRAPPER_SCALAR_ADD_H__
+#ifndef ARM_COMPUTE_WRAPPER_SCALAR_ADD_H
+#define ARM_COMPUTE_WRAPPER_SCALAR_ADD_H
 
 #include <arm_neon.h>
 
@@ -59,4 +59,4 @@ inline float16_t add_sat(const float16_t &a, const float16_t &b)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_SCALAR_ADD_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_SCALAR_ADD_H */

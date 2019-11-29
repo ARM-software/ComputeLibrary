@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_UTILS_TRAITS_TRAITS_H__
-#define __ARM_COMPUTE_UTILS_TRAITS_TRAITS_H__
+#ifndef ARM_COMPUTE_UTILS_TRAITS_TRAITS_H
+#define ARM_COMPUTE_UTILS_TRAITS_TRAITS_H
 
 #include <type_traits>
 
@@ -51,4 +51,4 @@ struct is_floating_point<__fp16> : public std::true_type
 } // namespace traits
 } // namespace utils
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_UTILS_TRAITS_TRAITS_H__ */
+#endif /* ARM_COMPUTE_UTILS_TRAITS_TRAITS_H */

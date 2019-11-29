@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEGEMMMATRIXVECTORMULTIPLYKERNEL_H_
-#define __ARM_COMPUTE_NEGEMMMATRIXVECTORMULTIPLYKERNEL_H_
+#ifndef ARM_COMPUTE_NEGEMMMATRIXVECTORMULTIPLYKERNEL_H_
+#define ARM_COMPUTE_NEGEMMMATRIXVECTORMULTIPLYKERNEL_H_
 
 #include "arm_compute/core/NEON/INESimpleKernel.h"
 
@@ -96,4 +96,4 @@ private:
     BorderSize                          _border_size;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEGEMMMATRIXVECTORMULTIPLYKERNEL_H_*/
+#endif /*ARM_COMPUTE_NEGEMMMATRIXVECTORMULTIPLYKERNEL_H_*/

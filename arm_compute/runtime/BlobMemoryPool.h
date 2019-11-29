@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_BLOBMEMORYPOOL_H__
-#define __ARM_COMPUTE_BLOBMEMORYPOOL_H__
+#ifndef ARM_COMPUTE_BLOBMEMORYPOOL_H
+#define ARM_COMPUTE_BLOBMEMORYPOOL_H
 
 #include "arm_compute/runtime/IMemoryPool.h"
 
@@ -82,4 +82,4 @@ private:
     std::vector<BlobInfo>                       _blob_info; /**< Information of each blob */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_BLOBMEMORYPOOL_H__ */
+#endif /* ARM_COMPUTE_BLOBMEMORYPOOL_H */

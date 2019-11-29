@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TENSORINFO_H__
-#define __ARM_COMPUTE_TENSORINFO_H__
+#ifndef ARM_COMPUTE_TENSORINFO_H
+#define ARM_COMPUTE_TENSORINFO_H
 
 #include "arm_compute/core/ITensorInfo.h"
 
@@ -339,4 +339,4 @@ private:
     DataLayout       _data_layout;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_TENSORINFO_H__ */
+#endif /*ARM_COMPUTE_TENSORINFO_H */

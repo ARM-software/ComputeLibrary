@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_LOG_H__
-#define __ARM_COMPUTE_WRAPPER_LOG_H__
+#ifndef ARM_COMPUTE_WRAPPER_LOG_H
+#define ARM_COMPUTE_WRAPPER_LOG_H
 
 #include "arm_compute/core/NEON/NEMath.h"
 #include <arm_neon.h>
@@ -44,4 +44,4 @@ VLOG_IMPL(float16x8_t, vlogq, f16)
 #undef VLOG_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_LOG_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_LOG_H */

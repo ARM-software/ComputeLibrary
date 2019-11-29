@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFFT1D_H__
-#define __ARM_COMPUTE_CLFFT1D_H__
+#ifndef ARM_COMPUTE_CLFFT1D_H
+#define ARM_COMPUTE_CLFFT1D_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -80,4 +80,4 @@ protected:
     bool                               _run_scale;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLFFT1D_H__ */
+#endif /*ARM_COMPUTE_CLFFT1D_H */

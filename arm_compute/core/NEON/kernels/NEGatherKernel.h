@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NEGATHERKERNEL_H__
-#define __ARM_COMPUTE_NEGATHERKERNEL_H__
+#ifndef ARM_COMPUTE_NEGATHERKERNEL_H
+#define ARM_COMPUTE_NEGATHERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -109,4 +109,4 @@ private:
     kernel_ptr     _func;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEGATHERKERNEL_H__ */
+#endif /* ARM_COMPUTE_NEGATHERKERNEL_H */

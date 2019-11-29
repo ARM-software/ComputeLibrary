@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCOMPARISON_H__
-#define __ARM_COMPUTE_CLCOMPARISON_H__
+#ifndef ARM_COMPUTE_CLCOMPARISON_H
+#define ARM_COMPUTE_CLCOMPARISON_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -99,4 +99,4 @@ using CLLess = CLComparisonStatic<ComparisonOperation::Less>;
 /** Basic function to run less-equal comparison. */
 using CLLessEqual = CLComparisonStatic<ComparisonOperation::LessEqual>;
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLCOMPARISON_H__ */
+#endif /* ARM_COMPUTE_CLCOMPARISON_H */

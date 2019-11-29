@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_NEG_H__
-#define __ARM_COMPUTE_WRAPPER_NEG_H__
+#ifndef ARM_COMPUTE_WRAPPER_NEG_H
+#define ARM_COMPUTE_WRAPPER_NEG_H
 
 #include <arm_neon.h>
 
@@ -55,4 +55,4 @@ VNEG_IMPL(float16x8_t, vnegq, f16)
 #undef VNEG_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_NEG_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_NEG_H */

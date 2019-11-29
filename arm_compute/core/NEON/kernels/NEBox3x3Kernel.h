@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEBOX3x3KERNEL_H__
-#define __ARM_COMPUTE_NEBOX3x3KERNEL_H__
+#ifndef ARM_COMPUTE_NEBOX3x3KERNEL_H
+#define ARM_COMPUTE_NEBOX3x3KERNEL_H
 
 #include "arm_compute/core/NEON/INESimpleKernel.h"
 
@@ -68,4 +68,4 @@ public:
 using NEBox3x3FP16Kernel = NEBox3x3Kernel;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEBOX3x3KERNEL_H__ */
+#endif /*ARM_COMPUTE_NEBOX3x3KERNEL_H */

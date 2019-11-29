@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_H__
-#define __ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_H__
+#ifndef ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_H
+#define ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_H
 
 #include "tests/SimpleTensor.h"
 
@@ -40,4 +40,4 @@ std::vector<SimpleTensor<U>> laplacian_pyramid(const SimpleTensor<T> &src, Simpl
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_H__ */
+#endif /* ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_H */

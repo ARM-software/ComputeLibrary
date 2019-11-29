@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __VALIDATE_EXAMPLE_H__
-#define __VALIDATE_EXAMPLE_H__
+#ifndef VALIDATE_EXAMPLE_H
+#define VALIDATE_EXAMPLE_H
 
 #include "utils/Utils.h"
 namespace arm_compute
@@ -84,4 +84,4 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
 
 } // namespace utils
 } // namespace arm_compute
-#endif /* __VALIDATE_EXAMPLE_H__ */
+#endif /* VALIDATE_EXAMPLE_H */

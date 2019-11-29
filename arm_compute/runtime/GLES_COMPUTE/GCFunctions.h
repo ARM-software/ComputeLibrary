@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCFUNCTIONS_H__
-#define __ARM_COMPUTE_GCFUNCTIONS_H__
+#ifndef ARM_COMPUTE_GCFUNCTIONS_H
+#define ARM_COMPUTE_GCFUNCTIONS_H
 
 /* Header regrouping all the GLES compute functions */
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCAbsoluteDifference.h"
@@ -48,4 +48,4 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCTensorShift.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCTranspose.h"
 
-#endif /* __ARM_COMPUTE_GCFUNCTIONS_H__ */
+#endif /* ARM_COMPUTE_GCFUNCTIONS_H */

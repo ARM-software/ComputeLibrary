@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFUNCTIONS_H__
-#define __ARM_COMPUTE_CLFUNCTIONS_H__
+#ifndef ARM_COMPUTE_CLFUNCTIONS_H
+#define ARM_COMPUTE_CLFUNCTIONS_H
 
 /* Header regrouping all the CL functions */
 #include "arm_compute/runtime/CL/functions/CLAbsoluteDifference.h"
@@ -152,4 +152,4 @@
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
 #include "arm_compute/runtime/CL/functions/CLYOLOLayer.h"
 
-#endif /* __ARM_COMPUTE_CLFUNCTIONS_H__ */
+#endif /* ARM_COMPUTE_CLFUNCTIONS_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLMEMSETKERNEL_H__
-#define __ARM_COMPUTE_CLMEMSETKERNEL_H__
+#ifndef ARM_COMPUTE_CLMEMSETKERNEL_H
+#define ARM_COMPUTE_CLMEMSETKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/PixelValue.h"
@@ -74,4 +74,4 @@ private:
     Window     _full_window;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLMEMSETRKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLMEMSETRKERNEL_H */

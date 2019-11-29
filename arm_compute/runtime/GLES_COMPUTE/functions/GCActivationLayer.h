@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCACTIVATIONLAYER_H__
-#define __ARM_COMPUTE_GCACTIVATIONLAYER_H__
+#ifndef ARM_COMPUTE_GCACTIVATIONLAYER_H
+#define ARM_COMPUTE_GCACTIVATIONLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
@@ -64,4 +64,4 @@ public:
     void configure(IGCTensor *input, IGCTensor *output, ActivationLayerInfo act_info);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GCACTIVATIONLAYER_H__ */
+#endif /* ARM_COMPUTE_GCACTIVATIONLAYER_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_LAYERS_H__
-#define __ARM_COMPUTE_GRAPH_LAYERS_H__
+#ifndef ARM_COMPUTE_GRAPH_LAYERS_H
+#define ARM_COMPUTE_GRAPH_LAYERS_H
 
 #include "arm_compute/graph/GraphBuilder.h"
 #include "arm_compute/graph/Types.h"
@@ -1275,4 +1275,4 @@ private:
 } // namespace frontend
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_LAYERS_H__ */
+#endif /* ARM_COMPUTE_GRAPH_LAYERS_H */

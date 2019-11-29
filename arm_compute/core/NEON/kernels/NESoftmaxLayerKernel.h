@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H__
-#define __ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H
+#define ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/NEON/INESimpleKernel.h"
@@ -136,4 +136,4 @@ private:
     ITensor               *_tmp; //Temporary. Used internally
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H */

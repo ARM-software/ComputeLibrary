@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H__
-#define __ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H__
+#ifndef ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H
+#define ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -111,4 +111,4 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H */

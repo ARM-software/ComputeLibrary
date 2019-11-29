@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__
-#define __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NEMINMAXLAYERKERNEL_H
+#define ARM_COMPUTE_NEMINMAXLAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "support/Mutex.h"
@@ -87,4 +87,4 @@ private:
     Mutex          _mtx;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEMINMAXLAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_NEMINMAXLAYERKERNEL_H */

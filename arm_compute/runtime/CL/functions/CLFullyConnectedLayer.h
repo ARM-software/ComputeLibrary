@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__
-#define __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__
+#ifndef ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
+#define ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -198,4 +198,4 @@ private:
     const ICLTensor                                                    *_original_weights;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__ */
+#endif /* ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H */

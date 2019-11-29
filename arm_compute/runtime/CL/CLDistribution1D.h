@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDISTRIBUTION1D_H__
-#define __ARM_COMPUTE_CLDISTRIBUTION1D_H__
+#ifndef ARM_COMPUTE_CLDISTRIBUTION1D_H
+#define ARM_COMPUTE_CLDISTRIBUTION1D_H
 
 #include "arm_compute/core/CL/ICLDistribution1D.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -76,4 +76,4 @@ private:
     cl::Buffer _mem;
 };
 }
-#endif /* __ARM_COMPUTE_CLDISTRIBUTION1D_H__ */
+#endif /* ARM_COMPUTE_CLDISTRIBUTION1D_H */

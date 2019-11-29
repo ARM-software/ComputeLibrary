@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H__
-#define __ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H__
+#ifndef ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H
+#define ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H
 
 #include "arm_compute/graph/INode.h"
 
@@ -57,4 +57,4 @@ private:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H__ */
+#endif /* ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H */

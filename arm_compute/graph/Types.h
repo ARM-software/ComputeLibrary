@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_TYPES_H__
-#define __ARM_COMPUTE_GRAPH_TYPES_H__
+#ifndef ARM_COMPUTE_GRAPH_TYPES_H
+#define ARM_COMPUTE_GRAPH_TYPES_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
@@ -197,4 +197,4 @@ struct NodeParams
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_TYPES_H__ */
+#endif /* ARM_COMPUTE_GRAPH_TYPES_H */

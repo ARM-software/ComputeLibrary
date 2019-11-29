@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLNORMALIZATIONLAYER_H__
-#define __ARM_COMPUTE_CLNORMALIZATIONLAYER_H__
+#ifndef ARM_COMPUTE_CLNORMALIZATIONLAYER_H
+#define ARM_COMPUTE_CLNORMALIZATIONLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -78,4 +78,4 @@ private:
     CLFillBorderKernel         _border_handler; /**< Kernel to handle  borders */
 };
 }
-#endif /* __ARM_COMPUTE_CLNORMALIZATIONLAYER_H__ */
+#endif /* ARM_COMPUTE_CLNORMALIZATIONLAYER_H */

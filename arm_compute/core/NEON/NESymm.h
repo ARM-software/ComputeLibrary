@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESYMM_H__
-#define __ARM_COMPUTE_NESYMM_H__
+#ifndef ARM_COMPUTE_NESYMM_H
+#define ARM_COMPUTE_NESYMM_H
 
 #include "arm_compute/core/NEON/NEMath.h"
 #include <arm_neon.h>
@@ -103,7 +103,7 @@ inline int16_t finalize_quantization_int16(int32_t in_value, int result_fixedpoi
     if(result_shift < 0)
     {
         const int64_t in_64 = static_cast<int64_t>(in_value) * (1 << (-result_shift)) * static_cast<int64_t>(result_fixedpoint_multiplier);
-        in_value = static_cast<int32_t>((in_64 + (1 << 30)) >> 31);
+        in_value            = static_cast<int32_t>((in_64 + (1 << 30)) >> 31);
     }
     else
     {
@@ -231,4 +231,4 @@ inline qsymm16x8x2_t vquantize_qsymm16(const float32x4x4_t &qv, const UniformQua
 }
 
 } // namespace arm_compute
-#endif // __ARM_COMPUTE_NESYMM_H__
+#endif // ARM_COMPUTE_NESYMM_H

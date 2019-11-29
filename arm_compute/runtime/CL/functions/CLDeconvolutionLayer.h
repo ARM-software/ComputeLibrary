@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDECONVOLUTIONLAYER_H__
-#define __ARM_COMPUTE_CLDECONVOLUTIONLAYER_H__
+#ifndef ARM_COMPUTE_CLDECONVOLUTIONLAYER_H
+#define ARM_COMPUTE_CLDECONVOLUTIONLAYER_H
 
 #include "arm_compute/runtime/CL/functions/CLDirectDeconvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMDeconvolutionLayer.h"
@@ -80,4 +80,4 @@ private:
     std::unique_ptr<IFunction>      _function;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLDECONVOLUTIONLAYER_H__ */
+#endif /* ARM_COMPUTE_CLDECONVOLUTIONLAYER_H */

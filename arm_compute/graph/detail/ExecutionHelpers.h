@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_H__
-#define __ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_H__
+#ifndef ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_H
+#define ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_H
 
 #include "arm_compute/graph/Types.h"
 
@@ -120,4 +120,4 @@ void call_all_tasks(ExecutionWorkload &workload);
 } // namespace detail
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_H__ */
+#endif /* ARM_COMPUTE_GRAPH_DETAIL_EXECUTION_HELPERS_H */

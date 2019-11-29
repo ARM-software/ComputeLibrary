@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H__
-#define __ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H
+#define ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -81,4 +81,4 @@ private:
     unsigned int   _width_offset;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H */

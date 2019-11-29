@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLHELPERS_H__
-#define __ARM_COMPUTE_CLHELPERS_H__
+#ifndef ARM_COMPUTE_CLHELPERS_H
+#define ARM_COMPUTE_CLHELPERS_H
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -202,4 +202,4 @@ cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &ke
 cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size);
 
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLHELPERS_H__ */
+#endif /* ARM_COMPUTE_CLHELPERS_H */

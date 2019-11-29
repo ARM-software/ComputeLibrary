@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ERROR_H__
-#define __ARM_COMPUTE_ERROR_H__
+#ifndef ARM_COMPUTE_ERROR_H
+#define ARM_COMPUTE_ERROR_H
 
 #include <array>
 #include <string>
@@ -482,4 +482,4 @@ Status create_error_msg(ErrorCode error_code, const char *func, const char *file
 #define ARM_COMPUTE_THROW(ex) (ex), std::abort()
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 
-#endif /* __ARM_COMPUTE_ERROR_H__ */
+#endif /* ARM_COMPUTE_ERROR_H */

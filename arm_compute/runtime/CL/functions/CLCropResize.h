@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CL_CROP_RESIZE_H__
-#define __ARM_COMPUTE_CL_CROP_RESIZE_H__
+#ifndef ARM_COMPUTE_CL_CROP_RESIZE_H
+#define ARM_COMPUTE_CL_CROP_RESIZE_H
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
@@ -111,4 +111,4 @@ public:
     std::vector<std::unique_ptr<CLTensor>>     _scaled_results;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CL_CROP_RESIZE_H__ */
+#endif /* ARM_COMPUTE_CL_CROP_RESIZE_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEPADLAYER_H__
-#define __ARM_COMPUTE_NEPADLAYER_H__
+#ifndef ARM_COMPUTE_NEPADLAYER_H
+#define ARM_COMPUTE_NEPADLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
@@ -108,4 +108,4 @@ private:
     std::vector<Tensor>             _concat_results;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEPADLAYER_H__ */
+#endif /*ARM_COMPUTE_NEPADLAYER_H */

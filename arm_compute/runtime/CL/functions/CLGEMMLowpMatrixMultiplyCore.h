@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
-#define __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
+#ifndef ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
+#define ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
 
 #include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
@@ -139,4 +139,4 @@ private:
     bool    _convert_to_qasymm8;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__ */
+#endif /*ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H */

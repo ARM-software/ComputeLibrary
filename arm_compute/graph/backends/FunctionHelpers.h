@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H__
-#define __ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H__
+#ifndef ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
+#define ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
 
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/Tensor.h"
@@ -1596,4 +1596,4 @@ std::unique_ptr<IFunction> create_yolo_layer(YOLOLayerNode &node, GraphContext &
 } // namespace graph
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H__ */
+#endif /* ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H */

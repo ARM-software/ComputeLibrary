@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLSOFTMAXLAYER_H__
-#define __ARM_COMPUTE_CLSOFTMAXLAYER_H__
+#ifndef ARM_COMPUTE_CLSOFTMAXLAYER_H
+#define ARM_COMPUTE_CLSOFTMAXLAYER_H
 
 #include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
@@ -114,4 +114,4 @@ private:
 using CLSoftmaxLayer    = CLSoftmaxLayerGeneric<false>;
 using CLLogSoftmaxLayer = CLSoftmaxLayerGeneric<true>;
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLSOFTMAXLAYER_H__ */
+#endif /* ARM_COMPUTE_CLSOFTMAXLAYER_H */

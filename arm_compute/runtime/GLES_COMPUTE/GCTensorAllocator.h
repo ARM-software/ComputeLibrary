@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GCTENSORALLOCATOR_H__
-#define __ARM_COMPUTE_GCTENSORALLOCATOR_H__
+#ifndef ARM_COMPUTE_GCTENSORALLOCATOR_H
+#define ARM_COMPUTE_GCTENSORALLOCATOR_H
 
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCMemory.h"
@@ -125,4 +125,4 @@ private:
     uint8_t           *_mapping;                 /**< Pointer to the CPU mapping of the OpenGL ES buffer. */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GCTENSORALLOCATOR_H__ */
+#endif /* ARM_COMPUTE_GCTENSORALLOCATOR_H */

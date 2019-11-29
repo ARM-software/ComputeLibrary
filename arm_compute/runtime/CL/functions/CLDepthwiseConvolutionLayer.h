@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__
-#define __ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__
+#ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
+#define ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H
 
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
@@ -356,4 +356,4 @@ private:
     CLDepthwiseConvolutionLayer _func;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__ */
+#endif /*ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H */

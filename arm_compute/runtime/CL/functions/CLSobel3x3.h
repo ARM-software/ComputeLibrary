@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLSOBEL3X3_H__
-#define __ARM_COMPUTE_CLSOBEL3X3_H__
+#ifndef ARM_COMPUTE_CLSOBEL3X3_H
+#define ARM_COMPUTE_CLSOBEL3X3_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -55,4 +55,4 @@ public:
     void configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 }
-#endif /*__ARM_COMPUTE_CLSOBEL3X3_H__ */
+#endif /*ARM_COMPUTE_CLSOBEL3X3_H */

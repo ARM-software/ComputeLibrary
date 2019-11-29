@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H__
-#define __ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H__
+#ifndef ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H
+#define ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H
 
 #include "arm_compute/runtime/RuntimeContext.h"
 #include "tests/framework/instruments/Instruments.h"
@@ -83,4 +83,4 @@ private:
 };
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H__ */
+#endif /* ARM_COMPUTE_TEST_INSTRUMENTS_UTILS_H */

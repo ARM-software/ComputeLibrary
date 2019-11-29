@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MEMORYGROUP_H__
-#define __ARM_COMPUTE_MEMORYGROUP_H__
+#ifndef ARM_COMPUTE_MEMORYGROUP_H
+#define ARM_COMPUTE_MEMORYGROUP_H
 
 #include "arm_compute/runtime/IMemoryGroup.h"
 
@@ -129,4 +129,4 @@ inline MemoryMappings &MemoryGroup::mappings()
     return _mappings;
 }
 } // arm_compute
-#endif /*__ARM_COMPUTE_MEMORYGROUP_H__ */
+#endif /*ARM_COMPUTE_MEMORYGROUP_H */

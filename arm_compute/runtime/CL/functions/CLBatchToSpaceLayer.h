@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLBATCHTOSPACELAYER_H__
-#define __ARM_COMPUTE_CLBATCHTOSPACELAYER_H__
+#ifndef ARM_COMPUTE_CLBATCHTOSPACELAYER_H
+#define ARM_COMPUTE_CLBATCHTOSPACELAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -81,4 +81,4 @@ private:
     CLBatchToSpaceLayerKernel _batch_to_space_kernel; /**< CLBatchToSpaceLayerKernel to run */
 };
 }
-#endif /* __ARM_COMPUTE_CLBATCHTOSPACELAYER_H__ */
+#endif /* ARM_COMPUTE_CLBATCHTOSPACELAYER_H */

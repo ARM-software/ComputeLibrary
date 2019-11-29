@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_CLGATHER_H__
-#define __ARM_COMPUTE_CLGATHER_H__
+#ifndef ARM_COMPUTE_CLGATHER_H
+#define ARM_COMPUTE_CLGATHER_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -56,4 +56,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis = 0);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLGATHER_H__ */
+#endif /* ARM_COMPUTE_CLGATHER_H */

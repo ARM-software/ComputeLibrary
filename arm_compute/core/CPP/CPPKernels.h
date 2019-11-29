@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPKERNELS_H__
-#define __ARM_COMPUTE_CPPKERNELS_H__
+#ifndef ARM_COMPUTE_CPPKERNELS_H
+#define ARM_COMPUTE_CPPKERNELS_H
 
 /* Header regrouping all the CPP kernels */
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
@@ -35,4 +35,4 @@
 #include "arm_compute/core/CPP/kernels/CPPTopKVKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPUpsampleKernel.h"
 
-#endif /* __ARM_COMPUTE_CPPKERNELS_H__ */
+#endif /* ARM_COMPUTE_CPPKERNELS_H */

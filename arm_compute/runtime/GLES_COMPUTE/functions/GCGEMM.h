@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GCGEMM_H__
-#define __ARM_COMPUTE_GCGEMM_H__
+#ifndef ARM_COMPUTE_GCGEMM_H
+#define ARM_COMPUTE_GCGEMM_H
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixAdditionKernel.h"
@@ -111,4 +111,4 @@ private:
 };
 }
 
-#endif /* __ARM_COMPUTE_GCGEMM_H__ */
+#endif /* ARM_COMPUTE_GCGEMM_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H__
-#define __ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H__
+#ifndef ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H
+#define ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H
 
 namespace arm_compute
 {
@@ -113,4 +113,4 @@ inline bool is_zero(float a, float epsilon = 0.00001f)
 } // namespace float_ops
 } // namespace helpers
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H__ */
+#endif /* ARM_COMPUTE_UTILS_HELPERS_FLOAT_OPS_H */

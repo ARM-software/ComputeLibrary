@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__
-#define __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__
+#ifndef ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H
+#define ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -54,4 +54,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__ */
+#endif /* ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H */

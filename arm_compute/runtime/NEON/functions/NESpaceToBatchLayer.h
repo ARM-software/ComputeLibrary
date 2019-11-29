@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESPACETOBATCHLAYER_H__
-#define __ARM_COMPUTE_NESPACETOBATCHLAYER_H__
+#ifndef ARM_COMPUTE_NESPACETOBATCHLAYER_H
+#define ARM_COMPUTE_NESPACETOBATCHLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -104,4 +104,4 @@ private:
     bool                      _has_padding;           /**< Flag to check if the output has padding */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NESPACETOBATCHLAYER_H__ */
+#endif /* ARM_COMPUTE_NESPACETOBATCHLAYER_H */

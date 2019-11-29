@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_CONCATENATE_LAYER_H__
-#define __ARM_COMPUTE_TEST_CONCATENATE_LAYER_H__
+#ifndef ARM_COMPUTE_TEST_CONCATENATE_LAYER_H
+#define ARM_COMPUTE_TEST_CONCATENATE_LAYER_H
 
 #include "tests/SimpleTensor.h"
 
@@ -42,4 +42,4 @@ SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTens
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_CONCATENATE_LAYER_H__ */
+#endif /* ARM_COMPUTE_TEST_CONCATENATE_LAYER_H */

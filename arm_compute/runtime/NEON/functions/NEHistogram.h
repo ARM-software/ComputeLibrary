@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEHISTOGRAM_H__
-#define __ARM_COMPUTE_NEHISTOGRAM_H__
+#ifndef ARM_COMPUTE_NEHISTOGRAM_H
+#define ARM_COMPUTE_NEHISTOGRAM_H
 
 #include "arm_compute/core/NEON/kernels/NEHistogramKernel.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -60,4 +60,4 @@ private:
     static constexpr unsigned int window_lut_default_size = 256;
 };
 }
-#endif /*__ARM_COMPUTE_NEHISTOGRAM_H__ */
+#endif /*ARM_COMPUTE_NEHISTOGRAM_H */

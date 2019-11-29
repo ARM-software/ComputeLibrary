@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GC_HELPERS_H__
-#define __ARM_COMPUTE_GC_HELPERS_H__
+#ifndef ARM_COMPUTE_GC_HELPERS_H
+#define ARM_COMPUTE_GC_HELPERS_H
 
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 
@@ -36,4 +36,4 @@ namespace arm_compute
  */
 std::tuple<EGLDisplay, EGLContext, EGLBoolean> create_opengl_display_and_context();
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GC_HELPERS_H__ */
+#endif /* ARM_COMPUTE_GC_HELPERS_H */

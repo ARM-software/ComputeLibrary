@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__
-#define __ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H
+#define ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLSimple3DKernel.h"
 #include "arm_compute/core/KernelDescriptors.h"
@@ -201,4 +201,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H */

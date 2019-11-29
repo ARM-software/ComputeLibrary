@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_CLBATCHCONCATENATEKERNEL_H__
-#define __ARM_COMPUTE_CLBATCHCONCATENATEKERNEL_H__
+#ifndef ARM_COMPUTE_CLBATCHCONCATENATEKERNEL_H
+#define ARM_COMPUTE_CLBATCHCONCATENATEKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -80,4 +80,4 @@ private:
     unsigned int     _batch_offset;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLBATCHCONCATENATEKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLBATCHCONCATENATEKERNEL_H */
