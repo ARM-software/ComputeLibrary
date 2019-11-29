@@ -76,7 +76,7 @@ __kernel void convert_depth_down(
     in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in.ptr);
 
 #if defined(IS_DATA_TYPE_QUANTIZED)
-    in_data ^= 0x80;
+    in_data ^= (VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE))0x80;
 #endif // defined(IS_DATA_TYPE_QUANTIZED)
 
 #if defined(IS_DATA_TYPE_FLOAT)
