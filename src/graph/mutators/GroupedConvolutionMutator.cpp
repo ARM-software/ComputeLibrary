@@ -103,6 +103,11 @@ const char *GroupedConvolutionMutator::name()
     return "GroupedConvolutionMutator";
 }
 
+IGraphMutator::MutationType GroupedConvolutionMutator::type() const
+{
+    return IGraphMutator::MutationType::Backend;
+}
+
 void GroupedConvolutionMutator::mutate(Graph &g)
 {
     // Early exit if no Convolution layers exist in graph

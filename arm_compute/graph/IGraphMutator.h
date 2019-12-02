@@ -35,6 +35,14 @@ class Graph;
 class IGraphMutator
 {
 public:
+    /** Mutation type */
+    enum class MutationType
+    {
+        IR,     /** IR specific mutation */
+        Backend /** Backend specific mutation */
+    };
+
+public:
     /** Virtual Destructor */
     virtual ~IGraphMutator() = default;
     /** Walk the graph and perform a specific mutation
@@ -42,6 +50,11 @@ public:
      * @param[in, out] g Graph to walk and mutate
      */
     virtual void mutate(Graph &g) = 0;
+    /** Returns mutation type
+     *
+     * @return Mutation type enumeration
+     */
+    virtual MutationType type() const = 0;
     /** Returns mutator name
      *
      * @return Mutator name

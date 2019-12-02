@@ -81,6 +81,7 @@ struct GraphConfig
     bool        use_function_weights_manager{ true };  /**< Use a weights manager to manage transformed weights */
     bool        use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
     bool        use_tuner{ false };                    /**< Use a tuner in tunable backends */
+    bool        convert_to_uint8{ false };             /**< Convert graph to a synthetic uint8 graph */
     CLTunerMode tuner_mode{ CLTunerMode::EXHAUSTIVE }; /**< Tuner mode to be used by the CL tuner */
     int         num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
     std::string tuner_file{ "acl_tuner.csv" };         /**< File to load/store tuning values from */

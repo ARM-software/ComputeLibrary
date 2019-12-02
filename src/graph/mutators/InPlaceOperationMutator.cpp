@@ -35,6 +35,11 @@ const char *InPlaceOperationMutator::name()
     return "InPlaceOperationMutator";
 }
 
+IGraphMutator::MutationType InPlaceOperationMutator::type() const
+{
+    return IGraphMutator::MutationType::Backend;
+}
+
 void InPlaceOperationMutator::mutate(Graph &g)
 {
     std::set<NodeType> in_place_nodes = { NodeType::BatchNormalizationLayer, NodeType::ActivationLayer };

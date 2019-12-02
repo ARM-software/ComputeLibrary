@@ -85,10 +85,11 @@ void force_target_to_graph(Graph &g, Target target);
 /** Creates a default @ref PassManager
  *
  * @param[in] target Target to create the pass manager for
+ * @param[in] cfg    Graph configuration meta-data
  *
  * @return A PassManager with default mutating passes
  */
-PassManager create_default_pass_manager(Target target);
+PassManager create_default_pass_manager(Target target, const GraphConfig &cfg);
 /** Setups requested backend context if it exists, is supported and hasn't been initialized already.
  *
  * @param[in,out] ctx    Graph Context.

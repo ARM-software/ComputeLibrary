@@ -51,6 +51,9 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
         ARM_COMPUTE_ERROR("Graph is already registered!");
     }
 
+    // Apply IR mutating passes
+    pm.run_type(graph, IGraphMutator::MutationType::IR);
+
     // Force target to all graph construct
     // TODO (COMPMID-2014) : Support heterogeneous execution
     Target forced_target = target;
@@ -68,8 +71,8 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Configure all tensors
     detail::configure_all_tensors(graph);
 
-    // Apply all mutating passes
-    pm.run_all(graph);
+    // Apply backend mutating passes
+    pm.run_type(graph, IGraphMutator::MutationType::Backend);
 
     // Perform topological sort
     std::vector<NodeID> topological_sorted_nodes = dfs(graph);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,11 @@ namespace graph
 const char *SplitLayerSubTensorMutator::name()
 {
     return "SplitLayerSubTensorMutator";
+}
+
+IGraphMutator::MutationType SplitLayerSubTensorMutator::type() const
+{
+    return IGraphMutator::MutationType::Backend;
 }
 
 void SplitLayerSubTensorMutator::mutate(Graph &g)

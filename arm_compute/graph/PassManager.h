@@ -78,12 +78,18 @@ public:
      * @param[in, out] g Graph to run the mutations on
      */
     void run_all(Graph &g);
+    /** Runs a mutation passes of a specific type on a given graph
+     *
+     * @param[in, out] g    Graph to run the mutation on
+     * @param[in]      type Type of the mutations to execute
+     */
+    void run_type(Graph &g, IGraphMutator::MutationType type);
     /** Runs a specific mutation pass on a given graph
      *
      * @param[in, out] g     Graph to run the mutation on
      * @param[in]      index Index of the mutation to execute
      */
-    void run(Graph &g, size_t index);
+    void run_index(Graph &g, size_t index);
 
 private:
     std::vector<std::unique_ptr<IGraphMutator>> _passes; /**< Vector of graph passes */

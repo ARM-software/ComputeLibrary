@@ -64,9 +64,6 @@ public:
             return false;
         }
 
-        // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-
         // Print parameter values
         std::cout << common_params << std::endl;
 
@@ -235,10 +232,11 @@ public:
 
         // Finalize graph
         GraphConfig config;
-        config.num_threads = common_params.threads;
-        config.use_tuner   = common_params.enable_tuner;
-        config.tuner_mode  = common_params.tuner_mode;
-        config.tuner_file  = common_params.tuner_file;
+        config.num_threads      = common_params.threads;
+        config.use_tuner        = common_params.enable_tuner;
+        config.tuner_mode       = common_params.tuner_mode;
+        config.tuner_file       = common_params.tuner_file;
+        config.convert_to_uint8 = (common_params.data_type == DataType::QASYMM8);
 
         graph.finalize(common_params.target, config);
 

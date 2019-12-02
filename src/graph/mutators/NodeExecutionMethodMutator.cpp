@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,6 +71,11 @@ void set_default_on_invalid_method(Graph &g, NodeType node_type, Setter &&setter
 const char *NodeExecutionMethodMutator::name()
 {
     return "NodeExecutionMethodMutator";
+}
+
+IGraphMutator::MutationType NodeExecutionMethodMutator::type() const
+{
+    return IGraphMutator::MutationType::Backend;
 }
 
 void NodeExecutionMethodMutator::mutate(Graph &g)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,20 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_GROUPED_CONVOLUTION_MUTATOR_H
-#define ARM_COMPUTE_GRAPH_GROUPED_CONVOLUTION_MUTATOR_H
+#ifndef ARM_COMPUTE_GRAPH_SYNTHETIC_DATA_TYPE_MUTATOR_H
+#define ARM_COMPUTE_GRAPH_SYNTHETIC_DATA_TYPE_MUTATOR_H
 
+#include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/IGraphMutator.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-/** Mutation pass to implement/optimize grouped convolutions
- *
- * @warning This is compulsory to run in case of grouped convolutions
- **/
-class GroupedConvolutionMutator final : public IGraphMutator
+/** Mutation pass to create synthetic graphs of a given data type */
+class SyntheticDataTypeMutator final : public IGraphMutator
 {
 public:
     // Inherited methods overridden
@@ -44,4 +42,4 @@ public:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_GROUPED_CONVOLUTION_MUTATOR_H */
+#endif /* ARM_COMPUTE_GRAPH_SYNTHETIC_DATA_TYPE_MUTATOR_H */

@@ -74,13 +74,17 @@ void force_target_to_graph(Graph &g, Target target)
     }
 }
 
-PassManager create_default_pass_manager(Target target)
+PassManager create_default_pass_manager(Target target, const GraphConfig &cfg)
 {
     PassManager pm;
 
     const bool is_target_gc = target == Target::GC;
 
     // Passes that mutate graph IR
+    if(cfg.convert_to_uint8)
+    {
+        pm.append(support::cpp14::make_unique<SyntheticDataTypeMutator>(), !is_target_gc);
+    }
     pm.append(support::cpp14::make_unique<NodeFusionMutator>(), !is_target_gc);
     pm.append(support::cpp14::make_unique<GroupedConvolutionMutator>());
     pm.append(support::cpp14::make_unique<InPlaceOperationMutator>(), !is_target_gc);
