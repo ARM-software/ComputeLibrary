@@ -37,13 +37,14 @@ class ITensor;
  * This kernel takes a final int32 accumulator value (the output of @ref NEGEMMLowpMatrixMultiplyKernel),
  * and adds to it the offset contribution of matrix A and matrix B in-place.
  *
- * The output stage can perform either QuantizeDownInt32ToUint8Scale or QuantizeDownInt32ToUint8ScaleByFixedPoint.
+ * The output stage can perform either QuantizeDownInt32ToUint8Scale or QuantizeDownInt32ToUint8ScaleByFixedPoint for Uint8.
+ * The output stage can perform either QuantizeDownInt32ToInt8Scale or QuantizeDownInt32ToInt8ScaleByFixedPoint for Int8.
  *
- * For QuantizeDownInt32ToUint8Scale the final result is:
+ * For QuantizeDownInt32ToUint8Scale/QuantizeDownInt32ToInt8Scale the final result is:
  *
  * ((mm_result'[i][k] + result_offset) * result_mult_int) >> result_shift
  *
- * For QuantizeDownInt32ToUint8ScaleByFixedPoint the final result is:
+ * For QuantizeDownInt32ToUint8ScaleByFixedPoint/QuantizeDownInt32ToInt8ScaleByFixedPoint the final result is:
  *
  * (FixedPointMul(mm_result'[i][k], result_fixedpoint_multiplier) >> result_shift) + result_offset_after_shift
  *

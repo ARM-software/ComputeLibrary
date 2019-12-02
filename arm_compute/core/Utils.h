@@ -549,6 +549,72 @@ inline DataType get_promoted_data_type(DataType dt)
     return DataType::UNKNOWN;
 }
 
+/** Compute the mininum and maximum values a data type can take
+ *
+ * @param[in] dt Data type to get the min/max bounds of
+ *
+ * @return A tuple (min,max) with the minimum and maximum values respectively wrapped in PixelValue.
+ */
+inline std::tuple<PixelValue, PixelValue> get_min_max(DataType dt)
+{
+    PixelValue min(0);
+    PixelValue max(0);
+    switch(dt)
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+        {
+            min = PixelValue(std::numeric_limits<uint8_t>::lowest());
+            max = PixelValue(std::numeric_limits<uint8_t>::max());
+            break;
+        }
+        case DataType::S8:
+        case DataType::QSYMM8:
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8_PER_CHANNEL:
+        {
+            min = PixelValue(std::numeric_limits<int8_t>::lowest());
+            max = PixelValue(std::numeric_limits<int8_t>::max());
+            break;
+        }
+        case DataType::U16:
+        case DataType::QASYMM16:
+        {
+            min = PixelValue(std::numeric_limits<uint16_t>::lowest());
+            max = PixelValue(std::numeric_limits<uint16_t>::max());
+            break;
+        }
+        case DataType::S16:
+        case DataType::QSYMM16:
+        {
+            min = PixelValue(std::numeric_limits<int16_t>::lowest());
+            max = PixelValue(std::numeric_limits<int16_t>::max());
+            break;
+        }
+        case DataType::U32:
+        {
+            min = PixelValue(std::numeric_limits<uint32_t>::lowest());
+            max = PixelValue(std::numeric_limits<uint32_t>::max());
+            break;
+        }
+        case DataType::S32:
+        {
+            min = PixelValue(std::numeric_limits<int32_t>::lowest());
+            max = PixelValue(std::numeric_limits<int32_t>::max());
+            break;
+        }
+        case DataType::F32:
+        {
+            min = PixelValue(std::numeric_limits<float>::lowest());
+            max = PixelValue(std::numeric_limits<float>::max());
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Undefined data type!");
+    }
+    return std::make_tuple(min, max);
+}
+
 /** Return true if the given format has horizontal subsampling.
  *
  * @param[in] format Format to determine subsampling.
@@ -1048,6 +1114,23 @@ inline bool is_data_type_quantized_asymmetric(DataType dt)
         case DataType::QASYMM8:
         case DataType::QASYMM8_SIGNED:
         case DataType::QASYMM16:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/** Check if a given data type is of asymmetric quantized signed type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of asymmetric quantized signed type, else false.
+ */
+inline bool is_data_type_quantized_asymmetric_signed(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QASYMM8_SIGNED:
             return true;
         default:
             return false;

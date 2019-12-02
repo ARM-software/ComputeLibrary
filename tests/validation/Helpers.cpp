@@ -122,6 +122,19 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 }
 
 template <>
+SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<int8_t> &src)
+{
+    const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
+    SimpleTensor<float>            dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
+
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        dst[i] = dequantize_qasymm8_signed(src[i], quantization_info);
+    }
+    return dst;
+}
+
+template <>
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src)
 {
     const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
@@ -156,19 +169,6 @@ SimpleTensor<int8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const
     for(int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantize_qasymm8_signed(src[i], qinfo);
-    }
-    return dst;
-}
-
-template <>
-SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<int8_t> &src)
-{
-    const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
-    SimpleTensor<float>            dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
-
-    for(int i = 0; i < src.num_elements(); ++i)
-    {
-        dst[i] = dequantize_qasymm8_signed(src[i], quantization_info);
     }
     return dst;
 }
@@ -351,6 +351,15 @@ std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, flo
 
     const int min_bound = quantize_qasymm8(min, quant_info.uniform());
     const int max_bound = quantize_qasymm8(max, quant_info.uniform());
+    return std::pair<int, int> { min_bound, max_bound };
+}
+
+std::pair<int, int> get_quantized_qasymm8_signed_bounds(const QuantizationInfo &quant_info, float min, float max)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(min > max, "min must be lower equal than max");
+
+    const int min_bound = quantize_qasymm8_signed(min, quant_info.uniform());
+    const int max_bound = quantize_qasymm8_signed(max, quant_info.uniform());
     return std::pair<int, int> { min_bound, max_bound };
 }
 

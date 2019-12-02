@@ -59,7 +59,9 @@ void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const I
 Status NEConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1,
+                                                         DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
     if(biases != nullptr)
@@ -114,11 +116,12 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
-        const QuantizationInfo        iqinfo  = input->info()->quantization_info();
-        const QuantizationInfo        wqinfo  = weights->info()->quantization_info();
-        const QuantizationInfo        oqinfo  = (output->info()->total_size() == 0) ? iqinfo : output->info()->quantization_info();
-        const UniformQuantizationInfo uiqinfo = iqinfo.uniform();
-        const UniformQuantizationInfo uoqinfo = oqinfo.uniform();
+        const QuantizationInfo        iqinfo    = input->info()->quantization_info();
+        const QuantizationInfo        wqinfo    = weights->info()->quantization_info();
+        const QuantizationInfo        oqinfo    = (output->info()->total_size() == 0) ? iqinfo : output->info()->quantization_info();
+        const UniformQuantizationInfo uiqinfo   = iqinfo.uniform();
+        const UniformQuantizationInfo uoqinfo   = oqinfo.uniform();
+        const DataType                data_type = input->info()->data_type();
 
         input->info()->set_quantization_info(QuantizationInfo(uiqinfo.scale, -uiqinfo.offset));
         if(!is_data_type_quantized_per_channel(weights->info()->data_type()))
@@ -128,23 +131,28 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         }
 
         // Merge activation with output stage
-        int min_activation = 0;
-        int max_activation = 255;
+        PixelValue type_min = 0;
+        PixelValue type_max = 0;
+        std::tie(type_min, type_max) = get_min_max(data_type);
+        int min_activation = type_min.get<int>();
+        int max_activation = type_max.get<int>();
 
         if(supported_acts.count(act_info.activation()) != 0)
         {
-            const int a_const_int = quantize_qasymm8(act_info.a(), uoqinfo);
-            const int b_const_int = quantize_qasymm8(act_info.b(), uoqinfo);
+            const bool is_quantized_signed = is_data_type_quantized_asymmetric_signed(data_type);
+            const int  a_const_int         = is_quantized_signed ? quantize_qasymm8_signed(act_info.a(), uoqinfo) : quantize_qasymm8(act_info.a(), uoqinfo);
+            const int  b_const_int         = is_quantized_signed ? quantize_qasymm8_signed(act_info.b(), uoqinfo) : quantize_qasymm8(act_info.b(), uoqinfo);
 
             min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? uoqinfo.offset : b_const_int;
-            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
+            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? max_activation : a_const_int;
         }
 
         GEMMLowpOutputStageInfo output_info;
-        output_info.type               = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-        output_info.gemmlowp_offset    = uoqinfo.offset;
-        output_info.gemmlowp_min_bound = min_activation;
-        output_info.gemmlowp_max_bound = max_activation;
+        output_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+        output_info.gemmlowp_offset          = uoqinfo.offset;
+        output_info.gemmlowp_min_bound       = min_activation;
+        output_info.gemmlowp_max_bound       = max_activation;
+        output_info.is_quantized_per_channel = (weights->info()->data_type() == DataType::QSYMM8_PER_CHANNEL);
         quantization::calculate_quantized_multipliers_less_than_one(iqinfo, wqinfo, oqinfo, output_info);
 
         _mm_gemmlowp.configure(input, weights, biases, output, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info));
@@ -163,8 +171,9 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
 Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
                                            const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col)
 {
-    const bool is_quantized          = is_data_type_quantized_asymmetric(input->data_type());
-    const bool is_activation_enabled = act_info.enabled();
+    const DataType data_type             = input->data_type();
+    const bool     is_quantized          = is_data_type_quantized_asymmetric(data_type);
+    const bool     is_activation_enabled = act_info.enabled();
 
     // Create GEMMInfo structure
     const GEMMInfo gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
@@ -181,8 +190,11 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         const UniformQuantizationInfo uoqinfo = oqinfo.uniform();
 
         // Merge activation with output stage
-        int min_activation = 0;
-        int max_activation = 255;
+        PixelValue type_min = 0;
+        PixelValue type_max = 0;
+        std::tie(type_min, type_max) = get_min_max(data_type);
+        int min_activation = type_min.get<int>();
+        int max_activation = type_max.get<int>();
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
@@ -190,18 +202,20 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
                                                                                  };
         if(is_activation_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            const int a_const_int = quantize_qasymm8(act_info.a(), uoqinfo);
-            const int b_const_int = quantize_qasymm8(act_info.b(), uoqinfo);
+            const bool is_quantized_signed = is_data_type_quantized_asymmetric_signed(data_type);
+            const int  a_const_int         = is_quantized_signed ? quantize_qasymm8_signed(act_info.a(), uoqinfo) : quantize_qasymm8(act_info.a(), uoqinfo);
+            const int  b_const_int         = is_quantized_signed ? quantize_qasymm8_signed(act_info.b(), uoqinfo) : quantize_qasymm8(act_info.b(), uoqinfo);
 
             min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? uoqinfo.offset : b_const_int;
-            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
+            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? max_activation : a_const_int;
         }
 
         GEMMLowpOutputStageInfo output_info;
-        output_info.type               = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-        output_info.gemmlowp_offset    = uoqinfo.offset;
-        output_info.gemmlowp_min_bound = min_activation;
-        output_info.gemmlowp_max_bound = max_activation;
+        output_info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+        output_info.gemmlowp_offset          = uoqinfo.offset;
+        output_info.gemmlowp_min_bound       = min_activation;
+        output_info.gemmlowp_max_bound       = max_activation;
+        output_info.is_quantized_per_channel = (weights->data_type() == DataType::QSYMM8_PER_CHANNEL);
         ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multipliers_less_than_one(iqinfo, wqinfo, oqinfo, output_info));
 
         // Perform validation step on GEMMLowp
@@ -387,8 +401,8 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Grouping (num_groups != 1) is not supported on NEON");
 

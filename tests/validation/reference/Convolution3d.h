@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_VALIDATION_CONVOLUTION_H
 #define ARM_COMPUTE_TEST_VALIDATION_CONVOLUTION_H
 
+#include "arm_compute/core/utils/misc/Requires.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"
@@ -94,10 +95,8 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<TW> &wei
 }
 
 // 3D convolution for QASYMM8 type
-template < typename T, typename TW, typename TB, typename std::enable_if < std::is_same<T, uint8_t>::value &&(std::is_same<TW, uint8_t>::value
-                                                                                                              || std::is_same<TW, int8_t>::value)
-                                                                           &&std::is_same<TB, int32_t>::value,
-                                                                           int >::type = 0 >
+template < typename T, typename TW, typename TB, REQUIRES_TA((std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) &&(std::is_same<TW, uint8_t>::value
+                                                             || std::is_same<TW, int8_t>::value)) >
 inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &out,
                           int i_offset, int w_offset, int b_offset, int o_offset,
                           int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x = 1, int dilation_y = 1, int filter_id = 0)
@@ -172,7 +171,8 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<TW> &wei
     acc += (*b_ptr);
 
     // Quantize down
-    acc = validation::quantize_down_scale_by_fixedpoint(acc, output_multiplier, output_shift, output_offset, 0, 255);
+    acc = validation::quantize_down_scale_by_fixedpoint(acc, output_multiplier, output_shift, output_offset,
+                                                        std::numeric_limits<T>::lowest(), std::numeric_limits<T>::max());
 
     // Store the result
     *out_ptr = acc;

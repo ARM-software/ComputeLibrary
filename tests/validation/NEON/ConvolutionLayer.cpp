@@ -462,6 +462,19 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>
 }
 TEST_SUITE_END() // QASYMM8
 
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true })),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                       QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
 TEST_SUITE(QSYMM8_PER_CHANNEL)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),

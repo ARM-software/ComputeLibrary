@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ class NECol2Im : public INESimpleFunctionNoBorder
 public:
     /** Configure the col2im NEON kernel
      *
-     * @param[in]  input          The input tensor to convert. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input          The input tensor to convert. Data types supported: Any
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                            while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in]  convolved_dims Output convolved dimensions.
@@ -47,7 +47,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const Size2D &convolved_dims);
     /** Static function to check if given info will lead to a valid configuration of @ref NECol2Im
      *
-     * @param[in] input          The input tensor to convert. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input          The input tensor to convert. Data types supported: Any
      * @param[in] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                           while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in] convolved_dims Output convolved dimensions.
