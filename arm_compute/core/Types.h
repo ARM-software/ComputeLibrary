@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1866,10 +1866,10 @@ struct DepthwiseConvolutionReshapeInfo
 /** GEMMLowp output stage type */
 enum class GEMMLowpOutputStageType
 {
-    NONE,                     /**< No quantization to uint8 */
-    QUANTIZE_DOWN,            /**< Quantize to uint8 using an integer multiplication */
-    QUANTIZE_DOWN_FIXEDPOINT, /**< Quantize to uint8 using a fixed point multiplication */
-    QUANTIZE_DOWN_FLOAT       /**< Quantize to uint8 using a floating point multiplication */
+    NONE,                     /**< No quantization */
+    QUANTIZE_DOWN,            /**< Quantize using an integer multiplication */
+    QUANTIZE_DOWN_FIXEDPOINT, /**< Quantize using a fixed point multiplication */
+    QUANTIZE_DOWN_FLOAT       /**< Quantize using a floating point multiplication */
 };
 
 /** GEMMLowp output stage info */
@@ -1884,6 +1884,7 @@ struct GEMMLowpOutputStageInfo
     std::vector<int32_t>    gemmlowp_multipliers{};                /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
     std::vector<int32_t>    gemmlowp_shifts{};                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
     bool                    is_quantized_per_channel{ false };     /**< GEMMLowp quantized per-channel flag */
+    DataType                output_data_type{ DataType::UNKNOWN }; /**< Output tensor data type to use if the output is not initialized */
 };
 
 /** GEMM LHS (Left Hand Side) matrix information */
