@@ -37,7 +37,7 @@ constexpr float   epsilon            = 0.00001f;
 
 Status calculate_quantized_multiplier(float multiplier, int *quant_multiplier, int *shift)
 {
-    if(multiplier > 1.f)
+    if(multiplier >= 1.f)
     {
         Status status = calculate_quantized_multiplier_greater_than_one(multiplier, quant_multiplier, shift);
         *shift *= -1;
@@ -57,13 +57,6 @@ Status calculate_quantized_multiplier_less_than_one(float multiplier,
     ARM_COMPUTE_RETURN_ERROR_ON(right_shift == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(multiplier < -epsilon);
     ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f + epsilon);
-    if(std::fabs(1.0f - multiplier) < epsilon)
-    {
-        *quant_multiplier = 1;
-        *right_shift      = 0;
-        return Status{};
-    }
-
     if(std::fabs(0.0f - multiplier) < epsilon)
     {
         *quant_multiplier = 0;
