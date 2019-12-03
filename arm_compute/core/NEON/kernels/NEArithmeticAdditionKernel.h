@@ -64,19 +64,20 @@ public:
      *   - (F16,F16)         -> F16
      *   - (F32,F32)         -> F32
      *   - (QASYMM8,QASYMM8) -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
      *   - (QSYMM16,QSYMM16) -> QSYMM16
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
+     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in]  policy Overflow policy.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAdditionKernel
      *
-     * @param[in] input1 An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32
-     * @param[in] input2 An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32
-     * @param[in] output The output tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
+     * @param[in] input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in] input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in] policy Overflow policy.
      *
      * @return a status

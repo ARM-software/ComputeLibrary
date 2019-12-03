@@ -60,6 +60,8 @@ const auto ArithmeticAdditionFP32Dataset = combine(combine(framework::dataset::m
                                                    framework::dataset::make("DataType", DataType::F32));
 const auto ArithmeticAdditionQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
                                                       framework::dataset::make("DataType", DataType::QASYMM8));
+const auto ArithmeticAdditionQASYMM8SIGNEDDataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                      framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
 const auto ArithmeticAdditionQSYMM16Dataset = combine(combine(framework::dataset::make("DataType", DataType::QSYMM16), framework::dataset::make("DataType", DataType::QSYMM16)),
                                                       framework::dataset::make("DataType", DataType::QSYMM16));
 } // namespace
@@ -105,28 +107,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
-{
-    // Create tensors
-    Tensor ref_src1 = create_tensor<Tensor>(shape, DataType::U8);
-    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::U8);
-    Tensor dst      = create_tensor<Tensor>(shape, DataType::U8);
-
-    // Create and Configure function
-    NEArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(ref_src1.info()->padding(), PaddingSize());
-    validate(ref_src2.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),
                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
@@ -136,29 +116,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, data_type, policy)
-{
-    // Create tensors
-    Tensor ref_src1 = create_tensor<Tensor>(shape, data_type);
-    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::S16);
-    Tensor dst      = create_tensor<Tensor>(shape, DataType::S16);
-
-    // Create and Configure function
-    NEArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(ref_src1.info()->padding(), PaddingSize());
-    validate(ref_src2.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionS16Dataset),
                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
@@ -188,28 +145,6 @@ TEST_SUITE_END() // F16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(F32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
-{
-    // Create tensors
-    Tensor ref_src1 = create_tensor<Tensor>(shape, DataType::F32);
-    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::F32);
-    Tensor dst      = create_tensor<Tensor>(shape, DataType::F32);
-
-    // Create and Configure function
-    NEArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(ref_src1.info()->padding(), PaddingSize());
-    validate(ref_src2.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP32Dataset),
                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
@@ -250,28 +185,6 @@ using NEArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantiz
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-               shape, policy)
-{
-    // Create tensors
-    Tensor ref_src1 = create_tensor<Tensor>(shape, DataType::QASYMM8);
-    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::QASYMM8);
-    Tensor dst      = create_tensor<Tensor>(shape, DataType::QASYMM8);
-
-    // Create and Configure function
-    NEArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(ref_src1.info()->padding(), PaddingSize());
-    validate(ref_src2.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEArithmeticAdditionQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
@@ -289,29 +202,27 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 #endif //__aarch64__
 }
 TEST_SUITE_END() // QASYMM8
-TEST_SUITE(QSYMM16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-               shape, policy)
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEArithmeticAdditionQuantizedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQASYMM8SIGNEDDataset),
+                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                               framework::dataset::make("Src0QInfo", { QuantizationInfo(0.5f, 20) })),
+                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(0.5f, 10) })),
+                               framework::dataset::make("OutQInfo", { QuantizationInfo(0.5f, 5) })))
 {
-    // Create tensors
-    Tensor ref_src1 = create_tensor<Tensor>(shape, DataType::QSYMM16);
-    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::QSYMM16);
-    Tensor dst      = create_tensor<Tensor>(shape, DataType::QSYMM16);
-
-    // Create and Configure function
-    NEArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    validate(ref_src1.info()->padding(), PaddingSize());
-    validate(ref_src2.info()->padding(), PaddingSize());
-    validate(dst.info()->padding(), PaddingSize());
+    // Validate output
+#ifdef __aarch64__
+    validate(Accessor(_target), _reference);
+#else  //__aarch64__
+    validate(Accessor(_target), _reference, tolerance_quant);
+#endif //__aarch64__
 }
+TEST_SUITE_END() // QASYMM8_SIGNED
 
+TEST_SUITE(QSYMM16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEArithmeticAdditionQuantizedFixture<int16_t>,
                        framework::DatasetMode::PRECOMMIT,

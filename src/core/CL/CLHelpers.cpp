@@ -44,7 +44,6 @@ std::string get_cl_type_from_data_type(const DataType &dt)
         case DataType::S8:
         case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8:
-        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             return "char";
         case DataType::U16:
