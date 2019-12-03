@@ -69,7 +69,16 @@ template <typename TypeInput, typename TypeOutput>
 class FallbackTransform : public ITransformWeights
 {
 public:
-    void run() override
+    FallbackTransform() noexcept {};
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    FallbackTransform(const FallbackTransform &) = delete;
+    /** Default move constructor */
+    FallbackTransform(FallbackTransform &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    FallbackTransform &operator=(const FallbackTransform &) = delete;
+    /** Default move assignment operator */
+    FallbackTransform &operator=(FallbackTransform &&) = default;
+    void               run() override
     {
         _output.allocator()->allocate();
         ARM_COMPUTE_ERROR_ON(_output.buffer() == nullptr);

@@ -51,7 +51,7 @@ struct KernelDescription
     bool         is_default  = false;
 
     KernelDescription(GemmMethod m, std::string n, bool d=false) : method(m), name(n), is_default(d) { }
-    KernelDescription() { }
+    KernelDescription() noexcept  { }
 };
 
 struct GemmConfig

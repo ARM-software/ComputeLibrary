@@ -47,14 +47,15 @@ namespace
 constexpr AbsoluteTolerance<float> absolute_tolerance_float(0.0001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<float>           tolerance_f32(0.1f);               /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 constexpr float                    tolerance_num = 0.07f;             /**< Tolerance number */
-
+} // namespace
+#ifndef DOXYGEN_SKIP_THIS
 using NENormLayerWrapper = SimpleFunctionWrapper<MemoryManagerOnDemand, NENormalizationLayer, ITensor>;
 template <>
 void NENormLayerWrapper::configure(arm_compute::ITensor *src, arm_compute::ITensor *dst)
 {
     _func.configure(src, dst, NormalizationLayerInfo(NormType::CROSS_MAP, 3));
 }
-} // namespace
+#endif // DOXYGEN_SKIP_THIS
 TEST_SUITE(NEON)
 TEST_SUITE(UNIT)
 TEST_SUITE(DynamicTensor)

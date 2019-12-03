@@ -43,15 +43,15 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
+#ifndef DOXYGEN_SKIP_THIS
 using GCNormLayerWrapper = SimpleFunctionWrapper<MemoryManagerOnDemand, GCNormalizationLayer, IGCTensor>;
 template <>
 void GCNormLayerWrapper::configure(IGCTensor *src, IGCTensor *dst)
 {
     _func.configure(src, dst, NormalizationLayerInfo(NormType::CROSS_MAP, 3));
 }
-} // namespace
+#endif // DOXYGEN_SKIP_THIS
+
 TEST_SUITE(GC)
 TEST_SUITE(UNIT)
 TEST_SUITE(DynamicTensor)
