@@ -846,6 +846,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         }
         case DataType::S8:
         case DataType::QSYMM8:
+        case DataType::QASYMM8_SIGNED:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<int8_t, D>::value));
             std::uniform_int_distribution<int8_t> distribution_s8(low, high);

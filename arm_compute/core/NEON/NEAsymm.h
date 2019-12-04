@@ -451,6 +451,30 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, float scale, int32_t offs
     return vdequantized_input;
 }
 
+/** Dequantize a vector of 16 values stored as signed asymmetric.
+ *
+ * @param[in] qv     Input values to be dequantized.
+ * @param[in] scale  Quantization scaling factor.
+ * @param[in] offset Zero quantization offset.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x4_t vdequantize(const int8x16_t &qv, float scale, int32_t offset)
+{
+    const int32x4_t     voffset = vdupq_n_s32(offset);
+    const float32x4_t   vscale  = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input =
+    {
+        {
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(qv)))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(qv)))), voffset)), vscale),
+        }
+    };
+    return vdequantized_input;
+}
+
 /** Dequantize following symmetric quantization scheme a neon vector holding 16 quantized values.
  *
  * @param[in] qv     Input values to be dequantized.
