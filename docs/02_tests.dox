@@ -401,6 +401,7 @@ To run the OpenCL precommit benchmark tests with OpenCL kernel timers in milisec
 
 	LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^CL.*" --instruments="opencl_timer_ms" --iterations=10
 
+@note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was build with OpenCL enabled.
 */
 } // namespace test
 } // namespace arm_compute

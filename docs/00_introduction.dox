@@ -1205,6 +1205,7 @@ i.e. to natively compile the "graph_lenet" example for Linux 64bit:
 @note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
 
 @note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L
+@note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was build with OpenCL enabled.
 
 To run the built executable simply run:
 
