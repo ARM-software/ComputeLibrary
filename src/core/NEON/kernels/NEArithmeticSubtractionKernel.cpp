@@ -113,6 +113,38 @@ void sub_saturate_QAYSMM8_QAYSMM8_QAYSMM8(const ITensor *in1, const ITensor *in2
     input1, input2, output);
 }
 
+void sub_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
+    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
+    Iterator output(out, window);
+
+    const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
+
+    execute_window_loop(window, [&](const Coordinates &)
+    {
+        const float32x4x4_t ta1 = vdequantize(vld1q_s8(reinterpret_cast<const qasymm8_signed_t *>(input1.ptr())), iq1_info);
+        const float32x4x4_t ta2 = vdequantize(vld1q_s8(reinterpret_cast<const qasymm8_signed_t *>(input2.ptr())), iq2_info);
+
+        const float32x4x4_t ta3 =
+        {
+            {
+                vsubq_f32(ta1.val[0], ta2.val[0]),
+                vsubq_f32(ta1.val[1], ta2.val[1]),
+                vsubq_f32(ta1.val[2], ta2.val[2]),
+                vsubq_f32(ta1.val[3], ta2.val[3]),
+            }
+        };
+
+        const int8x16_t result = vquantize_signed(ta3, oq_info);
+
+        vst1q_s8(reinterpret_cast<qasymm8_signed_t *>(output.ptr()), result);
+    },
+    input1, input2, output);
+}
+
 void sub_wrap_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
@@ -357,9 +389,9 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
 {
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
@@ -367,6 +399,7 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
         !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8)
         && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8)
+        && !(input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED)
         && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8)
         && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16)
         && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8)
@@ -376,8 +409,9 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
         "You called subtract with the wrong image formats");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && policy == ConvertPolicy::WRAP,
-        "Convert policy cannot be WRAP if datatype is QASYMM8");
+        input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED && policy == ConvertPolicy::WRAP
+        && input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && policy == ConvertPolicy::WRAP,
+        "Convert policy cannot be WRAP if datatype is QASYMM8 or QASYMM8_SIGNED");
 
     // Validate in case of configured output
     if(output.total_size() > 0)
@@ -385,6 +419,7 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(
             !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::U8)
             && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8)
+            && !(input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED && output.data_type() == DataType::QASYMM8_SIGNED)
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
@@ -463,6 +498,7 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
         { "sub_saturate_U8_U8_U8", &sub_saturate_U8_U8_U8 },
         { "sub_saturate_U8_U8_S16", &sub_saturate_U8_U8_S16 },
         { "sub_saturate_QASYMM8_QASYMM8_QASYMM8", &sub_saturate_QAYSMM8_QAYSMM8_QAYSMM8 },
+        { "sub_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &sub_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED },
         { "sub_wrap_U8_S16_S16", &sub_wrap_U8_S16_S16 },
         { "sub_wrap_S16_U8_S16", &sub_wrap_S16_U8_S16 },
         { "sub_saturate_U8_S16_S16", &sub_saturate_U8_S16_S16 },
