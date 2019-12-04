@@ -49,12 +49,16 @@ public:
     CLPermuteKernel &operator=(CLPermuteKernel &&) = default;
     /** Set the input and output of the kernel.
      *
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
+     *
      * @param[in] input  The input tensor to permute. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[in] output The output tensor. Data types supported: Same as @p input
      * @param[in] perm   Permutation vector
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPermuteKernel
+     *
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
      *
      * @param[in] input  First tensor input info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
      * @param[in] output Output tensor info. Data types supported: same as @p input.
