@@ -1,0 +1,4 @@
+<map id="NEArgMinMaxLayer" name="NEArgMinMaxLayer">
+<area shape="rect" id="node1" title="Function to calculate the index of the minimum or maximum values in a tensor based on an axis." alt="" coords="5,80,151,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="39,5,117,32"/>
+</map>
