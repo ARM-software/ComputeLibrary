@@ -202,7 +202,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyNativeFixture<float>, frame
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::DISABLED,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values_nightly,
                                                                    n_values_nightly),
@@ -239,7 +239,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyNative3DFixture<float>, f
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<float>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<float>, framework::DatasetMode::DISABLED,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values_nightly,
                                                                    m_h_values_nightly),
@@ -279,7 +279,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyNativeFixture<half>, framew
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<half>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<half>, framework::DatasetMode::DISABLED,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values_nightly,
                                                                    n_values_nightly),
@@ -316,7 +316,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyNative3DFixture<half>, fr
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<half>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<half>, framework::DatasetMode::DISABLED,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values_nightly,
                                                                    m_h_values_nightly),

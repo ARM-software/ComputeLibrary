@@ -209,7 +209,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall_2, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixtur
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture, framework::DatasetMode::DISABLED,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
@@ -265,7 +265,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D_2, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFi
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFixture, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFixture, framework::DatasetMode::DISABLED,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
