@@ -197,7 +197,7 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
         };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         map_function["op_F16"] = &select_op_16<float16_t, uint16x8_t>;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     }
     else
     {
@@ -213,7 +213,7 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
         };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         map_function["op_F16"] = &select_op_not_same_rank<float16_t>;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     }
 
     auto it = map_function.find(function_to_call);

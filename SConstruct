@@ -40,7 +40,9 @@ vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
-    EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64")),
+    EnumVariable("arch", "Target Architecture", "armv7a",
+                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64", "armv8a", "armv8.2-a", "armv8.2-a-sve", "x86")),
+    EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
@@ -164,48 +166,66 @@ if env['openmp']:
     env.Append(CXXFLAGS = ['-fopenmp'])
     env.Append(LINKFLAGS = ['-fopenmp'])
 
+# Validate and define state
+if env['estate'] == 'auto':
+    if 'v7a' in env['arch']:
+        env['estate'] = '32'
+    else:
+        env['estate'] = '64'
+
+# Map legacy arch
+if 'arm64' in env['arch']:
+    env['estate'] = '64'
+
+if 'v7a' in env['estate'] and env['estate'] == '64':
+    print("ERROR: armv7a architecture has only 32-bit execution state")
+    Exit(1)
+
 # Add architecture specific flags
 prefix = ""
-if env['arch'] == 'armv7a':
+if 'v7a' in env['arch']:
     env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
-
-    if env['os'] == 'linux':
-        prefix = "arm-linux-gnueabihf-"
-        env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
-    elif env['os'] == 'bare_metal':
-        prefix = "arm-eabi-"
-        env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
-    elif env['os'] == 'android':
-        prefix = "arm-linux-androideabi-"
+    if env['os'] == 'android':
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
-elif env['arch'] == 'arm64-v8a':
+    else:
+        env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
+elif 'v8a' in env['arch']:
     env.Append(CXXFLAGS = ['-march=armv8-a'])
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8A'])
-    if env['os'] == 'linux':
-        prefix = "aarch64-linux-gnu-"
-    elif env['os'] == 'bare_metal':
-        prefix = "aarch64-elf-"
-    elif env['os'] == 'android':
-        prefix = "aarch64-linux-android-"
-elif 'arm64-v8.2-a' in env['arch']:
-    if env['arch'] == 'arm64-v8.2-a-sve':
+    if env['estate'] == '32':
+        env.Append(CXXFLAGS = ['-mfpu=neon-fp-armv8'])
+elif 'v8.2-a' in env['arch']:
+    if env['estate'] == '32':
+        env.Append(CXXFLAGS = ['-mfpu=neon-fp-armv8'])
+    if 'sve' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
     else:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
-    if env['os'] == 'linux':
-        prefix = "aarch64-linux-gnu-"
-    elif env['os'] == 'bare_metal':
-        prefix = "aarch64-elf-"
-    elif env['os'] == 'android':
-        prefix = "aarch64-linux-android-"
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
-elif env['arch'] == 'x86_32':
-    env.Append(CCFLAGS = ['-m32'])
-    env.Append(LINKFLAGS = ['-m32'])
-elif env['arch'] == 'x86_64':
-    env.Append(CXXFLAGS = ['-fPIC'])
-    env.Append(CCFLAGS = ['-m64'])
-    env.Append(LINKFLAGS = ['-m64'])
+elif 'x86' in env['arch']:
+    if env['estate'] == '32':
+        env.Append(CCFLAGS = ['-m32'])
+        env.Append(LINKFLAGS = ['-m32'])
+    else:
+        env.Append(CXXFLAGS = ['-fPIC'])
+        env.Append(CCFLAGS = ['-m64'])
+        env.Append(LINKFLAGS = ['-m64'])
+
+# Define toolchain
+prefix = ""
+if 'x86' not in env['arch']:
+    if env['estate'] == '32':
+        if env['os'] == 'linux':
+            prefix = "arm-linux-gnueabihf-" if 'v7' in env['arch'] else "armv8l-linux-gnueabihf-"
+        elif env['os'] == 'bare_metal':
+            prefix = "arm-eabi-"
+        elif env['os'] == 'android':
+            prefix = "arm-linux-androideabi-"
+    elif env['estate'] == '64' and 'v8' in env['arch']:
+        if env['os'] == 'linux':
+            prefix = "aarch64-linux-gnu-"
+        elif env['os'] == 'bare_metal':
+            prefix = "aarch64-elf-"
+        elif env['os'] == 'android':
+            prefix = "aarch64-linux-android-"
 
 if env['build'] == 'native':
     prefix = ""

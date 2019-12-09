@@ -434,7 +434,7 @@ inline float16x8_t vexpq_f16(float16x8_t x)
     const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
     const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
 
-    const float16x8_t res = vcvt_high_f16_f32(vcvt_f16_f32(vexpq_f32(x_low)), vexpq_f32(x_high));
+    const float16x8_t res = vcombine_f16(vcvt_f16_f32(vexpq_f32(x_low)), vcvt_f16_f32(vexpq_f32(x_high)));
     return res;
 }
 
@@ -444,7 +444,7 @@ inline float16x8_t vlogq_f16(float16x8_t x)
     const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
     const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
 
-    const float16x8_t res = vcvt_high_f16_f32(vcvt_f16_f32(vlogq_f32(x_low)), vlogq_f32(x_high));
+    const float16x8_t res = vcombine_f16(vcvt_f16_f32(vlogq_f32(x_low)), vcvt_f16_f32(vlogq_f32(x_high)));
     return res;
 }
 
