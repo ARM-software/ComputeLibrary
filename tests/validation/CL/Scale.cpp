@@ -62,7 +62,8 @@ const auto AlignCorners = framework::dataset::make("AlignCorners",
 });
 
 /** Tolerance */
-constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
+constexpr AbsoluteTolerance<uint8_t> tolerance_q8(1);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(1);
 constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
 constexpr float                      tolerance_f32_absolute(0.001f);
 
@@ -251,7 +252,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<uint8_t>, framework::DatasetMode
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
@@ -266,7 +267,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<uint8_t>, framework::DatasetMode
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
 }
 TEST_SUITE_END() // U8
 TEST_SUITE(S16)
@@ -322,7 +323,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<uint8_t>, framework::Da
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
                                                                                                                     framework::dataset::make("DataType",
@@ -339,9 +340,41 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<uint8_t>, framework::Da
     const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
 }
 TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                               datasets::BorderModes()),
+                                                                                                       datasets::SamplingPolicies()))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           datasets::SamplingPolicies()))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // Scale

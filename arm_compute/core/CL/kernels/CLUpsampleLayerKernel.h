@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input             Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input             Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output            Destination tensor. Data types supported: same as @p input.
      * @param[in]  info              Contains stride information described in @ref Size2D.
      * @param[in]  upsampling_policy Defines the policy to fill the intermediate pixels.
@@ -57,7 +57,7 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, const Size2D &info, const InterpolationPolicy upsampling_policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLUpsampleLayerKernel
      *
-     * @param[in] input             Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input             Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output            Destination tensor info. Data types supported: same as @p input.
      * @param[in] info              Contains  stride information described in @ref Size2D.
      * @param[in] upsampling_policy Defines the policy to fill the intermediate pixels.

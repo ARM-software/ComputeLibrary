@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -154,6 +154,7 @@ std::pair<int, int> get_min_max_values_from_quantized_data_type(DataType data_ty
             max_quant_val = std::numeric_limits<uint8_t>::max();
             break;
         case DataType::QSYMM8:
+        case DataType::QASYMM8_SIGNED:
             min_quant_val = std::numeric_limits<int8_t>::min();
             max_quant_val = std::numeric_limits<int8_t>::max();
             break;

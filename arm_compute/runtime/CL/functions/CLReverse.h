@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,14 +36,14 @@ class CLReverse : public ICLSimpleFunction
 public:
     /** Initialize the function
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  Input tensor. Data types supported: All.
      * @param[out] output Output tensor. Data type supported: Same as @p input
      * @param[in]  axis   Axis tensor. Contains the indices of the dimensions to reverse. Data type supported: U32
      */
     void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *axis);
     /** Static function to check if given info will lead to a valid configuration of @ref CLReverseKernel
      *
-     * @param[in] input  Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input  Input tensor info. Data types supported: All.
      * @param[in] output Output tensor info. Data type supported: Same as @p input
      * @param[in] axis   Axis tensor info. Contains the indices of the dimensions to reverse. Data type supported: U32
      *

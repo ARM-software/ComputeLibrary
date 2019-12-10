@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,10 +84,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+TEST_SUITE(Float)
 template <typename T>
 using CLUpsampleLayerFixture = UpsampleLayerFixture<CLTensor, CLAccessor, CLUpsampleLayer, T>;
-
-TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLUpsampleLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
@@ -115,6 +114,35 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLUpsampleLayerFixture<half>, framework::Datase
 
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Quantized)
+template <typename T>
+using CLUpsampleLayerQuantizedFixture = UpsampleLayerQuantizedFixture<CLTensor, CLAccessor, CLUpsampleLayer, T>;
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLUpsampleLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                      framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                      framework::dataset::make("PadInfo", { Size2D(2, 2) })),
+                                                                                                                      framework::dataset::make("UpsamplingPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLUpsampleLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                     framework::dataset::make("PadInfo", { Size2D(2, 2) })),
+                                                                                                                     framework::dataset::make("UpsamplingPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
+                                                                                                                     framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // UpsampleLayer
 TEST_SUITE_END() // CL

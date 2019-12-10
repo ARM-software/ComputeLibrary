@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ public:
     /** Set the input, output.
      *
      * @param[in]  input  Source tensor. Data types supported: F32/F16.
-     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM16.
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
      * @note Output auto initialization is not supported by this kernel
      */
@@ -60,7 +60,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLQuantizationLayerKernel
      *
      * @param[in] input  Input tensor info. Data types supported: F32/F16.
-     * @param[in] output Destination tensor info with the same dimensions of input. Data types supported: QASYMM8/QASYMM16.
+     * @param[in] output Destination tensor info with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
      * @return a status
      */

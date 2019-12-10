@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,11 +103,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-template <typename T>
-using NEROIAlignLayerFixture = ROIAlignLayerFixture<Tensor, Accessor, NEROIAlignLayer, T>;
+using NEROIAlignLayerFloatFixture = ROIAlignLayerFixture<Tensor, Accessor, NEROIAlignLayer, float, float>;
 
 TEST_SUITE(Float)
-FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerFloat, NEROIAlignLayerFixture<float>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerFloat, NEROIAlignLayerFloatFixture, framework::DatasetMode::ALL,
                        framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
                                                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -116,7 +115,8 @@ FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerFloat, NEROIAlignLayerFixture<float>, f
     validate(Accessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
 }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerHalf, NEROIAlignLayerFixture<half>, framework::DatasetMode::ALL,
+using NEROIAlignLayerHalfFixture = ROIAlignLayerFixture<Tensor, Accessor, NEROIAlignLayer, half, half>;
+FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerHalf, NEROIAlignLayerHalfFixture, framework::DatasetMode::ALL,
                        framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
                                                                                framework::dataset::make("DataType", { DataType::F16 })),
                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -131,7 +131,7 @@ TEST_SUITE_END() // Float
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 template <typename T>
-using NEROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<Tensor, Accessor, NEROIAlignLayer, T>;
+using NEROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<Tensor, Accessor, NEROIAlignLayer, T, uint16_t>;
 
 FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(datasets::SmallROIDataset(),

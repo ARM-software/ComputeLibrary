@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,14 +49,14 @@ public:
     ~CLReshapeLayerKernel() = default;
     /** Set the input and output of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in]  input  Source tensor. Data type supported: All.
      * @param[out] output Destination tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayerKernel
      *
-     * @param[in] input  Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in] input  Source tensor info. Data type supported: All
      * @param[in] output Destination tensor info. Data type supported: Same as @p input
      *
      * @return a status

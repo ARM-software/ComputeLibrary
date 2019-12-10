@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  weights    Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                        Data type supported: QASYMM8/QSYMM8_PER_CHANNEL/F16/F32.
+     *                        Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
      * @param[in]  biases     Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output     Destination tensor. Data types supported: Same as @p weights.
      * @param[in]  num_groups (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
@@ -65,7 +65,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvolutionLayerReshapeWeights
      *
      * @param[in] weights    Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                       Data type supported: QASYMM8/QSYMM8_PER_CHANNEL/F16/F32.
+     *                       Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
      * @param[in] biases     Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[in] output     Destination tensor. Data types supported: Same as @p weights.
      * @param[in] num_groups (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
@@ -88,7 +88,7 @@ class CLConvolutionLayerReshapeWeightsTransform : public ITransformWeights
 public:
     /** Configures the @ref CLConvolutionLayerReshapeWeights function
      *
-     * @param[in] input      Input tensor. Data type supported: QASYMM8/F16/F32.
+     * @param[in] input      Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] biases     Biases tensor. Data type supported: Same as @p input.
      * @param[in] num_groups Number of groups when performing a grouped convolution.
      */

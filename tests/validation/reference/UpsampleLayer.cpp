@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,6 +106,10 @@ template SimpleTensor<float> upsample_layer(const SimpleTensor<float> &src,
                                             const Size2D &info, const InterpolationPolicy policy);
 template SimpleTensor<half> upsample_layer(const SimpleTensor<half> &src,
                                            const Size2D &info, const InterpolationPolicy policy);
+template SimpleTensor<uint8_t> upsample_layer(const SimpleTensor<uint8_t> &src,
+                                              const Size2D &info, const InterpolationPolicy policy);
+template SimpleTensor<int8_t> upsample_layer(const SimpleTensor<int8_t> &src,
+                                             const Size2D &info, const InterpolationPolicy policy);
 } // namespace reference
 } // namespace validation
 } // namespace test

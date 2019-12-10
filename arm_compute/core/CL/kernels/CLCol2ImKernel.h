@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ public:
     ~CLCol2ImKernel() = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input          The input tensor to convert. Data types supported: QASYMM8/F16/F32
+     * @param[in]  input          The input tensor to convert. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                            while the rest represent batch of outputs. Data types supported: Same as @p input. Data layout: NCHW
      * @param[in]  convolved_dims Output convolved dimensions.
@@ -74,7 +74,7 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCol2ImKernel
      *
-     * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/F16/F32
+     * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                           while the rest represent batch of outputs. Data types supported: Same as @p input. Data layout: NCHW
      * @param[in] convolved_dims Output convolved dimensions.

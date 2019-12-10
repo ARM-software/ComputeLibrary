@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,6 +97,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(QuantizationS
 template <typename T>
 using CLQuantizationLayerQASYMM8Fixture = QuantizationValidationFixture<CLTensor, CLAccessor, CLQuantizationLayer, T, uint8_t>;
 template <typename T>
+using CLQuantizationLayerQASYMM8_SIGNEDFixture = QuantizationValidationFixture<CLTensor, CLAccessor, CLQuantizationLayer, T, int8_t>;
+template <typename T>
 using CLQuantizationLayerQASYMM16Fixture = QuantizationValidationFixture<CLTensor, CLAccessor, CLQuantizationLayer, T, uint16_t>;
 
 TEST_SUITE(Float)
@@ -104,6 +106,14 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8, CLQuantizationLayerQASYMM8Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
                        framework::dataset::make("DataTypeIn", DataType::F32)),
                        framework::dataset::make("DataTypeOut", { DataType::QASYMM8 })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallQASYMM8_SIGNED, CLQuantizationLayerQASYMM8_SIGNEDFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(QuantizationSmallShapes,
+                       framework::dataset::make("DataTypeIn", DataType::F32)),
+                       framework::dataset::make("DataTypeOut", { DataType::QASYMM8_SIGNED })),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output

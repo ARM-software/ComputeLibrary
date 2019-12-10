@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,8 @@
 #include "arm_compute/core/Error.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void CLPermute::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLPermuteKernel>();
@@ -42,3 +42,4 @@ Status CLPermute::validate(const ITensorInfo *input, const ITensorInfo *output, 
     ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(input, output, perm));
     return Status{};
 }
+} // namespace arm_compute

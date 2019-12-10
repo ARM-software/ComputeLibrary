@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,14 +41,14 @@ public:
     CLBatchToSpaceLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape 1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output      Tensor output. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
     /** Set the input and output tensors. (Static block shape).
      *
-     * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
      * @param[out] output        Tensor output. Data types supported: same as @p input
@@ -56,7 +56,7 @@ public:
     void configure(const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayer
      *
-     * @param[in]  input       Tensor input info. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape block shape tensor info with shape [M]. Data types supported: S32
      * @param[out] output      Tensor output info. Data types supported: same as @p input
      *
@@ -65,7 +65,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayer (Static block shape).
      *
-     * @param[in]  input         Tensor input info. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input         Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
      * @param[out] output        Tensor output info. Data types supported: same as @p input

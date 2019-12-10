@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,15 +26,15 @@
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
 #define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
 #define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
-#define VEC_UCHAR VEC_DATA_TYPE(uchar, VEC_SIZE)
+#define VEC_QUANT VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
 #define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
-inline VEC_UCHAR requantize(VEC_UCHAR input, float in_offset, float out_offset, float in_scale, float out_scale)
+inline VEC_QUANT requantize(VEC_QUANT input, float in_offset, float out_offset, float in_scale, float out_scale)
 {
     const VEC_FLOAT in_f32  = (CONVERT(input, VEC_FLOAT) - (VEC_FLOAT)((float)in_offset)) * (VEC_FLOAT)((float)in_scale);
     const VEC_FLOAT out_f32 = in_f32 / ((VEC_FLOAT)(float)out_scale) + ((VEC_FLOAT)((float)out_offset));
-    const VEC_UCHAR res_u8  = CONVERT_SAT(CONVERT_DOWN(out_f32, VEC_INT), VEC_UCHAR);
-    return res_u8;
+    const VEC_QUANT res_q8  = CONVERT_SAT(CONVERT_DOWN(out_f32, VEC_INT), VEC_QUANT);
+    return res_q8;
 }
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
@@ -319,7 +319,7 @@ __kernel void concatenate_width(
     source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
-    const VEC_UCHAR out = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+    const VEC_QUANT out = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
     VSTORE(VEC_SIZE)
     (out, 0, (__global DATA_TYPE *)(dst.ptr) + WIDTH_OFFSET);
 #else  /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
@@ -372,7 +372,7 @@ __kernel void concatenate_height(
     source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
-    const VEC_UCHAR out = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+    const VEC_QUANT out = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
     VSTORE(VEC_SIZE)
     (out, 0, (__global DATA_TYPE *)(dst.ptr + HEIGHT_OFFSET * dst_stride_y));
 #else  /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */

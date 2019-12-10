@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,7 @@ public:
 
     /** Initialise the kernel's source and destination.
      *
-     * @param[in]  input        Input tensor. Supported data types: F16/F32.
+     * @param[in]  input        Input tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in]  bias         Bias tensor to be added directly during the reshape operation. Supported data types: same as @p input.  Supported data layouts: same as @p input.
      * @param[out] output       Output tensor with the following shape: [stride_x * (input_width - 1) + filter_width - 2 * padx, stride_y * (input_height - 1) + filter_height - 2 * pady, ofms, batch_size]
      *                          Supported data types: same as @p input.  Supported data layouts: same as @p input.
@@ -71,7 +71,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref  CLDeconvolutionReshapeOutputKernel.
      *
-     * @param[in] input        GEMM output tensor info to be reshaped. Supported data types: F16/F32.
+     * @param[in] input        GEMM output tensor info to be reshaped. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in] bias         (Optional) Optional bias tensor info to be added directly during the reshape operation. Supported data types: same as @p input.  Supported data layouts: same as @p input.
      * @param[in] output       Reshaped output tensor info. Supported data types: same as @p input.  Supported data layouts: same as @p input.
      * @param[in] input_info   Original input tensor info. Supported data types: same as @p input.  Supported data layouts: same as @p input.

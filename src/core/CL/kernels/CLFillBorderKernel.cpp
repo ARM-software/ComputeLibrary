@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,6 +115,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
                 set_constant_border<uint8_t>(idx, constant_border_value);
                 break;
             case DataType::S8:
+            case DataType::QASYMM8_SIGNED:
                 set_constant_border<int8_t>(idx, constant_border_value);
                 break;
             case DataType::U16:

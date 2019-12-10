@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,7 +117,7 @@ inline const VEC_DATA_TYPE(DATA_TYPE, 4) bilinear_interpolate_with_border_quanti
                           ((inf32.s8 * b.s4 * b.s5) + (inf32.s9 * a.s4 * b.s5) + (inf32.sa * b.s4 * a.s5) + (inf32.sb * a.s4 * a.s5)),
                           ((inf32.sc * b.s6 * b.s7) + (inf32.sd * a.s6 * b.s7) + (inf32.se * b.s6 * a.s7) + (inf32.sf * a.s6 * a.s7)));
 
-    const uchar4 res = convert_uchar4_sat(convert_int4_sat_rtp(fr / scale) + offset_qasymm);
+    const VEC_DATA_TYPE(DATA_TYPE, 4) res = CONVERT_SAT(convert_int4_sat_rtp(fr / scale) + offset_qasymm, VEC_DATA_TYPE(DATA_TYPE, 4));
 
     return res;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,14 +52,14 @@ public:
     ~CLWidthConcatenate2TensorsKernel() = default;
     /** Initialise the kernel's input1s and output
      *
-     * @param[in]  input1 First input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input1 First input tensor. Data types supported: All.
      * @param[in]  input2 Second input tensor. Data types supported: same as @p input1
      * @param[out] output Output tensor. Data types supported: Same as @p input1.
      */
     void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLWidthConcatenate2TensorsKernel
      *
-     * @param[in] input1 First tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input1 First tensor info. Data types supported: All.
      * @param[in] input2 Second tensor info. Data types supported: same as @p input1
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      *

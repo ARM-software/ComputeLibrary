@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,8 @@
 
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLStackLayer::CLStackLayer() // NOLINT
     : _input(),
       _stack_kernels(),
@@ -87,3 +87,4 @@ void CLStackLayer::run()
         CLScheduler::get().enqueue(_stack_kernels[i], false);
     }
 }
+} // namespace arm_compute

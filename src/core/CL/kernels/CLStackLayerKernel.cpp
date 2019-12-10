@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,18 +38,17 @@
 
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::U8, DataType::S8,
-                                                         DataType::U16, DataType::S16, DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(idx_input >= num_tensors);
     ARM_COMPUTE_RETURN_ERROR_ON(axis > input->num_dimensions());
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
@@ -134,3 +133,4 @@ void CLStackLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     add_4D_tensor_argument(idx, _output, slice_out);
     enqueue(queue, *this, slice_in, lws_hint());
 }
+} // namespace arm_compute

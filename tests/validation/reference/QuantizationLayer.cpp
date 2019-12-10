@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,11 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
         case DataType::QASYMM8_SIGNED:
             for(int i = 0; i < src.num_elements(); ++i)
             {
-                dst[i] = quantize_qasymm8_signed((src[i]), qinfo, rounding_policy);
+#ifdef __aarch64__
+                dst[i] = quantize_qasymm8_signed((src[i]), qinfo, RoundingPolicy::TO_NEAREST_EVEN);
+#else  // __aarch64__
+                dst[i] = quantize_qasymm8_signed((src[i]), qinfo, RoundingPolicy::TO_ZERO);
+#endif // __aarch64__
             }
             break;
         case DataType::QASYMM16:
@@ -73,12 +77,12 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
     return dst;
 }
 
+template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 template SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
-template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
-template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: F16/32.
-     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM16.
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
      * @note Output auto initialization is not supported by this function
      */
@@ -51,7 +51,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLQuantizationLayer
      *
      * @param[in] input  Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: F16/32.
-     * @param[in] output Output tensor info. Data types supported: QASYMM8/QASYMM16.
+     * @param[in] output Output tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
      * @return a status
      */

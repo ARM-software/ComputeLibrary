@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ class CLReorgLayer : public ICLSimpleFunction
 public:
     /** Initialise the function's source and destination.
      *
-     * @param[in]  input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input  Source tensor. Data types supported: All.
      * @param[out] output Destination tensor with tensor shape:
      *                    [width_input / stride, height_input / stride, channels_input * stride * stride, batch_size]. This means the output has
      *                    the same number of input elements. Data types supported: same as @p input.
@@ -47,7 +47,7 @@ public:
     void configure(ICLTensor *input, ICLTensor *output, int32_t stride);
     /** Static function to check if given info will lead to a valid configuration of @ref CLReorgLayer
      *
-     * @param[in] input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input  Source tensor. Data types supported: All.
      * @param[in] output Destination tensor with tensor shape:
      *                   [width_input / stride, height_input / stride, channels_input * stride * stride, batch_size]. This means the output has
      *                   the same number of input elements. Data types supported: same as @p input. Data types supported: same as @p input.

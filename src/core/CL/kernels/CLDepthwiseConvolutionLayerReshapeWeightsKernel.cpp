@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,7 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const DepthwiseConvolutionReshapeInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
@@ -51,6 +52,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(info.c0 != 4);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_h) != 3);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_w) != 3);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
 
     if(output->total_size() != 0)
     {

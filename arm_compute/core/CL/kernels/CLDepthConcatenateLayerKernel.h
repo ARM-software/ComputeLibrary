@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ public:
     ~CLDepthConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]     input        Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]     depth_offset The offset on the Z axis.
      * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
      *
@@ -63,7 +63,7 @@ public:
     void configure(const ICLTensor *input, unsigned int depth_offset, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLDepthConcatenateLayerKernel
      *
-     * @param[in] input        Input tensor info. Data types supported: QASYMM8/F16/F32
+     * @param[in] input        Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in] depth_offset The offset on the Z axis.
      * @param[in] output       Output tensor info. Data types supported: Same as @p input.
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,19 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
     return ((float)input - offset) * scale;
 }
 
+/** Dequantize a scalar value from signed 8-bit asymmetric to floating-point
+ *
+ * @param[in] input  Input value to quantize
+ * @param[in] offset Quantization offset
+ * @param[in] scale  Quantization scale
+ *
+ * @return quantized value
+ */
+inline float dequantize_qasymm8_signed(char input, float offset, float scale)
+{
+    return ((float)input - offset) * scale;
+}
+
 /** Quantize a vector of values from floating-point
  *
  * @param[in] type Output data type.
@@ -91,7 +104,7 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
 #define DEQUANTIZE_IMPL(type, size)                                                                                       \
     inline VEC_DATA_TYPE(float, size) dequantize_##type##size(VEC_DATA_TYPE(type, size) input, float offset, float scale) \
     {                                                                                                                     \
-        return (CONVERT(input, VEC_DATA_TYPE(float, 4)) - offset) * scale;                                                \
+        return (CONVERT(input, VEC_DATA_TYPE(float, size)) - offset) * scale;                                             \
     }
 
 /** Correctly-rounded-to-nearest division by a power-of-two.
@@ -384,10 +397,14 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
 #define ASYMM_ROUNDING_HALF_SUM(a, b, size) asymm_rounding_half_sum##size(a, b)
 #define ASYMM_RESCALE(value, src_integer_bits, dst_integer_bits, size) asymm_rescale##size(value, src_integer_bits, dst_integer_bits)
 
+QUANTIZE_IMPL(uchar, 1)
+QUANTIZE_IMPL(char, 1)
 QUANTIZE_IMPL(uchar, 4)
 QUANTIZE_IMPL(ushort, 4)
 QUANTIZE_IMPL(short, 4)
 
+DEQUANTIZE_IMPL(uchar, 1)
+DEQUANTIZE_IMPL(char, 1)
 DEQUANTIZE_IMPL(uchar, 4)
 DEQUANTIZE_IMPL(ushort, 4)
 DEQUANTIZE_IMPL(short, 4)
