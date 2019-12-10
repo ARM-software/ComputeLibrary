@@ -64,26 +64,18 @@ inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *i
     ARM_COMPUTE_UNUSED(rounding_policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::U8 && (input1->data_type() != DataType::U8 || input2->data_type() != DataType::U8),
                                     "Output can only be U8 if both inputs are U8");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() == DataType::QASYMM8 && input2->data_type() != DataType::QASYMM8,
-                                    "Input2 must be QASYMM8 if input1 is QASYMM8");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() != DataType::QASYMM8 && input2->data_type() == DataType::QASYMM8,
-                                    "Input1 must be QASYMM8 if input2 is QASYMM8");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() == DataType::QSYMM16 && input2->data_type() != DataType::QSYMM16,
-                                    "Input2 must be QSYMM16 if input1 is QSYMM16");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() != DataType::QSYMM16 && input2->data_type() == DataType::QSYMM16,
-                                    "Input1 must be QSYMM16 if input2 is QSYMM16");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(input1->data_type()) && overflow_policy == ConvertPolicy::WRAP,
-                                    "ConvertPolicy cannot be WRAP if datatype is quantized");
+    if(is_data_type_quantized(input1->data_type())||
+       is_data_type_quantized(input2->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(overflow_policy == ConvertPolicy::WRAP,"ConvertPolicy cannot be WRAP if datatype is quantized");
+    }
 
     if(output->total_size() > 0)
     {
@@ -141,6 +133,10 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         else if(input1->data_type() == DataType::QASYMM8)
         {
             set_data_type_if_unknown(*output, DataType::QASYMM8);
+        }
+        else if(input1->data_type() == DataType::QASYMM8_SIGNED)
+        {
+            set_data_type_if_unknown(*output, DataType::QASYMM8_SIGNED);
         }
         else if(input1->data_type() == DataType::QSYMM16)
         {
@@ -236,6 +232,32 @@ inline void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(const void *__restrict in
     const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
 
     vst1q_u8(output, vcombine_u8(pa, pb));
+}
+
+inline void mul_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED_n(
+    const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr,
+    float scale, const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info,
+    const UniformQuantizationInfo &output_qua_info)
+
+{
+    const auto                input1   = static_cast<const qasymm8_signed_t *__restrict>(input1_ptr);
+    const auto                input2   = static_cast<const qasymm8_signed_t *__restrict>(input2_ptr);
+    const auto                output   = static_cast<qasymm8_signed_t *__restrict>(output_ptr);
+    const qasymm8x16_signed_t input1_q = vld1q_s8(input1);
+    const qasymm8x16_signed_t input2_q = vld1q_s8(input2);
+    // Dequantitize inputs
+    const float32x4x4_t           in1_f32x4x4  = vdequantize(input1_q, input1_qua_info);
+    const float32x4x4_t           in2_f32x4x4  = vdequantize(input2_q, input2_qua_info);
+    const UniformQuantizationInfo tmp_qua_info = { output_qua_info.scale / scale, output_qua_info.offset };
+    const float32x4x4_t           out_f32x4x4 =
+    {
+        vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
+        vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
+        vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
+        vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
+    };
+    const int8x16_t result = vquantize_signed(out_f32x4x4, tmp_qua_info);
+    vst1q_s8(output, result);
 }
 
 void mul_saturate_QSYMM16_QSYMM16_QSYMM16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
@@ -603,6 +625,10 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
     if(dt_input1 == DataType::QASYMM8 && dt_input2 == DataType::QASYMM8)
     {
         _run_optimized_qasymm8 = true;
+    }
+    else if(dt_input1 == DataType::QASYMM8_SIGNED && dt_input2 == DataType::QASYMM8_SIGNED)
+    {
+        _func_quantized = &mul_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED_n;
     }
     else if(dt_input1 == DataType::QSYMM16 && dt_input2 == DataType::QSYMM16)
     {
