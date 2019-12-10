@@ -59,6 +59,9 @@ public:
             case DataType::QASYMM8:
                 value.u8 = quantize_qasymm8(static_cast<uint8_t>(v), qinfo);
                 break;
+            case DataType::QASYMM8_SIGNED:
+                value.u8 = quantize_qasymm8_signed(static_cast<int8_t>(v), qinfo);
+                break;
             case DataType::QSYMM8:
                 value.s8 = quantize_qsymm8(static_cast<int8_t>(v), qinfo);
                 break;
@@ -311,5 +314,5 @@ public:
         return val;
     }
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_PIXELVALUE_H */

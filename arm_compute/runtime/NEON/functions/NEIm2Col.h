@@ -32,6 +32,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Basic function to run @ref NEIm2ColKernel */
@@ -43,7 +44,7 @@ public:
     /** Configure the im2col NEON kernel
      *
      * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
+     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      *                         Note: QASYMM8 works only for has_bias = false
      * @param[out] output      The output tensor. Data types supported: Same as @p input
      * @param[in]  kernel_dims The kernel dimensions (width and height).
@@ -57,7 +58,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEIm2Col
      *
      * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                        while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
+     *                        while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      *                        Note: QASYMM8 works only for has_bias = false
      * @param[in] output      The output tensor. Data types supported: Same as @p input
      * @param[in] kernel_dims The kernel dimensions (width and height).

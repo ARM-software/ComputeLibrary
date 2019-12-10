@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,8 @@
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();
@@ -45,3 +45,4 @@ Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 
     return Status{};
 }
+} // namespace arm_compute

@@ -29,6 +29,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the select kernel
@@ -60,7 +61,7 @@ public:
     /** Common signature for all the specialised elementwise functions
      *
      * @param[in]  c      Condition input tensor. Data types supported: U8.
-     * @param[in]  x      First input tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  x      First input tensor. Data types supported: All.
      * @param[out] y      Second input tensor. Data types supported: Same as @p x
      * @param[in]  output Output tensor. Data types supported: Same as @p x
      */
@@ -69,7 +70,7 @@ public:
     /** Validate the argument passed to the kernel
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.
-     * @param[in] x      First input tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in] x      First input tensor. Data types supported: All.
      * @param[in] y      Second input tensor. Data types supported: Same as @p x
      * @param[in] output Output tensor. Data types supported: Same as @p x.
      *
@@ -84,7 +85,7 @@ private:
     /** Common signature for all the specialised select functions
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.
-     * @param[in] x      First input tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in] x      First input tensor. Data types supported: All.
      * @param[in] y      Second input tensor. Data types supported: Same as @p x
      * @param[in] output Output tensor. Data types supported: Same as @p x.
      */

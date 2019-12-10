@@ -56,7 +56,7 @@ public:
      *
      * @note Supported input tensor rank: up to 4
      *
-     * @param[in]  input       Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input       Input tensor. Data types supported: All
      * @param[in]  axis        The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
      * @param[in]  idx_input   Index of the input tensor in the list of tensors to stack.
      *                         All tensors in the list must have the same shape
@@ -69,7 +69,7 @@ public:
      *
      * @note Supported input tensor rank: up to 4
      *
-     * @param[in] input       Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input       Input tensor info. Data types supported: All
      * @param[in] axis        The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
      * @param[in] idx_input   Index of the input tensor in the list of tensors to stack
      *                        All tensors in the list must have the same shape

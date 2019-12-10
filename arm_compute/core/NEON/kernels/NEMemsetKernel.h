@@ -55,7 +55,7 @@ public:
     NEMemsetKernel &operator=(NEMemsetKernel &&) = default;
     /** Initialise the kernel's tensor and filling value
      *
-     * @param[in,out] tensor         Input tensor to fill. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in,out] tensor         Input tensor to fill. Supported data types: All
      * @param[in]     constant_value The value used to fill the planes of the tensor
      */
     void configure(ITensor *tensor, const PixelValue &constant_value);

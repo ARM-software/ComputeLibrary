@@ -28,6 +28,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** NEON kernel which transposes the elements of a matrix in chunks of 1xW, where W is equal to (16 / element size of the tensor)
@@ -74,13 +75,13 @@ public:
     }
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QASYMM8/QSYMM8_PER_CHANNEL/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  Input tensor. Data types supported: All
      * @param[out] output Output tensor. Data type supported: same as @p input.
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMTranspose1xWKernel
      *
-     * @param[in] input  Input tensor info. Data types supported: U8/S8/QASYMM8/QSYMM8_PER_CHANNEL/U16/S16/F16/U32/S32/F32
+     * @param[in] input  Input tensor info. Data types supported: All
      * @param[in] output Output tensor info. Data type supported: same as @p input.
      *
      * @return a status

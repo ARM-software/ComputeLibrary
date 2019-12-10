@@ -29,6 +29,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the depth concatenate kernel.
@@ -55,7 +56,7 @@ public:
     ~NEDepthConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]     input        Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]     depth_offset The offset on the Z axis.
      * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
      *
@@ -66,7 +67,7 @@ public:
     void configure(const ITensor *input, unsigned int depth_offset, ITensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEDepthConcatenateLayerKernel
      *
-     * @param[in] input        Input tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input        Input tensor info. Data types supported:  QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] depth_offset The offset on the Z axis.
      * @param[in] output       Output tensor info. Data types supported: Same as @p input.
      *

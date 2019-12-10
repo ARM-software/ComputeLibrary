@@ -28,6 +28,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Basic function to execute NEGEMMTranspose1xWKernel. This function calls the following NEON kernels:
@@ -40,13 +41,13 @@ class NEGEMMTranspose1xW : public INESimpleFunctionNoBorder
 public:
     /** Initialise the kernel's inputs, output
      *
-     * @param[in]  input  First input tensor. Data type supported: U8/S8/QASYMM8/QSYMM8_PER_CHANNEL/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  First input tensor. Data type supported: All
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMTranspose1xW
      *
-     * @param[in] input  First input tensor. Data type supported: U8/S8/QASYMM8/QSYMM8_PER_CHANNEL/U16/S16/F16/U32/S32/F32
+     * @param[in] input  First input tensor. Data type supported: All
      * @param[in] output Output tensor. Data type supported: same as @p input
      *
      * @return a status

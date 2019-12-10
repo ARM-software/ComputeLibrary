@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,8 @@
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NECopy::configure(ITensor *input, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NECopyKernel>();
@@ -41,3 +41,4 @@ Status NECopy::validate(const arm_compute::ITensorInfo *input, const arm_compute
 {
     return NECopyKernel::validate(input, output);
 }
+} // namespace arm_compute

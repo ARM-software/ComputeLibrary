@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Kernel to perform other operation on NEON */
@@ -59,7 +60,7 @@ public:
     }
     /** Initialise the kernel's inputs and outputs
      *
-     * @param[in]  input   Source tensor. Supported tensor rank: up to 4. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in]  input   Source tensor. Supported tensor rank: up to 4. Data type supported: All
      * @param[in]  indices Indices tensor. Supported tensor rank: up to 1. Must be one of the following type: U32/S32. Each value Must be in range [0, input.shape[@p axis])
      * @param[out] output  Destination tensor. Data type supported: Same as @p input
      * @param[in]  axis    (Optional) The axis in @p input to gather @p indices from. Negative values wrap around. Defaults to 0
@@ -67,7 +68,7 @@ public:
     void configure(const ITensor *input, const ITensor *indices, ITensor *output, int axis = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGatherKernel
      *
-     * @param[in] input   Source tensor info. Supported tensor rank: up to 4. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in] input   Source tensor info. Supported tensor rank: up to 4. Data type supported: All
      * @param[in] indices Indices tensor info. Supported tensor rank: up to 1. Must be one of the following type: U32/S32. Each value Must be in range [0, input.shape[@p axis])
      * @param[in] output  Destination tensor info. Data type supported: Same as @p input
      * @param[in] axis    (Optional) The axis in @p input to gather @p indices from. Negative values wrap around. Defaults to 0

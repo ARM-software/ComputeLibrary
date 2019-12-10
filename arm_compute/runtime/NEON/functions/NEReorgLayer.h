@@ -38,7 +38,7 @@ class NEReorgLayer : public INESimpleFunctionNoBorder
 public:
     /** Initialise the kernel's inputs and outputs
      *
-     * @param[in]  input  First tensor input. Data type supported: U8/S8/QASYMM8//U16/S16/U32/S32/F16/F32
+     * @param[in]  input  First tensor input. Data type supported: All
      * @param[out] output Output tensor. Data type supported: Same as @p input
      * @param[in]  stride Stride to be used during data re-organization
      *                    It defines the spatial distance between 2 consecutive pixels in the x and y direction
@@ -47,7 +47,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReorgLayer
      *
-     * @param[in] input  First tensor info. Data type supported: U8/S8/QASYMM8//U16/S16/U32/S32/F16/F32
+     * @param[in] input  First tensor info. Data type supported: All
      * @param[in] output Output tensor info. Data type supported: Same as @p input
      * @param[in] stride Stride to be used during data re-organization
      *                   It defines the spatial distance between 2 consecutive pixels in the x and y direction

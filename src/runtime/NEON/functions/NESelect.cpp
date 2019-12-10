@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,6 @@
 
 #include "arm_compute/core/NEON/kernels/NESelectKernel.h"
 #include "arm_compute/core/Types.h"
-
-using namespace arm_compute;
 
 namespace arm_compute
 {

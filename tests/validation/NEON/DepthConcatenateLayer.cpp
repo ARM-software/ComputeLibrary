@@ -133,10 +133,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<uint8_t>, framew
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::ConcatenateLayerShapes(),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::QASYMM8)),
-                                                                                                                   framework::dataset::make("Axis", 2)))
+TEST_SUITE_END()
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small3DShapes(), datasets::Tiny4DShapes()),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QASYMM8_SIGNED)),
+                                                                                                                    framework::dataset::make("Axis", 2)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

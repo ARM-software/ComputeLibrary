@@ -38,6 +38,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding = PaddingList())
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(padding.size() > 4);
 
     // Validate output if initialized

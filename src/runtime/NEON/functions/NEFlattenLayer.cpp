@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,8 +27,8 @@
 #include "arm_compute/core/Size2D.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEFlattenLayer::configure(const ITensor *input, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEFlattenLayerKernel>();
@@ -40,3 +40,4 @@ Status NEFlattenLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 {
     return NEFlattenLayerKernel::validate(input, output);
 }
+} // namespace arm_compute

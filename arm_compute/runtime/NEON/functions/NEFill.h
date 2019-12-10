@@ -39,7 +39,7 @@ class NEFill : public INESimpleFunctionNoBorder
 public:
     /** Initialize the function
      *
-     * @param[in,out] tensor         Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in,out] tensor         Source tensor. Data types supported: All
      * @param[in]     constant_value Constant value to use to fill tensor.
      */
     void configure(ITensor *tensor, PixelValue constant_value);

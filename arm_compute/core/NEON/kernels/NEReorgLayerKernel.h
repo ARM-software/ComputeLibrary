@@ -53,7 +53,7 @@ public:
     ~NEReorgLayerKernel() = default;
     /** Set the input and output of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: U8/S8/U16/S16/QASYMM8/U32/S32/F16/F32
+     * @param[in]  input  Source tensor. Data type supported: All
      * @param[out] output Destination tensor. Data type supported: Same as @p input
      * @param[in]  stride Stride to be used during data re-organization.
      *                    It defines the spatial distance between 2 consecutive pixels in the x and y direction
@@ -62,7 +62,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReshapeLayerKernel
      *
-     * @param[in] input  Source tensor info. Data type supported: U8/S8/U16/S16/QASYMM8/U32/S32/F16/F32
+     * @param[in] input  Source tensor info. Data type supported: All
      * @param[in] output Destination tensor info. Data type supported: Same as @p input
      * @param[in] stride Stride to be used during data re-organization
      *                   It defines the spatial distance between 2 consecutive pixels in the x and y direction

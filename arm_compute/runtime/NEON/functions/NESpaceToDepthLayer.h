@@ -55,14 +55,14 @@ public:
     virtual ~NESpaceToDepthLayer() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[out] output      Tensor output. Data types supported: same as @p input
      * @param[in]  block_shape Block shape value
      */
     void configure(const ITensor *input, ITensor *output, int32_t block_shape);
     /** Static function to check if given info will lead to a valid configuration of @ref NESpaceToDepthLayer (Static block shape and paddings)
      *
-     * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in] output      Tensor output info. Data types supported: same as @p input
      * @param[in] block_shape Block shape value
      *

@@ -50,14 +50,14 @@ public:
     }
     /** Set the source, destination of the kernel
      *
-     * @param[in]  input     Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input     Source tensor. Data type supported: All.
      * @param[out] output    Destination tensor. Same as @p input
      * @param[in]  multiples Contains the number of times the input tensor should be replicated on the given dimension.
      */
     void configure(const ITensor *input, ITensor *output, const Multiples &multiples);
     /** Static function to check if given info will lead to a valid configuration of @ref NETileKernel
      *
-     * @param[in] input     Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input     Source tensor info. Data type supported: All.
      * @param[in] output    Destination tensor info. Same as @p input
      * @param[in] multiples Contains the number of times the input tensor should be replicated on the given dimension.
      *

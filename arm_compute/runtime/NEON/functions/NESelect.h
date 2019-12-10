@@ -39,7 +39,7 @@ public:
     /** Initialise the kernel's inputs and output.
      *
      * @param[in]  c      Condition input tensor. Data types supported: U8.
-     * @param[in]  x      First input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  x      First input tensor. Data types supported: All.
      * @param[in]  y      Second input tensor. Data types supported: Same as @p x
      * @param[out] output Output tensor. Data types supported: Same as @p x.
      */
@@ -47,7 +47,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NESelect
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.
-     * @param[in] x      First input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in] x      First input tensor. Data types supported: All.
      * @param[in] y      Second input tensor. Data types supported: Same as @p x
      * @param[in] output Output tensor. Data types supported: Same as @p x.
      *

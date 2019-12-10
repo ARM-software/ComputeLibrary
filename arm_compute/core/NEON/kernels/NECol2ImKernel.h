@@ -72,7 +72,7 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input          The input tensor to convert. Data types supported: Any
+     * @param[in]  input          The input tensor to convert. Data types supported: All
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                            while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in]  convolved_dims Output convolved dimensions.
@@ -80,7 +80,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const Size2D &convolved_dims);
     /** Static function to check if given info will lead to a valid configuration of @ref NECol2ImKernel
      *
-     * @param[in] input          The input tensor to convert. Data types supported: Any
+     * @param[in] input          The input tensor to convert. Data types supported: All
      * @param[in] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                           while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in] convolved_dims Output convolved dimensions.

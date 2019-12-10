@@ -41,5 +41,4 @@ Status NEGather::validate(const ITensorInfo *input, const ITensorInfo *indices, 
 {
     return NEGatherKernel::validate(input, indices, output, axis);
 }
-
 } // namespace arm_compute

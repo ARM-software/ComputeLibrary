@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,8 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEFillBorder::configure(ITensor *input, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value)
 {
     _border_handler.configure(input, BorderSize(border_width), border_mode, constant_border_value);
@@ -37,3 +37,4 @@ void NEFillBorder::run()
 {
     NEScheduler::get().schedule(&_border_handler, Window::DimZ);
 }
+} // namespace arm_compute

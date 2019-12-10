@@ -49,13 +49,13 @@ class NEFullyConnectedLayerReshapeWeights : public INESimpleFunctionNoBorder
 public:
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output Destination tensor. Data type supported: Same as @p input.
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEFullyConnectedLayerReshapeWeights
      *
-     * @param[in] input  Weights tensor info. The weights must be 2 dimensional. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Weights tensor info. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output Destination tensor info. Data type supported: Same as @p input.
      *
      * @return a status

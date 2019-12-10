@@ -45,7 +45,7 @@ public:
     NESplit();
     /** Initialise the kernel's input and outputs.
      *
-     * @param[in]  input   The input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input   The input tensor. Data types supported: All
      * @param[out] outputs A vector containing the output tensors. Data types supported: Same as @p input.
      *                     The output tensors should match the input tensor dimensions for all shape dimensions apart
      *                     from the split dimension.
@@ -54,7 +54,7 @@ public:
     void configure(const ITensor *input, const std::vector<ITensor *> &outputs, unsigned int axis);
     /** Static function to check if given info will lead to a valid configuration of @ref NESplit
      *
-     * @param[in] input   The input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input   The input tensor info. Data types supported: All
      * @param[in] outputs A vector containing the output tensors' info. Data types supported: Same as @p input.
      *                    The output tensors should match the input tensor dimensions for all shape dimensions apart
      *                    from the split dimension

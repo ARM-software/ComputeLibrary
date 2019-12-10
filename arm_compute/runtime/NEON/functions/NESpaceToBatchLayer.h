@@ -56,7 +56,7 @@ public:
     virtual ~NESpaceToBatchLayer() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape 1-D tensor with shape [M]. Data types supported: S32
      * @param[in]  paddings    2-D tensor with shape [2, M]. Data types supported: S32
      * @param[out] output      Tensor output. Data types supported: same as @p input
@@ -64,7 +64,7 @@ public:
     void configure(const ITensor *input, const ITensor *block_shape, const ITensor *paddings, ITensor *output);
     /** Set the input and output tensors. (Static block shape and paddings)
      *
-     * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
      * @param[in]  padding_left  The left padding of the output tensor.
@@ -74,7 +74,7 @@ public:
     void configure(const ITensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NESpaceToBatchLayer
      *
-     * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in] block_shape block shape tensor info with shape [M]. Data types supported: S32
      * @param[in] paddings    paddings tensor info with shape [2, M]. Data types supported: S32
      * @param[in] output      Tensor output info. Data types supported: same as @p input
@@ -84,7 +84,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NESpaceToBatchLayer (Static block shape and paddings)
      *
-     * @param[in] input         Tensor input info. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input         Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in] block_shape_x Block shape x value.
      * @param[in] block_shape_y Block shape y value.
      * @param[in] padding_left  The left padding of the output tensor.

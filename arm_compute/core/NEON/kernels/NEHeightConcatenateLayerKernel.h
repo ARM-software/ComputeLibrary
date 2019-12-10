@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the height concatenate kernel.
@@ -56,7 +57,7 @@ public:
     ~NEHeightConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input         Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]     input         Input tensor. Data types supported: All
      * @param[in]     height_offset The starting offset on the Y axis for the output tensor.
      * @param[in,out] output        Output tensor. Data types supported: Same as @p input.
      *
@@ -64,7 +65,7 @@ public:
     void configure(const ITensor *input, unsigned int height_offset, ITensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEHeightConcatenateLayerKernel
      *
-     * @param[in] input         Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input         Input tensor info. Data types supported: All
      * @param[in] height_offset The starting offset on the Y axis for the output tensor.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
      *

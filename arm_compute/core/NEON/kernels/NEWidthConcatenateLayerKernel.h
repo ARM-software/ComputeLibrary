@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the width concatenate kernel.
@@ -56,7 +57,7 @@ public:
     ~NEWidthConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]     input        Input tensor. Data types supported: All
      * @param[in]     width_offset The offset on the X axis.
      * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
      *
@@ -64,7 +65,7 @@ public:
     void configure(const ITensor *input, unsigned int width_offset, ITensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEWidthConcatenateLayerKernel
      *
-     * @param[in] input        Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input        Input tensor info. Data types supported: All
      * @param[in] width_offset The offset on the X axis.
      * @param[in] output       Output tensor info. Data types supported: Same as @p input.
      *

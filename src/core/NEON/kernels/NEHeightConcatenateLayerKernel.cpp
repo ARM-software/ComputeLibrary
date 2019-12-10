@@ -36,8 +36,8 @@
 
 #include <cstdint>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
@@ -58,10 +58,7 @@ Status validate_arguments(const ITensorInfo *input, unsigned int height_offset, 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8,
-                                                         DataType::U16, DataType::S16, DataType::F16,
-                                                         DataType::U32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(Window::DimX) != output->dimension(Window::DimX));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(Window::DimY) + height_offset > output->dimension(Window::DimY));
@@ -128,6 +125,15 @@ void NEHeightConcatenateLayerKernel::run(const Window &window, const ThreadInfo 
         },
         input, output);
     }
+    else if(dt == DataType::QASYMM8_SIGNED && input_qinfo != output_qinfo)
+    {
+        execute_window_loop(window, [&](const Coordinates &)
+        {
+            vst1q_s8(reinterpret_cast<int8_t *>(output_ptr + output.offset()),
+                     vquantize_signed(vdequantize(vld1q_s8(reinterpret_cast<int8_t *>(input.ptr())), input_qinfo), output_qinfo));
+        },
+        input, output);
+    }
     else
     {
         execute_window_loop(window, [&](const Coordinates &)
@@ -140,3 +146,4 @@ void NEHeightConcatenateLayerKernel::run(const Window &window, const ThreadInfo 
         input, output);
     }
 }
+} // namespace arm_compute

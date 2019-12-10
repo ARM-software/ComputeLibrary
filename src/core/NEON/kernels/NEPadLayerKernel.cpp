@@ -38,6 +38,8 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &paddings, const PaddingMode mode)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(mode != PaddingMode::CONSTANT, "Only constant padding mode is supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(paddings.size() > 4, "Padding list bigger than 4 dimensions");
     if(output->total_size() != 0)
