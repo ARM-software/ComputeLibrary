@@ -70,10 +70,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
         ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL)));
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
     }
-    else
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_float(input->data_type()), "Calling output stage kernel with floating point arguments");
-    }
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
