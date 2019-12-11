@@ -39,6 +39,42 @@ namespace misc
 {
 namespace shape_calculator
 {
+/** Calculate the output tensor shape for the reduce mean operation
+ *
+ * @param[in] input          Input tensor shape
+ * @param[in] reduction_axis Reduction axis
+ * @param[in] keep_dims      Flag to indicate if dimensions are kept
+ *
+ * @return the calculated shape
+ */
+inline TensorShape calculate_reduce_mean_shape(ITensor *input, const Coordinates &reduction_axis, bool keep_dims)
+{
+    const int   reduction_ops = reduction_axis.num_dimensions();
+    Coordinates axis_local    = reduction_axis;
+    const int   input_dims    = input->info()->num_dimensions();
+    convert_negative_axis(axis_local, input_dims);
+    TensorShape out_shape = input->info()->tensor_shape();
+    // Configure reshape layer if we want to drop the dimensions
+    if(!keep_dims)
+    {
+        // We have to sort the reduction axis vectors in order for remove_dimension
+        // to work properly
+        std::sort(axis_local.begin(), axis_local.begin() + reduction_ops);
+        for(int i = 0; i < reduction_ops; ++i)
+        {
+            out_shape.remove_dimension(axis_local[i] - i);
+        }
+        return out_shape;
+    }
+    else
+    {
+        for(int i = 0; i < reduction_ops; ++i)
+        {
+            out_shape.set(axis_local[i], 1);
+        }
+        return out_shape;
+    }
+}
 /** Calculate the output tensor shape of a vector input given the convolution dimensions
  *
  * @param[in] input       Input tensor shape
