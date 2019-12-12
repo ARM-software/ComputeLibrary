@@ -943,8 +943,8 @@ std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned i
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
-std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height,
-                                                        unsigned int kernel_width, unsigned int kernel_height,
+std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
+                                                        int kernel_width, int kernel_height,
                                                         const PadStrideInfo &pad_stride_info,
                                                         const Size2D        &dilation = Size2D(1U, 1U));
 
