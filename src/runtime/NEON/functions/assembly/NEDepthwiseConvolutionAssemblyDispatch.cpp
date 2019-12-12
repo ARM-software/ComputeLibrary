@@ -263,8 +263,8 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
 
         // Calculate rescale parameters
         const float fmultipler  = iqinfo.scale * wqinfo.scale / oqinfo.scale;
-        int         qmultiplier = 0;
-        int         qshift      = 0;
+        int32_t     qmultiplier = 0;
+        int32_t     qshift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(fmultipler, &qmultiplier, &qshift);
         qasymm8::QAsymm8RescaleParams rescale_params(qshift, qmultiplier, fmultipler);
 
@@ -285,15 +285,15 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
         const qasymm8::QAsymm8Params         oqinfo{ static_cast<uint8_t>(output_qinfo.offset), output_qinfo.scale };
 
         // Calculate rescale parameters
-        std::vector<float> fmultipliers;
-        std::vector<int>   qmultipliers;
-        std::vector<int>   qshifts;
+        std::vector<float>   fmultipliers;
+        std::vector<int32_t> qmultipliers;
+        std::vector<int32_t> qshifts;
 
         for(auto const s : wqinfo.scales)
         {
             const float fmultipler  = iqinfo.scale * s / oqinfo.scale;
-            int         qmultiplier = 0;
-            int         qshift      = 0;
+            int32_t     qmultiplier = 0;
+            int32_t     qshift      = 0;
             quantization::calculate_quantized_multiplier_less_than_one(fmultipler, &qmultiplier, &qshift);
             fmultipliers.push_back(fmultipler);
             qmultipliers.push_back(qmultiplier);

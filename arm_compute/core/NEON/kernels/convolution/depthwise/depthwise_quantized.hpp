@@ -31,31 +31,21 @@
 using namespace neon_convolution_kernels;
 using namespace qasymm8;
 
-template <typename T, typename U = int32_t>
-inline T saturating_doubling_high_mul(const T&, const U&);
-
-template <>
 inline int32x4_t saturating_doubling_high_mul(const int32x4_t& a, const int32x4_t& b)
 {
   return vqrdmulhq_s32(a, b);
 }
 
-template <>
 inline int32x4_t saturating_doubling_high_mul(const int32x4_t& a, const int32_t& b)
 {
   return vqrdmulhq_n_s32(a, b);
 }
 
-template <>
 inline int32_t saturating_doubling_high_mul(const int32_t& a, const int32_t& b)
 {
   return vget_lane_s32(vqrdmulh_n_s32(vdup_n_s32(a), b), 0);
 }
 
-template <typename T, typename U = int32_t>
-inline T rounding_divide_by_exp2(const T& x, const U exponent);
-
-template <>
 inline int32x4_t rounding_divide_by_exp2(const int32x4_t& x, const int32x4_t shift)
 {
   const int32x4_t fixup = vshrq_n_s32(vandq_s32(x, shift), 31);
@@ -63,7 +53,6 @@ inline int32x4_t rounding_divide_by_exp2(const int32x4_t& x, const int32x4_t shi
   return vrshlq_s32(fixed, shift);
 }
 
-template <>
 inline int32x4_t rounding_divide_by_exp2(const int32x4_t& x, const int exponent)
 {
   const int32x4_t shift = vdupq_n_s32(-exponent);
@@ -72,7 +61,6 @@ inline int32x4_t rounding_divide_by_exp2(const int32x4_t& x, const int exponent)
   return vrshlq_s32(fixed, shift);
 }
 
-template <>
 inline int32x2_t rounding_divide_by_exp2(const int32x2_t& x, const int exponent)
 {
   const int32x2_t shift = vdup_n_s32(-exponent);
@@ -81,7 +69,6 @@ inline int32x2_t rounding_divide_by_exp2(const int32x2_t& x, const int exponent)
   return vrshl_s32(fixed, shift);
 }
 
-template <>
 inline int32_t rounding_divide_by_exp2(const int32_t& x, const int exponent)
 {
   const int32x2_t xs = vdup_n_s32(x);

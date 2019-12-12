@@ -136,8 +136,8 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
     _output_lowp.allocator()->init(TensorInfo(_output_highp.info()->tensor_shape(), 1, DataType::QSYMM16, qsymm_3));
 
     const float multiplier        = 4096.f * qasymm.uniform().scale * qweights.uniform().scale;
-    int         output_multiplier = 0;
-    int         output_shift      = 0;
+    int32_t     output_multiplier = 0;
+    int32_t     output_shift      = 0;
     quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
     _memory_group.manage(&_output_lowp);
@@ -342,8 +342,8 @@ Status NELSTMLayerQuantized::validate(const ITensorInfo *input,
     const TensorInfo output_lowp(output_highp.tensor_shape(), 1, DataType::QSYMM16, qsymm_3);
 
     const float multiplier        = 4096.f * qasymm.uniform().scale * qweights.uniform().scale;
-    int         output_multiplier = 0;
-    int         output_shift      = 0;
+    int32_t     output_multiplier = 0;
+    int32_t     output_shift      = 0;
     ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
 
     // _output_stage

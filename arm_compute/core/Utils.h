@@ -557,15 +557,15 @@ inline DataType get_promoted_data_type(DataType dt)
  */
 inline std::tuple<PixelValue, PixelValue> get_min_max(DataType dt)
 {
-    PixelValue min(0);
-    PixelValue max(0);
+    PixelValue min{};
+    PixelValue max{};
     switch(dt)
     {
         case DataType::U8:
         case DataType::QASYMM8:
         {
-            min = PixelValue(std::numeric_limits<uint8_t>::lowest());
-            max = PixelValue(std::numeric_limits<uint8_t>::max());
+            min = PixelValue(static_cast<int32_t>(std::numeric_limits<uint8_t>::lowest()));
+            max = PixelValue(static_cast<int32_t>(std::numeric_limits<uint8_t>::max()));
             break;
         }
         case DataType::S8:
@@ -573,22 +573,22 @@ inline std::tuple<PixelValue, PixelValue> get_min_max(DataType dt)
         case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
         {
-            min = PixelValue(std::numeric_limits<int8_t>::lowest());
-            max = PixelValue(std::numeric_limits<int8_t>::max());
+            min = PixelValue(static_cast<int32_t>(std::numeric_limits<int8_t>::lowest()));
+            max = PixelValue(static_cast<int32_t>(std::numeric_limits<int8_t>::max()));
             break;
         }
         case DataType::U16:
         case DataType::QASYMM16:
         {
-            min = PixelValue(std::numeric_limits<uint16_t>::lowest());
-            max = PixelValue(std::numeric_limits<uint16_t>::max());
+            min = PixelValue(static_cast<int32_t>(std::numeric_limits<uint16_t>::lowest()));
+            max = PixelValue(static_cast<int32_t>(std::numeric_limits<uint16_t>::max()));
             break;
         }
         case DataType::S16:
         case DataType::QSYMM16:
         {
-            min = PixelValue(std::numeric_limits<int16_t>::lowest());
-            max = PixelValue(std::numeric_limits<int16_t>::max());
+            min = PixelValue(static_cast<int32_t>(std::numeric_limits<int16_t>::lowest()));
+            max = PixelValue(static_cast<int32_t>(std::numeric_limits<int16_t>::max()));
             break;
         }
         case DataType::U32:

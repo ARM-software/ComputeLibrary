@@ -40,7 +40,7 @@ namespace quantization
  *
  * @return a status
  */
-Status calculate_quantized_multiplier(float multiplier, int *quant_multiplier, int *shift);
+Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplier, int32_t *shift);
 /** Calculate quantized representation of multiplier with value less than one.
  *
  * @param[in]  multiplier       Real multiplier.
@@ -49,7 +49,7 @@ Status calculate_quantized_multiplier(float multiplier, int *quant_multiplier, i
  *
  * @return a status
  */
-Status calculate_quantized_multiplier_less_than_one(float multiplier, int *quant_multiplier, int *right_shift);
+Status calculate_quantized_multiplier_less_than_one(float multiplier, int32_t *quant_multiplier, int32_t *right_shift);
 /** Calculate quantized representation of multiplier having value greater than one.
  *
  * @param[in]  multiplier           Real multiplier.
@@ -58,7 +58,7 @@ Status calculate_quantized_multiplier_less_than_one(float multiplier, int *quant
  *
  * @return a status
  */
-Status calculate_quantized_multiplier_greater_than_one(float multiplier, int *quantized_multiplier, int *left_shift);
+Status calculate_quantized_multiplier_greater_than_one(float multiplier, int32_t *quantized_multiplier, int32_t *left_shift);
 
 /** Calculate quantized representation of per-channel multipliers with value less than one.
  *

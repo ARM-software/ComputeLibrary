@@ -528,8 +528,8 @@ void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, co
 
         for(size_t i = 0; i < weights_scale.size(); ++i)
         {
-            int         out_mult   = 0;
-            int         out_shift  = 0;
+            int32_t     out_mult   = 0;
+            int32_t     out_shift  = 0;
             const float multiplier = input_scale * weights_scale.at(i) / output_scale;
             ARM_COMPUTE_ERROR_ON(multiplier > 1.f);
             arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &out_mult, &out_shift);

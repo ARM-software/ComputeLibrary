@@ -35,7 +35,7 @@ namespace quantization
 constexpr int64_t fixed_point_one_Q0 = (1LL << 31);
 constexpr float   epsilon            = 0.00001f;
 
-Status calculate_quantized_multiplier(float multiplier, int *quant_multiplier, int *shift)
+Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplier, int32_t *shift)
 {
     if(multiplier >= 1.f)
     {
@@ -49,9 +49,9 @@ Status calculate_quantized_multiplier(float multiplier, int *quant_multiplier, i
     }
 }
 
-Status calculate_quantized_multiplier_less_than_one(float multiplier,
-                                                    int *quant_multiplier,
-                                                    int *right_shift)
+Status calculate_quantized_multiplier_less_than_one(float    multiplier,
+                                                    int32_t *quant_multiplier,
+                                                    int32_t *right_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quant_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(right_shift == nullptr);
@@ -64,9 +64,10 @@ Status calculate_quantized_multiplier_less_than_one(float multiplier,
         return Status{};
     }
 
-    const double q = std::frexp(multiplier, right_shift);
-    *right_shift *= -1;
-    auto q_fixed = static_cast<int64_t>(support::cpp11::round(q * fixed_point_one_Q0));
+    int          shift_exp = 0;
+    const double q         = std::frexp(multiplier, &shift_exp);
+    *right_shift           = -1 * shift_exp;
+    auto q_fixed           = static_cast<int64_t>(support::cpp11::round(q * fixed_point_one_Q0));
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > fixed_point_one_Q0);
     if(q_fixed == fixed_point_one_Q0)
     {
@@ -80,15 +81,18 @@ Status calculate_quantized_multiplier_less_than_one(float multiplier,
     return Status{};
 }
 
-Status calculate_quantized_multiplier_greater_than_one(float multiplier,
-                                                       int *quantized_multiplier,
-                                                       int *left_shift)
+Status calculate_quantized_multiplier_greater_than_one(float    multiplier,
+                                                       int32_t *quantized_multiplier,
+                                                       int32_t *left_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quantized_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(left_shift == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(multiplier < 1.f);
-    const double q       = std::frexp(multiplier, left_shift);
-    auto         q_fixed = static_cast<int64_t>(support::cpp11::round(q * fixed_point_one_Q0));
+
+    int          shift_exp = 0;
+    const double q         = std::frexp(multiplier, &shift_exp);
+    *left_shift            = shift_exp;
+    auto q_fixed           = static_cast<int64_t>(support::cpp11::round(q * fixed_point_one_Q0));
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > fixed_point_one_Q0);
     if(q_fixed == fixed_point_one_Q0)
     {
@@ -125,8 +129,8 @@ arm_compute::Status calculate_quantized_multipliers_less_than_one(const Quantiza
     for(unsigned int i = 0; i < size; ++i)
     {
         const float multiplier       = i_scale * w_scales[i] / o_scale;
-        int         quant_multiplier = 0;
-        int         quant_shift      = 0;
+        int32_t     quant_multiplier = 0;
+        int32_t     quant_shift      = 0;
         ARM_COMPUTE_RETURN_ON_ERROR(calculate_quantized_multiplier_less_than_one(multiplier, &quant_multiplier, &quant_shift));
         quant_multipliers[i] = quant_multiplier;
         quant_shifts[i]      = quant_shift;
@@ -181,8 +185,8 @@ void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
 
     for(unsigned int i = 0; i < num_filters; ++i)
     {
-        int         output_multiplier = 0;
-        int         output_shift      = 0;
+        int32_t     output_multiplier = 0;
+        int32_t     output_shift      = 0;
         const float multiplier        = iq_info.scale * wq_info.scale()[i] / oq_info.scale;
         calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 

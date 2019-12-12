@@ -255,9 +255,9 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
         const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        int   output_multiplier;
-        int   output_shift;
+        float   multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        int32_t output_multiplier;
+        int32_t output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
         _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, oq_info.offset);
         _gemmlowp_output.allocator()->allocate();

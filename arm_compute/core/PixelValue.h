@@ -103,6 +103,15 @@ public:
                 break;
         }
     }
+    /** Initialize the union with a S8 pixel value
+     *
+     * @param[in] v S8 value.
+     */
+    PixelValue(int8_t v)
+        : PixelValue()
+    {
+        value.s8 = v;
+    }
     /** Initialize the union with a U8 pixel value
      *
      * @param[in] v U8 value.

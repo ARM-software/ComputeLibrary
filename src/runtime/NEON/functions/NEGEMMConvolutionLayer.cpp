@@ -33,7 +33,8 @@
 #include <set>
 #include <tuple>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 NEConvolutionLayerReshapeWeights::NEConvolutionLayerReshapeWeights()
@@ -131,11 +132,11 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         }
 
         // Merge activation with output stage
-        PixelValue type_min = 0;
-        PixelValue type_max = 0;
+        PixelValue type_min{};
+        PixelValue type_max{};
         std::tie(type_min, type_max) = get_min_max(data_type);
-        int min_activation = type_min.get<int>();
-        int max_activation = type_max.get<int>();
+        int32_t min_activation = type_min.get<int32_t>();
+        int32_t max_activation = type_max.get<int32_t>();
 
         if(supported_acts.count(act_info.activation()) != 0)
         {
@@ -190,11 +191,11 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         const UniformQuantizationInfo uoqinfo = oqinfo.uniform();
 
         // Merge activation with output stage
-        PixelValue type_min = 0;
-        PixelValue type_max = 0;
+        PixelValue type_min{};
+        PixelValue type_max{};
         std::tie(type_min, type_max) = get_min_max(data_type);
-        int min_activation = type_min.get<int>();
-        int max_activation = type_max.get<int>();
+        int32_t min_activation = type_min.get<int32_t>();
+        int32_t max_activation = type_max.get<int32_t>();
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
@@ -595,3 +596,4 @@ void NEGEMMConvolutionLayer::prepare()
         _is_prepared = true;
     }
 }
+} // namespace arm_compute

@@ -202,9 +202,9 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
         const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = (output->info()->total_size() == 0) ? iq_info : output->info()->quantization_info().uniform();
 
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        int   output_multiplier;
-        int   output_shift;
+        float   multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        int32_t output_multiplier;
+        int32_t output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
         _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, output_multiplier, output_shift, oq_info.offset);
         _accumulator.allocator()->allocate();

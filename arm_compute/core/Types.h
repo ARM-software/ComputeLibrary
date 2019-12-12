@@ -1876,11 +1876,11 @@ enum class GEMMLowpOutputStageType
 struct GEMMLowpOutputStageInfo
 {
     GEMMLowpOutputStageType type{ GEMMLowpOutputStageType::NONE }; /**< GEMMLowp output stage type */
-    int                     gemmlowp_offset{ 0 };                  /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
-    int                     gemmlowp_multiplier{ 0 };              /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    int                     gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
-    int                     gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
-    int                     gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
+    int32_t                 gemmlowp_offset{ 0 };                  /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
+    int32_t                 gemmlowp_multiplier{ 0 };              /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    int32_t                 gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
+    int32_t                 gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
+    int32_t                 gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
     std::vector<int32_t>    gemmlowp_multipliers{};                /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
     std::vector<int32_t>    gemmlowp_shifts{};                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
     bool                    is_quantized_per_channel{ false };     /**< GEMMLowp quantized per-channel flag */
