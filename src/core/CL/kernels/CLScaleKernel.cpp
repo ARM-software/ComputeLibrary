@@ -160,11 +160,12 @@ const ICLTensor *CLScaleKernel::output() const
 
 void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy)
 {
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy));
+
     _input               = input;
     _output              = output;
     _interpolationPolicy = policy;
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy));
+    _data_layout         = input->info()->data_layout();
 
     float wr = 0.f;
     float hr = 0.f;
@@ -172,10 +173,9 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 
     const bool call_quantized_kernel = is_data_type_quantized_asymmetric(input->info()->data_type()) && policy == InterpolationPolicy::BILINEAR;
 
-    DataLayout data_layout = input->info()->data_layout();
-    const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const bool is_nhwc     = data_layout == DataLayout::NHWC;
+    const int  idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const int  idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const bool is_nhwc    = _data_layout == DataLayout::NHWC;
 
     // Compute the ratio between source width/height and destination width/height
     const unsigned int input_width   = input->info()->dimension(idx_width);
@@ -215,7 +215,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
     std::string kernel_name = "scale_" + interpolation_name;
     kernel_name += call_quantized_kernel ? "_quantized_" : "_";
-    kernel_name += lower_string(string_from_data_layout(data_layout));
+    kernel_name += lower_string(string_from_data_layout(_data_layout));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     unsigned int idx = is_nhwc ? 2 * num_arguments_per_4D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
@@ -249,7 +249,7 @@ void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    switch(_input->info()->data_layout())
+    switch(_data_layout)
     {
         case DataLayout::NCHW:
         {

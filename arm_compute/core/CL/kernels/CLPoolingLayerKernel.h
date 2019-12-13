@@ -75,6 +75,7 @@ public:
     const ICLTensor *_input;
     ICLTensor       *_output;
     PoolingLayerInfo _pool_info;
+    DataLayout       _data_layout;
     BorderSize       _border_size;
     unsigned int     _num_elems_processed_per_iteration;
 };
