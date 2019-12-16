@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -125,14 +125,14 @@ Framework &Framework::get()
     return instance;
 }
 
-void Framework::init(const std::vector<framework::InstrumentsDescription> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter,
-                     LogLevel log_level)
+void Framework::init(const FrameworkConfig &config)
 {
-    _test_filter    = TestFilter(mode, name_filter, id_filter);
-    _num_iterations = num_iterations;
-    _log_level      = log_level;
+    _test_filter    = TestFilter(config.mode, config.name_filter, config.id_filter);
+    _num_iterations = config.num_iterations;
+    _log_level      = config.log_level;
+    _cooldown_sec   = config.cooldown_sec;
 
-    _instruments = std::set<framework::InstrumentsDescription>(instruments.begin(), instruments.end());
+    _instruments = std::set<framework::InstrumentsDescription>(std::begin(config.instruments), std::end(config.instruments));
 }
 
 std::string Framework::current_suite_name() const
@@ -579,6 +579,9 @@ bool Framework::run()
             run_test(test_info, *test_factory);
 
             ++id_run_test;
+
+            // Run test delay
+            sleep_in_seconds(_cooldown_sec);
         }
 
         ++id;

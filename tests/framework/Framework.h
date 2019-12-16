@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,18 @@ namespace test
 {
 namespace framework
 {
+/** Framework configuration structure */
+struct FrameworkConfig
+{
+    std::vector<framework::InstrumentsDescription> instruments{};               /**< Instrument types that will be used for benchmarking. */
+    std::string                                    name_filter{};               /**< Regular expression to filter tests by name. Only matching tests will be executed. */
+    std::string                                    id_filter{};                 /**< String to match selected test ids. Only matching tests will be executed. */
+    DatasetMode                                    mode{ DatasetMode::ALL };    /**< Dataset mode. */
+    int                                            num_iterations{ 1 };         /**< Number of iterations per test. */
+    float                                          cooldown_sec{ -1.f };        /**< Delay between tests in seconds. */
+    LogLevel                                       log_level{ LogLevel::NONE }; /**< Verbosity of the output. */
+};
+
 /** Information about a test case.
  *
  * A test can be identified either via its id or via its name. Additionally
@@ -99,14 +111,9 @@ public:
      *
      * @see TestFilter::TestFilter for the format of the string to filter ids.
      *
-     * @param[in] instruments    Instrument types that will be used for benchmarking.
-     * @param[in] num_iterations Number of iterations per test.
-     * @param[in] mode           Dataset mode.
-     * @param[in] name_filter    Regular expression to filter tests by name. Only matching tests will be executed.
-     * @param[in] id_filter      String to match selected test ids. Only matching tests will be executed.
-     * @param[in] log_level      Verbosity of the output.
+     * @param[in] config Framework configuration meta-data.
      */
-    void init(const std::vector<framework::InstrumentsDescription> &instruments, int num_iterations, DatasetMode mode, const std::string &name_filter, const std::string &id_filter, LogLevel log_level);
+    void init(const FrameworkConfig &config);
 
     /** Add a new test suite.
      *
@@ -329,6 +336,7 @@ private:
     std::vector<std::unique_ptr<TestCaseFactory>> _test_factories{};
     std::map<TestInfo, TestResult> _test_results{};
     int                    _num_iterations{ 1 };
+    float                  _cooldown_sec{ -1.f };
     bool                   _throw_errors{ false };
     bool                   _stop_on_error{ false };
     bool                   _error_on_missing_assets{ false };

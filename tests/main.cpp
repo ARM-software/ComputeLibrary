@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -142,6 +142,8 @@ int main(int argc, char **argv)
 #endif /* ARM_COMPUTE_CL */
     auto threads = parser.add_option<utils::SimpleOption<int>>("threads", 1);
     threads->set_help("Number of threads to use");
+    auto cooldown_sec = parser.add_option<utils::SimpleOption<float>>("delay", -1.f);
+    cooldown_sec->set_help("Delay to add between test executions in seconds");
 
     try
     {
@@ -261,12 +263,15 @@ int main(int argc, char **argv)
         framework.set_instruments_info(instruments_info);
 
         // Initialize framework
-        framework.init(options.instruments->value(),
-                       options.iterations->value(),
-                       dataset_mode->value(),
-                       filter->value(),
-                       filter_id->value(),
-                       options.log_level->value());
+        framework::FrameworkConfig fconfig;
+        fconfig.instruments    = options.instruments->value();
+        fconfig.name_filter    = filter->value();
+        fconfig.id_filter      = filter_id->value();
+        fconfig.num_iterations = options.iterations->value();
+        fconfig.mode           = dataset_mode->value();
+        fconfig.log_level      = options.log_level->value();
+        fconfig.cooldown_sec   = cooldown_sec->value();
+        framework.init(fconfig);
 
         for(auto &p : printers)
         {

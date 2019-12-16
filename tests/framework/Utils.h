@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -170,6 +170,11 @@ inline std::string arithmetic_to_string(T val, int decimal_places = 0)
     return ss.str();
 }
 
+/**  Makes the calling thread to sleep for a specified number of seconds
+ *
+ * @param[in] seconds Amount of seconds to sleep. Will return immediately if less or equal to zero.
+ */
+void sleep_in_seconds(float seconds);
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

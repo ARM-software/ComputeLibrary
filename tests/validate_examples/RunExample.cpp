@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -172,7 +172,13 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
         }
     }
 
-    framework.init(options.instruments->value(), options.iterations->value(), framework::DatasetMode::ALL, "", "", options.log_level->value());
+    // Initialize framework
+    framework::FrameworkConfig fconfig;
+    fconfig.instruments    = options.instruments->value();
+    fconfig.num_iterations = options.iterations->value();
+    fconfig.log_level      = options.log_level->value();
+    framework.init(fconfig);
+
     for(auto &p : printers)
     {
         framework.add_printer(p.get());
