@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,12 +52,6 @@ TEST_SUITE(GC)
 REGISTER_FIXTURE_DATA_TEST_CASE(SmallScaleLayer, GCScaleLayerFixture<half>, framework::DatasetMode::ALL,
                                 framework::dataset::combine(datasets::SmallScaleLayerShapes(), data_types));
 
-TEST_SUITE(NIGHTLY)
-
-REGISTER_FIXTURE_DATA_TEST_CASE(LargeScaleLayer, GCScaleLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(datasets::LargeScaleLayerShapes(), data_types));
-
-TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace benchmark
 } // namespace test

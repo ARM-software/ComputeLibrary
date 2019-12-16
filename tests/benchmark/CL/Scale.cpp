@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,11 +55,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture, framework::DatasetMode
                                                                                                                      interpolation_types),
                                                                                                              datasets::BorderModes()),
                                                                                                      datasets::SamplingPolicies()));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeImageShapes(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                                   interpolation_types),
-                                                                                                           datasets::BorderModes()),
-                                                                                                   datasets::SamplingPolicies()));
 TEST_SUITE_END() // Scale
 TEST_SUITE_END() // CL
 } // namespace benchmark
