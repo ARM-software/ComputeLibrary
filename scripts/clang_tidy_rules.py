@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import re
 import sys
@@ -157,6 +157,6 @@ if __name__ == "__main__":
     with open(sys.argv[1], mode="r") as clang_tidy_file:
         lines = clang_tidy_file.readlines()
         errors = filter_clang_tidy_lines(lines)
-        print "\n".join(errors)
+        print("\n".join(errors))
 
     sys.exit(0 if len(errors) == 0 else 1)
