@@ -89,21 +89,21 @@ void NEPadLayerKernel::run_pad_constant_uint8_3Dinput_3Dpad(const Window &window
     const size_t start_plane = window.z().start();
     const size_t end_plane   = window.z().end();
 
-    const size_t start_plane_input = start_plane - (_padding.size() > 2 && start_plane >= _padding[2].first ? _padding[2].first : 0);
-
+    size_t start_plane_input = start_plane;
+    if(_padding.size() > 2)
+    {
+        start_plane_input = (start_plane < _padding[2].first) ? 0 : start_plane - _padding[2].first;
+    }
     const int output_plane_size = _output->info()->dimension(0) * _output->info()->dimension(1);
-    const int input_plane_size  = (_input->info()->dimension(0) + _input->info()->padding().right + _input->info()->padding().left) * (_input->info()->dimension(
-                                      1)
-                                  + _input->info()->padding().top + _input->info()->padding().bottom);
+    const int input_plane_size  = _input->info()->dimension(0) * _input->info()->dimension(1);
 
     const int pad_y_elems_top = (_padding.size() > 1 ? _padding[1].first : 0) * _output->info()->dimension(0);
     const int pad_y_elems_bot = (_padding.size() > 1 ? _padding[1].second : 0) * _output->info()->dimension(0);
 
-    const size_t jump_to_next_row_input   = _input->info()->dimension(0) + _input->info()->padding().right + _input->info()->padding().left;
-    const size_t jump_to_next_row_output  = _padding[0].first + _padding[0].second;
-    const size_t jump_to_next_plane_input = _input->info()->padding().empty() ? 0 : _input->info()->dimension(0) * (_input->info()->padding().right + _input->info()->padding().top);
+    const size_t jump_to_next_row_input  = _input->info()->dimension(0);
+    const size_t jump_to_next_row_output = _padding[0].first + _padding[0].second;
 
-    uint8_t       *output_row_ptr = _output->buffer() + start_plane * output_plane_size;
+    uint8_t       *output_row_ptr = _output->buffer() + _output->info()->offset_first_element_in_bytes() + start_plane * output_plane_size;
     const uint8_t *input_it_ptr   = _input->buffer() + _input->info()->offset_first_element_in_bytes() + start_plane_input * input_plane_size;
     const auto     pad_value      = _constant_value.get<uint8_t>();
 
@@ -114,7 +114,7 @@ void NEPadLayerKernel::run_pad_constant_uint8_3Dinput_3Dpad(const Window &window
             memset(output_row_ptr, pad_value, output_plane_size);
             output_row_ptr += output_plane_size;
         }
-        else if(_padding.size() > 2 && z_i > _input->info()->dimension(2) + _padding[2].first - 1)
+        else if(_padding.size() > 2 && z_i > (_input->info()->dimension(2) + _padding[2].first - 1))
         {
             memset(output_row_ptr, pad_value, output_plane_size);
             output_row_ptr += output_plane_size;
@@ -170,7 +170,6 @@ void NEPadLayerKernel::run_pad_constant_uint8_3Dinput_3Dpad(const Window &window
                 memset(output_row_ptr, pad_value, _padding[0].second);
                 output_row_ptr += _padding[0].second;
             }
-            input_it_ptr += jump_to_next_plane_input;
             memset(output_row_ptr, pad_value, pad_y_elems_bot);
             output_row_ptr += pad_y_elems_bot;
         }
@@ -204,7 +203,9 @@ void NEPadLayerKernel::configure(ITensor *input, ITensor *output, const PaddingL
         switch(_input->info()->element_size())
         {
             case 1:
-                if(_input->info()->num_dimensions() == 3 && padding.size() <= 3)
+                if(_input->info()->num_dimensions() == 3 &&                           // Is 3D
+                   padding.size() <= 3 &&                                             // Has 3D padding
+                   !_input->info()->has_padding() && !_output->info()->has_padding()) // Input & Output have no padding
                 {
                     _func = &NEPadLayerKernel::run_pad_constant_uint8_3Dinput_3Dpad;
                 }
