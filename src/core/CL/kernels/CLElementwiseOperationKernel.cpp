@@ -195,7 +195,7 @@ std::pair<Status, Window> validate_and_configure_window_for_arithmetic_operators
     {
         set_format_if_unknown(output, Format::S16);
     }
-    else if(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16)
+    else if(input1.data_type() == DataType::F16 || input2.data_type() == DataType::F16)
     {
         set_format_if_unknown(output, Format::F16);
     }

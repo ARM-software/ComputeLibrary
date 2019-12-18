@@ -448,13 +448,21 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo &inpu
         {
             set_format_if_unknown(output, Format::S16);
         }
-        else if(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16)
+        else if(input1.data_type() == DataType::F16 || input2.data_type() == DataType::F16)
         {
             set_format_if_unknown(output, Format::F16);
         }
         else if(input1.data_type() == DataType::F32 || input2.data_type() == DataType::F32)
         {
             set_format_if_unknown(output, Format::F32);
+        }
+        else if(input1.data_type() == DataType::QASYMM8 || input2.data_type() == DataType::QASYMM8)
+        {
+            set_data_type_if_unknown(output, DataType::QASYMM8);
+        }
+        else if(input1.data_type() == DataType::QASYMM8_SIGNED || input2.data_type() == DataType::QASYMM8_SIGNED)
+        {
+            set_data_type_if_unknown(output, DataType::QASYMM8_SIGNED);
         }
     }
 

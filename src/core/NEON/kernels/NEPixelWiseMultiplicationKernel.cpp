@@ -70,11 +70,10 @@ inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *i
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::U8 && (input1->data_type() != DataType::U8 || input2->data_type() != DataType::U8),
                                     "Output can only be U8 if both inputs are U8");
 
-    if(is_data_type_quantized(input1->data_type())||
-       is_data_type_quantized(input2->data_type()))
+    if(is_data_type_quantized(input1->data_type()) || is_data_type_quantized(input2->data_type()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(overflow_policy == ConvertPolicy::WRAP,"ConvertPolicy cannot be WRAP if datatype is quantized");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(overflow_policy == ConvertPolicy::WRAP, "ConvertPolicy cannot be WRAP if datatype is quantized");
     }
 
     if(output->total_size() > 0)
@@ -130,15 +129,15 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         {
             set_format_if_unknown(*output, Format::F16);
         }
-        else if(input1->data_type() == DataType::QASYMM8)
+        else if(input1->data_type() == DataType::QASYMM8 || input2->data_type() == DataType::QASYMM8)
         {
             set_data_type_if_unknown(*output, DataType::QASYMM8);
         }
-        else if(input1->data_type() == DataType::QASYMM8_SIGNED)
+        else if(input1->data_type() == DataType::QASYMM8_SIGNED || input2->data_type() == DataType::QASYMM8_SIGNED)
         {
             set_data_type_if_unknown(*output, DataType::QASYMM8_SIGNED);
         }
-        else if(input1->data_type() == DataType::QSYMM16)
+        else if(input1->data_type() == DataType::QSYMM16 || input2->data_type() == DataType::QSYMM16)
         {
             set_data_type_if_unknown(*output, DataType::QSYMM16);
         }

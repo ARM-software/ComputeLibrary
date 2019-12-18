@@ -403,7 +403,7 @@ void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const 
             int x = window_start_x;
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                const int8x16_t    a = vld1q_s8(non_broadcast_input_ptr + x);
+                const int8x16_t     a = vld1q_s8(non_broadcast_input_ptr + x);
                 const float32x4x4_t af =
                 {
                     {
@@ -875,7 +875,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
         {
             set_format_if_unknown(output, Format::S16);
         }
-        else if(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16)
+        else if(input1.data_type() == DataType::F16 || input2.data_type() == DataType::F16)
         {
             set_format_if_unknown(output, Format::F16);
         }
@@ -883,15 +883,15 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
         {
             set_format_if_unknown(output, Format::F32);
         }
-        else if(input1.data_type() == DataType::QASYMM8)
+        else if(input1.data_type() == DataType::QASYMM8 || input2.data_type() == DataType::QASYMM8)
         {
             set_data_type_if_unknown(output, DataType::QASYMM8);
         }
-        else if(input1.data_type() == DataType::QASYMM8_SIGNED)
+        else if(input1.data_type() == DataType::QASYMM8_SIGNED || input2.data_type() == DataType::QASYMM8_SIGNED)
         {
             set_data_type_if_unknown(output, DataType::QASYMM8_SIGNED);
         }
-        else if(input1.data_type() == DataType::QSYMM16)
+        else if(input1.data_type() == DataType::QSYMM16 || input2.data_type() == DataType::QSYMM16)
         {
             set_data_type_if_unknown(output, DataType::QSYMM16);
         }
