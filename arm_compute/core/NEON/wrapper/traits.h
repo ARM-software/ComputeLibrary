@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ struct vector_128_tag {};
 
 /** Create the appropriate NEON vector given its type and size in terms of elements */
 template <typename T, int S> struct neon_vector;
+
 // Specializations
 #ifndef DOXYGEN_SKIP_THIS
 template <> struct neon_vector<uint8_t, 8>{ using scalar_type = uint8_t; using type = uint8x8_t; using tag_type = vector_64_tag; };
@@ -51,7 +52,9 @@ template <> struct neon_vector<int8_t, 16>{ using scalar_type = int8_t; using ty
 template <> struct neon_vector<uint16_t, 4>{ using scalar_type = uint16_t; using type = uint16x4_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<int16_t, 4>{ using scalar_type = int16_t; using type = int16x4_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<uint16_t, 8>{ using scalar_type = uint16_t; using type = uint16x8_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<uint16_t, 16>{ using scalar_type = uint16_t; using type = uint16x8x2_t; };
 template <> struct neon_vector<int16_t, 8>{ using scalar_type = int16_t; using type = int16x8_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<int16_t, 16>{ using scalar_type = int16_t; using type = int16x8x2_t; };
 template <> struct neon_vector<uint32_t, 2>{ using scalar_type = uint32_t; using type = uint32x2_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<int32_t, 2>{ using scalar_type = int32_t; using type = int32x2_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<uint32_t, 4>{ using scalar_type = uint32_t; using type = uint32x4_t; using tag_type = vector_128_tag; };
@@ -62,6 +65,7 @@ template <> struct neon_vector<uint64_t, 2>{ using scalar_type = uint64_t; using
 template <> struct neon_vector<int64_t, 2>{ using scalar_type = int64_t; using type = int64x2_t; using tag_type = vector_128_tag; };
 template <> struct neon_vector<float_t, 2>{ using scalar_type = float_t; using type = float32x2_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<float_t, 4>{ using scalar_type = float_t; using type = float32x4_t; using tag_type = vector_128_tag; };
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <> struct neon_vector<float16_t, 4>{ using scalar_type = float16_t; using type = float16x4_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<float16_t, 8>{ using scalar_type = float16_t; using type = float16x8_t; using tag_type = vector_128_tag; };

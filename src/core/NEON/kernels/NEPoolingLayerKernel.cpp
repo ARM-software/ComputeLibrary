@@ -39,6 +39,7 @@
 
 #include "support/ToolchainSupport.h"
 
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include <algorithm>
 #include <arm_neon.h>
 #include <cmath>
@@ -47,7 +48,8 @@
 #include <string>
 #include <tuple>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace misc::shape_calculator;
 
 namespace
@@ -71,7 +73,8 @@ inline float calculate_avg_scale(bool exclude_padding, DataLayout data_layout, c
     return 1.f / ((end_y - start_y) * (end_x - start_x));
 }
 
-inline void scale_vector_s16x8(bool exclude_padding, uint16x8_t &v, const Coordinates &id, int id_offset, int step,
+template <typename T, typename TVec>
+inline void scale_vector_q16x8(bool exclude_padding, TVec &v, const Coordinates &id, int id_offset, int step,
                                const int pool_size, const int upper_bound_w, const int upper_bound_h,
                                const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
@@ -83,17 +86,17 @@ inline void scale_vector_s16x8(bool exclude_padding, uint16x8_t &v, const Coordi
         start_y = std::max(0, start_y);
     }
 
-    std::array<uint16_t, 8> elems =
+    std::array<T, 8> elems =
     {
         {
-            vgetq_lane_u16(v, 0),
-            vgetq_lane_u16(v, 1),
-            vgetq_lane_u16(v, 2),
-            vgetq_lane_u16(v, 3),
-            vgetq_lane_u16(v, 4),
-            vgetq_lane_u16(v, 5),
-            vgetq_lane_u16(v, 6),
-            vgetq_lane_u16(v, 7),
+            wrapper::vgetlane(v, 0),
+            wrapper::vgetlane(v, 1),
+            wrapper::vgetlane(v, 2),
+            wrapper::vgetlane(v, 3),
+            wrapper::vgetlane(v, 4),
+            wrapper::vgetlane(v, 5),
+            wrapper::vgetlane(v, 6),
+            wrapper::vgetlane(v, 7),
         }
     };
 
@@ -110,14 +113,14 @@ inline void scale_vector_s16x8(bool exclude_padding, uint16x8_t &v, const Coordi
         start_x += step * stride_x;
     }
 
-    v = vsetq_lane_u16(elems[0], v, 0);
-    v = vsetq_lane_u16(elems[1], v, 1);
-    v = vsetq_lane_u16(elems[2], v, 2);
-    v = vsetq_lane_u16(elems[3], v, 3);
-    v = vsetq_lane_u16(elems[4], v, 4);
-    v = vsetq_lane_u16(elems[5], v, 5);
-    v = vsetq_lane_u16(elems[6], v, 6);
-    v = vsetq_lane_u16(elems[7], v, 7);
+    v = wrapper::vsetlane(elems[0], v, 0);
+    v = wrapper::vsetlane(elems[1], v, 1);
+    v = wrapper::vsetlane(elems[2], v, 2);
+    v = wrapper::vsetlane(elems[3], v, 3);
+    v = wrapper::vsetlane(elems[4], v, 4);
+    v = wrapper::vsetlane(elems[5], v, 5);
+    v = wrapper::vsetlane(elems[6], v, 6);
+    v = wrapper::vsetlane(elems[7], v, 7);
 }
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, unsigned int &pooled_w, unsigned int pooled_h)
@@ -131,7 +134,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_quantized(input->data_type()));
 
     if(output->total_size() != 0)
@@ -196,6 +199,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         switch(input->data_type())
         {
             case DataType::QASYMM8:
+            case DataType::QASYMM8_SIGNED:
                 if(is_nhwc)
                 {
                     num_elems_processed_per_iteration = 16;
@@ -318,6 +322,66 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
+
+template <typename T>
+inline T vquantize_q8(const float32x4x2_t &qv, const UniformQuantizationInfo &qi);
+
+template <>
+inline uint8x8_t vquantize_q8(const float32x4x2_t &qv, const UniformQuantizationInfo &qi)
+{
+    return vquantize(qv, qi);
+}
+
+template <>
+inline int8x8_t vquantize_q8(const float32x4x2_t &qv, const UniformQuantizationInfo &qi)
+{
+    return vquantize_signed(qv, qi);
+}
+
+template <typename T>
+inline T vquantize_q8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi);
+
+template <>
+inline uint8x16_t vquantize_q8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    return vquantize(qv, qi);
+}
+
+template <>
+inline int8x16_t vquantize_q8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    return vquantize_signed(qv, qi);
+}
+
+template <typename T>
+inline T vcvtq_q32_f32(float32x4_t values);
+
+template <>
+inline uint32x4_t vcvtq_q32_f32(float32x4_t values)
+{
+    return vcvtq_u32_f32(values);
+}
+
+template <>
+inline int32x4_t vcvtq_q32_f32(float32x4_t values)
+{
+    return vcvtq_s32_f32(values);
+}
+
+template <typename T>
+inline float32x4_t vcvtq_f32_q32(T values);
+
+template <>
+inline float32x4_t vcvtq_f32_q32(uint32x4_t values)
+{
+    return vcvtq_f32_u32(values);
+}
+
+template <>
+inline float32x4_t vcvtq_f32_q32(int32x4_t values)
+{
+    return vcvtq_f32_s32(values);
+}
 } // namespace
 
 NEPoolingLayerKernel::NEPoolingLayerKernel()
@@ -380,33 +444,69 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
         {
             if(is_nchw)
             {
-                _func = &NEPoolingLayerKernel::pooling2_qasymm8_nchw;
+                _func = &NEPoolingLayerKernel::pooling2_q8_nchw<uint8_t>;
             }
             else
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc;
+                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<uint8_t>;
             }
         }
         else if(pool_size.x() == 3 && pool_stride_x < 3 && _is_square)
         {
             if(is_nchw)
             {
-                _func = &NEPoolingLayerKernel::pooling3_qasymm8_nchw;
+                _func = &NEPoolingLayerKernel::pooling3_q8_nchw<uint8_t>;
             }
             else
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc;
+                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<uint8_t>;
             }
         }
         else
         {
             if(is_nchw)
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nchw;
+                _func = &NEPoolingLayerKernel::poolingMxN_q8_nchw<uint8_t>;
             }
             else
             {
-                _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc;
+                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<uint8_t>;
+            }
+        }
+    }
+    else if(data_type == DataType::QASYMM8_SIGNED)
+    {
+        if(pool_size.x() == 2 && pool_stride_x < 3 && _is_square)
+        {
+            if(is_nchw)
+            {
+                _func = &NEPoolingLayerKernel::pooling2_q8_nchw<int8_t>;
+            }
+            else
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<int8_t>;
+            }
+        }
+        else if(pool_size.x() == 3 && pool_stride_x < 3 && _is_square)
+        {
+            if(is_nchw)
+            {
+                _func = &NEPoolingLayerKernel::pooling3_q8_nchw<int8_t>;
+            }
+            else
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<int8_t>;
+            }
+        }
+        else
+        {
+            if(is_nchw)
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_q8_nchw<int8_t>;
+            }
+            else
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_q8_nhwc<int8_t>;
             }
         }
     }
@@ -542,10 +642,20 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     INEKernel::configure(win_config.second);
 }
 
-void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
+template <typename T>
+void NEPoolingLayerKernel::pooling2_q8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
+
+    /** NEON vector types */
+    using q8x8_t    = typename wrapper::traits::neon_vector<T, 8>::type;
+    using q8x16_t   = typename wrapper::traits::neon_vector<T, 16>::type;
+    using q8x8x2_t  = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
+    using q16_t     = typename wrapper::traits::promote_t<T>;
+    using q16x4_t   = typename wrapper::traits::neon_vector<q16_t, 4>::type;
+    using q16x8_t   = typename wrapper::traits::neon_vector<q16_t, 8>::type;
+    using q16x8x2_t = typename wrapper::traits::neon_vector<q16_t, 16>::type;
 
     constexpr int pool_size       = 2;
     int           pool_stride_x   = 0;
@@ -558,8 +668,8 @@ void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, con
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+    const T *const input_top_ptr    = reinterpret_cast<const T *>(_input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top))));
+    const T *const input_bottom_ptr = reinterpret_cast<const T *>(_input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1)));
 
     const int scale_step_x = (pool_stride_x == 1) ? 2 : 1;
 
@@ -569,98 +679,88 @@ void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, con
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const auto top_data    = vld1q_u8(reinterpret_cast<const uint8_t *>(input_top_ptr + input.offset()));
-        const auto bottom_data = vld1q_u8(reinterpret_cast<const uint8_t *>(input_bottom_ptr + input.offset()));
-        uint8x8_t  lower_res   = {};
-        uint8x8_t  upper_res   = {};
+        const auto top_data    = wrapper::vloadq(input_top_ptr + input.offset());
+        const auto bottom_data = wrapper::vloadq(input_bottom_ptr + input.offset());
+        q8x8_t     lower_res   = {};
+        q8x8_t     upper_res   = {};
 
         if(pooling_type != PoolingType::MAX)
         {
-            const uint16x8x2_t top_data_u16    = { { vmovl_u8(vget_low_u8(top_data)), vmovl_u8(vget_high_u8(top_data)) } };
-            const uint16x8x2_t bottom_data_u16 = { { vmovl_u8(vget_low_u8(bottom_data)), vmovl_u8(vget_high_u8(bottom_data)) } };
+            const q16x8x2_t top_data_q16    = { { wrapper::vmovl(wrapper::vgetlow(top_data)), wrapper::vmovl(wrapper::vgethigh(top_data)) } };
+            const q16x8x2_t bottom_data_q16 = { { wrapper::vmovl(wrapper::vgetlow(bottom_data)), wrapper::vmovl(wrapper::vgethigh(bottom_data)) } };
 
             // Add rows
-            const uint16x8x2_t vrsum =
+            const q16x8x2_t vrsum =
             {
                 {
-                    vaddq_u16(top_data_u16.val[0], bottom_data_u16.val[0]),
-                    vaddq_u16(top_data_u16.val[1], bottom_data_u16.val[1]),
+                    wrapper::vadd(top_data_q16.val[0], bottom_data_q16.val[0]),
+                    wrapper::vadd(top_data_q16.val[1], bottom_data_q16.val[1]),
                 }
             };
 
             // Pair-wise add row data
-            const uint16x4x2_t vpsum =
-            {
-                {
-                    vpadd_u16(vget_low_u16(vrsum.val[0]), vget_high_u16(vrsum.val[0])),
-                    vpadd_u16(vget_low_u16(vrsum.val[1]), vget_high_u16(vrsum.val[1])),
-                }
-            };
+            const q16x4_t vpsum_1 = wrapper::vpadd(wrapper::vgetlow(vrsum.val[0]), wrapper::vgethigh(vrsum.val[0]));
+            const q16x4_t vpsum_2 = wrapper::vpadd(wrapper::vgetlow(vrsum.val[1]), wrapper::vgethigh(vrsum.val[1]));
 
-            uint16x8_t res_lower = vcombine_u16(vpsum.val[0], vpsum.val[1]);
+            q16x8_t res_lower = wrapper::vcombine(vpsum_1, vpsum_2);
 
             // Scale lower result
-            scale_vector_s16x8(exclude_padding, res_lower, id, 0, scale_step_x,
-                               pool_size, upper_bound_w, upper_bound_h,
-                               pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-            lower_res = vmovn_u16(res_lower);
+            scale_vector_q16x8<q16_t, q16x8_t>(exclude_padding, res_lower, id, 0, scale_step_x,
+                                               pool_size, upper_bound_w, upper_bound_h,
+                                               pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            lower_res = wrapper::vmovn(res_lower);
 
             // Compute upper result for stride_x == 1
             if(pool_stride_x == 1)
             {
                 // Shifted row sum
-                const uint16x8x2_t vrsum_shifted =
+                const q16x8x2_t vrsum_shifted =
                 {
                     {
-                        vextq_u16(vrsum.val[0], vrsum.val[1], 1),
-                        vextq_u16(vrsum.val[1], vrsum.val[1], 1)
+                        wrapper::vext_1(vrsum.val[0], vrsum.val[1]),
+                        wrapper::vext_1(vrsum.val[1], vrsum.val[1])
                     }
                 };
 
                 // Pair-wise add shifted row
-                const uint16x4x2_t vpsum_shifted =
-                {
-                    {
-                        vpadd_u16(vget_low_u16(vrsum_shifted.val[0]), vget_high_u16(vrsum_shifted.val[0])),
-                        vpadd_u16(vget_low_u16(vrsum_shifted.val[1]), vget_high_u16(vrsum_shifted.val[1])),
-                    }
-                };
-                uint16x8_t res_upper = vcombine_u16(vpsum_shifted.val[0], vpsum_shifted.val[1]);
+                q16x8_t res_upper = wrapper::vcombine(
+                                        wrapper::vpadd(wrapper::vgetlow(vrsum_shifted.val[0]), wrapper::vgethigh(vrsum_shifted.val[0])),
+                                        wrapper::vpadd(wrapper::vgetlow(vrsum_shifted.val[1]), wrapper::vgethigh(vrsum_shifted.val[1])));
 
                 // Scale lower result
-                scale_vector_s16x8(exclude_padding, res_upper, id, 1, 2,
-                                   pool_size, upper_bound_w, upper_bound_h,
-                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-                upper_res = vmovn_u16(res_upper);
+                scale_vector_q16x8<q16_t, q16x8_t>(exclude_padding, res_upper, id, 1, 2,
+                                                   pool_size, upper_bound_w, upper_bound_h,
+                                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                upper_res = wrapper::vmovn(res_upper);
             }
         }
         else
         {
-            const uint8x16_t max_data = vmaxq_u8(top_data, bottom_data);
-            lower_res                 = vpmax_u8(vget_low_u8(max_data), vget_high_u8(max_data));
+            const q8x16_t max_data = wrapper::vmax(top_data, bottom_data);
+            lower_res              = wrapper::vpmax(wrapper::vgetlow(max_data), wrapper::vgethigh(max_data));
             if(pool_stride_x == 1)
             {
-                const uint8x16_t max_data_shifted = vextq_u8(max_data, max_data, 1);
-                upper_res                         = vpmax_u8(vget_low_u8(max_data_shifted), vget_high_u8(max_data_shifted));
+                const q8x16_t max_data_shifted = wrapper::vext_1(max_data, max_data);
+                upper_res                      = wrapper::vpmax(wrapper::vgetlow(max_data_shifted), wrapper::vgethigh(max_data_shifted));
             }
         }
 
         if(have_different_qinfo)
         {
-            const auto requantized_output = vquantize(vdequantize(vcombine_u8(lower_res, upper_res), input_qinfo), output_qinfo);
-            lower_res                     = vget_low_u8(requantized_output);
-            upper_res                     = vget_high_u8(requantized_output);
+            const auto requantized_output = vquantize_q8<q8x16_t>(vdequantize(wrapper::vcombine(lower_res, upper_res), input_qinfo), output_qinfo);
+            lower_res                     = wrapper::vgetlow(requantized_output);
+            upper_res                     = wrapper::vgethigh(requantized_output);
         }
 
         // Store result
         if(pool_stride_x == 1)
         {
-            const uint8x8x2_t res = { { lower_res, upper_res } };
-            vst2_u8(reinterpret_cast<uint8_t *>(output.ptr()), res);
+            const q8x8x2_t res = { { lower_res, upper_res } };
+            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), res);
         }
         else
         {
-            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), lower_res);
+            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), lower_res);
         }
     },
     input, output);
@@ -801,10 +901,19 @@ void NEPoolingLayerKernel::pooling2_f16_nchw(const Window &window_input, const W
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 }
 
-void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
+template <typename T>
+void NEPoolingLayerKernel::pooling3_q8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
+
+    /** NEON vector types */
+    using q8x8_t    = typename wrapper::traits::neon_vector<T, 8>::type;
+    using q8x16_t   = typename wrapper::traits::neon_vector<T, 16>::type;
+    using q8x8x2_t  = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
+    using q16_t     = typename wrapper::traits::promote_t<T>;
+    using q16x8_t   = typename wrapper::traits::neon_vector<q16_t, 8>::type;
+    using q16x8x2_t = typename wrapper::traits::neon_vector<q16_t, 16>::type;
 
     constexpr int pool_size       = 3;
     const int     pool_pad_right  = _pool_info.pad_stride_info.pad_right();
@@ -820,99 +929,99 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
     const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
     const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
 
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
-    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
+    const T *const input_top_ptr    = reinterpret_cast<const T *>(_input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top))));
+    const T *const input_middle_ptr = reinterpret_cast<const T *>(_input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1)));
+    const T *const input_bottom_ptr = reinterpret_cast<const T *>(_input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2)));
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const auto top_data    = vld1q_u8(reinterpret_cast<const uint8_t *>(input_top_ptr + input.offset()));
-        const auto middle_data = vld1q_u8(reinterpret_cast<const uint8_t *>(input_middle_ptr + input.offset()));
-        const auto bottom_data = vld1q_u8(reinterpret_cast<const uint8_t *>(input_bottom_ptr + input.offset()));
-        uint8x8_t  fres        = {};
-        uint8x16_t fqres       = {};
+        const auto top_data    = wrapper::vloadq(input_top_ptr + input.offset());
+        const auto middle_data = wrapper::vloadq(input_middle_ptr + input.offset());
+        const auto bottom_data = wrapper::vloadq(input_bottom_ptr + input.offset());
+        q8x8_t     fres        = {};
+        q8x16_t    fqres       = {};
 
         if(pooling_type == PoolingType::AVG)
         {
             // Convert data to u16
-            const uint16x8x2_t top_data_u16    = { { vmovl_u8(vget_low_u8(top_data)), vmovl_u8(vget_high_u8(top_data)) } };
-            const uint16x8x2_t middle_data_u16 = { { vmovl_u8(vget_low_u8(middle_data)), vmovl_u8(vget_high_u8(middle_data)) } };
-            const uint16x8x2_t bottom_data_u16 = { { vmovl_u8(vget_low_u8(bottom_data)), vmovl_u8(vget_high_u8(bottom_data)) } };
+            const q16x8x2_t top_data_q16    = { { wrapper::vmovl(wrapper::vgetlow(top_data)), wrapper::vmovl(wrapper::vgethigh(top_data)) } };
+            const q16x8x2_t middle_data_q16 = { { wrapper::vmovl(wrapper::vgetlow(middle_data)), wrapper::vmovl(wrapper::vgethigh(middle_data)) } };
+            const q16x8x2_t bottom_data_q16 = { { wrapper::vmovl(wrapper::vgetlow(bottom_data)), wrapper::vmovl(wrapper::vgethigh(bottom_data)) } };
 
             // Calculate row sums
-            const uint16x8x2_t vrsum =
+            const q16x8x2_t vrsum =
             {
                 {
-                    vaddq_u16(vaddq_u16(top_data_u16.val[0], bottom_data_u16.val[0]), middle_data_u16.val[0]),
-                    vaddq_u16(vaddq_u16(top_data_u16.val[1], bottom_data_u16.val[1]), middle_data_u16.val[1]),
+                    wrapper::vadd(wrapper::vadd(top_data_q16.val[0], bottom_data_q16.val[0]), middle_data_q16.val[0]),
+                    wrapper::vadd(wrapper::vadd(top_data_q16.val[1], bottom_data_q16.val[1]), middle_data_q16.val[1]),
                 }
             };
-            const uint16x8x2_t vrsum_shifted_1 =
+            const q16x8x2_t vrsum_shifted_1 =
             {
                 {
-                    vextq_u16(vrsum.val[0], vrsum.val[1], 1),
-                    vextq_u16(vrsum.val[1], vrsum.val[1], 1)
+                    wrapper::vext_1(vrsum.val[0], vrsum.val[1]),
+                    wrapper::vext_1(vrsum.val[1], vrsum.val[1])
                 }
             };
-            const uint16x8x2_t vrsum_shifted_2 =
+            const q16x8x2_t vrsum_shifted_2 =
             {
                 {
-                    vextq_u16(vrsum.val[0], vrsum.val[1], 2),
-                    vextq_u16(vrsum.val[1], vrsum.val[1], 2)
+                    wrapper::vext_2(vrsum.val[0], vrsum.val[1]),
+                    wrapper::vext_2(vrsum.val[1], vrsum.val[1])
                 }
             };
             // Calculate final sum
-            uint16x8x2_t final_sum =
+            q16x8x2_t final_sum =
             {
                 {
-                    vaddq_u16(vaddq_u16(vrsum.val[0], vrsum_shifted_1.val[0]), vrsum_shifted_2.val[0]),
-                    vaddq_u16(vaddq_u16(vrsum.val[1], vrsum_shifted_1.val[1]), vrsum_shifted_2.val[1]),
+                    wrapper::vadd(wrapper::vadd(vrsum.val[0], vrsum_shifted_1.val[0]), vrsum_shifted_2.val[0]),
+                    wrapper::vadd(wrapper::vadd(vrsum.val[1], vrsum_shifted_1.val[1]), vrsum_shifted_2.val[1]),
                 }
             };
             if(pool_stride_x == 2)
             {
-                uint16x8_t res =
+                q16x8_t res =
                 {
-                    vgetq_lane_u16(final_sum.val[0], 0),
-                    vgetq_lane_u16(final_sum.val[0], 2),
-                    vgetq_lane_u16(final_sum.val[0], 4),
-                    vgetq_lane_u16(final_sum.val[0], 6),
-                    vgetq_lane_u16(final_sum.val[1], 0),
-                    vgetq_lane_u16(final_sum.val[1], 2),
-                    vgetq_lane_u16(final_sum.val[1], 4),
-                    vgetq_lane_u16(final_sum.val[1], 6),
+                    wrapper::vgetlane(final_sum.val[0], 0),
+                    wrapper::vgetlane(final_sum.val[0], 2),
+                    wrapper::vgetlane(final_sum.val[0], 4),
+                    wrapper::vgetlane(final_sum.val[0], 6),
+                    wrapper::vgetlane(final_sum.val[1], 0),
+                    wrapper::vgetlane(final_sum.val[1], 2),
+                    wrapper::vgetlane(final_sum.val[1], 4),
+                    wrapper::vgetlane(final_sum.val[1], 6),
                 };
 
-                scale_vector_s16x8(exclude_padding, res, id, 0, 1,
-                                   pool_size, upper_bound_w, upper_bound_h,
-                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-                fres = vmovn_u16(res);
+                scale_vector_q16x8<q16_t, q16x8_t>(exclude_padding, res, id, 0, 1,
+                                                   pool_size, upper_bound_w, upper_bound_h,
+                                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                fres = wrapper::vmovn(res);
             }
             else
             {
                 // Scale lower result
-                scale_vector_s16x8(exclude_padding, final_sum.val[0], id, 0, 1,
-                                   pool_size, upper_bound_w, upper_bound_h,
-                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                scale_vector_q16x8<q16_t, q16x8_t>(exclude_padding, final_sum.val[0], id, 0, 1,
+                                                   pool_size, upper_bound_w, upper_bound_h,
+                                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 // Scale lower result
-                scale_vector_s16x8(exclude_padding, final_sum.val[1], id, 8, 1,
-                                   pool_size, upper_bound_w, upper_bound_h,
-                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-                fqres = vcombine_u8(vmovn_u16(final_sum.val[0]), vmovn_u16(final_sum.val[1]));
+                scale_vector_q16x8<q16_t, q16x8_t>(exclude_padding, final_sum.val[1], id, 8, 1,
+                                                   pool_size, upper_bound_w, upper_bound_h,
+                                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                fqres = wrapper::vcombine(wrapper::vmovn(final_sum.val[0]), wrapper::vmovn(final_sum.val[1]));
             }
         }
         else
         {
-            const uint8x16_t max_data        = vmaxq_u8(vmaxq_u8(top_data, bottom_data), middle_data);
-            const uint8x16_t max_data_shift1 = vextq_u8(max_data, max_data, 1);
-            const uint8x16_t max_data_shift2 = vextq_u8(max_data, max_data, 2);
-            const uint8x16_t final_max       = vmaxq_u8(vmaxq_u8(max_data, max_data_shift1), max_data_shift2);
+            const q8x16_t max_data        = wrapper::vmax(wrapper::vmax(top_data, bottom_data), middle_data);
+            const q8x16_t max_data_shift1 = wrapper::vext_1(max_data, max_data);
+            const q8x16_t max_data_shift2 = wrapper::vext_2(max_data, max_data);
+            const q8x16_t final_max       = wrapper::vmax(wrapper::vmax(max_data, max_data_shift1), max_data_shift2);
 
             if(pool_stride_x == 2)
             {
-                const uint8x8x2_t      table      = { { vget_low_u8(final_max), vget_high_u8(final_max) } };
-                static const uint8x8_t lookup_val = { 0, 2, 4, 6, 8, 10, 12, 14 };
-                fres                              = vtbl2_u8(table, lookup_val);
+                const q8x8x2_t      table      = { { wrapper::vgetlow(final_max), wrapper::vgethigh(final_max) } };
+                static const q8x8_t lookup_val = { 0, 2, 4, 6, 8, 10, 12, 14 };
+                fres                           = wrapper::vtbl(table, lookup_val);
             }
             else
             {
@@ -925,17 +1034,17 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
         {
             if(input_qinfo != output_qinfo)
             {
-                fqres = vquantize(vdequantize(fqres, input_qinfo), output_qinfo);
+                fqres = vquantize_q8<q8x16_t>(vdequantize(fqres, input_qinfo), output_qinfo);
             }
-            vst1q_u8(reinterpret_cast<uint8_t *>(output.ptr()), fqres);
+            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), fqres);
         }
         else
         {
             if(input_qinfo != output_qinfo)
             {
-                fres = vquantize(vdequantize(fres, input_qinfo), output_qinfo);
+                fres = vquantize_q8<q8x8_t>(vdequantize(fres, input_qinfo), output_qinfo);
             }
-            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), fres);
+            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), fres);
         }
     },
     input, output);
@@ -1593,10 +1702,18 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
     input, output);
 }
 
-void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
+template <typename T>
+void NEPoolingLayerKernel::poolingMxN_q8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
+
+    /** NEON vector types */
+    using q8x8_t  = typename wrapper::traits::neon_vector<T, 8>::type;
+    using q16_t   = typename wrapper::traits::promote_t<T>;
+    using q16x8_t = typename wrapper::traits::neon_vector<q16_t, 8>::type;
+    using q32_t   = typename wrapper::traits::promote_t<q16_t>;
+    using q32x4_t = typename wrapper::traits::neon_vector<q32_t, 4>::type;
 
     const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().x() : _pool_info.pool_size.width;
     const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.height;
@@ -1615,12 +1732,12 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        uint8_t res = 0;
+        T res = std::numeric_limits<T>::min();
 
         if(pooling_type != PoolingType::MAX)
         {
-            uint32x4_t vres = vdupq_n_u32(0);
-            uint32_t   sres = 0;
+            q32x4_t vres = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
+            q32_t   sres = 0;
 
             // Calculate scale
             const float scale = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
@@ -1631,73 +1748,78 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
                 int x = 0;
                 for(; x <= (pool_size_x - 8); x += 8)
                 {
-                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
-                                                                                     (_input->info()->strides_in_bytes().y())));
+                    const q8x8_t data = wrapper::vload(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                                   (_input->info()->strides_in_bytes().y())));
 
-                    const uint16x8_t data_u16 = vmovl_u8(data);
-                    vres                      = vaddq_u32(vres, vaddl_u16(vget_high_u16(data_u16), vget_low_u16(data_u16)));
+                    const q16x8_t data_q16 = wrapper::vmovl(data);
+                    vres                   = wrapper::vadd(vres, wrapper::vaddl(wrapper::vgethigh(data_q16), wrapper::vgetlow(data_q16)));
                 }
 
                 // Leftover for loop
                 for(; x < pool_size_x; ++x)
                 {
-                    uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
-                                                                       (_input->info()->strides_in_bytes().y())));
+                    T data = *(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                           (_input->info()->strides_in_bytes().y())));
                     sres += data;
                 }
             }
 
             // Reduction
-            const auto tmp = vpadd_u32(vget_high_u32(vres), vget_low_u32(vres));
-            sres += vget_lane_u32(tmp, 0) + vget_lane_u32(tmp, 1);
+            const auto tmp = wrapper::vpadd(wrapper::vgethigh(vres), wrapper::vgetlow(vres));
+            sres += wrapper::vgetlane(tmp, 0) + wrapper::vgetlane(tmp, 1);
 
             // Divide by scale
-            res = static_cast<uint8_t>(support::cpp11::round(sres * scale));
+            res = static_cast<T>(support::cpp11::round(sres * scale));
         }
         else
         {
-            uint8x8_t vres = vdup_n_u8(0);
-            res            = 0;
+            q8x8_t vres = wrapper::vdup_n(std::numeric_limits<T>::min(), wrapper::traits::vector_64_tag{});
 
             for(int y = 0; y < pool_size_y; ++y)
             {
                 int x = 0;
                 for(; x <= (pool_size_x - 8); x += 8)
                 {
-                    const uint8x8_t data = vld1_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
-                                                                                     (_input->info()->strides_in_bytes().y())));
-                    vres                 = vmax_u8(vres, data);
+                    const q8x8_t data = wrapper::vload(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                                   (_input->info()->strides_in_bytes().y())));
+                    vres              = wrapper::vmax(vres, data);
                 }
-
                 // Leftover for loop
                 for(; x < pool_size_x; ++x)
                 {
-                    const uint8_t data = *(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
-                                                                             (_input->info()->strides_in_bytes().y())));
-                    res                = std::max(res, data);
+                    const T data = *(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().x()) + (y - pool_pad_top) * static_cast<int>
+                                                                 (_input->info()->strides_in_bytes().y())));
+                    res          = std::max(res, data);
                 }
             }
 
             // Reduce max
-            vres = vpmax_u8(vres, vres);
-            vres = vpmax_u8(vres, vres);
-            vres = vpmax_u8(vres, vres);
+            vres = wrapper::vpmax(vres, vres);
+            vres = wrapper::vpmax(vres, vres);
+            vres = wrapper::vpmax(vres, vres);
 
             // Get max value
-            res = std::max(res, vget_lane_u8(vres, 0));
+            res = std::max(res, wrapper::vgetlane(vres, 0));
         }
-
         // Store result
-        res                                          = (input_qinfo != output_qinfo) ? quantize_qasymm8(dequantize_qasymm8(res, input_qinfo), output_qinfo) : res;
-        *(reinterpret_cast<uint8_t *>(output.ptr())) = res;
+        res                                    = (input_qinfo != output_qinfo) ? Qasymm8QuantizationHelper<T>::quantize(Qasymm8QuantizationHelper<T>::dequantize(res, input_qinfo), output_qinfo) : res;
+        *(reinterpret_cast<T *>(output.ptr())) = res;
     },
     input, output);
 }
 
-void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
+template <typename T>
+void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
+
+    using q8x8_t  = typename wrapper::traits::neon_vector<T, 8>::type;
+    using q8x16_t = typename wrapper::traits::neon_vector<T, 16>::type;
+    using q16_t   = typename wrapper::traits::promote_t<T>;
+    using q16x8_t = typename wrapper::traits::neon_vector<q16_t, 8>::type;
+    using q32_t   = typename wrapper::traits::promote_t<q16_t>;
+    using q32x4_t = typename wrapper::traits::neon_vector<q32_t, 4>::type;
 
     const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.width;
     const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().z() : _pool_info.pool_size.height;
@@ -1705,8 +1827,9 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
     const int pool_pad_top    = _pool_info.pad_stride_info.pad_top();
     const int pool_pad_left   = _pool_info.pad_stride_info.pad_left();
     const int pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
-    int       pool_stride_x   = 0;
-    int       pool_stride_y   = 0;
+
+    int pool_stride_x = 0;
+    int pool_stride_y = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(2) + (exclude_padding ? 0 : pool_pad_bottom);
@@ -1729,10 +1852,10 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
 
         if(pooling_type != PoolingType::MAX)
         {
-            uint32x4_t vres1 = vdupq_n_u32(0);
-            uint32x4_t vres2 = vdupq_n_u32(0);
-            uint32x4_t vres3 = vdupq_n_u32(0);
-            uint32x4_t vres4 = vdupq_n_u32(0);
+            q32x4_t vres1 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
+            q32x4_t vres2 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
+            q32x4_t vres3 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
+            q32x4_t vres4 = wrapper::vdup_n(static_cast<q32_t>(0.f), wrapper::traits::vector_128_tag{});
 
             // Calculate scale
             const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
@@ -1744,52 +1867,52 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
             {
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
-                    const uint8x16_t data = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
-                                                                                       (_input->info()->strides_in_bytes().z())));
+                    const q8x16_t data = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                     (_input->info()->strides_in_bytes().z())));
 
-                    const uint16x8_t data_u16  = vmovl_u8(vget_low_u8(data));
-                    const uint16x8_t data2_u16 = vmovl_u8(vget_high_u8(data));
-                    vres1                      = vaddq_u32(vres1, vmovl_u16(vget_low_u16(data_u16)));
-                    vres2                      = vaddq_u32(vres2, vmovl_u16(vget_high_u16(data_u16)));
-                    vres3                      = vaddq_u32(vres3, vmovl_u16(vget_low_u16(data2_u16)));
-                    vres4                      = vaddq_u32(vres4, vmovl_u16(vget_high_u16(data2_u16)));
+                    const q16x8_t data_q16  = wrapper::vmovl(wrapper::vgetlow(data));
+                    const q16x8_t data2_q16 = wrapper::vmovl(wrapper::vgethigh(data));
+                    vres1                   = wrapper::vadd(vres1, wrapper::vmovl(wrapper::vgetlow(data_q16)));
+                    vres2                   = wrapper::vadd(vres2, wrapper::vmovl(wrapper::vgethigh(data_q16)));
+                    vres3                   = wrapper::vadd(vres3, wrapper::vmovl(wrapper::vgetlow(data2_q16)));
+                    vres4                   = wrapper::vadd(vres4, wrapper::vmovl(wrapper::vgethigh(data2_q16)));
                 }
             }
             // Divide by scale and add 0.5f to round to nearest instead of rounding towards zero
-            vres1 = vcvtq_u32_f32(vmlaq_f32(half_scale_v, vcvtq_f32_u32(vres1), scale_v));
-            vres2 = vcvtq_u32_f32(vmlaq_f32(half_scale_v, vcvtq_f32_u32(vres2), scale_v));
-            vres3 = vcvtq_u32_f32(vmlaq_f32(half_scale_v, vcvtq_f32_u32(vres3), scale_v));
-            vres4 = vcvtq_u32_f32(vmlaq_f32(half_scale_v, vcvtq_f32_u32(vres4), scale_v));
+            vres1 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres1), scale_v));
+            vres2 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres2), scale_v));
+            vres3 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres3), scale_v));
+            vres4 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres4), scale_v));
 
-            uint8x8_t res1 = vmovn_u16(vcombine_u16(vmovn_u32(vres1), vmovn_u32(vres2)));
-            uint8x8_t res2 = vmovn_u16(vcombine_u16(vmovn_u32(vres3), vmovn_u32(vres4)));
+            q8x8_t res1 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres1), wrapper::vmovn(vres2)));
+            q8x8_t res2 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres3), wrapper::vmovn(vres4)));
             if(input_qinfo != output_qinfo)
             {
-                const auto requantized_output = vquantize(vdequantize(vcombine_u8(res1, res2), input_qinfo), output_qinfo);
-                res1                          = vget_low_u8(requantized_output);
-                res2                          = vget_high_u8(requantized_output);
+                const auto requantized_output = vquantize_q8<q8x16_t>(vdequantize(wrapper::vcombine(res1, res2), input_qinfo), output_qinfo);
+                res1                          = wrapper::vgetlow(requantized_output);
+                res2                          = wrapper::vgethigh(requantized_output);
             }
 
             // Store result
-            vst1_u8(output.ptr(), res1);
-            vst1_u8(output.ptr() + 8, res2);
+            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), res1);
+            wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + 8, res2);
         }
         else
         {
-            uint8x16_t vres = vdupq_n_u8(0);
+            q8x16_t vres = wrapper::vdup_n(std::numeric_limits<T>::min(), wrapper::traits::vector_128_tag{});
 
             for(int y = pool_start_y; y < pool_end_y; ++y)
             {
                 for(int x = pool_start_x; x < pool_end_x; ++x)
                 {
-                    const uint8x16_t data = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
-                                                                                       (_input->info()->strides_in_bytes().z())));
-                    vres                  = vmaxq_u8(vres, data);
+                    const q8x16_t data = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr() + (x - pool_pad_left) * static_cast<int>(_input->info()->strides_in_bytes().y()) + (y - pool_pad_top) * static_cast<int>
+                                                                                     (_input->info()->strides_in_bytes().z())));
+                    vres               = wrapper::vmax(vres, data);
                 }
             }
 
             // Store result
-            vst1q_u8(output.ptr(), (input_qinfo != output_qinfo) ? vquantize(vdequantize(vres, input_qinfo), output_qinfo) : vres);
+            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), (input_qinfo != output_qinfo) ? vquantize_q8<q8x16_t>(vdequantize(vres, input_qinfo), output_qinfo) : vres);
         }
     },
     input, output);
@@ -1854,6 +1977,7 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
         switch(_input->info()->data_type())
         {
             case DataType::QASYMM8:
+            case DataType::QASYMM8_SIGNED:
             {
                 window_x_inc = pool_stride_x;
                 if((pool_size == 2 || pool_size == 3) && pool_stride_x < 3)
@@ -1887,3 +2011,4 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     // Run function
     (this->*_func)(window_input, window, _pool_info.pool_type, exclude_padding);
 }
+} // namespace arm_compute

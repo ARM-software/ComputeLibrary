@@ -66,5 +66,6 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/sub.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/tanh.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/tbl.h"
 
 #endif /* ARM_COMPUTE_WRAPPER_INTRINSICS_H */

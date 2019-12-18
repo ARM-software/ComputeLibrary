@@ -38,9 +38,8 @@ namespace reference
 using namespace arm_compute::misc::shape_calculator;
 
 template <typename T, typename ACC_T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
+SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const PoolingLayerInfo &info)
 {
-    ARM_COMPUTE_UNUSED(output_qinfo); // requantization occurs in pooling_layer<uint8_t>
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling && (src.shape().x() != src.shape().y()));
 
     // Create reference
@@ -152,21 +151,22 @@ SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const Pooling
     return dst;
 }
 
-template SimpleTensor<float> pooling_layer_internal<float>(const SimpleTensor<float> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
-template SimpleTensor<half> pooling_layer_internal<half>(const SimpleTensor<half> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
-template SimpleTensor<half> pooling_layer_internal<half, float>(const SimpleTensor<half> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
+template SimpleTensor<float> pooling_layer_internal<float>(const SimpleTensor<float> &src, const PoolingLayerInfo &info);
+template SimpleTensor<half> pooling_layer_internal<half>(const SimpleTensor<half> &src, const PoolingLayerInfo &info);
+template SimpleTensor<half> pooling_layer_internal<half, float>(const SimpleTensor<half> &src, const PoolingLayerInfo &info);
 
 template <typename T>
 SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
 {
-    return pooling_layer_internal<T, T>(src, info, output_qinfo);
+    ARM_COMPUTE_UNUSED(output_qinfo);
+    return pooling_layer_internal<T, T>(src, info);
 }
 
 template <>
 SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
 {
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float>   dst_tmp = pooling_layer_internal<float>(src_tmp, info, output_qinfo);
+    SimpleTensor<float>   dst_tmp = pooling_layer_internal<float>(src_tmp, info);
     SimpleTensor<uint8_t> dst     = convert_to_asymmetric<uint8_t>(dst_tmp, output_qinfo);
     return dst;
 }
@@ -175,7 +175,7 @@ template <>
 SimpleTensor<int8_t> pooling_layer<int8_t>(const SimpleTensor<int8_t> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
 {
     SimpleTensor<float>  src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float>  dst_tmp = pooling_layer_internal<float>(src_tmp, info, output_qinfo);
+    SimpleTensor<float>  dst_tmp = pooling_layer_internal<float>(src_tmp, info);
     SimpleTensor<int8_t> dst     = convert_to_asymmetric<int8_t>(dst_tmp, output_qinfo);
     return dst;
 }
@@ -183,12 +183,13 @@ SimpleTensor<int8_t> pooling_layer<int8_t>(const SimpleTensor<int8_t> &src, cons
 template <>
 SimpleTensor<half> pooling_layer(const SimpleTensor<half> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
 {
+    ARM_COMPUTE_UNUSED(output_qinfo);
     if(src.data_type() == DataType::F16 && info.fp_mixed_precision)
     {
-        return pooling_layer_internal<half, float>(src, info, output_qinfo);
+        return pooling_layer_internal<half, float>(src, info);
     }
 
-    return pooling_layer_internal<half>(src, info, output_qinfo);
+    return pooling_layer_internal<half>(src, info);
 }
 
 template SimpleTensor<float> pooling_layer(const SimpleTensor<float> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);

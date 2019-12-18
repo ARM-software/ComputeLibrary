@@ -36,6 +36,23 @@ namespace wrapper
         return prefix##_##postfix(value_a, value_b, size); \
     }
 
+VEXT_IMPL(uint8x8_t, vext, u8, 1)
+VEXT_IMPL(uint8x8_t, vext, u8, 2)
+VEXT_IMPL(int8x8_t, vext, s8, 1)
+VEXT_IMPL(int8x8_t, vext, s8, 2)
+VEXT_IMPL(uint16x4_t, vext, u16, 1)
+VEXT_IMPL(uint16x4_t, vext, u16, 2)
+VEXT_IMPL(int16x4_t, vext, s16, 1)
+VEXT_IMPL(int16x4_t, vext, s16, 2)
+
+VEXT_IMPL(uint8x16_t, vextq, u8, 1)
+VEXT_IMPL(uint8x16_t, vextq, u8, 2)
+VEXT_IMPL(int8x16_t, vextq, s8, 1)
+VEXT_IMPL(int8x16_t, vextq, s8, 2)
+VEXT_IMPL(uint16x8_t, vextq, u16, 1)
+VEXT_IMPL(uint16x8_t, vextq, u16, 2)
+VEXT_IMPL(int16x8_t, vextq, s16, 1)
+VEXT_IMPL(int16x8_t, vextq, s16, 2)
 VEXT_IMPL(int32x4_t, vextq, s32, 1)
 VEXT_IMPL(int32x4_t, vextq, s32, 2)
 
