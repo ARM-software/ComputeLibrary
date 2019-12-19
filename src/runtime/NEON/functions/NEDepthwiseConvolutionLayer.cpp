@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,7 +67,9 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
 
         if(is_quantized)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, biases, output));
+            DirectConvolutionLayerOutputStageKernelInfo direct_conv_info;
+            direct_conv_info.output_data_type = input->data_type();
+            ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, biases, output, direct_conv_info));
         }
     }
     else
@@ -196,7 +198,13 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
         int32_t output_multiplier;
         int32_t output_shift;
         quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
-        _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, output_multiplier, output_shift, oq_info.offset);
+
+        DirectConvolutionLayerOutputStageKernelInfo direct_conv_info;
+        direct_conv_info.result_fixedpoint_multiplier = output_multiplier;
+        direct_conv_info.result_shift                 = output_shift;
+        direct_conv_info.result_offset_after_shift    = oq_info.offset;
+        direct_conv_info.output_data_type             = input->info()->data_type();
+        _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, direct_conv_info);
         _accumulator.allocator()->allocate();
     }
     else if(_has_bias)

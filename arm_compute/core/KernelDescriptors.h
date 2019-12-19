@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,6 +82,15 @@ struct SoftmaxKernelInfo
     float    beta{ 1.f };                          /**< A scaling factor for the exponent with default value 1.0 */
     bool     is_log{ false };                      /**< Flag used to perform Log Softmax operation */
     DataType input_data_type{ DataType::UNKNOWN }; /**< Input tensor data type */
+};
+
+/** Descriptor used by the direct convolution layer output stage kernels */
+struct DirectConvolutionLayerOutputStageKernelInfo
+{
+    int32_t  result_fixedpoint_multiplier{ 0 };     /**< Result output stage multiplier used for quantizing */
+    int32_t  result_shift{ 0 };                     /**< Result output stage shift used for quantizing */
+    int32_t  result_offset_after_shift{ 0 };        /**< Result offset used for quantizing */
+    DataType output_data_type{ DataType::UNKNOWN }; /**< Output tensor data type to use if the output is not initialized */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */
