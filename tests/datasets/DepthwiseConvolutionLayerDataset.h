@@ -126,6 +126,8 @@ public:
         // Asymmetric padding
         add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
         add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
+        // Ceil rounding
+        add_config(TensorShape(7U, 8U, 5U, 9U), Size2D(8U, 6U), PadStrideInfo(2, 3, 1, 1, 1, 3, DimensionRoundingType::CEIL), Size2D(1U, 2U));
     }
 };
 

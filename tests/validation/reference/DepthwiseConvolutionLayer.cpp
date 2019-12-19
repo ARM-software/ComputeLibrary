@@ -67,10 +67,8 @@ SimpleTensor<T> depthwise_convolution_fp(const SimpleTensor<T> &src, const Simpl
     const int input_depth   = src.shape().z();
     const int num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
-    const int pad_left   = conv_info.pad_left();
-    const int pad_top    = conv_info.pad_top();
-    const int pad_right  = conv_info.pad_right();
-    const int pad_bottom = conv_info.pad_bottom();
+    const int pad_left = conv_info.pad_left();
+    const int pad_top  = conv_info.pad_top();
 
     const float patch_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1));
     const float patch_height = (filter_height + (dilation.y() - 1) * (filter_height - 1));
@@ -83,8 +81,8 @@ SimpleTensor<T> depthwise_convolution_fp(const SimpleTensor<T> &src, const Simpl
 
     const int minimum_x = -pad_left + patch_half_width_floor;
     const int minimum_y = -pad_top + patch_half_height_floor;
-    const int maximum_x = input_width + pad_left + pad_right - static_cast<int>(patch_width);
-    const int maximum_y = input_height + pad_top + pad_bottom - static_cast<int>(patch_height);
+    const int maximum_x = (conv_info.stride().first * (dst_shape[0] - 1));
+    const int maximum_y = (conv_info.stride().second * (dst_shape[1] - 1));
 
     const T border_value(0);
 
@@ -162,10 +160,8 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
     const int input_depth   = src.shape().z();
     const int num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
-    const int pad_left   = conv_info.pad_left();
-    const int pad_top    = conv_info.pad_top();
-    const int pad_right  = conv_info.pad_right();
-    const int pad_bottom = conv_info.pad_bottom();
+    const int pad_left = conv_info.pad_left();
+    const int pad_top  = conv_info.pad_top();
 
     const float patch_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1));
     const float patch_height = (filter_height + (dilation.y() - 1) * (filter_height - 1));
@@ -178,8 +174,8 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
 
     const int minimum_x = -pad_left + patch_half_width_floor;
     const int minimum_y = -pad_top + patch_half_height_floor;
-    const int maximum_x = input_width + pad_left + pad_right - static_cast<int>(patch_width);
-    const int maximum_y = input_height + pad_top + pad_bottom - static_cast<int>(patch_height);
+    const int maximum_x = (conv_info.stride().first * (dst_shape[0] - 1));
+    const int maximum_y = (conv_info.stride().second * (dst_shape[1] - 1));
 
     const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights.data_type());
 
