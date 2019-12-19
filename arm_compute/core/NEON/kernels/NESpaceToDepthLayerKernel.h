@@ -75,6 +75,7 @@ private:
     const ITensor *_input;       /**< Source tensor */
     ITensor       *_output;      /**< Destination tensor */
     int32_t        _block_shape; /**< Block shape */
+    DataLayout     _data_layout;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NESPACETODEPTHLAYERKERNEL_H */
