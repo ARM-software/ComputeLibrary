@@ -96,9 +96,7 @@ const auto LargeWinogradInputTransformDatasetNCHW =
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x4_1x3(),
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_5x5(),
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x1_5x1(),
-           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x4_1x5(),
-           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x2_1x7(),
-                                      datasets::LargeWinogradInputTransformDataset2x1_7x1()))))))))));
+                                               datasets::LargeWinogradInputTransformDataset1x4_1x5()))))))));
 
 const auto LargeWinogradInputTransformDatasetNHWC =
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_3x3(),
