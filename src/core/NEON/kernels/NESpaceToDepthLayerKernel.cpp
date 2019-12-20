@@ -67,7 +67,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 } // namespace
 
 NESpaceToDepthLayerKernel::NESpaceToDepthLayerKernel()
-    : _input(nullptr), _output(nullptr), _block_shape(),_data_layout(DataLayout::UNKNOWN)
+    : _input(nullptr), _output(nullptr), _block_shape(), _data_layout(DataLayout::UNKNOWN)
 {
 }
 
@@ -102,8 +102,8 @@ void NESpaceToDepthLayerKernel::run(const Window &window, const ThreadInfo &info
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
 
-    const int        channel_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
-    const int        element_size = _input->info()->element_size();
+    const int channel_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
+    const int element_size = _input->info()->element_size();
 
     const size_t channel_size = _input->info()->dimension(channel_idx);
 
@@ -112,7 +112,7 @@ void NESpaceToDepthLayerKernel::run(const Window &window, const ThreadInfo &info
     int batch_id = 0;
 
     // Main loop for NCHW and NHWC
-    if(_output->info()->data_layout() == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         do
         {
