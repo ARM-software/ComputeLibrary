@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,7 @@ public:
     {
         DataType::QSYMM8,
                  DataType::QASYMM8,
+                 DataType::QASYMM8_SIGNED,
                  DataType::QSYMM16,
     })
     {

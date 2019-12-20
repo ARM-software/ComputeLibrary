@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,33 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "arm_compute/runtime/CL/functions/CLDepthToSpaceLayer.h"
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
+#include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
+#include <utility>
 
-CLDepthToSpaceLayer::CLDepthToSpaceLayer()
-    : _depth_to_space_kernel()
+namespace arm_compute
 {
-}
-
 void CLDepthToSpaceLayer::configure(const ICLTensor *input, ICLTensor *output, int32_t block_shape)
 {
-    _depth_to_space_kernel.configure(input, output, block_shape);
+    auto k = arm_compute::support::cpp14::make_unique<CLDepthToSpaceLayerKernel>();
+    k->configure(input, output, block_shape);
+    _kernel = std::move(k);
 }
 
 Status CLDepthToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
 {
     return CLDepthToSpaceLayerKernel::validate(input, output, block_shape);
 }
-
-void CLDepthToSpaceLayer::run()
-{
-    CLScheduler::get().enqueue(_depth_to_space_kernel, true);
-}
+} // namespace arm_compute

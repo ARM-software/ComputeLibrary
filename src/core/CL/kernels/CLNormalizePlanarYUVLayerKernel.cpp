@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,15 +35,15 @@
 
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, std);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, std);
@@ -97,12 +97,8 @@ CLNormalizePlanarYUVLayerKernel::CLNormalizePlanarYUVLayerKernel()
 
 void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, mean, std);
-
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), *input->info()->clone());
-
     // Perform validation step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, mean, std);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), mean->info(), std->info()));
 
     _input  = input;
@@ -183,3 +179,4 @@ void CLNormalizePlanarYUVLayerKernel::run(const Window &window, cl::CommandQueue
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

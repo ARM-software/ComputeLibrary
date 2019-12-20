@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,10 +50,18 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
     ARM_COMPUTE_UNUSED(overflow_policy);
     ARM_COMPUTE_UNUSED(rounding_policy);
 
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input2);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1,
+                                                         1,
+                                                         DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2,
+                                                         1,
+                                                         DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(scale < 0, "Scale cannot be negative.");
 
     const TensorShape &out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
@@ -63,12 +71,17 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
     // Validate in case of configured output
     if(output->total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output,
+                                                             1,
+                                                             DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                             DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                             DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::U8 && (input1->data_type() != DataType::U8 || input2->data_type() != DataType::U8),
                                         "Output can only be U8 if both inputs are U8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::QASYMM8 && (input1->data_type() != DataType::QASYMM8 || input2->data_type() != DataType::QASYMM8),
                                         "Output can only be QASYMM8 if both inputs are QASYMM8");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::QASYMM8_SIGNED && (input1->data_type() != DataType::QASYMM8_SIGNED || input2->data_type() != DataType::QASYMM8_SIGNED),
+                                        "Output can only be QASYMM8_SIGNED if both inputs are QASYMM8_SIGNED");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::QSYMM16 && (input1->data_type() != DataType::QSYMM16 || input2->data_type() != DataType::QSYMM16),
                                         "Output can only be QSYMM16 if both inputs are QSYMM16");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output->tensor_shape(), 0), "Wrong shape for output");
@@ -98,6 +111,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITe
         else if(input1->data_type() == DataType::QASYMM8)
         {
             set_data_type_if_unknown(*output, DataType::QASYMM8);
+        }
+        else if(input1->data_type() == DataType::QASYMM8_SIGNED)
+        {
+            set_data_type_if_unknown(*output, DataType::QASYMM8_SIGNED);
         }
         else if(input1->data_type() == DataType::QSYMM16)
         {

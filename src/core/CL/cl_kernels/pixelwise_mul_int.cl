@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,7 +109,7 @@ __kernel void pixelwise_mul_int(
  * @attention The data type must be passed at compile time using -DDATA_TYPE_OUT, i.e. -DDATA_TYPE_OUT=uchar
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
- * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: QASYMM8/QSYMM16
+ * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM16
  * @param[in]  in1_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -117,7 +117,7 @@ __kernel void pixelwise_mul_int(
  * @param[in]  in1_stride_z                      Stride of the source image in Y dimension (in bytes)
  * @param[in]  in1_step_z                        in1_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  in1_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[in]  in2_ptr                           Pointer to the source image. Supported data types: U8, S16, F16, F32
+ * @param[in]  in2_ptr                           Pointer to the source image. Supported data types: same as @p in1_ptr
  * @param[in]  in2_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  in2_step_x                        in2_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in2_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -125,7 +125,7 @@ __kernel void pixelwise_mul_int(
  * @param[in]  in2_stride_z                      Stride of the source image in Y dimension (in bytes)
  * @param[in]  in2_step_z                        in2_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  in2_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[out] out_ptr                           Pointer to the destination image. Supported data types: U8, S16, F16, F32
+ * @param[out] out_ptr                           Pointer to the destination image. Supported data types: same as @p in1_ptr
  * @param[in]  out_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination image in Y dimension (in bytes)

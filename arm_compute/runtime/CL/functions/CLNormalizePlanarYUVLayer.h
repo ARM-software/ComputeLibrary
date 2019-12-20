@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H
 #define ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+
+#include <cstdint>
 
 namespace arm_compute
 {
@@ -37,15 +37,13 @@ class ICLTensor;
  *
  *  @note The function simulates a NormalizePlanarYUV layer.
  */
-class CLNormalizePlanarYUVLayer : public IFunction
+class CLNormalizePlanarYUVLayer : public ICLSimpleFunction
 {
 public:
-    /** Default constructor */
-    CLNormalizePlanarYUVLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, channels].
-     *                    Data types supported: QASYMM8/F16/F32.
+     *                    Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output Destinationfeature tensor. Data type supported: same as @p input
      * @param[in]  mean   Mean values tensor. 1 dimension with size equal to the number of input channels. Data types supported: Same as @p input
      * @param[in]  std    Standard deviation values tensor. 1 dimension with size equal to the number of input channels.
@@ -55,7 +53,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizePlanarYUVLayer
      *
      * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, channels].
-     *                    Data types supported: QASYMM8/F16/F32.
+     *                    Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output Destination tensor info. Data type supported: same as @p input
      * @param[in]  mean   Mean values tensor info. 1 dimension with size equal to the number of input channels. Data types supported: Same as @p input
      * @param[in]  std    Standard deviation values tensor info. 1 dimension with size equal to the number of input channels.
@@ -64,12 +62,6 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    CLNormalizePlanarYUVLayerKernel _norm_kernel; /**< NormalizePlanarYUV layer kernel to run */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H */

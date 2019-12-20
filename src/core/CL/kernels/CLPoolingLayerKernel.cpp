@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,8 @@
 #include <string>
 #include <tuple>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
@@ -57,19 +58,8 @@ void auto_init(const ITensorInfo *input, ITensorInfo *output, PoolingLayerInfo p
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    DataLayout data_layout = input->data_layout();
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    switch(data_layout)
-    {
-        case DataLayout::NCHW:
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-            break;
-        case DataLayout::NHWC:
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Data layout not supported");
-    }
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type() == PoolingType::L2),
                                     "Unsupported combination of parameters!");
 
@@ -234,7 +224,25 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     build_opts.add_option("-DPOOL_SIZE_X=" + support::cpp11::to_string(pool_size_x));
     build_opts.add_option("-DPOOL_SIZE_Y=" + support::cpp11::to_string(pool_size_y));
 
-    build_opts.add_option_if(data_type == DataType::F16, "-DFP16");
+    // Set the initial value for the pooling operation accordingly with the data type
+    if(pool_type == PoolingType::MAX)
+    {
+        if(is_data_type_quantized(data_type))
+        {
+            PixelValue type_min{};
+            std::tie(type_min, std::ignore) = get_min_max(data_type);
+            build_opts.add_option("-DINITIAL_VALUE=" + support::cpp11::to_string(type_min.get<int32_t>()));
+        }
+        else
+        {
+            build_opts.add_option("-DINITIAL_VALUE=" + float_to_string_with_full_precision(std::numeric_limits<float>::lowest()));
+        }
+    }
+    else
+    {
+        // Pool AVG and Pool L2 initial value
+        build_opts.add_option("-DINITIAL_VALUE=0");
+    }
 
     const auto use_fp_mixed_precision = (data_type == DataType::F16) && pool_info.fp_mixed_precision();
     const auto use_wider_accumulator  = use_fp_mixed_precision && (pool_type != PoolingType::MAX);
@@ -389,3 +397,4 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
             ARM_COMPUTE_ERROR("Not implemented");
     }
 }
+} // namespace arm_compute

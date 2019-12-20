@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void CLConvertFullyConnectedWeights::configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
                                                DataLayout data_layout)
 {
@@ -38,3 +38,4 @@ Status CLConvertFullyConnectedWeights::validate(const ITensorInfo *input, const 
 {
     return CLConvertFullyConnectedWeightsKernel::validate(input, output, original_input_shape, data_layout);
 }
+} // namespace arm_compute

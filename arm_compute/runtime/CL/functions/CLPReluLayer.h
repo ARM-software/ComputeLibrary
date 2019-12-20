@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,14 +42,14 @@ public:
      *
      * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  alpha  PRelu layer parameters. Data types supported: same of @p input.
      * @param[out] output Destination tensor. Data type supported: same as @p input
      */
     void configure(ICLTensor *input, ICLTensor *alpha, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPReluLayer
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] alpha  PRelu layer parameters. Data types supported: same of @p input.
      * @param[in] output Destination tensor info. Data type supported: same as @p input
      *

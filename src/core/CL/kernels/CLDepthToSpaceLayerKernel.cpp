@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape < 2);
 
@@ -81,7 +82,7 @@ void CLDepthToSpaceLayerKernel::configure(const ICLTensor *input, ICLTensor *out
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
     build_opts.add_option("-DCHANNEL_SIZE=" + support::cpp11::to_string(input->info()->dimension(idx_channel)));
     build_opts.add_option("-DBLOCK_SHAPE=" + support::cpp11::to_string(block_shape));
     build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_width)));

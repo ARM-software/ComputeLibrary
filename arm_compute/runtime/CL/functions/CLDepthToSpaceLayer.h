@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,43 +24,33 @@
 #ifndef ARM_COMPUTE_CLDEPTHTOSPACELAYER_H
 #define ARM_COMPUTE_CLDEPTHTOSPACELAYER_H
 
-#include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
 /** Basic function to run @ref CLDepthToSpaceLayerKernel. */
-class CLDepthToSpaceLayer : public IFunction
+class CLDepthToSpaceLayer : public ICLSimpleFunction
 {
 public:
-    /** Default constructor */
-    CLDepthToSpaceLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[out] output      Tensor output. Data types supported: same as @p input
      * @param[in]  block_shape Block shape value.
      */
     void configure(const ICLTensor *input, ICLTensor *output, int32_t block_shape);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthToSpaceLayer.
      *
-     * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in] output      Tensor output info. Data types supported: same as @p input
      * @param[in] block_shape Block shape value.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    CLDepthToSpaceLayerKernel _depth_to_space_kernel; /**< CLDepthToSpaceLayerKernel to run */
 };
 }
 #endif /* ARM_COMPUTE_CLDEPTHTOSPACELAYER_H */

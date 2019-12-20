@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  * @attention The comparison operation should be given as a preprocessor argument using -DOP=operation. e.g. -DOP=LESS
  *
- * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: U8/S16/F16/F32
+ * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: All non-quantized data types.
  * @param[in]  in1_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -93,12 +93,13 @@ __kernel void DEFINE_KERNEL(OP_NAME)(
 #if defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(SCALE_IN1) && defined(SCALE_IN2)
 /** This function compares two quantized tensors.
  *
+ * @note The inputs' data type need to be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=uchar
  * @note The quantization offset of the first operand must be passed at compile time using -DOFFSET_IN1, i.e. -DOFFSET_IN1=10
  * @note The quantization offset of the second operand must be passed at compile time using -DOFFSET_IN2, i.e. -DOFFSET_IN2=10
  * @note The quantization scale of the first operand must be passed at compile time using -DSCALE_IN1, i.e. -DSCALE_IN1=10
  * @note The quantization scale of the second operand must be passed at compile time using -DSCALE_IN2, i.e. -DSCALE_IN2=10
  *
- * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: All quantized data types.
  * @param[in]  in1_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -133,8 +134,8 @@ __kernel void DEFINE_KERNEL_QUANTIZED(OP_NAME)(
     Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
-    int16 in_a = CONVERT(vload16(0, (__global uchar *)in1.ptr), int16);
-    int16 in_b = CONVERT(vload16(0, (__global uchar *)in2.ptr), int16);
+    int16 in_a = CONVERT(vload16(0, (__global DATA_TYPE *)in1.ptr), int16);
+    int16 in_b = CONVERT(vload16(0, (__global DATA_TYPE *)in2.ptr), int16);
 
     in_a = in_a - (int16)((int)OFFSET_IN1);
     in_b = in_b - (int16)((int)OFFSET_IN2);

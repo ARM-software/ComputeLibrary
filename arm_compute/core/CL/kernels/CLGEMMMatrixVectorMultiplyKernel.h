@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,16 +46,16 @@ public:
     CLGEMMMatrixVectorMultiplyKernel &operator=(CLGEMMMatrixVectorMultiplyKernel &&) = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input0 The reshaped input tensor. Data types supported: QASYMM8/F16/F32
-     * @param[in]  input1 The 2D reshaped weights tensor. Data type supported: Same as @p input, S32 for QASYMM8 input.
-     * @param[out] output The output 2D tensor. Data types supported: Same as @p input
+     * @param[in]  input0 The reshaped input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
+     * @param[in]  input1 The 2D reshaped weights tensor. Data type supported: Same as @p input.
+     * @param[out] output The output 2D tensor. Data types supported: Same as @p input, S32 for QASYMM8/QASYMM8_SIGNED.
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixVectorMultiplyKernel
      *
-     * @param[in] input0 The reshaped input tensor. Data types supported: QASYMM8/F16/F32
-     * @param[in] input1 The 2D reshaped weights tensor. Data type supported: Same as @p input, S32 for QASYMM8 input.
-     * @param[in] output The output 2D tensor. Data types supported: Same as @p input
+     * @param[in] input0 The reshaped input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
+     * @param[in] input1 The 2D reshaped weights tensor info. Data type supported: Same as @p input.
+     * @param[in] output The output 2D tensor info. Data types supported: Same as @p input, S32 for QASYMM8/QASYMM8_SIGNED.
      *
      * @return a status
      */

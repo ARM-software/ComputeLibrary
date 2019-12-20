@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@
  * @note The quantization offset should be given as a preprocessor argument using -DOFFSET e.g. -DOFFSET=8
  * @note The quantization scale should be given as a preprocessor argument using -DSCALE e.g. -DSCALE=8
  *
- * @param[in]  src_ptr                            Pointer to the first source tensor. Supported data types: QASYMM8
+ * @param[in]  src_ptr                            Pointer to the first source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                       Stride of the first source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                       Stride of the first source tensor in Y dimension (in bytes)
@@ -102,7 +102,7 @@ __kernel void normalize_planar_yuv_layer_q8_nchw(TENSOR3D_DECLARATION(src),
  * @note The quantization offset should be given as a preprocessor argument using -DOFFSET e.g. -DOFFSET=8
  * @note The quantization scale should be given as a preprocessor argument using -DSCALE e.g. -DSCALE=8
  *
- * @param[in]  src_ptr                            Pointer to the first source tensor. Supported data types: QASYMM8
+ * @param[in]  src_ptr                            Pointer to the first source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                       Stride of the first source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                       Stride of the first source tensor in Y dimension (in bytes)

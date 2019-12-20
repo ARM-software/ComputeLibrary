@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,32 +24,23 @@
 
 #include "arm_compute/runtime/CL/functions/CLNormalizePlanarYUVLayer.h"
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.h"
+#include "support/ToolchainSupport.h"
+
+#include <utility>
 
 namespace arm_compute
 {
-CLNormalizePlanarYUVLayer::CLNormalizePlanarYUVLayer()
-    : _norm_kernel()
-{
-}
-
 void CLNormalizePlanarYUVLayer::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
 {
-    _norm_kernel.configure(input, output, mean, std);
+    auto k = arm_compute::support::cpp14::make_unique<CLNormalizePlanarYUVLayerKernel>();
+    k->configure(input, output, mean, std);
+    _kernel = std::move(k);
 }
 
 Status CLNormalizePlanarYUVLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
                                            const ITensorInfo *mean, const ITensorInfo *std)
 {
     return CLNormalizePlanarYUVLayerKernel::validate(input, output, mean, std);
-}
-
-void CLNormalizePlanarYUVLayer::run()
-{
-    CLScheduler::get().enqueue(_norm_kernel, true);
 }
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@ void CLConvertFullyConnectedWeightsKernel::configure(const ICLTensor *input, ICL
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
     build_opts.add_option("-DFACTOR_1=" + support::cpp11::to_string(factor_1));
     build_opts.add_option("-DFACTOR_2=" + support::cpp11::to_string(factor_2));
 
@@ -79,18 +79,15 @@ void CLConvertFullyConnectedWeightsKernel::configure(const ICLTensor *input, ICL
 Status CLConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape,
                                                       DataLayout data_layout)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8,
-                                                         DataType::U16, DataType::S16,
-                                                         DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != original_input_shape.total_size_lower(3));
     ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::UNKNOWN);
 
     // Checks performed when output is configured
-    if((output != nullptr) && (output->total_size() != 0))
+    if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);

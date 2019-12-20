@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -168,6 +168,15 @@ SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, c
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float>   dst_tmp = pooling_layer_internal<float>(src_tmp, info, output_qinfo);
     SimpleTensor<uint8_t> dst     = convert_to_asymmetric<uint8_t>(dst_tmp, output_qinfo);
+    return dst;
+}
+
+template <>
+SimpleTensor<int8_t> pooling_layer<int8_t>(const SimpleTensor<int8_t> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
+{
+    SimpleTensor<float>  src_tmp = convert_from_asymmetric(src);
+    SimpleTensor<float>  dst_tmp = pooling_layer_internal<float>(src_tmp, info, output_qinfo);
+    SimpleTensor<int8_t> dst     = convert_to_asymmetric<int8_t>(dst_tmp, output_qinfo);
     return dst;
 }
 

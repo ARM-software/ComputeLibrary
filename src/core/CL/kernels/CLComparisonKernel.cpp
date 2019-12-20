@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,12 +52,7 @@ int calculate_num_elems_processed_per_iteration(const ITensorInfo &input)
 Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output, ComparisonOperation operation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1,
-                                                         1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8,
-                                                         DataType::U16, DataType::S16,
-                                                         DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input1.data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &input2);
     ARM_COMPUTE_RETURN_ERROR_ON(supported_comparison_ops.count(operation) == 0);
 
@@ -132,7 +127,7 @@ void CLComparisonKernel::configure(const ICLTensor *input1, const ICLTensor *inp
     build_opts.emplace("-DVEC_SIZE=" + support::cpp11::to_string(calculate_num_elems_processed_per_iteration(*input1->info())));
     build_opts.emplace("-DOP=" + operation_name);
     build_opts.emplace("-DOP_NAME=" + lower_string(operation_name));
-    if(is_data_type_quantized_asymmetric(input1->info()->data_type()))
+    if(is_data_type_quantized(input1->info()->data_type()))
     {
         const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
         const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();

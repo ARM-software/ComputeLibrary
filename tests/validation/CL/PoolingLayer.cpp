@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,9 +71,10 @@ framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(5, 7) })),
 framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
 framework::dataset::make("ExcludePadding", { true }));
 
-constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
-constexpr AbsoluteTolerance<float>   tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);  /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
+constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f);  /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
+constexpr AbsoluteTolerance<float>   tolerance_f16(0.01f);   /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);   /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit signed asymmetric type */
 const auto                           pool_data_layout_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
 
 const auto pool_fp_mixed_precision_dataset = framework::dataset::make("FpMixedPrecision", { true, false });
@@ -188,14 +189,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framew
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQASYMM8,
-                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8))),
-                                                                                                                   pool_data_layout_dataset))
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8Small,
+                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                    pool_data_layout_dataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);
 }
-TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // PoolingLayer
 TEST_SUITE_END() // CL

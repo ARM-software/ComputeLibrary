@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,13 +48,13 @@ public:
     ~CLDequantizationLayerKernel() = default;
     /** Set the input, output, min and max.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
      * @param[out] output Destination tensor. Data types supported: F16/F32.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDequantizationLayerKernel
      *
-     * @param[in] input  Input tensor info. Data types supported: QASYMM8/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
      * @param[in] output Output tensor info. Data types supported: F16/F32.
      *
      * @return a status

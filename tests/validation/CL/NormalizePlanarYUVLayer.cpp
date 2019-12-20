@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,7 +123,7 @@ FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<half>, framework
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
@@ -133,8 +133,8 @@ FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<float>, framewor
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
 template <typename T>
 using CLNormalizePlanarYUVLayerQuantizedFixture = NormalizePlanarYUVLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLNormalizePlanarYUVLayer, T>;
@@ -143,17 +143,27 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, 0);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, 0);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // NormalizePlanarYUVLayer
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

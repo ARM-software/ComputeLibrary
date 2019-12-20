@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -235,15 +235,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerQuantizedFixture<uint8_t>, fra
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::QASYMM8)),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::QASYMM8_SIGNED)),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 10.0f) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
 }
-TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QSYMM16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
                                                                                                                         framework::dataset::make("DataType",

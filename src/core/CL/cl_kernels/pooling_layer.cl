@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -391,28 +391,16 @@ __kernel void pooling_layer_optimized_3(
 
 #if defined(POOL_SIZE_X) && defined(POOL_SIZE_Y)
 
-// Set the initial value for the pooling operation accordingly with the data type
-#if defined(POOL_AVG) || defined(POOL_L2)
-#define INITIAL_VALUE 0
-#else /* defined(POOL_AVG) || defined(POOL_L2) */
-#if FP16
-#define INITIAL_VALUE -HALF_MAX
-#else // FP16
-#define INITIAL_VALUE -FLT_MAX
-#endif // FP16
-
-#endif // POOL_AVG
-
 /** Performs a pooling function of pool size equal to N  (NCHW)
  *
  * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32;
- * @note -DFP16 must be passed at compile time if half float data type is used
  * @note Pool sizes must be passed using -DPOOL_SIZE_X and -DPOOL_SIZE_Y e.g. -DPOOL_SIZE_X=13;
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
+ * @note The initial value for the pooling operation must be passed at compile time using -DINITIAL_VALUE e.g. -DINITIAL_VALUE=0
  *
  * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -519,13 +507,13 @@ ACC_DATA_TYPE calculate_avg_scale_nhwc(const int pool_size_x, const int pool_siz
 /** Performs a pooling function of pool size equal to N (NHWC)
  *
  * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32
- * @note -DFP16 must be passed at compile time if half float data type is used
  * @note Pool sizes must be passed using -DPOOL_SIZE_X and -DPOOL_SIZE_Y e.g. -DPOOL_SIZE_X=13;
  * @note Tensors width and height must be passed at compile time using -DMAX_WIDTH and -DMAX_HEIGHT
  * @note Strides must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  * @note Pad values must be passed at compile time using -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
+ * @note The initial value for the pooling operation must be passed at compile time using -DINITIAL_VALUE e.g. -DINITIAL_VALUE=0
  *
  * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)

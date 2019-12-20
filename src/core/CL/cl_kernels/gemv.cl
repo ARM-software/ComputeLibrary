@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,12 +110,12 @@ __kernel void gemm_mv(TENSOR3D_DECLARATION(src), IMAGE_DECLARATION(weights), VEC
         }
     }
 }
-#endif /* defined(DATA_TYPE) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) */
 
-#if defined(SRC_WIDTH) && defined(SRC_HEIGHT)
 /** This kernel applies dot product to each plane on the input tensor and the corresponding column of the reshaped weight tensor.
  *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
+ * @note Input data type should be given as a preprocessor argument using -DDATA_TYPE=type, e.g. -DDATA_TYPE=uchar
+ *
+ * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
@@ -123,13 +123,13 @@ __kernel void gemm_mv(TENSOR3D_DECLARATION(src), IMAGE_DECLARATION(weights), VEC
  * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Same as @p src_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
  * @param[in]  weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
- * @param[out] dst_ptr                               Pointer to the destination tensor. Same as @p src_ptr
+ * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: S32
  * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
@@ -158,14 +158,14 @@ __kernel void gemm_mv_quantized(TENSOR3D_DECLARATION(src),
     // This kernel handle 4 rows in per thread so that it can reuse the weights
     for(int i = 0; i < SRC_WIDTH; i += 4)
     {
-        int4 w = convert_int4(vload4(0, (__global uchar *)(current_weights + i * weights_stride_x))) + (int4)weights_offset;
+        int4 w = convert_int4(vload4(0, (__global DATA_TYPE *)(current_weights + i * weights_stride_x))) + (int4)weights_offset;
 
         int4 offset = (int4)i * (int4)src_stride_x + (int4)(0, 1, 2, 3) * (int4)src_stride_y;
 
-        int4 tmp0 = convert_int4(vload4(0, (__global uchar *)(input_ptr + offset.s0))) + (int4)input_offset;
-        int4 tmp1 = convert_int4(vload4(0, (__global uchar *)(input_ptr + offset.s1))) + (int4)input_offset;
-        int4 tmp2 = convert_int4(vload4(0, (__global uchar *)(input_ptr + offset.s2))) + (int4)input_offset;
-        int4 tmp3 = convert_int4(vload4(0, (__global uchar *)(input_ptr + offset.s3))) + (int4)input_offset;
+        int4 tmp0 = convert_int4(vload4(0, (__global DATA_TYPE *)(input_ptr + offset.s0))) + (int4)input_offset;
+        int4 tmp1 = convert_int4(vload4(0, (__global DATA_TYPE *)(input_ptr + offset.s1))) + (int4)input_offset;
+        int4 tmp2 = convert_int4(vload4(0, (__global DATA_TYPE *)(input_ptr + offset.s2))) + (int4)input_offset;
+        int4 tmp3 = convert_int4(vload4(0, (__global DATA_TYPE *)(input_ptr + offset.s3))) + (int4)input_offset;
 
         // Accumulate
         acc0 += tmp0.s0 * w.s0 + tmp0.s1 * w.s1 + tmp0.s2 * w.s2 + tmp0.s3 * w.s3;
@@ -197,4 +197,4 @@ __kernel void gemm_mv_quantized(TENSOR3D_DECLARATION(src),
         }
     }
 }
-#endif /* defined(SRC_WIDTH) && defined(SRC_HEIGHT) */
+#endif /* defined(DATA_TYPE) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) */

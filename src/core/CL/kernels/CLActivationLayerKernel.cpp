@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,14 +39,14 @@
 #include <cmath>
 #include <set>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::F16, DataType::F32);
 
     static std::set<ActivationLayerInfo::ActivationFunction> quantized_supported_activations =
     {
@@ -63,11 +63,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(data_type) && (quantized_supported_activations.count(f_act) == 0),
                                     "For Quantized data type only tanh, logistic, relu and lower/upper bounded relu are supported");
 
-    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 128.f, 128)));
-    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 256.f, 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8 && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 128.f, 128)));
+    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8 && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 256.f, 0)));
 
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_symmetric(data_type) && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 32768.f, 0)));
+
+    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8_SIGNED && (f_act == ActivationLayerInfo::ActivationFunction::TANH) && (oq_info != QuantizationInfo(1.f / 128.f, 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON(data_type == DataType::QASYMM8_SIGNED && (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) && (oq_info != QuantizationInfo(1.f / 256.f, -128)));
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
@@ -135,26 +138,10 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     const DataType     dt                                = input->info()->data_type();
     float              a_const                           = act_info.a();
     float              b_const                           = act_info.b();
-    int                a_const_int                       = 0;
-    int                b_const_int                       = 0;
 
     const ActivationLayerInfo::ActivationFunction f_act                       = act_info.activation();
     const bool                                    is_quantized                = is_data_type_quantized(dt);
     const bool                                    perform_activation_in_float = (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) || (f_act == ActivationLayerInfo::ActivationFunction::TANH);
-
-    // Create quantized version of constants a, b if needed
-    if(dt == DataType::QASYMM8)
-    {
-        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
-        a_const_int                           = quantize_qasymm8(a_const, iq_info);
-        b_const_int                           = quantize_qasymm8(b_const, iq_info);
-    }
-    else if(dt == DataType::QSYMM16)
-    {
-        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
-        a_const_int                           = quantize_qsymm16(a_const, iq_info);
-        b_const_int                           = quantize_qsymm16(b_const, iq_info);
-    }
 
     // Set build options
     CLBuildOptions build_opts;
@@ -164,27 +151,58 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
     build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
-    // Set A, B constants in build options
-    if(is_quantized && !perform_activation_in_float)
-    {
-        build_opts.add_option(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
-        build_opts.add_option(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
-    }
-    else
-    {
-        build_opts.add_option(("-DA_VAL=" + float_to_string_with_full_precision(a_const)));
-        build_opts.add_option(("-DB_VAL=" + float_to_string_with_full_precision(b_const)));
-    }
+    std::string kernel_name = std::string("activation_layer");
 
     // Set quantization info build options
     if(is_quantized)
     {
         const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
 
+        if(!perform_activation_in_float)
+        {
+            int a_const_int = 0;
+            int b_const_int = 0;
+
+            // Create quantized version of constants a, b if needed
+            switch(dt)
+            {
+                case DataType::QASYMM8:
+                {
+                    a_const_int = quantize_qasymm8(a_const, iq_info);
+                    b_const_int = quantize_qasymm8(b_const, iq_info);
+                }
+                break;
+                case DataType::QASYMM8_SIGNED:
+                {
+                    a_const_int = quantize_qasymm8_signed(a_const, iq_info);
+                    b_const_int = quantize_qasymm8_signed(b_const, iq_info);
+                }
+                break;
+                case DataType::QSYMM16:
+                {
+                    a_const_int = quantize_qsymm16(a_const, iq_info);
+                    b_const_int = quantize_qsymm16(b_const, iq_info);
+                }
+                break;
+                default:
+                    break;
+            }
+            build_opts.add_option(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
+            build_opts.add_option(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
+        }
+        else
+        {
+            build_opts.add_option(("-DA_VAL=" + float_to_string_with_full_precision(a_const)));
+            build_opts.add_option(("-DB_VAL=" + float_to_string_with_full_precision(b_const)));
+        }
+
         // Quantized value of 0 corresponds to the offset o1
         build_opts.add_option(("-DCONST_0=" + (is_data_type_quantized_asymmetric(dt) ? support::cpp11::to_string(iq_info.offset) : "0")));
         build_opts.add_option(("-DS1_VAL=" + float_to_string_with_full_precision(iq_info.scale)));
         build_opts.add_option_if(is_data_type_quantized_asymmetric(dt), "-DO1_VAL=" + support::cpp11::to_string(iq_info.offset));
+
+        // Set correct kernel name
+        kernel_name += perform_activation_in_float ? std::string("_quant_f32") : std::string("_quant");
 
         // Set scale and offset of the input and output if they have different quantization info
         if(output != nullptr)
@@ -198,14 +216,14 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
             }
         }
     }
-
-    // Create kernel
-    std::string kernel_name = std::string("activation_layer");
-    if(is_quantized)
+    else
     {
-        kernel_name += perform_activation_in_float ? std::string("_quant_f32") : std::string("_quant");
+        // Set A, B constants in build options for float types
+        build_opts.add_option(("-DA_VAL=" + float_to_string_with_full_precision(a_const)));
+        build_opts.add_option(("-DB_VAL=" + float_to_string_with_full_precision(b_const)));
     }
 
+    // Create kernel
     _kernel = create_opencl_kernel(_ctx, kernel_name, build_opts);
     // Make sure _kernel is initialized before calling the parent's configure
     _input  = input;
@@ -254,3 +272,4 @@ void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute
