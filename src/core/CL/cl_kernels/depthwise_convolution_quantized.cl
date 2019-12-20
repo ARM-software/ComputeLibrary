@@ -1313,15 +1313,15 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     acc3                     = select(res3_shift_lt0, res3_shift_gt0, output_shift >= 0);
 #else // defined(PER_CHANNEL_QUANTIZATION)
 #if OUTPUT_SHIFT < 0
-    acc0    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc0, output_multiplier, output_shift, VEC_SIZE);
-    acc1    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc1, output_multiplier, output_shift, VEC_SIZE);
-    acc2    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc2, output_multiplier, output_shift, VEC_SIZE);
-    acc3    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc3, output_multiplier, output_shift, VEC_SIZE);
+    acc0    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+    acc1    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+    acc2    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc2, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+    acc3    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc3, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
 #else  // OUTPUT_SHIFT < 0
-    acc0    = asymm_mult_by_quant_multiplier_less_than_one(acc0, output_multiplier, output_shift);
-    acc1    = asymm_mult_by_quant_multiplier_less_than_one(acc1, output_multiplier, output_shift);
-    acc2    = asymm_mult_by_quant_multiplier_less_than_one(acc2, output_multiplier, output_shift);
-    acc3    = asymm_mult_by_quant_multiplier_less_than_one(acc3, output_multiplier, output_shift);
+    acc0    = asymm_mult_by_quant_multiplier_less_than_one(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc1    = asymm_mult_by_quant_multiplier_less_than_one(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc2    = asymm_mult_by_quant_multiplier_less_than_one(acc2, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc3    = asymm_mult_by_quant_multiplier_less_than_one(acc3, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
 #endif // OUTPUT_SHIFT < 0
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
