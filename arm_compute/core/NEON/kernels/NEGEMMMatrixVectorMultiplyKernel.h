@@ -50,17 +50,17 @@ public:
     NEGEMMMatrixVectorMultiplyKernel &operator=(NEGEMMMatrixVectorMultiplyKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input0 First Input tensor. Data types supported: QASYMM8/F16/F32
+     * @param[in]  input0 First Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in]  input1 Second Input tensor. Data types supported: same as @p input.
-     * @param[out] output Output tensor which stores the interleaved matrix. Data type supported: same as @p input, S32 for QASYMM8 input.
+     * @param[out] output Output tensor which stores the interleaved matrix. Data type supported: same as @p input, S32 for QASYMM8/QASYMM8_SIGNED input.
      */
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMMatrixVectorMultiplyKernel
      *
-     * @param[in] input0 First Input tensor. Data types supported: QASYMM8/F16/F32
+     * @param[in] input0 First Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in] input1 Second Input tensor. Data types supported: same as @p input.
-     * @param[in] output Output tensor which stores the interleaved matrix. Data type supported: same as @p input, S32 for QASYMM8 input.
+     * @param[in] output Output tensor which stores the interleaved matrix. Data type supported: same as @p input, S32 for QASYMM8/QASYMM8_SIGNED input.
      *
      * @return a status
      */
