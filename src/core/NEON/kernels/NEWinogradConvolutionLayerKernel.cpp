@@ -77,26 +77,10 @@ Status validate_arguments_winograd_weight_trans(const ITensorInfo *input, const 
 
 std::pair<Status, Window> validate_and_configure_window_winograd_weight_trans(ITensorInfo *input, ITensorInfo *output, const WinogradInfo &winograd_info)
 {
-    const Size2D kernel_dims = winograd_info.kernel_size;
     // Output tensor auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(arm_compute::misc::shape_calculator::compute_winograd_filter_transform_shape(*input, winograd_info)));
-
-    unsigned int num_elems_processed_per_iteration_x = kernel_dims.width;
-    unsigned int num_elems_processed_per_iteration_y = kernel_dims.height;
-
-    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-    bool   window_changed = false;
-
-    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-    AccessWindowStatic    output_access(output, 0, 0, output->dimension(0), output->dimension(1));
-    window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
-
-    Window win_collapsed = win.collapse(win, Window::DimZ);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-
-    return std::make_pair(err, win_collapsed);
+    const Window win = calculate_max_window(*input, Steps(), true /* skip border*/);
+    return std::make_pair(Status{}, win);
 }
 
 Status validate_arguments_winograd_input_trans(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
@@ -124,24 +108,10 @@ Status validate_arguments_winograd_input_trans(const ITensorInfo *input, const I
 
 std::pair<Status, Window> validate_and_configure_window_winograd_input_trans(ITensorInfo *input, ITensorInfo *output, const WinogradInfo &winograd_info)
 {
-    const PadStrideInfo conv_info        = winograd_info.convolution_info;
-    const Size2D        output_tile_size = winograd_info.output_tile_size;
-    const Size2D        kernel_dims      = winograd_info.kernel_size;
-    const TensorShape   output_shape     = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
+    const TensorShape output_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
-
-    unsigned int num_elems_read_per_iteration_x = (output_tile_size.width + kernel_dims.width - 1);
-    unsigned int num_elems_read_per_iteration_y = (output_tile_size.height + kernel_dims.height - 1);
-
-    Window win = calculate_max_window(*input, Steps(1, 1));
-
-    AccessWindowRectangle input_access(input, -conv_info.pad_left(), -conv_info.pad_top(), num_elems_read_per_iteration_x, num_elems_read_per_iteration_y);
-
-    bool window_changed = update_window_and_padding(win, input_access);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(Status{}, calculate_max_window(*input, Steps(), true));
 }
 
 Status validate_arguments_winograd_output_trans(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
@@ -183,32 +153,12 @@ Status validate_arguments_winograd_output_trans(const ITensorInfo *input, const 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window_winograd_output_trans(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output, const WinogradInfo &winograd_info)
+std::pair<Status, Window> validate_and_configure_window_winograd_output_trans(ITensorInfo *input, ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(arm_compute::misc::shape_calculator::compute_winograd_output_transform_shape(*input, winograd_info)));
 
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
-
-    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    bool   window_changed = false;
-
-    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-    AccessWindowStatic    output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), 2), ceil_to_multiple(output->dimension(1), 2));
-
-    if(bias != nullptr)
-    {
-        AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-        window_changed = update_window_and_padding(win, input_access, bias_access, output_access);
-    }
-    else
-    {
-        window_changed = update_window_and_padding(win, input_access, output_access);
-    }
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(Status{}, calculate_max_window(*input, Steps(), true));
 }
 } // namespace
 
@@ -558,9 +508,7 @@ Status NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, K
                                                                                                                  const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_winograd_output_trans(input, (bias != nullptr ? bias->clone().get() : nullptr), output, winograd_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_winograd_output_trans(input->clone().get(), (bias != nullptr ? bias->clone().get() : nullptr), output->clone().get(),
-                                                                                    winograd_info)
-                                .first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_winograd_output_trans(input->clone().get(), output->clone().get(), winograd_info).first);
 
     return Status{};
 }
