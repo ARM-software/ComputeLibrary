@@ -59,7 +59,8 @@ namespace
 RelativeTolerance<float> rel_tolerance_f32(0.001f);
 constexpr float          abs_tolerance_f32(0.0001f);
 
-RelativeTolerance<half_float::half>  tolerance_f16(half_float::half(0.01));
+RelativeTolerance<half_float::half>  rel_tolerance_f16(half_float::half(0.01f));
+const float                          abs_tolerance_f16(half_float::half(0.02f));
 
 /** Width values to test - Precommit */
 const auto width_values_precommit = framework::dataset::make("width", { 37U } );
@@ -187,7 +188,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>,
                                                                                                 n0_values_precommit))
 {
     // Validate output
-        validate(CLAccessor(_target), _reference, tolerance_f16);
+        validate(CLAccessor(_target), _reference, rel_tolerance_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
@@ -207,7 +208,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>,
                                                                                                 n0_values_nightly))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
@@ -273,7 +274,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerNativeFixture<half>,
                                                                                                 framework::dataset::make("N0", 1)))
 {
     // Validate output
-        validate(CLAccessor(_target), _reference, tolerance_f16);
+        validate(CLAccessor(_target), _reference, rel_tolerance_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>, framework::DatasetMode::NIGHTLY,
@@ -293,7 +294,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerNativeFixture<half>,
                                                                                                 framework::dataset::make("N0", 1)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
