@@ -337,8 +337,8 @@ SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
 if env['examples'] and env['exceptions']:
     if env['os'] == 'bare_metal' and env['arch'] == 'armv7a':
-        print("Building examples for bare metal and armv7a is not supported. Use examples=0.")
-        Exit(1)
+        print("WARNING: Building examples for bare metal and armv7a is not supported. Use examples=0")
+        Return()
     SConscript('./examples/SConscript', variant_dir='%s/examples' % build_path, duplicate=0)
 
 if env['exceptions']:
