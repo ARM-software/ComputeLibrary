@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,14 +41,14 @@ class NEElementwiseMax : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in, out] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[out]     output Output tensor. Data types supported: Same as @p input1.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for max
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      *

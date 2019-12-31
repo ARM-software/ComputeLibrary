@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -795,8 +795,7 @@ void elementwise_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITe
 
     const UniformQuantizationInfo output_qinfo = out->info()->quantization_info().uniform();
 
-    // Output quantization info (add 0.5 to round toward the nearest integer - 0.5 rounds away from zero)
-    const float32x4_t voffseto   = vdupq_n_f32(output_qinfo.offset + 0.5f);
+    const float32x4_t voffseto   = vdupq_n_f32(output_qinfo.offset);
     const float32x4_t invvscaleo = vdupq_n_f32(1.f / output_qinfo.scale);
 
     if(is_broadcast_across_x)
@@ -1000,7 +999,6 @@ NEElementwiseOperationKernel::NEElementwiseOperationKernel()
 Status NEElementwiseOperationKernel::validate_arguments_common(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::S32, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &input2);
 
