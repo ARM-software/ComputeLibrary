@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/dup_n.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/eor.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/exp.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/ext.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/gethigh.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/getlane.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/getlow.h"

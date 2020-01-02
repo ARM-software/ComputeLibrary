@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -196,7 +196,7 @@ void NEGEMMLowpMatrixAReductionKernel::run_internal(const arm_compute::Window &w
 
             auto vector_sum_row = reinterpret_cast<int32_t *>(out.ptr());
 
-            wrapper::vstore(vector_sum_row, wrapper::vreinterpret_s32(sum_row));
+            wrapper::vstore(vector_sum_row, wrapper::vreinterpret(sum_row));
         },
         in, out);
     }
@@ -352,10 +352,10 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
 
             auto vector_sum_col = reinterpret_cast<int32_t *>(out.ptr());
 
-            wrapper::vstore(vector_sum_col + 0, wrapper::vreinterpret_s32(sum_col[0]));
-            wrapper::vstore(vector_sum_col + 4, wrapper::vreinterpret_s32(sum_col[1]));
-            wrapper::vstore(vector_sum_col + 8, wrapper::vreinterpret_s32(sum_col[2]));
-            wrapper::vstore(vector_sum_col + 12, wrapper::vreinterpret_s32(sum_col[3]));
+            wrapper::vstore(vector_sum_col + 0, wrapper::vreinterpret(sum_col[0]));
+            wrapper::vstore(vector_sum_col + 4, wrapper::vreinterpret(sum_col[1]));
+            wrapper::vstore(vector_sum_col + 8, wrapper::vreinterpret(sum_col[2]));
+            wrapper::vstore(vector_sum_col + 12, wrapper::vreinterpret(sum_col[3]));
         },
         in, out);
     }
@@ -467,10 +467,10 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
 
             auto vector_sum_col = reinterpret_cast<int32_t *>(out.ptr());
 
-            wrapper::vstore(vector_sum_col + 0, wrapper::vreinterpret_s32(sum_col[0]));
-            wrapper::vstore(vector_sum_col + 4, wrapper::vreinterpret_s32(sum_col[1]));
-            wrapper::vstore(vector_sum_col + 8, wrapper::vreinterpret_s32(sum_col[2]));
-            wrapper::vstore(vector_sum_col + 12, wrapper::vreinterpret_s32(sum_col[3]));
+            wrapper::vstore(vector_sum_col + 0, wrapper::vreinterpret(sum_col[0]));
+            wrapper::vstore(vector_sum_col + 4, wrapper::vreinterpret(sum_col[1]));
+            wrapper::vstore(vector_sum_col + 8, wrapper::vreinterpret(sum_col[2]));
+            wrapper::vstore(vector_sum_col + 12, wrapper::vreinterpret(sum_col[3]));
         },
         inb, out);
     }

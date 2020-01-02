@@ -39,7 +39,7 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
                                     unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     if(!is_data_type_quantized_per_channel(weights->data_type()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);

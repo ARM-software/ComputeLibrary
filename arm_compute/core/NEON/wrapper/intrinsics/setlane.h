@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -205,4 +205,4 @@ VSETQLANE_IMPL_8(float16x8_t, float16_t, float16x8_t, f16)
 #undef VSETQLANE_IMPL_4
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_WRAPPER_AET_LANE_H */
+#endif /* ARM_COMPUTE_WRAPPER_SET_LANE_H */

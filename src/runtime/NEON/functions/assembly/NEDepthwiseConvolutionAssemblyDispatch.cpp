@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -469,8 +469,12 @@ bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITenso
     }
 
     // Check data type
-    const DataType data_type          = weights->data_type();
-    bool           is_data_type_valid = is_data_type_float(data_type) || is_data_type_quantized_asymmetric(data_type) || data_type == DataType::QSYMM8_PER_CHANNEL;
+    // TODO (COMPMID-3004): Add assembly optimized routine for QASYMM8_SIGNED NEDepthwiseConvolutionLayer
+    const DataType input_type            = input->data_type();
+    const bool     is_input_type_valid   = is_data_type_float(input_type) || input_type == DataType::QASYMM8;
+    const DataType weights_type          = weights->data_type();
+    const bool     is_weights_type_valid = is_data_type_float(weights_type) || weights_type == DataType::QASYMM8 || weights_type == DataType::QASYMM8_SIGNED
+                                           || weights_type == DataType::QSYMM8_PER_CHANNEL;
 
     // Check weighs size
     std::set<unsigned int> supported_kernel_sizes = { 3, 5 };
@@ -496,12 +500,12 @@ bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITenso
     // TODO(COMPMID-2464): Enable once dilated conv with stride 2 is supported
     bool is_dilation_supported = ((dilation == Size2D(1U, 1U)) || ((dilation.x() == dilation.y()) && strides.first == 1));
 
-    if(data_type == DataType::QSYMM8_PER_CHANNEL)
+    if(weights_type == DataType::QSYMM8_PER_CHANNEL)
     {
         is_dilation_supported = is_dilation_supported && (dilation == Size2D(1U, 1U));
     }
 
-    return is_data_type_valid && weights_supported && supported_strides && supported_padding && (depth_multiplier == 1) && is_dilation_supported;
+    return is_input_type_valid && is_weights_type_valid && weights_supported && supported_strides && supported_padding && (depth_multiplier == 1) && is_dilation_supported;
 }
 
 void NEDepthwiseConvolutionAssemblyDispatch::run()
