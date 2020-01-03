@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -357,9 +357,9 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
         const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
 
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        int   output_multiplier;
-        int   output_shift;
+        float   multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        int32_t output_multiplier;
+        int32_t output_shift;
         ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&gemmlowp_output, biases, output));
     }
