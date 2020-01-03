@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,16 +98,21 @@ NEScale::NEScale() // NOLINT
       _dy(),
       _scale_kernel(),
       _border_handler(),
-      _use_padding(true)
+      _use_padding(true),
+      _align_corners(false)
 {
 }
 
-void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding)
+void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
+                        bool align_corners)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), policy, border_mode, constant_border_value, sampling_policy, use_padding));
 
-    _use_padding = use_padding;
+    _use_padding   = use_padding;
+    _align_corners = policy == InterpolationPolicy::BILINEAR
+                     && sampling_policy == SamplingPolicy::TOP_LEFT
+                     && align_corners;
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();
@@ -118,8 +123,8 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
     const TensorShape shape(output->info()->dimension(idx_width), output->info()->dimension(idx_height));
 
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = static_cast<float>(input->info()->dimension(idx_width)) / static_cast<float>(output->info()->dimension(idx_width));
-    const auto hr = static_cast<float>(input->info()->dimension(idx_height)) / static_cast<float>(output->info()->dimension(idx_height));
+    const auto wr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_width), output->info()->dimension(idx_width), _align_corners);
+    const auto hr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), _align_corners);
 
     // Get the element size of the input image
     const size_t input_element_size = input->info()->element_size();
@@ -155,7 +160,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dx.allocator()->init(tensor_info_dxdy);
             _dy.allocator()->init(tensor_info_dxdy);
 
-            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding);
+            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -181,7 +186,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
 }
 
 Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
-                         BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding)
+                         BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding, bool align_corners)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER && sampling_policy != SamplingPolicy::TOP_LEFT);
@@ -218,7 +223,7 @@ Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, In
     }
 
     ARM_COMPUTE_RETURN_ON_ERROR(NEScaleKernel::validate(input->clone().get(), dx, dy, offsets, output->clone().get(),
-                                                        policy, border_mode, constant_border_value, sampling_policy, use_padding));
+                                                        policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners));
     return Status{};
 }
 

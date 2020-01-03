@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -966,6 +966,16 @@ bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int
  * @return Quantization information for the output tensor
  */
 QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool is_log);
+
+/** Returns resize ratio between input and output with consideration of aligned corners
+ *
+ * @param[in] input_size    The input size
+ * @param[in] output_size   the output size
+ * @param[in] align_corners True to align corners of input and output. Defaults to false.
+ *
+ * @return The ratio between input and output (i.e., the input size divided by the output size)
+ */
+float calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners = false);
 
 /** Convert a tensor format into a string.
  *

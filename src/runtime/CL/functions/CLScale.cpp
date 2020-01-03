@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,10 @@
 
 using namespace arm_compute;
 
-void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
+void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
+                        bool align_corners)
 {
+    ARM_COMPUTE_UNUSED(use_padding, align_corners);
     auto k = arm_compute::support::cpp14::make_unique<CLScaleKernel>();
     k->set_target(CLScheduler::get().target());
     k->configure(input, output, policy, border_mode, sampling_policy);
@@ -51,8 +53,9 @@ void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy
     _border_handler.configure(input, _kernel->border_size(), border_mode, constant_border_value);
 }
 
-Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
+Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy,
+                         bool use_padding, bool align_corners)
 {
-    ARM_COMPUTE_UNUSED(constant_border_value);
+    ARM_COMPUTE_UNUSED(constant_border_value, use_padding, align_corners);
     return CLScaleKernel::validate(input, output, policy, border_mode, sampling_policy);
 }

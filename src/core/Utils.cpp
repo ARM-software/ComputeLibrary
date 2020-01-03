@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -457,6 +457,18 @@ QuantizationInfo arm_compute::get_softmax_output_quantization_info(DataType inpu
         }
     }
     return QuantizationInfo(1.f / 256, 0);
+}
+
+float arm_compute::calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners)
+{
+    const size_t offset = align_corners ? 1 : 0;
+    const auto   in     = input_size - offset;
+    const auto   out    = output_size - offset;
+
+    ARM_COMPUTE_ERROR_ON((input_size == 0 || output_size == 0) && offset == 1);
+    ARM_COMPUTE_ERROR_ON(out == 0);
+
+    return static_cast<float>(in) / static_cast<float>(out);
 }
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED

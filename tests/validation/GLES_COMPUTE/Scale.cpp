@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,12 @@ namespace
 const auto ScaleDataTypes = framework::dataset::make("DataType",
 {
     DataType::F16,
+});
+
+/** Align corners, this functionality is supported only by NEON */
+const auto AlignCorners = framework::dataset::make("AlignCorners",
+{
+    false,
 });
 
 /** Tolerance */
@@ -108,12 +114,13 @@ using GCScaleFixture = ScaleValidationFixture<GCTensor, GCAccessor, GCScale, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCScaleFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, GCScaleFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                     DataType::F16)),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                            framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
-                                                                                                    datasets::BorderModes()),
-                                                                                            datasets::SamplingPolicies()))
+                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
+                                                                                                            datasets::BorderModes()),
+                                                                                                    datasets::SamplingPolicies()),
+                                                                                            AlignCorners))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -122,12 +129,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, GCScaleFixture<half>, framework::DatasetMode::A
     // Validate output
     validate(GCAccessor(_target), _reference, valid_region, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCScaleFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, GCScaleFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                         DataType::F16)),
                                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                                framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
-                                                                                                        datasets::BorderModes()),
-                                                                                                datasets::SamplingPolicies()))
+                                                                                                                        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
+                                                                                                                datasets::BorderModes()),
+                                                                                                        datasets::SamplingPolicies()),
+                                                                                                AlignCorners))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);

@@ -31,6 +31,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Utility.h"
@@ -45,7 +46,7 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy,
                           const ITensorInfo *offsets, ITensorInfo *output, InterpolationPolicy policy,
-                          BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding)
+                          BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding, bool align_corners)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32, DataType::QASYMM8);
@@ -56,9 +57,13 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
     ARM_COMPUTE_RETURN_ERROR_ON(!use_padding && border_mode != BorderMode::CONSTANT);
     ARM_COMPUTE_UNUSED(constant_border_value);
 
-    const DataLayout data_layout = input->data_layout();
-    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)) == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)) == 0);
+    const DataLayout data_layout   = input->data_layout();
+    const auto       width_index   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const auto       height_index  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const auto       output_width  = output->dimension(width_index);
+    const auto       output_height = output->dimension(height_index);
+    ARM_COMPUTE_RETURN_ERROR_ON(output_width == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(output_height == 0);
 
     if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
     {
@@ -70,6 +75,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dx, 1, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dy, 1, DataType::F32);
+
+        if(align_corners)
+        {
+            // For bilinear method with aligned corners, the resize ratio will
+            // be calculated by (input_size - 1)/(output_size - 1). Belows are
+            // checking possible overflows.
+            const auto input_width  = input->dimension(width_index);
+            const auto input_height = input->dimension(height_index);
+
+            ARM_COMPUTE_RETURN_ERROR_ON(input_width == 0 || input_height == 0);
+            ARM_COMPUTE_RETURN_ERROR_ON((output_width - 1 == 0) || (output_height - 1 == 0));
+        }
     }
 
     if(policy == InterpolationPolicy::AREA)
@@ -327,7 +344,7 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 
 NEScaleKernel::NEScaleKernel()
     : _func(nullptr), _offsets(nullptr), _dx(nullptr), _dy(nullptr), _input(nullptr), _output(nullptr), _policy(), _border_size(1), _border_mode(), _constant_border_value(PixelValue()),
-      _sampling_offset(0), _use_padding(true)
+      _sampling_offset(0), _use_padding(true), _align_corners(false)
 {
 }
 
@@ -338,7 +355,7 @@ BorderSize NEScaleKernel::border_size() const
 
 void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITensor *dy, const ITensor *offsets,
                               ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy,
-                              bool use_padding)
+                              bool use_padding, bool align_corners)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     // Perform validation step
@@ -347,7 +364,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
                                                   dy != nullptr ? dy->info() : nullptr,
                                                   offsets != nullptr ? offsets->info() : nullptr,
                                                   output->info(),
-                                                  policy, border_mode, constant_border_value, sampling_policy, use_padding));
+                                                  policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners));
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();
@@ -364,6 +381,9 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     _border_mode           = border_mode;
     _constant_border_value = constant_border_value;
     _use_padding           = use_padding;
+    _align_corners         = _policy == InterpolationPolicy::BILINEAR
+                             && sampling_policy == SamplingPolicy::TOP_LEFT
+                             && align_corners;
 
     if(sampling_policy == SamplingPolicy::CENTER)
     {
@@ -371,8 +391,8 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     }
 
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = static_cast<float>(input->info()->dimension(idx_width)) / static_cast<float>(output->info()->dimension(idx_width));
-    const auto hr = static_cast<float>(input->info()->dimension(idx_height)) / static_cast<float>(output->info()->dimension(idx_height));
+    const auto wr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_width), output->info()->dimension(idx_width), _align_corners);
+    const auto hr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), _align_corners);
 
     // Add constant border only on top in case of NHWC layout
     if(data_layout == DataLayout::NHWC)
@@ -425,7 +445,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
     const size_t input_stride = _input->info()->strides_in_bytes()[1];
 
     // Compute the ratio between source height and destination height
-    const auto hr = static_cast<float>(_input->info()->dimension(1)) / static_cast<float>(_output->info()->dimension(1));
+    const auto hr = arm_compute::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
 
     // Don't increment in X and Y direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
@@ -622,7 +642,7 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
 
     // Compute the ratio between source height and destination height
-    const auto hr = static_cast<float>(_input->info()->dimension(1)) / static_cast<float>(_output->info()->dimension(1));
+    const auto hr = arm_compute::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
 
     // Don't increment in X and Y direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
@@ -871,8 +891,8 @@ void NEScaleKernel::scale_area_nchw(const Window &window)
     Iterator in(_input, win_in);
     Iterator out(_output, window);
 
-    const auto   wr        = static_cast<float>(_input->info()->dimension(0)) / static_cast<float>(_output->info()->dimension(0));
-    const auto   hr        = static_cast<float>(_input->info()->dimension(1)) / static_cast<float>(_output->info()->dimension(1));
+    const auto   wr        = arm_compute::calculate_resize_ratio(_input->info()->dimension(0), _output->info()->dimension(0), _align_corners);
+    const auto   hr        = arm_compute::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
     const auto   w         = _input->info()->dimension(0);
     const auto   h         = _input->info()->dimension(1);
     const size_t in_stride = _input->info()->strides_in_bytes()[1];
@@ -919,7 +939,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
     const size_t input_stride_c = _input->info()->strides_in_bytes()[idx_channels];
 
     // Compute the ratio between source height and destination height
-    const auto hr = static_cast<float>(_input->info()->dimension(idx_height)) / static_cast<float>(_output->info()->dimension(idx_height));
+    const auto hr = arm_compute::calculate_resize_ratio(_input->info()->dimension(idx_height), _output->info()->dimension(idx_height), _align_corners);
 
     // Don't increment in width/height/channels for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
@@ -994,7 +1014,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
 
 Status NEScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy,
                                const ITensorInfo *offsets, ITensorInfo *output, InterpolationPolicy policy,
-                               BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding)
+                               BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding, bool align_corners)
 {
     BorderSize border_size(1);
     if(input->data_layout() == DataLayout::NHWC)
@@ -1002,7 +1022,7 @@ Status NEScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *dx, 
         border_size = (border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, dx, dy, offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, dx, dy, offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
                                                               dx != nullptr ? dx->clone().get() : nullptr,
                                                               dy != nullptr ? dy->clone().get() : nullptr,
