@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,12 @@ namespace graph
 {
 // Forward Declaration
 class GraphContext;
+
+inline bool is_utility_node(INode *node)
+{
+    std::set<NodeType> utility_node_types = { NodeType::PrintLayer };
+    return utility_node_types.find(node->type()) != utility_node_types.end();
+}
 
 /** Returns the tensor descriptor of a given tensor
  *

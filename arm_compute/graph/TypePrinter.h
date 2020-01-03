@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -127,6 +127,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::PoolingLayer:
             os << "PoolingLayer";
+            break;
+        case NodeType::PrintLayer:
+            os << "PrintLayer";
             break;
         case NodeType::PriorBoxLayer:
             os << "PriorBoxLayer";

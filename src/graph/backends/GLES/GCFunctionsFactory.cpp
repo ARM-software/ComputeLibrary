@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -259,6 +259,8 @@ std::unique_ptr<IFunction> GCFunctionFactory::create(INode *node, GraphContext &
             return detail::create_normalize_planar_yuv_layer<GCNormalizePlanarYUVLayer, GCTargetInfo>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
         case NodeType::PoolingLayer:
             return detail::create_pooling_layer<GCPoolingLayer, GCTargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
+        case NodeType::PrintLayer:
+            return detail::create_print_layer<GCTargetInfo>(*polymorphic_downcast<PrintLayerNode *>(node));
         case NodeType::ResizeLayer:
             return detail::create_resize_layer<GCScale, GCTargetInfo>(*polymorphic_downcast<ResizeLayerNode *>(node));
         case NodeType::SoftmaxLayer:

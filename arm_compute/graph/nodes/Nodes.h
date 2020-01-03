@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,7 @@
 #include "arm_compute/graph/nodes/PadLayerNode.h"
 #include "arm_compute/graph/nodes/PermuteLayerNode.h"
 #include "arm_compute/graph/nodes/PoolingLayerNode.h"
+#include "arm_compute/graph/nodes/PrintLayerNode.h"
 #include "arm_compute/graph/nodes/PriorBoxLayerNode.h"
 #include "arm_compute/graph/nodes/QuantizationLayerNode.h"
 #include "arm_compute/graph/nodes/ROIAlignLayerNode.h"

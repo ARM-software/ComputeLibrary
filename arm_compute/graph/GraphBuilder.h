@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -366,6 +366,19 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_pooling_node(Graph &g, NodeParams params, NodeIdxPair input, PoolingLayerInfo pool_info);
+    /** Adds a print layer node to the graph
+     *
+     * @param[in] g           Graph to add the node to
+     * @param[in] params      Common node parameters
+     * @param[in] input       Input to the print layer node as a NodeID-Index pair
+     * @param[in] stream      Output stream.
+     * @param[in] format_info (Optional) Format info.
+     * @param[in] transform   (Optional) Transformation function to be applied to the input tensor before printing.
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_print_node(Graph &g, NodeParams params, NodeIdxPair input, std::ostream &stream, const IOFormatInfo &format_info = IOFormatInfo(),
+                                 const std::function<ITensor *(ITensor *)> transform = nullptr);
     /** Adds a priorbox layer node to the graph
      *
      * @param[in] g          Graph to add the node to

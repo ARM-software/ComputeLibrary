@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -151,7 +151,7 @@ std::unique_ptr<IFunction> create_detection_output_layer<CPPDetectionOutputLayer
                                << std::endl);
 
     auto wrap_function = support::cpp14::make_unique<CPPWrapperFunction>();
-    ;
+
     wrap_function->register_function(std::move(func));
     wrap_function->register_tensor(input0);
     wrap_function->register_tensor(input1);
@@ -272,6 +272,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_permute_layer<CLPermute, CLTargetInfo>(*polymorphic_downcast<PermuteLayerNode *>(node));
         case NodeType::PoolingLayer:
             return detail::create_pooling_layer<CLPoolingLayer, CLTargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
+        case NodeType::PrintLayer:
+            return detail::create_print_layer<CLTargetInfo>(*polymorphic_downcast<PrintLayerNode *>(node));
         case NodeType::PriorBoxLayer:
             return detail::create_priorbox_layer<CLPriorBoxLayer, CLTargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:

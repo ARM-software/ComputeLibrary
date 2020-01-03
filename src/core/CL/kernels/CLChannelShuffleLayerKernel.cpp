@@ -114,7 +114,7 @@ void CLChannelShuffleLayerKernel::configure(const ICLTensor *input, ICLTensor *o
 
     // Create kernel
     std::string kernel_name = "channel_shuffle_" + lower_string(string_from_data_layout(data_layout));
-    ;
+
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window

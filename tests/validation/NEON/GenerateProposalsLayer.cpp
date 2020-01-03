@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -286,9 +286,7 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
     };
 
     const std::vector<float> anchors_vector{ -26, -19, 87, 86, -81, -27, 58, 63 };
-    ;
-
-    SimpleTensor<float> proposals_expected(TensorShape(5, 9), DataType::F32);
+    SimpleTensor<float>      proposals_expected(TensorShape(5, 9), DataType::F32);
     fill_tensor(proposals_expected, std::vector<float>
     {
         0, 0, 0, 75.269, 64.4388,

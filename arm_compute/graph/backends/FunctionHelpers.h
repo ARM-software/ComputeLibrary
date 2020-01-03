@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1147,6 +1147,35 @@ std::unique_ptr<IFunction> create_pooling_layer(PoolingLayerNode &node)
                                << std::endl);
 
     return std::move(func);
+}
+
+/** Create a backend print layer function
+ *
+ * @tparam TargetInfo Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend print layer function
+ */
+template <typename TargetInfo>
+std::unique_ptr<IFunction> create_print_layer(PrintLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    typename TargetInfo::TensorType *input = get_backing_tensor<TargetInfo>(node.input(0));
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_UNUSED(input);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << std::endl);
+
+    return nullptr;
 }
 
 /** Create a backend priorbox layer function

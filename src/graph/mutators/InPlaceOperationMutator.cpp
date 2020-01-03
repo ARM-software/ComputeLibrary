@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ IGraphMutator::MutationType InPlaceOperationMutator::type() const
 
 void InPlaceOperationMutator::mutate(Graph &g)
 {
-    std::set<NodeType> in_place_nodes = { NodeType::BatchNormalizationLayer, NodeType::ActivationLayer };
+    std::set<NodeType> in_place_nodes = { NodeType::BatchNormalizationLayer, NodeType::ActivationLayer, NodeType::PrintLayer };
 
     // Not interested in the order of nodes
     for(auto &node : g.nodes())

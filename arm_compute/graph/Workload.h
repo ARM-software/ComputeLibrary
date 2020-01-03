@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_GRAPH_WORKLOAD_H
 
 #include "arm_compute/graph/GraphContext.h"
+#include "arm_compute/graph/Tensor.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
 
@@ -39,7 +40,6 @@ namespace graph
 // Forward declarations
 class ITensorHandle;
 class INode;
-class Tensor;
 class Graph;
 
 struct ExecutionTask;

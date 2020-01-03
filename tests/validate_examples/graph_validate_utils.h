@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -259,7 +259,6 @@ public:
         absolute_tolerance->set_help("Absolute tolerance used for verification");
         relative_tolerance->set_help("Absolute tolerance used for verification");
         tolerance_number->set_help("Absolute tolerance used for verification");
-        ;
     }
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */

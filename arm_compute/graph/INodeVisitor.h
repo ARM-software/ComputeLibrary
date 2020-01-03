@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -136,6 +136,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(PoolingLayerNode &n) = 0;
+    /** Visit PrintLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(PrintLayerNode &n) = 0;
     /** Visit PriorBoxLayerNode.
      *
      * @param[in] n Node to visit.
@@ -258,6 +263,10 @@ public:
         default_visit();
     }
     virtual void visit(PoolingLayerNode &) override
+    {
+        default_visit();
+    }
+    virtual void visit(PrintLayerNode &) override
     {
         default_visit();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -153,6 +153,7 @@ enum class NodeType
     PadLayer,
     PermuteLayer,
     PoolingLayer,
+    PrintLayer,
     PriorBoxLayer,
     QuantizationLayer,
     ReorgLayer,
