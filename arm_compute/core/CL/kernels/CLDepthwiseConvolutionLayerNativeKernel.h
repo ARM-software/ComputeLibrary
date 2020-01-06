@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,11 +49,11 @@ public:
     CLDepthwiseConvolutionLayerNativeKernel &operator=(CLDepthwiseConvolutionLayerNativeKernel &&) = default;
     /** Initialize the function's source, destination and parameters
      *
-     * @param[in]  input              Source tensor. Data type supported: QASYMM8/FP32/FP16. Data layout supported: NHWC
+     * @param[in]  input              Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/FP32/FP16. Data layout supported: NHWC
      * @param[in]  weights            Weights tensor. A 3D tensor with dimensions [IFM, N, M].
-     *                                Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                                Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in]  biases             Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                                Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                                Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[out] output             Destination tensor. Data type supported: Same as @p input.
      * @param[in]  dwc_weights_info   Depthwise convolution layer weights info to retrieve the number of output elements processed by each thread
      * @param[in]  dwc_info           Depthwise convolution layer info
@@ -70,11 +70,11 @@ public:
                    const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayerNativeKernel
      *
-     * @param[in] input              Source tensor info. Data type supported: QASYMM8/FP32/FP16. Data layout supported: NHWC
+     * @param[in] input              Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/FP32/FP16. Data layout supported: NHWC
      * @param[in] weights            Weights tensor info. A 3D tensor with dimensions [IFM, N, M].
-     *                               Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                               Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
      * @param[in] biases             Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                               Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                               Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] output             Destination tensor info. Data type supported: Same as @p input.
      * @param[in] dwc_weights_info   Depthwise convolution layer weights info to retrieve the number of output elements processed by each thread
      * @param[in] dwc_info           Depthwise convolution layer info

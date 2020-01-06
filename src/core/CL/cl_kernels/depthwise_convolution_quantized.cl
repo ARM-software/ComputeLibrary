@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1634,7 +1634,7 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
  * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
- * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in] src_stride_x                                     Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                       src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                                     Stride of the source tensor in Y dimension (in bytes)
@@ -1654,7 +1654,7 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
  * @param[in] dst_stride_w                                     Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                                       dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes                The offset of the first element in the destination tensor
- * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QSYMM8_PER_CHANNEL
+ * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL
  * @param[in] weights_stride_x                                 Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                                   weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                                 Stride of the weights tensor in Y dimension (in bytes)

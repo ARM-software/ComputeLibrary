@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -130,8 +130,8 @@ SimpleTensor<T> depthwise_convolution_fp(const SimpleTensor<T> &src, const Simpl
  * - Third dimention is number of channels
  * - Depths of input tensor and filter are equals
  * - Padding, stride and output shape "match"
- * - QASYMM8 input, output
- * - QASYMM8 or QSYMM8_PER_CHANNEL filter
+ * - QASYMM8/QASYMM8_SIGNED input, output
+ * - QASYMM8/QASYMM8_SIGNED or QSYMM8_PER_CHANNEL filter
  *
  */
 template <typename T, typename TW, typename TB>
@@ -179,6 +179,9 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
 
     const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights.data_type());
 
+    const int min = std::numeric_limits<T>::lowest();
+    const int max = std::numeric_limits<T>::max();
+
     int out_pos = 0;
     for(int r = 0; r < num_batches; ++r)
     {
@@ -217,7 +220,7 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
                         }
                         val += bias_val;
                         // Quantize down
-                        val = quantize_down_scale_by_fixedpoint(val, output_multiplier, output_shift, output_offset, 0, 255);
+                        val = quantize_down_scale_by_fixedpoint(val, output_multiplier, output_shift, output_offset, min, max);
 
                         // Store the result
                         dst[out_pos++] = val;
@@ -257,6 +260,13 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
                                             const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
 {
     return depthwise_convolution_quantized<uint8_t, int8_t, int32_t>(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation, out_quant_info);
+}
+
+template <>
+SimpleTensor<int8_t> depthwise_convolution(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
+                                           const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
+{
+    return depthwise_convolution_quantized<int8_t, int8_t, int32_t>(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation, out_quant_info);
 }
 } // namespace reference
 } // namespace validation
