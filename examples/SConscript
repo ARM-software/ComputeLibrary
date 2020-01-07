@@ -57,7 +57,7 @@ for file in Glob("./graph_*.cpp"):
     prog = None
 
     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-        prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive', '-fstack-protector-strong'])
         Depends(prog, graph_dependency)
         prog = install_bin(prog)
     else:
@@ -121,7 +121,7 @@ for file in Glob("#3rdparty/examples/graph_*.cpp"):
     prog = None
 
     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-        prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
+        prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive', '-fstack-protector-strong'])
         Depends(prog, graph_dependency)
         prog = install_bin(prog)
     else:

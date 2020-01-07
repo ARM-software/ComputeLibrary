@@ -155,9 +155,9 @@ if test_env['benchmark_tests']:
     Default(arm_compute_benchmark)
     Export('arm_compute_benchmark')
 
-bm_link_flags = []
+bm_link_flags = ['-fstack-protector-strong']
 if test_env['linker_script']:
-    bm_link_flags = ['-Wl,--build-id=none', '-T', env['linker_script']]
+    bm_link_flags += ['-Wl,--build-id=none', '-T', env['linker_script']]
 
 if test_env['validation_tests']:
     arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LIBS= [ arm_compute_test_framework, arm_compute_core_a])
