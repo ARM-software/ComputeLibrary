@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -909,7 +909,7 @@ void NEScaleKernel::scale_area_nchw(const Window &window)
 void NEScaleKernel::scale_nhwc(const Window &window)
 {
     // Get data layout and width/height indices
-    const DataLayout data_layout  = _input->info()->data_layout();
+    const DataLayout data_layout  = DataLayout::NHWC;
     const int        idx_channels = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
     const int        idx_width    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
