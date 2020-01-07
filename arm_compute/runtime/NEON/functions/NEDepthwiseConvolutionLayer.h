@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,12 +54,12 @@ public:
     NEDepthwiseConvolutionLayer &operator=(NEDepthwiseConvolutionLayer &&) = default;
     /** Initialize the function's source, destination, weights and convolution information.
      *
-     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-     *                                  Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                                  Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
      * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
@@ -70,12 +70,12 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer
      *
-     * @param[in] input            Source tensor. Data type supported: QASYMM8/F16/F32
+     * @param[in] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
      * @param[in] weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                             Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                             Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
@@ -93,15 +93,15 @@ public:
 private:
     /** Static function to choose the best depthwise convolution function for @ref NEDepthwiseConvolutionLayer
      *
-     * @param[in] input            Source tensor info. Data type supported: QASYMM8/F16/F32
+     * @param[in] input            Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in] weights          Weights tensor info. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-     *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                             Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] biases           Biases tensor info. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                             Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
-     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for 3x3 QASYMM8 supported.
+     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for 3x3 quantized are supported.
      * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
      * @return a Depthwise Convolution Function
@@ -136,10 +136,10 @@ private:
         NEDepthwiseConvolutionLayerOptimizedInternal &operator=(NEDepthwiseConvolutionLayerOptimizedInternal &&) = default;
         /** Initialize the function's source, destination, kernels and border_size.
          *
-         * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+         * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
          * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
          * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-         *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
+         *                                  Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
          * @param[out]     output           Destination tensor. Data type supported: same as @p input.
          * @param[in]      conv_info        Padding and stride information to use for the convolution.
          * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -151,10 +151,10 @@ private:
 
         /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer3x3
          *
-         * @param[in] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+         * @param[in] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
          * @param[in] weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
          * @param[in] biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-         *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
+         *                             Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
          * @param[in] output           Destination tensor. Data type supported: same as @p input.
          * @param[in] conv_info        Padding and stride information to use for the convolution.
          * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -173,10 +173,10 @@ private:
     private:
         /** Configure the kernels/functions for the generic pipeline.
          *
-         * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+         * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
          * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
          * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-         *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
+         *                                  Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
          * @param[out]     output           Destination tensor. Data type supported: same as @p input.
          * @param[in]      conv_info        Padding and stride information to use for the convolution.
          * @param[in]      depth_multiplier Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -188,10 +188,10 @@ private:
                                unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation = Size2D(1U, 1U));
         /** Configure the kernels/functions for the optimized pipeline.
          *
-         * @param[in]  input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+         * @param[in]  input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
          * @param[in]  weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
          * @param[in]  biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-         *                              Data type supported: Same as @p input, S32 when input is QASYMM8.
+         *                              Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
          * @param[out] output           Destination tensor. Data type supported: same as @p input.
          * @param[in]  conv_info        Padding and stride information to use for the convolution.
          * @param[in]  depth_multiplier Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -247,12 +247,12 @@ private:
         NEDepthwiseConvolutionLayerGeneric &operator=(NEDepthwiseConvolutionLayerGeneric &&) = default;
         /** Initialize the function's source, destination, weights and convolution information.
          *
-         * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+         * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
          * @param[out]     output           Destination tensor. Data type supported: same as @p input.
          * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-         *                                  Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+         *                                  Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
          * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-         *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
+         *                                  Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
          * @param[in]      conv_info        Padding and stride information to use for the convolution.
          * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
          * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
@@ -263,12 +263,12 @@ private:
 
         /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayerGeneric
          *
-         * @param[in] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+         * @param[in] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
          * @param[in] output           Destination tensor. Data type supported: same as @p input.
          * @param[in] weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM].
-         *                             Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+         *                             Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
          * @param[in] biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-         *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
+         *                             Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
          * @param[in] conv_info        Padding and stride information to use for the convolution.
          * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
          * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
@@ -330,10 +330,10 @@ public:
     NEDepthwiseConvolutionLayerOptimized &operator=(NEDepthwiseConvolutionLayerOptimized &&) = default;
     /** Initialize the function's source, destination, kernels and border_size.
      *
-     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [W, H, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -346,10 +346,10 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayerOptimized
      *
-     * @param[in] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+     * @param[in] input            Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32. (Written to only for border filling).
      * @param[in] weights          Weights tensor. These are 3D tensors with shape [W, H, IFM]. Data type supported: Same as @p input.
      * @param[in] biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                             Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
