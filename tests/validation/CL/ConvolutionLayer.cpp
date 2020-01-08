@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,7 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F16,
     DataType::F32,
     DataType::QASYMM8,
+    DataType::QASYMM8_SIGNED,
 });
 
 /** Grouped CNN data types */
@@ -319,6 +320,20 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QASYMM8_SIGNED)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       QuantizationData),
+                               QuantizedActivationFunctionsSmallDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QSYMM8_PER_CHANNEL)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedPerChannelFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,

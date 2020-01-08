@@ -471,6 +471,21 @@ float arm_compute::calculate_resize_ratio(size_t input_size, size_t output_size,
     return static_cast<float>(in) / static_cast<float>(out);
 }
 
+std::pair<int32_t, int32_t> arm_compute::get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info)
+{
+    const bool is_qasymm8_signed = is_data_type_quantized_asymmetric_signed(data_type);
+    const auto a                 = act_info.a();
+    const auto b                 = act_info.b();
+    const int  a_int             = is_qasymm8_signed ? quantize_qasymm8_signed(a, oq_info) : quantize_qasymm8(a, oq_info);
+    const int  b_int             = is_qasymm8_signed ? quantize_qasymm8_signed(b, oq_info) : quantize_qasymm8(b, oq_info);
+    const auto type_max_value    = std::get<1>(get_min_max(data_type)).get<int32_t>();
+
+    const int32_t min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? oq_info.offset : b_int;
+    const int32_t max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? type_max_value : a_int;
+
+    return std::make_pair(min_activation, max_activation);
+}
+
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
 {

@@ -977,6 +977,16 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
  */
 float calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners = false);
 
+/** Returns a pair of minimum and maximum values for a quantized activation
+ *
+ * @param[in] act_info  The information for activation
+ * @param[in] data_type The used data type
+ * @param[in] oq_info   The output quantization information
+ *
+ * @return The pair with minimum and maximum values
+ */
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info);
+
 /** Convert a tensor format into a string.
  *
  * @param[in] format @ref Format to be translated to string.

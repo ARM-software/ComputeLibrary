@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -140,12 +140,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
 
         if(supported_acts.count(act_info.activation()) != 0)
         {
-            const bool is_quantized_signed = is_data_type_quantized_asymmetric_signed(data_type);
-            const int  a_const_int         = is_quantized_signed ? quantize_qasymm8_signed(act_info.a(), uoqinfo) : quantize_qasymm8(act_info.a(), uoqinfo);
-            const int  b_const_int         = is_quantized_signed ? quantize_qasymm8_signed(act_info.b(), uoqinfo) : quantize_qasymm8(act_info.b(), uoqinfo);
-
-            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? uoqinfo.offset : b_const_int;
-            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? max_activation : a_const_int;
+            std::tie(min_activation, max_activation) = get_quantized_activation_min_max(act_info, data_type, uoqinfo);
         }
 
         GEMMLowpOutputStageInfo output_info;
@@ -203,12 +198,7 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
                                                                                  };
         if(is_activation_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            const bool is_quantized_signed = is_data_type_quantized_asymmetric_signed(data_type);
-            const int  a_const_int         = is_quantized_signed ? quantize_qasymm8_signed(act_info.a(), uoqinfo) : quantize_qasymm8(act_info.a(), uoqinfo);
-            const int  b_const_int         = is_quantized_signed ? quantize_qasymm8_signed(act_info.b(), uoqinfo) : quantize_qasymm8(act_info.b(), uoqinfo);
-
-            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? uoqinfo.offset : b_const_int;
-            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? max_activation : a_const_int;
+            std::tie(min_activation, max_activation) = get_quantized_activation_min_max(act_info, data_type, uoqinfo);
         }
 
         GEMMLowpOutputStageInfo output_info;
