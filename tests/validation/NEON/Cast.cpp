@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,10 +52,17 @@ constexpr AbsoluteTolerance<float> zero_tolerance(0);
 */
 
 /** Input data sets **/
+
+// QASYMM8_SIGNED
+const auto CastQASYMM8_SIGNEDtoS16Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::S16));
+const auto CastQASYMM8_SIGNEDtoS32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::S32));
+const auto CastQASYMM8_SIGNEDtoF32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::F32));
+const auto CastQASYMM8_SIGNEDtoF16Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::F16));
+
 // QASYMM8
-const auto CastQASYMM8toF16Dataset     = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F16));
-const auto CastQASYMM8toF32Dataset     = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F32));
-const auto CastQASYMM8toS32Dataset     = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::S32));
+const auto CastQASYMM8toF16Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F16));
+const auto CastQASYMM8toF32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::F32));
+const auto CastQASYMM8toS32Dataset = combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::S32));
 
 // U8
 const auto CastU8toU16Dataset = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U16));
@@ -68,26 +75,29 @@ const auto CastU16toU8Dataset  = combine(framework::dataset::make("DataType", Da
 const auto CastU16toU32Dataset = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U32));
 
 // S16
-const auto CastS16toU8Dataset  = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::U8));
-const auto CastS16toS32Dataset = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::S32));
+const auto CastS16toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+const auto CastS16toU8Dataset             = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::U8));
+const auto CastS16toS32Dataset            = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::S32));
 
 //S32
-const auto CastS32toF16Dataset     = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::F16));
-const auto CastS32toU8Dataset     = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::U8));
-const auto CastS32toF32Dataset     = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::F32));
-const auto CastS32toQASYMM8Dataset     = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::QASYMM8));
+const auto CastS32toF16Dataset            = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::F16));
+const auto CastS32toU8Dataset             = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::U8));
+const auto CastS32toF32Dataset            = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::F32));
+const auto CastS32toQASYMM8Dataset        = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::QASYMM8));
+const auto CastS32toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::S32), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
 
 // F16
-const auto CastF16toF32Dataset     = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F32));
-const auto CastF16toS32Dataset     = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::S32));
-const auto CastF16toQASYMM8Dataset     = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::QASYMM8));
-
+const auto CastF16toF32Dataset            = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F32));
+const auto CastF16toS32Dataset            = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::S32));
+const auto CastF16toQASYMM8Dataset        = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::QASYMM8));
+const auto CastF16toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
 
 // F32
-const auto CastF32toU8Dataset     = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::U8));
-const auto CastF32toF16Dataset     = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F16));
-const auto CastF32toS32Dataset     = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::S32));
-const auto CastF32toQASYMM8Dataset     = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QASYMM8));
+const auto CastF32toU8Dataset             = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::U8));
+const auto CastF32toF16Dataset            = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F16));
+const auto CastF32toS32Dataset            = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::S32));
+const auto CastF32toQASYMM8Dataset        = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QASYMM8));
+const auto CastF32toQASYMM8_SIGNEDDataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
 
 } // namespace
 
@@ -109,6 +119,8 @@ template <typename T>
 using NECastToF32Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, float>;
 template <typename T>
 using NECastToQASYMM8Fixture = CastValidationFixture<Tensor, Accessor, NECast, T, uint8_t>;
+template <typename T>
+using NECastToQASYMM8_SIGNEDFixture = CastValidationFixture<Tensor, Accessor, NECast, T, int8_t>;
 
 #define CAST_SUITE(NAME, idt, odt, type, dataset, tolerance)                                                                     \
     TEST_SUITE(NAME)                                                                                                             \
@@ -135,6 +147,14 @@ using NECastToQASYMM8Fixture = CastValidationFixture<Tensor, Accessor, NECast, T
     }                                                                                                                            \
     TEST_SUITE_END()
 
+//QASYMM8_SIGNED
+CAST_SUITE(QASYMM8_SIGNED_to_S16, DataType::QASYMM8_SIGNED, DataType::S16, NECastToS16Fixture<int8_t>, CastQASYMM8_SIGNEDtoS16Dataset, one_tolerance)
+CAST_SUITE(QASYMM8_SIGNED_to_S32, DataType::QASYMM8_SIGNED, DataType::S32, NECastToS32Fixture<int8_t>, CastQASYMM8_SIGNEDtoS32Dataset, one_tolerance)
+CAST_SUITE(QASYMM8_SIGNED_to_F32, DataType::QASYMM8_SIGNED, DataType::F32, NECastToF32Fixture<int8_t>, CastQASYMM8_SIGNEDtoF32Dataset, one_tolerance)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+CAST_SUITE(QASYMM8_SIGNED_to_F16, DataType::QASYMM8_SIGNED, DataType::F16, NECastToF16Fixture<int8_t>, CastQASYMM8_SIGNEDtoF16Dataset, one_tolerance)
+#endif //  __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 //QASYMM8
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 CAST_SUITE(QASYMM8_to_F16, DataType::QASYMM8, DataType::F16, NECastToF16Fixture<uint8_t>, CastQASYMM8toF16Dataset, one_tolerance)
@@ -153,10 +173,12 @@ CAST_SUITE(U16_to_U8, DataType::U16, DataType::U8, NECastToU8Fixture<uint16_t>, 
 CAST_SUITE(U16_to_U32, DataType::U16, DataType::U32, NECastToU32Fixture<uint16_t>, CastU16toU32Dataset, zero_tolerance)
 
 // S16
+CAST_SUITE(S16_to_QASYMM8_SIGNED, DataType::S16, DataType::QASYMM8_SIGNED, NECastToQASYMM8_SIGNEDFixture<int16_t>, CastS16toQASYMM8_SIGNEDDataset, zero_tolerance)
 CAST_SUITE(S16_to_U8, DataType::S16, DataType::U8, NECastToU8Fixture<int16_t>, CastS16toU8Dataset, zero_tolerance)
 CAST_SUITE(S16_to_S32, DataType::S16, DataType::S32, NECastToS32Fixture<int16_t>, CastS16toS32Dataset, zero_tolerance)
 
 // S32
+CAST_SUITE(S32_to_QASYMM8_SIGNED, DataType::S32, DataType::QASYMM8_SIGNED, NECastToQASYMM8_SIGNEDFixture<int32_t>, CastS32toQASYMM8_SIGNEDDataset, one_tolerance)
 CAST_SUITE(S32_to_QASYMM8, DataType::S32, DataType::QASYMM8, NECastToQASYMM8Fixture<int32_t>, CastS32toQASYMM8Dataset, one_tolerance)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 CAST_SUITE(S32_to_F16, DataType::S32, DataType::F16, NECastToF16Fixture<int32_t>, CastS32toF16Dataset, zero_tolerance)
@@ -166,12 +188,14 @@ CAST_SUITE(S32_to_U8, DataType::S32, DataType::U8, NECastToU8Fixture<int32_t>, C
 
 // F16
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+CAST_SUITE(F16_to_QASYMM8_SIGNED, DataType::F16, DataType::QASYMM8_SIGNED, NECastToQASYMM8_SIGNEDFixture<half>, CastF16toQASYMM8_SIGNEDDataset, one_tolerance)
 CAST_SUITE(F16_to_QASYMM8, DataType::F16, DataType::QASYMM8, NECastToQASYMM8Fixture<half>, CastF16toQASYMM8Dataset, one_tolerance)
 CAST_SUITE(F16_to_F32, DataType::F16, DataType::F32, NECastToF32Fixture<half>, CastF16toF32Dataset, zero_tolerance)
 CAST_SUITE(F16_to_S32, DataType::F16, DataType::S32, NECastToS32Fixture<half>, CastF16toS32Dataset, one_tolerance)
 #endif //  __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 // F32
+CAST_SUITE(F32_to_QASYMM8_SIGNED, DataType::F32, DataType::QASYMM8_SIGNED, NECastToQASYMM8_SIGNEDFixture<float>, CastF32toQASYMM8_SIGNEDDataset, one_tolerance)
 CAST_SUITE(F32_to_QASYMM8, DataType::F32, DataType::QASYMM8, NECastToQASYMM8Fixture<float>, CastF32toQASYMM8Dataset, one_tolerance)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 CAST_SUITE(F32_to_F16, DataType::F32, DataType::F16, NECastToF16Fixture<float>, CastF32toF16Dataset, zero_tolerance)

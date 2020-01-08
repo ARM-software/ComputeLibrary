@@ -54,24 +54,25 @@ public:
      *
      * Valid conversions Input -> Output :
      *
+     *   - QASYMM8_SIGNED -> S16, S32, F32, F16
      *   - QASYMM8 -> U16, S16, S32, F32, F16
      *   - U8 -> U16, S16, S32, F32, F16
      *   - U16 -> U8, U32
-     *   - S16 -> U8, S32
-     *   - F16 -> QASYMM8, F32, S32, U8
-     *   - S32 -> QASYMM8, F16, F32, U8
-     *   - F32 -> QASYMM8, F16, S32, U8
+     *   - S16 -> QASYMM8_SIGNED, U8, S32
+     *   - F16 -> QASYMM8_SIGNED, QASYMM8, F32, S32, U8
+     *   - S32 -> QASYMM8_SIGNED, QASYMM8, F16, F32, U8
+     *   - F32 -> QASYMM8_SIGNED, QASYMM8, F16, S32, U8
      *
-     * @param[in]  input  The input tensor to convert. Data types supported: QASYMM8/U8/U16/S16/F16/F32.
-     * @param[out] output The output tensor. Data types supported: QASYMM8/U8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input  The input tensor to convert. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/F16/F32.
+     * @param[out] output The output tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy.
      * @param[in]  shift  (Optional) Value for down/up conversions. Must be 0 <= shift < 8.
      */
     void configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthConvertLayerKernel
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/U8/U16/S16/F16/F32.
-     * @param[in] output Destination tensor info. Data type supported: QASYMM8/U8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/F16/F32.
+     * @param[in] output Destination tensor info. Data type supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/U32/S32/F16/F32.
      * @param[in] policy Conversion policy
      * @param[in] shift  (Optional) Value for down/up conversions. Must be 0 <= shift < 8.
      *

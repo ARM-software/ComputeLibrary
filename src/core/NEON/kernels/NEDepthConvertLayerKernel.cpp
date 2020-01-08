@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(output);
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON(input == output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::U8, DataType::S16, DataType::U16, DataType::F16, DataType::F32, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8, DataType::S16, DataType::U16, DataType::F16, DataType::F32, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16,
+                                                         DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(shift >= 8);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8_SIGNED && (output->data_type() != DataType::S16 && output->data_type() != DataType::S32
+                                                                                       && output->data_type() != DataType::F16 && output->data_type() != DataType::F32),
+                                    "Only data_types supported [in] QASYMM8 -> [out] U16, S16, S32, F16, F32");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8 && (output->data_type() != DataType::S16 && output->data_type() != DataType::U16
                                                                                 && output->data_type() != DataType::S32 && output->data_type() != DataType::F16 && output->data_type() != DataType::F32),
@@ -59,19 +64,22 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::U16 && (output->data_type() != DataType::U8 && output->data_type() != DataType::U32),
                                     "Only data_types supported [in] U16 ->  [out] U8, U32");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S16 && (output->data_type() != DataType::U8 && output->data_type() != DataType::S32),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S16 && (output->data_type() != DataType::QASYMM8_SIGNED && output->data_type() != DataType::U8 && output->data_type() != DataType::S32),
                                     "Only data_types supported [in] S16 ->  [out] U8, S32");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F16 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::U8 && output->data_type() != DataType::F32
-                                                                            && output->data_type() != DataType::S32),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F16 && (output->data_type() != DataType::QASYMM8_SIGNED && output->data_type() != DataType::QASYMM8
+                                                                            && output->data_type() != DataType::U8
+                                                                            && output->data_type() != DataType::F32 && output->data_type() != DataType::S32),
                                     "Only data_types supported [in] F16 ->  [out] QASYMM8, F32, S32, U8");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F32 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::F16 && output->data_type() != DataType::S32
-                                                                            && output->data_type() != DataType::U8),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F32 && (output->data_type() != DataType::QASYMM8_SIGNED && output->data_type() != DataType::QASYMM8
+                                                                            && output->data_type() != DataType::F16
+                                                                            && output->data_type() != DataType::S32 && output->data_type() != DataType::U8),
                                     "Only data_types supported [in] F32 ->  [out] QASYMM8, F16, S32, U8");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S32 && (output->data_type() != DataType::QASYMM8 && output->data_type() != DataType::F16 && output->data_type() != DataType::F32
-                                                                            && output->data_type() != DataType::U8),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S32 && (output->data_type() != DataType::QASYMM8_SIGNED && output->data_type() != DataType::QASYMM8
+                                                                            && output->data_type() != DataType::F16
+                                                                            && output->data_type() != DataType::F32 && output->data_type() != DataType::U8),
                                     "Only data_types supported [in] S32 ->  [out] QASYMM8, F16, F32, U8");
 
     // Validate in case of configured output
@@ -145,6 +153,107 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
 
     switch(_input->info()->data_type())
     {
+        case DataType::QASYMM8_SIGNED:
+        {
+            const int16x8_t b = vdupq_n_s16(_shift);
+
+            switch(_output->info()->data_type())
+            {
+                case DataType::S16:
+                {
+                    /* Up-conversion QASYMM8_SIGNED -> S16 */
+                    execute_window_loop(window, [&](const Coordinates &)
+                    {
+                        const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+
+                        const int16x8x2_t texels =
+                        {
+                            {
+                                vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
+                                vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
+                            }
+                        };
+
+                        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()), texels.val[0]);
+                        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()) + 8, texels.val[1]);
+                    },
+                    input, output);
+                    break;
+                }
+                case DataType::S32:
+                {
+                    /* Up-conversion QASYMM8_SIGNED -> S32 */
+                    execute_window_loop(window, [&](const Coordinates &)
+                    {
+                        const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+
+                        const int16x8x2_t texels =
+                        {
+                            {
+                                vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
+                                vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
+                            }
+                        };
+
+                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()), vmovl_s16(vget_low_s16(texels.val[0])));
+                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 4, vmovl_s16(vget_high_s16(texels.val[0])));
+                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 8, vmovl_s16(vget_low_s16(texels.val[1])));
+                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 12, vmovl_s16(vget_high_s16(texels.val[1])));
+                    },
+                    input, output);
+                    break;
+                }
+                case DataType::F32:
+                {
+                    /* Up-conversion QASYMM8_SIGNED -> F32 */
+                    execute_window_loop(window, [&](const Coordinates &)
+                    {
+                        const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+
+                        const int16x8x2_t texels =
+                        {
+                            {
+                                vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
+                                vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
+                            }
+                        };
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()), vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[0]))));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[0]))));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8, vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[1]))));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[1]))));
+                    },
+                    input, output);
+                    break;
+                }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                case DataType::F16:
+                {
+                    /* Up-conversion QASYMM8_SIGNED -> F16 */
+                    execute_window_loop(window, [&](const Coordinates &)
+                    {
+                        const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+
+                        const int16x8x2_t texels =
+                        {
+                            {
+                                vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
+                                vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
+                            }
+                        };
+                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vcvtq_f16_s16(texels.val[0]));
+                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + 8, vcvtq_f16_s16(texels.val[1]));
+                    },
+                    input, output);
+                    break;
+                }
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+                default:
+                    ARM_COMPUTE_ERROR("Output data type not supported");
+            }
+            break;
+        }
+
         case DataType::QASYMM8:
         case DataType::U8:
         {
@@ -271,6 +380,45 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
         {
             switch(_output->info()->data_type())
             {
+                case DataType::QASYMM8_SIGNED:
+                {
+                    const int16x8_t b = vdupq_n_s16(-static_cast<int16_t>(_shift));
+
+                    /* Down-conversion S16 -> QASYMM8_SIGNED */
+                    if(ConvertPolicy::SATURATE == _policy)
+                    {
+                        execute_window_loop(window, [&](const Coordinates &)
+                        {
+                            const int16x8x2_t texels =
+                            {
+                                {
+                                    vqshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr())), b),
+                                    vqshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr()) + 8), b)
+                                }
+                            };
+
+                            vst1q_s8(reinterpret_cast<int8_t *>(output.ptr()), vcombine_s8(vqmovn_s16(texels.val[0]), vqmovn_s16(texels.val[1])));
+                        },
+                        input, output);
+                    }
+                    else
+                    {
+                        execute_window_loop(window, [&](const Coordinates &)
+                        {
+                            const int16x8x2_t texels =
+                            {
+                                {
+                                    vshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr())), b),
+                                    vshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr()) + 8), b)
+                                }
+                            };
+
+                            vst1q_s8(reinterpret_cast<int8_t *>(output.ptr()), vcombine_s8(vmovn_s16(texels.val[0]), vmovn_s16(texels.val[1])));
+                        },
+                        input, output);
+                    }
+                    break;
+                }
                 case DataType::U8:
                 {
                     const int16x8_t b = vdupq_n_s16(-static_cast<int16_t>(_shift));
@@ -424,6 +572,26 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
         case DataType::F16:
             switch(_output->info()->data_type())
             {
+                case DataType::QASYMM8_SIGNED:
+                {
+                    const float16x8_t scale = vdupq_n_f16(1 << _shift);
+
+                    /* Up-conversion F16 -> QASYMM8_SIGNED */
+                    execute_window_loop(window, [&](const Coordinates &)
+                    {
+                        const float16x8x2_t texels =
+                        {
+                            {
+                                vmulq_f16(vld1q_f16(reinterpret_cast<float16_t *>(input.ptr())), scale),
+                                vmulq_f16(vld1q_f16(reinterpret_cast<float16_t *>(input.ptr()) + 8), scale),
+                            }
+                        };
+
+                        vst1q_s8(reinterpret_cast<int8_t *>(output.ptr()), vcombine_s8(vqmovn_s16(vcvtq_s16_f16(texels.val[0])), vqmovn_s16(vcvtq_s16_f16(texels.val[1]))));
+                    },
+                    input, output);
+                    break;
+                }
                 case DataType::QASYMM8:
                 case DataType::U8:
                 {
@@ -573,6 +741,29 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     input, output);
                     break;
                 }
+                case DataType::QASYMM8_SIGNED:
+                {
+                    const float32x4_t scale = vdupq_n_f32(1.f / (1 << _shift));
+
+                    /* Down-conversion F32 -> QASYMM8_SIGNED */
+                    execute_window_loop(window, [&](const Coordinates &)
+                    {
+                        const float32x4x4_t texels =
+                        {
+                            {
+                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr())), scale),
+                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 4), scale),
+                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 8), scale),
+                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 12), scale),
+                            }
+                        };
+
+                        vst1_s8(reinterpret_cast<int8_t *>(output.ptr()), vqmovn_s16(vcombine_s16(vqmovn_s32(vcvtq_s32_f32(texels.val[0])), vqmovn_s32(vcvtq_s32_f32(texels.val[1])))));
+                        vst1_s8(reinterpret_cast<int8_t *>(output.ptr()) + 8, vqmovn_s16(vcombine_s16(vqmovn_s32(vcvtq_s32_f32(texels.val[2])), vqmovn_s32(vcvtq_s32_f32(texels.val[3])))));
+                    },
+                    input, output);
+                    break;
+                }
 
                 default:
                     ARM_COMPUTE_ERROR("Output data type not supported");
@@ -630,6 +821,50 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                         vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, vcvtq_f32_s32(texels.val[3]));
                     },
                     input, output);
+                    break;
+                }
+                case DataType::QASYMM8_SIGNED:
+                {
+                    const int32x4_t b = vdupq_n_s32(-static_cast<int32_t>(_shift));
+
+                    /* Down-conversion S32 -> QASYMM8_SIGNED */
+                    if(ConvertPolicy::SATURATE == _policy)
+                    {
+                        execute_window_loop(window, [&](const Coordinates &)
+                        {
+                            const int32x4x4_t texels =
+                            {
+                                {
+                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr())), b),
+                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 4), b),
+                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 8), b),
+                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12), b)
+                                }
+                            };
+                            vst1_s8(reinterpret_cast<int8_t *>(output.ptr()), vqmovn_s16(vcombine_s16(vqmovn_s32(texels.val[0]), vqmovn_s32(texels.val[1]))));
+                            vst1_s8(reinterpret_cast<int8_t *>(output.ptr()) + 8, vqmovn_s16(vcombine_s16(vqmovn_s32(texels.val[2]), vqmovn_s32(texels.val[3]))));
+                        },
+                        input, output);
+                    }
+                    else
+                    {
+                        execute_window_loop(window, [&](const Coordinates &)
+                        {
+                            const int32x4x4_t texels =
+                            {
+                                {
+                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr())), b),
+                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 4), b),
+                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 8), b),
+                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12), b)
+                                }
+                            };
+
+                            vst1_s8(reinterpret_cast<int8_t *>(output.ptr()), vmovn_s16(vcombine_s16(vmovn_s32(texels.val[0]), vmovn_s32(texels.val[1]))));
+                            vst1_s8(reinterpret_cast<int8_t *>(output.ptr()) + 8, vmovn_s16(vcombine_s16(vmovn_s32(texels.val[2]), vmovn_s32(texels.val[3]))));
+                        },
+                        input, output);
+                    }
                     break;
                 }
                 case DataType::QASYMM8:
