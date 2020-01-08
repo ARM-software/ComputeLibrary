@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -263,6 +263,40 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
+};
+
+/** Basic function to execute GEMMLowpQuantizeDown kernels on NEON.
+ *
+ *  This function calls the following NEON kernels:
+ *
+ * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel
+ * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
+ * -# @ref NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel
+ * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+*/
+class NEGEMMLowpOutputStage : public INESimpleFunctionNoBorder
+{
+public:
+    /** Initialise the kernel's inputs, output
+     *
+     * @param[in]  input  Input tensor. Data type supported: S32
+     * @param[in]  bias   Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
+     *                    Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[out] output Output tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM16
+     * @param[in]  info   GEMMLowp output stage metadata.
+     */
+    void configure(const ITensor *input, const ITensor *bias, ITensor *output, const GEMMLowpOutputStageInfo &info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpOutputStage
+     *
+     * @param[in] input  Input tensor info. It is the output of @ref NEGEMMLowpMatrixMultiplyCore function. Data type supported: S32
+     * @param[in] bias   Biases tensor info. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
+     *                   Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[in] output Output tensor info. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM16
+     * @param[in] info   GEMMLowp output stage metadata.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo &info);
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEGEMMLOWPOUTPUTSTAGE_H */

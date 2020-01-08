@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -126,12 +126,12 @@ public:
     NEFullyConnectedLayer &operator=(NEFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor. Data type supported: QASYMM8/F16/F32.
+     * @param[in]  input   Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights Weights tensor. The weights must be 2 dimensional.
      *                     If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
      *                     If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
      *                     Data type supported: Same as @p input.
-     * @param[in]  biases  Bias tensor. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8.
+     * @param[in]  biases  Bias tensor. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
      * @param[out] output  Destination tensor. Its shape should be equal to the output of a matrix multiplication between:
      *                     - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
      *                     - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
@@ -142,12 +142,12 @@ public:
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEFullyConnectedLayer
      *
-     * @param[in] input   Source tensor info. Data type supported: QASYMM8/F16/F32.
+     * @param[in] input   Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] weights Weights tensor info. The weights must be 2 dimensional.
      *                    If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
      *                    If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
      *                    Data type supported: Same as @p input.
-     * @param[in] biases  Bias tensor. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8.
+     * @param[in] biases  Bias tensor. Can be nullptr. Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
      * @param[in] output  Destination tensor info. Its shape should be equal to the output of a matrix multiplication between:
      *                    - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
      *                    - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
@@ -177,7 +177,7 @@ private:
     weights_transformations::NEFullyConnectedLayerReshapeWeightsManaged _reshape_weights_managed_function;
     NEGEMM                                                              _mm_gemm;
     NEGEMMLowpMatrixMultiplyCore                                        _mm_gemmlowp;
-    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint                 _gemmlowp_output_stage;
+    NEGEMMLowpOutputStage                                               _gemmlowp_output_stage;
     NEGEMMMatrixAccumulateBiasesKernel                                  _accumulate_biases_kernel;
     Tensor                                                              _flatten_output;
     Tensor                                                              _gemmlowp_output;

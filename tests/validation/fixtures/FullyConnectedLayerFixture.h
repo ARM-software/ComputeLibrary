@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FullyConnectedLayerValidationGenericFixture : public framework::Fixture
 {
 public:
-    using TBias = typename std::conditional<std::is_same<typename std::decay<T>::type, uint8_t>::value, int32_t, T>::type;
+    using TBias = typename std::conditional < std::is_same<typename std::decay<T>::type, uint8_t>::value || std::is_same<typename std::decay<T>::type, int8_t>::value, int32_t, T >::type;
 
 public:
     template <typename...>
@@ -71,9 +71,14 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        if(is_data_type_quantized_asymmetric(_data_type))
+        if(_data_type == DataType::QASYMM8)
         {
             std::uniform_int_distribution<uint8_t> distribution(0, 30);
+            library->fill(tensor, distribution, i);
+        }
+        else if(_data_type == DataType::QASYMM8_SIGNED)
+        {
+            std::uniform_int_distribution<int8_t> distribution(-15, 15);
             library->fill(tensor, distribution, i);
         }
         else if(_data_type == DataType::S32)

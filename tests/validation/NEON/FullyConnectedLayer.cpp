@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,7 @@ constexpr float                           tolerance_num_f16 = 0.07f;            
 
 /** Tolerance for quantized asymmetric operations */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -233,6 +234,17 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerQuantizedFixture<uint8_t>,
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END()
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(
+                           combine(datasets::SmallFullyConnectedLayerDataset(),
+                                   FullyConnectedParameters),
+                           framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       QuantizationData))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
