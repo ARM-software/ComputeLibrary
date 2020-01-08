@@ -87,14 +87,15 @@ TEST_SUITE(ConvolutionLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
-                                          framework::dataset::make("InputInfo", { TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),      // Select GEMM
-                                                                                  TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),      // Select GEMM
-                                                                                  TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32),  // Select GEMM
-                                                                                  TensorInfo(TensorShape(23U, 27U, 31U, 4U), 1, DataType::F32), // Select WINOGRAD
-                                                                                  TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),    // Select GEMM
-                                                                                  TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32),  // Select GEMM
-                                                                                  TensorInfo(TensorShape(17U, 31U, 32U), 1, DataType::F32),     // Select WINOGRAD
-                                                                                  TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32)       // Select GEMM
+                                          framework::dataset::make("InputInfo", { TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),            // Select GEMM
+                                                                                  TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),            // Select GEMM
+                                                                                  TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32),        // Select GEMM
+                                                                                  TensorInfo(TensorShape(23U, 27U, 31U, 4U), 1, DataType::F32),       // Select WINOGRAD
+                                                                                  TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),          // Select GEMM
+                                                                                  TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32),        // Select GEMM
+                                                                                  TensorInfo(TensorShape(17U, 31U, 32U), 1, DataType::F32),           // Select WINOGRAD
+                                                                                  TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),            // Select GEMM
+                                                                                  TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::QASYMM8_SIGNED), // Select GEMM
                                           }),
                                           framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
                                                                                     TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
@@ -103,7 +104,8 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                     TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
                                                                                     TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16),
                                                                                     TensorInfo(TensorShape(5U, 5U, 32U, 19U), 1, DataType::F32),
-                                                                                    TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32)
+                                                                                    TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
+                                                                                    TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::QASYMM8_SIGNED),
                                           })),
                                           framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32),
@@ -112,7 +114,8 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                    TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32),
                                                                                    TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32),
-                                                                                   TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32)
+                                                                                   TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32),
+                                                                                   TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::QASYMM8_SIGNED),
                                           })),
                                           framework::dataset::make("ConvInfo", { PadStrideInfo(1, 2, 1, 1),
                                                                                  PadStrideInfo(1, 2, 1, 1),
@@ -121,7 +124,8 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                  PadStrideInfo(2, 1, 0, 0),
                                                                                  PadStrideInfo(3, 2, 1, 0),
                                                                                  PadStrideInfo(1, 1, 2, 2),
-                                                                                 PadStrideInfo(1, 1, 2, 2)
+                                                                                 PadStrideInfo(1, 1, 2, 2),
+                                                                                 PadStrideInfo(1, 1, 2, 2),
                                           })),
                                           framework::dataset::make("GpuTarget", { GPUTarget::BIFROST,
                                                                                   GPUTarget::MIDGARD,
@@ -130,7 +134,8 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                   GPUTarget::MIDGARD,
                                                                                   GPUTarget::BIFROST,
                                                                                   GPUTarget::BIFROST,
-                                                                                  GPUTarget::BIFROST
+                                                                                  GPUTarget::BIFROST,
+                                                                                  GPUTarget::BIFROST,
                                           })),
                                           framework::dataset::make("Dilation", { Size2D(1U, 1U),
                                                                  Size2D(1U, 1U),
@@ -140,8 +145,9 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                  Size2D(1U, 1U),
                                                                  Size2D(1U, 1U),
                                                                  Size2D(2U, 1U),
+                                                                 Size2D(2U, 1U),
                                           })),
-                                         framework::dataset::make("EnableFastMath", { false, false, false, false, false, false, true, true })),
+                                         framework::dataset::make("EnableFastMath", { false, false, false, false, false, false, true, true, true })),
                                          framework::dataset::make("Expected",{ ConvolutionMethod::GEMM,
                                                                                ConvolutionMethod::GEMM,
                                                                                ConvolutionMethod::GEMM,
@@ -149,6 +155,7 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                ConvolutionMethod::GEMM,
                                                                                ConvolutionMethod::GEMM,
                                                                                ConvolutionMethod::WINOGRAD,
+                                                                               ConvolutionMethod::GEMM,
                                                                                ConvolutionMethod::GEMM,
                                          })),
                                          input_info, weights_info, output_info, conv_info, gpu_target, dilation, enable_fast_math, expected)
