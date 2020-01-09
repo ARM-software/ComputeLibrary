@@ -344,13 +344,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<uint8_t>, framework::Da
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                               datasets::BorderModes()),
-                                                                                                       datasets::SamplingPolicies()))
+                                                                                                                       datasets::BorderModes()),
+                                                                                                               datasets::SamplingPolicies()),
+                                                                                                       AlignCorners))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -359,13 +360,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<int8_t>, framework::Dat
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                                    datasets::BorderModes()),
-                                                                                                           datasets::SamplingPolicies()))
+                                                                                                                   datasets::SamplingPolicies()),
+                                                                                                           AlignCorners))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
