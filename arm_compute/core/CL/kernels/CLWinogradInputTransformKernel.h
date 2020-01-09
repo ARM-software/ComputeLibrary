@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,6 +93,7 @@ private:
     BorderSize       _border_size;
     const ICLTensor *_input;
     ICLTensor       *_output;
+    DataLayout       _data_layout;
     int              _num_tiles_x;
     int              _num_tiles_y;
     unsigned int     _step_z;

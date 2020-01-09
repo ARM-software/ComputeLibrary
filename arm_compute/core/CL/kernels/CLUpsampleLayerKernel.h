@@ -73,6 +73,7 @@ private:
     const ICLTensor *_input;
     ICLTensor       *_output;
     Size2D           _info;
+    DataLayout       _data_layout;
     unsigned int     _num_elems_processed_per_iteration_input_x;
 };
 } // namespace arm_compute
