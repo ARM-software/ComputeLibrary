@@ -43,8 +43,9 @@ public:
      * @param[in]  policy          Interpolation type to use
      * @param[in]  border_mode     Selected border mode.
      * @param[in]  sampling_policy (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     * @param[in]  align_corners   (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+    void configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool align_corners = false);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLScaleKernel
      *
@@ -54,10 +55,12 @@ public:
      * @param[in] policy          Interpolation type to use
      * @param[in] border_mode     Selected border mode.
      * @param[in] sampling_policy (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     * @param[in] align_corners   (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER,
+                           bool align_corners = false);
     /** Input tensor accessor.
      *
      * @return Pointer to input tensor.
@@ -76,6 +79,7 @@ public:
 public:
     InterpolationPolicy _interpolationPolicy = InterpolationPolicy::BILINEAR;
     DataLayout          _data_layout         = DataLayout::UNKNOWN;
+    bool                _align_corners       = false;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLSCALEKERNEL_H */

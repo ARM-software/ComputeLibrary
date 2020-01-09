@@ -59,6 +59,7 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
 const auto AlignCorners = framework::dataset::make("AlignCorners",
 {
     false,
+    true,
 });
 
 /** Tolerance */

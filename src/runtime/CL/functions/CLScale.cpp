@@ -35,10 +35,10 @@ using namespace arm_compute;
 void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
                         bool align_corners)
 {
-    ARM_COMPUTE_UNUSED(use_padding, align_corners);
+    ARM_COMPUTE_UNUSED(use_padding);
     auto k = arm_compute::support::cpp14::make_unique<CLScaleKernel>();
     k->set_target(CLScheduler::get().target());
-    k->configure(input, output, policy, border_mode, sampling_policy);
+    k->configure(input, output, policy, border_mode, sampling_policy, align_corners);
     _kernel = std::move(k);
 
     // Tune kernels
@@ -56,6 +56,6 @@ void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy
 Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy,
                          bool use_padding, bool align_corners)
 {
-    ARM_COMPUTE_UNUSED(constant_border_value, use_padding, align_corners);
-    return CLScaleKernel::validate(input, output, policy, border_mode, sampling_policy);
+    ARM_COMPUTE_UNUSED(constant_border_value, use_padding);
+    return CLScaleKernel::validate(input, output, policy, border_mode, sampling_policy, align_corners);
 }

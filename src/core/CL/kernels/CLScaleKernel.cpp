@@ -41,7 +41,7 @@ using namespace arm_compute;
 
 namespace
 {
-inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input, const ITensorInfo &output)
+inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input, const ITensorInfo &output, bool align_corners)
 {
     DataLayout data_layout = input.data_layout();
     const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -53,13 +53,13 @@ inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input,
     const unsigned int output_width  = output.dimension(idx_width);
     const unsigned int output_height = output.dimension(idx_height);
 
-    float wr = static_cast<float>(input_width) / static_cast<float>(output_width);
-    float hr = static_cast<float>(input_height) / static_cast<float>(output_height);
+    float wr = arm_compute::calculate_resize_ratio(input_width, output_width, align_corners);
+    float hr = arm_compute::calculate_resize_ratio(input_height, output_height, align_corners);
 
     return std::make_pair(wr, hr);
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, bool align_corners)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
@@ -68,9 +68,27 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, I
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
 
+    if(align_corners)
+    {
+        // For bilinear method with aligned corners, the resize ratio will
+        // be calculated by (input_size - 1)/(output_size - 1). Belows are
+        // checking possible overflows.
+        const auto data_layout  = input->data_layout();
+        const auto width_index  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+        const auto height_index = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+        const auto input_width   = input->dimension(width_index);
+        const auto input_height  = input->dimension(height_index);
+        const auto output_width  = output->dimension(width_index);
+        const auto output_height = output->dimension(height_index);
+
+        ARM_COMPUTE_RETURN_ERROR_ON(input_width == 0 || input_height == 0 || output_width == 0 || output_height == 0);
+        ARM_COMPUTE_RETURN_ERROR_ON((output_width - 1 == 0) || (output_height - 1 == 0));
+    }
+
     float wr = 0.f;
     float hr = 0.f;
-    std::tie(wr, hr) = calculate_scale_factors(*input, *output);
+    std::tie(wr, hr) = calculate_scale_factors(*input, *output, align_corners);
 
     ARM_COMPUTE_RETURN_ERROR_ON(policy == InterpolationPolicy::AREA && (wr > 1.f || hr > 1.f));
 
@@ -139,10 +157,13 @@ BorderSize CLScaleKernel::border_size() const
 }
 
 Status CLScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
-                               BorderMode border_mode, SamplingPolicy sampling_policy)
+                               BorderMode border_mode, SamplingPolicy sampling_policy, bool align_corners)
 {
-    BorderSize border = BorderSize(1);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, policy));
+    BorderSize border           = BorderSize(1);
+    const bool is_align_corners = policy == InterpolationPolicy::BILINEAR
+                                  && sampling_policy == SamplingPolicy::TOP_LEFT
+                                  && align_corners;
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, policy, is_align_corners));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), policy, border_mode, sampling_policy, border).first);
 
     return Status{};
@@ -158,9 +179,13 @@ const ICLTensor *CLScaleKernel::output() const
     return _output;
 }
 
-void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy)
+void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy, bool align_corners)
 {
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy));
+    _align_corners = policy == InterpolationPolicy::BILINEAR
+                     && sampling_policy == SamplingPolicy::TOP_LEFT
+                     && align_corners;
+
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy, _align_corners));
 
     _input               = input;
     _output              = output;
@@ -169,19 +194,13 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 
     float wr = 0.f;
     float hr = 0.f;
-    std::tie(wr, hr) = calculate_scale_factors(*input->info(), *output->info());
+    std::tie(wr, hr) = calculate_scale_factors(*input->info(), *output->info(), _align_corners);
 
     const bool call_quantized_kernel = is_data_type_quantized_asymmetric(input->info()->data_type()) && policy == InterpolationPolicy::BILINEAR;
 
     const int  idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const int  idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
     const bool is_nhwc    = _data_layout == DataLayout::NHWC;
-
-    // Compute the ratio between source width/height and destination width/height
-    const unsigned int input_width   = input->info()->dimension(idx_width);
-    const unsigned int input_height  = input->info()->dimension(idx_height);
-    const unsigned int output_width  = output->info()->dimension(idx_width);
-    const unsigned int output_height = output->info()->dimension(idx_height);
 
     // Compute actual border size
     BorderSize border = border_size();
@@ -220,14 +239,13 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 
     unsigned int idx = is_nhwc ? 2 * num_arguments_per_4D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
 
-    // Set static kernel arguments
-    const float scale_x = static_cast<float>(input_width) / output_width;
-    const float scale_y = static_cast<float>(input_height) / output_height;
+    const unsigned int input_width  = input->info()->dimension(idx_width);
+    const unsigned int input_height = input->info()->dimension(idx_height);
 
     _kernel.setArg<float>(idx++, input_width);
     _kernel.setArg<float>(idx++, input_height);
-    _kernel.setArg<float>(idx++, scale_x);
-    _kernel.setArg<float>(idx++, scale_y);
+    _kernel.setArg<float>(idx++, wr);
+    _kernel.setArg<float>(idx++, hr);
 
     // Set config_id for enabling LWS tuning
     _config_id = "scale_";

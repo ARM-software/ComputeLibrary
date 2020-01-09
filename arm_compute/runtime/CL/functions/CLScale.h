@@ -47,7 +47,7 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      * @param[in]     sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
      * @param[in]     use_padding           (Optional) Is padding in use or not. Defaults to true.
-     * @param[in]     align_corners         (Optional) Align corners of input and output, only affecting bilinear policy. Defaults to false.
+     * @param[in]     align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      */
     void configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
                    SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
@@ -62,7 +62,7 @@ public:
      * @param[in] constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      * @param[in] sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
      * @param[in] use_padding           (Optional) Is padding in use or not. Defaults to true.
-     * @param[in] align_corners         (Optional) Align corners of input and output, only affecting bilinear policy. Defaults to false.
+     * @param[in] align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      *
      * @return a status
      */
