@@ -100,7 +100,13 @@ if env['gemm_tuner'] and env['opencl']:
 if env['neon']:
     for file in Glob("./neon_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
-        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = examples_libs + arm_compute_libs)
+
+        prog = None
+        if env['os'] in ['bare_metal']:
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LINKFLAGS=examples_env["LINKFLAGS"]+['-fstack-protector'], LIBS = examples_libs + arm_compute_libs)
+        else:
+            prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = examples_libs + arm_compute_libs)
+
         Depends(prog, arm_compute_dependency)
         prog = install_bin(prog)
         alias = examples_env.Alias(example, prog)
