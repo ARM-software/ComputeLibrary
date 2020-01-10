@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
 #include <arm_compute/core/NEON/kernels/NEElementwiseOperationKernel.h>
-#include "arm_compute/core/Validate.h"
 
 #include "arm_compute/core/ITensor.h"
 #include "support/ToolchainSupport.h"
@@ -41,7 +41,7 @@ void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *outp
 
 Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    if( input1->data_type() == DataType::QASYMM8_SIGNED)
+    if(input1->data_type() == DataType::QASYMM8_SIGNED)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input1, input2, output);
@@ -58,6 +58,11 @@ void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *outp
 
 Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
+    if(input1->data_type() == DataType::QASYMM8_SIGNED)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input1, input2, output);
+    }
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::MIN, input1, input2, output);
 }
 
