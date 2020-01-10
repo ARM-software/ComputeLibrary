@@ -49,7 +49,8 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FullyConnectedLayerValidationGenericFixture : public framework::Fixture
 {
 public:
-    using TBias = typename std::conditional < std::is_same<typename std::decay<T>::type, uint8_t>::value || std::is_same<typename std::decay<T>::type, int8_t>::value, int32_t, T >::type;
+    using TDecay = typename std::decay<T>::type;
+    using TBias  = typename std::conditional < (std::is_same<TDecay, uint8_t>::value || std::is_same<TDecay, int8_t>::value), int32_t, T >::type;
 
 public:
     template <typename...>

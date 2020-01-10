@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,8 +48,10 @@ Status construct_gemmlowp_output_stage(const ITensorInfo &input, const ITensorIn
     gemmlowp_output_stage.gemmlowp_multiplier = 0;
     gemmlowp_output_stage.gemmlowp_shift      = 0;
 
+    const auto data_type = input.data_type();
+
     // Configure output stage for quantized case
-    if(is_data_type_quantized_asymmetric(input.data_type()))
+    if(is_data_type_quantized_asymmetric(data_type))
     {
         const UniformQuantizationInfo iq_info = input.quantization_info().uniform();
         const UniformQuantizationInfo wq_info = weights.quantization_info().uniform();
@@ -62,14 +64,18 @@ Status construct_gemmlowp_output_stage(const ITensorInfo &input, const ITensorIn
         int         output_shift      = 0;
         ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
 
+        PixelValue type_min{};
+        PixelValue type_max{};
+        std::tie(type_min, type_max) = get_min_max(data_type);
+
         // Set the GEMMLowp output stage info
         gemmlowp_output_stage.gemmlowp_offset     = output_quant_info.offset;
         gemmlowp_output_stage.gemmlowp_multiplier = output_multiplier;
         gemmlowp_output_stage.gemmlowp_shift      = output_shift;
-        gemmlowp_output_stage.gemmlowp_min_bound  = 0;
-        gemmlowp_output_stage.gemmlowp_max_bound  = 255;
         gemmlowp_output_stage.gemmlowp_multipliers.push_back(output_multiplier);
         gemmlowp_output_stage.gemmlowp_shifts.push_back(output_shift);
+        type_min.get(gemmlowp_output_stage.gemmlowp_min_bound);
+        type_max.get(gemmlowp_output_stage.gemmlowp_max_bound);
     }
 
     return Status{};
@@ -304,7 +310,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
                                        FullyConnectedLayerInfo fc_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
 
