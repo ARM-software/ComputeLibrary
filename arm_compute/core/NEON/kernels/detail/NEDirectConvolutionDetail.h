@@ -306,10 +306,10 @@ inline float32x4x2_t convolve_3x3(const float *in_top, const float *in_mid, cons
 template < typename T, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
 inline int32x4_t single_convolve_3x3_dilation(const T *in_top, const T *in_mid, const T *in_low,
                                               const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
-                                              size_t dilation_x, int input_offset)
+                                              size_t dilation_x, int32_t input_offset)
 {
     using VectorType    = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x3_t, int8x8x3_t>::type;
-    using OutputTagType = typename wrapper::traits::neon_bitvector_tag_t<int, wrapper::traits::BitWidth::W128>;
+    using OutputTagType = typename wrapper::traits::neon_bitvector_tag_t<int32_t, wrapper::traits::BitWidth::W128>;
 
     const int32x4_t v_input_offset = wrapper::vdup_n(input_offset, OutputTagType{});
 
@@ -432,11 +432,11 @@ inline int32x4x2_t convolve_3x3_dilation(const T *in_top, const T *in_mid, const
 template < typename T, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
 int32x4x2_t convolve_3x3(const T *in_top, const T *in_mid, const T *in_low,
                          const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
-                         unsigned int stridex, int input_offset)
+                         unsigned int stridex, int32_t input_offset)
 {
     ARM_COMPUTE_ERROR_ON(stridex > 3);
     using VectorType    = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
-    using OutputTagType = typename wrapper::traits::neon_bitvector_tag_t<int, wrapper::traits::BitWidth::W128>;
+    using OutputTagType = typename wrapper::traits::neon_bitvector_tag_t<int32_t, wrapper::traits::BitWidth::W128>;
 
     const int32x4_t v_input_offset = wrapper::vdup_n(input_offset, OutputTagType{});
 
@@ -490,8 +490,8 @@ int32x4x2_t convolve_3x3(const T *in_top, const T *in_mid, const T *in_low,
     int32x4x2_t out
     {
         {
-            wrapper::vdup_n(0, OutputTagType{}),
-            wrapper::vdup_n(0, OutputTagType{}),
+            wrapper::vdup_n(static_cast<int32_t>(0), OutputTagType{}),
+            wrapper::vdup_n(static_cast<int32_t>(0), OutputTagType{}),
         }
     };
 
