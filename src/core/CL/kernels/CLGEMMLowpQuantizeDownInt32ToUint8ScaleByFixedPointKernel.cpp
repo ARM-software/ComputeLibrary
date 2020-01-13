@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,10 +122,9 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), min, max));
-    ARM_COMPUTE_ERROR_THROW_ON(validate_and_configure_window(input->info(),
-                                                             (bias != nullptr) ? bias->info() : nullptr,
-                                                             output->info())
-                               .first);
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     _input  = input;
     _bias   = bias;
@@ -144,9 +143,6 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down_fixedpoint", build_opts.options()));
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 }
 
