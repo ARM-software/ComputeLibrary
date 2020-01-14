@@ -135,8 +135,9 @@ private:
     bool    _is_midgard;
     bool    _reshape_b_only_on_first_run;
     bool    _is_prepared;
-    bool    _fuse_output_stage;
+    bool    _run_output_stage;
     bool    _convert_to_qasymm8;
+    bool    _run_offset_contribution;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H */

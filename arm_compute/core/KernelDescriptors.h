@@ -54,14 +54,21 @@ struct FFTRadixStageKernelInfo
 /** Descriptor used by the GEMM kernels */
 struct GEMMKernelInfo
 {
-    unsigned int        m{ 0 };                           /**< Number of LHS rows*/
-    unsigned int        n{ 0 };                           /**< Number of RHS columns*/
-    unsigned int        k{ 0 };                           /**< Number of LHS columns or RHS rows */
-    unsigned int        depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
-    bool                reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
-    bool                broadcast_bias{ false };          /**< Flag used to broadcase the bias addition */
-    bool                fp_mixed_precision{ false };      /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
-    ActivationLayerInfo activation_info{};                /**< Activation function to perform after the matrix multiplication */
+    unsigned int            m{ 0 };                           /**< Number of LHS rows*/
+    unsigned int            n{ 0 };                           /**< Number of RHS columns*/
+    unsigned int            k{ 0 };                           /**< Number of LHS columns or RHS rows */
+    unsigned int            depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
+    bool                    reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
+    bool                    broadcast_bias{ false };          /**< Flag used to broadcast the bias addition */
+    bool                    fp_mixed_precision{ false };      /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
+    ActivationLayerInfo     activation_info{};                /**< Activation function to perform after the matrix multiplication */
+    int                     mult_transpose1xW_width{ 1 };     /**< Multiplication factor for the width of the 1xW transposed block */
+    int                     mult_interleave4x4_height{ 1 };   /**< Multiplication factor for the height of the 4x4 interleaved block */
+    GEMMLHSMatrixInfo       lhs_info{};                       /**< LHS matrix information used to retrieve the number of rows processed by each thread */
+    GEMMRHSMatrixInfo       rhs_info{};                       /**< RHS matrix information used for reshaping the RHS matrix */
+    int32_t                 a_offset{ 0 };                    /**< Offset to be added to each element of the matrix A */
+    int32_t                 b_offset{ 0 };                    /**< Offset to be added to each element of the matrix B */
+    GEMMLowpOutputStageInfo output_stage{};                   /**< GEMMLowp output stage information */
 };
 
 /** Descriptor used by the depthwise convolution kernels */

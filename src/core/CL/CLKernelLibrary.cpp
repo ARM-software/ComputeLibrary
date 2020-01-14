@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -341,6 +341,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemmlowp_mm_native", "gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_only_rhs_t", "gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "gemmlowp.cl" },

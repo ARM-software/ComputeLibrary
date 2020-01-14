@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -130,7 +130,12 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
     rhs_info.interleave = i_value_rhs;
     rhs_info.transpose  = true;
 
-    GEMMReshapeInfo gemm_info(M, N, K);
+    GEMMKernelInfo gemm_info;
+    gemm_info.m = M;
+    gemm_info.n = N;
+    gemm_info.k = K;
+    gemm_info.lhs_info = lhs_info;
+    gemm_info.rhs_info = rhs_info;
 
     const TensorShape lhs_shape(K, M, b_value);
     const TensorShape rhs_shape(N, K, b_value);
@@ -152,7 +157,7 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
 
     // Create and configure function
     CLGEMMLowpMatrixMultiplyReshapedOnlyRHS gemm;
-    gemm.configure(&lhs, &rhs_reshaped, &dst, lhs_info, rhs_info, gemm_info);
+    gemm.configure(&lhs, &rhs_reshaped, &dst, gemm_info);
 }
 } // namespace
 
