@@ -524,7 +524,7 @@ template <typename T1>
 class convolver_nhwc
 {
 public:
-    static void convolve(const Window &window, int kernel_size, unsigned int num_elems_read_per_iteration,
+    static void convolve(const Window &window, uint32_t kernel_size, unsigned int num_elems_read_per_iteration,
                          const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
     {
         const int          input_width     = input->info()->dimension(0);
@@ -577,7 +577,7 @@ public:
                 auto in_addr_base0 = in_ptr;
                 auto we_addr_base0 = k.ptr();
 
-                for(int z = 0; z < kernel_size; ++z, in_addr_base0 += input_stride_z, we_addr_base0 += kernel_stride_z)
+                for(uint32_t z = 0; z < kernel_size; ++z, in_addr_base0 += input_stride_z, we_addr_base0 += kernel_stride_z)
                 {
                     const int in_z = id.z() * conv_stride_y + z - conv_pad_top;
 
@@ -586,7 +586,7 @@ public:
                         auto in_addr_base1 = in_addr_base0;
                         auto we_addr_base1 = we_addr_base0;
 
-                        for(int y = 0; y < kernel_size; ++y, in_addr_base1 += input_stride_y, we_addr_base1 += kernel_stride_y)
+                        for(uint32_t y = 0; y < kernel_size; ++y, in_addr_base1 += input_stride_y, we_addr_base1 += kernel_stride_y)
                         {
                             auto out_values = internal_vdupq_n(zero);
 
