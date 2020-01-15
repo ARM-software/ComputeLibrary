@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,8 +70,9 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>();
 
         // Create input descriptor
-        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+        const auto        operation_layout = common_params.data_layout;
+        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, operation_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
 
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
@@ -85,7 +86,7 @@ public:
                   get_weights_accessor(data_path, "conv1_biases.npy", weights_layout),
                   PadStrideInfo(2, 2, 3, 3))
               .set_name("conv1/convolution")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool1/MaxPool");
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool1/MaxPool");
 
         add_residual_block(data_path, "block1", weights_layout, 64, 3, 2);
         add_residual_block(data_path, "block2", weights_layout, 128, 4, 2);
@@ -100,7 +101,7 @@ public:
                   0.000009999999747378752f)
               .set_name("postnorm/BatchNorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("postnorm/Relu")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("pool5")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, operation_layout)).set_name("pool5")
               << ConvolutionLayer(
                   1U, 1U, 1001U,
                   get_weights_accessor(data_path, "logits_weights.npy", weights_layout),
@@ -174,7 +175,7 @@ private:
             {
                 if(middle_stride != 1)
                 {
-                    shortcut << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 1, PadStrideInfo(middle_stride, middle_stride, 0, 0), true)).set_name(unit_name + "shortcut/MaxPool");
+                    shortcut << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 1, common_params.data_layout, PadStrideInfo(middle_stride, middle_stride, 0, 0), true)).set_name(unit_name + "shortcut/MaxPool");
                 }
             }
             else

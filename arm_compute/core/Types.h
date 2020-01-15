@@ -29,6 +29,7 @@
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/utils/misc/Macros.h"
 #include "support/Half.h"
 
 #include <cmath>
@@ -1211,13 +1212,88 @@ struct PoolingLayerInfo
 {
     /** Default Constructor */
     PoolingLayerInfo()
-        : pool_type(PoolingType::MAX), pool_size(Size2D()), pad_stride_info(PadStrideInfo()), exclude_padding(false), is_global_pooling(false), fp_mixed_precision(false)
+        : pool_type(PoolingType::MAX),
+          pool_size(Size2D()),
+          data_layout(DataLayout::UNKNOWN),
+          pad_stride_info(PadStrideInfo()),
+          exclude_padding(false),
+          is_global_pooling(false),
+          fp_mixed_precision(false)
     {
     }
-    /** Default Constructor
+    /** Constructor
      *
      * @param[in] pool_type          Pooling type @ref PoolingType.
      * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(20.02, PoolingLayerInfo(PoolingType, unsigned int, DataLayout, PadStrideInfo, bool, bool))
+    explicit PoolingLayerInfo(PoolingType   pool_type,
+                              unsigned int  pool_size,
+                              PadStrideInfo pad_stride_info    = PadStrideInfo(),
+                              bool          exclude_padding    = false,
+                              bool          fp_mixed_precision = false)
+        : pool_type(pool_type),
+          pool_size(Size2D(pool_size, pool_size)),
+          data_layout(DataLayout::UNKNOWN),
+          pad_stride_info(pad_stride_info),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(20.02, PoolingLayerInfo(PoolingType, Size2D, DataLayout, PadStrideInfo, bool, bool))
+    explicit PoolingLayerInfo(PoolingType   pool_type,
+                              Size2D        pool_size,
+                              PadStrideInfo pad_stride_info    = PadStrideInfo(),
+                              bool          exclude_padding    = false,
+                              bool          fp_mixed_precision = false)
+        : pool_type(pool_type),
+          pool_size(pool_size),
+          data_layout(DataLayout::UNKNOWN),
+          pad_stride_info(pad_stride_info),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision)
+    {
+    }
+    /** Constructor
+     *
+     * @note This constructor is used for global pooling
+     *
+     * @param[in] pool_type Pooling type @ref PoolingType.
+     */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(20.02, PoolingLayerInfo(PoolingType, DataLayout))
+    explicit PoolingLayerInfo(PoolingType pool_type)
+        : pool_type(pool_type),
+          pool_size(Size2D()),
+          data_layout(DataLayout::UNKNOWN),
+          pad_stride_info(PadStrideInfo(1, 1, 0, 0)),
+          exclude_padding(false),
+          is_global_pooling(true),
+          fp_mixed_precision(false)
+    {
+    }
+
+    /** Constructor
+     *
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] data_layout        Data layout used by the layer @ref DataLayout
      * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
      * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
@@ -1226,16 +1302,25 @@ struct PoolingLayerInfo
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               unsigned int  pool_size,
+                              DataLayout    data_layout,
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
                               bool          fp_mixed_precision = false)
-        : pool_type(pool_type), pool_size(Size2D(pool_size, pool_size)), pad_stride_info(pad_stride_info), exclude_padding(exclude_padding), is_global_pooling(false), fp_mixed_precision(fp_mixed_precision)
+        : pool_type(pool_type),
+          pool_size(Size2D(pool_size, pool_size)),
+          data_layout(data_layout),
+          pad_stride_info(pad_stride_info),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision)
     {
     }
-    /** Default Constructor
+
+    /** Constructor
      *
      * @param[in] pool_type          Pooling type @ref PoolingType.
      * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] data_layout        Data layout used by the layer @ref DataLayout
      * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
      * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
@@ -1244,25 +1329,41 @@ struct PoolingLayerInfo
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               Size2D        pool_size,
+                              DataLayout    data_layout,
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
                               bool          fp_mixed_precision = false)
-        : pool_type(pool_type), pool_size(pool_size), pad_stride_info(pad_stride_info), exclude_padding(exclude_padding), is_global_pooling(false), fp_mixed_precision(fp_mixed_precision)
+        : pool_type(pool_type),
+          pool_size(pool_size),
+          data_layout(data_layout),
+          pad_stride_info(pad_stride_info),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision)
     {
     }
-    /** Default Constructor
+
+    /** Constructor
      *
      * @note This constructor is used for global pooling
      *
-     * @param[in] pool_type Pooling type @ref PoolingType.
+     * @param[in] pool_type   Pooling type @ref PoolingType.
+     * @param[in] data_layout Data layout used by the layer @ref DataLayout
      */
-    explicit PoolingLayerInfo(PoolingType pool_type)
-        : pool_type(pool_type), pool_size(Size2D()), pad_stride_info(PadStrideInfo(1, 1, 0, 0)), exclude_padding(false), is_global_pooling(true), fp_mixed_precision(false)
+    explicit PoolingLayerInfo(PoolingType pool_type, DataLayout data_layout)
+        : pool_type(pool_type),
+          pool_size(Size2D()),
+          data_layout(data_layout),
+          pad_stride_info(PadStrideInfo(1, 1, 0, 0)),
+          exclude_padding(false),
+          is_global_pooling(true),
+          fp_mixed_precision(false)
     {
     }
 
     PoolingType   pool_type;
     Size2D        pool_size;
+    DataLayout    data_layout;
     PadStrideInfo pad_stride_info;
     bool          exclude_padding;
     bool          is_global_pooling;

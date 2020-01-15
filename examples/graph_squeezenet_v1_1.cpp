@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,8 +66,9 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Create input descriptor
-        const TensorShape tensor_shape     = permute_shape(TensorShape(227U, 227U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+        const auto        operation_layout = common_params.data_layout;
+        const TensorShape tensor_shape     = permute_shape(TensorShape(227U, 227U, 3U, 1U), DataLayout::NCHW, operation_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
 
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
@@ -82,7 +83,7 @@ public:
                   PadStrideInfo(2, 2, 0, 0))
               .set_name("conv1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu_conv1")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL))).set_name("pool1")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL))).set_name("pool1")
               << ConvolutionLayer(
                   1U, 1U, 16U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire2_squeeze1x1_w.npy", weights_layout),
@@ -99,7 +100,7 @@ public:
               .set_name("fire3/squeeze1x1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("fire3/relu_squeeze1x1");
         graph << get_expand_fire_node(data_path, "fire3", weights_layout, 64U, 64U).set_name("fire3/concat");
-        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL))).set_name("pool3")
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL))).set_name("pool3")
               << ConvolutionLayer(
                   1U, 1U, 32U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire4_squeeze1x1_w.npy", weights_layout),
@@ -116,7 +117,7 @@ public:
               .set_name("fire5/squeeze1x1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("fire5/relu_squeeze1x1");
         graph << get_expand_fire_node(data_path, "fire5", weights_layout, 128U, 128U).set_name("fire5/concat");
-        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL))).set_name("pool5")
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL))).set_name("pool5")
               << ConvolutionLayer(
                   1U, 1U, 48U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire6_squeeze1x1_w.npy", weights_layout),
@@ -156,7 +157,7 @@ public:
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("conv10")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu_conv10")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("pool10")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, operation_layout)).set_name("pool10")
               << FlattenLayer().set_name("flatten")
               << SoftmaxLayer().set_name("prob")
               << OutputLayer(get_output_accessor(common_params, 5));

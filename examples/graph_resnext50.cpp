@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,8 +65,9 @@ public:
         std::string data_path = common_params.data_path;
 
         // Create input descriptor
-        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+        const auto        operation_layout = common_params.data_layout;
+        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, operation_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
 
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
@@ -84,14 +85,14 @@ public:
                   PadStrideInfo(2, 2, 2, 3, 2, 3, DimensionRoundingType::FLOOR))
               .set_name("conv0/Convolution")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv0/Relu")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool0");
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool0");
 
         add_residual_block(data_path, weights_layout, /*ofm*/ 256, /*stage*/ 1, /*num_unit*/ 3, /*stride_conv_unit1*/ 1);
         add_residual_block(data_path, weights_layout, 512, 2, 4, 2);
         add_residual_block(data_path, weights_layout, 1024, 3, 6, 2);
         add_residual_block(data_path, weights_layout, 2048, 4, 3, 2);
 
-        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("pool1")
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, operation_layout)).set_name("pool1")
               << FlattenLayer().set_name("predictions/Reshape")
               << OutputLayer(get_npy_output_accessor(common_params.labels, TensorShape(2048U), DataType::F32));
 

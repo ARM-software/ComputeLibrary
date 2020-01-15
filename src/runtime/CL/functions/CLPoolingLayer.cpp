@@ -49,7 +49,11 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     {
         pixel_value = PixelValue(0, data_type, input->info()->quantization_info());
     }
-    switch(input->info()->data_layout())
+
+    // Data layout
+    const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
+
+    switch(data_layout)
     {
         case DataLayout::NCHW:
             border_mode = (PoolingType::MAX == pool_info.pool_type) ? BorderMode::REPLICATE : BorderMode::CONSTANT;

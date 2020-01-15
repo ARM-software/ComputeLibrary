@@ -163,7 +163,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_pool_shape(*input, pool_info)));
 
-    DataLayout          data_layout                  = input->data_layout();
+    const auto          data_layout                  = pool_info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : pool_info.data_layout;
     unsigned int        num_elems_read_per_iteration = 0;
     unsigned int        num_elems_horizontal_window  = 0;
     int                 pool_stride_x                = 0;
@@ -403,9 +403,9 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     const int           pool_stride_x     = pad_stride_info.stride().first;
 
     // Get data layout
-    const DataLayout data_layout = input->info()->data_layout();
-    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
+    const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     // Update pool size in case of global pooling
     const Size2D pool_size(
@@ -1932,9 +1932,9 @@ Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInf
     unsigned int pool_size_y       = 0;
 
     // Get data layout
-    const DataLayout data_layout = input->data_layout();
-    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : pool_info.data_layout;
+    const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     pool_size_x = is_global_pooling ? input->dimension(idx_width) : pool_info.pool_size.width;
     pool_size_y = is_global_pooling ? input->dimension(idx_height) : pool_info.pool_size.height;

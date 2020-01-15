@@ -41,7 +41,7 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _is_global_pooling_layer = (input->info()->dimension(0) == pool_info.pool_size.width) && (input->info()->dimension(1) == pool_info.pool_size.height);
 
     // Get data layout
-    _data_layout = input->info()->data_layout();
+    _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
 
     // Configure pooling kernel
     _pooling_layer_kernel.configure(input, output, pool_info);

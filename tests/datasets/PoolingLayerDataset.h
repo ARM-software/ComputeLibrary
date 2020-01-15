@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,10 +106,10 @@ public:
     PoolingLayerDatasetSpecial()
     {
         // Special cases
-        add_config(TensorShape(60U, 52U, 3U, 2U), PoolingLayerInfo(PoolingType::AVG, Size2D(100, 100), PadStrideInfo(5, 5, 50, 50), true));
+        add_config(TensorShape(60U, 52U, 3U, 2U), PoolingLayerInfo(PoolingType::AVG, Size2D(100, 100), DataLayout::NCHW, PadStrideInfo(5, 5, 50, 50), true));
         // Asymmetric padding
-        add_config(TensorShape(112U, 112U, 32U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR)));
-        add_config(TensorShape(14U, 14U, 832U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(112U, 112U, 32U), PoolingLayerInfo(PoolingType::MAX, 3, DataLayout::NCHW, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR)));
+        add_config(TensorShape(14U, 14U, 832U), PoolingLayerInfo(PoolingType::MAX, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)));
     }
 };
 } // namespace datasets

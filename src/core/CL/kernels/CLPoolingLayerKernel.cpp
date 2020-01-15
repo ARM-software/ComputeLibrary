@@ -80,7 +80,7 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Get data layout
-    const DataLayout data_layout = input->data_layout();
+    const DataLayout data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : pool_info.data_layout;
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
@@ -179,7 +179,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     _input       = input;
     _output      = output;
     _pool_info   = pool_info;
-    _data_layout = input->info()->data_layout();
+    _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
 
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;

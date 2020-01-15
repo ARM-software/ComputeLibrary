@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,8 +70,9 @@ public:
         }
 
         // Create input descriptor
-        const TensorShape tensor_shape     = permute_shape(TensorShape(28U, 28U, 1U), DataLayout::NCHW, common_params.data_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+        const auto        operation_layout = common_params.data_layout;
+        const TensorShape tensor_shape     = permute_shape(TensorShape(28U, 28U, 1U), DataLayout::NCHW, operation_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
 
         const QuantizationInfo in_quant_info = QuantizationInfo(0.003921568859368563f, 0);
 
@@ -106,7 +107,7 @@ public:
                   PadStrideInfo(1U, 1U, 1U, 1U), 1, conv_quant_info.at(1).first, conv_quant_info.at(1).second)
               .set_name("conv1")
 
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("maxpool1")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, operation_layout, PadStrideInfo(2, 2, 0, 0))).set_name("maxpool1")
 
               << ConvolutionLayer(
                   3U, 3U, 32U,
@@ -115,7 +116,7 @@ public:
                   PadStrideInfo(1U, 1U, 1U, 1U), 1, conv_quant_info.at(2).first, conv_quant_info.at(2).second)
               .set_name("conv2")
 
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("maxpool2")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, operation_layout, PadStrideInfo(2, 2, 0, 0))).set_name("maxpool2")
 
               << FullyConnectedLayer(
                   10U,

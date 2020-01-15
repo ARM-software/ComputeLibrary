@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -131,6 +131,8 @@ public:
         const TensorShape out_shape_softmax(out_shape_fc0.x());
         out_softmax.allocator()->init(TensorInfo(out_shape_softmax, 1, DataType::F32));
 
+        constexpr auto data_layout = DataLayout::NCHW;
+
         /* -----------------------End: [Initialize tensors] */
 
         /* [Configure functions] */
@@ -142,7 +144,7 @@ public:
         act0.configure(&out_conv0, &out_act0, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         // in:32x32x8, out:16x16x8 (2x2 pooling), Pool type function: Max
-        pool0.configure(&out_act0, &out_pool0, PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2 /* stride_x */, 2 /* stride_y */)));
+        pool0.configure(&out_act0, &out_pool0, PoolingLayerInfo(PoolingType::MAX, 2, data_layout, PadStrideInfo(2 /* stride_x */, 2 /* stride_y */)));
 
         // in:16x16x8: 3x3 convolution, 16 output features maps (OFM)
         conv1->configure(&out_pool0, &weights1, &biases1, &out_conv1, PadStrideInfo(1 /* stride_x */, 1 /* stride_y */, 1 /* pad_x */, 1 /* pad_y */));
@@ -151,7 +153,7 @@ public:
         act1.configure(&out_conv1, &out_act1, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         // in:16x16x16, out:8x8x16 (2x2 pooling), Pool type function: Average
-        pool1.configure(&out_act1, &out_pool1, PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(2 /* stride_x */, 2 /* stride_y */)));
+        pool1.configure(&out_act1, &out_pool1, PoolingLayerInfo(PoolingType::AVG, 2, data_layout, PadStrideInfo(2 /* stride_x */, 2 /* stride_y */)));
 
         // in:8x8x16, out:128
         fc0->configure(&out_pool1, &weights2, &biases2, &out_fc0);

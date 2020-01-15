@@ -1621,6 +1621,7 @@ inline std::string to_string(const PoolingLayerInfo &info)
 {
     std::stringstream str;
     str << "{Type=" << info.pool_type << ","
+        << "DataLayout=" << info.data_layout << ","
         << "IsGlobalPooling=" << info.is_global_pooling;
     if(!info.is_global_pooling)
     {
