@@ -113,7 +113,7 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTens
     CLBuildOptions build_opts;
     build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(mtx_a->info()->dimension(0)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(mtx_a->info()->data_type()));
-    build_opts.add_option("-DDATA_ACC_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_a->info()->data_type()));
+    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_a->info()->data_type()));
 
     const bool is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
 
@@ -181,7 +181,7 @@ void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTens
     build_opts.add_option("-DCOLS_B=" + support::cpp11::to_string(mtx_b->info()->dimension(0)));
     build_opts.add_option("-DROWS_B=" + support::cpp11::to_string(mtx_b->info()->dimension(1)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(mtx_b->info()->data_type()));
-    build_opts.add_option("-DDATA_ACC_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_b->info()->data_type()));
+    build_opts.add_option("-DACC_DATA_TYPE=" + get_cl_dot8_acc_type_from_data_type(mtx_b->info()->data_type()));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_matrix_b_reduction", build_opts.options()));

@@ -990,8 +990,6 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
 }
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(K)
 
-#endif // defined(DATA_TYPE) && defined(ACC_DATA_TYPE)
-
 #if defined(COLS_A)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
  *
@@ -1000,7 +998,7 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
  *
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
  * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
- * @note The data type for the accumulation must be passed at compile time using -DDATA_ACC_TYPE (i.e. -DDATA_ACC_TYPE=uint)
+ * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -1024,9 +1022,9 @@ __kernel void gemmlowp_matrix_a_reduction(TENSOR3D_DECLARATION(src),
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Image    dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
-    VEC_DATA_TYPE(DATA_ACC_TYPE, 4)
-    sum_row_32            = (VEC_DATA_TYPE(DATA_ACC_TYPE, 4))0;
-    DATA_ACC_TYPE sum_row = 0;
+    VEC_DATA_TYPE(ACC_DATA_TYPE, 4)
+    sum_row_32            = (VEC_DATA_TYPE(ACC_DATA_TYPE, 4))0;
+    ACC_DATA_TYPE sum_row = 0;
 
     __global const DATA_TYPE *matrix_a = (__global const DATA_TYPE *)(src.ptr + get_global_id(0) * src_stride_y + get_global_id(1) * src_stride_z);
 
@@ -1037,14 +1035,14 @@ __kernel void gemmlowp_matrix_a_reduction(TENSOR3D_DECLARATION(src),
     {
         const VEC_DATA_TYPE(DATA_TYPE, 16) a0 = vload16(0, matrix_a + i);
 
-        sum_row_32 += CONVERT(a0.s0123, VEC_DATA_TYPE(DATA_ACC_TYPE, 4)) + CONVERT(a0.s4567, VEC_DATA_TYPE(DATA_ACC_TYPE, 4)) + CONVERT(a0.s89AB, VEC_DATA_TYPE(DATA_ACC_TYPE, 4)) + CONVERT(a0.sCDEF,
-                      VEC_DATA_TYPE(DATA_ACC_TYPE, 4));
+        sum_row_32 += CONVERT(a0.s0123, VEC_DATA_TYPE(ACC_DATA_TYPE, 4)) + CONVERT(a0.s4567, VEC_DATA_TYPE(ACC_DATA_TYPE, 4)) + CONVERT(a0.s89AB, VEC_DATA_TYPE(ACC_DATA_TYPE, 4)) + CONVERT(a0.sCDEF,
+                      VEC_DATA_TYPE(ACC_DATA_TYPE, 4));
     }
 
     // This for loop performs the leftover accumulations
     for(; i < COLS_A; ++i)
     {
-        sum_row += (DATA_ACC_TYPE)matrix_a[i];
+        sum_row += (ACC_DATA_TYPE)matrix_a[i];
     }
 
     sum_row += sum_row_32.s0 + sum_row_32.s1 + sum_row_32.s2 + sum_row_32.s3;
@@ -1060,7 +1058,7 @@ __kernel void gemmlowp_matrix_a_reduction(TENSOR3D_DECLARATION(src),
  *
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
  * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
- * @note The data type for the accumulation must be passed at compile time using -DDATA_ACC_TYPE (i.e. -DDATA_ACC_TYPE=uint)
+ * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -1084,7 +1082,7 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Image    dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
-    DATA_ACC_TYPE sum_row = 0;
+    ACC_DATA_TYPE sum_row = 0;
 
     __global const DATA_TYPE *matrix_a = (__global const DATA_TYPE *)(src.ptr + get_global_id(0) * src_stride_y + get_global_id(1) * src_stride_z);
 
@@ -1112,7 +1110,7 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
     // This for loop performs the leftover accumulations
     for(; i < COLS_A; ++i)
     {
-        sum_row += (DATA_ACC_TYPE)matrix_a[i];
+        sum_row += (ACC_DATA_TYPE)matrix_a[i];
     }
 
     *((__global int *)dst.ptr) = (int)sum_row;
@@ -1128,7 +1126,7 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
  *
  * @attention The number of matrix B columns and rows needs to be passed at compile time using -DCOLS_B and -DROWS_B
  * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
- * @note The data type for the accumulation must be passed at compile time using -DDATA_ACC_TYPE (i.e. -DDATA_ACC_TYPE=uint)
+ * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -1152,8 +1150,8 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Image    dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
-    VEC_DATA_TYPE(DATA_ACC_TYPE, 16)
-    sum_col_32 = (VEC_DATA_TYPE(DATA_ACC_TYPE, 16))0;
+    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
+    sum_col_32 = (VEC_DATA_TYPE(ACC_DATA_TYPE, 16))0;
 
     __global const DATA_TYPE *matrix_b = (__global const DATA_TYPE *)(src.ptr + get_global_id(1) * src_stride_z);
 
@@ -1170,7 +1168,7 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
         const VEC_DATA_TYPE(DATA_TYPE, 16)
         b3 = vload16(0, matrix_b + 3 * src_stride_y);
 
-        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(DATA_ACC_TYPE, 16)) + CONVERT(b1, VEC_DATA_TYPE(DATA_ACC_TYPE, 16)) + CONVERT(b2, VEC_DATA_TYPE(DATA_ACC_TYPE, 16)) + CONVERT(b3, VEC_DATA_TYPE(DATA_ACC_TYPE,
+        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b1, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b2, VEC_DATA_TYPE(ACC_DATA_TYPE, 16)) + CONVERT(b3, VEC_DATA_TYPE(ACC_DATA_TYPE,
                       16));
 
         matrix_b += 4 * src_stride_y;
@@ -1182,7 +1180,7 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
         const VEC_DATA_TYPE(DATA_TYPE, 16)
         b0 = vload16(0, matrix_b);
 
-        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(DATA_ACC_TYPE, 16));
+        sum_col_32 += CONVERT(b0, VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
 
         matrix_b += src_stride_y;
     }
@@ -1190,6 +1188,8 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
     vstore16(convert_int16(sum_col_32), 0, (__global int *)dst.ptr);
 }
 #endif // defined(COLS_B) && defined(ROWS_B)
+
+#endif // defined(DATA_TYPE) && defined(ACC_DATA_TYPE)
 
 #if defined(K_OFFSET)
 
