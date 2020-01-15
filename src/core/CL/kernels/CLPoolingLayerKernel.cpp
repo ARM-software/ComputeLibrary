@@ -60,7 +60,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type() == PoolingType::L2),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type == PoolingType::L2),
                                     "Unsupported combination of parameters!");
 
     // Checks performed when output is configured
@@ -88,9 +88,9 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
     int                 pool_stride_y   = 0;
     unsigned int        pooled_w        = 0;
     unsigned int        pooled_h        = 0;
-    int                 pool_size_x     = pool_info.is_global_pooling() ? input->dimension(idx_width) : pool_info.pool_size().width;
-    int                 pool_size_y     = pool_info.is_global_pooling() ? input->dimension(idx_height) : pool_info.pool_size().height;
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
+    int                 pool_size_x     = pool_info.is_global_pooling ? input->dimension(idx_width) : pool_info.pool_size.width;
+    int                 pool_size_y     = pool_info.is_global_pooling ? input->dimension(idx_height) : pool_info.pool_size.height;
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
     const int  pool_pad_right  = pad_stride_info.pad_right();
     const int  pool_pad_top    = pad_stride_info.pad_top();
@@ -183,14 +183,14 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
 
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
-    const PoolingType   pool_type       = pool_info.pool_type();
+    const PoolingType   pool_type       = pool_info.pool_type;
     const int           idx_width       = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
     const int           idx_height      = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
     const int           idx_channel     = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
-    const int           pool_size_x     = pool_info.is_global_pooling() ? input->info()->dimension(idx_width) : pool_info.pool_size().width;
-    const int           pool_size_y     = pool_info.is_global_pooling() ? input->info()->dimension(idx_height) : pool_info.pool_size().height;
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
-    const bool          exclude_padding = pool_info.exclude_padding();
+    const int           pool_size_x     = pool_info.is_global_pooling ? input->info()->dimension(idx_width) : pool_info.pool_size.width;
+    const int           pool_size_y     = pool_info.is_global_pooling ? input->info()->dimension(idx_height) : pool_info.pool_size.height;
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
+    const bool          exclude_padding = pool_info.exclude_padding;
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
     const int pool_pad_top  = pad_stride_info.pad_top();
     const int pool_pad_left = pad_stride_info.pad_left();
@@ -244,7 +244,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
         build_opts.add_option("-DINITIAL_VALUE=0");
     }
 
-    const auto use_fp_mixed_precision = (data_type == DataType::F16) && pool_info.fp_mixed_precision();
+    const auto use_fp_mixed_precision = (data_type == DataType::F16) && pool_info.fp_mixed_precision;
     const auto use_wider_accumulator  = use_fp_mixed_precision && (pool_type != PoolingType::MAX);
     const auto acc_data_type          = get_cl_type_from_data_type(use_wider_accumulator ? DataType::F32 : data_type);
     build_opts.add_option("-DACC_DATA_TYPE=" + acc_data_type);
@@ -342,7 +342,7 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
 
     unsigned int pool_stride_x = 0;
     unsigned int pool_stride_y = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
 
     // Collapse window
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
@@ -356,11 +356,11 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
             {
                 // Upsample input by pool size
                 Window in_slice(slice);
-                in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - _pool_info.pad_stride_info().pad_left(),
-                                                             (in_slice.x().end() - _pool_info.pad_stride_info().pad_left()) * pool_stride_x,
+                in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - _pool_info.pad_stride_info.pad_left(),
+                                                             (in_slice.x().end() - _pool_info.pad_stride_info.pad_left()) * pool_stride_x,
                                                              pool_stride_x * _num_elems_processed_per_iteration));
-                in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - _pool_info.pad_stride_info().pad_top(),
-                                                             (in_slice.y().end() - _pool_info.pad_stride_info().pad_top()) * pool_stride_y,
+                in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - _pool_info.pad_stride_info.pad_top(),
+                                                             (in_slice.y().end() - _pool_info.pad_stride_info.pad_top()) * pool_stride_y,
                                                              pool_stride_y));
 
                 // Set inputs

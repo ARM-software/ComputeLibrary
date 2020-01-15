@@ -1206,13 +1206,12 @@ private:
     bool         _dequantize_scores;
 };
 
-/** Pooling Layer Information class */
-class PoolingLayerInfo
+/** Pooling Layer Information struct*/
+struct PoolingLayerInfo
 {
-public:
     /** Default Constructor */
     PoolingLayerInfo()
-        : _pool_type(PoolingType::MAX), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false), _fp_mixed_precision(false)
+        : pool_type(PoolingType::MAX), pool_size(Size2D()), pad_stride_info(PadStrideInfo()), exclude_padding(false), is_global_pooling(false), fp_mixed_precision(false)
     {
     }
     /** Default Constructor
@@ -1230,8 +1229,7 @@ public:
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
                               bool          fp_mixed_precision = false)
-        : _pool_type(pool_type), _pool_size(Size2D(pool_size, pool_size)), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false),
-          _fp_mixed_precision(fp_mixed_precision)
+        : pool_type(pool_type), pool_size(Size2D(pool_size, pool_size)), pad_stride_info(pad_stride_info), exclude_padding(exclude_padding), is_global_pooling(false), fp_mixed_precision(fp_mixed_precision)
     {
     }
     /** Default Constructor
@@ -1249,7 +1247,7 @@ public:
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
                               bool          fp_mixed_precision = false)
-        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false), _fp_mixed_precision(fp_mixed_precision)
+        : pool_type(pool_type), pool_size(pool_size), pad_stride_info(pad_stride_info), exclude_padding(exclude_padding), is_global_pooling(false), fp_mixed_precision(fp_mixed_precision)
     {
     }
     /** Default Constructor
@@ -1259,47 +1257,16 @@ public:
      * @param[in] pool_type Pooling type @ref PoolingType.
      */
     explicit PoolingLayerInfo(PoolingType pool_type)
-        : _pool_type(pool_type), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true), _fp_mixed_precision(false)
+        : pool_type(pool_type), pool_size(Size2D()), pad_stride_info(PadStrideInfo(1, 1, 0, 0)), exclude_padding(false), is_global_pooling(true), fp_mixed_precision(false)
     {
-    }
-    /** Get the pooling type */
-    PoolingType pool_type() const
-    {
-        return _pool_type;
-    }
-    /** Get the pooling size */
-    const Size2D &pool_size() const
-    {
-        return _pool_size;
-    }
-    /** Get the padding and stride */
-    PadStrideInfo pad_stride_info() const
-    {
-        return _pad_stride_info;
-    }
-    /** Check if padding is excluded in calculations */
-    bool exclude_padding() const
-    {
-        return _exclude_padding;
-    }
-    /** Check if a wider accumulator should be used. */
-    bool fp_mixed_precision() const
-    {
-        return _fp_mixed_precision;
-    }
-    /** Check if is global pooling */
-    bool is_global_pooling() const
-    {
-        return _is_global_pooling;
     }
 
-private:
-    PoolingType   _pool_type;
-    Size2D        _pool_size;
-    PadStrideInfo _pad_stride_info;
-    bool          _exclude_padding;
-    bool          _is_global_pooling;
-    bool          _fp_mixed_precision;
+    PoolingType   pool_type;
+    Size2D        pool_size;
+    PadStrideInfo pad_stride_info;
+    bool          exclude_padding;
+    bool          is_global_pooling;
+    bool          fp_mixed_precision;
 };
 
 /** ROI Pooling Layer Information class */

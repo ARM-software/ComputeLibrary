@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -126,8 +126,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
-    PoolingType         pool_type       = pool_info.pool_type();
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
+    PoolingType         pool_type       = pool_info.pool_type;
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
@@ -169,7 +169,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const int           idx_height                   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const int           input_width                  = input->dimension(idx_width);
     const int           input_height                 = input->dimension(idx_height);
-    const PadStrideInfo pad_stride_info              = pool_info.pad_stride_info();
+    const PadStrideInfo pad_stride_info              = pool_info.pad_stride_info;
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
     const int  pool_pad_right  = pad_stride_info.pad_right();
     const int  pool_pad_top    = pad_stride_info.pad_top();
@@ -334,8 +334,8 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
-    const bool          is_global_pooling = pool_info.is_global_pooling();
+    const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info;
+    const bool          is_global_pooling = pool_info.is_global_pooling;
     const int           pool_stride_x     = pad_stride_info.stride().first;
 
     // Get data layout
@@ -345,8 +345,8 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
 
     // Update pool size in case of global pooling
     const Size2D pool_size(
-        is_global_pooling ? input->info()->dimension(idx_width) : pool_info.pool_size().width,
-        is_global_pooling ? input->info()->dimension(idx_height) : pool_info.pool_size().height);
+        is_global_pooling ? input->info()->dimension(idx_width) : pool_info.pool_size.width,
+        is_global_pooling ? input->info()->dimension(idx_height) : pool_info.pool_size.height);
 
     // Validate pool info before calling scaled_dimensions
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_pool_info(pool_size.x(), pool_size.y()));
@@ -550,11 +550,11 @@ void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, con
     constexpr int pool_size       = 2;
     int           pool_stride_x   = 0;
     int           pool_stride_y   = 0;
-    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    const int     pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -675,13 +675,13 @@ void NEPoolingLayerKernel::pooling3_f16_nchw(const Window &window_input, const W
     Iterator output(_output, window);
 
     constexpr const int pool_size       = 3;
-    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int           pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int           pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int           pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int           pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -745,12 +745,12 @@ void NEPoolingLayerKernel::pooling2_f16_nchw(const Window &window_input, const W
     Iterator      input(_input, window_input);
     Iterator      output(_output, window);
     constexpr int pool_size       = 2;
-    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int     pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int           pool_stride_x, pool_stride_y = 0;
-    std::tie(pool_stride_x, pool_stride_y)     = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y)     = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -807,13 +807,13 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
     Iterator output(_output, window);
 
     constexpr int pool_size       = 3;
-    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int     pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int           pool_stride_x   = 0;
     int           pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -949,15 +949,15 @@ void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size_x     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size().width;
-    const int pool_size_y     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().y() : _pool_info.pool_size().height;
-    const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().x() : _pool_info.pool_size.width;
+    const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.height;
+    const int pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int       pool_stride_x   = 0;
     int       pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1075,15 +1075,15 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size_x     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().y() : _pool_info.pool_size().width;
-    const int pool_size_y     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().z() : _pool_info.pool_size().height;
-    const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.width;
+    const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().z() : _pool_info.pool_size.height;
+    const int pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int       pool_stride_x   = 0;
     int       pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(2) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1170,15 +1170,15 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size_x     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size().width;
-    const int pool_size_y     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().y() : _pool_info.pool_size().height;
-    const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().x() : _pool_info.pool_size.width;
+    const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.height;
+    const int pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int       pool_stride_x   = 0;
     int       pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1295,13 +1295,13 @@ void NEPoolingLayerKernel::pooling2_f32_nchw(const Window &window_input, const W
     Iterator output(_output, window);
 
     constexpr int pool_size       = 2;
-    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int     pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int           pool_stride_x   = 0;
     int           pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1357,13 +1357,13 @@ void NEPoolingLayerKernel::pooling3_f32_nchw(const Window &window_input, const W
     Iterator output(_output, window);
 
     constexpr const int pool_size       = 3;
-    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int           pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int           pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int           pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int           pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1424,13 +1424,13 @@ void NEPoolingLayerKernel::pooling7_f32_nchw(const Window &window_input, const W
     Iterator output(_output, window);
 
     constexpr const int pool_size       = 7;
-    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int           pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int           pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int           pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int           pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1505,15 +1505,15 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size_x     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().y() : _pool_info.pool_size().width;
-    const int pool_size_y     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().z() : _pool_info.pool_size().height;
-    const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.width;
+    const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().z() : _pool_info.pool_size.height;
+    const int pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int       pool_stride_x   = 0;
     int       pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(2) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1598,15 +1598,15 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size_x     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size().width;
-    const int pool_size_y     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().y() : _pool_info.pool_size().height;
-    const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().x() : _pool_info.pool_size.width;
+    const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.height;
+    const int pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int       pool_stride_x   = 0;
     int       pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1699,15 +1699,15 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size_x     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().y() : _pool_info.pool_size().width;
-    const int pool_size_y     = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().z() : _pool_info.pool_size().height;
-    const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    const int pool_size_x     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().y() : _pool_info.pool_size.width;
+    const int pool_size_y     = _pool_info.is_global_pooling ? _input->info()->tensor_shape().z() : _pool_info.pool_size.height;
+    const int pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+    const int pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+    const int pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
     int       pool_stride_x   = 0;
     int       pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const int upper_bound_w = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(2) + (exclude_padding ? 0 : pool_pad_bottom);
 
@@ -1804,7 +1804,7 @@ Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInf
     unsigned int num_elems_processed_per_iteration = 0;
     BorderSize   border_size(0);
 
-    const bool   is_global_pooling = pool_info.is_global_pooling();
+    const bool   is_global_pooling = pool_info.is_global_pooling;
     unsigned int pool_size_x       = 0;
     unsigned int pool_size_y       = 0;
 
@@ -1813,8 +1813,8 @@ Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInf
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
-    pool_size_x = is_global_pooling ? input->dimension(idx_width) : pool_info.pool_size().width;
-    pool_size_y = is_global_pooling ? input->dimension(idx_height) : pool_info.pool_size().height;
+    pool_size_x = is_global_pooling ? input->dimension(idx_width) : pool_info.pool_size.width;
+    pool_size_y = is_global_pooling ? input->dimension(idx_height) : pool_info.pool_size.height;
 
     // Validate pool info before calling scaled_dimensions
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_pool_info(pool_size_x, pool_size_y));
@@ -1824,7 +1824,7 @@ Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInf
                                                      input->dimension(idx_height),
                                                      pool_size_x,
                                                      pool_size_y,
-                                                     pool_info.pad_stride_info());
+                                                     pool_info.pad_stride_info);
 
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, pooled_w, pooled_h));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), pool_info, num_elems_processed_per_iteration, border_size, pooled_w, pooled_h,
@@ -1841,10 +1841,10 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    const unsigned int pool_stride_x   = _pool_info.pad_stride_info().stride().first;
-    const unsigned int pool_stride_y   = _pool_info.pad_stride_info().stride().second;
-    const unsigned int pool_size       = _pool_info.pool_size().width;
-    const bool         exclude_padding = _pool_info.exclude_padding();
+    const unsigned int pool_stride_x   = _pool_info.pad_stride_info.stride().first;
+    const unsigned int pool_stride_y   = _pool_info.pad_stride_info.stride().second;
+    const unsigned int pool_size       = _pool_info.pool_size.width;
+    const bool         exclude_padding = _pool_info.exclude_padding;
 
     Window window_input(window);
     if(_data_layout == DataLayout::NCHW)
@@ -1885,5 +1885,5 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     }
 
     // Run function
-    (this->*_func)(window_input, window, _pool_info.pool_type(), exclude_padding);
+    (this->*_func)(window_input, window, _pool_info.pool_type, exclude_padding);
 }

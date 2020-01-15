@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ void GCPoolingLayer::configure(IGCTensor *input, IGCTensor *output, const Poolin
     _kernel = std::move(k);
 
     // Configure border depending on operation required
-    BorderMode border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
+    BorderMode border_mode = (PoolingType::MAX == pool_info.pool_type) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(0.0f));
 
     _shift_handler.configure(input);

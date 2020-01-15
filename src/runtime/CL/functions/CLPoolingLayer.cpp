@@ -45,18 +45,18 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     // Configure border depending on operation required (quantize border in case of asymmetric data_type)
     BorderMode border_mode{};
     PixelValue pixel_value(0.f);
-    if(is_data_type_quantized_asymmetric(data_type) && !pool_info.exclude_padding())
+    if(is_data_type_quantized_asymmetric(data_type) && !pool_info.exclude_padding)
     {
         pixel_value = PixelValue(0, data_type, input->info()->quantization_info());
     }
     switch(input->info()->data_layout())
     {
         case DataLayout::NCHW:
-            border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
+            border_mode = (PoolingType::MAX == pool_info.pool_type) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
             break;
         case DataLayout::NHWC:
             border_mode = BorderMode::CONSTANT;
-            if(PoolingType::MAX == pool_info.pool_type())
+            if(PoolingType::MAX == pool_info.pool_type)
             {
                 if(is_data_type_quantized(data_type))
                 {

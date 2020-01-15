@@ -41,21 +41,21 @@ template <typename T, typename ACC_T, typename std::enable_if<is_floating_point<
 SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
 {
     ARM_COMPUTE_UNUSED(output_qinfo); // requantization occurs in pooling_layer<uint8_t>
-    ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));
+    ARM_COMPUTE_ERROR_ON(info.is_global_pooling && (src.shape().x() != src.shape().y()));
 
     // Create reference
     SimpleTensor<T> dst{ compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type()), info), src.data_type(), 1 };
 
-    const int   pool_size_x     = info.is_global_pooling() ? src.shape().x() : info.pool_size().width;
-    const int   pool_size_y     = info.is_global_pooling() ? src.shape().y() : info.pool_size().height;
-    PoolingType type            = info.pool_type();
-    int         pool_stride_x   = info.pad_stride_info().stride().first;
-    int         pool_stride_y   = info.pad_stride_info().stride().second;
-    int         pad_left        = info.pad_stride_info().pad_left();
-    int         pad_top         = info.pad_stride_info().pad_top();
-    int         pad_right       = info.pad_stride_info().pad_right();
-    int         pad_bottom      = info.pad_stride_info().pad_bottom();
-    bool        exclude_padding = info.exclude_padding();
+    const int   pool_size_x     = info.is_global_pooling ? src.shape().x() : info.pool_size.width;
+    const int   pool_size_y     = info.is_global_pooling ? src.shape().y() : info.pool_size.height;
+    PoolingType type            = info.pool_type;
+    int         pool_stride_x   = info.pad_stride_info.stride().first;
+    int         pool_stride_y   = info.pad_stride_info.stride().second;
+    int         pad_left        = info.pad_stride_info.pad_left();
+    int         pad_top         = info.pad_stride_info.pad_top();
+    int         pad_right       = info.pad_stride_info.pad_right();
+    int         pad_bottom      = info.pad_stride_info.pad_bottom();
+    bool        exclude_padding = info.exclude_padding;
 
     const auto w_src      = static_cast<int>(src.shape()[0]);
     const auto h_src      = static_cast<int>(src.shape()[1]);
@@ -183,7 +183,7 @@ SimpleTensor<int8_t> pooling_layer<int8_t>(const SimpleTensor<int8_t> &src, cons
 template <>
 SimpleTensor<half> pooling_layer(const SimpleTensor<half> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo)
 {
-    if(src.data_type() == DataType::F16 && info.fp_mixed_precision())
+    if(src.data_type() == DataType::F16 && info.fp_mixed_precision)
     {
         return pooling_layer_internal<half, float>(src, info, output_qinfo);
     }

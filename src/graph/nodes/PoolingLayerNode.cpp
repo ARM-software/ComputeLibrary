@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,10 +52,10 @@ TensorDescriptor PoolingLayerNode::compute_output_descriptor(const TensorDescrip
 
     const unsigned int input_width  = get_dimension_size(input_descriptor, DataLayoutDimension::WIDTH);
     const unsigned int input_height = get_dimension_size(input_descriptor, DataLayoutDimension::HEIGHT);
-    const unsigned int pool_size_x  = info.is_global_pooling() ? input_width : info.pool_size().width;
-    const unsigned int pool_size_y  = info.is_global_pooling() ? input_height : info.pool_size().height;
+    const unsigned int pool_size_x  = info.is_global_pooling ? input_width : info.pool_size.width;
+    const unsigned int pool_size_y  = info.is_global_pooling ? input_height : info.pool_size.height;
 
-    std::tie(pooled_width, pooled_height) = scaled_dimensions(input_width, input_height, pool_size_x, pool_size_y, info.pad_stride_info());
+    std::tie(pooled_width, pooled_height) = scaled_dimensions(input_width, input_height, pool_size_x, pool_size_y, info.pad_stride_info);
 
     const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,18 +58,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type() == PoolingType::L2),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type == PoolingType::L2),
                                     "Unsupported combination of parameters!");
-    ARM_COMPUTE_RETURN_ERROR_ON(!pool_info.pad_stride_info().padding_is_symmetric());
+    ARM_COMPUTE_RETURN_ERROR_ON(!pool_info.pad_stride_info.padding_is_symmetric());
 
-    const bool         is_global_pooling = pool_info.is_global_pooling();
-    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size().width;
+    const bool         is_global_pooling = pool_info.is_global_pooling;
+    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size.width;
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()),
                                     "Global pooling is supported only with rectangular inputs!");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info().pad().first >= pool_size) || (pool_info.pad_stride_info().pad().second >= pool_size)),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info.pad().first >= pool_size) || (pool_info.pad_stride_info.pad().second >= pool_size)),
                                     "Invalid pool size and pool pad combination!");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_info.pool_size().width != pool_info.pool_size().height, "Invalid Pool size, width not equal to height!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_info.pool_size.width != pool_info.pool_size.height, "Invalid Pool size, width not equal to height!");
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -82,7 +82,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          input->dimension(1),
                                                          pool_size,
                                                          pool_size,
-                                                         pool_info.pad_stride_info());
+                                                         pool_info.pad_stride_info);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((output->dimension(0) != pooled_w) || (output->dimension(1) != pooled_h),
                                         "Invalid output pooling dimensions!");
     }
@@ -98,15 +98,15 @@ std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITenso
     int                 pool_stride_y   = 0;
     unsigned int        pooled_w        = 0;
     unsigned int        pooled_h        = 0;
-    int                 pool_size       = pool_info.pool_size().width;
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
+    int                 pool_size       = pool_info.pool_size.width;
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Update pool size in case of global pooling
-    pool_size = pool_info.is_global_pooling() ? input->dimension(0) : pool_size;
+    pool_size = pool_info.is_global_pooling ? input->dimension(0) : pool_size;
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
@@ -231,17 +231,17 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     int                 pool_stride_y   = 0;
     unsigned int        pooled_w        = 0;
     unsigned int        pooled_h        = 0;
-    const PoolingType   pool_type       = pool_info.pool_type();
-    int                 pool_size       = pool_info.pool_size().width;
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
-    const bool          exclude_padding = pool_info.exclude_padding();
+    const PoolingType   pool_type       = pool_info.pool_type;
+    int                 pool_size       = pool_info.pool_size.width;
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
+    const bool          exclude_padding = pool_info.exclude_padding;
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Update pool size in case of global pooling
-    pool_size = pool_info.is_global_pooling() ? input->info()->dimension(0) : pool_size;
+    pool_size = pool_info.is_global_pooling ? input->info()->dimension(0) : pool_size;
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
@@ -337,8 +337,8 @@ void GCPoolingLayerKernel::run(const Window &window)
     unsigned int pool_pad_y;
     unsigned int pool_stride_x;
     unsigned int pool_stride_y;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info.pad();
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
 
     _kernel.use();
 

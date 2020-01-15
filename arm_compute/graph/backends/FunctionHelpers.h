@@ -1143,7 +1143,7 @@ std::unique_ptr<IFunction> create_pooling_layer(PoolingLayerNode &node)
                                << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
-                               << " Pooling info: " << pool_info.pool_type()
+                               << " Pooling info: " << pool_info.pool_type
                                << std::endl);
 
     return std::move(func);
