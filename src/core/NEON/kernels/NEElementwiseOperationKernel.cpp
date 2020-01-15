@@ -534,6 +534,24 @@ inline int elementwise_comp_op_quantized_loop(int window_start_x, int window_end
     return x;
 }
 
+template <ComparisonOperation op>
+inline int elementwise_comp_op_quantized_signed_loop(int window_start_x, int window_end_x, int window_step_x,
+                                                     const int8_t *input1_ptr, const int8_t *input2_ptr, uint8_t *output_ptr,
+                                                     int32x4_t voffset1, int32x4_t voffset2, float32x4_t vscale1, float32x4_t vscale2,
+                                                     float32x4_t voffseto, float32x4_t invvscaleo)
+{
+    ARM_COMPUTE_UNUSED(voffseto, invvscaleo);
+    int x = window_start_x;
+    for(; x <= (window_end_x - window_step_x); x += window_step_x)
+    {
+        const float32x4x4_t af = load_quantized_signed(input1_ptr + x, voffset1, vscale1);
+        const float32x4x4_t bf = load_quantized_signed(input2_ptr + x, voffset2, vscale2);
+        const uint32x4x4_t  rf = elementwise_comp_op<op>(af, bf);
+        store_quantized(output_ptr + x, rf);
+    }
+    return x;
+}
+
 template <ComparisonOperation op, typename InputScalarType, typename InputVectorType>
 inline int elementwise_comp_op_broadcast_16_loop(int window_start_x, int window_end_x, int window_step_x,
                                                  const InputScalarType *non_broadcast_input_ptr, const InputScalarType &broadcast_value, uint8_t *output_ptr, const bool reorder)
@@ -772,6 +790,66 @@ void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *o
     }
 }
 
+void elementwise_comp_quantized_signed(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window,
+                                       uint8_t (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
+                                       int (*neon_func)(int, int, int, const int8_t *, const int8_t *, uint8_t *,
+                                                        int32x4_t, int32x4_t, float32x4_t, float32x4_t,
+                                                        float32x4_t, float32x4_t))
+{
+    // Create input windows
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+
+    // Clear X Dimension on execution window as we handle manually
+    Window win = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    const int                     window_step_x  = 16;
+    const auto                    window_start_x = static_cast<int>(window.x().start());
+    const auto                    window_end_x   = static_cast<int>(window.x().end());
+    const UniformQuantizationInfo output_qinfo   = out->info()->quantization_info().uniform();
+
+    const float32x4_t voffseto   = vdupq_n_f32(output_qinfo.offset);
+    const float32x4_t invvscaleo = vdupq_n_f32(1.f / output_qinfo.scale);
+    {
+        const UniformQuantizationInfo input1_qinfo = in1->info()->quantization_info().uniform();
+        const UniformQuantizationInfo input2_qinfo = in2->info()->quantization_info().uniform();
+
+        // Input1 quantization info
+        const int32x4_t   voffset1 = vdupq_n_s32(input1_qinfo.offset);
+        const float32x4_t vscale1  = vdupq_n_f32(input1_qinfo.scale);
+
+        // Input2 quantization info
+        const int32x4_t   voffset2 = vdupq_n_s32(input2_qinfo.offset);
+        const float32x4_t vscale2  = vdupq_n_f32(input2_qinfo.scale);
+
+        // Clear X Dimension on execution window as we handle manually
+        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input1(in1, input1_win);
+        Iterator input2(in2, input2_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto input1_ptr = reinterpret_cast<const int8_t *>(input1.ptr());
+            const auto input2_ptr = reinterpret_cast<const int8_t *>(input2.ptr());
+            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
+
+            int x = (*neon_func)(window_start_x, window_end_x, window_step_x, input1_ptr, input2_ptr, output_ptr, voffset1, voffset2,
+                                 vscale1, vscale2, voffseto, invvscaleo);
+            for(; x < window_end_x; ++x)
+            {
+                const float afs   = dequantize_qasymm8_signed(*(input1_ptr + x), input1_qinfo);
+                const float bfs   = dequantize_qasymm8_signed(*(input2_ptr + x), input2_qinfo);
+                *(output_ptr + x) = (*scalar_func)(afs, bfs, output_qinfo);
+            }
+        },
+        input1, input2, output);
+    }
+}
+
 void elementwise_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window,
                                      int8_t (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
                                      int (*broadcast_func)(int, int, int, const int8_t *, float32x4x4_t, int8_t *, int32x4_t, float32x4_t,
@@ -931,6 +1009,12 @@ void elementwise_comp_op_quantized(const ITensor *in1, const ITensor *in2, ITens
                              &elementwise_comp_op_quantized_loop<op>);
 }
 
+template <ComparisonOperation op>
+void elementwise_comp_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+    elementwise_comp_quantized_signed(in1, in2, out, window, &elementwise_comp_op_quantized_scalar<op>, &elementwise_comp_op_quantized_signed_loop<op>);
+}
+
 std::function<void(const ITensor *, const ITensor *, ITensor *, const Window &)>
 configure_func(const ITensor *input1, const ITensor *input2, ITensor *output,
                std::map<std::string, NEElementwiseOperationKernel::ElementwiseFunction *> map_function)
@@ -981,6 +1065,7 @@ configure_comp_func(const ITensor *input1, const ITensor *input2, ITensor *outpu
         { "op_F32_F32_U8", &elementwise_comp_op_32<op, float, float32x4_t> },
         { "op_S16_S16_U8", &elementwise_comp_op_16<op, int16_t, int16x8_t> },
         { "op_S32_S32_U8", &elementwise_comp_op_32<op, int32_t, int32x4_t> },
+        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED_U8", &elementwise_comp_op_quantized_signed<op> },
         { "op_QASYMM8_QASYMM8_U8", &elementwise_comp_op_quantized<op> }
     };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

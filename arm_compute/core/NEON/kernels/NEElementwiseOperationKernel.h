@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -189,7 +189,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
      *
      * @param[in] op     Comparison operation to be executed.
-     * @param[in] input1 First tensor input. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: U16/U32.
      */
@@ -198,7 +198,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
      *
      * @param[in] op     Comparison operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: U16/U32.
      *
