@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -239,7 +239,18 @@ void CLGEMMDeconvolutionLayer::configure(const ICLTensor *input, const ICLTensor
     // Configure output stage for asymmetric quantized types
     if(_is_quantized)
     {
+        // gemmlowp adds the offsets (instead of subtracting them). Thus, we need to negate the original
+        // and restore them back to make it work properly.
+        QuantizationInfo iq_info = input->info()->quantization_info();
+        QuantizationInfo wq_info = weights->info()->quantization_info();
+
+        input_to_use->info()->set_quantization_info(QuantizationInfo(iq_info.uniform().scale, -iq_info.uniform().offset));
+        _reshaped_weights_t.info()->set_quantization_info(QuantizationInfo(wq_info.uniform().scale, -wq_info.uniform().offset));
+
         _mm_gemmlowp.configure(input_to_use, &_reshaped_weights_t, nullptr, &_gemm_output, gemm_info);
+
+        input_to_use->info()->set_quantization_info(iq_info);
+        _reshaped_weights_t.info()->set_quantization_info(wq_info);
     }
     else
     {
