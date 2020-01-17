@@ -7,6 +7,7 @@ var NAVTREEINDEX24 =
 "_n_e_range_kernel_8h.xhtml":[9,0,0,0,3,0,94],
 "_n_e_range_kernel_8h_source.xhtml":[9,0,0,0,3,0,94],
 "_n_e_reduce_mean_8cpp.xhtml":[9,0,3,2,3,0,93],
+"_n_e_reduce_mean_8cpp.xhtml#aa88c74fbf9be5e1f2afd2cb81e371287":[9,0,3,2,3,0,93,0],
 "_n_e_reduce_mean_8cpp_source.xhtml":[9,0,3,2,3,0,93],
 "_n_e_reduce_mean_8h.xhtml":[9,0,0,2,4,0,93],
 "_n_e_reduce_mean_8h_source.xhtml":[9,0,0,2,4,0,93],
@@ -248,6 +249,5 @@ var NAVTREEINDEX24 =
 "_n_e_space_to_depth_layer_kernel_8cpp_source.xhtml":[9,0,3,0,3,0,106],
 "_n_e_space_to_depth_layer_kernel_8h.xhtml":[9,0,0,0,3,0,109],
 "_n_e_space_to_depth_layer_kernel_8h_source.xhtml":[9,0,0,0,3,0,109],
-"_n_e_split_8cpp.xhtml":[9,0,3,2,3,0,112],
-"_n_e_split_8cpp_source.xhtml":[9,0,3,2,3,0,112]
+"_n_e_split_8cpp.xhtml":[9,0,3,2,3,0,112]
 };

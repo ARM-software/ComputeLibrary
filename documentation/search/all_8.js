@@ -568,7 +568,7 @@ var searchData=
   ['graphmutators_2eh',['GraphMutators.h',['../_graph_mutators_8h.xhtml',1,'']]],
   ['graphutils_2ecpp',['GraphUtils.cpp',['../_graph_utils_8cpp.xhtml',1,'']]],
   ['graphutils_2eh',['GraphUtils.h',['../_graph_utils_8h.xhtml',1,'']]],
-  ['greater',['Greater',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca8768a6821cd735aea4f5b0df88c1fc6a',1,'arm_compute::Greater()'],['../comparisons_8cl.xhtml#a70e3dcde6a2e40c5b571a2b79a20d075',1,'GREATER():&#160;comparisons.cl']]],
+  ['greater',['GREATER',['../comparisons_8cl.xhtml#a70e3dcde6a2e40c5b571a2b79a20d075',1,'GREATER():&#160;comparisons.cl'],['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca8768a6821cd735aea4f5b0df88c1fc6a',1,'arm_compute::Greater()']]],
   ['greaterequal',['GreaterEqual',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca758b05d899def79c9eb864ad4f96be1f',1,'arm_compute::GreaterEqual()'],['../comparisons_8cl.xhtml#a18fee7f44d9b7e29bdf11be248e36930',1,'GREATEREQUAL():&#160;comparisons.cl']]],
   ['green_5fcoef2_5fbt709',['green_coef2_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a27e073d020236f5a325762985b10f8d0',1,'arm_compute::test::colorconvert_helper::detail']]],
   ['green_5fcoef_5fbt709',['green_coef_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a5e59bd8be31e871da2db7572e8b788ce',1,'arm_compute::test::colorconvert_helper::detail']]],

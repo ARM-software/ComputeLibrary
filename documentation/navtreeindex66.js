@@ -1,5 +1,14 @@
 var NAVTREEINDEX66 =
 {
+"classarm__gemm_1_1_gemv_batched.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560":[8,0,1,9,3],
+"classarm__gemm_1_1_gemv_batched.xhtml#a27df64c6276eb144594c5d37d1110b20":[8,0,1,9,10],
+"classarm__gemm_1_1_gemv_batched.xhtml#a28341e4e1158f3446a8dfa13c9f5c6f0":[8,0,1,9,7],
+"classarm__gemm_1_1_gemv_batched.xhtml#a2f51067424ad17181061558494fed662":[8,0,1,9,8],
+"classarm__gemm_1_1_gemv_batched.xhtml#a458c339803f238b70020c3d933e9f766":[8,0,1,9,11],
+"classarm__gemm_1_1_gemv_batched.xhtml#a468e9c50d4decc2ba86f9bd393ba27d6":[8,0,1,9,9],
+"classarm__gemm_1_1_gemv_batched.xhtml#a9fe814165d032363ea4f9cfdd36dd5e2":[8,0,1,9,5],
+"classarm__gemm_1_1_gemv_batched.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c":[8,0,1,9,2],
+"classarm__gemm_1_1_gemv_batched.xhtml#ab4a4a43810baddb96b202dfc569765a3":[8,0,1,9,0],
 "classarm__gemm_1_1_gemv_batched.xhtml#abf5a58f6feffeae31f48b750cba9303d":[8,0,1,9,6],
 "classarm__gemm_1_1_gemv_batched.xhtml#ac5dec5063a75604fdc60555f15577b94":[8,0,1,9,1],
 "classarm__gemm_1_1_gemv_batched.xhtml#ae9fc7380e533c43a1d91e48a7578e412":[8,0,1,9,4],
@@ -240,14 +249,5 @@ var NAVTREEINDEX66 =
 "depth__to__space_8cl.xhtml":[9,0,3,0,0,0,29],
 "depth__to__space_8cl_source.xhtml":[9,0,3,0,0,0,29],
 "depthwise__convolution_8cl.xhtml":[9,0,3,0,0,0,30],
-"depthwise__convolution_8cl.xhtml#a0916b921e5c01cc64afede6dc7bd5caa":[9,0,3,0,0,0,30,2],
-"depthwise__convolution_8cl.xhtml#a128f47cb6aacde29e07fde2c4b9f5dd2":[9,0,3,0,0,0,30,9],
-"depthwise__convolution_8cl.xhtml#a2da35283a28c35fd9f8b0d534e5a5a44":[9,0,3,0,0,0,30,1],
-"depthwise__convolution_8cl.xhtml#a32137dd220c1110408a7b498108de2c5":[9,0,3,0,0,0,30,6],
-"depthwise__convolution_8cl.xhtml#a4201b7aeda129409f16dd5a5cfe56450":[9,0,3,0,0,0,30,10],
-"depthwise__convolution_8cl.xhtml#a5447e2c4e1aae8fff9290b775fe813ff":[9,0,3,0,0,0,30,4],
-"depthwise__convolution_8cl.xhtml#a68fce1f0ee4080ed89c9427496d625f2":[9,0,3,0,0,0,30,7],
-"depthwise__convolution_8cl.xhtml#aa18ba8a4892890c942fea83c5cad8dbc":[9,0,3,0,0,0,30,3],
-"depthwise__convolution_8cl.xhtml#ac353c0687abd8c71a4fa096d322b39ec":[9,0,3,0,0,0,30,5],
-"depthwise__convolution_8cl.xhtml#ac8b6b732372937bba276e6391944d1e1":[9,0,3,0,0,0,30,8]
+"depthwise__convolution_8cl.xhtml#a0916b921e5c01cc64afede6dc7bd5caa":[9,0,3,0,0,0,30,2]
 };

@@ -1,6 +1,7 @@
 var _shape_calculator_8h =
 [
     [ "calculate_concatenate_shape", "_shape_calculator_8h.xhtml#a6100aeb494088632647c3e0d639c99ab", null ],
+    [ "calculate_reduce_mean_shape", "_shape_calculator_8h.xhtml#a7e4084fbf8d78731ea649eee03aaaab7", null ],
     [ "calculate_unstack_shape", "_shape_calculator_8h.xhtml#acedb0877d41f2ae0591a2d4e84318140", null ],
     [ "compute_batch_to_space_shape", "_shape_calculator_8h.xhtml#ac4d688e137d670d209b647ec37592a92", null ],
     [ "compute_col2im_shape", "_shape_calculator_8h.xhtml#a264e2e6d3ff632e90d450435fce66d54", null ],

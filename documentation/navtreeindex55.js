@@ -1,5 +1,12 @@
 var NAVTREEINDEX55 =
 {
+"classarm__compute_1_1_n_e_permute_kernel.xhtml#a93c836ab36443b23753d99495761daf7":[8,0,0,769,4],
+"classarm__compute_1_1_n_e_permute_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[8,0,0,769,5],
+"classarm__compute_1_1_n_e_permute_kernel.xhtml#ac041b093bce44d5969166685832c21d7":[8,0,0,769,1],
+"classarm__compute_1_1_n_e_permute_kernel.xhtml#acba877f622a9b909a592f5a43ed26863":[8,0,0,769,0],
+"classarm__compute_1_1_n_e_phase.xhtml":[8,0,0,770],
+"classarm__compute_1_1_n_e_phase.xhtml#adcb14816dc8d62ecdc185f4d3f1cd4d4":[8,0,0,770,0],
+"classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml":[8,0,0,771],
 "classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml#a080bc209f47babf3bc587f49b4286e53":[8,0,0,771,0],
 "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml":[8,0,0,772],
 "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a032fb6504d12ca1244b2d7d82609f062":[8,0,0,772,2],
@@ -242,12 +249,5 @@ var NAVTREEINDEX55 =
 "classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#a8dea438b6d74a45c8315643c5ffbc54b":[8,0,0,813,0],
 "classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#a9905eef5888d96ccddf9788adfadfcfb":[8,0,0,813,3],
 "classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#a9e6242e9d05e2d354358200b6b0c9bce":[8,0,0,813,7],
-"classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#ab3fe9be760d9e2faa8cb36872889fc98":[8,0,0,813,2],
-"classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[8,0,0,813,6],
-"classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#ace7523f9c3073ad82b77e46318a1ea77":[8,0,0,813,5],
-"classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml":[8,0,0,814],
-"classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82":[8,0,0,814,9],
-"classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml#a1aea9496b59f665829dfebcac7c6e8f3":[8,0,0,814,5],
-"classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml#a2ff0db37338bc4f3cbc18e51ce0317ae":[8,0,0,814,2],
-"classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[8,0,0,814,4]
+"classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#ab3fe9be760d9e2faa8cb36872889fc98":[8,0,0,813,2]
 };

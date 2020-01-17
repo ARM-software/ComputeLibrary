@@ -10,6 +10,7 @@ var classarm__compute_1_1_c_l_pooling_layer_kernel =
     [ "operator=", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#adf693cc1bc9aaacdfaa73e1309f4c0b3", null ],
     [ "run", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e", null ],
     [ "_border_size", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4", null ],
+    [ "_data_layout", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a76e83555c34bd6c9a18b669391a290c3", null ],
     [ "_input", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53", null ],
     [ "_num_elems_processed_per_iteration", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a8fd589467d6c372b7b717d9cf8f961b1", null ],
     [ "_output", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b", null ],

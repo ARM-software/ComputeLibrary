@@ -321,7 +321,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 NEPoolingLayerKernel::NEPoolingLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _pool_info(), _num_elems_processed_per_iteration(0), _border_size(0), _is_square(false)
+    : _func(nullptr), _input(nullptr), _output(nullptr), _pool_info(), _data_layout(DataLayout::UNKNOWN), _num_elems_processed_per_iteration(0), _border_size(0), _is_square(false)
 {
 }
 
@@ -364,14 +364,15 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, pooled_w, pooled_h));
 
     // Set instance variables
-    _input     = input;
-    _output    = output;
-    _pool_info = pool_info;
-    _is_square = (pool_size.x() == pool_size.y());
+    _input       = input;
+    _output      = output;
+    _pool_info   = pool_info;
+    _data_layout = input->info()->data_layout();
+    _is_square   = (pool_size.x() == pool_size.y());
 
     // Get data type
     const DataType data_type = input->info()->data_type();
-    const bool     is_nchw   = data_layout == DataLayout::NCHW;
+    const bool     is_nchw   = _data_layout == DataLayout::NCHW;
 
     if(data_type == DataType::QASYMM8)
     {
@@ -1574,7 +1575,12 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
         // Calculate square-root in case of l2 pooling
         if(pooling_type == PoolingType::L2)
         {
-            vres = vmulq_f32(vres, vinvsqrtq_f32(vres));
+            float32x4_t l2_res = { static_cast<float>(sqrt(vgetq_lane_f32(vres, 0))),
+                                   static_cast<float>(sqrt(vgetq_lane_f32(vres, 1))),
+                                   static_cast<float>(sqrt(vgetq_lane_f32(vres, 2))),
+                                   static_cast<float>(sqrt(vgetq_lane_f32(vres, 3)))
+                                 };
+            vres = l2_res;
         }
 
         // Store result
@@ -1835,7 +1841,7 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     const bool         exclude_padding = _pool_info.exclude_padding();
 
     Window window_input(window);
-    if(_input->info()->data_layout() == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         // Set step for input in x and y direction for the input
         unsigned int window_x_inc = 0;

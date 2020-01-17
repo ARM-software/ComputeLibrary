@@ -1,5 +1,12 @@
 var NAVTREEINDEX57 =
 {
+"classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#a5dbb04cc8d65cafca5884f9c2c5a82b8":[8,0,0,849,9],
+"classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#a632c7994a369ebfdaf27eb25e84405c8":[8,0,0,849,0],
+"classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#a87a7d4fe23da86c3682b79300d23f248":[8,0,0,849,5],
+"classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[8,0,0,849,7],
+"classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#ab9a247b5c031e2501d6b962d2c1024cc":[8,0,0,849,2],
+"classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#aba37abbbb60c14dfc48462c988f201de":[8,0,0,849,1],
+"classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#ad25daf413f7dd45f084ae22a25b8bbe5":[8,0,0,849,3],
 "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#ae43e71907cc8f09be3338c84c18701bb":[8,0,0,849,8],
 "classarm__compute_1_1_n_e_y_o_l_o_layer.xhtml":[8,0,0,850],
 "classarm__compute_1_1_n_e_y_o_l_o_layer.xhtml#a117e23eab202b2b2162b402826adb641":[8,0,0,850,0],
@@ -242,12 +249,5 @@ var NAVTREEINDEX57 =
 "classarm__compute_1_1_sub_tensor.xhtml#aafd31a7d3ee584d6ccf9e226e5a330d4":[8,0,0,875,10],
 "classarm__compute_1_1_sub_tensor.xhtml#ab7280b618490cedd24a18fe8849b4679":[8,0,0,875,3],
 "classarm__compute_1_1_sub_tensor.xhtml#ab77dfdfcd9be21524025d71a9650fba5":[8,0,0,875,9],
-"classarm__compute_1_1_sub_tensor.xhtml#af1fc5900259cbc0bc26c9e6e28bb49b6":[8,0,0,875,2],
-"classarm__compute_1_1_sub_tensor.xhtml#af3913a3ffefed788b1fa3fb91407472a":[8,0,0,875,7],
-"classarm__compute_1_1_sub_tensor_info.xhtml":[8,0,0,876],
-"classarm__compute_1_1_sub_tensor_info.xhtml#a13622133d9b41900a6a3e8f89e59a78b":[8,0,0,876,18],
-"classarm__compute_1_1_sub_tensor_info.xhtml#a147790358ccd40f61dcd618cd4edd688":[8,0,0,876,19],
-"classarm__compute_1_1_sub_tensor_info.xhtml#a16d275e5270f2c36a04764c863d852b6":[8,0,0,876,26],
-"classarm__compute_1_1_sub_tensor_info.xhtml#a269b19ce3f357ac65f41f9951906e38e":[8,0,0,876,35],
-"classarm__compute_1_1_sub_tensor_info.xhtml#a2d7e8b8e05c3318b2d90c40d781745d2":[8,0,0,876,32]
+"classarm__compute_1_1_sub_tensor.xhtml#af1fc5900259cbc0bc26c9e6e28bb49b6":[8,0,0,875,2]
 };

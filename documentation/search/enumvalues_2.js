@@ -26,5 +26,5 @@ var searchData=
   ['crashed',['CRASHED',['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba9c51674930e03c276344d19f9e4398fb',1,'arm_compute::test::framework::TestResult']]],
   ['cross',['CROSS',['../namespacearm__compute.xhtml#afdda916edc7502967bbec17ea3c06c02a04dd53a8e6c2306e9bbf944c1d6047f2',1,'arm_compute']]],
   ['cross_5fmap',['CROSS_MAP',['../namespacearm__compute.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caa980fef040549733973683b1a868f96e5',1,'arm_compute']]],
-  ['custom',['Custom',['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6a90589c47f06eb971d548591f23c285af',1,'arm_compute::IOFormatInfo::Custom()'],['../classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7a72baef04098f035e8a320b03ad197818',1,'arm_compute::Scheduler::CUSTOM()']]]
+  ['custom',['CUSTOM',['../classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7a72baef04098f035e8a320b03ad197818',1,'arm_compute::Scheduler::CUSTOM()'],['../structarm__compute_1_1_i_o_format_info.xhtml#a36c28b28da4e04d698d6b598fb1eaca6a90589c47f06eb971d548591f23c285af',1,'arm_compute::IOFormatInfo::Custom()']]]
 ];

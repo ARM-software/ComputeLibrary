@@ -1,5 +1,12 @@
 var NAVTREEINDEX47 =
 {
+"classarm__compute_1_1_h_o_g_info.xhtml#a5a4a2ab2f4396cc64b4a5676a90d7f07":[8,0,0,474,12],
+"classarm__compute_1_1_h_o_g_info.xhtml#a64f60c469394d4f5f621546fc3108590":[8,0,0,474,17],
+"classarm__compute_1_1_h_o_g_info.xhtml#a6a21c3fbc2803bbf3d975bec8977307f":[8,0,0,474,3],
+"classarm__compute_1_1_h_o_g_info.xhtml#a75215e8ba07a5ec88ee8c902e306e887":[8,0,0,474,10],
+"classarm__compute_1_1_h_o_g_info.xhtml#a79b522bd4aa0d5533649e60ef7f5f42f":[8,0,0,474,15],
+"classarm__compute_1_1_h_o_g_info.xhtml#a7cbda2c789c461237f0c6eaee8f8cd2a":[8,0,0,474,9],
+"classarm__compute_1_1_h_o_g_info.xhtml#aaefa291ad3cc3e3210c8b8ef2ffde476":[8,0,0,474,7],
 "classarm__compute_1_1_h_o_g_info.xhtml#ac3f834a0c4744ccbc55d3b8bc810fdff":[8,0,0,474,11],
 "classarm__compute_1_1_h_o_g_info.xhtml#ad96530ddba514601d376f991b568b346":[8,0,0,474,13],
 "classarm__compute_1_1_h_o_g_info.xhtml#ada121d63992678a09e1b3db5a2002bfa":[8,0,0,474,1],
@@ -242,12 +249,5 @@ var NAVTREEINDEX47 =
 "classarm__compute_1_1_i_g_c_simple_function.xhtml#a92fe532c342ae2b07956a65520c05362":[8,0,0,507,1],
 "classarm__compute_1_1_i_g_c_simple_kernel.xhtml":[8,0,0,508],
 "classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a10d2c80e7afcb7ae1ad42ff9a649a915":[8,0,0,508,5],
-"classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a246ecc53bc0c77507ef68c03937efd9d":[8,0,0,508,2],
-"classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a81af259374ad902ad2b9e735b3b380be":[8,0,0,508,1],
-"classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a86c574f15dfe0d3176db14c5b61e93c8":[8,0,0,508,4],
-"classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a90f6f44d1fbbe0d2261d81f4e9f1ff7e":[8,0,0,508,6],
-"classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a99b962384da15831b17aa35a1dcbc4d1":[8,0,0,508,3],
-"classarm__compute_1_1_i_g_c_simple_kernel.xhtml#afaee4bdfd8fed3b2fdf42d15560e2d7a":[8,0,0,508,0],
-"classarm__compute_1_1_i_g_c_tensor.xhtml":[8,0,0,509],
-"classarm__compute_1_1_i_g_c_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002":[8,0,0,509,7]
+"classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a246ecc53bc0c77507ef68c03937efd9d":[8,0,0,508,2]
 };

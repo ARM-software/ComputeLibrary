@@ -1,5 +1,14 @@
 var NAVTREEINDEX61 =
 {
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a0839be1697496b3a951e030627f9e69b":[8,0,0,4,66,12],
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a0cec440e0579d01d55a4e194f1c7178c":[8,0,0,4,66,7],
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a0d3608f94078b90ab1ff9e9465d4ed3b":[8,0,0,4,66,5],
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a37a56fcfb4c6a506d63f11d88e0981c0":[8,0,0,4,66,2],
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a45c1ef0023ce430d009ec79c97761544":[8,0,0,4,66,8],
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a738f5e449958bed64c970006375540fd":[8,0,0,4,66,9],
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a761495426edf3b875f67a8f4c3a199b5":[8,0,0,4,66,1],
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a7ca865118188dd8c307ae9e84f8a75f6":[8,0,0,4,66,10],
+"classarm__compute_1_1graph_1_1_tensor.xhtml#a88d65b04d950e6aba147624fcd308b34":[8,0,0,4,66,4],
 "classarm__compute_1_1graph_1_1_tensor.xhtml#a8c1a8dc99f338372d7dc6dd33672ec03":[8,0,0,4,66,11],
 "classarm__compute_1_1graph_1_1_tensor.xhtml#aa3dc08c2e62f20a8fbfbcc46c6b4cb68":[8,0,0,4,66,3],
 "classarm__compute_1_1graph_1_1_tensor.xhtml#add953d1e94e855a536231a2fde924251":[8,0,0,4,66,0],
@@ -240,14 +249,5 @@ var NAVTREEINDEX61 =
 "classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a110fbabe5b6b600f0f5b1fec06ab1484":[8,0,0,4,2,17,6],
 "classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a1279b8b362e78d55d4951512f410b14e":[8,0,0,4,2,17,1],
 "classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f":[8,0,0,4,2,17,3],
-"classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a3d1067259b70c7d8753be5062a4b9f6d":[8,0,0,4,2,17,2],
-"classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a75ce23fbe59cc58db22e1b6d072b10c6":[8,0,0,4,2,17,5],
-"classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a79a466f03b984179d44fe640cc2a98ef":[8,0,0,4,2,17,0],
-"classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#ab9d564f9d6113ecafc98200face036b8":[8,0,0,4,2,17,4],
-"classarm__compute_1_1graph_1_1frontend_1_1_input_layer.xhtml":[8,0,0,4,2,16],
-"classarm__compute_1_1graph_1_1frontend_1_1_input_layer.xhtml#a225fb162b43cbef27d5a1dbd7a51c60d":[8,0,0,4,2,16,1],
-"classarm__compute_1_1graph_1_1frontend_1_1_input_layer.xhtml#a8c543d7a0c50bd07dfba4bbc6ba1ee53":[8,0,0,4,2,16,0],
-"classarm__compute_1_1graph_1_1frontend_1_1_normalization_layer.xhtml":[8,0,0,4,2,18],
-"classarm__compute_1_1graph_1_1frontend_1_1_normalization_layer.xhtml#a225fb162b43cbef27d5a1dbd7a51c60d":[8,0,0,4,2,18,1],
-"classarm__compute_1_1graph_1_1frontend_1_1_normalization_layer.xhtml#ada275ffd82f624b62bdbc2f01349fe33":[8,0,0,4,2,18,0]
+"classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a3d1067259b70c7d8753be5062a4b9f6d":[8,0,0,4,2,17,2]
 };

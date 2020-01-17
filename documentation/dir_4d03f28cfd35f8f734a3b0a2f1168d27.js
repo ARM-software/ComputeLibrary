@@ -93,7 +93,7 @@ var dir_4d03f28cfd35f8f734a3b0a2f1168d27 =
     [ "NEPriorBoxLayer.cpp", "_n_e_prior_box_layer_8cpp.xhtml", null ],
     [ "NEQuantizationLayer.cpp", "_n_e_quantization_layer_8cpp.xhtml", null ],
     [ "NERange.cpp", "_n_e_range_8cpp.xhtml", null ],
-    [ "NEReduceMean.cpp", "_n_e_reduce_mean_8cpp.xhtml", null ],
+    [ "NEReduceMean.cpp", "_n_e_reduce_mean_8cpp.xhtml", "_n_e_reduce_mean_8cpp" ],
     [ "NEReductionOperation.cpp", "_n_e_reduction_operation_8cpp.xhtml", null ],
     [ "NERemap.cpp", "_n_e_remap_8cpp.xhtml", null ],
     [ "NEReorgLayer.cpp", "_n_e_reorg_layer_8cpp.xhtml", null ],

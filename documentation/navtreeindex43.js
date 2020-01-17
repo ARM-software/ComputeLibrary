@@ -1,5 +1,12 @@
 var NAVTREEINDEX43 =
 {
+"classarm__compute_1_1_c_l_sobel5x5_vert_kernel.xhtml#ab6450493472e18b0f6696826464a07fd":[8,0,0,325,2],
+"classarm__compute_1_1_c_l_sobel5x5_vert_kernel.xhtml#abc8c95a4a6d95911a79340b6015fa70c":[8,0,0,325,6],
+"classarm__compute_1_1_c_l_sobel5x5_vert_kernel.xhtml#ad88337f2cf8d90a2a9106d80c3807873":[8,0,0,325,3],
+"classarm__compute_1_1_c_l_sobel7x7.xhtml":[8,0,0,326],
+"classarm__compute_1_1_c_l_sobel7x7.xhtml#a0763281a67c98c916d8d9120a1a19ba1":[8,0,0,326,0],
+"classarm__compute_1_1_c_l_sobel7x7.xhtml#a62d1b655e7211f3ab44ed1a9c81a1336":[8,0,0,326,1],
+"classarm__compute_1_1_c_l_sobel7x7.xhtml#ad1717410afd0be936c6213a63c8005fb":[8,0,0,326,2],
 "classarm__compute_1_1_c_l_sobel7x7_hor_kernel.xhtml":[8,0,0,327],
 "classarm__compute_1_1_c_l_sobel7x7_hor_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[8,0,0,327,4],
 "classarm__compute_1_1_c_l_sobel7x7_hor_kernel.xhtml#a47960aeb216dbb7133ae2057fcb85211":[8,0,0,327,2],
@@ -242,12 +249,5 @@ var NAVTREEINDEX43 =
 "classarm__compute_1_1_c_l_warp_affine.xhtml":[8,0,0,355],
 "classarm__compute_1_1_c_l_warp_affine.xhtml#aa49a3628db3443398f6041fe8b4dec05":[8,0,0,355,0],
 "classarm__compute_1_1_c_l_warp_affine_kernel.xhtml":[8,0,0,356],
-"classarm__compute_1_1_c_l_warp_affine_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[8,0,0,356,0],
-"classarm__compute_1_1_c_l_warp_affine_kernel.xhtml#aa6f6097800a87984c4fab8ab1fffd65e":[8,0,0,356,1],
-"classarm__compute_1_1_c_l_warp_perspective.xhtml":[8,0,0,357],
-"classarm__compute_1_1_c_l_warp_perspective.xhtml#aa49a3628db3443398f6041fe8b4dec05":[8,0,0,357,0],
-"classarm__compute_1_1_c_l_warp_perspective_kernel.xhtml":[8,0,0,358],
-"classarm__compute_1_1_c_l_warp_perspective_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[8,0,0,358,0],
-"classarm__compute_1_1_c_l_warp_perspective_kernel.xhtml#aa6f6097800a87984c4fab8ab1fffd65e":[8,0,0,358,1],
-"classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml":[8,0,0,359]
+"classarm__compute_1_1_c_l_warp_affine_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[8,0,0,356,0]
 };

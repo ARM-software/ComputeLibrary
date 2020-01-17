@@ -24,80 +24,97 @@
 #include "arm_compute/runtime/NEON/functions/NEReduceMean.h"
 
 #include "arm_compute/core/CPP/Validate.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
 
 NEReduceMean::NEReduceMean(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _reduction_kernels(), _reduced_outs(), _reshape(), _reduction_ops(), _keep_dims()
 {
 }
 
-Status NEReduceMean::validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output)
+Status validate_config(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output)
 {
     ARM_COMPUTE_UNUSED(keep_dims);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(reduction_axis.num_dimensions() < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(reduction_axis.num_dimensions() > input->num_dimensions());
 
-    TensorShape        out_shape     = input->tensor_shape();
     const unsigned int reduction_ops = reduction_axis.num_dimensions();
     const int          input_dims    = input->num_dimensions();
     Coordinates        axis_local    = reduction_axis;
 
-    // Convert negative axis
-    for(unsigned int i = 0; i < reduction_ops; ++i)
+    for(unsigned int i = 0; i < axis_local.num_dimensions(); ++i)
     {
-        axis_local[i] = wrap_around(axis_local[i], input_dims);
+        //axis: The dimensions to reduce. Must be in the range [-rank(input_tensor), rank(input_tensor)).
+        ARM_COMPUTE_RETURN_ERROR_ON(axis_local[i] < (-static_cast<int>(input->num_dimensions())));
+        ARM_COMPUTE_RETURN_ERROR_ON(axis_local[i] >= static_cast<int>(input->num_dimensions()));
     }
 
-    std::sort(axis_local.begin(), axis_local.begin() + reduction_ops);
-    for(unsigned int i = 0; i < reduction_ops; ++i)
+    if(output->tensor_shape().total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(axis_local[i] > 3);
-        ARM_COMPUTE_RETURN_ERROR_ON(static_cast<unsigned int>(axis_local[i]) > input->num_dimensions() - 1);
-        if(output->total_size() > 0 && keep_dims)
+        // Only validate if not using auto_init for the output tensor
+        TensorShape out_shape = input->tensor_shape();
+        // Validate output_shape only if not using auto_init
+        convert_negative_axis(axis_local, input_dims);
+        std::sort(axis_local.begin(), axis_local.begin() + reduction_ops);
+        for(unsigned int i = 0; i < reduction_ops; ++i)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(axis_local[i]) != 1);
+            ARM_COMPUTE_RETURN_ERROR_ON(axis_local[i] > 3);
+            ARM_COMPUTE_RETURN_ERROR_ON(static_cast<unsigned int>(axis_local[i]) > input->num_dimensions() - 1);
+            if(output->total_size() > 0 && keep_dims)
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(axis_local[i]) != 1);
+            }
+            if(keep_dims)
+            {
+                out_shape.set(axis_local[i], 1);
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON(i > static_cast<unsigned int>(axis_local[i]));
+                const unsigned int remove_index = axis_local[i] - i;
+                ARM_COMPUTE_RETURN_ERROR_ON(remove_index >= out_shape.num_dimensions());
+                out_shape.remove_dimension(remove_index);
+            }
         }
-        if(keep_dims)
-        {
-            out_shape.set(axis_local[i], 1);
-        }
-        else
-        {
-            out_shape.remove_dimension(axis_local[i] - i);
-        }
+        const TensorInfo out_info = input->clone()->set_tensor_shape(out_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &out_info);
     }
-    const TensorInfo out_info = input->clone()->set_tensor_shape(out_shape);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &out_info);
-
     return Status{};
+}
+
+Status NEReduceMean::validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output)
+{
+    return validate_config(input, reduction_axis, keep_dims, output);
 }
 
 void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, bool keep_dims, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    // Perform validate step
+    ARM_COMPUTE_ERROR_THROW_ON(NEReduceMean::validate(input->info(), reduction_axis, keep_dims, output->info()));
+    // Output auto inizialitation if not yet initialized
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_reduce_mean_shape(input, reduction_axis, keep_dims);
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     _reduction_ops = reduction_axis.num_dimensions();
     _reduction_kernels.resize(_reduction_ops);
     _reduced_outs.resize(_reduction_ops - (keep_dims ? 1 : 0));
     _keep_dims = keep_dims;
 
-    Coordinates        axis_local    = reduction_axis;
-    const int          input_dims    = input->info()->num_dimensions();
-    const unsigned int reduction_ops = reduction_axis.num_dimensions();
+    Coordinates axis_local = reduction_axis;
+    const int   input_dims = input->info()->num_dimensions();
 
-    // Convert negative axis
-    for(unsigned int i = 0; i < reduction_ops; ++i)
-    {
-        axis_local[i] = wrap_around(axis_local[i], input_dims);
-    }
+    convert_negative_axis(axis_local, input_dims);
 
     // Perform reduction for every axis
-    for(unsigned int i = 0; i < _reduction_ops; ++i)
+    for(int i = 0; i < _reduction_ops; ++i)
     {
         TensorShape out_shape = i == 0 ? input->info()->tensor_shape() : (&_reduced_outs[i - 1])->info()->tensor_shape();
         out_shape.set(axis_local[i], 1);
@@ -116,7 +133,7 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
     }
 
     // Allocate intermediate tensors
-    for(unsigned int i = 0; i < _reduction_ops - (keep_dims ? 1 : 0); ++i)
+    for(int i = 0; i < _reduction_ops - (keep_dims ? 1 : 0); ++i)
     {
         _reduced_outs[i].allocator()->allocate();
     }
@@ -125,11 +142,10 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
     if(!keep_dims)
     {
         TensorShape out_shape = input->info()->tensor_shape();
-
         // We have to sort the reduction axis vectors in order for remove_dimension
         // to work properly
         std::sort(axis_local.begin(), axis_local.begin() + _reduction_ops);
-        for(unsigned int i = 0; i < _reduction_ops; ++i)
+        for(int i = 0; i < _reduction_ops; ++i)
         {
             out_shape.remove_dimension(axis_local[i] - i);
         }
@@ -141,10 +157,9 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
 void NEReduceMean::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
-
-    for(unsigned int i = 0; i < _reduction_ops; ++i)
+    for(auto &kernel : _reduction_kernels)
     {
-        _reduction_kernels[i].run();
+        kernel.run();
     }
 
     if(!_keep_dims)
@@ -152,3 +167,5 @@ void NEReduceMean::run()
         _reshape.run();
     }
 }
+
+} // namespace arm_compute

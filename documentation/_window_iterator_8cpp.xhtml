@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.08.1</span>
    </div>
   </td>
  </tr>
@@ -174,10 +174,10 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="_window_iterator_8cpp_source.xhtml#l00042">42</a> of file <a class="el" href="_window_iterator_8cpp_source.xhtml">WindowIterator.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <a class="code" href="classarm__compute_1_1_window.xhtml">Window</a> win;</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="keyword">const</span> std::array &lt; Dim, 1 + <span class="keyword">sizeof</span>...(Dims) &gt; dimensions{ { dim0, std::forward&lt;Dims&gt;(dims)... } };</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">size_t</span> i = 0; i &lt; dimensions.size(); i++)</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    {</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        win.<a class="code" href="classarm__compute_1_1_window.xhtml#acd3d2bba51cb84d34dd7656ad2375a6e">set</a>(i, dimensions[i]);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordflow">return</span> win;</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_window_xhtml_acd3d2bba51cb84d34dd7656ad2375a6e"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml#acd3d2bba51cb84d34dd7656ad2375a6e">arm_compute::Window::set</a></div><div class="ttdeci">void set(size_t dimension, const Dimension &amp;dim)</div><div class="ttdoc">Set the values of a given dimension.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8inl_source.xhtml#l00048">Window.inl:48</a></div></div>
+<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <a class="code" href="classarm__compute_1_1_window.xhtml">Window</a> win;</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="keyword">const</span> std::array &lt; Dim, 1 + <span class="keyword">sizeof</span>...(Dims) &gt; dimensions{ { dim0, std::forward&lt;Dims&gt;(dims)... } };</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">size_t</span> i = 0; i &lt; dimensions.size(); i++)</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    {</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        win.<a class="code" href="classarm__compute_1_1_window.xhtml#acd3d2bba51cb84d34dd7656ad2375a6e">set</a>(i, dimensions[i]);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keywordflow">return</span> win;</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_window_xhtml_acd3d2bba51cb84d34dd7656ad2375a6e"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml#acd3d2bba51cb84d34dd7656ad2375a6e">arm_compute::Window::set</a></div><div class="ttdeci">void set(size_t dimension, const Dimension &amp;dim)</div><div class="ttdoc">Set the values of a given dimension.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8inl_source.xhtml#l00049">Window.inl:49</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_window_xhtml"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml">arm_compute::Window</a></div><div class="ttdoc">Describe a multidimensional execution window.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8h_source.xhtml#l00039">Window.h:39</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_window_8inl_source.xhtml#l00048">Window::set()</a>.</p>
+<p class="reference">References <a class="el" href="_window_8inl_source.xhtml#l00049">Window::set()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_window_iterator_8cpp_source.xhtml#l00064">DATA_TEST_CASE()</a>.</p>
 
@@ -328,7 +328,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0c108762cda89b68d4571cbbabdf46df.xhtml">UNIT</a></li><li class="navelem"><a class="el" href="_window_iterator_8cpp.xhtml">WindowIterator.cpp</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:30 for Compute Library by
+    <li class="footer">Generated on Fri Jan 17 2020 10:26:24 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

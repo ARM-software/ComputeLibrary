@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -377,7 +377,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLDirectConvolutionLayerKernel::CLDirectConvolutionLayerKernel()
-    : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _border_size(0), _conv_stride_x(0), _conv_stride_y(0)
+    : _input(nullptr), _biases(nullptr), _weights(nullptr), _output(nullptr), _data_layout(DataLayout::UNKNOWN), _border_size(0), _conv_stride_x(0), _conv_stride_y(0)
 {
 }
 
@@ -390,10 +390,10 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
-    const DataLayout data_layout = input->info()->data_layout();
-    const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    _data_layout          = input->info()->data_layout();
+    const int width_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const int height_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const int channel_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
 
     const unsigned int kernel_size = weights->info()->dimension(width_idx);
     const DataType     data_type   = input->info()->data_type();
@@ -419,11 +419,11 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _conv_stride_x = std::get<0>(conv_info.stride());
     _conv_stride_y = std::get<1>(conv_info.stride());
 
-    if(data_layout == DataLayout::NHWC)
+    if(_data_layout == DataLayout::NHWC)
     {
         _border_size = BorderSize(conv_info.pad_left(), 0, conv_info.pad_right(), 0);
     }
-    else if(data_layout == DataLayout::NCHW)
+    else if(_data_layout == DataLayout::NCHW)
     {
         _border_size = BorderSize(conv_info.pad_top(), conv_info.pad_right(), conv_info.pad_bottom(), conv_info.pad_left());
     }
@@ -441,15 +441,15 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
     std::stringstream kernel_name;
     kernel_name << "direct_convolution" << kernel_size << "x" << kernel_size;
-    if(data_layout == DataLayout::NHWC)
+    if(_data_layout == DataLayout::NHWC)
     {
-        kernel_name << "_" << lower_string(string_from_data_layout(data_layout));
+        kernel_name << "_" << lower_string(string_from_data_layout(_data_layout));
     }
 
     CLBuildOptions build_options;
     build_options.add_option_if(_biases != nullptr, std::string("-DHAS_BIAS"));
 
-    const bool run_optimized_for_bifrost = can_run_optimized_kernel_for_bifrost(gpu_target, _conv_stride_x, _conv_stride_y, kernel_size, data_type, data_layout);
+    const bool run_optimized_for_bifrost = can_run_optimized_kernel_for_bifrost(gpu_target, _conv_stride_x, _conv_stride_y, kernel_size, data_type, _data_layout);
 
     if(run_optimized_for_bifrost)
     {
@@ -466,9 +466,9 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));
         build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(channel_idx))));
         build_options.add_option(std::string("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x)));
-        if(data_layout == DataLayout::NHWC)
+        if(_data_layout == DataLayout::NHWC)
         {
-            const bool run_optimized_for_bifrost_nhwc = can_run_optimized_kernel_for_bifrost_nhwc(gpu_target, _conv_stride_x, _conv_stride_y, kernel_size, data_type, data_layout);
+            const bool run_optimized_for_bifrost_nhwc = can_run_optimized_kernel_for_bifrost_nhwc(gpu_target, _conv_stride_x, _conv_stride_y, kernel_size, data_type, _data_layout);
             build_options.add_option(std::string("-DDATA_LAYOUT_NHWC=1"));
             build_options.add_option(std::string("-DDST_HEIGHT=" + support::cpp11::to_string(_output->info()->dimension(height_idx))));
             build_options.add_option(std::string("-DDST_WIDTH=" + support::cpp11::to_string(_output->info()->dimension(width_idx))));
@@ -538,7 +538,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(height_idx));
     _config_id += "_";
-    _config_id += lower_string(string_from_data_layout(data_layout));
+    _config_id += lower_string(string_from_data_layout(_data_layout));
 }
 
 Status CLDirectConvolutionLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
@@ -562,9 +562,8 @@ void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue 
     win_in.adjust(Window::DimX, -_border_size.left, true);
     win_in.adjust(Window::DimY, -_border_size.top, true);
 
-    const DataLayout data_layout = _input->info()->data_layout();
-    const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int width_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const int height_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
 
     win_in.set_dimension_step(width_idx, window[width_idx].step() * _conv_stride_x);
     win_in.set_dimension_step(height_idx, window[height_idx].step() * _conv_stride_y);

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.08</span>
+   &#160;<span id="projectnumber">19.08.1</span>
    </div>
   </td>
  </tr>
@@ -393,9 +393,9 @@ Functions</h2></td></tr>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="warp__helpers_8h_source.xhtml#l00034">34</a> of file <a class="el" href="warp__helpers_8h_source.xhtml">warp_helpers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">const</span> float4 clamped_x = <a class="code" href="namespacearm__compute_1_1utility.xhtml#a96efecf997f13a914609ddf1eb67f624">clamp</a>(coords.even, 0.0f - border_size, width - 1 + border_size);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">const</span> float4 clamped_y = <a class="code" href="namespacearm__compute_1_1utility.xhtml#a96efecf997f13a914609ddf1eb67f624">clamp</a>(coords.odd, 0.0f - border_size, height - 1 + border_size);</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordflow">return</span> (float8)(clamped_x.s0, clamped_y.s0, clamped_x.s1, clamped_y.s1, clamped_x.s2, clamped_y.s2, clamped_x.s3, clamped_y.s3);</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1utility_xhtml_a96efecf997f13a914609ddf1eb67f624"><div class="ttname"><a href="namespacearm__compute_1_1utility.xhtml#a96efecf997f13a914609ddf1eb67f624">arm_compute::utility::clamp</a></div><div class="ttdeci">DataType clamp(const DataType &amp;n, const DataType &amp;lower=std::numeric_limits&lt; RangeType &gt;::lowest(), const DataType &amp;upper=std::numeric_limits&lt; RangeType &gt;::max())</div><div class="ttdoc">Performs clamping among a lower and upper value.</div><div class="ttdef"><b>Definition:</b> <a href="_utility_8h_source.xhtml#l00084">Utility.h:84</a></div></div>
+<div class="fragment"><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">const</span> float4 clamped_x = <a class="code" href="namespacearm__compute_1_1utility.xhtml#a96efecf997f13a914609ddf1eb67f624">clamp</a>(coords.even, 0.0f - border_size, width - 1 + border_size);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">const</span> float4 clamped_y = <a class="code" href="namespacearm__compute_1_1utility.xhtml#a96efecf997f13a914609ddf1eb67f624">clamp</a>(coords.odd, 0.0f - border_size, height - 1 + border_size);</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordflow">return</span> (float8)(clamped_x.s0, clamped_y.s0, clamped_x.s1, clamped_y.s1, clamped_x.s2, clamped_y.s2, clamped_x.s3, clamped_y.s3);</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1utility_xhtml_a96efecf997f13a914609ddf1eb67f624"><div class="ttname"><a href="namespacearm__compute_1_1utility.xhtml#a96efecf997f13a914609ddf1eb67f624">arm_compute::utility::clamp</a></div><div class="ttdeci">DataType clamp(const DataType &amp;n, const DataType &amp;lower=std::numeric_limits&lt; RangeType &gt;::lowest(), const DataType &amp;upper=std::numeric_limits&lt; RangeType &gt;::max())</div><div class="ttdoc">Performs clamping among a lower and upper value.</div><div class="ttdef"><b>Definition:</b> <a href="_utility_8h_source.xhtml#l00098">Utility.h:98</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_utility_8h_source.xhtml#l00084">arm_compute::utility::clamp()</a>.</p>
+<p class="reference">References <a class="el" href="_utility_8h_source.xhtml#l00098">arm_compute::utility::clamp()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="warp__helpers_8h_source.xhtml#l00095">bilinear_interpolate_with_border()</a>, <a class="el" href="warp__helpers_8h_source.xhtml#l00049">clamp_to_border()</a>, and <a class="el" href="scale_8cl_source.xhtml#l00095">scale_nearest_neighbour_nchw()</a>.</p>
 
@@ -533,7 +533,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="warp__helpers_8h.xhtml">warp_helpers.h</a></li>
-    <li class="footer">Generated on Mon Sep 2 2019 11:47:29 for Compute Library by
+    <li class="footer">Generated on Fri Jan 17 2020 10:26:23 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

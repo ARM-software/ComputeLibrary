@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,6 +94,7 @@ public:
     const ICLTensor *_biases;
     const ICLTensor *_weights;
     ICLTensor       *_output;
+    DataLayout       _data_layout;
     BorderSize       _border_size;
     int              _conv_stride_x;
     int              _conv_stride_y;

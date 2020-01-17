@@ -1,5 +1,8 @@
 var NAVTREEINDEX37 =
 {
+"classarm__compute_1_1_c_l_comparison_kernel.xhtml#a9eb86fbe4825b43b638171bb6dd398c3":[8,0,0,83,5],
+"classarm__compute_1_1_c_l_comparison_kernel.xhtml#af727ecec8e36519d9369dbee5a0aa10a":[8,0,0,83,0],
+"classarm__compute_1_1_c_l_comparison_kernel.xhtml#af932cf60ff2f7c649c73f90efb48ead0":[8,0,0,83,3],
 "classarm__compute_1_1_c_l_comparison_static.xhtml":[8,0,0,84],
 "classarm__compute_1_1_c_l_comparison_static.xhtml#aa08e0c678275eb37e8de42be52d76e35":[8,0,0,84,0],
 "classarm__compute_1_1_c_l_complex_pixel_wise_multiplication.xhtml":[8,0,0,85],
@@ -246,8 +249,5 @@ var NAVTREEINDEX37 =
 "classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml#a126f5beb6dc874a89d5da5fcc7589565":[8,0,0,123,0],
 "classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml#a262e0cb2fe628b335836c5386c467001":[8,0,0,123,6],
 "classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[8,0,0,123,7],
-"classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml#a53c08a68f83068902992a8d0d5f2d03f":[8,0,0,123,1],
-"classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml#ab475d3d6b3279119cb22ac054bbd0ec1":[8,0,0,123,2],
-"classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml#ad739052d31399013f0cf01b376c442cc":[8,0,0,123,3],
-"classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml#aff837b05d92559e38076cb7a995f73fb":[8,0,0,123,5]
+"classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml#a53c08a68f83068902992a8d0d5f2d03f":[8,0,0,123,1]
 };

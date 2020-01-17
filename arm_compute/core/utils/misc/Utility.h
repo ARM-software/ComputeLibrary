@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,20 @@ struct index_sequence_generator<0u, S...> : index_sequence<S...>
 
 template <std::size_t N>
 using index_sequence_t = typename index_sequence_generator<N>::type;
+
+template <typename T, std::size_t N, T val, T... vals>
+struct generate_array : generate_array < T, N - 1, val, val, vals... >
+{
+};
+
+template <typename T, T val, T... vals>
+struct generate_array<T, 0, val, vals...>
+{
+    static constexpr std::array<T, sizeof...(vals)> value{ vals... };
+};
+
+template <typename T, T val, T... vals>
+constexpr std::array<T, sizeof...(vals)> generate_array<T, 0, val, vals...>::value;
 /** @endcond */
 
 namespace detail

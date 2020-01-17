@@ -24,11 +24,12 @@
 namespace arm_compute
 {
 inline Window::Window(const Window &src)
-    : _dims()
+    : _dims(), _is_broadcasted(utility::generate_array<bool, Coordinates::num_max_dimensions, false>::value)
 {
     for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
         set(i, src[i]);
+        _is_broadcasted[i] = src.is_broadcasted(i);
     }
 }
 
@@ -49,6 +50,19 @@ inline void Window::set(size_t dimension, const Window::Dimension &dim)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
     _dims[dimension] = dim;
+}
+
+inline void Window::set_broadcasted(size_t dimension)
+{
+    ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
+    set(dimension, Dimension(0, 0, 0));
+    _is_broadcasted[dimension] = true;
+}
+
+inline bool Window::is_broadcasted(size_t dimension) const
+{
+    ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
+    return _is_broadcasted[dimension];
 }
 
 inline Window Window::collapse_if_possible(const Window &full_window, const size_t first,
@@ -110,7 +124,7 @@ inline Window Window::broadcast_if_dimension_le_one(const TensorShape &shape) co
     {
         if(shape[d] <= 1)
         {
-            broadcastWin.set(d, Dimension(0, 0, 0));
+            broadcastWin.set_broadcasted(d);
         }
     }
     return broadcastWin;

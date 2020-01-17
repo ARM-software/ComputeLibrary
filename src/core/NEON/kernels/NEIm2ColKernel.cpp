@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -265,10 +265,9 @@ void NEIm2ColKernel::run_im2col(const Window &window)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    const DataLayout   data_layout = _input->info()->data_layout();
-    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const unsigned int width_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
 
     const int input_w        = _input->info()->dimension(width_idx);
     const int input_h        = _input->info()->dimension(height_idx);
@@ -344,7 +343,7 @@ void NEIm2ColKernel::run_im2col(const Window &window)
 }
 
 NEIm2ColKernel::NEIm2ColKernel()
-    : _func(), _input(nullptr), _output(nullptr), _convolved_dims(), _conv_info(), _kernel_width(0), _kernel_height(0), _has_bias(false), _dilation(1U, 1U)
+    : _func(), _input(nullptr), _output(nullptr), _convolved_dims(), _conv_info(), _kernel_width(0), _kernel_height(0), _has_bias(false), _dilation(1U, 1U), _data_layout(DataLayout::UNKNOWN)
 {
 }
 
@@ -355,9 +354,9 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, num_groups));
     ARM_COMPUTE_UNUSED(num_groups);
 
-    const DataLayout   data_layout = input->info()->data_layout();
-    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    _data_layout                  = input->info()->data_layout();
+    const unsigned int width_idx  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
 
     _input          = input;
     _output         = output;
@@ -370,7 +369,7 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                                         _conv_info, _dilation);
     _has_bias = has_bias;
 
-    if(data_layout == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         switch(_input->info()->data_type())
         {

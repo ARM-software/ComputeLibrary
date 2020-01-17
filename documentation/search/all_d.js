@@ -30,7 +30,7 @@ var searchData=
   ['leaky_5frelu',['LEAKY_RELU',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaac7e80a3de04936f4e423e1b564fdca10',1,'arm_compute::ActivationLayerInfo']]],
   ['left',['left',['../structarm__compute_1_1_border_size.xhtml#a05374b750b0fc472c34ee61e6f028bba',1,'arm_compute::BorderSize']]],
   ['less',['Less',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca1cfdf0e8d0c87a228c1f40d9bee7888b',1,'arm_compute::Less()'],['../comparisons_8cl.xhtml#ab57cc7442cb60d5e4cba22ca35986c18',1,'LESS():&#160;comparisons.cl']]],
-  ['lessequal',['LESSEQUAL',['../comparisons_8cl.xhtml#a6bc14fa19faf519c3cfa55b660ef5e06',1,'LESSEQUAL():&#160;comparisons.cl'],['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58cad3e6fdac55bb7b0edd7834c968ba1f38',1,'arm_compute::LessEqual()']]],
+  ['lessequal',['LessEqual',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58cad3e6fdac55bb7b0edd7834c968ba1f38',1,'arm_compute::LessEqual()'],['../comparisons_8cl.xhtml#a6bc14fa19faf519c3cfa55b660ef5e06',1,'LESSEQUAL():&#160;comparisons.cl']]],
   ['level',['level',['../classarm__compute_1_1test_1_1framework_1_1_test_error.xhtml#a01ff177012854b9a35d86825a3a8eabd',1,'arm_compute::test::framework::TestError']]],
   ['library',['library',['../namespacearm__compute_1_1test.xhtml#a71326f0909d77386e29b511e1990a11f',1,'arm_compute::test']]],
   ['lifetime_5fmanager',['lifetime_manager',['../classarm__compute_1_1_i_memory_manager.xhtml#ab065826e9ee10f61d681b2103eaa74ed',1,'arm_compute::IMemoryManager::lifetime_manager()'],['../classarm__compute_1_1_memory_manager_on_demand.xhtml#aad48fab4c4e70a4eedd86e95c94b1f04',1,'arm_compute::MemoryManagerOnDemand::lifetime_manager()']]],

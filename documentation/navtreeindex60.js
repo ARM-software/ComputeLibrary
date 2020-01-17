@@ -1,5 +1,14 @@
 var NAVTREEINDEX60 =
 {
+"classarm__compute_1_1graph_1_1_graph_context.xhtml#a9c24c14abfd0ab9d1f4ce8cd5cc20819":[8,0,0,4,31,4],
+"classarm__compute_1_1graph_1_1_graph_context.xhtml#aaaa0e858a95cbd8faa9faf0119911e63":[8,0,0,4,31,2],
+"classarm__compute_1_1graph_1_1_graph_context.xhtml#afe3196b59fd8d1a37841d4988db3dc3e":[8,0,0,4,31,1],
+"classarm__compute_1_1graph_1_1_graph_manager.xhtml":[8,0,0,4,32],
+"classarm__compute_1_1graph_1_1_graph_manager.xhtml#a4e179588488fda9085167dd70c29ff70":[8,0,0,4,32,3],
+"classarm__compute_1_1graph_1_1_graph_manager.xhtml#a4e7362b1e7b02f52aa94e150993fc3f8":[8,0,0,4,32,0],
+"classarm__compute_1_1graph_1_1_graph_manager.xhtml#a51543e8fce4ed3bd248eedd96d333099":[8,0,0,4,32,5],
+"classarm__compute_1_1graph_1_1_graph_manager.xhtml#a5d30e27e2d3ceaa4f575d84881c099aa":[8,0,0,4,32,6],
+"classarm__compute_1_1graph_1_1_graph_manager.xhtml#a7cc3d6b903533416f56a1a30660c112e":[8,0,0,4,32,1],
 "classarm__compute_1_1graph_1_1_graph_manager.xhtml#a7e6bc69b0ad4be79c10f72debc89dfc8":[8,0,0,4,32,7],
 "classarm__compute_1_1graph_1_1_graph_manager.xhtml#aa742e720f48c2a00c3c1d7cd2e13285c":[8,0,0,4,32,2],
 "classarm__compute_1_1graph_1_1_graph_manager.xhtml#afb8c302dc3cdebfe987751793a9aa4b5":[8,0,0,4,32,4],
@@ -240,14 +249,5 @@ var NAVTREEINDEX60 =
 "classarm__compute_1_1graph_1_1_stack_layer_node.xhtml#ae2f61b7b0cc3d8a7d63c34ffdab16037":[8,0,0,4,64,0],
 "classarm__compute_1_1graph_1_1_task_executor.xhtml":[8,0,0,4,65],
 "classarm__compute_1_1graph_1_1_task_executor.xhtml#af356b3757a26ca474239624e161fb49c":[8,0,0,4,65,0],
-"classarm__compute_1_1graph_1_1_tensor.xhtml":[8,0,0,4,66],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a0839be1697496b3a951e030627f9e69b":[8,0,0,4,66,12],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a0cec440e0579d01d55a4e194f1c7178c":[8,0,0,4,66,7],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a0d3608f94078b90ab1ff9e9465d4ed3b":[8,0,0,4,66,5],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a37a56fcfb4c6a506d63f11d88e0981c0":[8,0,0,4,66,2],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a45c1ef0023ce430d009ec79c97761544":[8,0,0,4,66,8],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a738f5e449958bed64c970006375540fd":[8,0,0,4,66,9],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a761495426edf3b875f67a8f4c3a199b5":[8,0,0,4,66,1],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a7ca865118188dd8c307ae9e84f8a75f6":[8,0,0,4,66,10],
-"classarm__compute_1_1graph_1_1_tensor.xhtml#a88d65b04d950e6aba147624fcd308b34":[8,0,0,4,66,4]
+"classarm__compute_1_1graph_1_1_tensor.xhtml":[8,0,0,4,66]
 };

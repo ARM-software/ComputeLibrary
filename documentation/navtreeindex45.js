@@ -1,5 +1,12 @@
 var NAVTREEINDEX45 =
 {
+"classarm__compute_1_1_detection_output_layer_info.xhtml#a381583deeb7c92f3b86d959c1e6c8185":[8,0,0,393,6],
+"classarm__compute_1_1_detection_output_layer_info.xhtml#a47c941c24980e6f61a74986c4a16c16c":[8,0,0,393,4],
+"classarm__compute_1_1_detection_output_layer_info.xhtml#a7bc581f245390f063f02c3fcbb422320":[8,0,0,393,10],
+"classarm__compute_1_1_detection_output_layer_info.xhtml#aa5081eb6d3f7bf20f32573af8a60f1f9":[8,0,0,393,12],
+"classarm__compute_1_1_detection_output_layer_info.xhtml#aba5c653899ad75de3548b6c60c08939c":[8,0,0,393,0],
+"classarm__compute_1_1_detection_output_layer_info.xhtml#acf35ae15a9350f47bcba0d0cedeb3e7c":[8,0,0,393,11],
+"classarm__compute_1_1_detection_output_layer_info.xhtml#ae82a2ccc5739cb255a9a7679d6161399":[8,0,0,393,9],
 "classarm__compute_1_1_detection_output_layer_info.xhtml#af14fc4cf24dfb69a0f225a582ef01d54":[8,0,0,393,7],
 "classarm__compute_1_1_detection_post_process_layer_info.xhtml":[8,0,0,394],
 "classarm__compute_1_1_detection_post_process_layer_info.xhtml#a0732a1286ff6a838da5c19e6d48c99cf":[8,0,0,394,6],
@@ -242,12 +249,5 @@ var NAVTREEINDEX45 =
 "classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#ada3b192e7f6ec5a8950b57fae93e9166":[8,0,0,436,3],
 "classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w.xhtml":[8,0,0,437],
 "classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w.xhtml#aa029e9740bc43eb3301316be76be3b7e":[8,0,0,437,0],
-"classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml":[8,0,0,438],
-"classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69":[8,0,0,438,1],
-"classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml#aa029e9740bc43eb3301316be76be3b7e":[8,0,0,438,0],
-"classarm__compute_1_1_g_c_im2_col_kernel.xhtml":[8,0,0,439],
-"classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a2461b3d633deab1e051da8170c959b2a":[8,0,0,439,3],
-"classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a430228b1b1392252b298974038b69abd":[8,0,0,439,4],
-"classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a8d844b55e2410bde3c57634418525dab":[8,0,0,439,1],
-"classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69":[8,0,0,439,6]
+"classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml":[8,0,0,438]
 };

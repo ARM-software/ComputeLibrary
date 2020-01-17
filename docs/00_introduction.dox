@@ -236,6 +236,9 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v19.08.1 Public maintanance release
+ - Various bug fixes.
+
 v19.08 Public major release
  - Various bug fixes.
  - Various optimisations.

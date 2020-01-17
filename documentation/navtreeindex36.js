@@ -1,5 +1,8 @@
 var NAVTREEINDEX36 =
 {
+"classarm__compute_1_1_c_l_abs_layer.xhtml":[8,0,0,32],
+"classarm__compute_1_1_c_l_abs_layer.xhtml#a074e10cfb217e657b9e81adeca2abc68":[8,0,0,32,0],
+"classarm__compute_1_1_c_l_absolute_difference.xhtml":[8,0,0,33],
 "classarm__compute_1_1_c_l_absolute_difference.xhtml#af53d66a8f8dd368d3c06b43c0c6a12f1":[8,0,0,33,0],
 "classarm__compute_1_1_c_l_absolute_difference_kernel.xhtml":[8,0,0,34],
 "classarm__compute_1_1_c_l_absolute_difference_kernel.xhtml#a2bf2c8f0611c9130e938c7013d513152":[8,0,0,34,2],
@@ -246,8 +249,5 @@ var NAVTREEINDEX36 =
 "classarm__compute_1_1_c_l_comparison_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[8,0,0,83,4],
 "classarm__compute_1_1_c_l_comparison_kernel.xhtml#a44e9e18934a2d89fe08eacdc402240ce":[8,0,0,83,7],
 "classarm__compute_1_1_c_l_comparison_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[8,0,0,83,8],
-"classarm__compute_1_1_c_l_comparison_kernel.xhtml#a50ebeeea386211a648f73bde01fdd55c":[8,0,0,83,6],
-"classarm__compute_1_1_c_l_comparison_kernel.xhtml#a9eb86fbe4825b43b638171bb6dd398c3":[8,0,0,83,5],
-"classarm__compute_1_1_c_l_comparison_kernel.xhtml#af727ecec8e36519d9369dbee5a0aa10a":[8,0,0,83,0],
-"classarm__compute_1_1_c_l_comparison_kernel.xhtml#af932cf60ff2f7c649c73f90efb48ead0":[8,0,0,83,3]
+"classarm__compute_1_1_c_l_comparison_kernel.xhtml#a50ebeeea386211a648f73bde01fdd55c":[8,0,0,83,6]
 };

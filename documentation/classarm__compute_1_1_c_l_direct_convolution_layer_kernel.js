@@ -13,6 +13,7 @@ var classarm__compute_1_1_c_l_direct_convolution_layer_kernel =
     [ "_border_size", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4", null ],
     [ "_conv_stride_x", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#aeebcff33f13042b2527755e294f5d53e", null ],
     [ "_conv_stride_y", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a862a2fc55a07b4d6a7e4e23cb11ff323", null ],
+    [ "_data_layout", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a76e83555c34bd6c9a18b669391a290c3", null ],
     [ "_input", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53", null ],
     [ "_output", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b", null ],
     [ "_weights", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a6fc108ac852099117f9c722f2afe2cb8", null ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@
 using namespace arm_compute;
 
 CLDeconvolutionLayerUpsampleKernel::CLDeconvolutionLayerUpsampleKernel()
-    : _input(nullptr), _output(nullptr), _info()
+    : _input(nullptr), _output(nullptr), _info(), _data_layout(DataLayout::UNKNOWN)
 {
 }
 
@@ -72,12 +72,13 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTe
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    _input  = input;
-    _output = output;
-    _info   = info;
-
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayerUpsampleKernel::validate(input->info(), output->info(), info));
+
+    _input       = input;
+    _output      = output;
+    _info        = info;
+    _data_layout = input->info()->data_layout();
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -99,10 +100,8 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    const DataLayout data_layout = _input->info()->data_layout();
-
-    const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const size_t idx_w = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
 
     const int out_start_x = _info.pad().first;
     const int out_end_x   = _output->info()->dimension(idx_w) - _info.pad().first + _info.stride().first - 1;
@@ -112,7 +111,7 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
     const int out_end_y   = _output->info()->dimension(idx_h) - _info.pad().second + _info.stride().second - 1;
     const int out_step_y  = _info.stride().second;
 
-    switch(data_layout)
+    switch(_data_layout)
     {
         case DataLayout::NCHW:
         {

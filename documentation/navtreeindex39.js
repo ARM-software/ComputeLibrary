@@ -1,5 +1,9 @@
 var NAVTREEINDEX39 =
 {
+"classarm__compute_1_1_c_l_g_e_m_m.xhtml#aebefa7576807b8b316ea46c242949039":[8,0,0,177,4],
+"classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml":[8,0,0,178],
+"classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml#a025e6bce0640a6cb5ecdab8a3e57f9a0":[8,0,0,178,4],
+"classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml#a4229132541843309482de80bc7083fff":[8,0,0,178,1],
 "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml#a78f1fff174957ab8dd876ee696d5a749":[8,0,0,178,5],
 "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77":[8,0,0,178,6],
 "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml#abbe1bfc2b6c8c58d711612255ca73a38":[8,0,0,178,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX39 =
 "classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml#aab322f707d331394f70405702b43378a":[8,0,0,174,6],
 "classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml#abfd56453f7a32b56582b212f450aa130":[8,0,0,174,2],
 "classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml#ae05299dbd8e52799fc34298966f0375d":[8,0,0,174,7],
-"classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml#aff3525c5fcfeb85912814c1bbbaf0835":[8,0,0,174,3],
-"classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml":[8,0,0,175],
-"classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml#a3039d9b3acf6992402f841a9290338f9":[8,0,0,175,0],
-"classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml#a9f1c2312374125fd95ee145a4f07515c":[8,0,0,175,1],
-"classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml#ad1717410afd0be936c6213a63c8005fb":[8,0,0,175,2]
+"classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml#aff3525c5fcfeb85912814c1bbbaf0835":[8,0,0,174,3]
 };

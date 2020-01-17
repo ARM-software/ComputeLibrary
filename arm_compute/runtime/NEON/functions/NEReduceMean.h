@@ -72,7 +72,7 @@ private:
     std::vector<NEReductionOperation> _reduction_kernels;
     std::vector<Tensor>               _reduced_outs;
     NEReshapeLayer                    _reshape;
-    unsigned int                      _reduction_ops;
+    int                               _reduction_ops;
     bool                              _keep_dims;
 };
 } // namespace arm_compute

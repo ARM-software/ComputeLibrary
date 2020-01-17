@@ -1,5 +1,8 @@
 var NAVTREEINDEX34 =
 {
+"benchmark_2_n_e_o_n_2_color_convert_8cpp.xhtml#ad14a5471a936562e38e9443b3fc80dc9":[9,0,5,0,2,3,5],
+"benchmark_2_n_e_o_n_2_color_convert_8cpp.xhtml#ada77cb4a0d44ccda26b8770188e9bf6b":[9,0,5,0,2,3,6],
+"benchmark_2_n_e_o_n_2_color_convert_8cpp_source.xhtml":[9,0,5,0,2,3],
 "benchmark_2_n_e_o_n_2_convolution_8cpp.xhtml":[9,0,5,0,2,4],
 "benchmark_2_n_e_o_n_2_convolution_8cpp.xhtml#a07c625bb00238c503b8cb61e6b4efba5":[9,0,5,0,2,4,16],
 "benchmark_2_n_e_o_n_2_convolution_8cpp.xhtml#a0e09ab22541be863c2e1044e96448ae8":[9,0,5,0,2,4,20],
@@ -246,8 +249,5 @@ var NAVTREEINDEX34 =
 "benchmark_2_n_e_o_n_2_warp_affine_8cpp.xhtml#a8c90cb4df98ef8f2fdceb6c2065accfa":[9,0,5,0,2,45,1],
 "benchmark_2_n_e_o_n_2_warp_affine_8cpp_source.xhtml":[9,0,5,0,2,45],
 "bit__ops_8h.xhtml":[9,0,0,0,4,0,0],
-"bit__ops_8h.xhtml#a54d65336303dbf657a5e954f72b37941":[9,0,0,0,4,0,0,0],
-"bit__ops_8h_source.xhtml":[9,0,0,0,4,0,0],
-"bitwise__op_8cl.xhtml":[9,0,3,0,0,0,8],
-"bitwise__op_8cl.xhtml#a24014fd2f171ae758db4eecffab00aac":[9,0,3,0,0,0,8,0]
+"bit__ops_8h.xhtml#a54d65336303dbf657a5e954f72b37941":[9,0,0,0,4,0,0,0]
 };

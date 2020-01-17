@@ -1,5 +1,12 @@
 var NAVTREEINDEX54 =
 {
+"classarm__compute_1_1_n_e_im2_col_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[8,0,0,730,5],
+"classarm__compute_1_1_n_e_im2_col_kernel.xhtml#acaa705664e19820e28eb86f7737a98ba":[8,0,0,730,3],
+"classarm__compute_1_1_n_e_im2_col_kernel.xhtml#aec5fb874227c941e8ac14de3d29e543b":[8,0,0,730,0],
+"classarm__compute_1_1_n_e_im2_col_kernel.xhtml#aff36152aec06ab80bbd3aa8d9dc66075":[8,0,0,730,1],
+"classarm__compute_1_1_n_e_integral_image.xhtml":[8,0,0,731],
+"classarm__compute_1_1_n_e_integral_image.xhtml#a83a344e60eb7db895953a942abf16628":[8,0,0,731,0],
+"classarm__compute_1_1_n_e_integral_image_kernel.xhtml":[8,0,0,732],
 "classarm__compute_1_1_n_e_integral_image_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82":[8,0,0,732,4],
 "classarm__compute_1_1_n_e_integral_image_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[8,0,0,732,0],
 "classarm__compute_1_1_n_e_integral_image_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283":[8,0,0,732,2],
@@ -242,12 +249,5 @@ var NAVTREEINDEX54 =
 "classarm__compute_1_1_n_e_permute_kernel.xhtml#a2547124bd52f012ea88a7ab901e38b6a":[8,0,0,769,3],
 "classarm__compute_1_1_n_e_permute_kernel.xhtml#a361148b07189c79f5a4178e718424554":[8,0,0,769,6],
 "classarm__compute_1_1_n_e_permute_kernel.xhtml#a53592f2e423ddbeffcc472cf7cbfb88c":[8,0,0,769,2],
-"classarm__compute_1_1_n_e_permute_kernel.xhtml#a62da7f629d96facdeaf3e712c1a4f5af":[8,0,0,769,7],
-"classarm__compute_1_1_n_e_permute_kernel.xhtml#a93c836ab36443b23753d99495761daf7":[8,0,0,769,4],
-"classarm__compute_1_1_n_e_permute_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[8,0,0,769,5],
-"classarm__compute_1_1_n_e_permute_kernel.xhtml#ac041b093bce44d5969166685832c21d7":[8,0,0,769,1],
-"classarm__compute_1_1_n_e_permute_kernel.xhtml#acba877f622a9b909a592f5a43ed26863":[8,0,0,769,0],
-"classarm__compute_1_1_n_e_phase.xhtml":[8,0,0,770],
-"classarm__compute_1_1_n_e_phase.xhtml#adcb14816dc8d62ecdc185f4d3f1cd4d4":[8,0,0,770,0],
-"classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml":[8,0,0,771]
+"classarm__compute_1_1_n_e_permute_kernel.xhtml#a62da7f629d96facdeaf3e712c1a4f5af":[8,0,0,769,7]
 };

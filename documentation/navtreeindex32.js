@@ -1,5 +1,8 @@
 var NAVTREEINDEX32 =
 {
+"arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16af2ee14b628c0a45e1682de8f33983dc1":[9,0,0,1,26,13,29],
+"arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16af5505217824e3e9e8000ef0d63360158":[9,0,0,1,26,13,3],
+"arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16afc71c950664ce080f333699aec4248a2":[9,0,0,1,26,13,32],
 "arm__compute_2graph_2_types_8h_source.xhtml":[9,0,0,1,26],
 "arm__compute_2graph_2_utils_8h.xhtml":[9,0,0,1,27],
 "arm__compute_2graph_2_utils_8h.xhtml#a1d56c5f246a7ed8c16f5eefa59bb587f":[9,0,0,1,27,1],
@@ -246,8 +249,5 @@ var NAVTREEINDEX32 =
 "benchmark_2_c_l_2_laplacian_pyramid_8cpp.xhtml":[9,0,5,0,0,27],
 "benchmark_2_c_l_2_laplacian_pyramid_8cpp.xhtml#a1cf8721318bc0e99364e7fd7c7131d16":[9,0,5,0,0,27,2],
 "benchmark_2_c_l_2_laplacian_pyramid_8cpp.xhtml#a768eb9c2b8ff754ad9874cbae0551acd":[9,0,5,0,0,27,1],
-"benchmark_2_c_l_2_laplacian_pyramid_8cpp.xhtml#ac9026b5d790e0ef296d2444d3fd9d17e":[9,0,5,0,0,27,0],
-"benchmark_2_c_l_2_laplacian_pyramid_8cpp_source.xhtml":[9,0,5,0,0,27],
-"benchmark_2_c_l_2_laplacian_reconstruct_8cpp.xhtml":[9,0,5,0,0,28],
-"benchmark_2_c_l_2_laplacian_reconstruct_8cpp.xhtml#a303febdbb0bd20fcb08e1e9c01204a41":[9,0,5,0,0,28,2]
+"benchmark_2_c_l_2_laplacian_pyramid_8cpp.xhtml#ac9026b5d790e0ef296d2444d3fd9d17e":[9,0,5,0,0,27,0]
 };

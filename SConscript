@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v19.08"
-SONAME_VERSION="16.0.0"
+VERSION = "v19.08.1"
+SONAME_VERSION="16.1.0"
 
 Import('env')
 Import('vars')

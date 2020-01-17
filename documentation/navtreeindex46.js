@@ -1,5 +1,12 @@
 var NAVTREEINDEX46 =
 {
+"classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69":[8,0,0,438,1],
+"classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml#aa029e9740bc43eb3301316be76be3b7e":[8,0,0,438,0],
+"classarm__compute_1_1_g_c_im2_col_kernel.xhtml":[8,0,0,439],
+"classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a2461b3d633deab1e051da8170c959b2a":[8,0,0,439,3],
+"classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a430228b1b1392252b298974038b69abd":[8,0,0,439,4],
+"classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a8d844b55e2410bde3c57634418525dab":[8,0,0,439,1],
+"classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69":[8,0,0,439,6],
 "classarm__compute_1_1_g_c_im2_col_kernel.xhtml#aa9f940db93f2843ff4694e64177e9b49":[8,0,0,439,0],
 "classarm__compute_1_1_g_c_im2_col_kernel.xhtml#ab34fe16c3f4d185089ed17c0ca3d6409":[8,0,0,439,5],
 "classarm__compute_1_1_g_c_im2_col_kernel.xhtml#ad0be113faf576003113427a5e54003b1":[8,0,0,439,2],
@@ -242,12 +249,5 @@ var NAVTREEINDEX46 =
 "classarm__compute_1_1_h_o_g_info.xhtml#a2a347c64540c1d48a579f830ddff622f":[8,0,0,474,8],
 "classarm__compute_1_1_h_o_g_info.xhtml#a3d18e8be8055827aa09839f6972ff271":[8,0,0,474,16],
 "classarm__compute_1_1_h_o_g_info.xhtml#a3f48ffe9fe37db10eb23de67101c1500":[8,0,0,474,18],
-"classarm__compute_1_1_h_o_g_info.xhtml#a576ef6e002aae702e9c619a1afd31ddb":[8,0,0,474,14],
-"classarm__compute_1_1_h_o_g_info.xhtml#a5a4a2ab2f4396cc64b4a5676a90d7f07":[8,0,0,474,12],
-"classarm__compute_1_1_h_o_g_info.xhtml#a64f60c469394d4f5f621546fc3108590":[8,0,0,474,17],
-"classarm__compute_1_1_h_o_g_info.xhtml#a6a21c3fbc2803bbf3d975bec8977307f":[8,0,0,474,3],
-"classarm__compute_1_1_h_o_g_info.xhtml#a75215e8ba07a5ec88ee8c902e306e887":[8,0,0,474,10],
-"classarm__compute_1_1_h_o_g_info.xhtml#a79b522bd4aa0d5533649e60ef7f5f42f":[8,0,0,474,15],
-"classarm__compute_1_1_h_o_g_info.xhtml#a7cbda2c789c461237f0c6eaee8f8cd2a":[8,0,0,474,9],
-"classarm__compute_1_1_h_o_g_info.xhtml#aaefa291ad3cc3e3210c8b8ef2ffde476":[8,0,0,474,7]
+"classarm__compute_1_1_h_o_g_info.xhtml#a576ef6e002aae702e9c619a1afd31ddb":[8,0,0,474,14]
 };

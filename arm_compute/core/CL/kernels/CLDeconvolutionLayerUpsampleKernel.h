@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,6 +72,7 @@ private:
     const ICLTensor *_input;
     ICLTensor       *_output;
     PadStrideInfo    _info;
+    DataLayout       _data_layout;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLEKERNEL_H__ */

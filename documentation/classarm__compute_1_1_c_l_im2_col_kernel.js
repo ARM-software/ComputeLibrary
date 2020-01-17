@@ -9,6 +9,7 @@ var classarm__compute_1_1_c_l_im2_col_kernel =
     [ "run", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e", null ],
     [ "_conv_info", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a118b70265d99428bf7d068d686d0cb80", null ],
     [ "_convolved_dims", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a4215b3b7076338a7834c0bbff11aefb2", null ],
+    [ "_data_layout", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a76e83555c34bd6c9a18b669391a290c3", null ],
     [ "_input", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53", null ],
     [ "_kernel_dims", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml#af153c85a143d20108f35f4575ac9eb22", null ],
     [ "_num_elems_processed_per_iteration", "classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a8fd589467d6c372b7b717d9cf8f961b1", null ],

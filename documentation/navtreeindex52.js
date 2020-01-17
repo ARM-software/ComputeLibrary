@@ -1,5 +1,12 @@
 var NAVTREEINDEX52 =
 {
+"classarm__compute_1_1_n_e_f_f_t1_d.xhtml":[8,0,0,660],
+"classarm__compute_1_1_n_e_f_f_t1_d.xhtml#a39c0ec3e9d531af3b96d375aec9de7b9":[8,0,0,660,0],
+"classarm__compute_1_1_n_e_f_f_t1_d.xhtml#ad1717410afd0be936c6213a63c8005fb":[8,0,0,660,2],
+"classarm__compute_1_1_n_e_f_f_t1_d.xhtml#afa1a519c93fadeba6e6e7f5f37971a25":[8,0,0,660,1],
+"classarm__compute_1_1_n_e_f_f_t2_d.xhtml":[8,0,0,661],
+"classarm__compute_1_1_n_e_f_f_t2_d.xhtml#a01212a054fa3a8003a01d7ff426a1e0a":[8,0,0,661,0],
+"classarm__compute_1_1_n_e_f_f_t2_d.xhtml#a4d704db199385825fcc6fa9fbed62924":[8,0,0,661,1],
 "classarm__compute_1_1_n_e_f_f_t2_d.xhtml#ad1717410afd0be936c6213a63c8005fb":[8,0,0,661,2],
 "classarm__compute_1_1_n_e_f_f_t_convolution_layer.xhtml":[8,0,0,662],
 "classarm__compute_1_1_n_e_f_f_t_convolution_layer.xhtml#a064452b83d4907c001b65886876d89c1":[8,0,0,662,3],
@@ -242,12 +249,5 @@ var NAVTREEINDEX52 =
 "classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[8,0,0,703,5],
 "classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel.xhtml#adb79bb3ad15444f00b55b35f1d6e16b7":[8,0,0,703,0],
 "classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel.xhtml#adbf0774f0ddecd71e3a37b11a1f76998":[8,0,0,703,6],
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel.xhtml#af5b5d293aabb6e876154c73bdf1cffac":[8,0,0,703,7],
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point.xhtml":[8,0,0,704],
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point.xhtml#a9056f370ad254c13fd11c85998e46911":[8,0,0,704,0],
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel.xhtml":[8,0,0,705],
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel.xhtml#a1051055be6e0bffbc2b5e6438ff2a37c":[8,0,0,705,2],
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82":[8,0,0,705,7],
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel.xhtml#a338e8d44945a67d3cf89e45d7aad14d2":[8,0,0,705,1],
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel.xhtml#a9056f370ad254c13fd11c85998e46911":[8,0,0,705,3]
+"classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel.xhtml#af5b5d293aabb6e876154c73bdf1cffac":[8,0,0,703,7]
 };
