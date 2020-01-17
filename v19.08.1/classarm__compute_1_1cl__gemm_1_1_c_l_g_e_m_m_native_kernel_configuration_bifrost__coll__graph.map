@@ -1,0 +1,4 @@
+<map id="CLGEMMNativeKernelConfigurationBifrost" name="CLGEMMNativeKernelConfigurationBifrost">
+<area shape="rect" id="node1" title="Bifrost based OpenCL GEMMNative configuration." alt="" coords="5,80,248,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_g_e_m_m_kernel_configuration.xhtml" title="Basic interface for the GEMM kernel configuration." alt="" coords="24,5,229,32"/>
+</map>
