@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,6 +112,24 @@ std::string get_cl_unsigned_type_from_element_size(size_t element_size)
             return "uint";
         case 8:
             return "ulong";
+        default:
+            ARM_COMPUTE_ERROR("Data type not supported");
+            return "";
+    }
+}
+
+std::string get_cl_signed_type_from_element_size(size_t element_size)
+{
+    switch(element_size)
+    {
+        case 1:
+            return "char";
+        case 2:
+            return "short";
+        case 4:
+            return "int";
+        case 8:
+            return "long";
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
             return "";

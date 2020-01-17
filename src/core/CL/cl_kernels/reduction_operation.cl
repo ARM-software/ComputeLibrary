@@ -23,6 +23,19 @@
  */
 #include "helpers.h"
 
+#if defined(FLOAT_DATA_TYPE)
+#define ISGREATER(x, y) isgreater(x, y)
+#define ISLESS(x, y) isless(x, y)
+#else // !FLOAT_DATA_TYPE
+#if defined(WIDTH)
+#define ISGREATER(x, y) (x > y) ? 1 : 0
+#define ISLESS(x, y) (x < y) ? 1 : 0
+#else // !defined(WIDTH)
+#define ISGREATER(x, y) select(int16)0, int16) - 1, x > y)
+#define ISLESS(x, y) select(int16)0, int16) - 1, x < y)
+#endif // defined(WIDTH)
+#endif // defined(FLOAT_DATA_TYPE)
+
 /** Calculate square sum of a vector
  *
  * @param[in] input Pointer to the first pixel.

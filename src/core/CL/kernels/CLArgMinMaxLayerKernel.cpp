@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *prev_outp
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op != ReductionOperation::ARG_IDX_MAX && op != ReductionOperation::ARG_IDX_MIN, "Only ARG_IDX_MAX and ARG_IDX_MIN are supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
@@ -128,17 +128,14 @@ void CLArgMinMaxLayerKernel::configure(const ICLTensor *input, const ICLTensor *
     _op             = op;
 
     // Set build options
-    CLBuildOptions    build_opts;
-    const std::string data_type_promoted = get_cl_type_from_data_type(input->info()->data_type());
+    CLBuildOptions build_opts;
 
     build_opts.add_option_if(_prev_output != nullptr, "-DPREV_OUTPUT");
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.add_option("-DDATA_TYPE_PROMOTED=" + data_type_promoted);
     build_opts.add_option_if(is_data_type_float(input->info()->data_type()), "-DFLOAT_DATA_TYPE");
-    build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX");
-    build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MIN, "-DARG_MIN");
-    build_opts.add_option("-DCOND_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option_if_else(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX", "-DARG_MIN");
     build_opts.add_option("-DDATA_TYPE_OUTPUT=" + get_cl_type_from_data_type(output->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE_SELECT=" + get_cl_signed_type_from_element_size(input->info()->element_size()));
 
     // Create kernel
     cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange();

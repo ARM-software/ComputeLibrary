@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,26 +69,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
-DATA_TEST_CASE(Configuration,
-               framework::DatasetMode::ALL,
-               combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F32 })),
-               shape, data_type)
-{
-    // Create tensors
-    Tensor    ref_src = create_tensor<Tensor>(shape, data_type);
-    Tensor    dst;
-    const int axis = 1;
-
-    // Create and Configure function
-    NEArgMinMaxLayer arg_min_max_layer;
-    arg_min_max_layer.configure(&ref_src, axis, &dst, ReductionOperation::ARG_IDX_MAX);
-
-    // Validate valid region
-    const auto        expected_output_shape = arm_compute::misc::shape_calculator::compute_reduced_shape(shape, axis, false);
-    const ValidRegion valid_region          = shape_to_valid_region(expected_output_shape);
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 template <typename T>
 using NEArgMinMaxValidationFixture = ArgMinMaxValidationFixture<Tensor, Accessor, NEArgMinMaxLayer, T>;

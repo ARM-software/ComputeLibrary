@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,14 @@ std::string get_cl_promoted_type_from_data_type(const DataType &dt);
  * @return The string specifying the OpenCL type to be used.
  */
 std::string get_cl_unsigned_type_from_element_size(size_t element_size);
+
+/** Translates the element size to an signed integer data type
+ *
+ * @param[in] element_size Size in bytes of an element.
+ *
+ * @return The string specifying the OpenCL type to be used.
+ */
+std::string get_cl_signed_type_from_element_size(size_t element_size);
 
 /** Translates a tensor data type to the appropriate OpenCL select type.
  *

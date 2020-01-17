@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -265,19 +265,6 @@
 
 #define CONVERT_SAT_ROUND_STR(x, type, round) (convert_##type##_sat_##round((x)))
 #define CONVERT_SAT_ROUND(x, type, round) CONVERT_SAT_ROUND_STR(x, type, round)
-
-#if FLOAT_DATA_TYPE
-#define ISGREATER(x, y) isgreater(x, y)
-#define ISLESS(x, y) isless(x, y)
-#else // !FLOAT_DATA_TYPE
-#if defined(WIDTH)
-#define ISGREATER(x, y) (x > y) ? 1 : 0
-#define ISLESS(x, y) (x < y) ? 1 : 0
-#else // !defined(WIDTH)
-#define ISGREATER(x, y) select((int16)0, (int16)-1, x > y)
-#define ISLESS(x, y) select((int16)0, (int16)-1, x < y)
-#endif // defined(WIDTH)
-#endif // FLOAT_DATA_TYPE
 
 #define VECTOR_DECLARATION(name)     \
     __global uchar *name##_ptr,      \
