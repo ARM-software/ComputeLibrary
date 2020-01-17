@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,20 +48,28 @@
 /** Applies element wise unary operator in a tensor.
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: F16/32.
- * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
- * @param[in]  in_step_x                         in_stride_x * number of elements along X processed per work item (in bytes)
+ * @param[in]  in_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  in_step_x                         in_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  in_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  in_step_y                         in_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  in_step_z                         in_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in_offset_first_element_in_bytes  Offset of the first element in the source image
  * @param[out] out_ptr                           Pointer to the destination image. Supported data types: F16/32.
  * @param[in]  out_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]  out_step_y                        out_stride_y * number of elements along Y processed per work item (in bytes)
+ * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  out_step_y                        Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  out_step_y                        out_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  out_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  out_step_z                        out_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  out_offset_first_element_in_bytes Offset of the first element in the destination image
  */
 __kernel void elementwise_unary(
-    VECTOR_DECLARATION(in),
-    VECTOR_DECLARATION(out))
+    TENSOR3D_DECLARATION(in),
+    TENSOR3D_DECLARATION(out))
 {
-    Vector in  = CONVERT_TO_VECTOR_STRUCT(in);
-    Vector out = CONVERT_TO_VECTOR_STRUCT(out);
+    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(in);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
 #if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
     // Check if access on width gets out of bounds
