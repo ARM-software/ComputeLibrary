@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,7 +83,7 @@ public:
 
     // Inherited methods overridden :
     void                          *buffer() override;
-    void                          *buffer() const override;
+    const void                    *buffer() const override;
     std::unique_ptr<IMemoryRegion> extract_subregion(size_t offset, size_t size) override;
 
 protected:

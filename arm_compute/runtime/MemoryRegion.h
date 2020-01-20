@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,7 +86,7 @@ public:
     {
         return _ptr;
     }
-    void *buffer() const final
+    const void *buffer() const final
     {
         return _ptr;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,8 +78,8 @@ public:
     virtual void unmap() = 0;
 
     // Inherited methods overridden :
-    void *buffer() override;
-    void *buffer() const override;
+    void       *buffer() override;
+    const void *buffer() const override;
 
 protected:
     void *_mapping;

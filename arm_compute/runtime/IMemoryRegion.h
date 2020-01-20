@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ public:
      *
      * @return Pointer to the allocated data
      */
-    virtual void *buffer() const = 0;
+    virtual const void *buffer() const = 0;
     /** Memory region size accessor
      *
      * @return Memory region size
