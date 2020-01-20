@@ -76,9 +76,10 @@ You should have the following file organisation:
 	│   ├── graph.h --> Includes all the Graph headers at once.
 	│   ├── core
 	│   │   ├── CL
+	│   │   │   ├── CLCoreRuntimeContext.h --> Manages all core OpenCL objects needed for kernel execution (cl_context, cl_kernel, cl_command_queue, etc).
 	│   │   │   ├── CLKernelLibrary.h --> Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
 	│   │   │   ├── CLKernels.h --> Includes all the OpenCL kernels at once
-	│   │   │   ├── CL specialisation of all the generic objects interfaces (ICLTensor, ICLImage, etc.)
+	│   │   │   ├── CL specialisation of all the generic objects interfaces (ICLTensor, ICLArray, etc.)
 	│   │   │   ├── kernels --> Folder containing all the OpenCL kernels
 	│   │   │   │   └── CL*Kernel.h
 	│   │   │   └── OpenCL.h --> Wrapper to configure the Khronos OpenCL C++ header
@@ -87,9 +88,10 @@ You should have the following file organisation:
 	│   │   │   └── kernels --> Folder containing all the CPP kernels
 	│   │   │       └── CPP*Kernel.h
 	│   │   ├── GLES_COMPUTE
+	│   │   │   ├── GCCoreRuntimeContext.h --> Manages all core GLES objects needed for kernel execution.
 	│   │   │   ├── GCKernelLibrary.h --> Manages all the GLES kernels compilation and caching, provides accessors for the GLES Context.
 	│   │   │   ├── GCKernels.h --> Includes all the GLES kernels at once
-	│   │   │   ├── GLES specialisation of all the generic objects interfaces (IGCTensor, IGCImage, etc.)
+	│   │   │   ├── GLES specialisation of all the generic objects interfaces (IGCTensor etc.)
 	│   │   │   ├── kernels --> Folder containing all the GLES kernels
 	│   │   │   │   └── GC*Kernel.h
 	│   │   │   └── OpenGLES.h --> Wrapper to configure the Khronos EGL and OpenGL ES C header
@@ -102,10 +104,15 @@ You should have the following file organisation:
 	│   │   │   │   │   └── winograd --> headers for Winograd convolution assembly implementation
 	│   │   │   │   ├── detail --> Common code for several intrinsics implementations.
 	│   │   │   │   └── NE*Kernel.h
+	│   │   │   ├── wrapper --> NEON wrapper used to simplify code
+	│   │   │   │   ├── intrinsics --> NEON instrincs' wrappers
+	│   │   │   │   ├── scalar --> Scalar operations
+	│   │   │   │   ├── traits.h --> Traits defined on NEON vectors
+	│   │   │   │   └── wrapper.h --> Includes all wrapper headers at once
 	│   │   │   └── NEKernels.h --> Includes all the NEON kernels at once
 	│   │   ├── All common basic types (Types.h, Window, Coordinates, Iterator, etc.)
-	│   │   ├── All generic objects interfaces (ITensor, IImage, etc.)
-	│   │   └── Objects metadata classes (ImageInfo, TensorInfo, MultiImageInfo)
+	│   │   ├── All generic objects interfaces (ITensor, IArray, etc.)
+	│   │   └── Objects metadata classes (TensorInfo, MultiImageInfo)
 	│   ├── graph
 	│   │   ├── algorithms
 	│   │   │   └── Generic algorithms used by the graph backend (e.g Order of traversal)
@@ -125,12 +132,15 @@ You should have the following file organisation:
 	│   │   │   └── Debug printers
 	│   │   └── Graph objects ( INode, ITensorAccessor, Graph, etc.)
 	│   └── runtime
+	│       ├── common
+	│       │   └── Common utility code used by all backends
 	│       ├── CL
-	│       │   ├── CL objects & allocators (CLArray, CLImage, CLTensor, etc.)
+	│       │   ├── CL objects & allocators (CLArray, CLTensor, etc.)
 	│       │   ├── functions --> Folder containing all the OpenCL functions
 	│       │   │   └── CL*.h
 	│       │   ├── CLScheduler.h --> Interface to enqueue OpenCL kernels and get/set the OpenCL CommandQueue and ICLTuner.
 	│       │   ├── CLFunctions.h --> Includes all the OpenCL functions at once
+	│       │   ├── ICLTuner.h --> Interface used to tune the local work-group size of OpenCL kernels
 	│       │   └── tuners
 	│       │       └── Local workgroup size tuners for specific architectures / GPUs
 	│       ├── CPP
@@ -139,7 +149,7 @@ You should have the following file organisation:
 	│       │   └── functions --> Folder containing all the CPP functions
 	│       │       └── CPP*.h
 	│       ├── GLES_COMPUTE
-	│       │   ├── GLES objects & allocators (GCArray, GCImage, GCTensor, etc.)
+	│       │   ├── GLES objects & allocators (GCArray, GCTensor, etc.)
 	│       │   ├── functions --> Folder containing all the GLES functions
 	│       │   │   └── GC*.h
 	│       │   ├── GCScheduler.h --> Interface to enqueue GLES kernels and get/set the GLES CommandQueue.
@@ -150,14 +160,14 @@ You should have the following file organisation:
 	│       │   └── NEFunctions.h --> Includes all the NEON functions at once
 	│       ├── OMP
 	│       │   └── OMPScheduler.h --> OpenMP scheduler (Alternative to the CPPScheduler)
-	│       ├── Memory manager files (LifetimeManager, PoolManager, etc.)
-	│       └── Basic implementations of the generic object interfaces (Array, Image, Tensor, etc.)
-	├── data -> Contains test images and reference data dumps used by validation tests
-	├── docs -> Contains Doxyfile and Doxygen sources used to generate the HTML pages in the documentation folder.
+	│       ├── Memory & weights manager files (LifetimeManager, PoolManager, etc.)
+	│       └── Basic implementations of the generic object interfaces (Array, Tensor, etc.)
+	├── data --> Contains test images and reference data dumps used by validation tests
+	├── docs --> Contains Doxyfile and Doxygen sources used to generate the HTML pages in the documentation folder.
 	├── documentation
 	│   ├── index.xhtml
 	│   └── ...
-	├── documentation.xhtml -> documentation/index.xhtml
+	├── documentation.xhtml --> documentation/index.xhtml
 	├── examples
 	│   ├── cl_*.cpp --> OpenCL examples
 	│   ├── gc_*.cpp --> GLES compute shaders examples
@@ -169,13 +179,10 @@ You should have the following file organisation:
 	│   │   └── Khronos OpenCL C headers and C++ wrapper
 	│   ├── half --> FP16 library available from http://half.sourceforge.net
 	│   ├── libnpy --> Library to load / write npy buffers, available from https://github.com/llohse/libnpy
-	│   └── linux --> Headers only needed for Linux builds
-	│       └── Khronos EGL and OpenGLES headers
-	├── opencl-1.2-stubs
-	│   └── opencl_stubs.c --> OpenCL stubs implementation
-	├── opengles-3.1-stubs
-	│   ├── EGL.c --> EGL stubs implementation
-	│   └── GLESv2.c --> GLESv2 stubs implementation
+	│   ├── linux --> Headers only needed for Linux builds
+	│   │   └── Khronos EGL and OpenGLES headers
+	│   └── stb
+	│        └── stb_image.h --> Single header library to load image files, available from https://github.com/nothings/stb
 	├── scripts
 	│   ├── caffe_data_extractor.py --> Basic script to export weights from Caffe to npy files
 	│   └── tensorflow_data_extractor.py --> Basic script to export weights from Tensor Flow to npy files
@@ -201,6 +208,7 @@ You should have the following file organisation:
 	│   │   ├── CL --> OpenCL benchmarking tests
 	│   │   ├── GLES_COMPUTE --> GLES benchmarking tests
 	│   │   └── NEON --> NEON benchmarking tests
+	│   ├── benchmark_examples --> Sources needed to wrap examples to run through our benchmarking framework.
 	│   ├── CL --> OpenCL accessors
 	│   ├── GLES_COMPUTE --> GLES accessors
 	│   ├── NEON --> NEON accessors
@@ -208,6 +216,8 @@ You should have the following file organisation:
 	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
 	│   ├── framework
 	│   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
+	│   ├── instruments --> User defined instruments that can be registered to the framework.
+	│   ├── validate_examples --> Sources needed to wrap examples to run through our validation framework.
 	│   └── validation --> Sources for validation
 	│       ├── Validation specific files
 	│       ├── fixtures
