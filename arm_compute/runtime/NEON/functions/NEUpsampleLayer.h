@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ public:
     NEUpsampleLayer();
     /** Set the input output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/F16/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      * @param[in]  info   Contains stride information described in @ref Size2D.
      * @param[in]  policy Defines the policy to fill the intermediate pixels.
@@ -52,7 +52,7 @@ public:
                    const InterpolationPolicy &policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEUpsampleLayer
      *
-     * @param[in]  input  Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Source tensor info. Data types supported: QASYMM8_SIGNED/QASYMM8/F16/F32.
      * @param[out] output Destination tensor info. Data types supported: same as @p input.
      * @param[in]  info   Contains stride information described in @ref Size2D.
      * @param[in]  policy Defines the policy to fill the intermediate pixels.
