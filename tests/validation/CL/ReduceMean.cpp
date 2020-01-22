@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ namespace
 {
 constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
 constexpr AbsoluteTolerance<float>   tolerance_f16(0.03f);  /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);  /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric quantized type */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(2);  /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric quantized type */
 
 const auto axis_keep = combine(framework::dataset::make("Axis", { Coordinates(0), Coordinates(1, 0), Coordinates(1, 2), Coordinates(0, 2), Coordinates(1, 3), Coordinates(0, 1, 2, 3) }),
                                framework::dataset::make("KeepDims", { true }));

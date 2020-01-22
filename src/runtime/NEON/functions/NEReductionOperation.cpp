@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -194,11 +194,15 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
             }
             case ReductionOperation::ARG_IDX_MAX:
             case ReductionOperation::ARG_IDX_MIN:
+            {
+                pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
+                break;
+            }
             case ReductionOperation::MEAN_SUM:
             case ReductionOperation::SUM_SQUARE:
             case ReductionOperation::SUM:
             {
-                pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
+                pixelValue = PixelValue(static_cast<uint32_t>(0));
                 break;
             }
             default:

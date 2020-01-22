@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,9 +58,9 @@ const auto ReductionOperations = framework::dataset::make("ReductionOperation",
 
 const auto QuantizationInfos = framework::dataset::make("QuantizationInfo",
 {
-    QuantizationInfo(1.f / 128, -10),
-    QuantizationInfo(1.f / 64, -5),
-    QuantizationInfo(1.f / 32, -2)
+    QuantizationInfo(1.f / 128, 10),
+    QuantizationInfo(1.f / 64, 5),
+    QuantizationInfo(1.f / 32, 2)
 });
 
 const auto Axises = framework::dataset::make("Axis",
@@ -127,17 +127,8 @@ template <typename T>
 using NEReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<Tensor, Accessor, NEReductionOperation, T>;
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), Axises),
-                                               ReductionOperations),
-                                       QuantizationInfos),
-                               KeepDims))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), Axises),
                                                ReductionOperations),
                                        QuantizationInfos),
                                KeepDims))

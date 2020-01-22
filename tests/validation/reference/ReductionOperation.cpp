@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -277,7 +277,7 @@ SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorSha
 template <>
 SimpleTensor<uint8_t> reduction_operation(const SimpleTensor<uint8_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op)
 {
-    if(src.data_type() == DataType::QASYMM8 && op != ReductionOperation::MEAN_SUM)
+    if(src.data_type() == DataType::QASYMM8)
     {
         SimpleTensor<float> src_f = convert_from_asymmetric(src);
         SimpleTensor<float> dst_f = reference::reduction_operation<float, float>(src_f, dst_shape, axis, op);
