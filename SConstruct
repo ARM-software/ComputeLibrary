@@ -41,7 +41,8 @@ vars.AddVariables(
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a",
-                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64", "armv8a", "armv8.2-a", "armv8.2-a-sve", "x86")),
+                  allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64",
+                                  "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
@@ -194,17 +195,17 @@ if 'v7a' in env['arch']:
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
     else:
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
-elif 'v8a' in env['arch']:
-    env.Append(CXXFLAGS = ['-march=armv8-a'])
-    if env['estate'] == '32':
-        env.Append(CXXFLAGS = ['-mfpu=neon-fp-armv8'])
-elif 'v8.2-a' in env['arch']:
-    if env['estate'] == '32':
-        env.Append(CXXFLAGS = ['-mfpu=neon-fp-armv8'])
+elif 'v8' in env['arch']:
     if 'sve' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
-    else:
+    elif 'v8.2-a' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+    else:
+        env.Append(CXXFLAGS = ['-march=armv8-a'])
+
+    if 'v8.6-a' in env['arch']:
+        env.Append(CXXFLAGS = ['-DV8P6'])
+
 elif 'x86' in env['arch']:
     if env['estate'] == '32':
         env.Append(CCFLAGS = ['-m32'])

@@ -34,10 +34,12 @@
 #include "kernels/a64_gemm_u8_12x8.hpp"
 #include "kernels/a64_gemm_u8_4x4.hpp"
 #include "kernels/a64_hybrid_u8u32_dot_16x4.hpp"
+#include "kernels/a64_interleaved_u8u32_mmla_12x8.hpp"
 #include "kernels/a64_smallK_hybrid_u8u32_dot_4x6.hpp"
 #include "kernels/a64_smallK_hybrid_u8u32_dot_4x8.hpp"
 #include "kernels/sve_hybrid_u8u32_dot_4VLx4.hpp"
 #include "kernels/sve_interleaved_u8u32_dot_3VLx8.hpp"
+#include "kernels/sve_interleaved_u8u32_mmla_3VLx8.hpp"
 #include "kernels/sve_native_u8u32_dot_4VLx4.hpp"
 #include "kernels/sve_smallK_hybrid_u8u32_dot_1VLx8.hpp"
 
@@ -45,6 +47,15 @@ namespace arm_gemm {
 
 static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
 #ifdef __ARM_FEATURE_SVE
+#ifdef V8P6
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "interleaved_u8u32_mmla_3VLx8",
+    [](const GemmArgs &args) { return (args._Ksize>8); },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_u8u32_mmla_3VLx8, uint8_t, uint32_t>(args); }
+},
+#endif
 {
     GemmMethod::GEMM_HYBRID,
     "smallK_hybrid_u8u32_dot_1VLx8",
@@ -72,6 +83,15 @@ static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
     [](const GemmArgs &args) { return (args._Ksize>4); },
     nullptr,
     [](const GemmArgs &args) { return new GemmInterleaved<interleaved_u8u32_dot_3VLx8, uint8_t, uint32_t>(args); }
+},
+#endif
+#ifdef V8P6
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "interleaved_u8u32_mmla_12x8",
+    [](const GemmArgs &args) { return (args._Ksize>8); },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_u8u32_mmla_12x8, uint8_t, uint32_t>(args); }
 },
 #endif
 {

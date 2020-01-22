@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,19 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "a32_interleave_6way_32bit.hpp"
-#include "a32_transpose_interleave_8way_32bit.hpp"
-#include "a64_block16_interleave4_8bit.hpp"
-#include "a64_interleave_8way_16bit.hpp"
-#include "a64_interleave_8way_32bit.hpp"
-#include "a64_interleave_8way_block4_8bit.hpp"
-#include "a64_interleave_8way_half_to_float.hpp"
-#include "a64_transpose_interleave_12way_16bit.hpp"
-#include "a64_transpose_interleave_12way_half_to_float.hpp"
-#include "a64_transpose_interleave_24way_16bit.hpp"
-#include "a64_transpose_interleave_8way_32bit.hpp"
-#include "sve_interleave_8way_32bit.hpp"
-#include "sve_interleave_8way_block2_16bit.hpp"
-#include "sve_interleave_8way_block4_16bit.hpp"
-#include "sve_interleave_8way_block4_8bit.hpp"
-#include "sve_interleave_8way_block8_8bit.hpp"
+#pragma once
+
+#ifdef __aarch64__
+
+#include <cstdint>
+#include "../std_transforms_fixed.hpp"
+
+namespace arm_gemm {
+
+// Actual kernel implementations
+void a64_interleaved_u8u32_mmla_12x8(const uint8_t *, const uint8_t *, uint32_t *, int, int, int);
+
+class interleaved_u8u32_mmla_12x8 {
+public:
+    typedef uint8_t operand_type;
+    typedef uint32_t result_type;
+
+    typedef void (*kern_type)(const uint8_t *, const uint8_t *, uint32_t *, int, int, int);
+
+    /* Kernel blocking parameters */
+    static unsigned int out_width()
+    {
+        return 12;
+    }
+
+    static unsigned int out_height()
+    {
+        return 8;
+    }
+
+    static unsigned int k_unroll()
+    {
+        return 8;
+    }
+
+    // Use the standard fixed size transforms.
+    StdTransformsFixed<operand_type, result_type, 8, 12, 8> transforms = {};
+
+    kern_type kernel=a64_interleaved_u8u32_mmla_12x8;
+
+    interleaved_u8u32_mmla_12x8(const CPUInfo *ci)
+    {
+        UNUSED(ci);
+    }
+};
+
+} // namespace arm_gemm
+
+#endif // __aarch64__

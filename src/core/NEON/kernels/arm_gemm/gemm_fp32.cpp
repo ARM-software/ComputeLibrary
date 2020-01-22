@@ -114,7 +114,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 {
     GemmMethod::GEMM_HYBRID,
-    "hybrid_fp32_mla_16x4",
+    "hybrid_fp32_mla_16x4_normal",
     [](const GemmArgs &args) { return (args._Ksize >= 4) && !args._trA && args._pretransposed_hint; },
     [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || (args._Msize < 16) || (args._nmulti > 1); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mla_16x4, float, float>(args); }
