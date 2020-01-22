@@ -103,6 +103,7 @@ public:
 public:
     const ICLTensor *_input;
     ICLTensor       *_output;
+    DataLayout       _data_layout;
     std::pair<unsigned int, unsigned int> _convolved_dims;
     unsigned int  _num_elems_processed_per_iteration;
     Size2D        _kernel_dims;

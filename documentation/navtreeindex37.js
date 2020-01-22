@@ -1,5 +1,6 @@
 var NAVTREEINDEX37 =
 {
+"channel__extract_8cl.xhtml#aeecb8084159259d10790df3e0a602cbf":[11,0,3,0,0,0,13,2],
 "channel__extract_8cl_source.xhtml":[11,0,3,0,0,0,13],
 "channel__shuffle_8cl.xhtml":[11,0,3,0,0,0,14],
 "channel__shuffle_8cl_source.xhtml":[11,0,3,0,0,0,14],
@@ -248,6 +249,5 @@ var NAVTREEINDEX37 =
 "classarm__compute_1_1_c_l_arithmetic_division.xhtml#aa08e0c678275eb37e8de42be52d76e35":[10,0,0,46,0],
 "classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml":[10,0,0,47],
 "classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a498e5769090f1436cc0191dfa5580c2e":[10,0,0,47,1],
-"classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#af9d6d899047862af33fc919a1dcb35eb":[10,0,0,47,0],
-"classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml":[10,0,0,48]
+"classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#af9d6d899047862af33fc919a1dcb35eb":[10,0,0,47,0]
 };

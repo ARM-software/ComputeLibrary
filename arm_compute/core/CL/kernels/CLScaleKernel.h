@@ -75,6 +75,7 @@ public:
 
 public:
     InterpolationPolicy _interpolationPolicy = InterpolationPolicy::BILINEAR;
+    DataLayout          _data_layout         = DataLayout::UNKNOWN;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLSCALEKERNEL_H__ */

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['m',['m',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#a4033037df26775dd60840e66d38a08ba',1,'arm_compute::GEMMKernelInfo::m()'],['../structgemm__tuner_1_1_common_gemm_example_params.xhtml#af0337b6054d4462adeb69c1b2a5387e6',1,'gemm_tuner::CommonGemmExampleParams::M()'],['../classgemm__tuner_1_1_common_gemm_example_options.xhtml#ac454f986dddc4ac01a91e71b2ffe1cb2',1,'gemm_tuner::CommonGemmExampleOptions::M()']]],
+  ['m',['M',['../structgemm__tuner_1_1_common_gemm_example_params.xhtml#af0337b6054d4462adeb69c1b2a5387e6',1,'gemm_tuner::CommonGemmExampleParams::M()'],['../classgemm__tuner_1_1_common_gemm_example_options.xhtml#ac454f986dddc4ac01a91e71b2ffe1cb2',1,'gemm_tuner::CommonGemmExampleOptions::M()'],['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#a4033037df26775dd60840e66d38a08ba',1,'arm_compute::GEMMKernelInfo::m()']]],
   ['m0',['m0',['../structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml#a41618231c7d7b990c42fe6846b4dde27',1,'arm_compute::GEMMLHSMatrixInfo']]],
   ['m0_5fvalue',['m0_value',['../namespacearm__compute_1_1test_1_1validation.xhtml#aceda8c228bbcc0e305cc66b0c24f433d',1,'arm_compute::test::validation']]],
   ['max',['max',['../structarm__compute_1_1_min_max_location_values.xhtml#a4b7ee8a31f634f28eb1d4d97f6159ccd',1,'arm_compute::MinMaxLocationValues']]],

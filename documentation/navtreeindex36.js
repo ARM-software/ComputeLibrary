@@ -1,5 +1,6 @@
 var NAVTREEINDEX36 =
 {
+"benchmark_2_n_e_o_n_2_harris_corners_8cpp.xhtml#a1aa05c5a190c320fbb0e259c9af430d2":[11,0,5,0,2,19,0],
 "benchmark_2_n_e_o_n_2_harris_corners_8cpp.xhtml#aad65e9549e68a0293552a8b73130d8fe":[11,0,5,0,2,19,1],
 "benchmark_2_n_e_o_n_2_harris_corners_8cpp.xhtml#ab56c4df58f3f00d41df0eb7af2e4433b":[11,0,5,0,2,19,2],
 "benchmark_2_n_e_o_n_2_harris_corners_8cpp_source.xhtml":[11,0,5,0,2,19],
@@ -248,6 +249,5 @@ var NAVTREEINDEX36 =
 "channel__extract_8cl.xhtml#a628f0c1a3a80b8dc275ad0ca877e3833":[11,0,3,0,0,0,13,1],
 "channel__extract_8cl.xhtml#a6f8110fd6923dfc2db9daf1f3ed92435":[11,0,3,0,0,0,13,5],
 "channel__extract_8cl.xhtml#a8b54e12b0c19a206a73ade8e8bed82f3":[11,0,3,0,0,0,13,6],
-"channel__extract_8cl.xhtml#ae133ea6ea26771fc36a31d0a3d783077":[11,0,3,0,0,0,13,3],
-"channel__extract_8cl.xhtml#aeecb8084159259d10790df3e0a602cbf":[11,0,3,0,0,0,13,2]
+"channel__extract_8cl.xhtml#ae133ea6ea26771fc36a31d0a3d783077":[11,0,3,0,0,0,13,3]
 };

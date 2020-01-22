@@ -1,5 +1,10 @@
 var NAVTREEINDEX78 =
 {
+"reference_2_gaussian5x5_8cpp.xhtml#ae74885d96f07f242e6974979cce5673b":[11,0,5,8,4,97,0],
+"reference_2_gaussian5x5_8cpp_source.xhtml":[11,0,5,8,4,97],
+"reference_2_im2_col_8cpp.xhtml":[11,0,5,8,4,122],
+"reference_2_im2_col_8cpp.xhtml#a53c6c871275a6e678cdc9e6f2d9ee872":[11,0,5,8,4,122,1],
+"reference_2_im2_col_8cpp.xhtml#a676e94ff38d81a5794e2bf69008c5137":[11,0,5,8,4,122,5],
 "reference_2_im2_col_8cpp.xhtml#a77f0a04bc3f800ccd330df1170e76344":[11,0,5,8,4,122,0],
 "reference_2_im2_col_8cpp.xhtml#ad6895d72078004becb83ec54725ff384":[11,0,5,8,4,122,3],
 "reference_2_im2_col_8cpp.xhtml#ad77dc54e222c3f36e9de88a70b6572af":[11,0,5,8,4,122,2],
@@ -244,10 +249,5 @@ var NAVTREEINDEX78 =
 "runtime_2_g_l_e_s___c_o_m_p_u_t_e_2_g_c_helpers_8cpp_source.xhtml":[11,0,3,2,2,2],
 "runtime_2_g_l_e_s___c_o_m_p_u_t_e_2_g_c_helpers_8h.xhtml":[11,0,0,2,3,3],
 "runtime_2_g_l_e_s___c_o_m_p_u_t_e_2_g_c_helpers_8h.xhtml#a7a693978af5e57f16ba933439da00aeb":[11,0,0,2,3,3,0],
-"runtime_2_g_l_e_s___c_o_m_p_u_t_e_2_g_c_helpers_8h_source.xhtml":[11,0,0,2,3,3],
-"runtime_2_tensor_8cpp.xhtml":[11,0,3,2,32],
-"runtime_2_tensor_8cpp_source.xhtml":[11,0,3,2,32],
-"runtime_2_tensor_8h.xhtml":[11,0,0,2,49],
-"runtime_2_tensor_8h.xhtml#a7fb6a368d181ef193475f725c713430a":[11,0,0,2,49,1],
-"runtime_2_tensor_8h_source.xhtml":[11,0,0,2,49]
+"runtime_2_g_l_e_s___c_o_m_p_u_t_e_2_g_c_helpers_8h_source.xhtml":[11,0,0,2,3,3]
 };

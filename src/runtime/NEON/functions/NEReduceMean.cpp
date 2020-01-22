@@ -26,40 +26,13 @@
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 namespace arm_compute
 {
 namespace
 {
-inline TensorShape calculate_reduce_mean_shape(ITensor *input, const Coordinates &reduction_axis, bool keep_dims)
-{
-    const int   reduction_ops = reduction_axis.num_dimensions();
-    Coordinates axis_local    = reduction_axis;
-    const int   input_dims    = input->info()->num_dimensions();
-    convert_negative_axis(axis_local, input_dims);
-    TensorShape out_shape = input->info()->tensor_shape();
-    // Configure reshape layer if we want to drop the dimensions
-    if(!keep_dims)
-    {
-        // We have to sort the reduction axis vectors in order for remove_dimension
-        // to work properly
-        std::sort(axis_local.begin(), axis_local.begin() + reduction_ops);
-        for(int i = 0; i < reduction_ops; ++i)
-        {
-            out_shape.remove_dimension(axis_local[i] - i);
-        }
-        return out_shape;
-    }
-    else
-    {
-        for(int i = 0; i < reduction_ops; ++i)
-        {
-            out_shape.set(axis_local[i], 1);
-        }
-        return out_shape;
-    }
-}
 } // namespace
 
 NEReduceMean::NEReduceMean(std::shared_ptr<IMemoryManager> memory_manager)
@@ -130,7 +103,7 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(NEReduceMean::validate(input->info(), reduction_axis, keep_dims, output->info()));
     // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = calculate_reduce_mean_shape(input, reduction_axis, keep_dims);
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_reduce_mean_shape(input, reduction_axis, keep_dims);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     _reduction_ops = reduction_axis.num_dimensions();

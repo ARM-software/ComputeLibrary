@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['m',['m',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#a4033037df26775dd60840e66d38a08ba',1,'arm_compute::GEMMKernelInfo::m()'],['../classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a137948e04c296b448be2c0de97c6adcb',1,'arm_compute::GEMMReshapeInfo::m()'],['../structgemm__tuner_1_1_common_gemm_example_params.xhtml#af0337b6054d4462adeb69c1b2a5387e6',1,'gemm_tuner::CommonGemmExampleParams::M()'],['../classgemm__tuner_1_1_common_gemm_example_options.xhtml#ac454f986dddc4ac01a91e71b2ffe1cb2',1,'gemm_tuner::CommonGemmExampleOptions::M()']]],
+  ['m',['M',['../structgemm__tuner_1_1_common_gemm_example_params.xhtml#af0337b6054d4462adeb69c1b2a5387e6',1,'gemm_tuner::CommonGemmExampleParams::M()'],['../classgemm__tuner_1_1_common_gemm_example_options.xhtml#ac454f986dddc4ac01a91e71b2ffe1cb2',1,'gemm_tuner::CommonGemmExampleOptions::M()'],['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#a4033037df26775dd60840e66d38a08ba',1,'arm_compute::GEMMKernelInfo::m()'],['../classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a137948e04c296b448be2c0de97c6adcb',1,'arm_compute::GEMMReshapeInfo::m()']]],
   ['m0',['m0',['../structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml#a41618231c7d7b990c42fe6846b4dde27',1,'arm_compute::GEMMLHSMatrixInfo']]],
   ['m0_5fvalue',['m0_value',['../namespacearm__compute_1_1test_1_1validation.xhtml#aceda8c228bbcc0e305cc66b0c24f433d',1,'arm_compute::test::validation']]],
   ['m_5fpi',['M_PI',['../_n_e_math_8inl.xhtml#ae71449b1cc6e6250b91f539153a7a0d3',1,'NEMath.inl']]],

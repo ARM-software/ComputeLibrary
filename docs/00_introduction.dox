@@ -236,6 +236,14 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v19.11.1 Public maintenance release
+ - Fix offset calculation in NEReductionOperationKernel.
+ - Fix data layout in NEScaleKernel for nhwc.
+ - Retain configuration step data layout to avoid side-effects.
+ - Perform sqrt in double domain for L2 pooling.
+ - Fix output shape calculation for Reduce Mean
+ - Restrict cases where optimized NEPadLayer runs.
+
 v19.11 Public major release
  - Various bug fixes.
  - Various optimisations.
@@ -301,6 +309,14 @@ v19.11 Public major release
  - Optimized @ref CLPadLayer.
  - Optimized CL generic depthwise convolution layer by introducing @ref CLDepthwiseConvolutionLayerNativeKernel.
  - Reduced memory consumption by implementing weights sharing.
+
+v19.08.1 Public maintenance release
+ - Fix offset calculation in NEReductionOperationKernel.
+ - Fix data layout in NEScaleKernel for nhwc.
+ - Retain configuration step data layout to avoid side-effects.
+ - Perform sqrt in double domain for L2 pooling.
+ - Fix output shape calculation for Reduce Mean
+ - Fix broadcast CLPixelwiseMultiplication with 5D tensors
 
 v19.08 Public major release
  - Various bug fixes.

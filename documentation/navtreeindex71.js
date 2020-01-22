@@ -1,5 +1,10 @@
 var NAVTREEINDEX71 =
 {
+"direct__convolution3x3_8cl.xhtml#ad3cc858846806e6b1d3694b9d0a2e6da":[11,0,3,0,0,0,37,2],
+"direct__convolution3x3_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39":[11,0,3,0,0,0,37,0],
+"direct__convolution3x3_8cl_source.xhtml":[11,0,3,0,0,0,37],
+"direct__convolution5x5_8cl.xhtml":[11,0,3,0,0,0,38],
+"direct__convolution5x5_8cl_source.xhtml":[11,0,3,0,0,0,38],
 "direct__convolution9x9_8cl.xhtml":[11,0,3,0,0,0,39],
 "direct__convolution9x9_8cl_source.xhtml":[11,0,3,0,0,0,39],
 "direct__convolution__quantized_8cl.xhtml":[11,0,3,0,0,0,40],
@@ -244,10 +249,5 @@ var NAVTREEINDEX71 =
 "functions_vars_z.xhtml":[10,3,2,26],
 "functions_w.xhtml":[10,3,0,23],
 "functions_x.xhtml":[10,3,0,24],
-"functions_y.xhtml":[10,3,0,25],
-"functions_z.xhtml":[10,3,0,26],
-"functions_~.xhtml":[10,3,0,27],
-"gather_8cl.xhtml":[11,0,3,0,0,0,52],
-"gather_8cl_source.xhtml":[11,0,3,0,0,0,52],
-"gaussian__pyramid_8cl.xhtml":[11,0,3,0,0,0,53]
+"functions_y.xhtml":[10,3,0,25]
 };

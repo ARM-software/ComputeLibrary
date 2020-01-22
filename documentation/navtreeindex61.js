@@ -1,5 +1,10 @@
 var NAVTREEINDEX61 =
 {
+"classarm__compute_1_1_tensor_info.xhtml#ab54246abe670b06f5624add7e7022904":[10,0,0,899,38],
+"classarm__compute_1_1_tensor_info.xhtml#ac307dc31ce68e3cf1273ffbc86e57646":[10,0,0,899,6],
+"classarm__compute_1_1_tensor_info.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db":[10,0,0,899,21],
+"classarm__compute_1_1_tensor_info.xhtml#ac745167b7289cd4510034dbe81d5052a":[10,0,0,899,27],
+"classarm__compute_1_1_tensor_info.xhtml#ac74736e3863207232a23b7181c1d0f44":[10,0,0,899,42],
 "classarm__compute_1_1_tensor_info.xhtml#ad03af3eeb6f3666d6282ca689c1b2ce8":[10,0,0,899,49],
 "classarm__compute_1_1_tensor_info.xhtml#ad3e249a7d8f329aa470d6903c9e415fe":[10,0,0,899,12],
 "classarm__compute_1_1_tensor_info.xhtml#ad4b6171ddcf854de5d1226cd4d0b0439":[10,0,0,899,25],
@@ -244,10 +249,5 @@ var NAVTREEINDEX61 =
 "classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml#a3f18a7449b9d7fc9e5fec212b8e61710":[10,0,0,4,14,2],
 "classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b":[10,0,0,4,14,3],
 "classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5":[10,0,0,4,14,4],
-"classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f":[10,0,0,4,14,1],
-"classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml":[10,0,0,4,15],
-"classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml#a3f18a7449b9d7fc9e5fec212b8e61710":[10,0,0,4,15,2],
-"classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml#a4491336dccd18464fbbf617c981736cf":[10,0,0,4,15,3],
-"classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b":[10,0,0,4,15,4],
-"classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5":[10,0,0,4,15,5]
+"classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f":[10,0,0,4,14,1]
 };

@@ -63,7 +63,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 } // namespace
 
 NEDepthToSpaceLayerKernel::NEDepthToSpaceLayerKernel()
-    : _input(nullptr), _output(nullptr), _block_shape()
+    : _input(nullptr), _output(nullptr), _block_shape(), _data_layout(DataLayout::UNKNOWN)
 {
 }
 
@@ -80,6 +80,7 @@ void NEDepthToSpaceLayerKernel::configure(const ITensor *input, ITensor *output,
     _input       = input;
     _output      = output;
     _block_shape = block_shape;
+    _data_layout = input->info()->data_layout();
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -99,7 +100,7 @@ void NEDepthToSpaceLayerKernel::run(const Window &window, const ThreadInfo &info
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
 
-    const int idx_channel  = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::CHANNEL);
+    const int idx_channel  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::CHANNEL);
     const int depth_size   = _input->info()->dimension(idx_channel);
     const int r            = (depth_size / (_block_shape * _block_shape));
     const int element_size = _input->info()->element_size();
@@ -112,7 +113,7 @@ void NEDepthToSpaceLayerKernel::run(const Window &window, const ThreadInfo &info
     slice_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     // Main loop for NCHW and NHWC
-    if(_input->info()->data_layout() == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         Window slice_in = window.first_slice_window_2D();
         do

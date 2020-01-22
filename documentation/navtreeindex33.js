@@ -1,5 +1,6 @@
 var NAVTREEINDEX33 =
 {
+"arm__compute_2core_2_utils_8h.xhtml#a84437d80241f6a31e1a07c231ee8e3ac":[11,0,0,0,41,23],
 "arm__compute_2core_2_utils_8h.xhtml#a8b82da7b5e0f6192f415ac347c9e0555":[11,0,0,0,41,41],
 "arm__compute_2core_2_utils_8h.xhtml#a922cd85c475c0d725fc030116ea57979":[11,0,0,0,41,24],
 "arm__compute_2core_2_utils_8h.xhtml#a95358b677c5c17f5cc1e369e4a27e2c2":[11,0,0,0,41,19],
@@ -248,6 +249,5 @@ var NAVTREEINDEX33 =
 "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a023437471ee7946587c06790482d4e57":[11,0,5,0,0,5,19],
 "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a026ba76d826a3808560aecf0c0862ef6":[11,0,5,0,0,5,16],
 "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a0af44d42b10be152a26535c7d656fe7e":[11,0,5,0,0,5,17],
-"benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a1fdc6b13682f64eb954a4d4843d1f0db":[11,0,5,0,0,5,23],
-"benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a22fb86f77a20d298ea600a2d24713c5e":[11,0,5,0,0,5,0]
+"benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a1fdc6b13682f64eb954a4d4843d1f0db":[11,0,5,0,0,5,23]
 };

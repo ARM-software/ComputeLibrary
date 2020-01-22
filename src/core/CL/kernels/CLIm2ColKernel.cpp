@@ -287,7 +287,7 @@ Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size
 } // namespace
 
 CLIm2ColKernel::CLIm2ColKernel()
-    : _input(nullptr), _output(nullptr), _convolved_dims(), _num_elems_processed_per_iteration(1), _kernel_dims(), _conv_info(), _num_groups()
+    : _input(nullptr), _output(nullptr), _data_layout(DataLayout::UNKNOWN), _convolved_dims(), _num_elems_processed_per_iteration(1), _kernel_dims(), _conv_info(), _num_groups()
 {
 }
 
@@ -297,9 +297,10 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, num_groups));
 
-    const DataLayout   data_layout  = input->info()->data_layout();
-    const unsigned int width_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    _data_layout = input->info()->data_layout();
+
+    const unsigned int width_idx    = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
     const unsigned int input_width  = input->info()->dimension(width_idx);
     const unsigned int input_height = input->info()->dimension(height_idx);
 
@@ -336,7 +337,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
     _config_id += "_";
-    _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
+    _config_id += lower_string(string_from_data_layout(_data_layout));
 }
 
 Status CLIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,
@@ -369,7 +370,7 @@ void CLIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)
     Window slice_in  = first_slice_3d;
     Window slice_out = window_output.first_slice_window_2D();
 
-    if(_input->info()->data_layout() == DataLayout::NHWC)
+    if(_data_layout == DataLayout::NHWC)
     {
         const Window tmp_win     = window.collapse_if_possible(ICLKernel::window(), 3);
         const int    num_batches = tmp_win[3].end();

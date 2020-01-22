@@ -1,5 +1,10 @@
 var NAVTREEINDEX81 =
 {
+"structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a6e019ad85979fd73c74f97e5483faf35":[10,0,0,475,8],
+"structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a7d24a8e7bad9b4d51aae3af31072d896":[10,0,0,475,1],
+"structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a94e1801be6c3d9d6645c694d7e280cda":[10,0,0,475,7],
+"structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#ab269b182588a158cd256f9d4bb2a00dd":[10,0,0,475,6],
+"structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#ab5b217eb04673634f9fcd97238f2db77":[10,0,0,475,5],
 "structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#ae5bbe76a801cb3001c3ea60bd9fb71d8":[10,0,0,475,4],
 "structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#ae5bd6bebbc0c7ebd9e7dbfd47d939c2a":[10,0,0,475,3],
 "structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml":[10,0,0,477],
@@ -244,10 +249,5 @@ var NAVTREEINDEX81 =
 "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a6cb5526035904ad08a9d5ba9fff9a942":[10,0,0,11,3,14,0,4],
 "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a6fb5fa1257ad2837d4b83dded72e2fe8":[10,0,0,11,3,14,0,3],
 "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a722639a64527d7e2fd655372694166ce":[10,0,0,11,3,14,0,2],
-"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a7a4338759c5836029ef531ae45f57007":[10,0,0,11,3,14,0,8],
-"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a82dc1e06c88a4412fd40f1750487c2ae":[10,0,0,11,3,14,0,1],
-"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa1bee75ce77e93989e011aae01955b03":[10,0,0,11,3,14,0,12],
-"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aac993ecccd3d88aafefb6b8e3caa1dee":[10,0,0,11,3,14,0,7],
-"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab037372802cee601adeb0ee97dc0c0f3":[10,0,0,11,3,14,0,0],
-"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b":[10,0,0,11,3,14,0,9]
+"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a7a4338759c5836029ef531ae45f57007":[10,0,0,11,3,14,0,8]
 };

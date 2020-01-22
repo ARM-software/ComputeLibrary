@@ -71,7 +71,7 @@ private:
     std::vector<CLReductionOperation> _reduction_kernels;
     std::vector<CLTensor>             _reduced_outs;
     CLReshapeLayer                    _reshape;
-    unsigned int                      _reduction_ops;
+    int                               _reduction_ops;
     bool                              _keep_dims;
 };
 } // namespace arm_compute

@@ -1,5 +1,6 @@
 var NAVTREEINDEX32 =
 {
+"arm__compute_2core_2_helpers_8h.xhtml#a6174495b626531de015ae2b810859287":[11,0,0,0,12,24],
 "arm__compute_2core_2_helpers_8h.xhtml#a6f698fa1629f7f800b3c8cd77a3d4b4a":[11,0,0,0,12,20],
 "arm__compute_2core_2_helpers_8h.xhtml#a75509469ec2689ec143f4a37bbcb4437":[11,0,0,0,12,41],
 "arm__compute_2core_2_helpers_8h.xhtml#a7c3d8e17b509d0d18cc7c94b7e0a993d":[11,0,0,0,12,29],
@@ -248,6 +249,5 @@ var NAVTREEINDEX32 =
 "arm__compute_2core_2_utils_8h.xhtml#a59846ef5ca75cd81cdb7e8a1ce08f9db":[11,0,0,0,41,11],
 "arm__compute_2core_2_utils_8h.xhtml#a5e4254e9c71fffafb79b99d972df8f81":[11,0,0,0,41,17],
 "arm__compute_2core_2_utils_8h.xhtml#a635f1895d94050329b7da12850d1a056":[11,0,0,0,41,36],
-"arm__compute_2core_2_utils_8h.xhtml#a64c17a5a42d2499a1626222ff9753b4d":[11,0,0,0,41,1],
-"arm__compute_2core_2_utils_8h.xhtml#a84437d80241f6a31e1a07c231ee8e3ac":[11,0,0,0,41,23]
+"arm__compute_2core_2_utils_8h.xhtml#a64c17a5a42d2499a1626222ff9753b4d":[11,0,0,0,41,1]
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -131,6 +131,7 @@ private:
     unsigned int  _kernel_height;
     bool          _has_bias;
     Size2D        _dilation;
+    DataLayout    _data_layout;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEIM2COLKERNEL_H__ */

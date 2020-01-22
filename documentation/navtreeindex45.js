@@ -1,5 +1,10 @@
 var NAVTREEINDEX45 =
 {
+"classarm__compute_1_1_c_l_softmax_layer_generic.xhtml#ad1717410afd0be936c6213a63c8005fb":[10,0,0,330,2],
+"classarm__compute_1_1_c_l_softmax_layer_generic.xhtml#ae3fdd368418ef45db831786e741ea1bb":[10,0,0,330,1],
+"classarm__compute_1_1_c_l_space_to_batch_layer.xhtml":[10,0,0,331],
+"classarm__compute_1_1_c_l_space_to_batch_layer.xhtml#a70408a1376ad3c51c4a4ac31606ef731":[10,0,0,331,6],
+"classarm__compute_1_1_c_l_space_to_batch_layer.xhtml#a8adba619d5104e036b506335761bd267":[10,0,0,331,1],
 "classarm__compute_1_1_c_l_space_to_batch_layer.xhtml#a948804ad61ca2c4d419876e6dec1c024":[10,0,0,331,5],
 "classarm__compute_1_1_c_l_space_to_batch_layer.xhtml#aae636d5d5d69bd1e0a94703499b61143":[10,0,0,331,7],
 "classarm__compute_1_1_c_l_space_to_batch_layer.xhtml#abd736910fb9a292fc8e87a981260558a":[10,0,0,331,2],
@@ -244,10 +249,5 @@ var NAVTREEINDEX45 =
 "classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#a226e57b99f58a82694dccafc07fc88b0":[10,0,0,361,1],
 "classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#a3b3917731ac9aba105792209b0e23677":[10,0,0,361,5],
 "classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[10,0,0,361,7],
-"classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#a88dd44621621d5c794e952d3a533c9d4":[10,0,0,361,2],
-"classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#a9474659ca4a4bf972731b0465dd28afd":[10,0,0,361,6],
-"classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#ac0b82bf392611c6ec3bb716de8887333":[10,0,0,361,0],
-"classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#aee6f8399af0d7f7cdb3fd590619db816":[10,0,0,361,3],
-"classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#af53d66a8f8dd368d3c06b43c0c6a12f1":[10,0,0,361,4],
-"classarm__compute_1_1_c_l_width_concatenate4_tensors_kernel.xhtml":[10,0,0,362]
+"classarm__compute_1_1_c_l_width_concatenate2_tensors_kernel.xhtml#a88dd44621621d5c794e952d3a533c9d4":[10,0,0,361,2]
 };

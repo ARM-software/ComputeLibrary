@@ -1,5 +1,9 @@
 var NAVTREEINDEX44 =
 {
+"classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[10,0,0,288,7],
+"classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml#a8f28dbe7a21f5ae5c54776d1953f3d39":[10,0,0,288,5],
+"classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml#ad4c3fe05fa833af7ab12dbd4b55a9930":[10,0,0,288,6],
+"classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml#ae373227f8bc0d4c1b27f66dedaf53bca":[10,0,0,288,1],
 "classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml#aec2ad990f91ebeb1c5e26426bcb9529c":[10,0,0,288,0],
 "classarm__compute_1_1_c_l_r_n_n_layer.xhtml":[10,0,0,302],
 "classarm__compute_1_1_c_l_r_n_n_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77":[10,0,0,302,2],
@@ -126,7 +130,8 @@ var NAVTREEINDEX44 =
 "classarm__compute_1_1_c_l_scale_kernel.xhtml":[10,0,0,312],
 "classarm__compute_1_1_c_l_scale_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[10,0,0,312,0],
 "classarm__compute_1_1_c_l_scale_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[10,0,0,312,4],
-"classarm__compute_1_1_c_l_scale_kernel.xhtml#a8639ae30eec16840f9d0ae0549eeaf3e":[10,0,0,312,5],
+"classarm__compute_1_1_c_l_scale_kernel.xhtml#a76e83555c34bd6c9a18b669391a290c3":[10,0,0,312,5],
+"classarm__compute_1_1_c_l_scale_kernel.xhtml#a8639ae30eec16840f9d0ae0549eeaf3e":[10,0,0,312,6],
 "classarm__compute_1_1_c_l_scale_kernel.xhtml#aa6d582c489816426715ac5cdcf079334":[10,0,0,312,1],
 "classarm__compute_1_1_c_l_scale_kernel.xhtml#ac62c4b5998255ec1c67fe4470b4a9e3c":[10,0,0,312,3],
 "classarm__compute_1_1_c_l_scale_kernel.xhtml#aed48dc7adafd9f7542a35b0482dd434f":[10,0,0,312,2],
@@ -244,10 +249,5 @@ var NAVTREEINDEX44 =
 "classarm__compute_1_1_c_l_sobel7x7_vert_kernel.xhtml#ad22bc492781a9536130d81344e26b1b7":[10,0,0,329,3],
 "classarm__compute_1_1_c_l_sobel7x7_vert_kernel.xhtml#afa6becd7a5a59d6853e0f447ba231ac4":[10,0,0,329,6],
 "classarm__compute_1_1_c_l_softmax_layer_generic.xhtml":[10,0,0,330],
-"classarm__compute_1_1_c_l_softmax_layer_generic.xhtml#a21c529666f0d9c998cdae7c52bea4fc1":[10,0,0,330,0],
-"classarm__compute_1_1_c_l_softmax_layer_generic.xhtml#ad1717410afd0be936c6213a63c8005fb":[10,0,0,330,2],
-"classarm__compute_1_1_c_l_softmax_layer_generic.xhtml#ae3fdd368418ef45db831786e741ea1bb":[10,0,0,330,1],
-"classarm__compute_1_1_c_l_space_to_batch_layer.xhtml":[10,0,0,331],
-"classarm__compute_1_1_c_l_space_to_batch_layer.xhtml#a70408a1376ad3c51c4a4ac31606ef731":[10,0,0,331,6],
-"classarm__compute_1_1_c_l_space_to_batch_layer.xhtml#a8adba619d5104e036b506335761bd267":[10,0,0,331,1]
+"classarm__compute_1_1_c_l_softmax_layer_generic.xhtml#a21c529666f0d9c998cdae7c52bea4fc1":[10,0,0,330,0]
 };

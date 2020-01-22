@@ -16,6 +16,7 @@ var searchData=
   ['calculate_5fquantized_5fmultiplier_5fgreater_5fthan_5fone',['calculate_quantized_multiplier_greater_than_one',['../namespacearm__compute_1_1quantization.xhtml#a75b05c663a2bf3a46c32ad843cab86f9',1,'arm_compute::quantization']]],
   ['calculate_5fquantized_5fmultiplier_5fless_5fthan_5fone',['calculate_quantized_multiplier_less_than_one',['../namespacearm__compute_1_1quantization.xhtml#aa7f38ca13336118049b3e1db4d9f4623',1,'arm_compute::quantization']]],
   ['calculate_5fquantized_5fmultipliers_5fless_5fthan_5fone',['calculate_quantized_multipliers_less_than_one',['../namespacearm__compute_1_1quantization.xhtml#a358bb588545254dbd23b21b6a5b04424',1,'arm_compute::quantization']]],
+  ['calculate_5freduce_5fmean_5fshape',['calculate_reduce_mean_shape',['../namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a7e4084fbf8d78731ea649eee03aaaab7',1,'arm_compute::misc::shape_calculator']]],
   ['calculate_5fsame_5fpad',['calculate_same_pad',['../namespacearm__compute.xhtml#aa6d4f0b9fedd979c5b768f9b34fda9f6',1,'arm_compute']]],
   ['calculate_5fstart_5fon_5findex',['calculate_start_on_index',['../namespacearm__compute_1_1helpers_1_1tensor__transform.xhtml#a3ff938cc9ead3acbbb2eb10d09d9c457',1,'arm_compute::helpers::tensor_transform']]],
   ['calculate_5fstride_5fon_5findex',['calculate_stride_on_index',['../namespacearm__compute_1_1helpers_1_1tensor__transform.xhtml#a9e3d9626e902ce6f9555d3580e13011e',1,'arm_compute::helpers::tensor_transform']]],

@@ -1,5 +1,10 @@
 var NAVTREEINDEX52 =
 {
+"classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#ad336181c06f2c2983212849bd9ebcd35":[10,0,0,578,0],
+"classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#ae549ed675eab6d763ac6ffd18d226c27":[10,0,0,578,4],
+"classarm__compute_1_1_n_e_arithmetic_operation_kernel.xhtml":[10,0,0,579],
+"classarm__compute_1_1_n_e_arithmetic_operation_kernel.xhtml#a2f102d09a50ed7a0f75e242f7ca53b68":[10,0,0,579,0],
+"classarm__compute_1_1_n_e_arithmetic_operation_kernel.xhtml#ada5fe786261e1a1a8e84d1cd6ec557a5":[10,0,0,579,1],
 "classarm__compute_1_1_n_e_arithmetic_subtraction.xhtml":[10,0,0,580],
 "classarm__compute_1_1_n_e_arithmetic_subtraction.xhtml#a17b1a968874510a32f0bdcc78e0cb360":[10,0,0,580,0],
 "classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml":[10,0,0,581],
@@ -244,10 +249,5 @@ var NAVTREEINDEX52 =
 "classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82":[10,0,0,619,7],
 "classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#a24c1c89aafe068ffdfa7fab6a32854c9":[10,0,0,619,6],
 "classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#a61548352af699841b1b0d6bfa70ecf27":[10,0,0,619,5],
-"classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#a800dabb568e12b5306f0c29d08b0cdaa":[10,0,0,619,2],
-"classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#a83a344e60eb7db895953a942abf16628":[10,0,0,619,3],
-"classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#ab4dc7fea753e4770dda96bee4f1cc194":[10,0,0,619,0],
-"classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[10,0,0,619,4],
-"classarm__compute_1_1_n_e_convolution3x3.xhtml":[10,0,0,620],
-"classarm__compute_1_1_n_e_convolution3x3.xhtml#a58d050865536a28b56a92eeaf3ac478e":[10,0,0,620,0]
+"classarm__compute_1_1_n_e_convert_quantized_signedness_kernel.xhtml#a800dabb568e12b5306f0c29d08b0cdaa":[10,0,0,619,2]
 };

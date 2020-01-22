@@ -1,5 +1,10 @@
 var NAVTREEINDEX51 =
 {
+"classarm__compute_1_1_i_tensor_allocator.xhtml#af3461a6d7c86f09c854cbb7ab5578c4e":[10,0,0,545,8],
+"classarm__compute_1_1_i_tensor_allocator.xhtml#af36143939a43fa124312e395975091ed":[10,0,0,545,9],
+"classarm__compute_1_1_i_tensor_allocator.xhtml#af97d553d2aa86688c92db8ed9a67cf0e":[10,0,0,545,0],
+"classarm__compute_1_1_i_tensor_info.xhtml":[10,0,0,546],
+"classarm__compute_1_1_i_tensor_info.xhtml#a07b929c34ad1dc823d8315876aa403ce":[10,0,0,546,16],
 "classarm__compute_1_1_i_tensor_info.xhtml#a0cd5aea514f03afb48ebe22581ea4c66":[10,0,0,546,7],
 "classarm__compute_1_1_i_tensor_info.xhtml#a12a4f1190952613e36b44846962e26bb":[10,0,0,546,26],
 "classarm__compute_1_1_i_tensor_info.xhtml#a17394f0f7aea22d9b2d4c6f33bfa69ca":[10,0,0,546,21],
@@ -244,10 +249,5 @@ var NAVTREEINDEX51 =
 "classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#a9095b3a8068080cd67214ffac9cbb7f8":[10,0,0,578,7],
 "classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#a9a168f182be423014aa67a334323dfd8":[10,0,0,578,3],
 "classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#ab12c64a745f0eb7e3d9380214ebe1b82":[10,0,0,578,1],
-"classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[10,0,0,578,5],
-"classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#ad336181c06f2c2983212849bd9ebcd35":[10,0,0,578,0],
-"classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#ae549ed675eab6d763ac6ffd18d226c27":[10,0,0,578,4],
-"classarm__compute_1_1_n_e_arithmetic_operation_kernel.xhtml":[10,0,0,579],
-"classarm__compute_1_1_n_e_arithmetic_operation_kernel.xhtml#a2f102d09a50ed7a0f75e242f7ca53b68":[10,0,0,579,0],
-"classarm__compute_1_1_n_e_arithmetic_operation_kernel.xhtml#ada5fe786261e1a1a8e84d1cd6ec557a5":[10,0,0,579,1]
+"classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828":[10,0,0,578,5]
 };

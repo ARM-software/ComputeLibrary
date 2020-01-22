@@ -1,5 +1,6 @@
 var NAVTREEINDEX39 =
 {
+"classarm__compute_1_1_c_l_convolution3x3.xhtml":[10,0,0,93],
 "classarm__compute_1_1_c_l_convolution3x3.xhtml#a26e1b4686b1f2d591d62d11585114a82":[10,0,0,93,0],
 "classarm__compute_1_1_c_l_convolution_kernel.xhtml":[10,0,0,94],
 "classarm__compute_1_1_c_l_convolution_kernel.xhtml#a07e35fa34ecbbc82d848fa3997cc6fdb":[10,0,0,94,1],
@@ -224,13 +225,14 @@ var NAVTREEINDEX39 =
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a034283c10cd4235ad8ee889c7b312136":[10,0,0,129,2],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a050c832adce3b274f8daacedd0558dc8":[10,0,0,129,3],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a0e2cfb6fb263bd6f761756c816574345":[10,0,0,129,5],
-"classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53":[10,0,0,129,13],
+"classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53":[10,0,0,129,14],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4":[10,0,0,129,10],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[10,0,0,129,4],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a46ab1c9fbed755d1da9729a47e6fbab2":[10,0,0,129,7],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[10,0,0,129,8],
-"classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b":[10,0,0,129,14],
-"classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a6fc108ac852099117f9c722f2afe2cb8":[10,0,0,129,15],
+"classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b":[10,0,0,129,15],
+"classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a6fc108ac852099117f9c722f2afe2cb8":[10,0,0,129,16],
+"classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a76e83555c34bd6c9a18b669391a290c3":[10,0,0,129,13],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a862a2fc55a07b4d6a7e4e23cb11ff323":[10,0,0,129,12],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a8c384e82445ca3f6f481f04295bcf3a9":[10,0,0,129,0],
 "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a95ba9da2ab49208dfa0d4642c8f7b23b":[10,0,0,129,9],
@@ -247,7 +249,5 @@ var NAVTREEINDEX39 =
 "classarm__compute_1_1_c_l_direct_deconvolution_layer.xhtml#ada7beb051c3fd2d8422a786f2cecac5c":[10,0,0,130,3],
 "classarm__compute_1_1_c_l_direct_deconvolution_layer.xhtml#afc54da06814c4b73e4345fa97114f38c":[10,0,0,130,5],
 "classarm__compute_1_1_c_l_distribution1_d.xhtml":[10,0,0,131],
-"classarm__compute_1_1_c_l_distribution1_d.xhtml#a14c53d2d17be6fa8a2c9861527c7b002":[10,0,0,131,3],
-"classarm__compute_1_1_c_l_distribution1_d.xhtml#a1b056f14381ab6eda09ed227a3d9e9e5":[10,0,0,131,0],
-"classarm__compute_1_1_c_l_distribution1_d.xhtml#a1ffeb3b5abb3d61f62b58a391816201c":[10,0,0,131,6]
+"classarm__compute_1_1_c_l_distribution1_d.xhtml#a14c53d2d17be6fa8a2c9861527c7b002":[10,0,0,131,3]
 };

@@ -1,5 +1,10 @@
 var NAVTREEINDEX79 =
 {
+"runtime_2_tensor_8cpp.xhtml":[11,0,3,2,32],
+"runtime_2_tensor_8cpp_source.xhtml":[11,0,3,2,32],
+"runtime_2_tensor_8h.xhtml":[11,0,0,2,49],
+"runtime_2_tensor_8h.xhtml#a7fb6a368d181ef193475f725c713430a":[11,0,0,2,49,1],
+"runtime_2_tensor_8h_source.xhtml":[11,0,0,2,49],
 "scalar_2add_8h.xhtml":[11,0,0,0,3,1,1,0],
 "scalar_2add_8h.xhtml#a350f25870874602bdc7de9630397bdd0":[11,0,0,0,3,1,1,0,2],
 "scalar_2add_8h.xhtml#a8a782c9af673065e72ac33de6a95cb49":[11,0,0,0,3,1,1,0,1],
@@ -244,10 +249,5 @@ var NAVTREEINDEX79 =
 "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#acaa9ac7ab7a3a37dd1d19467682b9781":[11,0,3,0,0,0,61,104],
 "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#acb0bd7c47c336d7f858d8b430aa49975":[11,0,3,0,0,0,61,124],
 "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#acb282042d1edeeaa3cc979a206f78b54":[11,0,3,0,0,0,61,134],
-"src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ace6c067d310d62a4649afe93c3dcd01e":[11,0,3,0,0,0,61,28],
-"src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#acfabbc4d3d33d2e66a69e0dbe42309f2":[11,0,3,0,0,0,61,101],
-"src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ad2d5cc68aaf0a75d20269e88fb463ba2":[11,0,3,0,0,0,61,12],
-"src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ad442fb5ec8be1fff97f543150de5d822":[11,0,3,0,0,0,61,143],
-"src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ad57d553c3b0caf95ffbfc408c28be75f":[11,0,3,0,0,0,61,96],
-"src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ad7b90c34e7f0b02d66ef27d4acc3598f":[11,0,3,0,0,0,61,71]
+"src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ace6c067d310d62a4649afe93c3dcd01e":[11,0,3,0,0,0,61,28]
 };

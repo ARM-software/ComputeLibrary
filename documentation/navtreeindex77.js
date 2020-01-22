@@ -1,5 +1,10 @@
 var NAVTREEINDEX77 =
 {
+"pmin_8h.xhtml#a14642064b6d61c95588ff03d2bf3e522":[11,0,0,0,3,1,0,31,3],
+"pmin_8h.xhtml#a3f1bc2edd11ddc6647c50e9f52ef64e5":[11,0,0,0,3,1,0,31,6],
+"pmin_8h.xhtml#a53afd5e9a5ce60ef6cf7426f4998fed8":[11,0,0,0,3,1,0,31,5],
+"pmin_8h.xhtml#a7f1295502983abdaece250516b8e564e":[11,0,0,0,3,1,0,31,2],
+"pmin_8h.xhtml#a90e2e64fc6298266c08a915c77fca4b3":[11,0,0,0,3,1,0,31,4],
 "pmin_8h.xhtml#ab12ca96a30ec693404ee462fa9972441":[11,0,0,0,3,1,0,31,7],
 "pmin_8h.xhtml#ab82845d16e532ba6603e1b960a79384b":[11,0,0,0,3,1,0,31,1],
 "pmin_8h.xhtml#af0531017308927dadbb17f06fce91676":[11,0,0,0,3,1,0,31,0],
@@ -244,10 +249,5 @@ var NAVTREEINDEX77 =
 "reference_2_gaussian3x3_8cpp.xhtml#a0bf5cc0e54ac74aee07c3034844a27f8":[11,0,5,8,4,95,1],
 "reference_2_gaussian3x3_8cpp_source.xhtml":[11,0,5,8,4,95],
 "reference_2_gaussian5x5_8cpp.xhtml":[11,0,5,8,4,97],
-"reference_2_gaussian5x5_8cpp.xhtml#a45e01cc48f39327d25187bfc0ab27287":[11,0,5,8,4,97,1],
-"reference_2_gaussian5x5_8cpp.xhtml#ae74885d96f07f242e6974979cce5673b":[11,0,5,8,4,97,0],
-"reference_2_gaussian5x5_8cpp_source.xhtml":[11,0,5,8,4,97],
-"reference_2_im2_col_8cpp.xhtml":[11,0,5,8,4,122],
-"reference_2_im2_col_8cpp.xhtml#a53c6c871275a6e678cdc9e6f2d9ee872":[11,0,5,8,4,122,1],
-"reference_2_im2_col_8cpp.xhtml#a676e94ff38d81a5794e2bf69008c5137":[11,0,5,8,4,122,5]
+"reference_2_gaussian5x5_8cpp.xhtml#a45e01cc48f39327d25187bfc0ab27287":[11,0,5,8,4,97,1]
 };

@@ -194,6 +194,7 @@ private:
     const ITensor   *_input;
     ITensor         *_output;
     PoolingLayerInfo _pool_info;
+    DataLayout       _data_layout;
     unsigned int     _num_elems_processed_per_iteration;
     BorderSize       _border_size;
     bool             _is_square;

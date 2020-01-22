@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11</span>
+   &#160;<span id="projectnumber">19.11.1</span>
    </div>
   </td>
  </tr>
@@ -331,6 +331,14 @@ v17.04 (First release of April 2017)
 </pre><dl class="section note"><dt>Note</dt><dd>We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.</dd></dl>
 <h2><a class="anchor" id="S2_2_changelog"></a>
 Changelog</h2>
+<p>v19.11.1 Public maintenance release</p><ul>
+<li>Fix offset calculation in <a class="el" href="classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml" title="NEON kernel to perform a reduction operation.">NEReductionOperationKernel</a>.</li>
+<li>Fix data layout in <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml" title="NEON kernel to perform scaling on a tensor.">NEScaleKernel</a> for nhwc.</li>
+<li>Retain configuration step data layout to avoid side-effects.</li>
+<li>Perform sqrt in double domain for L2 pooling.</li>
+<li>Fix output shape calculation for Reduce Mean</li>
+<li>Restrict cases where optimized <a class="el" href="classarm__compute_1_1_n_e_pad_layer.xhtml" title="Basic function to pad a tensor.">NEPadLayer</a> runs.</li>
+</ul>
 <p>v19.11 Public major release</p><ul>
 <li>Various bug fixes.</li>
 <li>Various optimisations.</li>
@@ -419,6 +427,14 @@ Changelog</h2>
 <li>Optimized <a class="el" href="classarm__compute_1_1_c_l_pad_layer.xhtml">CLPadLayer</a>.</li>
 <li>Optimized CL generic depthwise convolution layer by introducing <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer_native_kernel.xhtml">CLDepthwiseConvolutionLayerNativeKernel</a>.</li>
 <li>Reduced memory consumption by implementing weights sharing.</li>
+</ul>
+<p>v19.08.1 Public maintenance release</p><ul>
+<li>Fix offset calculation in <a class="el" href="classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml" title="NEON kernel to perform a reduction operation.">NEReductionOperationKernel</a>.</li>
+<li>Fix data layout in <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml" title="NEON kernel to perform scaling on a tensor.">NEScaleKernel</a> for nhwc.</li>
+<li>Retain configuration step data layout to avoid side-effects.</li>
+<li>Perform sqrt in double domain for L2 pooling.</li>
+<li>Fix output shape calculation for Reduce Mean</li>
+<li>Fix broadcast CLPixelwiseMultiplication with 5D tensors</li>
 </ul>
 <p>v19.08 Public major release</p><ul>
 <li>Various bug fixes.</li>
@@ -1497,7 +1513,7 @@ How to use it</h3>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Nov 28 2019 16:53:21 for Compute Library by
+    <li class="footer">Generated on Wed Jan 22 2020 18:08:01 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

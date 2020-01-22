@@ -1,5 +1,10 @@
 var NAVTREEINDEX54 =
 {
+"classarm__compute_1_1_n_e_division_operation_kernel.xhtml#afc96fa047235667233e73836c97aa774":[10,0,0,653,0],
+"classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml":[10,0,0,654],
+"classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82":[10,0,0,654,9],
+"classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7":[10,0,0,654,4],
+"classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a4403ce6bb21831222942bb8904201e42":[10,0,0,654,2],
 "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a57a36344e261edfdfa97b19ac40b7c30":[10,0,0,654,5],
 "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a5f1f723a41130cb9ff98478cd958ac28":[10,0,0,654,7],
 "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a6fcd697a53de530052da4ffd113d1dd9":[10,0,0,654,8],
@@ -244,10 +249,5 @@ var NAVTREEINDEX54 =
 "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch_1_1_i_fallback.xhtml#a6516a60ee54e48d9e1f5565c0b8fda5a":[10,0,0,703,0,2],
 "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch_1_1_i_fallback.xhtml#a6f8ab7ea60418ed56df810befee4c34a":[10,0,0,703,0,0],
 "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch_1_1_i_fallback.xhtml#a959cc06df096abd4449c1b9afd0ffc2f":[10,0,0,703,0,1],
-"classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml":[10,0,0,704],
-"classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml#a0a7030af14bb803820435ca75009b0f9":[10,0,0,704,5],
-"classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml#a24fed20754466c50bb2c823444556a6d":[10,0,0,704,2],
-"classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml#a627cee3df543519d4a134291189a3b9e":[10,0,0,704,0],
-"classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml#a97f4fd717623515cacaa206a889933ce":[10,0,0,704,3],
-"classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77":[10,0,0,704,6]
+"classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml":[10,0,0,704]
 };

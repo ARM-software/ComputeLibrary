@@ -1,5 +1,10 @@
 var NAVTREEINDEX82 =
 {
+"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a82dc1e06c88a4412fd40f1750487c2ae":[10,0,0,11,3,14,0,1],
+"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa1bee75ce77e93989e011aae01955b03":[10,0,0,11,3,14,0,12],
+"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aac993ecccd3d88aafefb6b8e3caa1dee":[10,0,0,11,3,14,0,7],
+"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab037372802cee601adeb0ee97dc0c0f3":[10,0,0,11,3,14,0,0],
+"structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b":[10,0,0,11,3,14,0,9],
 "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aea625d488d9eafbc023001f74f15f7af":[10,0,0,11,3,14,0,11],
 "structarm__compute_1_1test_1_1framework_1_1_scheduler_clock_1_1kernel__info.xhtml":[10,0,0,11,3,22,0],
 "structarm__compute_1_1test_1_1framework_1_1_scheduler_clock_1_1kernel__info.xhtml#a5f061b503cb1681c0b047c04d645e24e":[10,0,0,11,3,22,0,0],
@@ -244,10 +249,5 @@ var NAVTREEINDEX82 =
 "sub_8h.xhtml#aae7a048314067322874e692c4395b47d":[11,0,0,0,3,1,0,39,12],
 "sub_8h.xhtml#acae4ec59246f93845fa78120d83d7c1e":[11,0,0,0,3,1,0,39,1],
 "sub_8h.xhtml#ace6024107f3c7f23e71fb8f562b8d5c7":[11,0,0,0,3,1,0,39,2],
-"sub_8h_source.xhtml":[11,0,0,0,3,1,0,39],
-"sve__hybrid__fp16__mla__4_v_lx4_2generic_8cpp.xhtml":[11,0,3,0,3,0,0,0,21,0],
-"sve__hybrid__fp16__mla__4_v_lx4_2generic_8cpp_source.xhtml":[11,0,3,0,3,0,0,0,21,0],
-"sve__hybrid__fp16__mla__4_v_lx4_8hpp.xhtml":[11,0,3,0,3,0,0,0,56],
-"sve__hybrid__fp16__mla__4_v_lx4_8hpp_source.xhtml":[11,0,3,0,3,0,0,0,56],
-"sve__hybrid__fp32__mla__4_v_lx4_2generic_8cpp.xhtml":[11,0,3,0,3,0,0,0,22,0]
+"sub_8h_source.xhtml":[11,0,0,0,3,1,0,39]
 };

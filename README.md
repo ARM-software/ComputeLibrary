@@ -27,7 +27,9 @@ Tutorials:
 
 Documentation (API, changelogs, build guide, contribution guide, errata, etc.) available here:
 
+- [v19.11.1](https://arm-software.github.io/ComputeLibrary/v19.11.1/)
 - [v19.11](https://arm-software.github.io/ComputeLibrary/v19.11/)
+- [v19.08.1](https://arm-software.github.io/ComputeLibrary/v19.08.1/)
 - [v19.08](https://arm-software.github.io/ComputeLibrary/v19.08/)
 - [v19.05](https://arm-software.github.io/ComputeLibrary/v19.05/)
 - [v19.02](https://arm-software.github.io/ComputeLibrary/v19.02/)
@@ -47,8 +49,12 @@ Documentation (API, changelogs, build guide, contribution guide, errata, etc.) a
 
 Binaries available here:
 
+- [v19.11.1-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11.1/arm_compute-v19.11.1-bin-linux.tar.gz)
+- [v19.11.1-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11.1/arm_compute-v19.11.1-bin-android.tar.gz)
 - [v19.11-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11/arm_compute-v19.11-bin-linux.tar.gz)
 - [v19.11-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11/arm_compute-v19.11-bin-android.tar.gz)
+- [v19.08.1-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.08.1/arm_compute-v19.08.1-bin-linux.tar.gz)
+- [v19.08.1-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.08.1/arm_compute-v19.08.1-bin-android.tar.gz)
 - [v19.08-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.08/arm_compute-v19.08-bin-linux.tar.gz)
 - [v19.08-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.08/arm_compute-v19.08-bin-android.tar.gz)
 - [v19.05-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.05/arm_compute-v19.05-bin-linux.tar.gz)

@@ -1,5 +1,10 @@
 var NAVTREEINDEX72 =
 {
+"functions_z.xhtml":[10,3,0,26],
+"functions_~.xhtml":[10,3,0,27],
+"gather_8cl.xhtml":[11,0,3,0,0,0,52],
+"gather_8cl_source.xhtml":[11,0,3,0,0,0,52],
+"gaussian__pyramid_8cl.xhtml":[11,0,3,0,0,0,53],
 "gaussian__pyramid_8cl.xhtml#ae8b283818e0ddb9edf271668d2682dc3":[11,0,3,0,0,0,53,0],
 "gaussian__pyramid_8cl.xhtml#afa433ed067b24c37933229beb846b34b":[11,0,3,0,0,0,53,1],
 "gaussian__pyramid_8cl_source.xhtml":[11,0,3,0,0,0,53],
@@ -244,10 +249,5 @@ var NAVTREEINDEX72 =
 "gemv_8cl_source.xhtml":[11,0,3,0,0,0,57],
 "gemv__batched_8hpp.xhtml":[11,0,3,0,3,0,0,19],
 "gemv__batched_8hpp_source.xhtml":[11,0,3,0,3,0,0,19],
-"gemv__native__transposed_8hpp.xhtml":[11,0,3,0,3,0,0,20],
-"gemv__native__transposed_8hpp_source.xhtml":[11,0,3,0,3,0,0,20],
-"gemv__pretransposed_8hpp.xhtml":[11,0,3,0,3,0,0,21],
-"gemv__pretransposed_8hpp_source.xhtml":[11,0,3,0,3,0,0,21],
-"generate__proposals_8cl.xhtml":[11,0,3,0,0,0,58],
-"generate__proposals_8cl_source.xhtml":[11,0,3,0,0,0,58]
+"gemv__native__transposed_8hpp.xhtml":[11,0,3,0,3,0,0,20]
 };

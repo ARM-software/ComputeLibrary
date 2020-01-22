@@ -93,6 +93,7 @@ private:
     BorderSize       _border_size;
     const ICLTensor *_input;
     ICLTensor       *_output;
+    DataLayout       _data_layout;
     int              _num_tiles_x;
     int              _num_tiles_y;
     unsigned int     _step_z;

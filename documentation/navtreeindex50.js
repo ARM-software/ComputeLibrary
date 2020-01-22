@@ -1,5 +1,10 @@
 var NAVTREEINDEX50 =
 {
+"classarm__compute_1_1_i_g_c_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187":[10,0,0,510,4],
+"classarm__compute_1_1_i_g_c_memory_region.xhtml#a3fc929b7c49a15aabeda3efac4142383":[10,0,0,510,2],
+"classarm__compute_1_1_i_g_c_memory_region.xhtml#a44bf2849a57a0fced75e0f67f56847a9":[10,0,0,510,1],
+"classarm__compute_1_1_i_g_c_memory_region.xhtml#a5a589966a248f6e2a958f8dff2550418":[10,0,0,510,7],
+"classarm__compute_1_1_i_g_c_memory_region.xhtml#a8fb30f2d054c3ad3e11edf5f9d477f87":[10,0,0,510,6],
 "classarm__compute_1_1_i_g_c_memory_region.xhtml#a9b586073abda157c8aa9cfc1d1a6baf7":[10,0,0,510,8],
 "classarm__compute_1_1_i_g_c_memory_region.xhtml#aa070a495e1556ae2dd1cbcbdc7731d01":[10,0,0,510,9],
 "classarm__compute_1_1_i_g_c_memory_region.xhtml#ab8777d03065e8c7146157148a5355dd1":[10,0,0,510,10],
@@ -244,10 +249,5 @@ var NAVTREEINDEX50 =
 "classarm__compute_1_1_i_tensor_allocator.xhtml#a4fe09d257ff33e01defc7074ca22dc98":[10,0,0,545,2],
 "classarm__compute_1_1_i_tensor_allocator.xhtml#a8378fc6c887231765b885f8033c7bb99":[10,0,0,545,3],
 "classarm__compute_1_1_i_tensor_allocator.xhtml#aa8a4946cd749d482dd996874d295af85":[10,0,0,545,5],
-"classarm__compute_1_1_i_tensor_allocator.xhtml#ae82acbc677aa7d77c6a3f5e3547ef917":[10,0,0,545,1],
-"classarm__compute_1_1_i_tensor_allocator.xhtml#af3461a6d7c86f09c854cbb7ab5578c4e":[10,0,0,545,8],
-"classarm__compute_1_1_i_tensor_allocator.xhtml#af36143939a43fa124312e395975091ed":[10,0,0,545,9],
-"classarm__compute_1_1_i_tensor_allocator.xhtml#af97d553d2aa86688c92db8ed9a67cf0e":[10,0,0,545,0],
-"classarm__compute_1_1_i_tensor_info.xhtml":[10,0,0,546],
-"classarm__compute_1_1_i_tensor_info.xhtml#a07b929c34ad1dc823d8315876aa403ce":[10,0,0,546,16]
+"classarm__compute_1_1_i_tensor_allocator.xhtml#ae82acbc677aa7d77c6a3f5e3547ef917":[10,0,0,545,1]
 };

@@ -1,5 +1,6 @@
 var NAVTREEINDEX35 =
 {
+"benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_batch_normalization_layer_8cpp_source.xhtml":[11,0,5,0,1,1],
 "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_convolution_layer_8cpp.xhtml":[11,0,5,0,1,2],
 "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_convolution_layer_8cpp.xhtml#a47dc5b272eef08d8b7fdf3d3436fd6d7":[11,0,5,0,1,2,2],
 "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_convolution_layer_8cpp.xhtml#a5b5cc1ee4163f7b272b4b01bb244609d":[11,0,5,0,1,2,12],
@@ -248,6 +249,5 @@ var NAVTREEINDEX35 =
 "benchmark_2_n_e_o_n_2_h_o_g_multi_detection_8cpp.xhtml#a57528fa93bdde8a61964014f39865021":[11,0,5,0,2,23,1],
 "benchmark_2_n_e_o_n_2_h_o_g_multi_detection_8cpp.xhtml#a8183e97c93d88c78159cae2d8f83a4b0":[11,0,5,0,2,23,0],
 "benchmark_2_n_e_o_n_2_h_o_g_multi_detection_8cpp_source.xhtml":[11,0,5,0,2,23],
-"benchmark_2_n_e_o_n_2_harris_corners_8cpp.xhtml":[11,0,5,0,2,19],
-"benchmark_2_n_e_o_n_2_harris_corners_8cpp.xhtml#a1aa05c5a190c320fbb0e259c9af430d2":[11,0,5,0,2,19,0]
+"benchmark_2_n_e_o_n_2_harris_corners_8cpp.xhtml":[11,0,5,0,2,19]
 };
