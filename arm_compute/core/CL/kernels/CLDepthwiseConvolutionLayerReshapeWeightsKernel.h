@@ -47,7 +47,7 @@ public:
 
     /** Initialize the function's source and destination.
      *
-     * @param[in]  input  The input tensor of dimension [IFM, W, H]. Data types supported: QASYMM8/QASYMM8_SIGNED. Data layouts supported: NHWC
+     * @param[in]  input  The input tensor of dimension [IFM, W, H]. Data types supported: All. Data layouts supported: NHWC
      * @param[out] output The output tensor of dimension [W*H*C0, ceil(IFM/C0)]. C0 is the number of channels read by each thread. Data types supported: same as @p weights.
      * @param[in]  info   Depthwise convolution information to reshape the input tensor.
      */
@@ -55,7 +55,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
      *
-     * @param[in] input  The input tensor info of dimension [IFM, W, H]. Data types supported: QASYMM8/QASYMM8_SIGNED. Data layouts supported: NHWC
+     * @param[in] input  The input tensor info of dimension [IFM, W, H]. Data types supported: All. Data layouts supported: NHWC
      * @param[in] output The output tensor info of dimension [W*H*C0, ceil(IFM/C0)]. C0 is the number of channels read by each thread. Data types supported: same as @p weights.
      * @param[in] info   Depthwise convolution information to reshape the input tensor.
      *
