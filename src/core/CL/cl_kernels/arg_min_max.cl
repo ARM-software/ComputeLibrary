@@ -254,10 +254,15 @@ __kernel void arg_min_max_x(
 
         barrier(CLK_LOCAL_MEM_FENCE);
 
+        // Looking for the next highest power of 2 (maximum value of lsize is 8)
+        unsigned int middle = lsize - 1;
+        middle |= middle >> 1;
+        middle |= middle >> 2;
+        middle += 1;
         // Perform parallel reduction
-        for(unsigned int i = lsize >> 1; i > 0; i >>= 1)
+        for(unsigned int i = middle; i > 0; i >>= 1)
         {
-            if(lid < i)
+            if( lid < i && lid + i < lsize)
             {
                 DATA_TYPE tmp0 = *(src_in_row + local_results[lid]);
                 DATA_TYPE tmp1 = *(src_in_row + local_results[lid + i]);

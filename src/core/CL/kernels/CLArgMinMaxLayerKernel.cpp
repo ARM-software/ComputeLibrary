@@ -198,8 +198,6 @@ void CLArgMinMaxLayerKernel::run(const Window &window, cl::CommandQueue &queue)
             Window out_slice = out_window.first_slice_window_2D();
 
             // Reshape window
-            const unsigned int border_width = ((in_slice.x().end() % vector_size) != 0) ? vector_size - in_slice.x().end() % vector_size : 0;
-            in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
             const unsigned int num_tensors = _prev_output != nullptr ? 3 : 2;
 
             // Set local sums buffer

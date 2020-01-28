@@ -47,12 +47,14 @@ namespace
 const auto ArgMinMaxSmallDataset = framework::dataset::make("Shape",
 {
     TensorShape{ 2U, 7U, 1U, 3U },
-    TensorShape{ 128U, 64U, 21U, 3U },
+    TensorShape{ 149U, 5U, 1U, 2U },
+    TensorShape{ 166U, 5U, 1U, 2U },
+    TensorShape{ 322U, 5U, 1U, 2U },
+    TensorShape{ 128U, 5U, 21U, 3U },
     TensorShape{ 2560, 2U, 2U, 2U },
 });
 
-const auto ArgMinMaxLargeDataset = framework::dataset::make("Shape",
-{ TensorShape{ 517U, 123U, 13U, 2U } });
+const auto ArgMinMaxLargeDataset = framework::dataset::make("Shape", { TensorShape{ 517U, 123U, 13U, 2U } });
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(ArgMinMax)
