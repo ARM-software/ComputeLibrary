@@ -175,25 +175,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<uint8_t>, framew
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQASYMM8,
-                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8))),
-                                                                                                                   pool_data_layout_dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
-}
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8Small,
                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
                                                                                                                     pool_data_layout_dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8_s);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQASYMM8,
-                                                                                                                  framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
-                                                                                                                  pool_data_layout_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_s);
