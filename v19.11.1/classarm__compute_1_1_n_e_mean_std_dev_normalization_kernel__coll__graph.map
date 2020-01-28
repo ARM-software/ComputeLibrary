@@ -1,0 +1,5 @@
+<map id="NEMeanStdDevNormalizationKernel" name="NEMeanStdDevNormalizationKernel">
+<area shape="rect" id="node1" title="Interface for the kernel to normalize the input 2D tensor across the first dimension with respect to ..." alt="" coords="5,155,216,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="69,80,152,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="79,5,143,32"/>
+</map>

@@ -1,0 +1,25 @@
+var gemmlowp_8cl =
+[
+    [ "ARM_DOT1", "gemmlowp_8cl.xhtml#af6f3e915f4b9b0e76dad9ea458a17ba6", null ],
+    [ "ARM_DOT16", "gemmlowp_8cl.xhtml#a82a34a6b94dcdb93e446287e1a3e630d", null ],
+    [ "ARM_DOT2", "gemmlowp_8cl.xhtml#ae34a7418dab77ded3f299ad8e01dc545", null ],
+    [ "ARM_DOT3", "gemmlowp_8cl.xhtml#aa1fc470aae7d425cb48b4eddd923c1f1", null ],
+    [ "ARM_DOT4", "gemmlowp_8cl.xhtml#a691532f1c550b718a64219c0bf8d1aea", null ],
+    [ "ARM_DOT8", "gemmlowp_8cl.xhtml#aa6675b3d030e11613b7af2f591a3215f", null ],
+    [ "ARM_DOT_K0", "gemmlowp_8cl.xhtml#a66f8007bc273c19637859c71e89b7ef3", null ],
+    [ "ARM_DOT_K0X16", "gemmlowp_8cl.xhtml#a9a4dd8e50aea16bfbdd001ae160c52f1", null ],
+    [ "ARM_DOT_K0X2", "gemmlowp_8cl.xhtml#ae1635754535ac499cdad8b067e90c435", null ],
+    [ "ARM_DOT_K0X3", "gemmlowp_8cl.xhtml#a204079a2adf17e607e9cfcad60b89602", null ],
+    [ "ARM_DOT_K0X4", "gemmlowp_8cl.xhtml#a95f17ea569b0d658d161981c656ce028", null ],
+    [ "ARM_DOT_K0X8", "gemmlowp_8cl.xhtml#a9fe47ceb84fabdb9ecc8b96c3104e8c7", null ],
+    [ "ARM_DOT_K0XN0", "gemmlowp_8cl.xhtml#ae991dacacb5b9b0b176538400a7e8269", null ],
+    [ "ARM_MM_K0XN0X1", "gemmlowp_8cl.xhtml#a6a30e0c9210948b09a983dff1b3db289", null ],
+    [ "ARM_MM_K0XN0X2", "gemmlowp_8cl.xhtml#ad2c6dbc81440272f6ef8f19c7a5e7843", null ],
+    [ "ARM_MM_K0XN0X3", "gemmlowp_8cl.xhtml#a82ee8878109026b86a3296e786248d15", null ],
+    [ "ARM_MM_K0XN0X4", "gemmlowp_8cl.xhtml#a7422ff84359302ff418d39bfa212a4cc", null ],
+    [ "ARM_MM_K0XN0X5", "gemmlowp_8cl.xhtml#a9ab09032778390f87d7050d58a0645e9", null ],
+    [ "ARM_MM_K0XN0X6", "gemmlowp_8cl.xhtml#a74a18e1f44fcfd47b8ec54dca07435e7", null ],
+    [ "ARM_MM_K0XN0X7", "gemmlowp_8cl.xhtml#a9233e80ae6cba402274f8921ffb22078", null ],
+    [ "ARM_MM_K0XN0X8", "gemmlowp_8cl.xhtml#a5cc688208a6d222018ca05eeabb461a2", null ],
+    [ "ARM_MM_K0XN0XM0", "gemmlowp_8cl.xhtml#af110f6648cbcc21216a66fb3342632b0", null ]
+];

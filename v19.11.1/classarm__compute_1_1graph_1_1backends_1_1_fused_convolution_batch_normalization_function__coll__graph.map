@@ -1,0 +1,4 @@
+<map id="FusedConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;" name="FusedConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;">
+<area shape="rect" id="node1" title="Wrapper function to first apply {NE, CL}BatchNormalizationLayer on the weights and then run {NE,..." alt="" coords="5,80,288,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="107,5,186,32"/>
+</map>
