@@ -26,8 +26,6 @@ Import('env')
 Import('vars')
 Import('install_bin')
 
-SConscript('./framework/SConscript', duplicate=0)
-
 # vars is imported from arm_compute:
 variables = [
     BoolVariable("benchmark_examples", "Build benchmark examples programs", True),
@@ -45,17 +43,30 @@ for v in variables:
     new_options.Add(v)
     vars.Add(v)
 
-# Disable floating-point expression contraction (e.g. fused multiply-add operations)
-env.Append(CXXFLAGS = ['-ffp-contract=off'])
-
 # Clone the environment to make sure we're not polluting the arm_compute one:
 test_env = env.Clone()
 vars.Update(test_env)
 
 Help(new_options.GenerateHelpText(test_env))
 
+# Check if we need to build the test framework
+build_test_framework = False
+for opt in new_options.keys():
+    option_value = test_env[opt]
+    if type(option_value) is bool and option_value:
+        build_test_framework = True
+        break
+
+if not build_test_framework:
+    Return()
+else:
+    SConscript('./framework/SConscript', duplicate=0)
+
 Import("arm_compute_test_framework")
 test_env.Append(LIBS = arm_compute_test_framework)
+
+# Disable floating-point expression contraction (e.g. fused multiply-add operations)
+test_env.Append(CXXFLAGS = ['-ffp-contract=off'])
 
 # Remove -Wnoexcept from tests
 if 'g++' in test_env['CXX'] and '-Wnoexcept' in test_env['CXXFLAGS']:
