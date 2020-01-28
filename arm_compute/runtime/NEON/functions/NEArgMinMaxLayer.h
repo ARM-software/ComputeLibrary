@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ public:
     NEArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Input source tensor. Data types supported: QASYMM8/S32/F16/F32.
+     * @param[in]  input  Input source tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/S32/F16/F32.
      * @param[in]  axis   Axis to find max/min index.
      * @param[out] output Output source tensor. Data types supported: U32/S32.
      * @param[in]  op     Operation to perform: min or max
@@ -62,7 +62,7 @@ public:
     void configure(ITensor *input, int axis, ITensor *output, const ReductionOperation &op);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArgMinMaxLayer
      *
-     * @param[in] input  Input source tensor info. Data types supported: QASYMM8/S32/F16/F32.
+     * @param[in] input  Input source tensor info. Data types supported: QASYMM8_SIGNED/QASYMM8/S32/F16/F32.
      * @param[in] axis   Axis to find max/min index.
      * @param[in] output Output source tensor info. Data types supported: U32/S32.
      * @param[in] op     Operation to perform: min or max

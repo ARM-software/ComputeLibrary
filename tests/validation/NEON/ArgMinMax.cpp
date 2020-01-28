@@ -163,6 +163,30 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEArgMinMaxQuantizedValidationFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                                       framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })),
+                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 127.f, 20) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEArgMinMaxQuantizedValidationFixture<int8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                                       framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })),
+                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 127.f, 20) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // ArgMinMax
 TEST_SUITE_END() // NEON
 } // namespace validation

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
     NEReductionOperation(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. Data type supported: QASYMM8/F16/F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
+     * @param[in]  input     Source tensor. Data type supported: QASYMM8_SIGNED/QASYMM8/F16/F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
      * @param[out] output    Destination tensor. Data types and data layouts supported: same as @p input.
      * @param[in]  axis      Dimension along which to reduce. Supported reduction axis : 0
      * @param[in]  op        Reduction operation to perform.
@@ -59,7 +59,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReductionOperation.
      *
-     * @param[in] input     Source tensor info. Data type supported: QASYMM8/F16/F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
+     * @param[in] input     Source tensor info. Data type supported: QASYMM8_SIGNED/QASYMM8/F16/F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
      * @param[in] output    Destination tensor info. Data types and data layouts supported: same as @p input.
      * @param[in] axis      Dimension along which to reduce. Supported reduction axis : 0
      * @param[in] op        Reduction operation to perform.

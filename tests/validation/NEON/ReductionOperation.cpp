@@ -44,9 +44,11 @@ namespace
 {
 /** Tolerance for float operations */
 AbsoluteTolerance<float> tolerance_f32(0.0001f);
-RelativeTolerance<float> rel_tolerance_f32(0.00001f);
+RelativeTolerance<float> rel_tolerance_f32(0.0001f);
+AbsoluteTolerance<float> tolerance_f16(0.1f);
+RelativeTolerance<float> rel_tolerance_f16(0.1f);
 /** Tolerance for quantized operations */
-RelativeTolerance<float> tolerance_qasymm8(1);
+RelativeTolerance<float> tolerance_quantized(1.f);
 
 const auto ReductionOperations = framework::dataset::make("ReductionOperation",
 {
@@ -58,7 +60,7 @@ const auto ReductionOperations = framework::dataset::make("ReductionOperation",
 
 const auto QuantizationInfos = framework::dataset::make("QuantizationInfo",
 {
-    QuantizationInfo(1.f / 128, 10),
+    QuantizationInfo(1.f / 117, 10), // Numbers chosen so that the quantized values are in range of qasymm8_signed data type
     QuantizationInfo(1.f / 64, 5),
     QuantizationInfo(1.f / 32, 2)
 });
@@ -123,6 +125,23 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<float>, framework::
 }
 TEST_SUITE_END() // FP32
 
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationFixture<half>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F16)), Axises), ReductionOperations), KeepDims))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<half>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F16)), Axises), ReductionOperations), KeepDims))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f16, 0, tolerance_f16);
+}
+TEST_SUITE_END() // FP16
+#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 template <typename T>
 using NEReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<Tensor, Accessor, NEReductionOperation, T>;
 
@@ -134,9 +153,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<uint8_t>, 
                                KeepDims))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_quantized);
 }
 TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), Axises),
+                                               ReductionOperations),
+                                       QuantizationInfos),
+                               KeepDims))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_quantized);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE_END() // ReductionOperation
 TEST_SUITE_END() // NEON

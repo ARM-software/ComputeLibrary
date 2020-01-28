@@ -596,6 +596,12 @@ inline std::tuple<PixelValue, PixelValue> get_min_max(DataType dt)
             max = PixelValue(std::numeric_limits<int32_t>::max());
             break;
         }
+        case DataType::F16:
+        {
+            min = PixelValue(std::numeric_limits<half>::lowest());
+            max = PixelValue(std::numeric_limits<half>::max());
+            break;
+        }
         case DataType::F32:
         {
             min = PixelValue(std::numeric_limits<float>::lowest());
