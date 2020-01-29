@@ -241,8 +241,7 @@ std::tuple<const int32_t *, const int32_t *> Fallback<TypeInput, TypeOutput, Out
 {
     _multipliers = multipliers;
     _shifts      = shifts;
-    std::transform(_shifts.begin(), _shifts.end(), _shifts.begin(),
-                   std::bind1st(std::multiplies<int32_t>(), -1));
+    std::transform(_shifts.begin(), _shifts.end(), _shifts.begin(), std::negate<int32_t>());
     return std::make_tuple(_shifts.data(), _multipliers.data());
 }
 
