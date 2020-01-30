@@ -289,6 +289,21 @@ SimpleTensor<uint8_t> reduction_operation(const SimpleTensor<uint8_t> &src, cons
     }
 }
 
+template <>
+SimpleTensor<int8_t> reduction_operation(const SimpleTensor<int8_t> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op)
+{
+    if(src.data_type() == DataType::QASYMM8_SIGNED)
+    {
+        SimpleTensor<float> src_f = convert_from_asymmetric(src);
+        SimpleTensor<float> dst_f = reference::reduction_operation<float, float>(src_f, dst_shape, axis, op);
+        return convert_to_asymmetric<int8_t>(dst_f, src.quantization_info());
+    }
+    else
+    {
+        return compute_reduction_operation<int8_t, int8_t>(src, dst_shape, axis, op);
+    }
+}
+
 template SimpleTensor<float> reduction_operation(const SimpleTensor<float> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op);
 template SimpleTensor<half> reduction_operation(const SimpleTensor<half> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -271,6 +271,11 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
                         pixelValue = PixelValue(255, input->info()->data_type(), input->info()->quantization_info());
                         break;
                     }
+                    case DataType::QASYMM8_SIGNED:
+                    {
+                        pixelValue = PixelValue(127, input->info()->data_type(), input->info()->quantization_info());
+                        break;
+                    }
                     default:
                     {
                         ARM_COMPUTE_ERROR("Unsupported DataType");
@@ -296,6 +301,11 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
                     case DataType::QASYMM8:
                     {
                         pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
+                        break;
+                    }
+                    case DataType::QASYMM8_SIGNED:
+                    {
+                        pixelValue = PixelValue(-128, input->info()->data_type(), input->info()->quantization_info());
                         break;
                     }
                     default:

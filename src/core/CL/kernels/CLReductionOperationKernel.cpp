@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     if(input->num_channels() == 1)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S32, DataType::F16, DataType::F32);
     }
     else
     {
@@ -59,8 +59,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op == ReductionOperation::SUM_SQUARE && input->data_type() == DataType::QASYMM8, "Not supported reduction operation for QASYMM8");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
-    ARM_COMPUTE_RETURN_ERROR_ON(op == ReductionOperation::MEAN_SUM && axis == 0 && width == 0 && input->data_type() != DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN, "Not supported reduction operation, use CLArgMinMaxLayer");
+    ARM_COMPUTE_RETURN_ERROR_ON((op == ReductionOperation::MEAN_SUM) && (axis == 0) && (width == 0) && (input->data_type() != DataType::QASYMM8) && (input->data_type() != DataType::QASYMM8_SIGNED));
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN), "Not supported reduction operation, use CLArgMinMaxLayer");
 
     if(output->total_size() != 0)
     {
@@ -147,21 +147,30 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
 
     // Set build options
     CLBuildOptions build_opts;
-    std::string    data_type_promoted = get_cl_type_from_data_type(input->info()->data_type());
-    if(is_data_type_quantized(input->info()->data_type()))
+    DataType       data_type = input->info()->data_type();
+    std::string    data_type_promoted{};
+
+    if(is_data_type_quantized(data_type))
     {
-        data_type_promoted = "uint";
+        data_type_promoted = get_cl_dot8_acc_type_from_data_type(data_type);
+    }
+    else
+    {
+        data_type_promoted = get_cl_type_from_data_type(data_type);
     }
 
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DDATA_TYPE_PROMOTED=" + data_type_promoted);
-    build_opts.add_option_if(is_data_type_float(input->info()->data_type()), "-DFLOAT_DATA_TYPE");
+    build_opts.add_option_if(is_data_type_float(data_type), "-DFLOAT_DATA_TYPE");
     build_opts.add_option_if(op == ReductionOperation::SUM_SQUARE, "-DSUM_SQUARE");
     build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DMEAN");
+    build_opts.add_option_if(op == ReductionOperation::SUM, "-DSUM");
     build_opts.add_option_if(op == ReductionOperation::PROD, "-DPROD");
     build_opts.add_option_if(op == ReductionOperation::MIN, "-DMIN");
     build_opts.add_option_if(op == ReductionOperation::MAX, "-DMAX");
     build_opts.add_option_if(input->info()->num_channels() == 2, "-DCOMPLEX");
+    build_opts.add_option_if(is_data_type_quantized(data_type), "-DOFFSET=" + support::cpp11::to_string(input->info()->quantization_info().uniform().offset));
+    build_opts.add_option_if(is_data_type_quantized(data_type), "-DSCALE=" + float_to_string_with_full_precision(input->info()->quantization_info().uniform().scale));
 
     switch(op)
     {

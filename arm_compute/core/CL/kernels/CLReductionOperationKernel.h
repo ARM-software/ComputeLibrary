@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/S32/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
      *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0,1,2,3
@@ -62,7 +62,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/S32/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
      * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
      *                   Output will have the same number of dimensions as input.
      * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0,1,2,3
