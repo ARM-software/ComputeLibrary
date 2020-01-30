@@ -77,6 +77,41 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
     return dst;
 }
 
+template <>
+SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<uint8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<float> src_tmp = convert_from_asymmetric<uint8_t>(src);
+    return quantization_layer<float, uint8_t>(src_tmp, output_data_type, quantization_info);
+}
+
+template <>
+SimpleTensor<int8_t> quantization_layer(const SimpleTensor<uint8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<float> src_tmp = convert_from_asymmetric<uint8_t>(src);
+    return quantization_layer<float, int8_t>(src_tmp, output_data_type, quantization_info);
+}
+
+template <>
+SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<int8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<float> src_tmp = convert_from_asymmetric<int8_t>(src);
+    return quantization_layer<float, uint8_t>(src_tmp, output_data_type, quantization_info);
+}
+
+template <>
+SimpleTensor<int8_t> quantization_layer(const SimpleTensor<int8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<float> src_tmp = convert_from_asymmetric<int8_t>(src);
+    return quantization_layer<float, int8_t>(src_tmp, output_data_type, quantization_info);
+}
+
+template <>
+SimpleTensor<uint16_t> quantization_layer(const SimpleTensor<uint8_t> &src, DataType output_data_type, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<float> src_tmp = convert_from_asymmetric<uint8_t>(src);
+    return quantization_layer<float, uint16_t>(src_tmp, output_data_type, quantization_info);
+}
+
 template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 template SimpleTensor<int8_t> quantization_layer(const SimpleTensor<float> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
