@@ -1299,14 +1299,14 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     VEC_INT         output_multiplier  = VLOAD(VEC_SIZE)(0, (__global int *)output_multipliers.ptr);
     VEC_INT         output_shift       = VLOAD(VEC_SIZE)(0, (__global int *)output_shifts.ptr);
 
-    res0_shift_lt0           = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc0, output_multiplier, output_shift, VEC_SIZE);
-    res1_shift_lt0           = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc1, output_multiplier, output_shift, VEC_SIZE);
-    res2_shift_lt0           = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc2, output_multiplier, output_shift, VEC_SIZE);
-    res3_shift_lt0           = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc3, output_multiplier, output_shift, VEC_SIZE);
-    res0_shift_gt0           = asymm_mult_by_quant_multiplier_less_than_one(acc0, output_multiplier, output_shift);
-    res1_shift_gt0           = asymm_mult_by_quant_multiplier_less_than_one(acc1, output_multiplier, output_shift);
-    res2_shift_gt0           = asymm_mult_by_quant_multiplier_less_than_one(acc2, output_multiplier, output_shift);
-    res3_shift_gt0           = asymm_mult_by_quant_multiplier_less_than_one(acc3, output_multiplier, output_shift);
+    VEC_INT res0_shift_lt0   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc0, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res1_shift_lt0   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc1, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res2_shift_lt0   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc2, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res3_shift_lt0   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc3, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res0_shift_gt0   = asymm_mult_by_quant_multiplier_less_than_one(acc0, output_multiplier, output_shift);
+    VEC_INT res1_shift_gt0   = asymm_mult_by_quant_multiplier_less_than_one(acc1, output_multiplier, output_shift);
+    VEC_INT res2_shift_gt0   = asymm_mult_by_quant_multiplier_less_than_one(acc2, output_multiplier, output_shift);
+    VEC_INT res3_shift_gt0   = asymm_mult_by_quant_multiplier_less_than_one(acc3, output_multiplier, output_shift);
     acc0                     = select(res0_shift_lt0, res0_shift_gt0, output_shift >= 0);
     acc1                     = select(res1_shift_lt0, res1_shift_gt0, output_shift >= 0);
     acc2                     = select(res2_shift_lt0, res2_shift_gt0, output_shift >= 0);
