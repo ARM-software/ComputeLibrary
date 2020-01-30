@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #include "helpers.h"
 
-#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(GAMMA) && defined(BETA) && defined(EPSILON) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z)
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(INTERNAL_DATA_TYPE) && defined(GAMMA) && defined(BETA) && defined(EPSILON) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z)
 /** This function normalizes the input 2D tensor across the first dimension with respect to mean and standard deviation of the same dimension.
  *
  * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
@@ -63,8 +63,8 @@ __kernel void instance_normalization(
     Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(output, 0);
 #endif /* IN_PLACE */
 
-    float sum    = 0.f;
-    float sum_sq = 0.f;
+    INTERNAL_DATA_TYPE sum    = 0.f;
+    INTERNAL_DATA_TYPE sum_sq = 0.f;
 
 #if defined(NHWC)
 
@@ -76,7 +76,7 @@ __kernel void instance_normalization(
     {
         for(int i_h = 0; i_h < DIM_Z; ++i_h)
         {
-            float data = (float) * ((__global DATA_TYPE *)tensor4D_offset(&in, ch, i_w, i_h, batch));
+            INTERNAL_DATA_TYPE data = (INTERNAL_DATA_TYPE) * ((__global DATA_TYPE *)tensor4D_offset(&in, ch, i_w, i_h, batch));
             sum += data;
             sum_sq += data * data;
         }
@@ -87,9 +87,9 @@ __kernel void instance_normalization(
     const int batch          = get_global_id(2) / DIM_Z; // Current batch
     const int elements_plane = DIM_X * DIM_Y;
 
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE)
     part_sum = 0.f;
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE)
     part_sum_sq = 0.f;
     // Calculate partial sum
     for(int y = 0; y < DIM_Y; ++y)
@@ -98,15 +98,15 @@ __kernel void instance_normalization(
         for(; x <= (DIM_X - VEC_SIZE); x += VEC_SIZE)
         {
             // Load data
-            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-            data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch));
+            VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE)
+            data = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch)), VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE));
             part_sum += data;
             part_sum_sq += data * data;
         }
         // Left-overs loop
         for(; x < DIM_X; ++x)
         {
-            DATA_TYPE data = *((__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch));
+            INTERNAL_DATA_TYPE data = (INTERNAL_DATA_TYPE)(*((__global DATA_TYPE *)tensor4D_offset(&in, x, y, ch, batch)));
             part_sum.s0 += data;
             part_sum_sq.s0 += data * data;
         }
@@ -127,16 +127,14 @@ __kernel void instance_normalization(
     part_sum.s0 += part_sum.s1;
     part_sum_sq.s0 += part_sum_sq.s1;
 
-    sum    = (float)part_sum.s0;
-    sum_sq = (float)part_sum_sq.s0;
+    sum    = (INTERNAL_DATA_TYPE)part_sum.s0;
+    sum_sq = (INTERNAL_DATA_TYPE)part_sum_sq.s0;
 
 #endif // defined(NHWC)
 
-    const float     mean_float   = (sum / elements_plane);
-    const DATA_TYPE mean         = (DATA_TYPE)mean_float;
-    const float     var_float    = (sum_sq / elements_plane) - (mean_float * mean_float);
-    const float     multip_float = GAMMA / sqrt(var_float + EPSILON);
-    const DATA_TYPE multip       = (DATA_TYPE)multip_float;
+    const INTERNAL_DATA_TYPE mean   = (sum / elements_plane);
+    const INTERNAL_DATA_TYPE var    = (sum_sq / elements_plane) - (mean * mean);
+    const INTERNAL_DATA_TYPE multip = GAMMA / sqrt(var + EPSILON);
 
 #if defined(NHWC)
 
@@ -150,7 +148,7 @@ __kernel void instance_normalization(
 #else  /* !IN_PLACE */
             __global DATA_TYPE *output_address = (__global DATA_TYPE *)tensor4D_offset(&out, ch, i_w, i_h, batch);
 #endif /* IN_PLACE */
-            *(output_address) = (*(input_address) - mean) * multip + (DATA_TYPE)BETA;
+            *(output_address) = (*(input_address) - mean) * multip + (INTERNAL_DATA_TYPE)BETA;
         }
     }
 
@@ -167,13 +165,13 @@ __kernel void instance_normalization(
             __global DATA_TYPE *output_address = (__global DATA_TYPE *)tensor4D_offset(&out, x, y, ch, batch);
 #endif /* IN_PLACE */
 
-            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-            data = VLOAD(VEC_SIZE)(0, input_address);
+            VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE)
+            data = CONVERT(VLOAD(VEC_SIZE)(0, input_address), VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE));
 
-            VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-            res = (data - mean) * multip + (DATA_TYPE)BETA;
+            VEC_DATA_TYPE(INTERNAL_DATA_TYPE, VEC_SIZE)
+            res = (data - mean) * multip + (INTERNAL_DATA_TYPE)BETA;
             VSTORE(VEC_SIZE)
-            (res, 0, output_address);
+            (CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)), 0, output_address);
         }
         // Left-overs loop
         for(; x < DIM_X; ++x)
@@ -184,9 +182,9 @@ __kernel void instance_normalization(
 #else  /* !IN_PLACE */
             __global DATA_TYPE *output_address = (__global DATA_TYPE *)tensor4D_offset(&out, x, y, ch, batch);
 #endif /* IN_PLACE */
-            *(output_address)                  = (*(input_address) - mean) * multip + (DATA_TYPE)BETA;
+            *(output_address)                  = (*(input_address) - mean) * multip + (INTERNAL_DATA_TYPE)BETA;
         }
     }
 #endif // defined(NHWC)
 }
-#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) && defined(GAMMA) && defined(BETA) && defined(EPSILON) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z) */
+#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) && defined(INTERNAL_DATA_TYPE) && defined(GAMMA) && defined(BETA) && defined(EPSILON) && defined(DIM_X) && defined(DIM_Y) && defined(DIM_Z) */
