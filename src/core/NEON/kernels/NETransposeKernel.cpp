@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,9 +68,9 @@ unsigned int num_elems_processed(size_t element_size)
             return 4;
             break;
         default:
-            ARM_COMPUTE_ERROR("Element size not supported");
             break;
     }
+    ARM_COMPUTE_ERROR("Element size not supported");
 }
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -150,9 +150,9 @@ size_t get_dimension_idx(DataLayout data_layout, const DataLayoutDimension data_
             return 3;
             break;
         default:
-            ARM_COMPUTE_ERROR("Data layout index not supported!");
             break;
     }
+    ARM_COMPUTE_ERROR("Data layout index not supported!");
 }
 
 std::vector<NodeIdxPair> get_driving_nodes(const INode &node)
