@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ public:
      * @param[in] padding The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                    specifies the front and the end padding in the i-th dimension.
      */
-    PadLayerNode(PaddingList &padding);
+    PadLayerNode(const PaddingList &padding);
     /** Padding list accessor
      *
      * @return Padding list
