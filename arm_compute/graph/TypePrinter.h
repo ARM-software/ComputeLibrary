@@ -128,6 +128,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::PoolingLayer:
             os << "PoolingLayer";
             break;
+        case NodeType::PReluLayer:
+            os << "PReluLayer";
+            break;
         case NodeType::PrintLayer:
             os << "PrintLayer";
             break;

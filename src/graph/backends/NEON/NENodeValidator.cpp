@@ -73,6 +73,8 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_pad_layer<NEPadLayer>(*polymorphic_downcast<PadLayerNode *>(node));
         case NodeType::PermuteLayer:
             return detail::validate_permute_layer<NEPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
+        case NodeType::PReluLayer:
+            return detail::validate_prelu_layer<NEPReluLayer>(*polymorphic_downcast<PReluLayerNode *>(node));
         case NodeType::PriorBoxLayer:
             return detail::validate_priorbox_layer<NEPriorBoxLayer>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:

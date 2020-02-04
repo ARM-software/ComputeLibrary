@@ -153,6 +153,7 @@ enum class NodeType
     PadLayer,
     PermuteLayer,
     PoolingLayer,
+    PReluLayer,
     PrintLayer,
     PriorBoxLayer,
     QuantizationLayer,

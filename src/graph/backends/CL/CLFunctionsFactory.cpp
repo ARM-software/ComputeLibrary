@@ -272,6 +272,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_permute_layer<CLPermute, CLTargetInfo>(*polymorphic_downcast<PermuteLayerNode *>(node));
         case NodeType::PoolingLayer:
             return detail::create_pooling_layer<CLPoolingLayer, CLTargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
+        case NodeType::PReluLayer:
+            return detail::create_prelu_layer<CLPReluLayer, CLTargetInfo>(*polymorphic_downcast<PReluLayerNode *>(node));
         case NodeType::PrintLayer:
             return detail::create_print_layer<CLTargetInfo>(*polymorphic_downcast<PrintLayerNode *>(node));
         case NodeType::PriorBoxLayer:

@@ -56,6 +56,7 @@ class OutputNode;
 class PadLayerNode;
 class PermuteLayerNode;
 class PoolingLayerNode;
+class PReluLayerNode;
 class PrintLayerNode;
 class PriorBoxLayerNode;
 class QuantizationLayerNode;

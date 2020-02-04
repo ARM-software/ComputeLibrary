@@ -902,6 +902,34 @@ private:
     PoolingLayerInfo _pool_info;
 };
 
+/** PRelu Layer */
+class PReluLayer final : public ILayer
+{
+public:
+    /** Construct an PRelu operation layer
+     *
+     * @param[in] sub_stream0 First graph sub-stream
+     * @param[in] sub_stream1 First graph sub-stream
+     */
+    PReluLayer(SubStream &&sub_stream0, SubStream &&sub_stream1)
+        : _ss0(std::move(sub_stream0)), _ss1(std::move(sub_stream1))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { _ss0.tail_node(), 0 };
+        NodeIdxPair alpha         = { _ss1.tail_node(), 0 };
+
+        return GraphBuilder::add_prelu_node(s.graph(), common_params, input, alpha);
+    }
+
+private:
+    SubStream _ss0;
+    SubStream _ss1;
+};
+
 /** Print Layer */
 class PrintLayer final : public ILayer
 {

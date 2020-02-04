@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,6 +73,8 @@ Status CLNodeValidator::validate(INode *node)
             return detail::validate_pad_layer<CLPadLayer>(*polymorphic_downcast<PadLayerNode *>(node));
         case NodeType::PermuteLayer:
             return detail::validate_permute_layer<CLPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
+        case NodeType::PReluLayer:
+            return detail::validate_prelu_layer<CLPReluLayer>(*polymorphic_downcast<PReluLayerNode *>(node));
         case NodeType::PriorBoxLayer:
             return detail::validate_priorbox_layer<CLPriorBoxLayer>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:
