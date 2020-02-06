@@ -324,48 +324,26 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 
 template <typename T>
-inline T vquantize_q8(const float32x4x2_t &qv, const UniformQuantizationInfo &qi);
-
-template <>
-inline uint8x8_t vquantize_q8(const float32x4x2_t &qv, const UniformQuantizationInfo &qi)
-{
-    return vquantize(qv, qi);
-}
-
-template <>
-inline int8x8_t vquantize_q8(const float32x4x2_t &qv, const UniformQuantizationInfo &qi)
-{
-    return vquantize_signed(qv, qi);
-}
-
-template <typename T>
-inline T vquantize_q8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi);
-
-template <>
-inline uint8x16_t vquantize_q8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
-{
-    return vquantize(qv, qi);
-}
-
-template <>
-inline int8x16_t vquantize_q8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
-{
-    return vquantize_signed(qv, qi);
-}
-
-template <typename T>
 inline T vcvtq_q32_f32(float32x4_t values);
 
 template <>
 inline uint32x4_t vcvtq_q32_f32(float32x4_t values)
 {
+#ifdef __aarch64__
+    return vcvtnq_u32_f32(values);
+#else  //__aarch64__
     return vcvtq_u32_f32(values);
+#endif //__aarch64__
 }
 
 template <>
 inline int32x4_t vcvtq_q32_f32(float32x4_t values)
 {
+#ifdef __aarch64__
+    return vcvtnq_s32_f32(values);
+#else  //__aarch64__
     return vcvtq_s32_f32(values);
+#endif //__aarch64__
 }
 
 template <typename T>
@@ -382,6 +360,86 @@ inline float32x4_t vcvtq_f32_q32(int32x4_t values)
 {
     return vcvtq_f32_s32(values);
 }
+
+template <typename Tout>
+inline Tout vrequantize_pooling_with_scale(const float32x4x4_t &acc, const float quant_rescale, const float scale_pooling, const int32_t new_offset);
+
+template <>
+inline uint8x16_t vrequantize_pooling_with_scale(const float32x4x4_t &acc, const float quant_rescale, const float scale_pooling, const int32_t new_offset)
+{
+    const float new_scale = quant_rescale / scale_pooling;
+    return vquantize(acc, UniformQuantizationInfo(new_scale, new_offset));
+}
+
+template <>
+inline int8x16_t vrequantize_pooling_with_scale(const float32x4x4_t &acc, const float quant_rescale, const float scale_pooling, const int32_t new_offset)
+{
+    const float new_scale = quant_rescale / scale_pooling;
+    return vquantize_signed(acc, UniformQuantizationInfo(new_scale, new_offset));
+}
+
+template <typename Tin, typename Tout>
+inline Tout vrequantize_pooling(Tin vec1, Tin vec2, const UniformQuantizationInfo &requant_qinfo);
+
+template <>
+inline uint8x16_t vrequantize_pooling(uint8x8_t vec1, uint8x8_t vec2, const UniformQuantizationInfo &requant_qinfo)
+{
+    const float32x4x4_t acc =
+    {
+        {
+            vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec1))))),
+            vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec1))))),
+            vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec2))))),
+            vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec2))))),
+        }
+    };
+    return vquantize(acc, requant_qinfo);
+}
+
+template <>
+inline int8x16_t vrequantize_pooling(int8x8_t vec1, int8x8_t vec2, const UniformQuantizationInfo &requant_qinfo)
+{
+    const float32x4x4_t acc =
+    {
+        {
+            vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec1))))),
+            vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec1))))),
+            vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec2))))),
+            vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec2))))),
+        }
+    };
+    return vquantize_signed(acc, requant_qinfo);
+}
+
+template <typename T>
+inline T vrequantize_pooling(T &vec, const UniformQuantizationInfo &requant_qinfo);
+
+template <>
+inline uint8x8_t vrequantize_pooling(uint8x8_t &vec, const UniformQuantizationInfo &requant_qinfo)
+{
+    const float32x4x2_t acc =
+    {
+        {
+            vcvtq_f32_u32(vmovl_u16(vget_low_u16(vmovl_u8((vec))))),
+            vcvtq_f32_u32(vmovl_u16(vget_high_u16(vmovl_u8((vec))))),
+        }
+    };
+    return vquantize(acc, requant_qinfo);
+}
+
+template <>
+inline int8x8_t vrequantize_pooling(int8x8_t &vec, const UniformQuantizationInfo &requant_qinfo)
+{
+    const float32x4x2_t acc =
+    {
+        {
+            vcvtq_f32_s32(vmovl_s16(vget_low_s16(vmovl_s8((vec))))),
+            vcvtq_f32_s32(vmovl_s16(vget_high_s16(vmovl_s8((vec))))),
+        }
+    };
+    return vquantize_signed(acc, requant_qinfo);
+}
+
 } // namespace
 
 NEPoolingLayerKernel::NEPoolingLayerKernel()
@@ -677,6 +735,10 @@ void NEPoolingLayerKernel::pooling2_q8_nchw(const Window &window_input, const Wi
     const UniformQuantizationInfo output_qinfo         = _output->info()->quantization_info().uniform();
     const bool                    have_different_qinfo = input_qinfo != output_qinfo;
 
+    const float                   requant_scale  = output_qinfo.scale / input_qinfo.scale;
+    const int32_t                 requant_offset = output_qinfo.offset - static_cast<int32_t>(static_cast<float>(input_qinfo.offset) / requant_scale);
+    const UniformQuantizationInfo requant_qinfo  = UniformQuantizationInfo(requant_scale, requant_offset);
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const auto top_data    = wrapper::vloadq(input_top_ptr + input.offset());
@@ -727,7 +789,7 @@ void NEPoolingLayerKernel::pooling2_q8_nchw(const Window &window_input, const Wi
                                         wrapper::vpadd(wrapper::vgetlow(vrsum_shifted.val[0]), wrapper::vgethigh(vrsum_shifted.val[0])),
                                         wrapper::vpadd(wrapper::vgetlow(vrsum_shifted.val[1]), wrapper::vgethigh(vrsum_shifted.val[1])));
 
-                // Scale lower result
+                // Scale upper result
                 scale_vector_q16x8<q16_t, q16x8_t>(exclude_padding, res_upper, id, 1, 2,
                                                    pool_size, upper_bound_w, upper_bound_h,
                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
@@ -747,7 +809,7 @@ void NEPoolingLayerKernel::pooling2_q8_nchw(const Window &window_input, const Wi
 
         if(have_different_qinfo)
         {
-            const auto requantized_output = vquantize_q8<q8x16_t>(vdequantize(wrapper::vcombine(lower_res, upper_res), input_qinfo), output_qinfo);
+            const auto requantized_output = vrequantize_pooling<q8x8_t, q8x16_t>(lower_res, upper_res, requant_qinfo);
             lower_res                     = wrapper::vgetlow(requantized_output);
             upper_res                     = wrapper::vgethigh(requantized_output);
         }
@@ -929,6 +991,10 @@ void NEPoolingLayerKernel::pooling3_q8_nchw(const Window &window_input, const Wi
     const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
     const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
 
+    const float                   requant_scale  = output_qinfo.scale / input_qinfo.scale;
+    const int32_t                 requant_offset = output_qinfo.offset - static_cast<int32_t>(static_cast<float>(input_qinfo.offset) / requant_scale);
+    const UniformQuantizationInfo requant_qinfo  = UniformQuantizationInfo(requant_scale, requant_offset);
+
     const T *const input_top_ptr    = reinterpret_cast<const T *>(_input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top))));
     const T *const input_middle_ptr = reinterpret_cast<const T *>(_input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1)));
     const T *const input_bottom_ptr = reinterpret_cast<const T *>(_input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2)));
@@ -1034,7 +1100,7 @@ void NEPoolingLayerKernel::pooling3_q8_nchw(const Window &window_input, const Wi
         {
             if(input_qinfo != output_qinfo)
             {
-                fqres = vquantize_q8<q8x16_t>(vdequantize(fqres, input_qinfo), output_qinfo);
+                fqres = vrequantize_pooling<q8x8_t, q8x16_t>(wrapper::vgetlow(fqres), wrapper::vgethigh(fqres), requant_qinfo);
             }
             wrapper::vstore(reinterpret_cast<T *>(output.ptr()), fqres);
         }
@@ -1042,7 +1108,7 @@ void NEPoolingLayerKernel::pooling3_q8_nchw(const Window &window_input, const Wi
         {
             if(input_qinfo != output_qinfo)
             {
-                fres = vquantize_q8<q8x8_t>(vdequantize(fres, input_qinfo), output_qinfo);
+                fres = vrequantize_pooling<q8x8_t>(fres, requant_qinfo);
             }
             wrapper::vstore(reinterpret_cast<T *>(output.ptr()), fres);
         }
@@ -1838,6 +1904,15 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
     const UniformQuantizationInfo input_qinfo  = _input->info()->quantization_info().uniform();
     const UniformQuantizationInfo output_qinfo = _output->info()->quantization_info().uniform();
 
+    const float   quant_rescale = output_qinfo.scale / input_qinfo.scale;
+    // "new_offset" doesn't have to consider the "half_scale_v" in its computation
+    // With a requantization performed in a single step there won't be uncertainties introduced
+    const int32_t new_offset    = output_qinfo.offset - static_cast<int32_t>( static_cast<float>(input_qinfo.offset) / quant_rescale);
+
+    const float                   requant_scale  = output_qinfo.scale / input_qinfo.scale;
+    const int32_t                 requant_offset = output_qinfo.offset - static_cast<int32_t>(static_cast<float>(input_qinfo.offset) / requant_scale);
+    const UniformQuantizationInfo requant_qinfo  = UniformQuantizationInfo(requant_scale, requant_offset);
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const int idx_width    = id.y() * pool_stride_x;
@@ -1860,7 +1935,6 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
             // Calculate scale
             const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
                                                     pool_stride_y);
-            const float32x4_t scale_v = vdupq_n_f32(scale);
 
             // Perform pooling
             for(int y = pool_start_y; y < pool_end_y; ++y)
@@ -1878,24 +1952,38 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
                     vres4                   = wrapper::vadd(vres4, wrapper::vmovl(wrapper::vgethigh(data2_q16)));
                 }
             }
-            // Divide by scale and add 0.5f to round to nearest instead of rounding towards zero
-            vres1 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres1), scale_v));
-            vres2 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres2), scale_v));
-            vres3 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres3), scale_v));
-            vres4 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres4), scale_v));
 
-            q8x8_t res1 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres1), wrapper::vmovn(vres2)));
-            q8x8_t res2 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres3), wrapper::vmovn(vres4)));
             if(input_qinfo != output_qinfo)
             {
-                const auto requantized_output = vquantize_q8<q8x16_t>(vdequantize(wrapper::vcombine(res1, res2), input_qinfo), output_qinfo);
-                res1                          = wrapper::vgetlow(requantized_output);
-                res2                          = wrapper::vgethigh(requantized_output);
+                const float32x4x4_t vres =
+                {
+                    {
+                        vcvtq_f32_q32(vres1),
+                        vcvtq_f32_q32(vres2),
+                        vcvtq_f32_q32(vres3),
+                        vcvtq_f32_q32(vres4),
+                    }
+                };
+                const auto requantized_output = vrequantize_pooling_with_scale<q8x16_t>(vres, quant_rescale, scale, new_offset);
+                // Store result
+                wrapper::vstore(reinterpret_cast<T *>(output.ptr()), wrapper::vgetlow(requantized_output));
+                wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + 8, wrapper::vgethigh(requantized_output));
             }
+            else
+            {
+                const float32x4_t scale_v = vdupq_n_f32(scale);
+                // Divide by scale and add 0.5f to round to nearest instead of rounding towards zero
+                vres1 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres1), scale_v));
+                vres2 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres2), scale_v));
+                vres3 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres3), scale_v));
+                vres4 = vcvtq_q32_f32<q32x4_t>(wrapper::vmla(half_scale_v, vcvtq_f32_q32(vres4), scale_v));
 
-            // Store result
-            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), res1);
-            wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + 8, res2);
+                const q8x8_t res1 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres1), wrapper::vmovn(vres2)));
+                const q8x8_t res2 = wrapper::vmovn(wrapper::vcombine(wrapper::vmovn(vres3), wrapper::vmovn(vres4)));
+                // Store result
+                wrapper::vstore(reinterpret_cast<T *>(output.ptr()), res1);
+                wrapper::vstore(reinterpret_cast<T *>(output.ptr()) + 8, res2);
+            }
         }
         else
         {
@@ -1912,7 +2000,7 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
             }
 
             // Store result
-            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), (input_qinfo != output_qinfo) ? vquantize_q8<q8x16_t>(vdequantize(vres, input_qinfo), output_qinfo) : vres);
+            wrapper::vstore(reinterpret_cast<T *>(output.ptr()), (input_qinfo != output_qinfo) ? vrequantize_pooling<q8x8_t, q8x16_t>(wrapper::vgetlow(vres), wrapper::vgethigh(vres), requant_qinfo) : vres);
         }
     },
     input, output);
