@@ -13,7 +13,7 @@ import (
 func globalFlags(ctx android.BaseContext) []string {
     var cppflags []string
 
-    if ctx.AConfig().PlatformVersionName() >= "Q" || ctx.AConfig().PlatformVersionName() >= "10" {
+    if ctx.AConfig().PlatformVersionName() == "Q" || ctx.AConfig().PlatformVersionName() == "10" {
         cppflags = append(cppflags, "-fno-addrsig")
     }
 
