@@ -799,39 +799,6 @@ private:
     DimensionRoundingType _round_type;
 };
 
-/** Fully connected layer info */
-struct FullyConnectedLayerInfo
-{
-    DataLayout weights_trained_layout{ DataLayout::NCHW }; /**<  Layout that the weights have been trained with. */
-    bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
-    bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
-    bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
-    bool       fp_mixed_precision{ false };                /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
-
-    /** Sets the weights trained data layout
-     *
-     * @param[in] layout Data layout that the weights were trained with
-     *
-     * @return Updated object
-     */
-    FullyConnectedLayerInfo &set_weights_trained_layout(DataLayout layout)
-    {
-        weights_trained_layout = layout;
-        return *this;
-    }
-    /** Sets the transpose weights flag
-     *
-     * @param[in] should_transpose_weights Boolean flag indicating if weights should be transposed
-     *
-     * @return Updated object
-     */
-    FullyConnectedLayerInfo &set_transpose_weights(bool should_transpose_weights)
-    {
-        transpose_weights = should_transpose_weights;
-        return *this;
-    }
-};
-
 /** PriorBox layer info */
 class PriorBoxLayerInfo final
 {
@@ -1674,6 +1641,40 @@ private:
     bool               _enabled = { false };
 };
 
+/** Fully connected layer info */
+struct FullyConnectedLayerInfo
+{
+    DataLayout          weights_trained_layout{ DataLayout::NCHW }; /**<  Layout that the weights have been trained with. */
+    bool                transpose_weights{ true };                  /**<  Transpose weights if true. */
+    bool                are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
+    bool                retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
+    bool                fp_mixed_precision{ false };                /**<  Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy. */
+    ActivationLayerInfo activation_info{};                          /**<  Fused activation to apply after the matrix multiplication. */
+
+    /** Sets the weights trained data layout
+     *
+     * @param[in] layout Data layout that the weights were trained with
+     *
+     * @return Updated object
+     */
+    FullyConnectedLayerInfo &set_weights_trained_layout(DataLayout layout)
+    {
+        weights_trained_layout = layout;
+        return *this;
+    }
+    /** Sets the transpose weights flag
+     *
+     * @param[in] should_transpose_weights Boolean flag indicating if weights should be transposed
+     *
+     * @return Updated object
+     */
+    FullyConnectedLayerInfo &set_transpose_weights(bool should_transpose_weights)
+    {
+        transpose_weights = should_transpose_weights;
+        return *this;
+    }
+};
+
 /** Normalization Layer Information class */
 class NormalizationLayerInfo
 {
@@ -1944,16 +1945,16 @@ enum class GEMMLowpOutputStageType
 /** GEMMLowp output stage info */
 struct GEMMLowpOutputStageInfo
 {
-    GEMMLowpOutputStageType type{ GEMMLowpOutputStageType::NONE }; /**< GEMMLowp output stage type */
-    int32_t                 gemmlowp_offset{ 0 };                  /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
-    int32_t                 gemmlowp_multiplier{ 0 };              /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    int32_t                 gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
-    int32_t                 gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
-    int32_t                 gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
-    std::vector<int32_t>    gemmlowp_multipliers{};                /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    std::vector<int32_t>    gemmlowp_shifts{};                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    bool                    is_quantized_per_channel{ false };     /**< GEMMLowp quantized per-channel flag */
-    DataType                output_data_type{ DataType::UNKNOWN }; /**< Output tensor data type to use if the output is not initialized */
+    GEMMLowpOutputStageType type{ GEMMLowpOutputStageType::NONE };                        /**< GEMMLowp output stage type */
+    int32_t                 gemmlowp_offset{ 0 };                                         /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
+    int32_t                 gemmlowp_multiplier{ 0 };                                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    int32_t                 gemmlowp_shift{ 0 };                                          /**< GEMMLowp output stage shift used for quantizing to uint8 */
+    int32_t                 gemmlowp_min_bound{ std::numeric_limits<int32_t>::lowest() }; /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
+    int32_t                 gemmlowp_max_bound{ std::numeric_limits<int32_t>::max() };    /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
+    std::vector<int32_t>    gemmlowp_multipliers{};                                       /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    std::vector<int32_t>    gemmlowp_shifts{};                                            /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    bool                    is_quantized_per_channel{ false };                            /**< GEMMLowp quantized per-channel flag */
+    DataType                output_data_type{ DataType::UNKNOWN };                        /**< Output tensor data type to use if the output is not initialized */
 };
 
 /** GEMM LHS (Left Hand Side) matrix information */

@@ -778,15 +778,8 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
                           int32_t a_offset, int32_t b_offset, GEMMLowpOutputStageInfo output_stage)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
-    if(output->data_type() == DataType::QASYMM8)
+    if(output->data_type() != DataType::QASYMM8)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > 255);
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < 0);
-    }
-    else
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > 127);
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < -128);
         ARM_COMPUTE_RETURN_ERROR_ON(mm_result->dimension(0) > 1 && output_stage.gemmlowp_multipliers.size() > 1 && b_offset != 0);
     }
     ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
@@ -914,7 +907,7 @@ get_configured_function(const ITensor *mm_result, const ITensor *vector_sum_row,
     std::tie(type_min, type_max) = get_min_max(output->info()->data_type());
     int32_t    type_min_int    = type_min.get<int32_t>();
     int32_t    type_max_int    = type_max.get<int32_t>();
-    const bool is_bounded_relu = !(output_stage.gemmlowp_min_bound == type_min_int && output_stage.gemmlowp_max_bound == type_max_int);
+    const bool is_bounded_relu = !(output_stage.gemmlowp_min_bound <= type_min_int && output_stage.gemmlowp_max_bound >= type_max_int);
 
     // Check if we need to perform fixed point requantization
     const bool is_fixed_point = output_stage.type != GEMMLowpOutputStageType::QUANTIZE_DOWN;

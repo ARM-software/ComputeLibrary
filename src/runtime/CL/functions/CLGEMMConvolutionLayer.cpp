@@ -333,8 +333,12 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         gemmlowp_output_stage.gemmlowp_multiplier = gemmlowp_output_stage.gemmlowp_multipliers[0];
         gemmlowp_output_stage.gemmlowp_shift      = gemmlowp_output_stage.gemmlowp_shifts[0];
 
-        int min_activation = 0;
-        int max_activation = 0;
+        PixelValue min_val{};
+        PixelValue max_val{};
+        std::tie(min_val, max_val) = get_min_max(output->info()->data_type());
+
+        auto min_activation = min_val.get<int32_t>();
+        auto max_activation = max_val.get<int32_t>();
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,

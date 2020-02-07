@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -301,6 +301,10 @@ void NodeFusionMutator::mutate(Graph &g)
     {
         return true;
     };
+    auto cl_target_prec = [](INode & n)
+    {
+        return n.assigned_target() == Target::CL;
+    };
     auto qs8_prec = [&g](INode & n)
     {
         ARM_COMPUTE_ERROR_ON(n.output(0) == nullptr);
@@ -318,6 +322,7 @@ void NodeFusionMutator::mutate(Graph &g)
     detail::fuse_layer<BatchNormalizationLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<BatchNormalizationLayerNode>, supported_fused_activations);
     detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations);
+    detail::fuse_layer<FullyConnectedLayerNode, ActivationLayerNode>(g, cl_target_prec, detail::fuse_node_with_activation<FullyConnectedLayerNode>, supported_fused_activations);
     detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_depthwise_convolution_with_batch_normalization);
 }

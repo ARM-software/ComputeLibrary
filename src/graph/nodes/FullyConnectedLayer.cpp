@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,11 @@ FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, Quant
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
+}
+
+void FullyConnectedLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)
+{
+    _info.activation_info = fused_activation;
 }
 
 TensorDescriptor FullyConnectedLayerNode::compute_weights_descriptor(const TensorDescriptor &input_descriptor,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,8 +41,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
-    ARM_COMPUTE_RETURN_ERROR_ON(min < 0 || min > max);
+    ARM_COMPUTE_RETURN_ERROR_ON(min > max);
 
     // Check biases if exist
     if(bias != nullptr)
@@ -135,8 +134,8 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *i
     build_opts.add_option("-DRESULT_OFFSET=" + support::cpp11::to_string(result_offset));
     build_opts.add_option("-DRESULT_MULT_INT=" + support::cpp11::to_string(result_mult_int));
     build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(result_shift));
-    build_opts.add_option_if((min != 0) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
-    build_opts.add_option_if((max != 255) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
+    build_opts.add_option_if((min > 0), "-DMIN_BOUND=" + support::cpp11::to_string(min));
+    build_opts.add_option_if((max < 255), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
     // Create kernel

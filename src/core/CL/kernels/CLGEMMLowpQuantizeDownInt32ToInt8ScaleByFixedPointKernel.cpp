@@ -44,8 +44,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
                           int min, int max)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON(max > 127);
-    ARM_COMPUTE_RETURN_ERROR_ON(min < -128 || min > max);
+    ARM_COMPUTE_RETURN_ERROR_ON(min > max);
 
     // Check biases if exist
     if(bias != nullptr)
@@ -136,8 +135,8 @@ void CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::configure(const I
     build_opts.add_option("-DRESULT_FIXEDPOINT_MULTIPLIER=" + support::cpp11::to_string(result_fixedpoint_multiplier));
     build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(result_shift));
     build_opts.add_option("-DOUTPUT_DATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
-    build_opts.add_option_if((min != -128) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
-    build_opts.add_option_if((max != 127) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
+    build_opts.add_option_if((min > -128), "-DMIN_BOUND=" + support::cpp11::to_string(min));
+    build_opts.add_option_if((max < 127), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
     // Create kernel

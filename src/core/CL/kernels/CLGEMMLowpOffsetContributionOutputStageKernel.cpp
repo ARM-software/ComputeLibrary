@@ -113,22 +113,9 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
         ARM_COMPUTE_RETURN_ERROR_ON(output_stage.output_data_type != output->data_type());
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mm_result, output);
-        PixelValue min_val{};
-        PixelValue max_val{};
-        std::tie(min_val, max_val) = get_min_max(output->data_type());
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > max_val.get<int32_t>());
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < min_val.get<int32_t>() || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
-    }
-    else
-    {
-        // Output will be configured as depending on the chosen output data type in the output stage
-        PixelValue min_val{};
-        PixelValue max_val{};
-        std::tie(min_val, max_val) = get_min_max(output_stage.output_data_type);
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > max_val.get<int32_t>());
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < min_val.get<int32_t>() || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
     }
 
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_stage.gemmlowp_multipliers.size() != output_stage.gemmlowp_shifts.size(), "per channel quantization info is incorrect");
 
     return Status{};
@@ -248,8 +235,8 @@ void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const ICLTensor *m
     PixelValue min_val{};
     PixelValue max_val{};
     std::tie(min_val, max_val) = get_min_max(output->info()->data_type());
-    build_opts.add_option_if((min != min_val.get<int32_t>()) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
-    build_opts.add_option_if((max != max_val.get<int32_t>()) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
+    build_opts.add_option_if((min > min_val.get<int32_t>()), "-DMIN_BOUND=" + support::cpp11::to_string(min));
+    build_opts.add_option_if((max < max_val.get<int32_t>()), "-DMAX_BOUND=" + support::cpp11::to_string(max));
 
     std::string kernel_name("gemmlowp_offset_contribution");
     kernel_name += "_" + string_from_gemmlowp_output_stage(output_stage.type);

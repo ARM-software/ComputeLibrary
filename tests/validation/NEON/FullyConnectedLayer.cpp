@@ -71,6 +71,8 @@ const auto QuantizationData = framework::dataset::make("QuantizationInfo",
     QuantizationInfo(1.f / 256.f, 10),
     QuantizationInfo(1.1f, 10),
 });
+
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo", ActivationLayerInfo());
 } // namespace
 
 TEST_SUITE(NEON)
@@ -179,16 +181,18 @@ using NEFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<Tensor
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
                                                                                                                         FullyConnectedParameters),
-                                                                                                                framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(),
                                                                                                                       FullyConnectedParameters),
-                                                                                                              framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
+                                                                                                              ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
@@ -197,14 +201,16 @@ TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                 ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
-                                                                                                               framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
+                                                                                                               ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
@@ -217,31 +223,34 @@ using NEFullyConnectedLayerQuantizedFixture = FullyConnectedLayerValidationQuant
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
                            combine(datasets::SmallFullyConnectedLayerDataset(),
                                    FullyConnectedParameters),
                            framework::dataset::make("DataType", DataType::QASYMM8)),
-                       QuantizationData))
+                       QuantizationData),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(
                            combine(datasets::LargeFullyConnectedLayerDataset(),
                                    FullyConnectedParameters),
                            framework::dataset::make("DataType", DataType::QASYMM8)),
-                       QuantizationData))
+                       QuantizationData),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
                            combine(datasets::SmallFullyConnectedLayerDataset(),
                                    FullyConnectedParameters),
                            framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                       QuantizationData))
+                       QuantizationData),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,11 @@ public:
     FullyConnectedLayerNode(unsigned int            num_outputs,
                             QuantizationInfo        out_quant_info = QuantizationInfo(),
                             FullyConnectedLayerInfo fc_info        = FullyConnectedLayerInfo());
+    /** Sets fused activation
+     *
+     * @param[in] fused_activation Fused activation to set
+     */
+    void set_fused_activation(ActivationLayerInfo fused_activation);
     /** Computes weights descriptor
      *
      * @warning Works for inputs with 1D batch space
@@ -82,6 +87,8 @@ public:
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
+
+    static constexpr NodeType node_type = NodeType::FullyConnectedLayer;
 
 private:
     unsigned int            _num_outputs;

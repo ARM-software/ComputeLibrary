@@ -169,7 +169,7 @@ TEST_SUITE(QuantizeDownInt32ToUint8Scale)
 
 const auto quantize_down_int32_to_uint8_scale_cases = framework::dataset::make("result_offset", -2, 1) * framework::dataset::make("result_mult_int", 1, 2) * framework::dataset::make("result_shift", 2,
                                                       3)
-                                                      * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+                                                      * framework::dataset::make("min", 0) * framework::dataset::make("max", 255) * framework::dataset::make("addBias", { false, true });
 
 const auto quantize_down_int32_to_uint8_scale_relu_cases = framework::dataset::make("result_offset", -2, 1) * framework::dataset::make("result_mult_int", 1,
                                                            2)
@@ -181,26 +181,21 @@ using NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture = GEMMLowpQuantizeDownInt32
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Input not a multiple of 16
-                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Invalid min and max
                                              TensorInfo(TensorShape(20U, 13U), 1, DataType::S32), // Wrong output data type
                                           }),
     framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(21U), 1, DataType::S32),
-                                            TensorInfo(TensorShape(21U), 1, DataType::S32),
                                             TensorInfo(TensorShape(20U), 1, DataType::S32),
                                           })),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8),
-                                            TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8),
                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::S32),
                                            })),
     framework::dataset::make("Min",{        0,
-                                            8,
                                             13,
                                            })),
     framework::dataset::make("Max",{        205,
-                                            300,
                                             180,
                                            })),
-    framework::dataset::make("Expected", { true, false, false })),
+    framework::dataset::make("Expected", { true, false })),
     a_info, b_info, output_info, min, max, expected)
 {
     // Lock tensors
@@ -287,7 +282,7 @@ TEST_SUITE(QuantizeDownInt32ToUint8ScaleByFixedPoint)
 
 const auto quantize_down_int32_to_uint8_scale_by_fixedpoint_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                     2)
-                                                                    * framework::dataset::make("result_offset_after_shift", 2, 3) * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+                                                                    * framework::dataset::make("result_offset_after_shift", 2, 3) * framework::dataset::make("min", 0) * framework::dataset::make("max", 255) * framework::dataset::make("addBias", { false, true });
 
 const auto quantize_down_int32_to_uint8_scale_by_fixedpoint_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                          2)
@@ -303,26 +298,21 @@ using NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture =
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Input not a multiple of 16
-                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Invalid min and max
                                              TensorInfo(TensorShape(20U, 13U), 1, DataType::S32), // Wrong output data type
                                           }),
     framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(21U), 1, DataType::S32),
-                                            TensorInfo(TensorShape(21U), 1, DataType::S32),
                                             TensorInfo(TensorShape(20U), 1, DataType::S32),
                                           })),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8),
-                                            TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8),
                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::S32),
                                            })),
     framework::dataset::make("Min",{        0,
-                                            8,
                                             13,
                                            })),
     framework::dataset::make("Max",{        205,
-                                            300,
                                             180,
                                            })),
-    framework::dataset::make("Expected", { true, false, false })),
+    framework::dataset::make("Expected", { true, false })),
     a_info, b_info, output_info, min, max, expected)
 {
     // Lock tensors
@@ -414,7 +404,7 @@ TEST_SUITE(QuantizeDownInt32ToInt8ScaleByFixedPoint)
 
 const auto quantize_down_int32_to_int8_scale_by_fixedpoint_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                    2)
-                                                                   * framework::dataset::make("result_offset_after_shift", 2, 3) * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+                                                                   * framework::dataset::make("result_offset_after_shift", 2, 3) * framework::dataset::make("min", -128) * framework::dataset::make("max", 128) * framework::dataset::make("addBias", { false, true });
 
 const auto quantize_down_int32_to_int8_scale_by_fixedpoint_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                         2)
@@ -427,31 +417,26 @@ using NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointFixture =
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
         framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::F32), // Invalid input data type
-                                                 TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Invalid min and max
                                                  TensorInfo(TensorShape(20U, 13U), 1, DataType::S32), // Wrong output data type
                                                  TensorInfo(TensorShape(21U, 13U), 1, DataType::S32),
         }),
         framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(21U), 1, DataType::S32),
-                                                TensorInfo(TensorShape(21U), 1, DataType::S32),
                                                 TensorInfo(TensorShape(20U), 1, DataType::S32),
                                                 TensorInfo(TensorShape(21U), 1, DataType::S32),
         })),
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8_SIGNED),
-                                                TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8_SIGNED),
                                                 TensorInfo(TensorShape(20U, 13U), 1, DataType::S32),
                                                 TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8_SIGNED),
         })),
         framework::dataset::make("Min",{ -110,
-                                         -130,
                                          -113,
                                          -113,
         })),
         framework::dataset::make("Max",{ 87,
-                                         140,
                                          97,
                                          97,
         })),
-        framework::dataset::make("Expected", { false, false, false, true })),
+        framework::dataset::make("Expected", { false, false, true })),
                a_info, b_info, output_info, min, max, expected)
 {
     // Lock tensors
@@ -527,7 +512,7 @@ TEST_SUITE(QuantizeDownInt32ToInt16ScaleByFixedPoint)
 
 const auto quantize_down_int32_to_int16_scale_by_fixedpoint_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                     2)
-                                                                    * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+                                                                    * framework::dataset::make("min", -32768) * framework::dataset::make("max", 32767) * framework::dataset::make("addBias", { false, true });
 
 const auto quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                          2)
@@ -536,7 +521,7 @@ const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_cases = f
                                                                                                         1073741825)
                                                                                * framework::dataset::make("result_shift", -3,
                                                                                                           -2)
-                                                                               * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+                                                                               * framework::dataset::make("min", -32768) * framework::dataset::make("max", 32767) * framework::dataset::make("addBias", { false, true });
 
 const auto quantize_down_int32_to_int16_scale_by_fixedpoint_multgreat1_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600,
                                                                                                              254601602)
@@ -551,26 +536,21 @@ using NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture =
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Input not a multiple of 16
-                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Invalid min and max
                                              TensorInfo(TensorShape(20U, 13U), 1, DataType::S32), // Wrong output data type
                                           }),
     framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(21U), 1, DataType::S32),
-                                            TensorInfo(TensorShape(21U), 1, DataType::S32),
                                             TensorInfo(TensorShape(20U), 1, DataType::S32),
                                           })),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U, 13U), 1, DataType::QSYMM16),
-                                            TensorInfo(TensorShape(21U, 13U), 1, DataType::QSYMM16),
                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::S32),
                                            })),
     framework::dataset::make("Min",{        -205,
-                                            -60000,
                                             -180,
                                            })),
     framework::dataset::make("Max",{        205,
-                                            60000,
                                             180,
                                            })),
-    framework::dataset::make("Expected", { true, false, false })),
+    framework::dataset::make("Expected", { true, false })),
     a_info, b_info, output_info, min, max, expected)
 {
     // Lock tensors
