@@ -154,10 +154,12 @@ if env['gles_compute']:
     files_validation += Glob('validation/GLES_COMPUTE/*/*.cpp')
     files_validation += Glob('validation/GLES_COMPUTE/*.cpp')
 
+extra_link_flags = []
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
 elif env['os'] != 'bare_metal':
     test_env.Append(LIBS = ["rt"])
+    extra_link_flags += ['-fstack-protector-strong']
 
 if test_env['benchmark_tests']:
     arm_compute_benchmark = test_env.Program('arm_compute_benchmark', files_benchmark + common_objects)
@@ -167,7 +169,7 @@ if test_env['benchmark_tests']:
     Default(arm_compute_benchmark)
     Export('arm_compute_benchmark')
 
-bm_link_flags = ['-fstack-protector-strong']
+bm_link_flags = []
 if test_env['linker_script']:
     bm_link_flags += ['-Wl,--build-id=none', '-T', env['linker_script']]
 
@@ -219,7 +221,7 @@ if test_env['validation_tests']:
                 for file in Glob("validate_examples/graph_*.cpp"):
                     example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
                     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + [ arm_compute_validation_framework ], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'] + bm_link_flags)
+                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + [ arm_compute_validation_framework ], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'] + bm_link_flags + extra_link_flags)
                         arm_compute_validate_examples += [ prog ]
                     else:
                         #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
@@ -268,7 +270,7 @@ if test_env['benchmark_examples']:
         for file in Glob("%s/graph_*.cpp" % examples_folder ):
             example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
             if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'] + bm_link_flags)
+                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'] + bm_link_flags + extra_link_flags)
                 arm_compute_benchmark_examples += [ prog ]
             else:
                 #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
