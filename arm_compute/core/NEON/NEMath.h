@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -172,6 +172,15 @@ float32x4x4_t convert_uint8x16_to_float32x4x4(const uint8x16_t &in);
  * @return Converted vector of float
  */
 float32x4x4_t convert_int8x16_to_float32x4x4(const int8x16_t &in);
+
+/** Converts to float32x4x4_t from the specified templated 16 elements vectors
+ *
+ * @param[in] in Vector of float to be converted
+ *
+ * @return Converted vector of float
+ */
+template <typename T>
+float32x4x4_t convert_to_float32x4x4(const T &in);
 
 /** Converts from two float32x4x3_t to just one uint8x8x3_t
  *

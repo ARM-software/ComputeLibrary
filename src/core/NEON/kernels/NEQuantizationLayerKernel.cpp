@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
+#include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -46,7 +47,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape().total_size() == 0);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QASYMM16);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
@@ -54,6 +55,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     return Status{};
 }
 
+template <typename T>
+inline float32x4x4_t load_value(const T *input_ptr)
+{
+    using Tx16_t = typename wrapper::traits::neon_vector<T, 16>::type;
+    return arm_compute::convert_to_float32x4x4<Tx16_t>(wrapper::vloadq(input_ptr));
+}
+
+template <>
 inline float32x4x4_t load_value(const float *input_ptr)
 {
     return { wrapper::vloadq(input_ptr),
@@ -62,7 +71,8 @@ inline float32x4x4_t load_value(const float *input_ptr)
              wrapper::vloadq(input_ptr + 12) };
 }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-inline const float32x4x4_t load_value(const float16_t *input_ptr)
+template <>
+inline float32x4x4_t load_value(const float16_t *input_ptr)
 {
     return { vcvt_f32_f16(wrapper::vload(input_ptr)),
              vcvt_f32_f16(wrapper::vload(input_ptr + 4)),
@@ -105,34 +115,38 @@ void NEQuantizationLayerKernel::configure(const ITensor *input, ITensor *output)
     _input  = input;
     _output = output;
 
-    static std::map<DataType, QuantizationFunctionExecutorPtr> quant_map_f32 =
+    static const std::map<std::string, QuantizationFunctionExecutorPtr> quant_map =
     {
-        { DataType::QASYMM8, &NEQuantizationLayerKernel::run_quantize_qasymm8<float, uint8_t> },
-        { DataType::QASYMM8_SIGNED, &NEQuantizationLayerKernel::run_quantize_qasymm8<float, int8_t> },
-        { DataType::QASYMM16, &NEQuantizationLayerKernel::run_quantize_qasymm16<float> },
-    };
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    static std::map<DataType, QuantizationFunctionExecutorPtr> quant_map_f16 =
-    {
-        { DataType::QASYMM8, &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t, uint8_t> },
-        { DataType::QASYMM8_SIGNED, &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t, int8_t> },
-        { DataType::QASYMM16, &NEQuantizationLayerKernel::run_quantize_qasymm16<float16_t> },
-    };
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
+        { "op_QASYMM8_QASYMM8", &NEQuantizationLayerKernel::run_quantize_qasymm8<uint8_t, uint8_t> },
+        { "op_QASYMM8_QASYMM8_SIGNED", &NEQuantizationLayerKernel::run_quantize_qasymm8<uint8_t, int8_t> },
+        { "op_QASYMM8_QASYMM16", &NEQuantizationLayerKernel::run_quantize_qasymm16<uint8_t> },
 
-    switch(input->info()->data_type())
-    {
-        case DataType::F32:
-            _func = quant_map_f32[output->info()->data_type()];
-            break;
+        { "op_QASYMM8_SIGNED_QASYMM8", &NEQuantizationLayerKernel::run_quantize_qasymm8<int8_t, uint8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM8_SIGNED", &NEQuantizationLayerKernel::run_quantize_qasymm8<int8_t, int8_t> },
+        { "op_QASYMM8_SIGNED_QASYMM16", &NEQuantizationLayerKernel::run_quantize_qasymm16<int8_t> },
+
+        { "op_F32_QASYMM8", &NEQuantizationLayerKernel::run_quantize_qasymm8<float, uint8_t> },
+        { "op_F32_QASYMM8_SIGNED", &NEQuantizationLayerKernel::run_quantize_qasymm8<float, int8_t> },
+        { "op_F32_QASYMM16", &NEQuantizationLayerKernel::run_quantize_qasymm16<float> },
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            _func = quant_map_f16[output->info()->data_type()];
-            break;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        default:
-            ARM_COMPUTE_ERROR("Unsupported input data type.");
+        { "op_F16_QASYMM8", &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t, uint8_t> },
+        { "op_F16_QASYMM8_SIGNED", &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t, int8_t> },
+        { "op_F16_QASYMM16", &NEQuantizationLayerKernel::run_quantize_qasymm16<float16_t> },
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
+    };
+
+    std::string function_to_call("op_");
+    function_to_call += string_from_data_type(_input->info()->data_type()) + "_";
+    function_to_call += string_from_data_type(_output->info()->data_type());
+
+    auto it = quant_map.find(function_to_call);
+
+    if(it == quant_map.end())
+    {
+        ARM_COMPUTE_ERROR("Unsupported combination of input and output data types");
     }
+    _func = it->second;
 
     // Configure kernel window
     Window win_config = calculate_max_window(*input->info(), Steps());
@@ -156,7 +170,12 @@ void NEQuantizationLayerKernel::run_quantize_qasymm8(const Window &window)
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    const UniformQuantizationInfo uqinfo = _output->info()->quantization_info().uniform();
+    const UniformQuantizationInfo uqinfo_in = _input->info()->quantization_info().uniform();
+    UniformQuantizationInfo       uqinfo    = _output->info()->quantization_info().uniform();
+    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
+    {
+        uqinfo = compute_requantization_scale_offset(uqinfo_in, uqinfo);
+    }
 #ifdef __aarch64__
     constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_EVEN;
 #else  //__aarch64__
@@ -194,7 +213,12 @@ void NEQuantizationLayerKernel::run_quantize_qasymm16(const Window &window)
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    const UniformQuantizationInfo uqinfo = _output->info()->quantization_info().uniform();
+    const UniformQuantizationInfo uqinfo_in = _input->info()->quantization_info().uniform();
+    UniformQuantizationInfo       uqinfo    = _output->info()->quantization_info().uniform();
+    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
+    {
+        uqinfo = compute_requantization_scale_offset(uqinfo_in, uqinfo);
+    }
 #ifdef __aarch64__
     constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_EVEN;
 #else  //__aarch64__

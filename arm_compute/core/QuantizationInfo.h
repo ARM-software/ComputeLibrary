@@ -516,5 +516,49 @@ inline float dequantize_qasymm16(uint16_t value, const QuantizationInfo &qinfo)
 {
     return dequantize_qasymm16(value, qinfo.uniform());
 }
+
+/*
+ * In case of requantization of a quantized input tensor to an output tensor with another quantization
+ * instead of applying dequantization and then a quantization functions, we just compute new scale and
+ * offset.
+ *
+ * Assuming:
+ *   - q_i as input quantized value
+ *   - q_o as output quantized value
+ *   - z_i as input quantization offset value
+ *   - z_o as output quantization offset value
+ *   - s_i as input quantization scale value
+ *   - s_o as output quantization scale value
+ *   - z_n as new quantization offset value
+ *   - s_n as new quantization scale value
+ *
+ * q_o = ( q_i - z_i ) * s_i / s_o + z_o
+ *
+ * We can rewrite the formula as:
+ *
+ * q_o = ( q_i * s_i / s_o ) - z_i * s_i / s_o + z_o
+ *
+ * q_o = q_i / s_n + z_n
+ *
+ * Where:
+ *
+ * s_n = s_o / s_i
+ *
+ * z_n = - z_i * s_i / s_o + z_o
+ *
+ */
+inline UniformQuantizationInfo compute_requantization_scale_offset(const UniformQuantizationInfo &uqinfo_in, const UniformQuantizationInfo &uqinfo_out)
+{
+    float   scale_to_apply  = uqinfo_out.scale;
+    int32_t offset_to_apply = uqinfo_out.offset;
+
+    scale_to_apply /= uqinfo_in.scale;
+    // In order to minimize flooring we convert the offset to a float,
+    // then compute the new offset in the float domain,
+    // finally we convert it back as int32_t
+    offset_to_apply -= static_cast<int32_t>(static_cast<float>(uqinfo_in.offset) * uqinfo_in.scale / uqinfo_out.scale);
+    return UniformQuantizationInfo(scale_to_apply, offset_to_apply);
+}
+
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_QUANTIZATION_INFO_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -343,6 +343,18 @@ inline float32x4x4_t convert_int8x16_to_float32x4x4(const int8x16_t &in)
     out.val[2]      = vcvtq_f32_s32(vmovl_s16(vget_low_s16(tmp2)));
     out.val[3]      = vcvtq_f32_s32(vmovl_s16(vget_high_s16(tmp2)));
     return out;
+}
+
+template <>
+inline float32x4x4_t convert_to_float32x4x4(const uint8x16_t &in)
+{
+    return convert_uint8x16_to_float32x4x4(in);
+}
+
+template <>
+inline float32x4x4_t convert_to_float32x4x4(const int8x16_t &in)
+{
+    return convert_int8x16_to_float32x4x4(in);
 }
 
 inline void convert_float32x4x3_to_uint8x8x3(const float32x4x3_t &in1, const float32x4x3_t &in2, uint8x8x3_t &out)
