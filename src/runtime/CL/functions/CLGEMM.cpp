@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,7 +109,14 @@ CLGEMM::GEMMType CLGEMM::select_gemm_type(unsigned int m, unsigned int n, unsign
         {
             if((m == 1) || (!reshape_b_only_on_first_run))
             {
-                gemm_type = GEMMType::RESHAPED_ONLY_RHS;
+                if((n > k) && gpu_target_is_in(gpu_target, GPUTarget::G71))
+                {
+                    gemm_type = GEMMType::NATIVE;
+                }
+                else
+                {
+                    gemm_type = GEMMType::RESHAPED_ONLY_RHS;
+                }
             }
             else
             {
