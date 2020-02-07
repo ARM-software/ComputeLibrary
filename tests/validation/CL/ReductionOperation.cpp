@@ -118,7 +118,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall4D, CLReductionOperationFixture<half>, framework:
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), concat(ReductionOperationsSumProd,
-                                       ReductionOperationsMinMax)), KeepDimensions))
+                                       ReductionOperationsMinMax)),
+                               KeepDimensions))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0, tolerance_f16);
@@ -135,7 +136,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall4D, CLReductionOperationFixture<float>, framework
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), concat(ReductionOperationsSumProd,
-                                       ReductionOperationsMinMax)), KeepDimensions))
+                                       ReductionOperationsMinMax)),
+                               KeepDimensions))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, tolerance_f32);
@@ -147,6 +149,26 @@ template <typename T>
 using CLReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<CLTensor, CLAccessor, CLReductionOperation, T>;
 
 TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                                               ReductionOperationsSumProd),
+                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(1.f / 64, 2))),
+                               KeepDimensions))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunSmallMinMax, CLReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                                               ReductionOperationsMinMax),
+                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(1.f / 64, 2))),
+                               KeepDimensions))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
                        combine(combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),

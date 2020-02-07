@@ -152,7 +152,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
 
     if(is_data_type_quantized(data_type))
     {
-        data_type_promoted = get_cl_dot8_acc_type_from_data_type(data_type);
+        data_type_promoted = "int";
     }
     else
     {
