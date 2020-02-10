@@ -64,6 +64,7 @@ vars.AddVariables(
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", False),
     ("toolchain_prefix", "Override the toolchain prefix", ""),
+    ("compiler_prefix", "Override the compiler prefix", ""),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
@@ -239,8 +240,12 @@ if env['build'] == 'native':
 if env["toolchain_prefix"] != "":
     prefix = env["toolchain_prefix"]
 
-env['CC'] = env['compiler_cache']+" "+prefix + c_compiler
-env['CXX'] = env['compiler_cache']+" "+prefix + cpp_compiler
+compiler_prefix = prefix
+if env["compiler_prefix"] != "":
+    compiler_prefix = env["compiler_prefix"]
+
+env['CC'] = env['compiler_cache']+ " " + compiler_prefix + c_compiler
+env['CXX'] = env['compiler_cache']+ " " + compiler_prefix + cpp_compiler
 env['LD'] = prefix + "ld"
 env['AS'] = prefix + "as"
 env['AR'] = prefix + "ar"
