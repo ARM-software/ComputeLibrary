@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -197,18 +197,30 @@ inline Window Window::split_window(size_t dimension, size_t id, size_t total) co
     {
         if(d == dimension)
         {
-            int start          = _dims[d].start();
-            int end            = _dims[d].end();
-            int per_sub_window = (num_iterations(d) / total) * _dims[d].step();
+            int start        = _dims[d].start();
+            int end          = _dims[d].end();
+            const int step   = _dims[d].step();
 
-            start += id * per_sub_window;
+            const int num_it = num_iterations(d);
+            const int rem    = num_it % total;
+            int work         = num_it / total;
 
-            if(id != total - 1)
+            int it_start     = work * id;
+
+            if(int(id) < rem)
             {
-                end = start + per_sub_window;
+                ++work;
+                it_start += id;
+            }
+            else
+            {
+                it_start += rem;
             }
 
-            out.set(d, Dimension(start, end, _dims[d].step()));
+            start += it_start * step;
+            end = std::min(end, start + work * step);
+
+            out.set(d, Dimension(start, end, step));
         }
         else
         {
