@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,16 +23,19 @@
  */
 #pragma once
 
+#include <array>
 #include <algorithm>
 #include <initializer_list>
+
+#include <cassert>
 
 namespace arm_gemm {
 
 template<unsigned int D>
 class NDRange {
 private:
-    unsigned int m_sizes[D];
-    unsigned int m_totalsizes[D];
+    std::array<unsigned int, D> m_sizes {};
+    std::array<unsigned int, D> m_totalsizes {};
 
     class NDRangeIterator {
     private:
@@ -81,8 +84,25 @@ private:
     };
 
 public:
+    NDRange& operator=(const NDRange& rhs)=default;
+    NDRange(const NDRange& rhs)           =default;
+
     template <typename... T>
-    NDRange(T... ts) : m_sizes{ts...} {
+    NDRange(T... ts)
+    : m_sizes{ts...}
+    {
+        unsigned int t=1;
+
+        for (unsigned int i=0; i<D; i++) {
+            t *= m_sizes[i];
+
+            m_totalsizes[i] = t;
+        }
+    }
+
+    NDRange(const std::array<unsigned int, D>& n)
+    : m_sizes{n}
+    {
         unsigned int t=1;
 
         for (unsigned int i=0; i<D; i++) {
@@ -104,5 +124,62 @@ public:
         return m_sizes[v];
     }
 };
+
+/** NDCoordinate builds upon a range, but specifies a starting position
+ * in addition to a size which it inherits from NDRange
+ */
+template<unsigned int N>
+class NDCoordinate : public NDRange<N> {
+    using int_t     =unsigned int;
+    using ndrange_t = NDRange<N>;
+
+    std::array<int_t, N> m_positions {};
+public:
+    NDCoordinate& operator=(const NDCoordinate& rhs)=default;
+    NDCoordinate(const NDCoordinate& rhs)           =default;
+    NDCoordinate(const std::initializer_list<std::pair<int_t, int_t>>& list)
+    {
+        std::array<int_t, N> sizes;
+
+        std::size_t i = 0;
+        for(auto& p : list) {
+            m_positions[i]= p.first;
+            sizes[i++]    = p.second;
+        }
+
+        //update the parents sizes
+        static_cast<ndrange_t&>(*this) = ndrange_t(sizes);
+    }
+
+    int_t get_position(int_t d) const {
+        assert(d < m_positions.size());
+        return m_positions[d];
+    }
+
+    void set_position(int_t d, int_t v) {
+        assert(d < size(m_positions));
+        assert(v < ndrange_t::get_size(d));
+
+        m_positions[d] = v;
+    }
+
+    int_t get_position_end(int_t d) const {
+        return get_position(d) + NDRange<N>::get_size(d);
+    }
+}; //class NDCoordinate
+
+/** @returns the number of dimensions in the NDRange which have none-1 values
+ * IE there is actual work in these dimensions that can be broken up
+ */
+template<unsigned int N>
+std::size_t ndrange_popcount(const NDRange<N>& ndr) {
+    std::size_t count = 0;
+
+    for(unsigned int d = 0; d != N; ++d) {
+        if(ndr.get_size(d) != 1)
+            ++count;
+    }
+    return count;
+}
 
 } // namespace arm_gemm

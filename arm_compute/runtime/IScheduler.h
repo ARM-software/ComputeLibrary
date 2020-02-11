@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/CPP/CPPTypes.h"
 
 #include <functional>
+#include <limits>
 
 namespace arm_compute
 {
@@ -42,6 +43,13 @@ public:
         STATIC,  /**< Split the workload evenly among the threads */
         DYNAMIC, /**< Split the workload dynamically using a bucket system */
     };
+
+    /** When arm_compute::ISchedular::Hints::_split_dimension is initialized with this value
+     * then the schedular is free to break down the problem space over as many dimensions
+     * as it wishes
+     */
+    static constexpr unsigned int split_dimensions_all = std::numeric_limits<unsigned>::max();
+
     /** Scheduler hints
      *
      * Collection of preferences set by the function regarding how to split a given workload

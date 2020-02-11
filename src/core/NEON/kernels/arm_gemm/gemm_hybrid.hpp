@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -142,8 +142,8 @@ public:
                 _window_range(iceildiv(args._Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmulti) { }
 
     // Interface implementation - Compulsory functions
-    unsigned int get_window_size() const override {
-        return _window_range.total_size();
+    ndrange_t get_window_size() const override {
+        return { _window_range.total_size(), 1u, 1u, 1u, 1u, 1u };
     }
 
     // This kernel can always be dynamically scheduled.
@@ -151,8 +151,7 @@ public:
         return true;
     }
 
-    // Execute
-    void execute(unsigned int start, unsigned int end, int threadid) override {
+    void execute_1d(unsigned int start, unsigned int end, int threadid) {
         UNUSED(threadid);
 #ifdef CYCLE_PROFILING
         profiler prof;
@@ -213,6 +212,17 @@ public:
 
             } while (p.next_dim1());
         }
+    }
+
+    // Execute
+    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
+        UNUSED(thread_locator);
+
+        const auto start = work_range.get_position(0);
+        const auto size  = work_range.get_size(0);
+        const auto stop  = start + size;
+
+        execute_1d(start, stop, threadid);
     }
 
     // Interface implementation - pretransposed

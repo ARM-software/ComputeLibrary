@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,12 +72,12 @@ public:
     }
 
     // Window is number of out_width blocks times number of multis.
-    unsigned int get_window_size() const override {
-        return iceildiv(_Nsize, strategy::out_width()) * _nmultis;
+    ndrange_t get_window_size() const override {
+        return { iceildiv(_Nsize, strategy::out_width()) * _nmultis, 1u, 1u, 1u, 1u, 1u };
     }
 
     // Actually execute the GEMV.
-    void execute(unsigned int start, unsigned int end, int) override {
+    void execute_1d(unsigned int start, unsigned int end, int) {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -126,6 +126,17 @@ public:
                 }
             }
         }
+    }
+
+    // Execute
+    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
+        UNUSED(thread_locator);
+
+        const auto start = work_range.get_position(0);
+        const auto size  = work_range.get_size(0);
+        const auto stop  = start + size;
+
+        execute_1d(start, stop, threadid);
     }
 };
 

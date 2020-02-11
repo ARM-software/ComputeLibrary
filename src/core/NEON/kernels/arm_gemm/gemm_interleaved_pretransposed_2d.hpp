@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,15 +23,9 @@
  */
 #pragma once
 
-#include <stdio.h>
-#include <assert.h>
-
-#include <algorithm>
-
 #include "arm_gemm.hpp"
 #include "utils.hpp"
 
-#include "buffer_manager.hpp"
 #include "mergeresults.hpp"
 #include "transform.hpp"
 
@@ -39,10 +33,13 @@
 #include "profiler.hpp"
 #endif
 
+#include <algorithm>
+#include <cassert>
+
 // Some macros used to decide how much working space to allocate.
 // Round allocations up to the next cache line.
-#define ALLOC_ROUND	64
-#define ROUND_UP(x)	((((x) + ALLOC_ROUND-1) / ALLOC_ROUND) * ALLOC_ROUND)
+#define ALLOC_ROUND    64
+#define ROUND_UP(x)    ((((x) + ALLOC_ROUND-1) / ALLOC_ROUND) * ALLOC_ROUND)
 
 // Implementation of the GemmCommon abstract class.
 //
@@ -51,7 +48,7 @@
 namespace arm_gemm {
 
 template<typename strategy, typename To, typename Tr>
-class GemmInterleaved : public GemmCommon<To, Tr> {
+class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
     typedef typename strategy::operand_type Toi;
     typedef typename strategy::result_type Tri;
 
@@ -72,16 +69,18 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
 
     const int _maxthreads;
     int _nthreads;
-    const bool _pretransposed;
 
     /* Blocking info */
     unsigned int _k_block=0;
     unsigned int _x_block=0;
-    unsigned int _Mround=0;
 
-    /* Working space, pretransposed buffer, buffer manager */
+    unsigned int _Mround_div=0;
+    unsigned int _Mround=0;
+    unsigned int _Nround_div=0;
+    unsigned int _Nround=0;
+
+    /* Working space, pretransposed buffer */
     const Toi *_B_transposed=nullptr;
-    BufferManager *_bm=nullptr;
     void *_working_space=nullptr;
 
     /* We will need to walk through the blocks of B in a few contexts, so
@@ -89,10 +88,10 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
     class blockwalker {
     private:
         /* Size loops, etc. based on our parent's configuration */
-        const GemmInterleaved<strategy, To, Tr> &_parent;
+        const GemmInterleavedPretransposed2d<strategy, To, Tr> &_parent;
 
         /* K, X and multi parameters for current iteration. */
-        unsigned int _k0=0, _x0=0, _multi=0;
+        unsigned int _k0=0, _x0=0, _xmin=0, _xmax=0, _multi=0;
 
         unsigned int _index=0;
         bool _done=false;
@@ -100,10 +99,22 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
         bool _newmulti=true;
 
     public:
-        blockwalker(const GemmInterleaved<strategy, To, Tr> &parent) : _parent(parent) { }
+        blockwalker(const GemmInterleavedPretransposed2d<strategy, To, Tr> &parent)
+        : _parent(parent)
+        , _xmax { parent._Nsize }
+        { }
+
+        blockwalker(const GemmInterleavedPretransposed2d<strategy, To, Tr> &parent, unsigned int x0, unsigned int xmax)
+        : _parent(parent)
+        , _x0   { x0   }
+        , _xmin { x0   }
+        , _xmax { xmax }
+        {
+            assert(_x0 <= _xmax);
+        }
 
         unsigned int xmax() {
-            return std::min(_x0 + _parent._x_block, _parent._Nsize);
+            return std::min(_x0 + _parent._x_block, _xmax);
         }
 
         unsigned int kmax() {
@@ -118,8 +129,8 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
 
             _newkblock=false;
             _x0 += _parent._x_block;
-            if (_x0 >= _parent._Nsize) {
-                _x0=0;
+            if (_x0 >= _xmax) {
+                _x0=_xmin;
                 _k0 += _parent._k_block;
                 if (_k0 >= _parent._Ksize) {
                     _k0=0;
@@ -147,12 +158,12 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
 
     // A working size: One of these needed, regardless of thread count.  Divided according to window.
     size_t get_a_working_size() const {
-        return ROUND_UP(sizeof(Toi) * _k_block * _Mround * _nbatches);
+        return ROUND_UP(sizeof(Toi) * _k_block * _Mround * _nbatches) * 2;
     }
 
-    // B working size: 0, 1 or 3 of these needed depending on pretransposed and threading settings.
+    // As B will be pretranspose we do not need to alloc any space for it
     size_t get_b_working_size() const {
-        return ROUND_UP(sizeof(Toi) * _x_block * _k_block);
+        return 0;
     }
 
     // C working size: One needed per thread.
@@ -162,59 +173,68 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
 
     // Internal execute function.
     // This supports both the "pretransposed" and "standard" interfaces via the template parameter.
-    template<bool pretransposed>
-    void execute_internal(unsigned int start, unsigned int end, int threadid) {
+    void execute_pretranspose(unsigned int m_start, unsigned int m_end, unsigned int n_start, unsigned int n_end, int threadid, int mthreadid, int nthreadid) {
+        /* Make sure we've been set up correctly. */
+        assert(_B_transposed);
+        assert(_working_space);
+        assert(this->_Aptr);
+        assert(this->_Cptr);
+
+        UNUSED(mthreadid);
+        UNUSED(nthreadid);
+
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
         strategy strat(_ci);
 
-        blockwalker current(*this);
-        blockwalker next=current;
-
         /* Translate 'start' and 'end' into a position within the batches and rows. */
         const unsigned int window_per_batch = _Mround / strategy::out_height();
-        unsigned int batch_0   = start / window_per_batch;
-        unsigned int batch_end = end   / window_per_batch;
+        unsigned int batch_0   = m_start / window_per_batch;
+        unsigned int batch_end = m_end   / window_per_batch;
 
         /* Compute the M values to operate on */
-        unsigned int m_0   = (start - (batch_0 * window_per_batch)) * strategy::out_height();
-        unsigned int m_max = (end - (batch_end * window_per_batch)) * strategy::out_height();
+        unsigned int m_0   = (m_start - (batch_0 * window_per_batch)) * strategy::out_height();
+        unsigned int m_max = (m_end - (batch_end * window_per_batch)) * strategy::out_height();
 
-        /* Make sure we've been set up correctly. */
-        if (pretransposed) {
-            assert(_B_transposed);
-        } else {
-            assert(_bm);
-        }
+        unsigned int n_0   = std::min(this->_Nsize, strategy::out_width() * n_start);
+        unsigned int n_max = std::min(this->_Nsize, strategy::out_width() * n_end);
 
-        assert(_working_space);
+        blockwalker current(*this, n_0, n_max);
+
         int8_t *working_space_bytes = reinterpret_cast<int8_t *>(_working_space);
 
-        // Private buffers.  Treat working_space as an array of C buffers
-        // (one per thread) first, followed by the (window-divided) A
-        // buffer.
-        // Set a_panel to the base of the A buffers - compute offsets into it based on M/batches later.
-        Toi * const a_panel = reinterpret_cast<Toi *>(working_space_bytes + (_maxthreads * get_c_working_size()));
-        Tri * const c_panel = reinterpret_cast<Tri *>(working_space_bytes + (threadid * get_c_working_size()));
+        auto c_panel_start = working_space_bytes;
+        auto a_panel_start = c_panel_start + get_c_working_size() * _maxthreads;
 
-        // Shared buffers - these come either from BufferManager or _B_transposed.
-        const Toi *b_panel;
+        auto c_panel = reinterpret_cast<Tri *>(c_panel_start + get_c_working_size() * threadid);
+        auto a_panel = reinterpret_cast<Toi *>(a_panel_start + get_a_working_size() * threadid);
 
-        if (pretransposed) {
-            b_panel = _B_transposed;
-        }
-
-        //printf("Starting GEMM loop, x_block=%d, k_block=%d\n", _x_block, _k_block);
+        /* B^t is stored in interleaved panels separated by their K-block component
+         * we want to store a pointer to the start of the current k-page
+         * then when we come to the next k-block we just add the size of the previous to
+         * this base pointer
+         */
+        const Toi *b_panel_start = _B_transposed;
+        // b_panels stores a pointer to the start of our current block inside of the k-block
+        const Toi *b_panel       = b_panel_start;
 
         // newkblock() is always true on the first iteration, so this will be set properly on the first loop.
+        unsigned b_page_size = 0;
         int kern_k = 0;
-
         for (;!current.done();current.advance()) {
+            int bblocks = iceildiv(current.xmax() - current.x0(), strategy::out_width());
+
             if (current.newkblock()) {
-#ifdef CYCLE_PROFILING
-                auto p=prof.ScopedProfiler(PROFILE_PREPA, (end - start) * strategy::out_height() * (current.kmax()-current.k0()) * sizeof(Toi));
-#endif
+                kern_k         = iceildiv(current.kmax() - current.k0(), strategy::k_unroll());
+                kern_k        *= strat.k_unroll();
+
+                unsigned b_thread_start_offset = iceildiv(current.x0(), strategy::out_width());
+
+                b_panel_start += b_page_size;
+                b_panel        = b_panel_start + (b_thread_start_offset * strat.out_width() * kern_k);
+                b_page_size    = _Nround * kern_k;
+
                 for (unsigned int batch = batch_0; batch <= batch_end; batch++) {
                     unsigned int first_m = (batch == batch_0)   ? m_0   : 0;
                     unsigned int last_m  = (batch == batch_end) ? m_max : _Msize;
@@ -222,51 +242,22 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
                     if (first_m >= last_m)
                         continue;
 
-                    strat.transforms.PrepareA(a_panel + ((batch * _Mround + first_m) * _k_block),
-                                              this->_Aptr + (batch * this->_A_batch_stride) + (current.multi() * this->_A_multi_stride),
-                                              this->_lda, first_m, last_m, current.k0(), current.kmax(), _trA);
+                    auto a_thread_panel_in  = this->_Aptr
+                                            + (batch * this->_A_batch_stride)
+                                            + (current.multi() * this->_A_multi_stride);
+
+                    auto a_thread_panel_out = a_panel + ((batch * _Mround + first_m) * _k_block);
+
+                    strat.transforms.PrepareA(
+                        a_thread_panel_out,
+                        a_thread_panel_in,
+                        this->_lda,
+                        first_m,
+                        last_m,
+                        current.k0(),
+                        current.kmax(),
+                        _trA);
                 }
-
-                // Figure out how many "K" the kernel will actually process.
-                kern_k = iceildiv(current.kmax() - current.k0(), strategy::k_unroll());
-                kern_k *= strat.k_unroll();
-            }
-
-            int bblocks = iceildiv(current.xmax() - current.x0(), strategy::out_width());
-
-            if (!pretransposed) {
-                /* Look ahead to the next block and populate it if necessary.
-                 * This avoids the populate operation becoming a bottleneck, and
-                 * helps keep the threads synchronized (the first thread to get
-                 * here will populate while the rest will advance).
-                 *
-                 * If we are running single threaded, bm->try_populate() will do
-                 * nothing.
-                 */
-                if (next.advance()) {
-                    _bm->try_populate(next.index(), [&](void *buffer) {
-#ifdef CYCLE_PROFILING
-                        auto p=prof.ScopedProfiler(PROFILE_PREPB, (next.xmax()-next.x0()) * (next.kmax()-next.k0()) * sizeof(Toi));
-#endif
-
-                        Toi *b_panel = reinterpret_cast<Toi *>(buffer);
-
-                        strat.transforms.PrepareB(b_panel, this->_Bptr + (next.multi() * this->_B_multi_stride), this->_ldb,
-                                                  next.x0(), next.xmax(), next.k0(), next.kmax(), _trB);
-                    });
-                }
-
-                /* Get the buffer for this iteration from the BufferManager. */
-                b_panel = reinterpret_cast<Toi *>(_bm->get(current.index(), [&](void *bpv) {
-#ifdef CYCLE_PROFILING
-                    auto p=prof.ScopedProfiler(PROFILE_PREPB, (current.xmax()-current.x0()) * (current.kmax()-current.k0()) * sizeof(Toi));
-#endif
-
-                    Toi *b_panel = reinterpret_cast<Toi *>(bpv);
-
-                    strat.transforms.PrepareB(b_panel, this->_Bptr + (current.multi() * this->_B_multi_stride), this->_ldb,
-                                              current.x0(), current.xmax(), current.k0(), current.kmax(), _trB);
-                }));
             }
 
             /* Do the actual work. */
@@ -282,54 +273,72 @@ class GemmInterleaved : public GemmCommon<To, Tr> {
                 for (unsigned int y=first_m; y<last_m; y+=strategy::out_height()) {
                     unsigned int ymax = std::min(_Msize, y + strategy::out_height());
 
-                    {
-#ifdef CYCLE_PROFILING
-                        auto p=prof.ScopedProfiler(PROFILE_KERNEL, (strategy::out_height() * bblocks * strategy::out_width() * kern_k));
-#endif
+                    strat.kernel(a_ptr, b_panel, c_panel, 1, bblocks, kern_k);
+                    a_ptr += (strategy::out_height() * kern_k);
 
-                        strat.kernel(a_ptr, b_panel, c_panel, 1, bblocks, kern_k);
+                    /* Only activate on last pass, only add bias on first pass, ask for accumulation on any non-first pass */
+                    const bool first_pass = current.k0()==0;
+                    const bool last_pass  = current.kmax()==_Ksize;
 
-                        a_ptr += (strategy::out_height() * kern_k);
-                    }
+                    auto c_panel_out = this->_Cptr
+                                     + this->_C_batch_stride * batch
+                                     + this->_C_multi_stride * current.multi();
 
-                    {
-#ifdef CYCLE_PROFILING
-                        auto p=prof.ScopedProfiler(PROFILE_MERGE, (strategy::out_height() * bblocks * strategy::out_width() * sizeof(Tr)));
-#endif
-                        /* Only activate on last pass, only add bias on first pass, ask for accumulation on any non-first pass */
-                        const bool first_pass = current.k0()==0;
-                        const bool last_pass  = current.kmax()==_Ksize;
+                    auto bias        = (first_pass && this->_bias)
+                                     ? this->_bias + (current.multi() * this->_bias_multi_stride)
+                                     : nullptr;
 
-                        strat.transforms.Merge(this->_Cptr + (batch * this->_C_batch_stride) + (current.multi() * this->_C_multi_stride),
-                                               c_panel, this->_ldc, y, ymax, current.x0(), current.xmax(),
-                                               ((first_pass && this->_bias) ? this->_bias + (current.multi() * this->_bias_multi_stride) : nullptr),
-                                               (last_pass ? _act : Activation()), !first_pass);
-                    }
+                    auto act        = last_pass ? _act : Activation();
+
+                    strat.transforms.Merge(
+                        c_panel_out,
+                        c_panel,
+                        this->_ldc,
+                        y,
+                        ymax,
+                        current.x0(),
+                        current.xmax(),
+                        bias,
+                        act,
+                        !first_pass);  //Append
                 }
             }
 
-            if (pretransposed) {
-                b_panel += (bblocks * strat.out_width() * kern_k);
-            } else {
-                _bm->release(current.index());
-            }
+            b_panel += (bblocks * strat.out_width() * kern_k);
         }
     }
 
 public:
-    GemmInterleaved(GemmInterleaved &) = delete;
-    GemmInterleaved & operator= (GemmInterleaved &) = delete;
+    GemmInterleavedPretransposed2d(GemmInterleavedPretransposed2d &) = delete;
+    GemmInterleavedPretransposed2d & operator= (GemmInterleavedPretransposed2d &) = delete;
 
     /* Constructor */
-    GemmInterleaved(const GemmArgs &args)
-                    : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
-                      _nbatches(args._nbatches), _nmulti(args._nmulti), _trA(args._trA), _trB(args._trB),
-                      _act(args._act), _maxthreads(args._maxthreads), _nthreads(args._maxthreads),
-                      _pretransposed(args._pretransposed_hint) {
+    GemmInterleavedPretransposed2d(const GemmArgs &args)
+    :    _ci(args._ci)
+    ,    _Msize(args._Msize)
+    ,    _Nsize(args._Nsize)
+    ,    _Ksize(args._Ksize)
+    ,    _nbatches(args._nbatches)
+    ,    _nmulti(args._nmulti)
+    ,    _trA(args._trA)
+    ,    _trB(args._trB)
+    ,    _act(args._act)
+    ,    _maxthreads(args._maxthreads)
+    ,    _nthreads(args._maxthreads) 
+
+    // Work out the rounded size of M - needed for some buffers.
+    ,    _Mround_div ( iceildiv(_Msize, strategy::out_height()) )
+    ,    _Mround     ( _Mround_div * strategy::out_height()     )
+
+    ,    _Nround_div ( iceildiv(_Nsize, strategy::out_width()) )
+    ,    _Nround     ( _Nround_div * strategy::out_width()     )
+    {
+
+        assert(args._pretransposed_hint);
+        assert(_maxthreads > 0);
+
         const unsigned int L1_size = _ci->get_L1_cache_size();
         const unsigned int L2_size = _ci->get_L2_cache_size();
-
-        assert(_maxthreads > 0);
 
         // Work out blocking parameters, or override from provided GemmConfig
         if (args._cfg && args._cfg->inner_block_size) {
@@ -373,70 +382,59 @@ public:
             _x_block = iceildiv(_x_block, strategy::out_width());
             _x_block *= strategy::out_width();
         }
-
-        // Work out the rounded size of M - needed for some buffers.
-        _Mround = iceildiv(_Msize, strategy::out_height());
-        _Mround *= strategy::out_height();
     }
 
     // Interface implementation - Compulsory functions
-
-    // Window size: Only the last thread should do a ragged block, so dole
-    // out work in units of out_height.  Factor batches into the window, but
-    // not multi for now (as this would cause problems with the buffer
-    // manager).
     ndrange_t get_window_size() const override {
-        auto m_win_size = (_Mround / strategy::out_height()) * _nbatches;
-        return { m_win_size, 1u, 1u, 1u, 1u, 1u };
+        unsigned m = (_Mround / strategy::out_height()) * _nbatches;
+        unsigned n = _Nround_div;
+
+        return { m, n, 1u, 1u, 1u, 1u };
     }
 
     // set_nthreads: pass on to buffer manager to avoid it waiting for non-existant threads.
     void set_nthreads(int nthreads) override {
         _nthreads = std::min(nthreads, _maxthreads);
-        if (_bm) {
-            _bm->set_nthreads(_nthreads);
-        }
     }
 
-    // Execute
-    void execute_1d(unsigned int start, unsigned int end, int threadid) {
-        if (_pretransposed) {
-            execute_internal<true>(start, end, threadid);
-        } else {
-            execute_internal<false>(start, end, threadid);
-        }
-    }
-
-    //Execute
     void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
+        /* This particular GEMM implementation can only be broken up over the M & N
+         * dimensions, we inform the frame work of this limitation via the get_window_size function
+         */
+        assert(ndrange_popcount(work_range) <= 2);
 
-        const auto start = work_range.get_position(0);
-        const auto stop  = work_range.get_position_end(0);
+        const auto m_start = work_range.get_position(0);
+        const auto n_start = work_range.get_position(1);
+        const auto m_size  = work_range.get_size(0);
+        const auto n_size  = work_range.get_size(1);
+        const auto m_end   = m_start + m_size;
+        const auto n_end   = n_start + n_size;
 
-        execute_1d(start, stop, threadid);
+        const auto m_threadid = thread_locator.get_position(0);
+        const auto n_threadid = thread_locator.get_position(1);
+
+        execute_pretranspose(m_start, m_end, n_start, n_end, threadid, m_threadid, n_threadid);
     }
 
-    // Interface implementation - working space
-    size_t get_working_size() const override {
-        // In all cases, we need one A buffer plus a C buffer per thread.
-        size_t size = get_a_working_size() + (get_c_working_size() * _maxthreads);
-
-        // For pretransposed case, there is no working space needed for B.
-        // Otherwise, we need a BufferManager.
-        if (!_pretransposed) {
-            size += BufferManager::get_storage_requirement(_maxthreads, get_b_working_size());
-        }
-
-        size += 64; // Add on a cache line extra for alignment.
-
-        return size;
+    std::size_t get_working_size()const override {
+        /* Because we do not know how schedular will break up
+         * the task, we need to ensure that alloc enough
+         * space to be able to handle the case where every thread
+         * is parallelised across B AND also every thrread is parallelised across A
+         *
+         * If we parallelise across A, then we only need one buffer of A and 64 buffers of B
+         * If we parallelise across B, then we only need 64 buffer of B and
+         */
+        return get_c_working_size() * _maxthreads
+             + get_a_working_size() * _maxthreads
+             + 64; //to account for cacheline alignment
     }
+
 
     void set_working_space(void *working_space) override {
         // Make sure everything ends up cache line aligned
         int8_t *working_space_bytes = reinterpret_cast<int8_t *>(working_space);
-        intptr_t working_space_int = reinterpret_cast<intptr_t>(working_space);
+        intptr_t working_space_int  = reinterpret_cast<intptr_t>(working_space);
 
         size_t diff=0;
 
@@ -446,29 +444,16 @@ public:
 
         working_space_bytes += diff;
 
-        if (_pretransposed) {
-            // Pretransposed case: just set internal pointer to parameter value.
-            _working_space = reinterpret_cast<void *>(working_space_bytes);
-        } else {
-            // Otherwise, use the first part of the working space for the buffer manager.
-            // It's legal to call this again so don't leak a buffer manager if it already existed.
-            delete _bm;
-
-            _bm = new BufferManager(_nthreads, get_b_working_size(), reinterpret_cast<void *>(working_space_bytes));
-
-            working_space_bytes += BufferManager::get_storage_requirement(_maxthreads, get_b_working_size());
-
-            _working_space = reinterpret_cast<void *>(working_space_bytes);
-        }
+        _working_space = reinterpret_cast<void *>(working_space_bytes);
     }
 
     // Interface implementation - pretransposed
     bool B_is_pretransposed() const override {
-        return _pretransposed;
+        return true;
     }
 
     bool B_pretranspose_required() const override {
-        return _pretransposed && (_B_transposed==nullptr);
+        return _B_transposed==nullptr;
     }
 
     // TODO: this could almost certainly be considerably simpler.
@@ -523,9 +508,7 @@ public:
         _B_transposed = reinterpret_cast<Toi *>(in_buffer);
     }
 
-    ~GemmInterleaved() override {
-        delete _bm;
-    }
+    ~GemmInterleavedPretransposed2d() override { }
 };
 
 } // namespace arm_gemm
