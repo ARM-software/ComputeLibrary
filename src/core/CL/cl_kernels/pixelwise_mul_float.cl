@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,11 @@
 #define CONVERT_OP_FLOAT(x, type, round) CONVERT_OP_FLOAT_STR(x, type, round)
 
 #if defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_RES) && defined(DATA_TYPE_OUT)
+
+#if defined(ACTIVATION_TYPE)
+#include "activation_float_helpers.h"
+#endif // defined(ACTIVATION_TYPE)
+
 /** Performs a pixelwise multiplication with float scale of either integer or float inputs.
  *
  * @attention The inputs and output data types need to be passed at compile time using -DDATA_TYPE_IN1, -DDATA_TYPE_IN2 and -DDATA_TYPE_OUT:
@@ -91,8 +96,12 @@ __kernel void pixelwise_mul_float(
     res = CONVERT_OP_FLOAT(CONVERT_OP_FLOAT((convert_float16(in1_data * in2_data) * scale), VEC_DATA_TYPE(DATA_TYPE_RES, 16), ROUND), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), ROUND);
 #endif /* DATA_TYPE_FLOAT */
 
+#if defined(ACTIVATION_TYPE)
+    vstore16(ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, res, A_VAL, B_VAL), 0, (__global DATA_TYPE_OUT *)out.ptr);
+#else  // defined(ACTIVATION_TYPE)
     // Store result
     vstore16(res, 0, (__global DATA_TYPE_OUT *)out.ptr);
+#endif // defined(ACTIVATION_TYPE)
 }
 #endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_RES) && defined(DATA_TYPE_OUT) */
 
@@ -140,6 +149,10 @@ __kernel void pixelwise_mul_complex(
     // Perform complex multiplication
     float2 res = { vin1.x *vin2.x - vin1.y * vin2.y, vin1.x *vin2.y + vin2.x * vin1.y };
 
+#if defined(ACTIVATION_TYPE)
+    vstore2(ACTIVATION(ACTIVATION_TYPE, float, res, A_VAL, B_VAL), 0, (__global float *)out.ptr);
+#else  // defined(ACTIVATION_TYPE)
     // Store result
     vstore2(res, 0, (__global float *)out.ptr);
+#endif // defined(ACTIVATION_TYPE)
 }

@@ -72,6 +72,6 @@
 // Identity Activation
 #define identity_op(DATA_TYPE, x, A_VAL, B_VAL) (x)
 
-#define OP(op, DATA_TYPE, x, A_VAL, B_VAL) op##_op(DATA_TYPE, x, A_VAL, B_VAL)
+#define ACT_OP(op, DATA_TYPE, x, A_VAL, B_VAL) op##_op(DATA_TYPE, x, A_VAL, B_VAL)
 
-#define ACTIVATION(op, DATA_TYPE, x, A_VAL, B_VAL) OP(op, DATA_TYPE, x, A_VAL, B_VAL)
+#define ACTIVATION(op, DATA_TYPE, x, A_VAL, B_VAL) ACT_OP(op, DATA_TYPE, x, A_VAL, B_VAL)

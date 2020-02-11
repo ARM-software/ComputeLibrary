@@ -773,6 +773,7 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     typename TargetInfo::TensorType *output         = get_backing_tensor<TargetInfo>(node.output(0));
     const EltwiseOperation           eltwise_op     = node.eltwise_operation();
     const ConvertPolicy              convert_policy = node.convert_policy();
+    const ActivationLayerInfo        act_info       = node.fused_activation();
     ARM_COMPUTE_ERROR_ON(input1 == nullptr);
     ARM_COMPUTE_ERROR_ON(input2 == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -783,19 +784,19 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     {
         std::tie(func, func_name) = create_named_function<typename EltwiseFunctions::Addition>(
                                         std::string("ArithmeticAddition"),
-                                        input1, input2, output, convert_policy);
+                                        input1, input2, output, convert_policy, act_info);
     }
     else if(eltwise_op == EltwiseOperation::Sub)
     {
         std::tie(func, func_name) = create_named_function<typename EltwiseFunctions::Subtraction>(
                                         std::string("ArithmeticSubtraction"),
-                                        input1, input2, output, convert_policy);
+                                        input1, input2, output, convert_policy, act_info);
     }
     else if(eltwise_op == EltwiseOperation::Mul)
     {
         std::tie(func, func_name) = create_named_function<typename EltwiseFunctions::Multiplication>(
                                         std::string("PixelWiseMultiplication"),
-                                        input1, input2, output, 1.f, convert_policy, node.rounding_policy());
+                                        input1, input2, output, 1.f, convert_policy, node.rounding_policy(), act_info);
     }
     else
     {

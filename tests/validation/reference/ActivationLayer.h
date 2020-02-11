@@ -82,7 +82,7 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
             ret = x;
             break;
         case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
-            ret = x * ((std::min(std::max((x + 3), 0.0f), 6.0f)) * 0.166666667f);
+            ret = x * ((std::min(std::max(static_cast<T>(x + 3), static_cast<T>(0.0f)), static_cast<T>(6.0f))) * 0.166666667f);
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported activation function");

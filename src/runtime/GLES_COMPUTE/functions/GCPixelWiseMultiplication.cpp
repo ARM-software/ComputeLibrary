@@ -30,8 +30,9 @@
 
 using namespace arm_compute;
 
-void GCPixelWiseMultiplication::configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, float scale)
+void GCPixelWiseMultiplication::configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, float scale, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<GCPixelWiseMultiplicationKernel>();
     k->configure(input1, input2, output, scale);
     _kernel = std::move(k);

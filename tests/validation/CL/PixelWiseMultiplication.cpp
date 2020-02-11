@@ -43,20 +43,27 @@ namespace
 const float                        scale_255 = 1.f / 255.f;
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit quantized asymmetric data types */
 constexpr AbsoluteTolerance<float> tolerance_qsymm16(1); /**< Tolerance value for comparing reference's output against implementation's output for 16-bit quantized symmetric data types */
+const auto                         EmptyActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{ ActivationLayerInfo() });
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
+});
 } //namespace
 // *INDENT-OFF*
 // clang-format off
 #define VALIDATE(TYPE, TOLERANCE) validate(CLAccessor(_target), _reference, AbsoluteTolerance<TYPE>(TOLERANCE), 0.f);
 
-#define PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, SHAPES, DT1, DT2, SCALE, RP, VALIDATE) \
+#define PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, SHAPES, DT1, DT2, SCALE, RP, ACT, VALIDATE) \
     FIXTURE_DATA_TEST_CASE(TEST_NAME, CLPixelWiseMultiplication##FIXTURE, framework::DatasetMode::MODE,                   \
-                           combine(combine(combine(combine(combine(                                                       \
+                           combine(combine(combine(combine(combine(combine(                                                       \
                            datasets::SHAPES,                                                                              \
                            framework::dataset::make("DataType1", DataType::DT1)),                                         \
                            framework::dataset::make("DataType2", DataType::DT2)),                                         \
                            framework::dataset::make("Scale", std::move(SCALE))),                                          \
                            datasets::ConvertPolicies()),                                                                  \
-                           framework::dataset::make("RoundingPolicy", RoundingPolicy::RP)))                               \
+                           framework::dataset::make("RoundingPolicy", RoundingPolicy::RP)), ACT))  \
     {                                                                                                                     \
         VALIDATE                                                                                                          \
     }
@@ -65,11 +72,11 @@ constexpr AbsoluteTolerance<float> tolerance_qsymm16(1); /**< Tolerance value fo
 } // namespace
 
 template <typename T>
-using CLPixelWiseMultiplicationToF16Fixture = PixelWiseMultiplicationValidationFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, half_float::half>;
+using CLPixelWiseMultiplicationToF16Fixture = PixelWiseMultiplicationValidationFloatFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, half_float::half>;
 template <typename T>
-using CLPixelWiseMultiplicationToF32Fixture = PixelWiseMultiplicationValidationFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
+using CLPixelWiseMultiplicationToF32Fixture = PixelWiseMultiplicationValidationFloatFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
 template <typename T>
-using CLPixelWiseMultiplicationBroadcastFixture = PixelWiseMultiplicationBroadcastValidationFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
+using CLPixelWiseMultiplicationBroadcastFixture = PixelWiseMultiplicationBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, float>;
 
 TEST_SUITE(CL)
 TEST_SUITE(PixelWiseMultiplication)
@@ -110,17 +117,24 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
 TEST_SUITE(F16toF16)
 TEST_SUITE(Scale255)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF16Fixture<half_float::half>, PRECOMMIT, SmallShapes(), F16, F16, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF16Fixture<half_float::half>, PRECOMMIT, SmallShapes(), F16, F16, scale_255, TO_NEAREST_UP, EmptyActivationFunctionsDataset,
+                                                 VALIDATE(float, 1.f))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunWithActivation, ToF16Fixture<half_float::half>, ALL, TinyShapes(), F16, F16, scale_255, TO_NEAREST_UP, ActivationFunctionsDataset, VALIDATE(float,
+                                                 1.f))
 TEST_SUITE_END() // Scale255
 TEST_SUITE_END() // F16toF16
 
 TEST_SUITE(F32toF32)
 TEST_SUITE(Scale255)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, PRECOMMIT, SmallShapes(), F32, F32, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, PRECOMMIT, SmallShapes(), F32, F32, scale_255, TO_NEAREST_UP, EmptyActivationFunctionsDataset, VALIDATE(float, 1.f))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunWithActivation, ToF32Fixture<float>, ALL, TinyShapes(), F32, F32, scale_255, TO_NEAREST_UP, ActivationFunctionsDataset, VALIDATE(float, 1.f))
 TEST_SUITE_END() // Scale255
 TEST_SUITE_END() // F32toF32
 
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, BroadcastFixture<float>, PRECOMMIT, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, BroadcastFixture<float>, PRECOMMIT, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, EmptyActivationFunctionsDataset,
+                                                 VALIDATE(float, 1.f))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunWithActivationSmallBroadcast, BroadcastFixture<float>, ALL, TinyShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, ActivationFunctionsDataset,
+                                                 VALIDATE(float, 1.f))
 
 template <typename T>
 using CLPixelWiseMultiplicationQuantizedFixture = PixelWiseMultiplicationValidationQuantizedFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, T>;

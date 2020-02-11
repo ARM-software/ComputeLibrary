@@ -32,15 +32,17 @@
 
 namespace arm_compute
 {
-void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *output)
+void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::MAX, input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     if(input1->data_type() == DataType::QASYMM8_SIGNED)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
@@ -49,15 +51,17 @@ Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::MAX, input1, input2, output);
 }
 
-void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *output)
+void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::MIN, input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     if(input1->data_type() == DataType::QASYMM8_SIGNED)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
@@ -66,39 +70,45 @@ Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::MIN, input1, input2, output);
 }
 
-void NEElementwiseSquaredDiff::configure(ITensor *input1, ITensor *input2, ITensor *output)
+void NEElementwiseSquaredDiff::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
 }
 
-void NEElementwiseDivision::configure(ITensor *input1, ITensor *input2, ITensor *output)
+void NEElementwiseDivision::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEDivisionOperationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEDivisionOperationKernel::validate(input1, input2, output);
 }
 
-void NEElementwisePower::configure(ITensor *input1, ITensor *input2, ITensor *output)
+void NEElementwisePower::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEPowerOperationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
 }
 
-Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEPowerOperationKernel::validate(input1, input2, output);
 }
 

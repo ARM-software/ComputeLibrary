@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,8 +54,8 @@ const auto ElementwiseMaxQASYMM8Dataset = combine(combine(framework::dataset::ma
                                                   framework::dataset::make("DataType",
                                                                            DataType::QASYMM8));
 const auto ElementwiseMaxQASYMM8SignedDataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                  framework::dataset::make("DataType",
-                                                                           DataType::QASYMM8_SIGNED));
+                                                        framework::dataset::make("DataType",
+                                                                                 DataType::QASYMM8_SIGNED));
 const auto ElementwiseMaxQSYMM16Dataset = combine(combine(framework::dataset::make("DataType", DataType::QSYMM16), framework::dataset::make("DataType", DataType::QSYMM16)),
                                                   framework::dataset::make("DataType",
                                                                            DataType::QSYMM16));
@@ -65,6 +65,13 @@ const auto ElementwiseMaxFP16Dataset = combine(combine(framework::dataset::make(
                                                framework::dataset::make("DataType", DataType::F16));
 const auto ElementwiseMaxFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
                                                framework::dataset::make("DataType", DataType::F32));
+const auto EmptyActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{ ActivationLayerInfo() });
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
+});
 } // namespace
 
 TEST_SUITE(CL)
@@ -229,10 +236,10 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                       ElementwiseMaxQASYMM8SignedDataset),
-                                                                                                                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                                                                                                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                                                                                                                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+                                                                                                                      ElementwiseMaxQASYMM8SignedDataset),
+                                                                                                                      framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                                                                                                                      framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                                                                                      framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -274,9 +281,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxQuantizedFixture<int16_t>, fram
 TEST_SUITE_END()
 TEST_SUITE_END()
 
+template <typename T>
+using CLElementwiseMaxFloatFixture = ElementwiseMaxValidationFloatFixture<CLTensor, CLAccessor, CLElementwiseMax, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMaxFP16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMaxFP16Dataset), EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMaxFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ElementwiseMaxFP16Dataset),
+                                                                                                                   ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
@@ -307,17 +323,32 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMaxFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseMaxFP32Dataset),
+                                                                                                           EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseMaxFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ElementwiseMaxFP32Dataset),
+                                                                                                                    ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 
 template <typename T>
-using CLElementwiseMaxBroadcastFixture = ElementwiseMaxBroadcastValidationFixture<CLTensor, CLAccessor, CLElementwiseMax, T>;
+using CLElementwiseMaxBroadcastFloatFixture = ElementwiseMaxBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLElementwiseMax, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
-                                                                                                                        ElementwiseMaxFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMaxBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapesBroadcast(),
+                       ElementwiseMaxFP32Dataset),
+                       EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwiseMaxBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapesBroadcast(),
+                       ElementwiseMaxFP32Dataset),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

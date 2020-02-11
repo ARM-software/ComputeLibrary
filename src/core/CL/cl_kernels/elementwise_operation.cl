@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,11 @@
 #define OP_FUN_NAME(op) OP_FUN_NAME_STR(op)
 
 #if defined(OP) && defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE)
+
+#if defined(ACTIVATION_TYPE)
+#include "activation_float_helpers.h"
+#endif // defined(ACTIVATION_TYPE)
+
 /** This function executes an element-wise operation among two tensors.
  *
  * @attention The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN1, -DDATA_TYPE_IN2 and -DDATA_TYPE_OUT:
@@ -94,7 +99,12 @@ __kernel void OP_FUN_NAME(OP)(
     in_b = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
 
     // Calculate and store result
+#if defined(ACTIVATION_TYPE)
+    VSTORE(VEC_SIZE)
+    (ACTIVATION(ACTIVATION_TYPE, DATA_TYPE_OUT, CONVERT(OP(in_a, in_b), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), A_VAL, B_VAL), 0, (__global DATA_TYPE_OUT *)out.ptr);
+#else  // defined(ACTIVATION_TYPE)
     VSTORE(VEC_SIZE)
     (OP(in_a, in_b), 0, (__global DATA_TYPE_OUT *)out.ptr);
+#endif // defined(ACTIVATION_TYPE)
 }
 #endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE) */

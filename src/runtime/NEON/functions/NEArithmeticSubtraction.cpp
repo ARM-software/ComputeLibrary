@@ -31,8 +31,9 @@
 
 namespace arm_compute
 {
-void NEArithmeticSubtraction::configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy)
+void NEArithmeticSubtraction::configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticSubtractionKernel>();
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
@@ -48,8 +49,9 @@ void NEArithmeticSubtraction::configure(ITensor *input1, ITensor *input2, ITenso
     }
 }
 
-Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticSubtractionKernel::validate(input1, input2, output, policy);
 }
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,6 +87,7 @@ SimpleTensor<int16_t> activation_layer<int16_t>(const SimpleTensor<int16_t> &src
     return dst;
 }
 
+template SimpleTensor<int32_t> activation_layer(const SimpleTensor<int32_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
 template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
 template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
 } // namespace reference

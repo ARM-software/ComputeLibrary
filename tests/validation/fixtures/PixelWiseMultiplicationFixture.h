@@ -31,6 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/PixelWiseMultiplication.h"
 
 namespace arm_compute
@@ -46,18 +47,19 @@ public:
     template <typename...>
     void setup(const TensorShape &shape0,
                const TensorShape &shape1,
-               DataType           dt_in1,
-               DataType           dt_in2,
-               DataType           dt_out,
-               float              scale,
-               ConvertPolicy      convert_policy,
-               RoundingPolicy     rounding_policy,
-               QuantizationInfo   qinfo0,
-               QuantizationInfo   qinfo1,
-               QuantizationInfo   qinfo_out)
+               DataType            dt_in1,
+               DataType            dt_in2,
+               DataType            dt_out,
+               float               scale,
+               ConvertPolicy       convert_policy,
+               RoundingPolicy      rounding_policy,
+               QuantizationInfo    qinfo0,
+               QuantizationInfo    qinfo1,
+               QuantizationInfo    qinfo_out,
+               ActivationLayerInfo act_info)
     {
-        _target    = compute_target(shape0, shape1, dt_in1, dt_in2, dt_out, scale, convert_policy, rounding_policy, qinfo0, qinfo1, qinfo_out);
-        _reference = compute_reference(shape0, shape1, dt_in1, dt_in2, dt_out, scale, convert_policy, rounding_policy, qinfo0, qinfo1, qinfo_out);
+        _target    = compute_target(shape0, shape1, dt_in1, dt_in2, dt_out, scale, convert_policy, rounding_policy, qinfo0, qinfo1, qinfo_out, act_info);
+        _reference = compute_reference(shape0, shape1, dt_in1, dt_in2, dt_out, scale, convert_policy, rounding_policy, qinfo0, qinfo1, qinfo_out, act_info);
     }
 
 protected:
@@ -69,7 +71,7 @@ protected:
 
     TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, DataType dt_in1, DataType dt_in2, DataType dt_out,
                               float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy,
-                              QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
+                              QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, ActivationLayerInfo act_info)
     {
         // Create tensors
         TensorType src1 = create_tensor<TensorType>(shape0, dt_in1, 1, qinfo0);
@@ -78,7 +80,7 @@ protected:
 
         // Create and configure function
         FunctionType multiply;
-        multiply.configure(&src1, &src2, &dst, scale, convert_policy, rounding_policy);
+        multiply.configure(&src1, &src2, &dst, scale, convert_policy, rounding_policy, act_info);
 
         ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -105,7 +107,7 @@ protected:
 
     SimpleTensor<T3> compute_reference(const TensorShape &shape0, const TensorShape &shape1, DataType dt_in1, DataType dt_in2, DataType dt_out,
                                        float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy,
-                                       QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
+                                       QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, ActivationLayerInfo act_info)
     {
         // Create reference
         SimpleTensor<T1> src1{ shape0, dt_in1, 1, qinfo0 };
@@ -115,7 +117,8 @@ protected:
         fill(src1, 0);
         fill(src2, 1);
 
-        return reference::pixel_wise_multiplication<T1, T2, T3>(src1, src2, scale, convert_policy, rounding_policy, dt_out, qinfo_out);
+        auto result = reference::pixel_wise_multiplication<T1, T2, T3>(src1, src2, scale, convert_policy, rounding_policy, dt_out, qinfo_out);
+        return act_info.enabled() ? reference::activation_layer(result, act_info, qinfo_out) : result;
     }
 
     TensorType       _target{};
@@ -130,7 +133,7 @@ public:
     void setup(const TensorShape &shape, DataType dt_in1, DataType dt_in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
     {
         PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, shape, dt_in1, dt_in2, dt_in2, scale, convert_policy, rounding_policy,
-                                                                                                               QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
+                                                                                                               QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), ActivationLayerInfo());
     }
 };
 
@@ -142,7 +145,32 @@ public:
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType dt_in1, DataType dt_in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
     {
         PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape0, shape1, dt_in1, dt_in2, dt_in2, scale, convert_policy, rounding_policy,
-                                                                                                               QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
+                                                                                                               QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), ActivationLayerInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
+class PixelWiseMultiplicationValidationFloatFixture : public PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType dt_in1, DataType dt_in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy, ActivationLayerInfo act_info)
+    {
+        PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, shape, dt_in1, dt_in2, dt_in2, scale, convert_policy, rounding_policy,
+                                                                                                               QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), act_info);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
+class PixelWiseMultiplicationBroadcastValidationFloatFixture : public PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType dt_in1, DataType dt_in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy,
+               ActivationLayerInfo act_info)
+    {
+        PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape0, shape1, dt_in1, dt_in2, dt_in2, scale, convert_policy, rounding_policy,
+                                                                                                               QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), act_info);
     }
 };
 
@@ -154,8 +182,8 @@ public:
     void setup(const TensorShape &shape, DataType dt_in1, DataType dt_in2, DataType dt_out, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
     {
-        PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>::setup(shape, shape, dt_in1, dt_in2, dt_out, scale, convert_policy,
-                                                                                                                   rounding_policy, qinfo0, qinfo1, qinfo_out);
+        PixelWiseMultiplicationGenericValidationFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>::setup(shape, shape, dt_in1, dt_in2, dt_out, scale, convert_policy, rounding_policy,
+                                                                                                                   qinfo0, qinfo1, qinfo_out, ActivationLayerInfo());
     }
 };
 } // namespace validation

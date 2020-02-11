@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,13 @@ const auto ElementwiseSquaredDiffFP16Dataset = combine(combine(framework::datase
                                                        framework::dataset::make("DataType", DataType::F16));
 const auto ElementwiseSquaredDiffFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
                                                        framework::dataset::make("DataType", DataType::F32));
+const auto EmptyActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{ ActivationLayerInfo() });
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
+});
 } // namespace
 
 TEST_SUITE(CL)
@@ -239,9 +246,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<int16_
 TEST_SUITE_END()
 TEST_SUITE_END()
 
+template <typename T>
+using CLElementwiseSquaredDiffFloatFixture = ElementwiseSquaredDiffValidationFloatFixture<CLTensor, CLAccessor, CLElementwiseSquaredDiff, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP16Dataset),
+                                                                                                                  EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseSquaredDiffFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ElementwiseSquaredDiffFP16Dataset),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
@@ -272,16 +289,31 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset),
+                                                                                                                   EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLElementwiseSquaredDiffFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ElementwiseSquaredDiffFP32Dataset),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 template <typename T>
-using CLElementwiseSquaredDiffBroadcastFixture = ElementwiseSquaredDiffBroadcastValidationFixture<CLTensor, CLAccessor, CLElementwiseSquaredDiff, T>;
+using CLElementwiseSquaredDiffBroadcastFloatFixture = ElementwiseSquaredDiffBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLElementwiseSquaredDiff, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseSquaredDiffBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
-                       ElementwiseSquaredDiffFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseSquaredDiffBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapesBroadcast(),
+                       ElementwiseSquaredDiffFP32Dataset),
+                       EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLElementwiseSquaredDiffBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapesBroadcast(),
+                       ElementwiseSquaredDiffFP32Dataset),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

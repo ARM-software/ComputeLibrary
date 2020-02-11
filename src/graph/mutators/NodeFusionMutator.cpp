@@ -294,12 +294,19 @@ IGraphMutator::MutationType NodeFusionMutator::type() const
 void NodeFusionMutator::mutate(Graph &g)
 {
     // Supported activations when fusing
-    const std::set<Activation> supported_fused_activations = { Activation::RELU, Activation::BOUNDED_RELU, Activation::LU_BOUNDED_RELU };
+    const std::set<Activation> supported_fused_activations_conv    = { Activation::RELU, Activation::BOUNDED_RELU, Activation::LU_BOUNDED_RELU };
+    const std::set<Activation> supported_fused_activations_eltwise = { Activation::RELU, Activation::BOUNDED_RELU, Activation::LU_BOUNDED_RELU,
+                                                                       Activation::TANH, Activation::LOGISTIC
+                                                                     };
 
     // Preconditions
     auto empty_prec = [](INode &)
     {
         return true;
+    };
+    auto cl_target_prec = [](INode & n)
+    {
+        return n.assigned_target() == Target::CL;
     };
     auto qs8_prec = [&g](INode & n)
     {
@@ -315,10 +322,11 @@ void NodeFusionMutator::mutate(Graph &g)
     };
 
     // Fusion mutations
-    detail::fuse_layer<BatchNormalizationLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<BatchNormalizationLayerNode>, supported_fused_activations);
-    detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations);
-    detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations);
-    detail::fuse_layer<FullyConnectedLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<FullyConnectedLayerNode>, supported_fused_activations);
+    detail::fuse_layer<BatchNormalizationLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<BatchNormalizationLayerNode>, supported_fused_activations_conv);
+    detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations_conv);
+    detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations_conv);
+    detail::fuse_layer<FullyConnectedLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<FullyConnectedLayerNode>, supported_fused_activations_conv);
+    detail::fuse_layer<EltwiseLayerNode, ActivationLayerNode>(g, cl_target_prec, detail::fuse_node_with_activation<EltwiseLayerNode>, supported_fused_activations_eltwise);
     detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_depthwise_convolution_with_batch_normalization);
 }

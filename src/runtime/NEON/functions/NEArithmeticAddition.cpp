@@ -31,14 +31,16 @@
 
 namespace arm_compute
 {
-void NEArithmeticAddition::configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy)
+void NEArithmeticAddition::configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticAdditionKernel>();
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
 }
-Status NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEArithmeticAdditionKernel::validate(input1, input2, output, policy);
 }
 } // namespace arm_compute

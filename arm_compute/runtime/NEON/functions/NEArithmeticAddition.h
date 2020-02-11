@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,22 +37,24 @@ class NEArithmeticAddition : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in]  input1 First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in]  input2 Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[out] output Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in]  policy Policy to use to handle overflow.
+     * @param[in]  input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in]  input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[out] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in]  policy   Policy to use to handle overflow.
+     * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy);
+    void configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAddition
      *
-     * @param[in] input1 First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in] input2 Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in] output Output tensor. Data types supported: U8/SQASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in] policy Policy to use to handle overflow.
+     * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in] output   Output tensor. Data types supported: U8/SQASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
+     * @param[in] policy   Policy to use to handle overflow
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEARITHMETICADDITION_H */

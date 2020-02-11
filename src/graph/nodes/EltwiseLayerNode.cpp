@@ -52,6 +52,16 @@ RoundingPolicy EltwiseLayerNode::rounding_policy() const
     return descriptor.r_policy;
 }
 
+ActivationLayerInfo EltwiseLayerNode::fused_activation() const
+{
+    return descriptor.fused_activation;
+}
+
+void EltwiseLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)
+{
+    descriptor.fused_activation = fused_activation;
+}
+
 bool EltwiseLayerNode::forward_descriptors()
 {
     if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
