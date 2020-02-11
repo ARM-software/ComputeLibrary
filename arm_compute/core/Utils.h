@@ -28,6 +28,7 @@
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Rounding.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Version.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -82,14 +83,6 @@ inline auto floor_to_multiple(S value, T divisor) -> decltype((value / divisor) 
     ARM_COMPUTE_ERROR_ON(value < 0 || divisor <= 0);
     return (value / divisor) * divisor;
 }
-
-/** Returns the arm_compute library build information
- *
- * Contains the version number and the build options used to build the library
- *
- * @return The arm_compute library build information
- */
-std::string build_information();
 
 /** Load an entire file in memory
  *

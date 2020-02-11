@@ -49,7 +49,7 @@ def filter_clang_tidy_lines( lines ):
             continue
 
         if "error:" in line:
-            if (("Utils.cpp" in line and "arm_compute_version.embed" in line and "file not found" in line) or
+            if (("Version.cpp" in line and "arm_compute_version.embed" in line and "file not found" in line) or
                 ("arm_fp16.h" in line) or
                 ("omp.h" in line) or
                 ("cast from pointer to smaller type 'uintptr_t' (aka 'unsigned int') loses information" in line) or
