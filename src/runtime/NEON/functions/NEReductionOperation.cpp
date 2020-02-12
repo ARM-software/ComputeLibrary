@@ -156,7 +156,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
                     }
                     case DataType::QASYMM8:
                     {
-                        pixelValue = PixelValue(255, input->info()->data_type(), input->info()->quantization_info());
+                        pixelValue = std::get<1>(get_min_max(input->info()->data_type()));
                         break;
                     }
                     default:
@@ -182,7 +182,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
                     }
                     case DataType::QASYMM8:
                     {
-                        pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
+                        pixelValue = std::get<0>(get_min_max(input->info()->data_type()));
                         break;
                     }
                     default:
