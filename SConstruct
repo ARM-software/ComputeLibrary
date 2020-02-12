@@ -141,7 +141,7 @@ if not env['exceptions']:
 env.Append(CXXFLAGS = ['-Wall','-DARCH_ARM',
          '-Wextra','-pedantic','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
-         '-fpermissive','-std=gnu++11','-Woverloaded-virtual', '-Wformat-security',
+         '-std=gnu++11','-Woverloaded-virtual', '-Wformat-security',
          '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-overlength-strings'])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
@@ -283,7 +283,7 @@ if env['Werror']:
 
 if env['os'] == 'android':
     env.Append(CPPDEFINES = ['ANDROID'])
-    env.Append(LINKFLAGS = ['-pie', '-static-libstdc++'])
+    env.Append(LINKFLAGS = ['-pie', '-static-libstdc++', '-ldl'])
 elif env['os'] == 'bare_metal':
     env.Append(LINKFLAGS = ['-static'])
     env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
