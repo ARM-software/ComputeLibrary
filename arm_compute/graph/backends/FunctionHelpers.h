@@ -1048,15 +1048,16 @@ std::unique_ptr<IFunction> create_pad_layer(PadLayerNode &node)
     validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info
-    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
-    typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
-    const PaddingList               &padding = node.padding();
+    typename TargetInfo::TensorType *input     = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output    = get_backing_tensor<TargetInfo>(node.output(0));
+    const PaddingList               &padding   = node.padding();
+    const PixelValue                 pad_value = node.pad_value();
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     // Create and configure function
     auto func = support::cpp14::make_unique<PadLayerFunction>();
-    func->configure(input, output, padding);
+    func->configure(input, output, padding, pad_value);
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "

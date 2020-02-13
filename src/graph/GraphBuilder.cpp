@@ -571,9 +571,9 @@ NodeID GraphBuilder::add_normalize_planar_yuv_node(Graph &g, NodeParams params, 
     return norm_planar_yuv_nid;
 }
 
-NodeID GraphBuilder::add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, PaddingList padding)
+NodeID GraphBuilder::add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, const PaddingList &paddings, PixelValue pad_value)
 {
-    return create_simple_single_input_output_node<PadLayerNode>(g, params, input, padding);
+    return create_simple_single_input_output_node<PadLayerNode>(g, params, input, paddings, pad_value);
 }
 
 NodeID GraphBuilder::add_permute_node(Graph &g, NodeParams params, NodeIdxPair input, PermutationVector perm, DataLayout layout)

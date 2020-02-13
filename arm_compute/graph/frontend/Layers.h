@@ -832,11 +832,12 @@ class PadLayer final : public ILayer
 public:
     /** Construct a pad layer.
      *
-     * @param[in] padding The padding for each spatial dimension of the input tensor. The pair padding[i]
-     *                    specifies the front and the end padding in the i-th dimension.
+     * @param[in] padding   The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                      specifies the front and the end padding in the i-th dimension.
+     * @param[in] pad_value Padding value to use. Defaults to 0.
      */
-    PadLayer(PaddingList padding)
-        : _padding(padding)
+    PadLayer(PaddingList padding, PixelValue pad_value = PixelValue())
+        : _padding(padding), _pad_value(pad_value)
     {
     }
 
@@ -844,11 +845,12 @@ public:
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
-        return GraphBuilder::add_pad_node(s.graph(), common_params, input, _padding);
+        return GraphBuilder::add_pad_node(s.graph(), common_params, input, _padding, _pad_value);
     }
 
 private:
     PaddingList _padding;
+    PixelValue  _pad_value;
 };
 
 /** Permute Layer */

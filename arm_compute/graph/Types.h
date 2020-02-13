@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_GRAPH_TYPES_H
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
 
@@ -45,6 +46,7 @@ using arm_compute::DataLayoutDimension;
 using arm_compute::TensorShape;
 using arm_compute::Size2D;
 using arm_compute::PermutationVector;
+using arm_compute::PixelValue;
 
 using arm_compute::ActivationLayerInfo;
 using arm_compute::DetectionOutputLayerInfo;
