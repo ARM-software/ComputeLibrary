@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,8 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget arch)
-    : ICLGEMMKernelConfiguration(arch)
+CLGEMMReshapedOnlyRHSKernelConfigurationBifrost::CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget gpu)
+    : ICLGEMMKernelConfiguration(gpu)
 {
 }
 
@@ -72,7 +72,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     switch(_target)
     {
         case GPUTarget::G76:
-            if (gemm_configs_G76.find(data_type) != gemm_configs_G76.end())
+            if(gemm_configs_G76.find(data_type) != gemm_configs_G76.end())
             {
                 return (this->*gemm_configs_G76[data_type])(m, n, k, b);
             }
@@ -81,7 +81,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
                 ARM_COMPUTE_ERROR("Not supported data type");
             }
         case GPUTarget::G51:
-            if (gemm_configs_G51.find(data_type) != gemm_configs_G51.end())
+            if(gemm_configs_G51.find(data_type) != gemm_configs_G51.end())
             {
                 return (this->*gemm_configs_G51[data_type])(m, n, k, b);
             }
@@ -90,7 +90,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
                 ARM_COMPUTE_ERROR("Not supported data type");
             }
         default:
-            if (gemm_configs_G7x.find(data_type) != gemm_configs_G7x.end())
+            if(gemm_configs_G7x.find(data_type) != gemm_configs_G7x.end())
             {
                 return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
             }
@@ -148,7 +148,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
 
     if(m == 1)
     {
-        const unsigned int n0 = n < 1280? 2 : 4;
+        const unsigned int n0 = n < 1280 ? 2 : 4;
         const unsigned int h0 = std::max(n / n0, 1U);
         return configure_lhs_rhs_info(m, n, 1, n0, 4, 1, h0, false, true, false, true);
     }
@@ -205,7 +205,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
 
     if(m == 1)
     {
-        const unsigned int n0 = n < 1280? 2 : 4;
+        const unsigned int n0 = n < 1280 ? 2 : 4;
         const unsigned int h0 = std::max(n / n0, 1U);
         return configure_lhs_rhs_info(m, n, 1, n0, 8, 1, h0, false, true, false, true);
     }
@@ -280,5 +280,6 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
         return configure_lhs_rhs_info(m, n, 4, 2, 16, 1, h0, false, true, false, true);
     }
 }
+
 } // namespace cl_gemm
 } // namespace arm_compute

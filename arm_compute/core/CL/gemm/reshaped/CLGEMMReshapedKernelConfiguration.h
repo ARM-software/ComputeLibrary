@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/ICLGEMMKernelConfiguration.h"
 #include "arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
+#include "arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationValhall.h"
 
 #include <memory>
 
@@ -37,17 +38,26 @@ namespace cl_gemm
 class CLGEMMReshapedKernelConfigurationFactory final
 {
 public:
-    /** Static method to call the CLGEMMReshaped kernel configuration class accordingly with the GPU architecture
+    /** Static method to call the CLGEMMReshaped kernel configuration class accordingly with the GPU target
      *
-     * @param[in] arch GPU target
+     * @param[in] gpu GPU target
      *
      * @return CLGEMMReshaped kernel configuration class
      */
-    static std::unique_ptr<ICLGEMMKernelConfiguration> create(GPUTarget arch)
+    static std::unique_ptr<ICLGEMMKernelConfiguration> create(GPUTarget gpu)
     {
-        // Note: At the moment we only support Bifrost architecture. However, we should have a dedicated path for each GPU architecture
-        // using get_arch_from_target(arch)
-        return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(arch);
+        switch(get_arch_from_target(gpu))
+        {
+            case GPUTarget::MIDGARD:
+            case GPUTarget::BIFROST:
+                return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(gpu);
+                break;
+            case GPUTarget::VALHALL:
+                return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationValhall>(gpu);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Not supported GPU target");
+        }
     }
 };
 } // namespace cl_gemm

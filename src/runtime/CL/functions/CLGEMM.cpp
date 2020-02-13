@@ -77,7 +77,7 @@ CLGEMM::GEMMType CLGEMM::select_gemm_type(unsigned int m, unsigned int n, unsign
         {
             if((m > 1) && (n < 16))
             {
-                gemm_type = GEMMType::RESHAPED_V1;
+                gemm_type = GEMMType::RESHAPED_V2;
             }
             else if(m == 1)
             {
@@ -93,11 +93,11 @@ CLGEMM::GEMMType CLGEMM::select_gemm_type(unsigned int m, unsigned int n, unsign
                     constexpr float fact1 = 1.66f;
                     constexpr float ops   = 12.0f;
                     const float     scale = k > 1024 ? 1.07f : 1.0f;
-                    gemm_type             = (alpha + ((n * fact0) / ops) < ((fact1 * n * scale) / ops)) ? GEMMType::RESHAPED_V1 : GEMMType::NATIVE;
+                    gemm_type             = (alpha + ((n * fact0) / ops) < ((fact1 * n * scale) / ops)) ? GEMMType::RESHAPED_V2 : GEMMType::RESHAPED_V2;
                 }
                 else
                 {
-                    gemm_type = GEMMType::NATIVE;
+                    gemm_type = GEMMType::RESHAPED_ONLY_RHS;
                 }
             }
 

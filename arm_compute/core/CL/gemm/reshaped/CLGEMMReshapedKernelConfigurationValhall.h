@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONBIFROST_H
-#define ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONBIFROST_H
+#ifndef ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATIONVALHALL_H
+#define ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATIONVALHALL_H
 
 #include "arm_compute/core/CL/ICLGEMMKernelConfiguration.h"
 
@@ -30,35 +30,32 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-/** Bifrost based OpenCL GEMMNative configuration */
-class CLGEMMNativeKernelConfigurationBifrost final : public ICLGEMMKernelConfiguration
+/** Valhall based OpenCL GEMMReshaped configuration */
+class CLGEMMReshapedKernelConfigurationValhall final : public ICLGEMMKernelConfiguration
 {
 public:
     /** Constructor
      *
      * @param[in] gpu GPU target
      */
-    CLGEMMNativeKernelConfigurationBifrost(GPUTarget gpu);
+    CLGEMMReshapedKernelConfigurationValhall(GPUTarget gpu);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMNativeKernelConfigurationBifrost(const CLGEMMNativeKernelConfigurationBifrost &) = delete;
+    CLGEMMReshapedKernelConfigurationValhall(const CLGEMMReshapedKernelConfigurationValhall &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMNativeKernelConfigurationBifrost &operator=(const CLGEMMNativeKernelConfigurationBifrost &) = delete;
+    CLGEMMReshapedKernelConfigurationValhall &operator=(const CLGEMMReshapedKernelConfigurationValhall &) = delete;
     /** Default Move Constructor. */
-    CLGEMMNativeKernelConfigurationBifrost(CLGEMMNativeKernelConfigurationBifrost &&) = default;
+    CLGEMMReshapedKernelConfigurationValhall(CLGEMMReshapedKernelConfigurationValhall &&) = default;
     /** Default move assignment operator */
-    CLGEMMNativeKernelConfigurationBifrost &operator=(CLGEMMNativeKernelConfigurationBifrost &&) = default;
+    CLGEMMReshapedKernelConfigurationValhall &operator=(CLGEMMReshapedKernelConfigurationValhall &&) = default;
 
     // Inherited overridden method
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
 
 private:
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G71_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G71_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G76_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G76_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_default_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
-    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_default_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_f32(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_f16(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_G77_u8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONBIFROST_H */
+#endif /*ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATIONVALHALL_H */

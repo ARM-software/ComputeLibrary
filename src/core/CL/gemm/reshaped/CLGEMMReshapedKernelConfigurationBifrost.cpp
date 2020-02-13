@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,8 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-CLGEMMReshapedKernelConfigurationBifrost::CLGEMMReshapedKernelConfigurationBifrost(GPUTarget arch)
-    : ICLGEMMKernelConfiguration(arch)
+CLGEMMReshapedKernelConfigurationBifrost::CLGEMMReshapedKernelConfigurationBifrost(GPUTarget gpu)
+    : ICLGEMMKernelConfiguration(gpu)
 {
 }
 
@@ -63,7 +63,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     switch(_target)
     {
         case GPUTarget::G76:
-            if (gemm_configs_G76.find(data_type) != gemm_configs_G76.end())
+            if(gemm_configs_G76.find(data_type) != gemm_configs_G76.end())
             {
                 return (this->*gemm_configs_G76[data_type])(m, n, k, b);
             }
@@ -72,7 +72,7 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
                 ARM_COMPUTE_ERROR("Not supported data type");
             }
         default:
-            if (gemm_configs_G7x.find(data_type) != gemm_configs_G7x.end())
+            if(gemm_configs_G7x.find(data_type) != gemm_configs_G7x.end())
             {
                 return (this->*gemm_configs_G7x[data_type])(m, n, k, b);
             }

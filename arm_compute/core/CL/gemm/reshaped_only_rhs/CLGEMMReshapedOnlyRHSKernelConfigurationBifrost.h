@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,9 @@ class CLGEMMReshapedOnlyRHSKernelConfigurationBifrost final : public ICLGEMMKern
 public:
     /** Constructor
      *
-     * @param[in] arch GPU target
+     * @param[in] gpu GPU target
      */
-    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget arch);
+    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget gpu);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(const CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,9 @@ class CLGEMMReshapedKernelConfigurationBifrost final : public ICLGEMMKernelConfi
 public:
     /** Constructor
      *
-     * @param[in] arch GPU target
+     * @param[in] gpu GPU target
      */
-    CLGEMMReshapedKernelConfigurationBifrost(GPUTarget arch);
+    CLGEMMReshapedKernelConfigurationBifrost(GPUTarget gpu);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLGEMMReshapedKernelConfigurationBifrost(const CLGEMMReshapedKernelConfigurationBifrost &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
