@@ -855,7 +855,6 @@ v17.12 Public major release
     - @ref NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
     - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
-    - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
     - NEWinogradLayer / NEWinogradLayerKernel
 
  - New OpenCL kernels / functions

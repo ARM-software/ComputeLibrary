@@ -64,7 +64,7 @@ public:
      * @param[in]  bias         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
      *                          Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
      * @param[out] output       Output tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[in]  output_stage Output stage info. Used to pass the quantized output data type
+     * @param[in]  output_stage GEMMLowp output stage metadata.
      */
     void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *output_stage);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
@@ -73,7 +73,7 @@ public:
      * @param[in] bias         Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
      *                         Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
      * @param[in] output       Output tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[in] output_stage Output stage info. Used to pass the quantized output data type
+     * @param[in] output_stage GEMMLowp output stage metadata.
      *
      * @return a status
      */

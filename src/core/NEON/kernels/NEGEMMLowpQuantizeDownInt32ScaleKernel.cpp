@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,29 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ScaleKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 #include <arm_neon.h>
 #include <cstddef>
 #include <cstdint>
 
-using namespace arm_compute;
-
-namespace
+namespace arm_compute
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo *output_stage)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON(min > max);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage->gemmlowp_max_bound > std::get<1>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type)));
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage->gemmlowp_min_bound < std::get<0>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type))
+                                || output_stage->gemmlowp_min_bound > output_stage->gemmlowp_max_bound);
 
     // Check biases if exist
     if(bias != nullptr)
@@ -55,44 +58,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+        if(output->data_type() != output_stage->output_data_type && (output_stage->output_data_type == DataType::QASYMM8 || output_stage->output_data_type == DataType::QASYMM8_SIGNED))
+        {
+            ARM_COMPUTE_RETURN_ERROR_MSG("Mismatching data types");
+        }
+
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
     }
 
     return Status{};
-}
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
-{
-    // Note: This kernel performs 16 elements per iteration.
-    // However, since we use a left-over for loop, we cannot have any read or write out of memory
-    // For this reason num_elems_processed_per_iteration is set to 1
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
-
-    // Configure kernel window
-    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win,
-                                                    input_access);
-
-    if(output->total_size() != 0)
-    {
-        AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, output_result_access);
-
-        output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-    }
-
-    if(bias != nullptr)
-    {
-        AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-        window_changed = window_changed || update_window_and_padding(win, bias_access);
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
 }
 
 inline void scale_input(int32x4x4_t &in_s32, int32x4_t result_offset_s32, int32_t result_mult_int)
@@ -110,22 +84,31 @@ inline void scale_input(int32x4x4_t &in_s32, int32x4_t result_offset_s32, int32_
     in_s32.val[3] = vmulq_n_s32(in_s32.val[3], result_mult_int);
 }
 
-template <bool    is_bounded_relu>
-inline uint8x16_t finalize_quantization(int32x4x4_t &in_s32, int32x4_t result_shift_s32, uint8x16_t min_u8, uint8x16_t max_u8)
+template <typename T>
+inline typename std::enable_if<std::is_same<T, uint8_t>::value,
+       typename wrapper::traits::neon_vector<T, 16>::type>::type
+       convert_to_8bit(const int16x8x2_t in_s16)
 {
-    const static int32x4_t zero_s32 = vdupq_n_s32(0);
+    return wrapper::vcombine(wrapper::vqmovun(in_s16.val[0]), wrapper::vqmovun(in_s16.val[1]));
+}
 
+template <typename T>
+inline typename std::enable_if<std::is_same<T, int8_t>::value,
+       typename wrapper::traits::neon_vector<T, 16>::type>::type
+       convert_to_8bit(const int16x8x2_t in_s16)
+{
+    return wrapper::vcombine(wrapper::vqmovn(in_s16.val[0]), wrapper::vqmovn(in_s16.val[1]));
+}
+
+template <typename T>
+inline typename wrapper::traits::neon_vector<T, 16>::type finalize_quantization(int32x4x4_t &in_s32, int32x4_t result_shift_s32, typename wrapper::traits::neon_vector<T, 16>::type min,
+                                                                                typename wrapper::traits::neon_vector<T, 16>::type max)
+{
     // Shift final result (negative value shift right)
     in_s32.val[0] = vshlq_s32(in_s32.val[0], result_shift_s32);
     in_s32.val[1] = vshlq_s32(in_s32.val[1], result_shift_s32);
     in_s32.val[2] = vshlq_s32(in_s32.val[2], result_shift_s32);
     in_s32.val[3] = vshlq_s32(in_s32.val[3], result_shift_s32);
-
-    // Saturate negative values
-    in_s32.val[0] = vmaxq_s32(in_s32.val[0], zero_s32);
-    in_s32.val[1] = vmaxq_s32(in_s32.val[1], zero_s32);
-    in_s32.val[2] = vmaxq_s32(in_s32.val[2], zero_s32);
-    in_s32.val[3] = vmaxq_s32(in_s32.val[3], zero_s32);
 
     // Convert S32 to S16
     const int16x8x2_t in_s16 =
@@ -136,38 +119,33 @@ inline uint8x16_t finalize_quantization(int32x4x4_t &in_s32, int32x4_t result_sh
         }
     };
 
-    // Convert S16 to U8
-    uint8x16_t out_u8 = vcombine_u8(vqmovun_s16(in_s16.val[0]), vqmovun_s16(in_s16.val[1]));
+    // Convert S16 to S8 or U8
+    typename wrapper::traits::neon_vector<T, 16>::type out = convert_to_8bit<T>(in_s16);
 
-    if(is_bounded_relu)
-    {
-        out_u8 = vmaxq_u8(out_u8, min_u8);
-        out_u8 = vminq_u8(out_u8, max_u8);
-    }
+    out = wrapper::vmax(out, min);
+    out = wrapper::vmin(out, max);
 
-    return out_u8;
+    return out;
 }
-} // namespace
 
-namespace arm_compute
-{
 class Coordinates;
-} // namespace arm_compute
 
-template <bool is_bounded_relu>
-void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
+template <typename T>
+void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window)
 {
-    const int32x4_t  result_offset_s32 = vdupq_n_s32(_result_offset);
-    const int32x4_t  result_shift_s32  = vdupq_n_s32(-_result_shift);
-    const uint8x16_t min_u8            = vdupq_n_u8(static_cast<uint8_t>(_min));
-    const uint8x16_t max_u8            = vdupq_n_u8(static_cast<uint8_t>(_max));
+    using VectorType = typename wrapper::traits::neon_vector<T, 16>::type;
 
-    ARM_COMPUTE_UNUSED(min_u8);
-    ARM_COMPUTE_UNUSED(max_u8);
+    const int32x4_t result_offset_s32 = vdupq_n_s32(_output_stage->gemmlowp_offset);
+    const int32x4_t result_shift_s32  = vdupq_n_s32(-_output_stage->gemmlowp_shift);
+    const int       window_step_x     = 16;
+    const auto      window_start_x    = static_cast<int>(window.x().start());
+    const auto      window_end_x      = static_cast<int>(window.x().end());
 
-    const int  window_step_x  = 16;
-    const auto window_start_x = static_cast<int>(window.x().start());
-    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int clamp_min = (_is_bounded_relu) ? _output_stage->gemmlowp_min_bound : std::numeric_limits<T>::lowest();
+    const int clamp_max = (_is_bounded_relu) ? _output_stage->gemmlowp_max_bound : std::numeric_limits<T>::max();
+
+    VectorType min = wrapper::vdup_n(static_cast<T>(clamp_min), wrapper::traits::vector_128_tag{});
+    VectorType max = wrapper::vdup_n(static_cast<T>(clamp_max), wrapper::traits::vector_128_tag{});
 
     Window win(window);
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -215,9 +193,9 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
                 in_s32.val[3] = vaddq_s32(in_s32.val[3], bias_s32.val[3]);
 
                 // Add the offset terms to GEMM's result and multiply by result_mult_int
-                scale_input(in_s32, result_offset_s32, _result_mult_int);
+                scale_input(in_s32, result_offset_s32, _output_stage->gemmlowp_multiplier);
 
-                vst1q_u8(out.ptr() + x, finalize_quantization<is_bounded_relu>(in_s32, result_shift_s32, min_u8, max_u8));
+                wrapper::vstore(reinterpret_cast<T *>(out.ptr() + x), finalize_quantization<T>(in_s32, result_shift_s32, min, max));
             }
 
             // Compute left-over elements
@@ -227,17 +205,10 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
                 int       in_value   = *(reinterpret_cast<const int *>(in.ptr()) + x);
 
                 // Quantize
-                in_value = ((in_value + bias_value + _result_offset) * _result_mult_int) >> _result_shift;
+                in_value = ((in_value + bias_value + _output_stage->gemmlowp_offset) * _output_stage->gemmlowp_multiplier) >> _output_stage->gemmlowp_shift;
 
-                // Finalize and store the result
-                if(is_bounded_relu)
-                {
-                    *(out.ptr() + x) = static_cast<uint8_t>(std::max(_min, std::min(_max, in_value)));
-                }
-                else
-                {
-                    *(out.ptr() + x) = static_cast<uint8_t>(std::max(0, std::min(255, in_value)));
-                }
+                // Store the result
+                *(out.ptr() + x) = static_cast<T>(utility::clamp<int>(in_value, clamp_min, clamp_max));
             }
         },
         in, bias, out);
@@ -261,9 +232,9 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
                 };
 
                 // Add the offset terms to GEMM's result and multiply by result_mult_int
-                scale_input(in_s32, result_offset_s32, _result_mult_int);
+                scale_input(in_s32, result_offset_s32, _output_stage->gemmlowp_multiplier);
 
-                vst1q_u8(out.ptr() + x, finalize_quantization<is_bounded_relu>(in_s32, result_shift_s32, min_u8, max_u8));
+                wrapper::vstore(reinterpret_cast<T *>(out.ptr() + x), finalize_quantization<T>(in_s32, result_shift_s32, min, max));
             }
 
             // Compute left-over elements
@@ -272,74 +243,74 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
                 int in_value = *(reinterpret_cast<const int *>(in.ptr()) + x);
 
                 // Quantize
-                in_value = ((in_value + _result_offset) * _result_mult_int) >> _result_shift;
+                in_value = ((in_value + _output_stage->gemmlowp_offset) * _output_stage->gemmlowp_multiplier) >> _output_stage->gemmlowp_shift;
 
-                // Finalize and store the result
-                if(is_bounded_relu)
-                {
-                    *(out.ptr() + x) = static_cast<uint8_t>(std::max(_min, std::min(_max, in_value)));
-                }
-                else
-                {
-                    *(out.ptr() + x) = static_cast<uint8_t>(std::max(0, std::min(255, in_value)));
-                }
+                // Store the result
+                *(out.ptr() + x) = static_cast<T>(utility::clamp<int>(in_value, clamp_min, clamp_max));
             }
         },
         in, out);
     }
 }
 
-NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel()
-    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_offset(0), _result_mult_int(0), _result_shift(0), _min(0), _max(0)
+NEGEMMLowpQuantizeDownInt32ScaleKernel::NEGEMMLowpQuantizeDownInt32ScaleKernel()
+    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _output_stage(nullptr), _is_bounded_relu(false)
 {
 }
 
-void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_offset, int result_mult_int, int result_shift, int min, int max)
+void NEGEMMLowpQuantizeDownInt32ScaleKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, const GEMMLowpOutputStageInfo *output_stage)
 {
     // Perform validate step
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, output_stage);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(output_stage->output_data_type));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
                                                   (bias != nullptr) ? bias->info() : nullptr,
                                                   output->info(),
-                                                  min,
-                                                  max));
+                                                  output_stage));
 
-    _input           = input;
-    _bias            = bias;
-    _output          = output;
-    _result_offset   = result_offset;
-    _result_mult_int = result_mult_int;
-    _result_shift    = result_shift;
-    _min             = min;
-    _max             = max;
+    _input        = input;
+    _bias         = bias;
+    _output       = output;
+    _output_stage = output_stage;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Window      win = calculate_max_window(*input->info(), Steps());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+
+    INEKernel::configure(win);
 
     // Check if we need to clamp the result using min and max
-    const bool is_bounded_relu = !(min <= 0 && max >= 255);
-    _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run<false>;
+    _is_bounded_relu = ((_output_stage->gemmlowp_min_bound != _output_stage->gemmlowp_max_bound)
+                        && !(_output_stage->gemmlowp_min_bound == std::get<0>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type))
+                             && _output_stage->gemmlowp_max_bound == std::get<1>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type))));
+    if(_output_stage->output_data_type == DataType::QASYMM8)
+    {
+        _func = &NEGEMMLowpQuantizeDownInt32ScaleKernel::run<uint8_t>;
+    }
+    else if(_output_stage->output_data_type == DataType::QASYMM8_SIGNED)
+    {
+        _func = &NEGEMMLowpQuantizeDownInt32ScaleKernel::run<int8_t>;
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Data type not supported");
+    }
 }
 
-Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status NEGEMMLowpQuantizeDownInt32ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo *output_stage)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
-                                                              (bias != nullptr) ? bias->clone().get() : nullptr,
-                                                              output->clone().get())
-                                .first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, output_stage));
 
     return Status{};
 }
 
-void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window, const ThreadInfo &info)
+void NEGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -347,3 +318,4 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window, co
 
     (this->*_func)(window);
 }
+} // namespace arm_compute

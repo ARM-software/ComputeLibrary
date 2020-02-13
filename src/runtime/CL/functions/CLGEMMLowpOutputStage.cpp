@@ -156,22 +156,9 @@ void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *b
         }
         case GEMMLowpOutputStageType::QUANTIZE_DOWN:
         {
-            switch(info.output_data_type)
-            {
-                case DataType::QASYMM8:
-                case DataType::QASYMM8_SIGNED:
-                {
-                    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleKernel>();
-                    k->configure(input, bias, output, &info);
-                    _kernel = std::move(k);
-                    break;
-                }
-                default:
-                {
-                    ARM_COMPUTE_ERROR("Unsupported output data type.");
-                    break;
-                }
-            }
+            auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleKernel>();
+            k->configure(input, bias, output, &info);
+            _kernel = std::move(k);
             break;
         }
         case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
@@ -206,22 +193,9 @@ Status CLGEMMLowpOutputStage::validate(const ITensorInfo *input, const ITensorIn
             }
         }
         case GEMMLowpOutputStageType::QUANTIZE_DOWN:
-        {
-            switch(output->data_type())
-            {
-                case DataType::QASYMM8:
-                case DataType::QASYMM8_SIGNED:
-                {
-                    return CLGEMMLowpQuantizeDownInt32ScaleKernel::validate(input, bias, output, &info);
-                }
-                default:
-                    return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported output data type.");
-            }
-        }
+            return CLGEMMLowpQuantizeDownInt32ScaleKernel::validate(input, bias, output, &info);
         case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
-        {
             return CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::validate(input, bias, output, &info);
-        }
         default:
             return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported GEMMLowpOutputStage type.");
     }
