@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2019 ARM Limited.
+/// Copyright (c) 2017-2020 ARM Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -245,6 +245,53 @@ If there is more than one release in a month then an extra sequential number is 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
 
 @subsection S2_2_changelog Changelog
+
+v20.02 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - Added new data type QASYMM8_SIGNED support for:
+     - @ref CLDepthwiseConvolutionLayer
+     - @ref CLDepthwiseConvolutionLayer3x3
+     - @ref CLGEMMConvolutionLayer
+     - @ref CLGEMMLowpMatrixMultiplyCore
+     - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
+     - @ref CLGEMMLowpMatrixMultiplyNativeKernel
+     - @ref NEActivationLayer
+     - @ref NEComparisonOperationKernel
+     - @ref NEConvolutionLayer
+     - @ref NEDepthwiseConvolutionLayer
+     - @ref NEDepthwiseConvolutionLayer3x3Kernel
+     - @ref NEDirectConvolutionLayerOutputStageKernel
+     - @ref NEElementwiseComparison
+     - @ref NEElementwiseMax
+     - @ref NEElementwiseMin
+     - @ref NEElementwiseSquaredDiff
+     - @ref NEFullyConnectedLayer
+     - @ref NEGEMMMatrixVectorMultiplyKernel
+     - @ref NEPixelWiseMultiplication
+     - @ref NEPoolingLayer
+     - @ref NEPReluLayer
+ - Added support for QSYMM8_PER_CHANNEL in:
+     - @ref NEDepthwiseConvolutionLayer3x3Kernel
+ - Added support for split sizes in:
+     - @ref CLSplit
+     - @ref NESplit
+ - New OpenCL kernels / functions:
+     - @ref CLFill
+     - @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
+ - New NEON kernels / functions:
+     - @ref NEFill
+     - @ref NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
+ - Deprecated NEON functions / interfaces:
+     - @ref CLDepthwiseConvolutionLayer3x3
+     - @ref NEDepthwiseConvolutionLayerOptimized
+     - @ref PoolingLayerInfo constructors without Data Layout.
+ - Added support for quantization with multiplier greater than 1 on NEON and CL.
+ - Added support for quantized inputs of type QASYMM8_SIGNED and QASYMM8 to @ref CLQuantizationLayer.
+ - Added the ability to build bootcode for bare metal.
+ - Added support for generating synthetic QASYMM8 graphs.
+ - Added support for F16 datatype in VGG16.
+ - Removed pre-built binaries for GLES.
 
 v19.11.1 Public maintenance release
  - Fix offset calculation in NEReductionOperationKernel.
