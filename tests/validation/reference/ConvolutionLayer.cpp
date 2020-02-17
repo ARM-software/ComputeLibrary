@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,18 +115,7 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
     // Create reference
     SimpleTensor<T> dst{ output_shape, src.data_type(), 1, out_quant_info };
 
-    if(src.data_layout() == DataLayout::NHWC)
-    {
-        SimpleTensor<T>  src_nchw     = reference::permute<T>(src, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<TW> weights_nchw = reference::permute<TW>(weights, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<T>  dst_nchw     = reference::permute<T>(dst, PermutationVector(1U, 2U, 0U));
-
-        return reference::permute<T>(convolution_layer_nchw(src_nchw, weights_nchw, bias, dst_nchw, info, dilation, num_groups), PermutationVector(2U, 0U, 1U));
-    }
-    else
-    {
-        return convolution_layer_nchw(src, weights, bias, dst, info, dilation, num_groups);
-    }
+    return convolution_layer_nchw(src, weights, bias, dst, info, dilation, num_groups);
 }
 
 template SimpleTensor<float> convolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,

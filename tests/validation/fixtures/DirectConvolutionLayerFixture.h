@@ -216,10 +216,10 @@ class DirectConvolutionValidationQuantizedFixture : public DirectConvolutionVali
 public:
     template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels, DataType data_type, QuantizationInfo quantization_info,
-               ActivationLayerInfo act_info)
+               ActivationLayerInfo act_info, DataLayout data_layout)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, quantization_info,
-                                                                                                    act_info, DataLayout::NCHW);
+                                                                                                    act_info, data_layout);
     }
 };
 
@@ -229,10 +229,10 @@ class DirectConvolutionValidationWithTensorShapesQuantizedFixture : public Direc
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
-               DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+               DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, quantization_info,
-                                                                                                    act_info, DataLayout::NCHW);
+                                                                                                    act_info, data_layout);
     }
 };
 
