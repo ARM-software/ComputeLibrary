@@ -27,13 +27,11 @@
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMMatrixAccumulateBiasesKernel.h"
 #include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -107,7 +105,7 @@ private:
  *  -# @ref NEIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref NEFullyConnectedLayerReshapeWeights (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref NEGEMMMatrixMultiplyKernel or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- *  -# @ref NEGEMMMatrixAccumulateBiasesKernel or @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric) (if @p biases is not equal to nullptr)
+ *  -# @ref NEGEMMMatrixAdditionKernel or @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric) (if @p biases is not equal to nullptr)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
@@ -164,9 +162,9 @@ public:
     void prepare() override;
 
 private:
-    void configure_fc_fc(const ITensor *input, const ITensor *weights, ITensor *output);
-    void configure_conv_fc(const ITensor *input, const ITensor *weights, ITensor *output);
-    void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output);
+    void configure_fc_fc(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output);
+    void configure_conv_fc(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output);
+    void configure_mm(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output);
 
     MemoryGroup                                                         _memory_group;
     IWeightsManager                                                    *_weights_manager;
@@ -177,17 +175,13 @@ private:
     weights_transformations::NEFullyConnectedLayerReshapeWeightsManaged _reshape_weights_managed_function;
     NEGEMM                                                              _mm_gemm;
     NEGEMMLowpMatrixMultiplyCore                                        _mm_gemmlowp;
-    NEGEMMLowpOutputStage                                               _gemmlowp_output_stage;
-    NEGEMMMatrixAccumulateBiasesKernel                                  _accumulate_biases_kernel;
     Tensor                                                              _flatten_output;
-    Tensor                                                              _gemmlowp_output;
     Tensor                                                              _converted_weights_output;
     Tensor                                                              _reshape_weights_output;
     const ITensor                                                      *_original_weights;
     bool                                                                _are_weights_converted;
     bool                                                                _are_weights_reshaped;
     bool                                                                _is_fc_after_conv;
-    bool                                                                _accumulate_biases;
     bool                                                                _is_quantized;
     bool                                                                _is_prepared;
 };

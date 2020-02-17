@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,9 +56,6 @@ public:
             cmd_parser.print_help(argv[0]);
             return false;
         }
-
-        // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
 
         // Print parameter values
         std::cout << common_params << std::endl;
