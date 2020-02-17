@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPFlipWeightsKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPNonMaximumSuppressionKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"

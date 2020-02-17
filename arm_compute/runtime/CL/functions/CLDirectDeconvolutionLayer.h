@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ class ICLTensor;
  *      stride_x and stride_y is the input stride of the first and second dimension.
  *
  * The weights used by Deconvolution are supposed to be the same as the ones used for Convolution. Therefore, it will be necessary to use the weights in the
- * reverse order to perform an actual convolution. This is achieved by using the @ref CPPFlipWeightsKernel.
+ * reverse order to perform an actual convolution. This is achieved by using @ref CLReverse.
  *
  * This function calls the following OpenCL kernels/functions:
  *

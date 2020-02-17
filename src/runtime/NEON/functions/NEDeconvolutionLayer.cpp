@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,7 @@ NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
       _permuted_input(),
       _permuted_weights(),
       _permuted_output(),
+      _flip_axis(),
       _is_nchw(false),
       _original_weights(nullptr),
       _input(nullptr),
@@ -57,7 +58,7 @@ NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
 Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, input);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(weights, input);
     const unsigned int width_idx  = get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH);
@@ -122,6 +123,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     _info             = info;
     _is_prepared      = false;
     _is_nchw          = data_layout == DataLayout::NCHW;
+    _flip_axis.allocator()->init(TensorInfo(TensorShape(2U), 1, DataType::U32));
 
     const unsigned int pad_left   = info.pad_left();
     const unsigned int pad_right  = info.pad_right();
@@ -139,6 +141,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
 
+    _flip_axis.allocator()->init(TensorInfo(TensorShape(2U), 1, DataType::U32));
     _memory_group.manage(&_scaled_output);
 
     if(!_is_nchw)
@@ -185,7 +188,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
         _weights_flipped.allocator()->init(*_permuted_weights.info()->clone());
         _weights_flipped.info()->set_quantization_info(weights->info()->quantization_info());
-        _flip_weights.configure(&_permuted_weights, &_weights_flipped);
+        _flip_weights.configure(&_permuted_weights, &_weights_flipped, &_flip_axis);
 
         // setup the function to convolve the upscaled output
         const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
@@ -230,13 +233,19 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
         _upsample_f.configure(input, &_scaled_output, upsample_info);
 
         _weights_flipped.allocator()->init(weights->info()->clone()->set_data_layout(data_layout));
-        _flip_weights.configure(weights, &_weights_flipped);
+        _flip_weights.configure(weights, &_weights_flipped, &_flip_axis);
 
         // setup the function to convolve the upscaled output
         const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
         _conv_f.configure(&_scaled_output, &_weights_flipped, bias, output, conv_info);
     }
     _scaled_output.allocator()->allocate();
+
+    // Setup flip axis data
+    _flip_axis.allocator()->allocate();
+    auto axis_data = reinterpret_cast<uint32_t *>(_flip_axis.buffer());
+    axis_data[0]   = 0;
+    axis_data[1]   = 1;
 }
 
 void NEDeconvolutionLayer::run()
@@ -276,16 +285,13 @@ void NEDeconvolutionLayer::prepare()
 
         // Run weights flipping and mark original weights tensor as unused
         _weights_flipped.allocator()->allocate();
-        NEScheduler::get().schedule(&_flip_weights, Window::DimZ);
+        _flip_weights.run();
         _original_weights->mark_as_unused();
 
         // Prepare convolution
         _conv_f.prepare();
 
-        if(!_weights_flipped.is_used())
-        {
-            _weights_flipped.allocator()->free();
-        }
+        // Unused weights are already released in _conv_f
 
         if(!_is_nchw)
         {

@@ -212,7 +212,6 @@ cc_library_static {
         "src/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.cpp",
         "src/core/CPP/kernels/CPPCornerCandidatesKernel.cpp",
         "src/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.cpp",
-        "src/core/CPP/kernels/CPPFlipWeightsKernel.cpp",
         "src/core/CPP/kernels/CPPNonMaximumSuppressionKernel.cpp",
         "src/core/CPP/kernels/CPPPermuteKernel.cpp",
         "src/core/CPP/kernels/CPPSortEuclideanDistanceKernel.cpp",
