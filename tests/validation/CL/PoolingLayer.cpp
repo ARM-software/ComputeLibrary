@@ -94,6 +94,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8), // Invalid parameters
                                                        TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32),     // Non-rectangular Global Pooling
                                                        TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),     // Invalid output Global Pooling
+                                                       TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::QASYMM8), // Invalid exclude_padding = false with quantized type, no actual padding and NHWC
                                                        TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
@@ -103,6 +104,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(12U, 12U, 5U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32),
                                                      })),
                framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
@@ -112,9 +114,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        PoolingLayerInfo(PoolingType::L2, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
                                                        PoolingLayerInfo(PoolingType::AVG, DataLayout::NCHW),
                                                        PoolingLayerInfo(PoolingType::MAX, DataLayout::NCHW),
+                                                       PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NHWC, PadStrideInfo(), false),
                                                        PoolingLayerInfo(PoolingType::AVG, DataLayout::NCHW),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, false, false, true, false, true })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true, false, false, true })),
                input_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info)) == expected, framework::LogLevel::ERRORS);
