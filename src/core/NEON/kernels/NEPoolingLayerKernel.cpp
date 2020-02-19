@@ -329,21 +329,13 @@ inline T vcvtq_q32_f32(float32x4_t values);
 template <>
 inline uint32x4_t vcvtq_q32_f32(float32x4_t values)
 {
-#ifdef __aarch64__
-    return vcvtnq_u32_f32(values);
-#else  //__aarch64__
     return vcvtq_u32_f32(values);
-#endif //__aarch64__
 }
 
 template <>
 inline int32x4_t vcvtq_q32_f32(float32x4_t values)
 {
-#ifdef __aarch64__
-    return vcvtnq_s32_f32(values);
-#else  //__aarch64__
     return vcvtq_s32_f32(values);
-#endif //__aarch64__
 }
 
 template <typename T>
@@ -1904,10 +1896,10 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
     const UniformQuantizationInfo input_qinfo  = _input->info()->quantization_info().uniform();
     const UniformQuantizationInfo output_qinfo = _output->info()->quantization_info().uniform();
 
-    const float   quant_rescale = output_qinfo.scale / input_qinfo.scale;
+    const float quant_rescale = output_qinfo.scale / input_qinfo.scale;
     // "new_offset" doesn't have to consider the "half_scale_v" in its computation
     // With a requantization performed in a single step there won't be uncertainties introduced
-    const int32_t new_offset    = output_qinfo.offset - static_cast<int32_t>( static_cast<float>(input_qinfo.offset) / quant_rescale);
+    const int32_t new_offset = output_qinfo.offset - static_cast<int32_t>(static_cast<float>(input_qinfo.offset) / quant_rescale);
 
     const float                   requant_scale  = output_qinfo.scale / input_qinfo.scale;
     const int32_t                 requant_offset = output_qinfo.offset - static_cast<int32_t>(static_cast<float>(input_qinfo.offset) / requant_scale);
