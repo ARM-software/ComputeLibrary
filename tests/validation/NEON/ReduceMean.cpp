@@ -46,7 +46,7 @@ constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value f
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.03f);   /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
 #endif                                                     // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(2); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric quantized type */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric quantized type */
 
 const auto axis_keep = combine(framework::dataset::make("Axis", { Coordinates(0), Coordinates(1, 0), Coordinates(1, 2), Coordinates(0, 2), Coordinates(1, 3), Coordinates(0, 1, 2, 3) }),
                                framework::dataset::make("KeepDims", { true }));
@@ -159,7 +159,7 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEReduceMeanQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
+                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 5) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -168,7 +168,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        NEReduceMeanQuantizedFixture<uint8_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
+                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 5) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);

@@ -64,7 +64,7 @@ OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, in
 
     if(std::is_integral<type>::value)
     {
-        auto int_res = static_cast<uint32_t>(res);
+        auto int_res = static_cast<int32_t>(res);
         for(int i = 0; i < reduce_elements; ++i)
         {
             auto elem = *(ptr + stride * i);
@@ -101,7 +101,7 @@ OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, in
         {
             int_res /= reduce_elements;
         }
-        res = saturate_cast<type>(int_res);
+        res = static_cast<type>(int_res);
     }
     else
     {
@@ -279,9 +279,17 @@ SimpleTensor<uint8_t> reduction_operation(const SimpleTensor<uint8_t> &src, cons
 {
     if(src.data_type() == DataType::QASYMM8)
     {
-        SimpleTensor<float> src_f = convert_from_asymmetric(src);
-        SimpleTensor<float> dst_f = reference::reduction_operation<float, float>(src_f, dst_shape, axis, op);
-        return convert_to_asymmetric<uint8_t>(dst_f, src.quantization_info());
+        // If the operation is MEAN_SUM, we can directly use the uint8 implementation without taking into account scale and offset
+        if(op == ReductionOperation::MEAN_SUM)
+        {
+            return compute_reduction_operation<uint8_t, uint8_t>(src, dst_shape, axis, op);
+        }
+        else
+        {
+            SimpleTensor<float> src_f = convert_from_asymmetric(src);
+            SimpleTensor<float> dst_f = reference::reduction_operation<float, float>(src_f, dst_shape, axis, op);
+            return convert_to_asymmetric<uint8_t>(dst_f, src.quantization_info());
+        }
     }
     else
     {
@@ -294,9 +302,17 @@ SimpleTensor<int8_t> reduction_operation(const SimpleTensor<int8_t> &src, const 
 {
     if(src.data_type() == DataType::QASYMM8_SIGNED)
     {
-        SimpleTensor<float> src_f = convert_from_asymmetric(src);
-        SimpleTensor<float> dst_f = reference::reduction_operation<float, float>(src_f, dst_shape, axis, op);
-        return convert_to_asymmetric<int8_t>(dst_f, src.quantization_info());
+        // If the operation is MEAN_SUM, we can directly use the int8 implementation without taking into account scale and offset
+        if(op == ReductionOperation::MEAN_SUM)
+        {
+            return compute_reduction_operation<int8_t, int8_t>(src, dst_shape, axis, op);
+        }
+        else
+        {
+            SimpleTensor<float> src_f = convert_from_asymmetric(src);
+            SimpleTensor<float> dst_f = reference::reduction_operation<float, float>(src_f, dst_shape, axis, op);
+            return convert_to_asymmetric<int8_t>(dst_f, src.quantization_info());
+        }
     }
     else
     {
