@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -295,6 +295,40 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantiz
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8_CustomDataset
+
+TEST_SUITE(QASYMM8_SIGNED)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
+                                                                                                                        DataType::QASYMM8_SIGNED)),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, -10) })),
+                                                                                                                        QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(data_precommit_9x9,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10), QuantizationInfo(1.1f, 10) })),
+                       QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunCustomDataset, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::DirectConvolutionLayerDataset(),
+                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127), QuantizationInfo(1.1f, 10) })),
+                               QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
+TEST_SUITE_END() // QASYMM8_SIGNED
+
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // DirectConvolutionLayer

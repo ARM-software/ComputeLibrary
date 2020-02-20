@@ -57,12 +57,12 @@ public:
      *        9x9 convolution with stride_x = 1/2, stride_y = 1/2, data_layout=NHWC
      *
      * @param[in]  input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
-     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32.
+     *                       while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8_SIGNED/QASYMM8/F16/F32.
      * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                       The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                       Data type supported:Same as @p input.
      * @param[in]  biases    Biases tensor. Biases are 1D tensor with dimension [OFM].
-     *                       Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type
+     *                       Data type supported: Should match @p input data type, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type
      * @param[out] output    Output tensor.
      *                       The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
@@ -71,11 +71,12 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLDirectConvolutionLayerKernel
      *
      * @param[in] input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],
-     *                      while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32.
+     *                      while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8_SIGNED/QASYMM8/F16/F32.
      * @param[in] weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                      The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                      Data type supported:Same as @p input.
-     * @param[in] biases    Biases tensor. Biases are 1D tensor with dimension [OFM]. Data type supported: Same as @p input.
+     * @param[in] biases    Biases tensor. Biases are 1D tensor with dimension [OFM].
+     *                      Data type supported: Should match @p input data type, except for input of QASYMM8 and QASYMM8_SIGNED type where biases should be of S32 type.
      * @param[in] output    Output tensor.
      *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,13 @@
  */
 #include "helpers_asymm.h"
 
+#undef CONVERT_SAT_STR
 #undef CONVERT_SAT
 
 #if defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)
+
+#define CONVERT_SAT_STR(x, type) (convert_##type##8_sat((x)))
+#define CONVERT_SAT(x, type) CONVERT_SAT_STR(x, type)
 
 #if KERNEL_SIZE == 9
 
@@ -155,7 +159,7 @@
  *
  * @return extracted input pixels.
  */
-inline uchar8 extract_input_stride1(__global const uchar *input_pixel)
+inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride1(__global const DATA_TYPE *input_pixel)
 {
     return vload8(0, input_pixel);
 }
@@ -166,9 +170,10 @@ inline uchar8 extract_input_stride1(__global const uchar *input_pixel)
  *
  * @return extracted input pixels.
  */
-inline uchar8 extract_input_stride2(__global const uchar *input_pixel)
+inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride2(__global const DATA_TYPE *input_pixel)
 {
-    uchar16 temp = vload16(0, input_pixel);
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    temp = vload16(0, input_pixel);
     return temp.s02468ace;
 }
 
@@ -178,11 +183,13 @@ inline uchar8 extract_input_stride2(__global const uchar *input_pixel)
  *
  * @return extracted input pixels.
  */
-inline uchar8 extract_input_stride3(__global const uchar *input_pixel)
+inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride3(__global const DATA_TYPE *input_pixel)
 {
-    uchar16 temp1 = vload16(0, input_pixel);
-    uchar16 temp2 = vload16(0, input_pixel + 12);
-    return (uchar8)(temp1.s0369, temp2.s0369);
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    temp1 = vload16(0, input_pixel);
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    temp2 = vload16(0, input_pixel + 12);
+    return (VEC_DATA_TYPE(DATA_TYPE, 8))(temp1.s0369, temp2.s0369);
 }
 
 #else /* KERNEL_SIZE not equals 1, 3 , 5, 9 */
@@ -197,7 +204,7 @@ inline uchar8 extract_input_stride3(__global const uchar *input_pixel)
  * @note The output quantization multiplier must be passed at compile time using -DOUTPUT_MULTIPLIER e.g. -DOUTPUT_MULTIPLIER=1234
  * @note The output quantization shift must be passed at compile time using -DOUTPUT_SHIFT e.g. -DOUTPUT_SHIFT=4
  *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
@@ -213,7 +220,7 @@ inline uchar8 extract_input_stride3(__global const uchar *input_pixel)
  * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p weights_ptr
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -248,8 +255,8 @@ __kernel void direct_convolution_quantized(
 
     int8 pixels0 = 0;
 
-    __global uchar *weights_addr = (__global uchar *)tensor3D_offset(&weights, 0, 0, 0);
-    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0);
+    __global DATA_TYPE *weights_addr = (__global DATA_TYPE *)tensor3D_offset(&weights, 0, 0, 0);
+    __global DATA_TYPE *src_addr     = (__global DATA_TYPE *)offset(&src, 0, 0);
 
     const int kernel_index = get_global_id(2);
     weights_addr += kernel_index * weights_stride_w;
@@ -257,28 +264,28 @@ __kernel void direct_convolution_quantized(
     for(volatile int d = 0; d < WEIGHTS_DEPTH; ++d)
     {
 #if KERNEL_SIZE == 9
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 0 * src_stride_y), (__global uchar *)(weights_addr + 0 * weights_stride_y));
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 1 * src_stride_y), (__global uchar *)(weights_addr + 1 * weights_stride_y));
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 2 * src_stride_y), (__global uchar *)(weights_addr + 2 * weights_stride_y));
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 3 * src_stride_y), (__global uchar *)(weights_addr + 3 * weights_stride_y));
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 4 * src_stride_y), (__global uchar *)(weights_addr + 4 * weights_stride_y));
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 5 * src_stride_y), (__global uchar *)(weights_addr + 5 * weights_stride_y));
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 6 * src_stride_y), (__global uchar *)(weights_addr + 6 * weights_stride_y));
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 7 * src_stride_y), (__global uchar *)(weights_addr + 7 * weights_stride_y));
-        CONVOLUTION1x9(pixels0, (__global uchar *)(src_addr + 8 * src_stride_y), (__global uchar *)(weights_addr + 8 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 0 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 3 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 3 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 4 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 4 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 5 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 5 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 6 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 6 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 7 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 7 * weights_stride_y));
+        CONVOLUTION1x9(pixels0, (__global DATA_TYPE *)(src_addr + 8 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 8 * weights_stride_y));
 #elif KERNEL_SIZE == 5
-        CONVOLUTION1x5(pixels0, (__global uchar *)src_addr, (__global uchar *)weights_addr);
-        CONVOLUTION1x5(pixels0, (__global uchar *)(src_addr + 1 * src_stride_y), (__global uchar *)(weights_addr + 1 * weights_stride_y));
-        CONVOLUTION1x5(pixels0, (__global uchar *)(src_addr + 2 * src_stride_y), (__global uchar *)(weights_addr + 2 * weights_stride_y));
-        CONVOLUTION1x5(pixels0, (__global uchar *)(src_addr + 3 * src_stride_y), (__global uchar *)(weights_addr + 3 * weights_stride_y));
-        CONVOLUTION1x5(pixels0, (__global uchar *)(src_addr + 4 * src_stride_y), (__global uchar *)(weights_addr + 4 * weights_stride_y));
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)src_addr, (__global DATA_TYPE *)weights_addr);
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y));
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y));
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 3 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 3 * weights_stride_y));
+        CONVOLUTION1x5(pixels0, (__global DATA_TYPE *)(src_addr + 4 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 4 * weights_stride_y));
 #elif KERNEL_SIZE == 3
-        CONVOLUTION1x3(pixels0, (__global uchar *)(src_addr + 0 * src_stride_y), (__global uchar *)(weights_addr + 0 * weights_stride_y));
-        CONVOLUTION1x3(pixels0, (__global uchar *)(src_addr + 1 * src_stride_y), (__global uchar *)(weights_addr + 1 * weights_stride_y));
-        CONVOLUTION1x3(pixels0, (__global uchar *)(src_addr + 2 * src_stride_y), (__global uchar *)(weights_addr + 2 * weights_stride_y));
+        CONVOLUTION1x3(pixels0, (__global DATA_TYPE *)(src_addr + 0 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_y));
+        CONVOLUTION1x3(pixels0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_y));
+        CONVOLUTION1x3(pixels0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_y), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_y));
 #elif KERNEL_SIZE == 1
-        int weight       = convert_int(*(__global uchar *)weights_addr);
-        int8 input_pixel = convert_int8(INPUT_PIXEL((__global uchar *)src_addr));
+        int weight       = convert_int(*(__global DATA_TYPE *)weights_addr);
+        int8 input_pixel = convert_int8(INPUT_PIXEL((__global DATA_TYPE *)src_addr));
         pixels0 += (input_pixel + input_offset) * ((int8)weight + weight_offset);
 #endif /* (KERNEL_SIZE == 1) || (KERNEL_SIZE == 3) || (KERNEL_SIZE == 5) */
 
@@ -299,6 +306,6 @@ __kernel void direct_convolution_quantized(
 #endif // OUTPUT_SHIFT < 0
     pixels0 = pixels0 + output_offset;
 
-    vstore8(convert_uchar8_sat(pixels0), 0, (__global uchar *)dst.ptr);
+    vstore8(CONVERT_SAT(pixels0, DATA_TYPE), 0, (__global DATA_TYPE *)dst.ptr);
 }
 #endif // defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)
