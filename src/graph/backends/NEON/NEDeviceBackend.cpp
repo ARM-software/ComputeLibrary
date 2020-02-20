@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,9 +122,8 @@ std::unique_ptr<ITensorHandle> NEDeviceBackend::create_tensor(const Tensor &tens
     // Create backend tensor handle
     TensorInfo info(tensor_desc.shape, 1, tensor_desc.data_type, tensor_desc.quant_info);
     info.set_data_layout(tensor_desc.layout);
-    auto backend_tensor_handle = support::cpp14::make_unique<NETensorHandle>(info);
 
-    return std::move(backend_tensor_handle);
+    return support::cpp14::make_unique<NETensorHandle>(info);
 }
 
 std::unique_ptr<ITensorHandle> NEDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent)

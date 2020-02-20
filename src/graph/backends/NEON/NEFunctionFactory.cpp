@@ -179,7 +179,7 @@ std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETa
                                << " Normalization info: " << norm_info.type()
                                << std::endl);
 
-    return std::move(func);
+    return RETURN_UNIQUE_PTR(func);
 }
 } // namespace detail
 

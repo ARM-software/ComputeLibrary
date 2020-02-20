@@ -158,7 +158,7 @@ std::unique_ptr<IFunction> create_detection_output_layer<CPPDetectionOutputLayer
     wrap_function->register_tensor(input2);
     wrap_function->register_tensor(output);
 
-    return std::move(wrap_function);
+    return RETURN_UNIQUE_PTR(wrap_function);
 }
 template <>
 std::unique_ptr<IFunction> create_detection_post_process_layer<CPPDetectionPostProcessLayer, CLTargetInfo>(DetectionPostProcessLayerNode &node)
@@ -214,7 +214,7 @@ std::unique_ptr<IFunction> create_detection_post_process_layer<CPPDetectionPostP
     wrap_function->register_tensor(output2);
     wrap_function->register_tensor(output3);
 
-    return std::move(wrap_function);
+    return RETURN_UNIQUE_PTR(wrap_function);
 }
 } // namespace detail
 

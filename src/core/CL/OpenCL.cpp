@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,14 @@
 
 namespace arm_compute
 {
+CLSymbols::CLSymbols() noexcept(false)
+    : _loaded(
+{
+    false, false
+})
+{
+}
+
 CLSymbols &CLSymbols::get()
 {
     static CLSymbols symbols;

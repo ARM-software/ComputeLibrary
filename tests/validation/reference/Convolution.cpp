@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ SimpleTensor<T> convolution(const SimpleTensor<uint8_t> &src, DataType output_da
                             const unsigned int height)
 {
     ARM_COMPUTE_ERROR_ON(scale == 0);
-    ARM_COMPUTE_ERROR_ON(scale >= std::numeric_limits<int32_t>::max());
+    ARM_COMPUTE_ERROR_ON(scale >= static_cast<unsigned int>(std::numeric_limits<int32_t>::max()));
 
     SimpleTensor<T>       dst(src.shape(), output_data_type);
     SimpleTensor<int32_t> sum(src.shape(), output_data_type);
