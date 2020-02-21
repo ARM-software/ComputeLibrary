@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,10 +48,10 @@ public:
     NEMinMaxLayerKernel(const NEMinMaxLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEMinMaxLayerKernel &operator=(const NEMinMaxLayerKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEMinMaxLayerKernel(NEMinMaxLayerKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEMinMaxLayerKernel &operator=(NEMinMaxLayerKernel &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMinMaxLayerKernel(NEMinMaxLayerKernel &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMinMaxLayerKernel &operator=(NEMinMaxLayerKernel &&) = delete;
     /** Default destructor */
     ~NEMinMaxLayerKernel() = default;
 
@@ -82,9 +82,9 @@ public:
 
 private:
     void update_min_max(float *out_ptr, float min, float max);
-    const ITensor *_input;
-    ITensor       *_output;
-    Mutex          _mtx;
+    const ITensor     *_input;
+    ITensor           *_output;
+    arm_compute::Mutex _mtx;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEMINMAXLAYERKERNEL_H */
