@@ -32,8 +32,8 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLDeconvolutionLayerUpsampleKernel::CLDeconvolutionLayerUpsampleKernel()
     : _input(nullptr), _output(nullptr), _info(), _data_layout(DataLayout::UNKNOWN)
 {
@@ -45,7 +45,7 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
 
@@ -82,7 +82,7 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTe
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    build_opts.add_option(("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size())));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("deconvolution_upsample", build_opts.options()));
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
@@ -156,3 +156,4 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
             ARM_COMPUTE_ERROR("Unsupported data layout");
     }
 }
+} // namespace arm_compute

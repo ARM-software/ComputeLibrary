@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,11 +44,14 @@ namespace test
 {
 namespace validation
 {
+namespace
+{
+constexpr AbsoluteTolerance<float> tolerance_quant(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+}
 TEST_SUITE(CL)
 TEST_SUITE(GEMMLowp)
 
 TEST_SUITE(MatrixMultiplyCore)
-
 using CLGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset(),
@@ -84,21 +87,33 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFixture, framework:
     validate(CLAccessor(_target), _reference);
 }
 
-using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
 TEST_SUITE(FusedOffsetOutput)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpFusedOffsetOutputDataset(),
+TEST_SUITE(QASYMM8)
+using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpFusedOffsetOutputUint8Dataset(),
                        framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_quant);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpFusedOffsetOutputDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputUint8Fixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMLowpFusedOffsetOutputUint8Dataset(),
                        framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_quant);
 }
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QASYMM8_SIGNED)
+using CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputInt8Fixture =
+    GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore, false, false, int8_t, int8_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFusedOffsetOutputInt8Fixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpFusedOffsetOutputInt8Dataset(),
+                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_quant);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // FusedOffsetOutput
 
 TEST_SUITE(Output3D)
@@ -211,9 +226,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpQuantizeDownInt32ToUint8ScaleFixture,
 }
 TEST_SUITE_END() // BoundedReLu
 TEST_SUITE_END() // QuantizeDownInt32ToUint8Scale
-
 TEST_SUITE(QuantizeDownInt32ToUint8ScaleByFixedPoint)
-
 const auto quantize_down_int32_to_uint8_scale_by_fixedpoint_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                     2)
                                                                     * framework::dataset::make("result_offset_after_shift", 2, 3) * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
@@ -221,12 +234,10 @@ const auto quantize_down_int32_to_uint8_scale_by_fixedpoint_cases = framework::d
 const auto quantize_down_int32_to_uint8_scale_by_fixedpoint_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
                                                                          2)
                                                                          * framework::dataset::make("result_offset_after_shift", 2, 3) * framework::dataset::make("min", 0, 2) * framework::dataset::make("max", 171, 174) * framework::dataset::make("addBias", { false, true });
-
 using CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture =
     GEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointValidationFixture<CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
-                                                                   quantize_down_int32_to_uint8_scale_by_fixedpoint_cases),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_by_fixedpoint_cases),
                shape, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max, add_bias)
 {
     TensorShape shape_bias(shape[0]);
@@ -297,6 +308,73 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedP
 }
 TEST_SUITE_END() // BoundedReLu
 TEST_SUITE_END() // QuantizeDownInt32ToUint8ScaleByFixedPoint
+TEST_SUITE(QuantizeDownInt32ToInt8ScaleByFixedPoint)
+const auto quantize_down_int32_to_int8_scale_by_fixedpoint_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1, 2)
+                                                                   * framework::dataset::make("result_offset_after_shift", 2, 3) * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+
+const auto quantize_down_int32_to_int8_scale_by_fixedpoint_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1, 2)
+                                                                        * framework::dataset::make("result_offset_after_shift", 2, 3) * framework::dataset::make("min", -128, -126) * framework::dataset::make("max", 110, 112) * framework::dataset::make("addBias", { false, true });
+using CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointFixture =
+    GEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointValidationFixture<CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint>;
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_int8_scale_by_fixedpoint_cases),
+               shape, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max, add_bias)
+{
+    TensorShape shape_bias(shape[0]);
+
+    // Create tensors
+    CLTensor in   = create_tensor<CLTensor>(shape, DataType::S32);
+    CLTensor bias = create_tensor<CLTensor>(shape_bias, DataType::S32);
+    CLTensor out  = create_tensor<CLTensor>(shape, DataType::QASYMM8_SIGNED);
+
+    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint output_stage;
+    output_stage.configure(&in, add_bias ? &bias : nullptr, &out, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
+
+    // Validate valid region input and output
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(in.info()->valid_region(), valid_region);
+    validate(out.info()->valid_region(), valid_region);
+
+    // Validate valid region bias
+    if(add_bias)
+    {
+        const ValidRegion valid_region_bias = shape_to_valid_region(shape_bias);
+        validate(bias.info()->valid_region(), valid_region_bias);
+    }
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 4).required_padding();
+    validate(in.info()->padding(), padding);
+    validate(out.info()->padding(), padding);
+
+    if(add_bias)
+    {
+        validate(bias.info()->padding(), padding);
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+                       quantize_down_int32_to_int8_scale_by_fixedpoint_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+TEST_SUITE(BoundedReLu)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+                       quantize_down_int32_to_int8_scale_by_fixedpoint_relu_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+TEST_SUITE_END() // BoundedReLu
+TEST_SUITE_END() // QuantizeDownInt32ToInt8ScaleByFixedPoint
 TEST_SUITE(QuantizeDownInt32ToInt16ScaleByFixedPoint)
 
 const auto quantize_down_int32_to_int16_scale_by_fixedpoint_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H__
-#define __ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H__
+#ifndef ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H
+#define ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -56,19 +56,20 @@ public:
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
-     *   - (U8,U8)              -> U8
-     *   - (U8,U8)              -> S16
-     *   - (QASYMM8, QASYMM8)   -> QASYMM8
-     *   - (S16,U8)             -> S16
-     *   - (U8,S16)             -> S16
-     *   - (S16,S16)            -> S16
-     *   - (F16,F16)            -> F16
-     *   - (F32,F32)            -> F32
+     *   - (U8,U8)                          -> U8
+     *   - (U8,U8)                          -> S16
+     *   - (QASYMM8, QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (S16,U8)                         -> S16
+     *   - (U8,S16)                         -> S16
+     *   - (S16,S16)                        -> S16
+     *   - (F16,F16)                        -> F16
+     *   - (F32,F32)                        -> F32
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/S16/F16/F32.
-     * @param[in]  policy Overflow policy. Convert policy cannot be WRAP if datatype is QASYMM8
+     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32.
+     * @param[in]  policy Overflow policy. Convert policy cannot be WRAP if datatype is QASYMM8/QASYMM8_SIGNED
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticSubtractionKernel
@@ -91,9 +92,9 @@ public:
 private:
     /** Common signature for all the specialised sub functions
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/S16/F16/F32.
+     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32.
      * @param[in]  window Region on which to execute the kernel.
      */
     using SubFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
@@ -104,4 +105,4 @@ private:
     ITensor       *_output;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H__ */
+#endif /* ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H */

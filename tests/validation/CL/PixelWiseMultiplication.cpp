@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -139,8 +139,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<uint8
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPixelWiseMultiplicationQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                        framework::dataset::make("Scale", { 1.f, 2.f })),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                        framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
@@ -151,7 +154,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPixelWiseMultiplicationQuantizedFixture<uint8
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // QASYMM8_SIGNED
+
 TEST_SUITE(QSYMM16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        framework::dataset::make("DataType", DataType::QSYMM16)),

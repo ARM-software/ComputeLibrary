@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTSKERNEL_H__
-#define __ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTSKERNEL_H__
+#ifndef ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTSKERNEL_H
+#define ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTSKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface to convert the 2D Fully Connected weights from NCHW to NHWC or vice versa.
@@ -59,7 +60,7 @@ public:
     ~NEConvertFullyConnectedWeightsKernel() = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: All.
      * @param[out] output               The converted weights tensor. Shape and Data Type: Same as @p input.
      * @param[in]  original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in]  data_layout          The data layout the weights have been trained in.
@@ -67,7 +68,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const TensorShape &original_input_shape, DataLayout data_layout);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvertFullyConnectedWeightsKernel
      *
-     * @param[in] input                Source weights tensor info to convert. Must be 2 dimensional. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input                Source weights tensor info to convert. Must be 2 dimensional. Data types supported: All.
      * @param[in] output               The converted weights tensor info. Shape and Data Type: Same as @p input.
      * @param[in] original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in] data_layout          The data layout the weights have been trained in.
@@ -91,4 +92,4 @@ private:
     unsigned int   _factor2; /*  equals to the number of elements per original input plane if @p data_layout == NHWC; its number of channels otherwise */
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTSKERNEL_H__ */
+#endif /*ARM_COMPUTE_NECONVERTFULLYCONNECTEDWEIGHTSKERNEL_H */

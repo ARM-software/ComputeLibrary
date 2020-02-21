@@ -17,7 +17,7 @@ var searchData=
   ['min_5fdist',['min_dist',['../structarm__compute_1_1test_1_1validation_1_1_harris_corners_parameters.xhtml#aa464047f090200f942a1e47c29fff783',1,'arm_compute::test::validation::HarrisCornersParameters']]],
   ['min_5feig',['min_eig',['../structarm__compute_1_1_c_l_coefficient_table.xhtml#a08ad73a840663cb2f4a6e040e507cbb7',1,'arm_compute::CLCoefficientTable']]],
   ['min_5floc',['min_loc',['../structarm__compute_1_1_min_max_location_values.xhtml#ab589f4342adb62f0b4605785e4812750',1,'arm_compute::MinMaxLocationValues']]],
-  ['mode',['mode',['../structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml#aadbc5003f5cc399930b16ddb89b16cdc',1,'arm_compute::test::framework::TestInfo::mode()'],['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#a816aa7a286e811e2cdeaf06d1cee5876',1,'arm_compute::utils::ConvolutionParams::mode()']]],
+  ['mode',['mode',['../structarm__compute_1_1test_1_1framework_1_1_framework_config.xhtml#aadbc5003f5cc399930b16ddb89b16cdc',1,'arm_compute::test::framework::FrameworkConfig::mode()'],['../structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml#aadbc5003f5cc399930b16ddb89b16cdc',1,'arm_compute::test::framework::TestInfo::mode()'],['../structarm__compute_1_1utils_1_1_convolution_params.xhtml#a816aa7a286e811e2cdeaf06d1cee5876',1,'arm_compute::utils::ConvolutionParams::mode()']]],
   ['mp_5fcount',['mp_count',['../_mali_counter_8cpp.xhtml#a758363070b7d50831c3077176556deef',1,'MaliCounter.cpp']]],
   ['mvbg_5finfo',['mvbg_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#ab97b993400500dac0f4902018aac7b43',1,'arm_compute::test::validation']]]
 ];

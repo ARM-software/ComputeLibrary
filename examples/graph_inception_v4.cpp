@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,9 +55,6 @@ public:
             return false;
         }
 
-        // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-
         // Print parameter values
         std::cout << common_params << std::endl;
 
@@ -68,8 +65,9 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>();
 
         // Create input descriptor
-        const TensorShape tensor_shape     = permute_shape(TensorShape(299U, 299U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+        const auto        operation_layout = common_params.data_layout;
+        const TensorShape tensor_shape     = permute_shape(TensorShape(299U, 299U, 3U, 1U), DataLayout::NCHW, operation_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
 
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
@@ -138,7 +136,7 @@ public:
         graph << get_inceptionC_block(data_path, weights_layout, "Mixed_7b").set_name("Mixed_7b/concat");
         graph << get_inceptionC_block(data_path, weights_layout, "Mixed_7c").set_name("Mixed_7c/concat");
         graph << get_inceptionC_block(data_path, weights_layout, "Mixed_7d").set_name("Mixed_7d/concat");
-        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("Logits/AvgPool_1a/AvgPool")
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, operation_layout)).set_name("Logits/AvgPool_1a/AvgPool")
               << FlattenLayer().set_name("Logits/Flatten")
               << FullyConnectedLayer(
                   1001U,
@@ -150,10 +148,11 @@ public:
 
         // Finalize graph
         GraphConfig config;
-        config.num_threads = common_params.threads;
-        config.use_tuner   = common_params.enable_tuner;
-        config.tuner_mode  = common_params.tuner_mode;
-        config.tuner_file  = common_params.tuner_file;
+        config.num_threads      = common_params.threads;
+        config.use_tuner        = common_params.enable_tuner;
+        config.tuner_mode       = common_params.tuner_mode;
+        config.tuner_file       = common_params.tuner_file;
+        config.convert_to_uint8 = (common_params.data_type == DataType::QASYMM8);
 
         // Load the precompiled kernels from a file into the kernel library, in this way the next time they are needed
         // compilation won't be required.
@@ -190,7 +189,9 @@ private:
         std::string total_path = "/cnn_data/inceptionv4_model/Mixed_3a_";
 
         SubStream i_a(graph);
-        i_a << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), true)).set_name("Mixed_3a/Branch_0/MaxPool_0a_3x3/MaxPool");
+        i_a << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, common_params.data_layout, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL),
+                                             true))
+            .set_name("Mixed_3a/Branch_0/MaxPool_0a_3x3/MaxPool");
 
         SubStream i_b(graph);
         i_b << ConvolutionLayer(3U, 3U, 96U,
@@ -303,7 +304,9 @@ private:
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Mixed_5a/Branch_0/Conv2d_1a_3x3/Relu");
 
         SubStream i_b(graph);
-        i_b << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), true)).set_name("Mixed_5a/Branch_1/MaxPool_1a_3x3/MaxPool");
+        i_b << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, common_params.data_layout, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL),
+                                             true))
+            .set_name("Mixed_5a/Branch_1/MaxPool_1a_3x3/MaxPool");
 
         return ConcatLayer(std::move(i_a), std::move(i_b));
     }
@@ -385,7 +388,9 @@ private:
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_2/Conv2d_0c_3x3/Relu");
 
         SubStream i_d(graph);
-        i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), true)).set_name(param_path + "/Branch_3/AvgPool_0a_3x3/AvgPool")
+        i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, common_params.data_layout, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                             true))
+            .set_name(param_path + "/Branch_3/AvgPool_0a_3x3/AvgPool")
             << ConvolutionLayer(1U, 1U, 96U,
                                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_weights.npy", weights_layout),
                                 std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr), PadStrideInfo(1, 1, 0, 0))
@@ -454,7 +459,9 @@ private:
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Mixed_6a/Branch_1/Conv2d_1a_3x3/Relu");
 
         SubStream i_c(graph);
-        i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), true)).set_name("Mixed_6a/Branch_2/MaxPool_1a_3x3/MaxPool");
+        i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, common_params.data_layout, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL),
+                                             true))
+            .set_name("Mixed_6a/Branch_2/MaxPool_1a_3x3/MaxPool");
 
         return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c));
     }
@@ -569,7 +576,9 @@ private:
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_2/Conv2d_0e_1x7/Relu");
 
         SubStream i_d(graph);
-        i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), true)).set_name(param_path + "/Branch_3/AvgPool_0a_3x3/AvgPool")
+        i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, common_params.data_layout, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                             true))
+            .set_name(param_path + "/Branch_3/AvgPool_0a_3x3/AvgPool")
             << ConvolutionLayer(1U, 1U, 128U,
                                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_weights.npy", weights_layout),
                                 std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr), PadStrideInfo(1, 1, 0, 0))
@@ -660,7 +669,9 @@ private:
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Mixed_7a/Branch_1/Conv2d_1a_3x3/Relu");
 
         SubStream i_c(graph);
-        i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), true)).set_name("Mixed_7a/Branch_2/MaxPool_1a_3x3/MaxPool");
+        i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, common_params.data_layout, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL),
+                                             true))
+            .set_name("Mixed_7a/Branch_2/MaxPool_1a_3x3/MaxPool");
 
         return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c));
     }
@@ -813,7 +824,9 @@ private:
         i_c << ConcatLayer(std::move(i_c1), std::move(i_c2)).set_name(param_path + "/Branch_2/concat");
 
         SubStream i_d(graph);
-        i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), true)).set_name(param_path + "/Branch_3/AvgPool_0a_3x3/AvgPool")
+        i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, common_params.data_layout, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL),
+                                             true))
+            .set_name(param_path + "/Branch_3/AvgPool_0a_3x3/AvgPool")
             << ConvolutionLayer(1U, 1U, 256U,
                                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_weights.npy", weights_layout),
                                 std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr), PadStrideInfo(1, 1, 0, 0))

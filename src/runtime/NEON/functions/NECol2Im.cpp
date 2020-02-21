@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,8 @@
 #include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NECol2Im::configure(const ITensor *input, ITensor *output, const Size2D &convolved_dims)
 {
     auto k = arm_compute::support::cpp14::make_unique<NECol2ImKernel>();
@@ -39,3 +39,4 @@ Status NECol2Im::validate(const ITensorInfo *input, const ITensorInfo *output, c
 {
     return NECol2ImKernel::validate(input, output, convolved_dims);
 }
+} // namespace arm_compute

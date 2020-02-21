@@ -128,8 +128,9 @@ void validate_configuration(TensorShape shape, DataType dt1, DataType dt2, float
 }
 } // namespace
 
-using NEPixelWiseMultiplicationQASYMM8Fixture = PixelWiseMultiplicationValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t>;
-using NEPixelWiseMultiplicationQSYMM16Fixture = PixelWiseMultiplicationValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, int16_t, int16_t>;
+using NEPixelWiseMultiplicationQASYMM8Fixture       = PixelWiseMultiplicationValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t>;
+using NEPixelWiseMultiplicationQASYMM8SignedFixture = PixelWiseMultiplicationValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, int8_t, int8_t>;
+using NEPixelWiseMultiplicationQSYMM16Fixture       = PixelWiseMultiplicationValidationQuantizedFixture<Tensor, Accessor, NEPixelWiseMultiplication, int16_t, int16_t>;
 template <typename T>
 using NEPixelWiseMultiplicationToU8Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, uint8_t>;
 template <typename T>
@@ -146,15 +147,20 @@ TEST_SUITE(PixelWiseMultiplication)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid scale
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching data type
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8), // Mismatching data type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //1 Ok
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //2 Ok
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),                 //3 Window shrink
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //4 Invalid scale
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),                 //5 Invalid data type combination
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),                //6 Mismatching shapes
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),                //7 Mismatching data type
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),            //8 Mismatching data type
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),     //9 Ok
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),     //10 Mismatching data type
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),            //11 Mismatching data type
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),            //12 Ok
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),     //13 Quantized cannot do WRAP
                                                       }),
                framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
@@ -164,6 +170,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                      })),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
@@ -173,18 +184,65 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                      })),
-               framework::dataset::make("Scale",{  scale_unity, scale_unity, scale_unity, -1.f, scale_unity, scale_unity, scale_unity})),
-               framework::dataset::make("Expected", { true, true, false, false, false, false, false, false })),
-               input1_info, input2_info, output_info, scale, expected)
+               framework::dataset::make("Scale",{  scale_unity,
+                                                   scale_unity,
+                                                   scale_unity,
+                                                   -1.f,
+                                                   scale_unity,
+                                                   scale_unity,
+                                                   scale_unity,
+                                                   scale_unity,
+                                                   scale_unity,
+                                                   scale_unity,
+                                                   scale_unity,
+                                                   scale_unity,
+                                                   scale_unity})),
+               framework::dataset::make("OverflowPolicy",{
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::SATURATE,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::WRAP,
+                                                   ConvertPolicy::SATURATE,
+                                                   ConvertPolicy::WRAP,
+                                        })),
+
+               framework::dataset::make("Expected", { true, true, false, false, false, false, false, false, true , false, false, true, false })),
+               input1_info, input2_info, output_info, scale, policy, expected)
 {
-    bool has_error = bool(NEPixelWiseMultiplication::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), scale, ConvertPolicy::WRAP, RoundingPolicy::TO_ZERO));
+    bool has_error = bool(NEPixelWiseMultiplication::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), scale, policy, RoundingPolicy::TO_ZERO));
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
 
 TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8_SIGNED)
+TEST_SUITE(Scale255)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8SignedFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       framework::dataset::make("Scale", { scale_unity })),
+                       PixelWiseMultiplicationPolicySTZDataset),
+                       PixelWiseMultiplicationQASYMM8QuantDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // Scale255
+TEST_SUITE_END() // QASYMM8
+
 TEST_SUITE(QASYMM8)
 TEST_SUITE(Scale255)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQASYMM8Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_IMEMORY_H__
-#define __ARM_COMPUTE_IMEMORY_H__
+#ifndef ARM_COMPUTE_IMEMORY_H
+#define ARM_COMPUTE_IMEMORY_H
 
 #include "arm_compute/runtime/IMemoryRegion.h"
 
@@ -60,4 +60,4 @@ public:
     virtual void set_owned_region(std::unique_ptr<IMemoryRegion> region) = 0;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_IMEMORY_H__ */
+#endif /* ARM_COMPUTE_IMEMORY_H */

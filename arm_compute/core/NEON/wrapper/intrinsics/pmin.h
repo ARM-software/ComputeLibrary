@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_PMIN_H__
-#define __ARM_COMPUTE_WRAPPER_PMIN_H__
+#ifndef ARM_COMPUTE_WRAPPER_PMIN_H
+#define ARM_COMPUTE_WRAPPER_PMIN_H
 
 #include <arm_neon.h>
 
@@ -50,4 +50,4 @@ VPMIN_IMPL(float16_t, float16x4_t, vpmin, f16)
 #undef VPMIN_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_PMIN_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_PMIN_H */

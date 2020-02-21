@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -138,7 +138,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 : <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">CLSubTensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">CLTensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">GCTensorHandle</a>
-, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">NESubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a5d9a543899a9f7c93a950a1d080f2437">NESubTensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f">NETensorHandle</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_edge.xhtml#aff6b38772acc09675f4f64e510e31055">Edge</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a91bccd842a1caad3149523a05f150ee6">Graph</a>
@@ -291,6 +291,9 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="struct_internal_keypoint.xhtml#a08361efa212a9ab04a5965766ea942d5">InternalKeypoint</a>
 , <a class="el" href="struct_keypoint.xhtml#a7edfed755585d6095522904dbe0ec4d8">Keypoint</a>
 </li>
+<li>transform()
+: <a class="el" href="classarm__compute_1_1graph_1_1_print_layer_node.xhtml#a1bbe4fd0d0366aac6e830baf2153ee89">PrintLayerNode</a>
+</li>
 <li>Transform()
 : <a class="el" href="struct_transpose_interleave_common.xhtml#a01a4063744a2a3facb06389427638d2a">TransposeInterleaveCommon&lt; IntBy, TIn, TOut &gt;</a>
 </li>
@@ -355,6 +358,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_const_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">ConstNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">ConvolutionLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_deconvolution_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DeconvolutionLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">DepthConcatSubTensorMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DepthwiseConvolutionLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_dequantization_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DequantizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">DetectionOutputLayerNode</a>
@@ -366,14 +370,21 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">FusedConvolutionBatchNormalizationNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_fused_depthwise_convolution_batch_normalization_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">FusedDepthwiseConvolutionBatchNormalizationNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_generate_proposals_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">GenerateProposalsLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">GroupedConvolutionMutator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a827f1f617c0eab4347324fa3b7256131">IGraphMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a6b2d83e561886647467f86c20ce39bec">INode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">InPlaceOperationMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_input_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">InputNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">NodeExecutionMethodMutator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">NodeFusionMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_normalization_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">NormalizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_normalize_planar_y_u_v_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">NormalizePlanarYUVLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_output_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">OutputNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_pad_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">PadLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_permute_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">PermuteLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">PoolingLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_p_relu_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">PReluLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_print_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">PrintLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">PriorBoxLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_quantization_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">QuantizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_reorg_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">ReorgLayerNode</a>
@@ -383,7 +394,9 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_slice_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">SliceLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">SoftmaxLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">SplitLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">SplitLayerSubTensorMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_stack_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">StackLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_synthetic_data_type_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">SyntheticDataTypeMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_upsample_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">UpsampleLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_y_o_l_o_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">YOLOLayerNode</a>
 , <a class="el" href="classarm__compute_1_1_i_lut.xhtml#aa1917b40b57ce0a0f1c69722b46f3f46">ILut</a>
@@ -428,7 +441,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 22 2020 18:08:02 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

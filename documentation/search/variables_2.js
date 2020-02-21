@@ -7,7 +7,7 @@ var searchData=
   ['batch_5fnorm_5fepsilon',['batch_norm_epsilon',['../graph__inception__resnet__v1_8cpp.xhtml#ae89536b490f3ad0e9070bd2dd0a6df5d',1,'graph_inception_resnet_v1.cpp']]],
   ['benchmark_5fresult_5fjson_5fextension',['BENCHMARK_RESULT_JSON_EXTENSION',['../namespace_gemm_tuner.xhtml#a2f8b815490a02d3feccad7c5472ba4e2',1,'GemmTuner']]],
   ['benchmarkresultcsvrow',['BenchmarkResultCSVRow',['../namespace_gemm_tuner.xhtml#a547e317a8765ca62ed005b0bf03fec15',1,'GemmTuner']]],
-  ['beta',['beta',['../structarm__compute_1_1_softmax_kernel_info.xhtml#aa773d9a6c0ccefaa0fc9ab66fec68ec1',1,'arm_compute::SoftmaxKernelInfo']]],
+  ['beta',['beta',['../structarm__compute_1_1_softmax_kernel_info.xhtml#aa773d9a6c0ccefaa0fc9ab66fec68ec1',1,'arm_compute::SoftmaxKernelInfo::beta()'],['../structarm__compute_1_1_instance_normalization_layer_kernel_info.xhtml#aa773d9a6c0ccefaa0fc9ab66fec68ec1',1,'arm_compute::InstanceNormalizationLayerKernelInfo::beta()']]],
   ['beta_5finfo',['beta_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a4117a6db63ae46d644756cbfff7fe74b',1,'arm_compute::test::validation']]],
   ['bias',['bias',['../structarm__compute_1_1utils_1_1_common_params.xhtml#a2cf08508c0b5892468831a326739d95b',1,'arm_compute::utils::CommonParams::bias()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a3a77be8aebd8e00522b32061d46ccdbd',1,'arm_compute::test::validation::bias()']]],
   ['bias_5finfo',['bias_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a43c38c81ff3058e36ceb9904a944d1ea',1,'arm_compute::test::validation']]],
@@ -17,5 +17,6 @@ var searchData=
   ['border_5fmode',['border_mode',['../namespacearm__compute_1_1test_1_1validation.xhtml#a5471e46933e7a9c4709972d91fc4ea65',1,'arm_compute::test::validation']]],
   ['bordersizesdataset',['BorderSizesDataset',['../namespacearm__compute_1_1test_1_1validation.xhtml#a3a0ac966aec5b787bd5b1a5218b97401',1,'arm_compute::test::validation']]],
   ['bottom',['bottom',['../structarm__compute_1_1_border_size.xhtml#a802ffcf1b49237efe5be8a314d3f3869',1,'arm_compute::BorderSize']]],
-  ['broadcast_5fbias',['broadcast_bias',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#aab96468aedb59e7a2a19c6eea2f4b055',1,'arm_compute::GEMMKernelInfo']]]
+  ['broadcast_5fbias',['broadcast_bias',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#aab96468aedb59e7a2a19c6eea2f4b055',1,'arm_compute::GEMMKernelInfo']]],
+  ['build_5foptions',['build_options',['../_c_l_im2_col_kernel_8cpp.xhtml#a3e76c95cfc49454dbfff42e02d25ccb8',1,'CLIm2ColKernel.cpp']]]
 ];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
                           const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, input_info, weights_info);
-    const DataLayout   data_layout = input_info->data_layout();
+    const DataLayout data_layout = input_info->data_layout();
 
     const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -50,7 +50,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     ARM_COMPUTE_RETURN_ERROR_ON(weights_info->dimension(idx_w) != deconv_info.stride().first);
     ARM_COMPUTE_RETURN_ERROR_ON(weights_info->dimension(idx_h) != deconv_info.stride().second);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S32);
     if(!is_qasymm)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, input_info, weights_info);
@@ -76,7 +76,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     if(output->total_size() != 0)
     {
         const PadStrideInfo stride_info(deconv_info.stride().first, deconv_info.stride().second);
-        auto out_dims = deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h), weights_info->dimension(idx_w), weights_info->dimension(idx_h), stride_info);
+        auto                out_dims = deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h), weights_info->dimension(idx_w), weights_info->dimension(idx_h), stride_info);
 
         const TensorShape output_shape = misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input_info, *weights_info);
 
@@ -89,9 +89,9 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    const DataLayout data_layout = input_info->data_layout();
-    const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const DataLayout    data_layout = input_info->data_layout();
+    const size_t        idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t        idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const PadStrideInfo stride_info(deconv_info.stride().first, deconv_info.stride().second);
 
     auto out_dims = deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h), weights_info->dimension(idx_w), weights_info->dimension(idx_h), stride_info);

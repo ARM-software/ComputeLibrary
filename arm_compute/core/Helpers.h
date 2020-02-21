@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_HELPERS_H__
-#define __ARM_COMPUTE_HELPERS_H__
+#ifndef ARM_COMPUTE_HELPERS_H
+#define ARM_COMPUTE_HELPERS_H
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
@@ -810,4 +810,4 @@ inline unsigned int get_next_power_two(unsigned int x)
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"
-#endif /*__ARM_COMPUTE_HELPERS_H__ */
+#endif /*ARM_COMPUTE_HELPERS_H */

@@ -8,6 +8,7 @@ var namespacearm__compute_1_1test_1_1framework =
     [ "FileNotFound", "classarm__compute_1_1test_1_1framework_1_1_file_not_found.xhtml", "classarm__compute_1_1test_1_1framework_1_1_file_not_found" ],
     [ "Fixture", "classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml", "classarm__compute_1_1test_1_1framework_1_1_fixture" ],
     [ "Framework", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml", "classarm__compute_1_1test_1_1framework_1_1_framework" ],
+    [ "FrameworkConfig", "structarm__compute_1_1test_1_1framework_1_1_framework_config.xhtml", "structarm__compute_1_1test_1_1framework_1_1_framework_config" ],
     [ "Instrument", "classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml", "classarm__compute_1_1test_1_1framework_1_1_instrument" ],
     [ "InstrumentsInfo", "structarm__compute_1_1test_1_1framework_1_1_instruments_info.xhtml", "structarm__compute_1_1test_1_1framework_1_1_instruments_info" ],
     [ "InstrumentsStats", "classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml", "classarm__compute_1_1test_1_1framework_1_1_instruments_stats" ],

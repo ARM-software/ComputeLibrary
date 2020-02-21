@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,8 @@
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NETranspose::configure(const ITensor *input, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NETransposeKernel>();
@@ -41,3 +41,4 @@ Status NETranspose::validate(const ITensorInfo *input, const ITensorInfo *output
 {
     return NETransposeKernel::validate(input, output);
 }
+} // namespace arm_compute

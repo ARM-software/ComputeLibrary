@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__
-#define __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__
+#ifndef ARM_COMPUTE_TEST_REDUCTION_OPERATION_H
+#define ARM_COMPUTE_TEST_REDUCTION_OPERATION_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -41,4 +41,4 @@ SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorSha
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__ */
+#endif /* ARM_COMPUTE_TEST_REDUCTION_OPERATION_H */

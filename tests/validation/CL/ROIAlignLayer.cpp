@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,7 @@ constexpr RelativeTolerance<float> relative_tolerance_f16(0.01f);
 constexpr AbsoluteTolerance<float> absolute_tolerance_f16(0.001f);
 
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1);
 } // namespace
 
 TEST_SUITE(CL)
@@ -103,12 +104,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-template <typename T>
-using CLROIAlignLayerFixture = ROIAlignLayerFixture<CLTensor, CLAccessor, CLROIAlignLayer, T>;
+using CLROIAlignLayerFloatFixture = ROIAlignLayerFixture<CLTensor, CLAccessor, CLROIAlignLayer, float, float>;
+using CLROIAlignLayerHalfFixture  = ROIAlignLayerFixture<CLTensor, CLAccessor, CLROIAlignLayer, half, half>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerFixture<float>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerFloatFixture, framework::DatasetMode::ALL,
                        combine(combine(datasets::SmallROIDataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -118,7 +119,7 @@ FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerFixture<float>, framework::DatasetM
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerFixture<half>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerHalfFixture, framework::DatasetMode::ALL,
                        combine(combine(datasets::SmallROIDataset(),
                                        framework::dataset::make("DataType", { DataType::F16 })),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -130,7 +131,7 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
 template <typename T>
-using CLROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<CLTensor, CLAccessor, CLROIAlignLayer, T>;
+using CLROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<CLTensor, CLAccessor, CLROIAlignLayer, T, uint16_t>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -145,6 +146,18 @@ FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerQuantizedFixture<uint8_t>, framewor
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(Small, CLROIAlignLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(datasets::SmallROIDataset(),
+                                                       framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 65) })),
+                               framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 20) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // RoiAlign

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSKERNEL_H__
-#define __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSKERNEL_H__
+#ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSKERNEL_H
+#define ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -47,7 +47,7 @@ public:
 
     /** Initialize the function's source and destination.
      *
-     * @param[in]  input  The input tensor of dimension [IFM, W, H]. Data types supported: QASYMM8. Data layouts supported: NHWC
+     * @param[in]  input  The input tensor of dimension [IFM, W, H]. Data types supported: All. Data layouts supported: NHWC
      * @param[out] output The output tensor of dimension [W*H*C0, ceil(IFM/C0)]. C0 is the number of channels read by each thread. Data types supported: same as @p weights.
      * @param[in]  info   Depthwise convolution information to reshape the input tensor.
      */
@@ -55,7 +55,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
      *
-     * @param[in] input  The input tensor info of dimension [IFM, W, H]. Data types supported: QASYMM8. Data layouts supported: NHWC
+     * @param[in] input  The input tensor info of dimension [IFM, W, H]. Data types supported: All. Data layouts supported: NHWC
      * @param[in] output The output tensor info of dimension [W*H*C0, ceil(IFM/C0)]. C0 is the number of channels read by each thread. Data types supported: same as @p weights.
      * @param[in] info   Depthwise convolution information to reshape the input tensor.
      *
@@ -74,4 +74,4 @@ private:
     void configure_generic(const DepthwiseConvolutionReshapeInfo &info);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSKERNEL_H */

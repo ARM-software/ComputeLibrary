@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPP_VALIDATE_H__
-#define __ARM_COMPUTE_CPP_VALIDATE_H__
+#ifndef ARM_COMPUTE_CPP_VALIDATE_H
+#define ARM_COMPUTE_CPP_VALIDATE_H
 
 #include "arm_compute/core/Validate.h"
 
@@ -37,15 +37,15 @@ namespace arm_compute
  *
  * @return Status
  */
-inline arm_compute::Status error_on_unsupported_cpu_fp16(const char *function, const char *file, const int line,
-                                                         const ITensorInfo *tensor_info)
+inline Status error_on_unsupported_cpu_fp16(const char *function, const char *file, const int line,
+                                            const ITensorInfo *tensor_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
 #ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor_info->data_type() == DataType::F16,
                                         function, file, line, "This CPU architecture does not support F16 data type, you need v8.2 or above");
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    return arm_compute::Status {};
+    return Status {};
 }
 
 /** Return an error if the data type of the passed tensor is FP16 and FP16 support is not compiled in.
@@ -57,12 +57,12 @@ inline arm_compute::Status error_on_unsupported_cpu_fp16(const char *function, c
  *
  * @return Status
  */
-inline arm_compute::Status error_on_unsupported_cpu_fp16(const char *function, const char *file, const int line,
-                                                         const ITensor *tensor)
+inline Status error_on_unsupported_cpu_fp16(const char *function, const char *file, const int line,
+                                            const ITensor *tensor)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_cpu_fp16(function, file, line, tensor->info()));
-    return arm_compute::Status{};
+    return Status{};
 }
 
 #define ARM_COMPUTE_ERROR_ON_CPU_F16_UNSUPPORTED(tensor) \
@@ -71,4 +71,4 @@ inline arm_compute::Status error_on_unsupported_cpu_fp16(const char *function, c
 #define ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(tensor) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_cpu_fp16(__func__, __FILE__, __LINE__, tensor))
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CPP_VALIDATE_H__ */
+#endif /* ARM_COMPUTE_CPP_VALIDATE_H */

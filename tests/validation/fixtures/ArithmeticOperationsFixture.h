@@ -182,6 +182,20 @@ public:
     }
 };
 
+template <typename TensorType, typename AccessorType, typename FunctionType>
+class ArithmeticSubtractionQuantSignedValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, qasymm8_signed_t>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
+               QuantizationInfo in1_qua_info, QuantizationInfo in2_qua_info, QuantizationInfo out_qua_info)
+    {
+        ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, qasymm8_signed_t>::setup(reference::ArithmeticOperation::SUB, shape, shape,
+                                                                                                           data_type0, data_type1, output_data_type, convert_policy,
+                                                                                                           in1_qua_info, in2_qua_info, out_qua_info);
+    }
+};
+
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ArithmeticSubtractionValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {

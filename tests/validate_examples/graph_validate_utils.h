@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __GRAPH_VALIDATE_UTILS_H__
-#define __GRAPH_VALIDATE_UTILS_H__
+#ifndef GRAPH_VALIDATE_UTILS_H
+#define GRAPH_VALIDATE_UTILS_H
 
 #include "arm_compute/graph.h"
 
@@ -259,7 +259,6 @@ public:
         absolute_tolerance->set_help("Absolute tolerance used for verification");
         relative_tolerance->set_help("Absolute tolerance used for verification");
         tolerance_number->set_help("Absolute tolerance used for verification");
-        ;
     }
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -694,4 +693,4 @@ public:
 
 } // graph_validate_utils
 } // arm_compute
-#endif //__GRAPH_VALIDATE_UTILS_H__
+#endif //GRAPH_VALIDATE_UTILS_H

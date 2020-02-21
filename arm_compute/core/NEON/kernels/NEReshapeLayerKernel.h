@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NERESHAPELAYERKERNEL_H__
-#define __ARM_COMPUTE_NERESHAPELAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NERESHAPELAYERKERNEL_H
+#define ARM_COMPUTE_NERESHAPELAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INESimpleKernel.h"
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the kernel to perform tensor reshaping */
@@ -40,14 +41,14 @@ public:
     }
     /** Set the input and output of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: U8/S8/U16/S16/QASYMM8/U32/S32/F16/F32
+     * @param[in]  input  Source tensor. Data type supported: All
      * @param[out] output Destination tensor. Data type supported: Same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReshapeLayerKernel
      *
-     * @param[in] input  Source tensor info. Data type supported: U8/S8/U16/S16/QASYMM8/U32/S32/F16/F32
+     * @param[in] input  Source tensor info. Data type supported: All
      * @param[in] output Destination tensor info. Data type supported: Same as @p input
      *
      * @return a status
@@ -58,4 +59,4 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NERESHAPELAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_NERESHAPELAYERKERNEL_H */

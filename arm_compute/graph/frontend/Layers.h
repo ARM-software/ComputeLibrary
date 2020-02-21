@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_LAYERS_H__
-#define __ARM_COMPUTE_GRAPH_LAYERS_H__
+#ifndef ARM_COMPUTE_GRAPH_LAYERS_H
+#define ARM_COMPUTE_GRAPH_LAYERS_H
 
 #include "arm_compute/graph/GraphBuilder.h"
 #include "arm_compute/graph/Types.h"
@@ -902,6 +902,91 @@ private:
     PoolingLayerInfo _pool_info;
 };
 
+/** PRelu Layer */
+class PReluLayer final : public ILayer
+{
+public:
+    /** Construct an PRelu operation layer
+     *
+     * @param[in] sub_stream0 First graph sub-stream
+     * @param[in] sub_stream1 First graph sub-stream
+     */
+    PReluLayer(SubStream &&sub_stream0, SubStream &&sub_stream1)
+        : _ss0(std::move(sub_stream0)), _ss1(std::move(sub_stream1))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { _ss0.tail_node(), 0 };
+        NodeIdxPair alpha         = { _ss1.tail_node(), 0 };
+
+        return GraphBuilder::add_prelu_node(s.graph(), common_params, input, alpha);
+    }
+
+private:
+    SubStream _ss0;
+    SubStream _ss1;
+};
+
+/** Print Layer */
+class PrintLayer final : public ILayer
+{
+public:
+    /** Construct a print layer.
+     *
+     * Example usage to locally dequantize and print a tensor:
+     *
+     * Tensor *output = new Tensor();
+     * const auto transform = [output](ITensor *input)
+     * {
+     *     output->allocator()->init(*input->info());
+     *     output->info()->set_data_type(DataType::F32);
+     *     output->allocator()->allocate();
+     *
+     *     Window win;
+     *     win.use_tensor_dimensions(input->info()->tensor_shape());
+     *     Iterator in(input, win);
+     *     Iterator out(output, win);
+     *     execute_window_loop(win, [&](const Coordinates &)
+     *     {
+     *         *(reinterpret_cast<float *>(out.ptr())) = dequantize_qasymm8(*in.ptr(), input->info()->quantization_info().uniform());
+     *     }, in, out);
+     *
+     *     return output;
+     * };
+     *
+     * graph << InputLayer(input_descriptor.set_quantization_info(in_quant_info), get_input_accessor(common_params, nullptr, false))
+     *       << ...
+     *       << \\ CNN Layers
+     *       << ...
+     *       << PrintLayer(std::cout, IOFormatInfo(), transform)
+     *       << ...
+     *       << OutputLayer(get_output_accessor(common_params, 5));
+     *
+     * @param[in] stream      Output stream.
+     * @param[in] format_info (Optional) Format info.
+     * @param[in] transform   (Optional) Input transform function.
+     */
+    PrintLayer(std::ostream &stream, const IOFormatInfo &format_info = IOFormatInfo(), const std::function<ITensor *(ITensor *)> transform = nullptr)
+        : _stream(stream), _format_info(format_info), _transform(transform)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_print_node(s.graph(), common_params, input, _stream, _format_info, _transform);
+    }
+
+private:
+    std::ostream                             &_stream;
+    const IOFormatInfo                       &_format_info;
+    const std::function<ITensor *(ITensor *)> _transform;
+};
+
 /** PriorBox Layer */
 class PriorBoxLayer final : public ILayer
 {
@@ -1275,4 +1360,4 @@ private:
 } // namespace frontend
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_LAYERS_H__ */
+#endif /* ARM_COMPUTE_GRAPH_LAYERS_H */

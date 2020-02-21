@@ -180,6 +180,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h", "_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel_8h.xhtml", [
       [ "NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel", "classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel" ]
     ] ],
+    [ "NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h", "_n_e_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel_8h.xhtml", [
+      [ "NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel", "classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel" ]
+    ] ],
     [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h", "_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel_8h.xhtml", [
       [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel", "classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel" ]
     ] ],

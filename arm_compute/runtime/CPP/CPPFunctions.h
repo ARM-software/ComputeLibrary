@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPFUNCTIONS_H__
-#define __ARM_COMPUTE_CPPFUNCTIONS_H__
+#ifndef ARM_COMPUTE_CPPFUNCTIONS_H
+#define ARM_COMPUTE_CPPFUNCTIONS_H
 
 /* Header regrouping all the CPP functions */
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
@@ -30,7 +30,8 @@
 #include "arm_compute/runtime/CPP/functions/CPPDetectionPostProcessLayer.h"
 #include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
+#include "arm_compute/runtime/CPP/functions/CPPSplit.h"
 #include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 
-#endif /* __ARM_COMPUTE_CPPFUNCTIONS_H__ */
+#endif /* ARM_COMPUTE_CPPFUNCTIONS_H */

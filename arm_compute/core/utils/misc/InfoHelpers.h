@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MISC_INFO_HELPERS_H__
-#define __ARM_COMPUTE_MISC_INFO_HELPERS_H__
+#ifndef ARM_COMPUTE_MISC_INFO_HELPERS_H
+#define ARM_COMPUTE_MISC_INFO_HELPERS_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
@@ -61,4 +61,4 @@ inline bool is_relu6(ActivationLayerInfo activation_info)
 } // namespace info_helpers
 } // namespace utils
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_MISC_INFO_HELPERS_H__ */
+#endif /* ARM_COMPUTE_MISC_INFO_HELPERS_H */

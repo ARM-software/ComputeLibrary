@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,8 +40,8 @@
 #include <sstream>
 #include <string>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 TensorShape transposed_tensor_shape(const TensorShape &in)
@@ -57,11 +57,9 @@ TensorShape transposed_tensor_shape(const TensorShape &in)
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
-                                                         DataType::U16, DataType::S16,
-                                                         DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     if(output->total_size() != 0)
     {
@@ -132,3 +130,4 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second, cl::NDRange(2, 8));
 }
+} // namespace arm_compute

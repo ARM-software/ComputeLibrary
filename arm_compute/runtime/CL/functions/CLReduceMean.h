@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CL_REDUCE_MEAN_H__
-#define __ARM_COMPUTE_CL_REDUCE_MEAN_H__
+#ifndef ARM_COMPUTE_CL_REDUCE_MEAN_H
+#define ARM_COMPUTE_CL_REDUCE_MEAN_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
@@ -45,7 +45,7 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in]  input          Source tensor. Data type supported: QASYMM8/F16/F32
+     * @param[in]  input          Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in]  reduction_axis Reduction axis vector.
      * @param[in]  keep_dims      If positive, retains reduced dimensions with length 1.
      * @param[out] output         Destination tensor. Data type supported: Same as @p input
@@ -54,7 +54,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReduceMean
      *
-     * @param[in] input          Source tensor. Data type supported: QASYMM8/F16/F32
+     * @param[in] input          Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in] reduction_axis Reduction axis vector.
      * @param[in] keep_dims      If positive, retains reduced dimensions with length 1.
      * @param[in] output         Destination tensor. Data type supported: Same as @p input
@@ -75,4 +75,4 @@ private:
     bool                              _keep_dims;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CL_REDUCE_MEAN_H__ */
+#endif /* ARM_COMPUTE_CL_REDUCE_MEAN_H */

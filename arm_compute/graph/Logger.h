@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_LOGGER_H__
-#define __ARM_COMPUTE_GRAPH_LOGGER_H__
+#ifndef ARM_COMPUTE_GRAPH_LOGGER_H
+#define ARM_COMPUTE_GRAPH_LOGGER_H
 
 #include "arm_compute/core/utils/logging/Macros.h"
 
@@ -63,4 +63,4 @@
     ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER(); \
     ARM_COMPUTE_LOG_STREAM("GRAPH", arm_compute::logging::LogLevel::ERROR, x)
 
-#endif /* __ARM_COMPUTE_GRAPH_LOGGER_H__ */
+#endif /* ARM_COMPUTE_GRAPH_LOGGER_H */

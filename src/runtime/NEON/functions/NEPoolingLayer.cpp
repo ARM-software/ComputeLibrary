@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,10 +38,10 @@ NEPoolingLayer::NEPoolingLayer()
 void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
 {
     // Check if we have Global Pooling Layer
-    _is_global_pooling_layer = (input->info()->dimension(0) == pool_info.pool_size().width) && (input->info()->dimension(1) == pool_info.pool_size().height);
+    _is_global_pooling_layer = (input->info()->dimension(0) == pool_info.pool_size.width) && (input->info()->dimension(1) == pool_info.pool_size.height);
 
     // Get data layout
-    _data_layout = input->info()->data_layout();
+    _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
 
     // Configure pooling kernel
     _pooling_layer_kernel.configure(input, output, pool_info);
@@ -51,11 +51,11 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
         case DataLayout::NCHW:
         {
             // Configure border depending on operation required (quantize border in case of asymmetric data_type)
-            BorderMode border_mode = (pool_info.pool_type() == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
+            BorderMode border_mode = (pool_info.pool_type == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
             PixelValue zero_value(0.f);
-            if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding())
+            if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding)
             {
-                zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().uniform().offset));
+                zero_value = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
             }
             _border_handler.configure(input, _pooling_layer_kernel.border_size(), border_mode, zero_value);
             break;

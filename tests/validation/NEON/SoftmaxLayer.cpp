@@ -48,6 +48,7 @@ RelativeTolerance<half>            tolerance_f16(half(0.2));
 
 /** Tolerance for quantized operations */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_signed(1);
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -162,12 +163,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<half>, framework::Dataset
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunSmall4D, NESoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small4DShapes(),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
                                                                                                                    framework::dataset::make("Beta", { 1.0f, 2.0f })),
                                                                                                            framework::dataset::make("Axis", { 1, 2, 3 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
@@ -241,6 +242,28 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerQuantizedFixture<uint8_t>, framew
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() //QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall2D, NESoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
+                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                        combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.f }))),
+                                                                                                                framework::dataset::make("Axis", { 1 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall4D, NESoftmaxLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small4DShapes(),
+                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                        combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.f }))),
+                                                                                                                framework::dataset::make("Axis", { 1, 2, 3 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
+}
+TEST_SUITE_END() //QASYMM8_SIGNED
+
 TEST_SUITE_END() //Quantized
 
 TEST_SUITE_END() //SoftmaxLayer

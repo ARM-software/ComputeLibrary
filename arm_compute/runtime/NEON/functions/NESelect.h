@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESELECT_H__
-#define __ARM_COMPUTE_NESELECT_H__
+#ifndef ARM_COMPUTE_NESELECT_H
+#define ARM_COMPUTE_NESELECT_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -39,7 +39,7 @@ public:
     /** Initialise the kernel's inputs and output.
      *
      * @param[in]  c      Condition input tensor. Data types supported: U8.
-     * @param[in]  x      First input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  x      First input tensor. Data types supported: All.
      * @param[in]  y      Second input tensor. Data types supported: Same as @p x
      * @param[out] output Output tensor. Data types supported: Same as @p x.
      */
@@ -47,7 +47,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NESelect
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.
-     * @param[in] x      First input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in] x      First input tensor. Data types supported: All.
      * @param[in] y      Second input tensor. Data types supported: Same as @p x
      * @param[in] output Output tensor. Data types supported: Same as @p x.
      *
@@ -56,4 +56,4 @@ public:
     static Status validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NESELECT_H__ */
+#endif /* ARM_COMPUTE_NESELECT_H */

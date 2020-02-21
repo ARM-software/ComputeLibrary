@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *block_inf
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, block_info, padddings, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(block_info, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(block_info->num_dimensions() > 1);
     ARM_COMPUTE_RETURN_ERROR_ON(padddings->num_dimensions() > 2);

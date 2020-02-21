@@ -9,7 +9,7 @@ var classarm__compute_1_1test_1_1framework_1_1_framework =
     [ "error_on_missing_assets", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a41183a1a8909c9f852acd99d3b69626d", null ],
     [ "get_profiler", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a47e7a1a6baab80560c11a9ee8f8a0636", null ],
     [ "has_test_info", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a6ad85a69f028cf3f5030666babd7e8e7", null ],
-    [ "init", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a47fbbce86aea0ba4a9d539c069f840c9", null ],
+    [ "init", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a01e3aa67ceaeae837e9a68050d850724", null ],
     [ "log_failed_expectation", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a0128e62cd67888b56078dac05dd59761", null ],
     [ "log_info", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a60b060774255916807ef1cca44bfbfe1", null ],
     [ "log_level", "classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#a621f62a02364fc584cf86a8f221e715d", null ],

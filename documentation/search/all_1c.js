@@ -8,6 +8,7 @@ var searchData=
   ['_7eclabsolutedifferencekernel',['~CLAbsoluteDifferenceKernel',['../classarm__compute_1_1_c_l_absolute_difference_kernel.xhtml#aea6992684b565a3656dae7216a3be2d4',1,'arm_compute::CLAbsoluteDifferenceKernel']]],
   ['_7eclaccessor',['~CLAccessor',['../classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a5041d7243d610e3d7b0d9a1414497558',1,'arm_compute::test::CLAccessor']]],
   ['_7eclactivationlayerkernel',['~CLActivationLayerKernel',['../classarm__compute_1_1_c_l_activation_layer_kernel.xhtml#a181f365021a9a09d59233ba388d34e04',1,'arm_compute::CLActivationLayerKernel']]],
+  ['_7eclargminmaxlayerkernel',['~CLArgMinMaxLayerKernel',['../classarm__compute_1_1_c_l_arg_min_max_layer_kernel.xhtml#aefb61c43c15194b4b49c8f3572add8c3',1,'arm_compute::CLArgMinMaxLayerKernel']]],
   ['_7eclarrayaccessor',['~CLArrayAccessor',['../classarm__compute_1_1test_1_1_c_l_array_accessor.xhtml#a2a37710fa81773bdbf719162c10f2309',1,'arm_compute::test::CLArrayAccessor']]],
   ['_7eclbatchconcatenatelayerkernel',['~CLBatchConcatenateLayerKernel',['../classarm__compute_1_1_c_l_batch_concatenate_layer_kernel.xhtml#a6ebc652f50352f8c80663ea7e107d1ec',1,'arm_compute::CLBatchConcatenateLayerKernel']]],
   ['_7eclbatchnormalizationlayerkernel',['~CLBatchNormalizationLayerKernel',['../classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml#aafb7a9f7e113cbb1f93dd030a4994b4a',1,'arm_compute::CLBatchNormalizationLayerKernel']]],

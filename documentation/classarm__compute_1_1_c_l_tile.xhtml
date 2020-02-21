@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -193,7 +193,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the source, destination of the kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data type supported: All. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">multiples</td><td>Contains the number of times the input tensor should be replicated on the given dimension. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Same as <code>input</code> </td></tr>
   </table>
@@ -250,7 +250,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_tile.xhtml">CLTile</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data type supported: All. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">multiples</td><td>Contains the number of times the input tensor should be replicated on the given dimension. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Same as <code>input</code> </td></tr>
   </table>
@@ -260,9 +260,9 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_tile_8cpp_source.xhtml#l00038">38</a> of file <a class="el" href="_c_l_tile_8cpp_source.xhtml">CLTile.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_tile_kernel.xhtml#a08a1fa223722d3c335af0810c89974e9">CLTileKernel::validate</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, output, multiples);</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_c_l_tile_kernel_xhtml_a08a1fa223722d3c335af0810c89974e9"><div class="ttname"><a href="classarm__compute_1_1_c_l_tile_kernel.xhtml#a08a1fa223722d3c335af0810c89974e9">arm_compute::CLTileKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Multiples &amp;multiples)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLTileKernel.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_tile_kernel_8cpp_source.xhtml#l00129">CLTileKernel.cpp:129</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_c_l_tile_kernel_xhtml_a08a1fa223722d3c335af0810c89974e9"><div class="ttname"><a href="classarm__compute_1_1_c_l_tile_kernel.xhtml#a08a1fa223722d3c335af0810c89974e9">arm_compute::CLTileKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Multiples &amp;multiples)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLTileKernel.</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_tile_kernel_8cpp_source.xhtml#l00130">CLTileKernel.cpp:130</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, and <a class="el" href="_c_l_tile_kernel_8cpp_source.xhtml#l00129">CLTileKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, and <a class="el" href="_c_l_tile_kernel_8cpp_source.xhtml#l00130">CLTileKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -276,7 +276,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_tile.xhtml">CLTile</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:53 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

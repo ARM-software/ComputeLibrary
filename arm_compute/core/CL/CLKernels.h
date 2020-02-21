@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLKERNELS_H__
-#define __ARM_COMPUTE_CLKERNELS_H__
+#ifndef ARM_COMPUTE_CLKERNELS_H
+#define ARM_COMPUTE_CLKERNELS_H
 
 /* Header regrouping all the CL kernels */
 #include "arm_compute/core/CL/kernels/CLAbsoluteDifferenceKernel.h"
 #include "arm_compute/core/CL/kernels/CLAccumulateKernel.h"
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLArgMinMaxLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBatchToSpaceLayerKernel.h"
@@ -79,6 +80,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
@@ -160,4 +162,4 @@
 #include "arm_compute/core/CL/kernels/CLYOLOLayerKernel.h"
 #include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 
-#endif /* __ARM_COMPUTE_CLKERNELS_H__ */
+#endif /* ARM_COMPUTE_CLKERNELS_H */

@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1wrapper_1_1traits_1_1vector__64__tag.xhtml" title="64&#45;bit vector tag" alt="" coords="5,5,119,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1utils_1_1_validate_example.xhtml" title="Abstract ValidateExample class." alt="" coords="5,129,133,155"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_graph_validate_example.xhtml" title=" " alt="" coords="181,5,448,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1utils_1_1_graph_validate_example.xhtml" title=" " alt="" coords="183,70,446,126"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1utils_1_1_graph_validate_example.xhtml" title=" " alt="" coords="191,151,439,221"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1utils_1_1_graph_validate_example.xhtml" title=" " alt="" coords="199,245,430,316"/>
 </map>

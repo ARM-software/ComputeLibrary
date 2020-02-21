@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,13 +74,17 @@ void force_target_to_graph(Graph &g, Target target)
     }
 }
 
-PassManager create_default_pass_manager(Target target)
+PassManager create_default_pass_manager(Target target, const GraphConfig &cfg)
 {
     PassManager pm;
 
     const bool is_target_gc = target == Target::GC;
 
     // Passes that mutate graph IR
+    if(cfg.convert_to_uint8)
+    {
+        pm.append(support::cpp14::make_unique<SyntheticDataTypeMutator>(), !is_target_gc);
+    }
     pm.append(support::cpp14::make_unique<NodeFusionMutator>(), !is_target_gc);
     pm.append(support::cpp14::make_unique<GroupedConvolutionMutator>());
     pm.append(support::cpp14::make_unique<InPlaceOperationMutator>(), !is_target_gc);
@@ -146,9 +150,9 @@ size_t get_dimension_idx(DataLayout data_layout, const DataLayoutDimension data_
             return 3;
             break;
         default:
-            ARM_COMPUTE_ERROR("Data layout index not supported!");
             break;
     }
+    ARM_COMPUTE_ERROR("Data layout index not supported!");
 }
 
 std::vector<NodeIdxPair> get_driving_nodes(const INode &node)

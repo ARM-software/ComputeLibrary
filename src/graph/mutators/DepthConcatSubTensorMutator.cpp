@@ -42,6 +42,11 @@ const char *DepthConcatSubTensorMutator::name()
     return "DepthConcatSubTensorMutator";
 }
 
+IGraphMutator::MutationType DepthConcatSubTensorMutator::type() const
+{
+    return IGraphMutator::MutationType::Backend;
+}
+
 void DepthConcatSubTensorMutator::mutate(Graph &g)
 {
     // Early exit if no Concatenation layers exist in graph

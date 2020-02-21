@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H__
-#define __ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H__
+#ifndef ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H
+#define ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
@@ -791,17 +791,17 @@ inline TensorShape compute_pool_shape(const ITensorInfo &input, PoolingLayerInfo
 
     TensorShape output_shape{ input.tensor_shape() };
 
-    const bool         is_global_pooling = pool_info.is_global_pooling();
+    const bool         is_global_pooling = pool_info.is_global_pooling;
     const unsigned int idx_width         = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
     const unsigned int idx_height        = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
-    const unsigned int pool_size_x       = is_global_pooling ? output_shape[idx_width] : pool_info.pool_size().width;
-    const unsigned int pool_size_y       = is_global_pooling ? output_shape[idx_height] : pool_info.pool_size().height;
+    const unsigned int pool_size_x       = is_global_pooling ? output_shape[idx_width] : pool_info.pool_size.width;
+    const unsigned int pool_size_y       = is_global_pooling ? output_shape[idx_height] : pool_info.pool_size.height;
 
     std::tie(pooled_w, pooled_h) = scaled_dimensions(output_shape[idx_width],
                                                      output_shape[idx_height],
                                                      pool_size_x,
                                                      pool_size_y,
-                                                     pool_info.pad_stride_info());
+                                                     pool_info.pad_stride_info);
 
     output_shape.set(idx_width, pooled_w);
     output_shape.set(idx_height, pooled_h);
@@ -1390,4 +1390,4 @@ inline TensorShape compute_gather_shape(const TensorShape &input_shape, const Te
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H__ */
+#endif /* ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H */

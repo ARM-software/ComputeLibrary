@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -128,6 +128,9 @@ Data Fields</h2></td></tr>
 <tr class="memitem:a9da74af255a3e6ea61180d4a03192a48"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a9da74af255a3e6ea61180d4a03192a48">use_tuner</a> { false }</td></tr>
 <tr class="memdesc:a9da74af255a3e6ea61180d4a03192a48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use a tuner in tunable backends.  <a href="#a9da74af255a3e6ea61180d4a03192a48">More...</a><br /></td></tr>
 <tr class="separator:a9da74af255a3e6ea61180d4a03192a48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0292b7cb87d1bcd5c093c4b9d3b9c0bc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a0292b7cb87d1bcd5c093c4b9d3b9c0bc">convert_to_uint8</a> { false }</td></tr>
+<tr class="memdesc:a0292b7cb87d1bcd5c093c4b9d3b9c0bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert graph to a synthetic uint8 graph.  <a href="#a0292b7cb87d1bcd5c093c4b9d3b9c0bc">More...</a><br /></td></tr>
+<tr class="separator:a0292b7cb87d1bcd5c093c4b9d3b9c0bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a249f3f713c6ea8f564e760559cf509f4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#ae76ef5bd3ad69f7380ebb3ac6033ec5c">CLTunerMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a249f3f713c6ea8f564e760559cf509f4">tuner_mode</a> { <a class="el" href="namespacearm__compute.xhtml#ae76ef5bd3ad69f7380ebb3ac6033ec5ca39e07a5dab0694c7ebb6a0578511ee15">CLTunerMode::EXHAUSTIVE</a> }</td></tr>
 <tr class="memdesc:a249f3f713c6ea8f564e760559cf509f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuner mode to be used by the CL tuner.  <a href="#a249f3f713c6ea8f564e760559cf509f4">More...</a><br /></td></tr>
 <tr class="separator:a249f3f713c6ea8f564e760559cf509f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -143,6 +146,26 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00078">78</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 </div><h2 class="groupheader">Field Documentation</h2>
+<a id="a0292b7cb87d1bcd5c093c4b9d3b9c0bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0292b7cb87d1bcd5c093c4b9d3b9c0bc">&#9670;&nbsp;</a></span>convert_to_uint8</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool convert_to_uint8 { false }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Convert graph to a synthetic uint8 graph. </p>
+
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00084">84</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="src_2graph_2_utils_8cpp_source.xhtml#l00077">arm_compute::graph::create_default_pass_manager()</a>.</p>
+
+</div>
+</div>
 <a id="a08963f7335eef295237ab460863bc3d5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a08963f7335eef295237ab460863bc3d5">&#9670;&nbsp;</a></span>num_threads</h2>
 
@@ -157,9 +180,9 @@ Data Fields</h2></td></tr>
 
 <p>Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00085">85</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00086">86</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="graph__validate__utils_8h_source.xhtml#l00640">GraphValidateExample&lt; DepthwiseConvolutionLayer, DepthConvolutionOptions, DepthConvolutionVerifyAccessor &gt;::do_setup()</a>, and <a class="el" href="_n_e_device_backend_8cpp_source.xhtml#l00074">NEDeviceBackend::setup_backend_context()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="graph__validate__utils_8h_source.xhtml#l00639">GraphValidateExample&lt; DepthwiseConvolutionLayer, DepthConvolutionOptions, DepthConvolutionVerifyAccessor &gt;::do_setup()</a>, and <a class="el" href="_n_e_device_backend_8cpp_source.xhtml#l00074">NEDeviceBackend::setup_backend_context()</a>.</p>
 
 </div>
 </div>
@@ -177,7 +200,7 @@ Data Fields</h2></td></tr>
 
 <p>File to load/store tuning values from. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00086">86</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00087">87</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_c_l_device_backend_8cpp_source.xhtml#l00109">CLDeviceBackend::setup_backend_context()</a>.</p>
 
@@ -197,7 +220,7 @@ Data Fields</h2></td></tr>
 
 <p>Tuner mode to be used by the CL tuner. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00084">84</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00085">85</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_c_l_device_backend_8cpp_source.xhtml#l00109">CLDeviceBackend::setup_backend_context()</a>.</p>
 
@@ -292,7 +315,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml">GraphConfig</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:58 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:31 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

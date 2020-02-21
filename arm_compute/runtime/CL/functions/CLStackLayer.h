@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLSTACKLAYER_H__
-#define __ARM_COMPUTE_CLSTACKLAYER_H__
+#ifndef ARM_COMPUTE_CLSTACKLAYER_H
+#define ARM_COMPUTE_CLSTACKLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -50,7 +50,7 @@ public:
      *
      * @note Supported input tensor rank: up to 4
      *
-     * @param[in]  input  The vectors containing all the tensors with the same shape to stack. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  The vectors containing all the tensors with the same shape to stack. Data types supported: All.
      * @param[in]  axis   The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
      *                    Negative values wrap around
      * @param[out] output Output tensor. Data types supported: Same as @p input.
@@ -60,7 +60,7 @@ public:
      *
      * @note Supported input tensor rank: up to 4
      *
-     * @param[in] input  The vectors containing all the tensors info with the same shape to stack. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input  The vectors containing all the tensors info with the same shape to stack. Data types supported: All.
      * @param[in] axis   The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
      *                   Negative values wrap around
      * @param[in] output Output tensor info. Data types supported: Same as @p input.
@@ -78,4 +78,4 @@ private:
     unsigned int                    _num_inputs;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLSTACKLAYER_H__ */
+#endif /* ARM_COMPUTE_CLSTACKLAYER_H */

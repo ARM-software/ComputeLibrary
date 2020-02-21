@@ -286,6 +286,11 @@ const char *NodeFusionMutator::name()
     return "NodeFusionMutator";
 }
 
+IGraphMutator::MutationType NodeFusionMutator::type() const
+{
+    return IGraphMutator::MutationType::Backend;
+}
+
 void NodeFusionMutator::mutate(Graph &g)
 {
     // Supported activations when fusing

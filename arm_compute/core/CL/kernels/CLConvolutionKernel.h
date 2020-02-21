@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCONVOLUTIONKERNEL_H__
-#define __ARM_COMPUTE_CLCONVOLUTIONKERNEL_H__
+#ifndef ARM_COMPUTE_CLCONVOLUTIONKERNEL_H
+#define ARM_COMPUTE_CLCONVOLUTIONKERNEL_H
 
 #include "arm_compute/core/CL/ICLSimple2DKernel.h"
 
@@ -179,4 +179,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLCONVOLUTIONKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLCONVOLUTIONKERNEL_H */

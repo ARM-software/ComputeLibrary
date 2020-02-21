@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECOMPUTEALLANCHORS_H__
-#define __ARM_COMPUTE_NECOMPUTEALLANCHORS_H__
+#ifndef ARM_COMPUTE_NECOMPUTEALLANCHORS_H
+#define ARM_COMPUTE_NECOMPUTEALLANCHORS_H
 
 #include "arm_compute/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -59,4 +59,4 @@ public:
     static Status validate(const ITensorInfo *anchors, const ITensorInfo *all_anchors, const ComputeAnchorsInfo &info);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NECOMPUTEALLANCHORS_H__ */
+#endif /* ARM_COMPUTE_NECOMPUTEALLANCHORS_H */

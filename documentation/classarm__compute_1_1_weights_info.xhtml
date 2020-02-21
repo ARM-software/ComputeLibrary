@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -132,7 +132,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Convolution Layer Weights Information class. </p>
 <p>This class stores the necessary information to compute convolution layer when the weights are already reshaped </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01689">1689</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01757">1757</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a8bf46ce65f0f9cc0210774dfc60b4e2f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8bf46ce65f0f9cc0210774dfc60b4e2f">&#9670;&nbsp;</a></span>WeightsInfo() <span class="overload">[1/2]</span></h2>
@@ -159,8 +159,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Default constructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01693">1693</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01694"></a><span class="lineno"> 1694</span>&#160;        : _are_reshaped(<span class="keyword">false</span>), _kernel_width(0), _kernel_height(0), _num_kernels(0), _retain_internal_weights(<span class="keyword">false</span>)</div><div class="line"><a name="l01695"></a><span class="lineno"> 1695</span>&#160;    {</div><div class="line"><a name="l01696"></a><span class="lineno"> 1696</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01761">1761</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01762"></a><span class="lineno"> 1762</span>&#160;        : _are_reshaped(<span class="keyword">false</span>), _kernel_width(0), _kernel_height(0), _num_kernels(0), _retain_internal_weights(<span class="keyword">false</span>)</div><div class="line"><a name="l01763"></a><span class="lineno"> 1763</span>&#160;    {</div><div class="line"><a name="l01764"></a><span class="lineno"> 1764</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="aa31155966d774759cdcab55b5c58f4d7"></a>
@@ -227,10 +227,10 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01705">1705</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01706"></a><span class="lineno"> 1706</span>&#160;        : _are_reshaped(<a class="code" href="classarm__compute_1_1_weights_info.xhtml#a54a5271cc6a1b58827a9b3f58ec5ba56">are_reshaped</a>), _kernel_width(kernel_width), _kernel_height(kernel_height), _num_kernels(<a class="code" href="classarm__compute_1_1_weights_info.xhtml#ab039f58ba3db07baaba2cbdc65608dbb">num_kernels</a>), _retain_internal_weights(<a class="code" href="classarm__compute_1_1_weights_info.xhtml#ac9e7f8fc8a688fd119d3fb2892cce6b9">retain_internal_weights</a>)</div><div class="line"><a name="l01707"></a><span class="lineno"> 1707</span>&#160;    {</div><div class="line"><a name="l01708"></a><span class="lineno"> 1708</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_weights_info_xhtml_a54a5271cc6a1b58827a9b3f58ec5ba56"><div class="ttname"><a href="classarm__compute_1_1_weights_info.xhtml#a54a5271cc6a1b58827a9b3f58ec5ba56">arm_compute::WeightsInfo::are_reshaped</a></div><div class="ttdeci">bool are_reshaped() const</div><div class="ttdoc">Flag which specifies if the weights tensor has been reshaped.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01713">Types.h:1713</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_weights_info_xhtml_ab039f58ba3db07baaba2cbdc65608dbb"><div class="ttname"><a href="classarm__compute_1_1_weights_info.xhtml#ab039f58ba3db07baaba2cbdc65608dbb">arm_compute::WeightsInfo::num_kernels</a></div><div class="ttdeci">unsigned int num_kernels() const</div><div class="ttdoc">Return the number of convolution kernels.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01721">Types.h:1721</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_weights_info_xhtml_ac9e7f8fc8a688fd119d3fb2892cce6b9"><div class="ttname"><a href="classarm__compute_1_1_weights_info.xhtml#ac9e7f8fc8a688fd119d3fb2892cce6b9">arm_compute::WeightsInfo::retain_internal_weights</a></div><div class="ttdeci">bool retain_internal_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01733">Types.h:1733</a></div></div>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01773">1773</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01774"></a><span class="lineno"> 1774</span>&#160;        : _are_reshaped(<a class="code" href="classarm__compute_1_1_weights_info.xhtml#a54a5271cc6a1b58827a9b3f58ec5ba56">are_reshaped</a>), _kernel_width(kernel_width), _kernel_height(kernel_height), _num_kernels(<a class="code" href="classarm__compute_1_1_weights_info.xhtml#ab039f58ba3db07baaba2cbdc65608dbb">num_kernels</a>), _retain_internal_weights(<a class="code" href="classarm__compute_1_1_weights_info.xhtml#ac9e7f8fc8a688fd119d3fb2892cce6b9">retain_internal_weights</a>)</div><div class="line"><a name="l01775"></a><span class="lineno"> 1775</span>&#160;    {</div><div class="line"><a name="l01776"></a><span class="lineno"> 1776</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_weights_info_xhtml_a54a5271cc6a1b58827a9b3f58ec5ba56"><div class="ttname"><a href="classarm__compute_1_1_weights_info.xhtml#a54a5271cc6a1b58827a9b3f58ec5ba56">arm_compute::WeightsInfo::are_reshaped</a></div><div class="ttdeci">bool are_reshaped() const</div><div class="ttdoc">Flag which specifies if the weights tensor has been reshaped.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01781">Types.h:1781</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_weights_info_xhtml_ab039f58ba3db07baaba2cbdc65608dbb"><div class="ttname"><a href="classarm__compute_1_1_weights_info.xhtml#ab039f58ba3db07baaba2cbdc65608dbb">arm_compute::WeightsInfo::num_kernels</a></div><div class="ttdeci">unsigned int num_kernels() const</div><div class="ttdoc">Return the number of convolution kernels.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01789">Types.h:1789</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_weights_info_xhtml_ac9e7f8fc8a688fd119d3fb2892cce6b9"><div class="ttname"><a href="classarm__compute_1_1_weights_info.xhtml#ac9e7f8fc8a688fd119d3fb2892cce6b9">arm_compute::WeightsInfo::retain_internal_weights</a></div><div class="ttdeci">bool retain_internal_weights() const</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01801">Types.h:1801</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -261,8 +261,8 @@ Public Member Functions</h2></td></tr>
 <p>Flag which specifies if the weights tensor has been reshaped. </p>
 <dl class="section return"><dt>Returns</dt><dd>True if the weights tensors has been reshaped </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01713">1713</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01714"></a><span class="lineno"> 1714</span>&#160;    {</div><div class="line"><a name="l01715"></a><span class="lineno"> 1715</span>&#160;        <span class="keywordflow">return</span> _are_reshaped;</div><div class="line"><a name="l01716"></a><span class="lineno"> 1716</span>&#160;    };</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01781">1781</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01782"></a><span class="lineno"> 1782</span>&#160;    {</div><div class="line"><a name="l01783"></a><span class="lineno"> 1783</span>&#160;        <span class="keywordflow">return</span> _are_reshaped;</div><div class="line"><a name="l01784"></a><span class="lineno"> 1784</span>&#160;    };</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a1fba899b6ce8e0a8f4091031d75b0241"></a>
@@ -291,8 +291,8 @@ Public Member Functions</h2></td></tr>
 <p>Return the width and height of the kernel. </p>
 <dl class="section return"><dt>Returns</dt><dd>The width and height of the kernel </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01729">1729</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01730"></a><span class="lineno"> 1730</span>&#160;    {</div><div class="line"><a name="l01731"></a><span class="lineno"> 1731</span>&#160;        <span class="keywordflow">return</span> std::make_pair(_kernel_width, _kernel_height);</div><div class="line"><a name="l01732"></a><span class="lineno"> 1732</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01797">1797</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01798"></a><span class="lineno"> 1798</span>&#160;    {</div><div class="line"><a name="l01799"></a><span class="lineno"> 1799</span>&#160;        <span class="keywordflow">return</span> std::make_pair(_kernel_width, _kernel_height);</div><div class="line"><a name="l01800"></a><span class="lineno"> 1800</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="ab039f58ba3db07baaba2cbdc65608dbb"></a>
@@ -321,8 +321,8 @@ Public Member Functions</h2></td></tr>
 <p>Return the number of convolution kernels. </p>
 <dl class="section return"><dt>Returns</dt><dd>The number of convolution kernels </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01721">1721</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01722"></a><span class="lineno"> 1722</span>&#160;    {</div><div class="line"><a name="l01723"></a><span class="lineno"> 1723</span>&#160;        <span class="keywordflow">return</span> _num_kernels;</div><div class="line"><a name="l01724"></a><span class="lineno"> 1724</span>&#160;    };</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01789">1789</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01790"></a><span class="lineno"> 1790</span>&#160;    {</div><div class="line"><a name="l01791"></a><span class="lineno"> 1791</span>&#160;        <span class="keywordflow">return</span> _num_kernels;</div><div class="line"><a name="l01792"></a><span class="lineno"> 1792</span>&#160;    };</div></div><!-- fragment -->
 </div>
 </div>
 <a id="ac9e7f8fc8a688fd119d3fb2892cce6b9"></a>
@@ -348,8 +348,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01733">1733</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01734"></a><span class="lineno"> 1734</span>&#160;    {</div><div class="line"><a name="l01735"></a><span class="lineno"> 1735</span>&#160;        <span class="keywordflow">return</span> _retain_internal_weights;</div><div class="line"><a name="l01736"></a><span class="lineno"> 1736</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01801">1801</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01802"></a><span class="lineno"> 1802</span>&#160;    {</div><div class="line"><a name="l01803"></a><span class="lineno"> 1803</span>&#160;        <span class="keywordflow">return</span> _retain_internal_weights;</div><div class="line"><a name="l01804"></a><span class="lineno"> 1804</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -361,7 +361,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_weights_info.xhtml">WeightsInfo</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:57 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:31 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

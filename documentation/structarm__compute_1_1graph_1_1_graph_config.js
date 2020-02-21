@@ -1,5 +1,6 @@
 var structarm__compute_1_1graph_1_1_graph_config =
 [
+    [ "convert_to_uint8", "structarm__compute_1_1graph_1_1_graph_config.xhtml#a0292b7cb87d1bcd5c093c4b9d3b9c0bc", null ],
     [ "num_threads", "structarm__compute_1_1graph_1_1_graph_config.xhtml#a08963f7335eef295237ab460863bc3d5", null ],
     [ "tuner_file", "structarm__compute_1_1graph_1_1_graph_config.xhtml#a5cabfb35cd0014387f7ec2a0c362c20f", null ],
     [ "tuner_mode", "structarm__compute_1_1graph_1_1_graph_config.xhtml#a249f3f713c6ea8f564e760559cf509f4", null ],

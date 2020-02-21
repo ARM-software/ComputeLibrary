@@ -26,6 +26,8 @@ var namespacearm__compute_1_1graph_1_1frontend =
     [ "PadLayer", "classarm__compute_1_1graph_1_1frontend_1_1_pad_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_pad_layer" ],
     [ "PermuteLayer", "classarm__compute_1_1graph_1_1frontend_1_1_permute_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_permute_layer" ],
     [ "PoolingLayer", "classarm__compute_1_1graph_1_1frontend_1_1_pooling_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_pooling_layer" ],
+    [ "PReluLayer", "classarm__compute_1_1graph_1_1frontend_1_1_p_relu_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_p_relu_layer" ],
+    [ "PrintLayer", "classarm__compute_1_1graph_1_1frontend_1_1_print_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_print_layer" ],
     [ "PriorBoxLayer", "classarm__compute_1_1graph_1_1frontend_1_1_prior_box_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_prior_box_layer" ],
     [ "QuantizationLayer", "classarm__compute_1_1graph_1_1frontend_1_1_quantization_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_quantization_layer" ],
     [ "ReorgLayer", "classarm__compute_1_1graph_1_1frontend_1_1_reorg_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_reorg_layer" ],

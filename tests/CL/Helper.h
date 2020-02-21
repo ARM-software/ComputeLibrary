@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_CL_HELPER_H__
-#define __ARM_COMPUTE_TEST_CL_HELPER_H__
+#ifndef ARM_COMPUTE_TEST_CL_HELPER_H
+#define ARM_COMPUTE_TEST_CL_HELPER_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
@@ -136,4 +136,4 @@ private:
 };
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_CL_HELPER_H__ */
+#endif /* ARM_COMPUTE_TEST_CL_HELPER_H */

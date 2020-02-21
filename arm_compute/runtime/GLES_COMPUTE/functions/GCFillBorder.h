@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GCFILLBORDER_H__
-#define __ARM_COMPUTE_GCFILLBORDER_H__
+#ifndef ARM_COMPUTE_GCFILLBORDER_H
+#define ARM_COMPUTE_GCFILLBORDER_H
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
@@ -49,4 +49,4 @@ public:
 };
 }
 
-#endif /*__ARM_COMPUTE_FILLBORDER_H__ */
+#endif /*ARM_COMPUTE_FILLBORDER_H */

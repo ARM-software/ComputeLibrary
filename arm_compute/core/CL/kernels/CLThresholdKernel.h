@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLTHRESHOLDKERNEL_H__
-#define __ARM_COMPUTE_CLTHRESHOLDKERNEL_H__
+#ifndef ARM_COMPUTE_CLTHRESHOLDKERNEL_H
+#define ARM_COMPUTE_CLTHRESHOLDKERNEL_H
 
 #include "arm_compute/core/CL/ICLSimple2DKernel.h"
 #include "arm_compute/core/Types.h"
@@ -53,4 +53,4 @@ public:
                    uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper);
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NETHRESHOLDKERNEL_H__ */
+#endif /*ARM_COMPUTE_NETHRESHOLDKERNEL_H */

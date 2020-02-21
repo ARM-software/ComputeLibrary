@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_UTILS_ROUNDING_H__
-#define __ARM_COMPUTE_UTILS_ROUNDING_H__
+#ifndef ARM_COMPUTE_UTILS_ROUNDING_H
+#define ARM_COMPUTE_UTILS_ROUNDING_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Requires.h"
@@ -202,4 +202,4 @@ inline T round(T value, RoundingMode rounding_mode)
 } // namespace rounding
 } // namespace utils
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_UTILS_ROUNDING_H__ */
+#endif /*ARM_COMPUTE_UTILS_ROUNDING_H */

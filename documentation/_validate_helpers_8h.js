@@ -12,6 +12,7 @@ var _validate_helpers_8h =
     [ "validate_normalize_planar_yuv_layer", "_validate_helpers_8h.xhtml#ad6c95a270f3275bd5711ce6ec193c4ff", null ],
     [ "validate_pad_layer", "_validate_helpers_8h.xhtml#ada206e294c8d07093a8a50e08172c272", null ],
     [ "validate_permute_layer", "_validate_helpers_8h.xhtml#aeb6f53f28ef137932823d17554043056", null ],
+    [ "validate_prelu_layer", "_validate_helpers_8h.xhtml#a5f83a0fbf23529c0f205c6732b3c8312", null ],
     [ "validate_priorbox_layer", "_validate_helpers_8h.xhtml#a76682a55960d790a11357ab922a5d659", null ],
     [ "validate_quantization_layer", "_validate_helpers_8h.xhtml#a959fdd41c94dde46a21dd2bf6d50c48b", null ],
     [ "validate_reorg_layer", "_validate_helpers_8h.xhtml#a4451f539afe63a19da3d17ee95582277", null ],

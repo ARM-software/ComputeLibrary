@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -126,7 +126,7 @@ $(document).ready(function(){initNavTree('validation_2_g_l_e_s___c_o_m_p_u_t_e_2
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2020 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -143,10 +143,10 @@ Typedefs</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a21aee323ab2c48634afcdaa5d1d87901"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a21aee323ab2c48634afcdaa5d1d87901">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::MediumShapes(), datasets::LargeShapes()), ScaleDataTypes), framework::dataset::make(&quot;InterpolationPolicy&quot;, { InterpolationPolicy::NEAREST_NEIGHBOR })), datasets::BorderModes()), datasets::SamplingPolicies()), shape, data_type, policy, border_mode, sampling_policy)</td></tr>
 <tr class="separator:a21aee323ab2c48634afcdaa5d1d87901"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5c38109e4992afecf1325e188de37d58"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5c38109e4992afecf1325e188de37d58">FIXTURE_DATA_TEST_CASE</a> (RunSmall, GCScaleFixture&lt; half &gt;, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW })), framework::dataset::make(&quot;InterpolationPolicy&quot;, { InterpolationPolicy::NEAREST_NEIGHBOR })), datasets::BorderModes()), datasets::SamplingPolicies()))</td></tr>
-<tr class="separator:a5c38109e4992afecf1325e188de37d58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad56ba736ba5ba45aa629f1d7345ffe7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aad56ba736ba5ba45aa629f1d7345ffe7">FIXTURE_DATA_TEST_CASE</a> (RunLarge, GCScaleFixture&lt; half &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW })), framework::dataset::make(&quot;InterpolationPolicy&quot;, { InterpolationPolicy::NEAREST_NEIGHBOR })), datasets::BorderModes()), datasets::SamplingPolicies()))</td></tr>
-<tr class="separator:aad56ba736ba5ba45aa629f1d7345ffe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a788309a5234e34bd7f0729e5b339321b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a788309a5234e34bd7f0729e5b339321b">FIXTURE_DATA_TEST_CASE</a> (RunSmall, GCScaleFixture&lt; half &gt;, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW })), framework::dataset::make(&quot;InterpolationPolicy&quot;, { InterpolationPolicy::NEAREST_NEIGHBOR })), datasets::BorderModes()), datasets::SamplingPolicies()), AlignCorners))</td></tr>
+<tr class="separator:a788309a5234e34bd7f0729e5b339321b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a935d80b3175db4a0353835c1e78c430b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a935d80b3175db4a0353835c1e78c430b">FIXTURE_DATA_TEST_CASE</a> (RunLarge, GCScaleFixture&lt; half &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)), framework::dataset::make(&quot;DataLayout&quot;, { DataLayout::NCHW })), framework::dataset::make(&quot;InterpolationPolicy&quot;, { InterpolationPolicy::NEAREST_NEIGHBOR })), datasets::BorderModes()), datasets::SamplingPolicies()), AlignCorners))</td></tr>
+<tr class="separator:a935d80b3175db4a0353835c1e78c430b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -154,7 +154,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_fbdf7bf92663091dc4d5520df638c068.xhtml">GLES_COMPUTE</a></li><li class="navelem"><a class="el" href="validation_2_g_l_e_s___c_o_m_p_u_t_e_2_scale_8cpp.xhtml">Scale.cpp</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:48 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

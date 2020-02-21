@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLELEMENTWISEOPERATIONKERNEL_H__
-#define __ARM_COMPUTE_CLELEMENTWISEOPERATIONKERNEL_H__
+#ifndef ARM_COMPUTE_CLELEMENTWISEOPERATIONKERNEL_H
+#define ARM_COMPUTE_CLELEMENTWISEOPERATIONKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -64,7 +64,7 @@ protected:
 
     /** Initialise the kernel's output.
      *
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: Same as @p input1.
      *
@@ -74,7 +74,7 @@ protected:
 
     /** Validate the argument passed to the kernel
      *
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: Same as @p input1.
      */
@@ -115,7 +115,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: Same as @p input1.
      * @param[in] policy Policy to use to handle overflow.
@@ -125,7 +125,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      * @param[in] policy Policy to use to handle overflow.
@@ -158,7 +158,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: Same as @p input1.
      */
@@ -167,7 +167,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      *
@@ -187,4 +187,4 @@ private:
     ArithmeticOperation _op;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLELEMENTWISEOPERATIONKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLELEMENTWISEOPERATIONKERNEL_H */

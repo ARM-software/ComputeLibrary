@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLRESHAPELAYERKERNEL_H__
-#define __ARM_COMPUTE_CLRESHAPELAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLRESHAPELAYERKERNEL_H
+#define ARM_COMPUTE_CLRESHAPELAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -49,14 +49,14 @@ public:
     ~CLReshapeLayerKernel() = default;
     /** Set the input and output of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in]  input  Source tensor. Data type supported: All.
      * @param[out] output Destination tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayerKernel
      *
-     * @param[in] input  Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in] input  Source tensor info. Data type supported: All
      * @param[in] output Destination tensor info. Data type supported: Same as @p input
      *
      * @return a status
@@ -71,4 +71,4 @@ private:
     ICLTensor       *_output; /**< Destination tensor */
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLRESHAPELAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLRESHAPELAYERKERNEL_H */

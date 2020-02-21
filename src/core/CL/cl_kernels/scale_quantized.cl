@@ -165,7 +165,7 @@ __kernel void scale_bilinear_quantized_nhwc(
 
     const float fr = ((insf32.s0 * b * b1) + (insf32.s1 * a * b1) + (insf32.s2 * b * a1) + (insf32.s3 * a * a1));
 
-    uchar res = convert_uchar_sat(convert_int_sat_rtp(fr / SCALE) + OFFSET);
+    DATA_TYPE res = CONVERT_SAT(convert_int_sat_rtp(fr / SCALE) + OFFSET, DATA_TYPE);
 
     *((__global DATA_TYPE *)out.ptr) = res;
 }

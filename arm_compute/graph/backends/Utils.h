@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_BACKENDS_UTILS_H__
-#define __ARM_COMPUTE_GRAPH_BACKENDS_UTILS_H__
+#ifndef ARM_COMPUTE_GRAPH_BACKENDS_UTILS_H
+#define ARM_COMPUTE_GRAPH_BACKENDS_UTILS_H
 
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -108,4 +108,4 @@ inline std::shared_ptr<IWeightsManager> get_weights_manager(GraphContext &ctx, T
 } // namespace graph
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_GRAPH_BACKENDS_UTILS_H__ */
+#endif /* ARM_COMPUTE_GRAPH_BACKENDS_UTILS_H */

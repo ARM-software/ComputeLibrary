@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H__
-#define __ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H__
+#ifndef ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H
+#define ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -189,7 +189,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
      *
      * @param[in] op     Comparison operation to be executed.
-     * @param[in] input1 First tensor input. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: U16/U32.
      */
@@ -198,7 +198,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
      *
      * @param[in] op     Comparison operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: U16/U32.
      *
@@ -211,4 +211,4 @@ protected:
     static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H__ */
+#endif /* ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H */

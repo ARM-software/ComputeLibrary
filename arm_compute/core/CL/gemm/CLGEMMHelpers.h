@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMHELPERS_H__
-#define __ARM_COMPUTE_CLGEMMHELPERS_H__
+#ifndef ARM_COMPUTE_CLGEMMHELPERS_H
+#define ARM_COMPUTE_CLGEMMHELPERS_H
 
 #include "arm_compute/core/Types.h"
 
@@ -50,4 +50,4 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_lhs_rhs_info(unsigned 
                                                                        bool lhs_interleave, bool rhs_interleave, bool lhs_transpose, bool rhs_transpose);
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLGEMMHELPERS_H__ */
+#endif /*ARM_COMPUTE_CLGEMMHELPERS_H */

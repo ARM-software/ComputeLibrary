@@ -61,7 +61,7 @@ public:
 
     static constexpr bool supports_append()
     {
-        return false;
+        return true;
     }
 
     static constexpr bool supports_bias()

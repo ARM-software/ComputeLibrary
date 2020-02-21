@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLTILE_H__
-#define __ARM_COMPUTE_CLTILE_H__
+#ifndef ARM_COMPUTE_CLTILE_H
+#define ARM_COMPUTE_CLTILE_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -38,14 +38,14 @@ class CLTile : public ICLSimpleFunction
 public:
     /** Set the source, destination of the kernel
      *
-     * @param[in]  input     Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input     Source tensor. Data type supported: All.
      * @param[in]  multiples Contains the number of times the input tensor should be replicated on the given dimension.
      * @param[out] output    Destination tensor. Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output, const Multiples &multiples);
     /** Static function to check if given info will lead to a valid configuration of @ref CLTile
      *
-     * @param[in] input     Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input     Source tensor info. Data type supported: All.
      * @param[in] multiples Contains the number of times the input tensor should be replicated on the given dimension.
      * @param[in] output    Destination tensor info. Same as @p input
      *
@@ -54,4 +54,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Multiples &multiples);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLTILE_H__ */
+#endif /* ARM_COMPUTE_CLTILE_H */

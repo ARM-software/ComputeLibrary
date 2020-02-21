@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H__
-#define __ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H__
+#ifndef ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H
+#define ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H
 
 #include "arm_compute/core/CL/kernels/CLHistogramKernel.h"
 #include "arm_compute/core/CL/kernels/CLTableLookupKernel.h"
@@ -69,4 +69,4 @@ private:
     static const uint32_t   nr_bins   = 256;          /**< Histogram bins of the internal histograms. */
 };
 }
-#endif /*__ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H__ */
+#endif /*ARM_COMPUTE_CLEQUALIZEHISTOGRAM_H */

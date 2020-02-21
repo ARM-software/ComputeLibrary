@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -399,44 +399,95 @@ std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensio
     return std::make_pair<unsigned int, unsigned int>(w, h);
 }
 
-std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height,
-                                                                     unsigned int kernel_width, unsigned int kernel_height,
+std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(int width, int height,
+                                                                     int kernel_width, int kernel_height,
                                                                      const PadStrideInfo &pad_stride_info,
                                                                      const Size2D        &dilation)
 {
-    const unsigned int pad_left   = pad_stride_info.pad_left();
-    const unsigned int pad_top    = pad_stride_info.pad_top();
-    const unsigned int pad_right  = pad_stride_info.pad_right();
-    const unsigned int pad_bottom = pad_stride_info.pad_bottom();
-    const unsigned int stride_x   = pad_stride_info.stride().first;
-    const unsigned int stride_y   = pad_stride_info.stride().second;
-    unsigned int       w          = 0;
-    unsigned int       h          = 0;
+    const int dilation_x = dilation.x();
+    const int dilation_y = dilation.y();
+    const int pad_left   = pad_stride_info.pad_left();
+    const int pad_top    = pad_stride_info.pad_top();
+    const int pad_right  = pad_stride_info.pad_right();
+    const int pad_bottom = pad_stride_info.pad_bottom();
+    const int stride_x   = pad_stride_info.stride().first;
+    const int stride_y   = pad_stride_info.stride().second;
+    int       w          = 0;
+    int       h          = 0;
     switch(pad_stride_info.round())
     {
         case DimensionRoundingType::FLOOR:
-            w = static_cast<unsigned int>(std::floor((static_cast<float>(width + pad_left + pad_right - (dilation.x() * (kernel_width - 1) + 1)) / stride_x) + 1));
-            h = static_cast<unsigned int>(std::floor((static_cast<float>(height + pad_top + pad_bottom - (dilation.y() * (kernel_height - 1) + 1)) / stride_y) + 1));
+            w = static_cast<int>(std::floor((static_cast<float>(width + pad_left + pad_right - (dilation_x * (kernel_width - 1) + 1)) / stride_x) + 1));
+            h = static_cast<int>(std::floor((static_cast<float>(height + pad_top + pad_bottom - (dilation_y * (kernel_height - 1) + 1)) / stride_y) + 1));
             break;
         case DimensionRoundingType::CEIL:
-            w = static_cast<unsigned int>(std::ceil((static_cast<float>(width + pad_left + pad_right - (dilation.x() * (kernel_width - 1) + 1)) / stride_x) + 1));
-            h = static_cast<unsigned int>(std::ceil((static_cast<float>(height + pad_top + pad_bottom - (dilation.y() * (kernel_height - 1) + 1)) / stride_y) + 1));
+            w = static_cast<int>(std::ceil((static_cast<float>(width + pad_left + pad_right - (dilation_x * (kernel_width - 1) + 1)) / stride_x) + 1));
+            h = static_cast<int>(std::ceil((static_cast<float>(height + pad_top + pad_bottom - (dilation_y * (kernel_height - 1) + 1)) / stride_y) + 1));
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported rounding type");
     }
 
-    return std::make_pair(w, h);
+    w = std::max(1, w);
+    h = std::max(1, h);
+    return std::make_pair(static_cast<unsigned int>(w), static_cast<unsigned int>(h));
 }
 
 bool arm_compute::needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis)
 {
-    const bool is_arg_min_max    = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN);
     const bool is_min_max        = (op == ReductionOperation::MAX || op == ReductionOperation::MIN);
     const bool is_quantized_type = is_data_type_quantized(dt);
     const bool is_first_dim      = (axis == 0);
 
-    return !is_first_dim || is_arg_min_max || is_min_max || is_quantized_type;
+    return !is_first_dim || is_min_max || is_quantized_type;
+}
+
+QuantizationInfo arm_compute::get_softmax_output_quantization_info(DataType input_type, bool is_log)
+{
+    // Note: Output quantization info for softmax should always have
+    // * Softmax with QASYMM8: scale = 1/256, offset = 0
+    // * Softmax with QASYMM8_SIGNED: scale = 1/256, offset = -128
+    // * LogSoftmax with QASYMM8: scale = 1/256, offset = 0
+    // * LogSoftmax with QASYMM8_SIGNED: scale = 16/256, offset = 127
+    if(is_data_type_quantized_asymmetric_signed(input_type))
+    {
+        if(is_log)
+        {
+            return QuantizationInfo(16.f / 256, 127);
+        }
+        else
+        {
+            return QuantizationInfo(1.f / 256, -128);
+        }
+    }
+    return QuantizationInfo(1.f / 256, 0);
+}
+
+float arm_compute::calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners)
+{
+    const size_t offset = align_corners ? 1 : 0;
+    const auto   in     = input_size - offset;
+    const auto   out    = output_size - offset;
+
+    ARM_COMPUTE_ERROR_ON((input_size == 0 || output_size == 0) && offset == 1);
+    ARM_COMPUTE_ERROR_ON(out == 0);
+
+    return static_cast<float>(in) / static_cast<float>(out);
+}
+
+std::pair<int32_t, int32_t> arm_compute::get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info)
+{
+    const bool is_qasymm8_signed = is_data_type_quantized_asymmetric_signed(data_type);
+    const auto a                 = act_info.a();
+    const auto b                 = act_info.b();
+    const int  a_int             = is_qasymm8_signed ? quantize_qasymm8_signed(a, oq_info) : quantize_qasymm8(a, oq_info);
+    const int  b_int             = is_qasymm8_signed ? quantize_qasymm8_signed(b, oq_info) : quantize_qasymm8(b, oq_info);
+    const auto type_max_value    = std::get<1>(get_min_max(data_type)).get<int32_t>();
+
+    const int32_t min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? oq_info.offset : b_int;
+    const int32_t max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? type_max_value : a_int;
+
+    return std::make_pair(min_activation, max_activation);
 }
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -524,7 +524,7 @@ template <typename T1>
 class convolver_nhwc
 {
 public:
-    static void convolve(const Window &window, int kernel_size, unsigned int num_elems_read_per_iteration,
+    static void convolve(const Window &window, uint32_t kernel_size, unsigned int num_elems_read_per_iteration,
                          const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
     {
         const int          input_width     = input->info()->dimension(0);
@@ -577,7 +577,7 @@ public:
                 auto in_addr_base0 = in_ptr;
                 auto we_addr_base0 = k.ptr();
 
-                for(int z = 0; z < kernel_size; ++z, in_addr_base0 += input_stride_z, we_addr_base0 += kernel_stride_z)
+                for(uint32_t z = 0; z < kernel_size; ++z, in_addr_base0 += input_stride_z, we_addr_base0 += kernel_stride_z)
                 {
                     const int in_z = id.z() * conv_stride_y + z - conv_pad_top;
 
@@ -586,7 +586,7 @@ public:
                         auto in_addr_base1 = in_addr_base0;
                         auto we_addr_base1 = we_addr_base0;
 
-                        for(int y = 0; y < kernel_size; ++y, in_addr_base1 += input_stride_y, we_addr_base1 += kernel_stride_y)
+                        for(uint32_t y = 0; y < kernel_size; ++y, in_addr_base1 += input_stride_y, we_addr_base1 += kernel_stride_y)
                         {
                             auto out_values = internal_vdupq_n(zero);
 
@@ -651,7 +651,7 @@ public:
         const int          output_w        = output->info()->dimension(0);
         const int          output_h        = output->info()->dimension(1);
         const int          num_planes_z    = window.z().end() - window.z().start();
-        const int          delta_input     = get_input_num_elems_processed<stridex>(num_elems_written_per_iteration);
+        const int          delta_input     = get_input_num_elems_processed(num_elems_written_per_iteration, stridex);
         const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
         const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
         const unsigned int conv_pad_left   = conv_info.pad_left();
@@ -718,7 +718,7 @@ public:
                         for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration,
                             in_top += delta_input, in_mid += delta_input, in_low += delta_input, p_out += num_elems_written_per_iteration)
                         {
-                            auto vres = convolve_3x3<stridex>(in_top, in_mid, in_low, vk_r0, vk_r1, vk_r2);
+                            auto vres = convolve_3x3(in_top, in_mid, in_low, vk_r0, vk_r1, vk_r2, stridex);
                             store_results<stridex>(p_out, vres);
                         }
                     }
@@ -743,7 +743,7 @@ public:
                         for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration,
                             in_top += delta_input, in_mid += delta_input, in_low += delta_input, p_out += num_elems_written_per_iteration)
                         {
-                            auto vres = convolve_3x3<stridex>(in_top, in_mid, in_low, vk_r0, vk_r1, vk_r2);
+                            auto vres = convolve_3x3(in_top, in_mid, in_low, vk_r0, vk_r1, vk_r2, stridex);
                             accumulate_results<stridex>(p_out, vres);
                         }
                     }
@@ -774,7 +774,7 @@ public:
         const int          output_w        = output->info()->dimension(0);
         const int          output_h        = output->info()->dimension(1);
         const int          num_planes_z    = window.z().end() - window.z().start();
-        const int          delta_input     = get_input_num_elems_processed<stridex>(num_elems_written_per_iteration);
+        const int          delta_input     = get_input_num_elems_processed(num_elems_written_per_iteration, stridex);
         const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
         const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
         const unsigned int conv_pad_left   = conv_info.pad_left();

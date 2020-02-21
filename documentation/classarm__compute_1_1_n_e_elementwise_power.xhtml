@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -193,8 +193,8 @@ For an exponent that is a float, this function will only work with a positive ba
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml#l00082">82</a> of file <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml">NEElementwiseOperators.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;{</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NEPowerOperationKernel&gt;();</div><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    k-&gt;configure(input1, input2, output);</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml#l00093">93</a> of file <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml">NEElementwiseOperators.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;{</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NEPowerOperationKernel&gt;();</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    k-&gt;configure(input1, input2, output);</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a id="afe71126bef1735fe1613a6da30d2c0c4"></a>
@@ -248,10 +248,10 @@ For an exponent that is a float, this function will only work with a positive ba
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml#l00089">89</a> of file <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml">NEElementwiseOperators.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;{</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_power_operation_kernel.xhtml#afe71126bef1735fe1613a6da30d2c0c4">NEPowerOperationKernel::validate</a>(input1, input2, output);</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_power_operation_kernel_xhtml_afe71126bef1735fe1613a6da30d2c0c4"><div class="ttname"><a href="classarm__compute_1_1_n_e_power_operation_kernel.xhtml#afe71126bef1735fe1613a6da30d2c0c4">arm_compute::NEPowerOperationKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEArithmeticOperationKer...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_elementwise_operation_kernel_8cpp_source.xhtml#l00939">NEElementwiseOperationKernel.cpp:939</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml#l00100">100</a> of file <a class="el" href="_n_e_elementwise_operators_8cpp_source.xhtml">NEElementwiseOperators.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;{</div><div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_power_operation_kernel.xhtml#afe71126bef1735fe1613a6da30d2c0c4">NEPowerOperationKernel::validate</a>(input1, input2, output);</div><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_power_operation_kernel_xhtml_afe71126bef1735fe1613a6da30d2c0c4"><div class="ttname"><a href="classarm__compute_1_1_n_e_power_operation_kernel.xhtml#afe71126bef1735fe1613a6da30d2c0c4">arm_compute::NEPowerOperationKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEArithmeticOperationKer...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_elementwise_operation_kernel_8cpp_source.xhtml#l01213">NEElementwiseOperationKernel.cpp:1213</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_n_e_elementwise_operation_kernel_8cpp_source.xhtml#l00939">NEPowerOperationKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="_n_e_elementwise_operation_kernel_8cpp_source.xhtml#l01213">NEPowerOperationKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -265,7 +265,7 @@ For an exponent that is a float, this function will only work with a positive ba
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_elementwise_power.xhtml">NEElementwisePower</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:55 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:29 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

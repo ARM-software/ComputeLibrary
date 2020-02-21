@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,9 @@ const auto PReluLayerU8Dataset = combine(combine(framework::dataset::make("DataT
 const auto PReluLayerQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
                                               framework::dataset::make("DataType",
                                                                        DataType::QASYMM8));
+const auto PReluLayerQASYMM8SIGNEDDataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                    framework::dataset::make("DataType",
+                                                                             DataType::QASYMM8_SIGNED));
 const auto PReluLayerS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
                                           framework::dataset::make("DataType", DataType::S16));
 const auto PReluLayerFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
@@ -165,7 +168,21 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<uint8_t>, framewor
                       )
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                  PReluLayerQASYMM8SIGNEDDataset),
+                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 127.f, 20) })),
+                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 127.f, 10) })),
+                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 127.f, 5) }))
+
+                      )
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
@@ -211,8 +228,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<half>, framework::DatasetMo
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(), shape)
 {
     // Create tensors
     CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::F32);

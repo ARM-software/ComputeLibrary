@@ -6,6 +6,5 @@ var searchData=
   ['parallelreductioninfo',['ParallelReductionInfo',['../classarm__compute_1_1_c_l_logits1_d_max_shift_exp_sum_kernel.xhtml#a6474b575b0139e3e1973acc9179556b8',1,'arm_compute::CLLogits1DMaxShiftExpSumKernel']]],
   ['permutationvector',['PermutationVector',['../namespacearm__compute.xhtml#a33e65be485104e2e9e69fca551d6f492',1,'arm_compute']]],
   ['promote_5ft',['promote_t',['../namespacearm__compute_1_1wrapper_1_1traits.xhtml#ac20ca549fa27b2eed44367745055a233',1,'arm_compute::wrapper::traits::promote_t()'],['../namespacearm__compute_1_1test_1_1traits.xhtml#ac20ca549fa27b2eed44367745055a233',1,'arm_compute::test::traits::promote_t()']]],
-  ['promoted_5ftype',['promoted_type',['../structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml#aeab553c4422f2a498954db0b4eb15789',1,'arm_compute::test::common_promoted_signed_type::promoted_type()'],['../structarm__compute_1_1test_1_1common__promoted__unsigned__type.xhtml#aeab553c4422f2a498954db0b4eb15789',1,'arm_compute::test::common_promoted_unsigned_type::promoted_type()']]],
-  ['ptr_5ft',['ptr_t',['../namespacearm__compute.xhtml#a1e36f8a2df3d6bd1756b90e2efb151e9',1,'arm_compute']]]
+  ['promoted_5ftype',['promoted_type',['../structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml#aeab553c4422f2a498954db0b4eb15789',1,'arm_compute::test::common_promoted_signed_type::promoted_type()'],['../structarm__compute_1_1test_1_1common__promoted__unsigned__type.xhtml#aeab553c4422f2a498954db0b4eb15789',1,'arm_compute::test::common_promoted_unsigned_type::promoted_type()']]]
 ];

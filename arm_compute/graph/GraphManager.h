@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_GRAPH_MANAGER_H__
-#define __ARM_COMPUTE_GRAPH_GRAPH_MANAGER_H__
+#ifndef ARM_COMPUTE_GRAPH_GRAPH_MANAGER_H
+#define ARM_COMPUTE_GRAPH_GRAPH_MANAGER_H
 
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/graph/Workload.h"
@@ -83,4 +83,4 @@ private:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_GRAPH_MANAGER_H__ */
+#endif /* ARM_COMPUTE_GRAPH_GRAPH_MANAGER_H */

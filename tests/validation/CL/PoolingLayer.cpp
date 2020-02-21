@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,9 +71,10 @@ framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(5, 7) })),
 framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
 framework::dataset::make("ExcludePadding", { true }));
 
-constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
-constexpr AbsoluteTolerance<float>   tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);  /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
+constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f);  /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
+constexpr AbsoluteTolerance<float>   tolerance_f16(0.01f);   /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);   /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit signed asymmetric type */
 const auto                           pool_data_layout_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
 
 const auto pool_fp_mixed_precision_dataset = framework::dataset::make("FpMixedPrecision", { true, false });
@@ -93,6 +94,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8), // Invalid parameters
                                                        TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32),     // Non-rectangular Global Pooling
                                                        TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),     // Invalid output Global Pooling
+                                                       TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::QASYMM8), // Invalid exclude_padding = false with quantized type, no actual padding and NHWC
                                                        TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
@@ -102,18 +104,20 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(12U, 12U, 5U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32),
                                                      })),
-               framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
-                                                       PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
-                                                       PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 2, 0)),
-                                                       PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 0, 2)),
-                                                       PoolingLayerInfo(PoolingType::L2, 3, PadStrideInfo(1, 1, 0, 0)),
-                                                       PoolingLayerInfo(PoolingType::AVG),
-                                                       PoolingLayerInfo(PoolingType::MAX),
-                                                       PoolingLayerInfo(PoolingType::AVG),
+               framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 2, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 2)),
+                                                       PoolingLayerInfo(PoolingType::L2, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
+                                                       PoolingLayerInfo(PoolingType::AVG, DataLayout::NCHW),
+                                                       PoolingLayerInfo(PoolingType::MAX, DataLayout::NCHW),
+                                                       PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NHWC, PadStrideInfo(), false),
+                                                       PoolingLayerInfo(PoolingType::AVG, DataLayout::NCHW),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, false, false, true, false, true })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true, false, false, true })),
                input_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info)) == expected, framework::LogLevel::ERRORS);
@@ -188,14 +192,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framew
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQASYMM8,
-                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8))),
-                                                                                                                   pool_data_layout_dataset))
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8Small,
+                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))),
+                                                                                                                    pool_data_layout_dataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);
 }
-TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // PoolingLayer
 TEST_SUITE_END() // CL

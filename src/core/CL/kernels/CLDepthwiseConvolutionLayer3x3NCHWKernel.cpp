@@ -48,8 +48,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
                           const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && (input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && (input->data_type() == DataType::QASYMM8 || input->data_type() == DataType::QASYMM8_SIGNED)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
@@ -296,6 +297,14 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
         build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * iq_info.offset * wq_info.offset));
         build_opts.add_option_if(is_quantized_per_channel, "-DPER_CHANNEL_QUANTIZATION");
         build_opts.add_option_if(is_dot8_supported, "-DIS_DOT8");
+
+        // Compute non-per-channel multiplier and shift anyway to make OpenCL kernel simpler
+        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+        build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+        build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
 
         if(act_info.enabled())
         {

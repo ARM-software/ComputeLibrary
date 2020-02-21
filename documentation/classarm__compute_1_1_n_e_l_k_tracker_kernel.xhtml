@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -570,7 +570,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section warning"><dt>Warning</dt><dd>If <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a0466ee6ce6552c87595f0e88e73eeb1b" title="Indicates whether or not the kernel is parallelisable.">is_parallelisable()</a> returns false then the passed window must be equal to <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#ad34a46f53686c12a5c5e717cc9617fb6" title="The maximum window the kernel can be executed on.">window()</a></dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The window has to be a region within the window returned by the <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#ad34a46f53686c12a5c5e717cc9617fb6" title="The maximum window the kernel can be executed on.">window()</a> method</dd>
 <dd>
-The width of the window has to be a multiple of num_elems_processed_per_iteration().</dd></dl>
+The width of the window has to be a multiple of <a class="el" href="_c_l_im2_col_kernel_8cpp.xhtml#a4e45c1f5e4280813a78a77dda71d8799">num_elems_processed_per_iteration()</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">window</td><td>Region on which to execute the kernel. (Must be a region of the window returned by <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#ad34a46f53686c12a5c5e717cc9617fb6" title="The maximum window the kernel can be executed on.">window()</a>) </td></tr>
@@ -592,7 +592,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_l_k_tracker_kernel.xhtml">NELKTrackerKernel</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:56 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

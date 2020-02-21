@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_CROP_RESIZE_H__
-#define __ARM_COMPUTE_TEST_CROP_RESIZE_H__
+#ifndef ARM_COMPUTE_TEST_CROP_RESIZE_H
+#define ARM_COMPUTE_TEST_CROP_RESIZE_H
 
 #include "tests/SimpleTensor.h"
 
@@ -41,4 +41,4 @@ SimpleTensor<float> crop_and_resize(const SimpleTensor<T> &src, const SimpleTens
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_CROP_RESIZE_H__ */
+#endif /* ARM_COMPUTE_TEST_CROP_RESIZE_H */

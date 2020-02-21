@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLREORGLAYERKERNEL_H__
-#define __ARM_COMPUTE_CLREORGLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLREORGLAYERKERNEL_H
+#define ARM_COMPUTE_CLREORGLAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -47,7 +47,7 @@ public:
     CLReorgLayerKernel &operator=(CLReorgLayerKernel &&) = default;
     /** Initialize the kernel's input, output.
      *
-     * @param[in]  input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input  Source tensor. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32.
      * @param[out] output Destination tensor with tensor shape:
      *                    [width_input / stride, height_input / stride, channels_input * stride * stride, batch_size]. This means the output has
      *                    the same number of input elements. Data types supported: same as @p input.
@@ -57,7 +57,7 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, int32_t stride);
     /** Static function to check if given info will lead to a valid configuration of @ref CLReorgLayerKernel
      *
-     * @param[in] input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input  Source tensor. Data types supported: All.
      * @param[in] output Destination tensor with tensor shape:
      *                   [width_input / stride, height_input / stride, channels_input * stride * stride, batch_size]. This means the output has
      *                   the same number of input elements. Data types supported: same as @p input. Data types supported: same as @p input.
@@ -76,4 +76,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLREORGLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLREORGLAYERKERNEL_H */

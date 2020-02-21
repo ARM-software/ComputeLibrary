@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLL2NORMALIZELAYER_H__
-#define __ARM_COMPUTE_CLL2NORMALIZELAYER_H__
+#ifndef ARM_COMPUTE_CLL2NORMALIZELAYER_H
+#define ARM_COMPUTE_CLL2NORMALIZELAYER_H
 
 #include "arm_compute/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "arm_compute/core/Types.h"
@@ -81,4 +81,4 @@ private:
     CLTensor                 _sumsq;
 };
 }
-#endif /*__ARM_COMPUTE_CLL2NORMALIZELAYER_H__ */
+#endif /*ARM_COMPUTE_CLL2NORMALIZELAYER_H */

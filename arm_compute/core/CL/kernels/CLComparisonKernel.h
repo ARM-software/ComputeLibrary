@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCOMPARISONKERNEL_H__
-#define __ARM_COMPUTE_CLCOMPARISONKERNEL_H__
+#ifndef ARM_COMPUTE_CLCOMPARISONKERNEL_H
+#define ARM_COMPUTE_CLCOMPARISONKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -50,7 +50,7 @@ public:
     ~CLComparisonKernel() = default;
     /** Set the inputs and output tensors
      *
-     * @param[in]  input1    Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input1    Source tensor. Data types supported: All.
      * @param[in]  input2    Source tensor. Data types supported: Same as @p input1.
      * @param[out] output    Destination tensor. Data types supported: U8.
      * @param[in]  operation Comparison operation to use.
@@ -58,7 +58,7 @@ public:
     void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation);
     /** Static function to check if given info will lead to a valid configuration of @ref CLComparisonKernel
      *
-     * @param[in] input1    Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input1    Source tensor. Data types supported: All.
      * @param[in] input2    Source tensor. Data types supported: Same as @p input1.
      * @param[in] output    Destination tensor. Data types supported: U8.
      * @param[in] operation Comparison operation to use.
@@ -77,4 +77,4 @@ private:
     ICLTensor       *_output; /**< Destination tensor */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLCOMPARISONKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLCOMPARISONKERNEL_H */

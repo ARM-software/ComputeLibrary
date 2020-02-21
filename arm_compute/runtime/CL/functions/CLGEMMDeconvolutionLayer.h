@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H__
-#define __ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H__
+#ifndef ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H
+#define ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H
 
 #include "arm_compute/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
@@ -141,4 +142,4 @@ private:
     bool             _is_quantized;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H__ */
+#endif /* ARM_COMPUTE_CLGEMMDECONVOLUTIONLAYER_H */

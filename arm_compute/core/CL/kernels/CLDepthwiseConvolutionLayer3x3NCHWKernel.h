@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H__
-#define __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H__
+#ifndef ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H
+#define ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H
 
 #include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 
@@ -39,11 +39,11 @@ public:
     CLDepthwiseConvolutionLayer3x3NCHWKernel();
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in]  input              Source tensor. DataType supported: QASYMM8/F16/F32.
+     * @param[in]  input              Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights            Weights tensor. A 3D tensor with dimensions [3, 3, IFM].
-     *                                Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                                Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
      * @param[in]  biases             Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                                Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                                Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[out] output             Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info          Padding and stride information to use for the convolution.
      * @param[in]  depth_multiplier   (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -59,11 +59,11 @@ public:
                    const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NCHWKernel
      *
-     * @param[in] input              Source tensor info. DataType supported: F16/F32/QASYMM8.
+     * @param[in] input              Source tensor info. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] weights            Weights tensor info. A 3D tensor with dimensions [3, 3, IFM].
-     *                               Data type supported: Same as @p input or QASYMM8/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     *                               Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] biases             Biases tensor info. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                               Data type supported: Same as @p input, S32 when input is QASYMM8.
+     *                               Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
      * @param[in] output             Destination tensor. Data type supported: Same as @p input.
      * @param[in] conv_info          Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier   (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
@@ -90,4 +90,4 @@ private:
     unsigned int _conv_pad_left;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H__ */
+#endif /*ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NETILEKERNEL_H__
-#define __ARM_COMPUTE_NETILEKERNEL_H__
+#ifndef ARM_COMPUTE_NETILEKERNEL_H
+#define ARM_COMPUTE_NETILEKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -50,14 +50,14 @@ public:
     }
     /** Set the source, destination of the kernel
      *
-     * @param[in]  input     Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input     Source tensor. Data type supported: All.
      * @param[out] output    Destination tensor. Same as @p input
      * @param[in]  multiples Contains the number of times the input tensor should be replicated on the given dimension.
      */
     void configure(const ITensor *input, ITensor *output, const Multiples &multiples);
     /** Static function to check if given info will lead to a valid configuration of @ref NETileKernel
      *
-     * @param[in] input     Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input     Source tensor info. Data type supported: All.
      * @param[in] output    Destination tensor info. Same as @p input
      * @param[in] multiples Contains the number of times the input tensor should be replicated on the given dimension.
      *
@@ -73,4 +73,4 @@ private:
     ITensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NETILEKERNEL_H__ */
+#endif /*ARM_COMPUTE_NETILEKERNEL_H */

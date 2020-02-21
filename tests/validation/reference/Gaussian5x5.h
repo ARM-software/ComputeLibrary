@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_GAUSSIAN5X5_H__
-#define __ARM_COMPUTE_TEST_GAUSSIAN5X5_H__
+#ifndef ARM_COMPUTE_TEST_GAUSSIAN5X5_H
+#define ARM_COMPUTE_TEST_GAUSSIAN5X5_H
 
 #include "tests/SimpleTensor.h"
 
@@ -40,4 +40,4 @@ SimpleTensor<T> gaussian5x5(const SimpleTensor<T> &src, BorderMode border_mode, 
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_GAUSSIAN5X5_H__ */
+#endif /* ARM_COMPUTE_TEST_GAUSSIAN5X5_H */

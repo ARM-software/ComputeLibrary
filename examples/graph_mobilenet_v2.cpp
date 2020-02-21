@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -188,7 +188,7 @@ private:
               .set_name("Conv_1/BatchNorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
               .set_name("Conv_1/Relu6")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("Logits/AvgPool")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, common_params.data_layout)).set_name("Logits/AvgPool")
               << ConvolutionLayer(1U, 1U, 1001U,
                                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy", DataLayout::NCHW),
                                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_biases.npy"),
@@ -398,7 +398,7 @@ private:
                                   PadStrideInfo(1, 1, 0, 0), 1, conv_weights_quant_info.at(1))
               .set_name("Conv_1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name("Conv_1/Relu6")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("Logits/AvgPool")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, common_params.data_layout)).set_name("Logits/AvgPool")
               << ConvolutionLayer(1U, 1U, 1001U,
                                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy"),
                                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_biases.npy"),

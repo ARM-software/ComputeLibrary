@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,8 +28,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
@@ -40,23 +40,36 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     k->configure(input, output, pool_info);
     _kernel = std::move(k);
 
+    const DataType data_type = input->info()->data_type();
+
     // Configure border depending on operation required (quantize border in case of asymmetric data_type)
     BorderMode border_mode{};
     PixelValue pixel_value(0.f);
-    if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding())
+    if(is_data_type_quantized_asymmetric(data_type) && !pool_info.exclude_padding)
     {
-        pixel_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().uniform().offset));
+        pixel_value = PixelValue(0, data_type, input->info()->quantization_info());
     }
-    switch(input->info()->data_layout())
+
+    // Data layout
+    const auto data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
+
+    switch(data_layout)
     {
         case DataLayout::NCHW:
-            border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
+            border_mode = (PoolingType::MAX == pool_info.pool_type) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
             break;
         case DataLayout::NHWC:
             border_mode = BorderMode::CONSTANT;
-            if(PoolingType::MAX == pool_info.pool_type() && !is_data_type_quantized_asymmetric(input->info()->data_type()))
+            if(PoolingType::MAX == pool_info.pool_type)
             {
-                pixel_value = PixelValue(std::numeric_limits<float>::lowest());
+                if(is_data_type_quantized(data_type))
+                {
+                    std::tie(pixel_value, std::ignore) = get_min_max(data_type);
+                }
+                else
+                {
+                    pixel_value = PixelValue(std::numeric_limits<float>::lowest());
+                }
             }
             break;
         default:
@@ -72,3 +85,4 @@ Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 {
     return CLPoolingLayerKernel::validate(input, output, pool_info);
 }
+} // namespace arm_compute

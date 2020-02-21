@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_PAD_LAYER_NODE_H__
-#define __ARM_COMPUTE_GRAPH_PAD_LAYER_NODE_H__
+#ifndef ARM_COMPUTE_GRAPH_PAD_LAYER_NODE_H
+#define ARM_COMPUTE_GRAPH_PAD_LAYER_NODE_H
 
 #include "arm_compute/graph/INode.h"
 
@@ -39,7 +39,7 @@ public:
      * @param[in] padding The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                    specifies the front and the end padding in the i-th dimension.
      */
-    PadLayerNode(PaddingList &padding);
+    PadLayerNode(const PaddingList &padding);
     /** Padding list accessor
      *
      * @return Padding list
@@ -57,4 +57,4 @@ private:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_PAD_LAYER_NODE_H__ */
+#endif /* ARM_COMPUTE_GRAPH_PAD_LAYER_NODE_H */

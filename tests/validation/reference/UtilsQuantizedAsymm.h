@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H__
-#define __ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H__
+#ifndef ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H
+#define ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H
 
 #include <cstdint>
 
@@ -51,7 +51,25 @@ inline int32_t asymm_int_mult(int32_t a, int32_t b)
     int32_t ab_x2_high32 = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
     return overflow ? std::numeric_limits<int32_t>::max() : ab_x2_high32;
 }
+
+/** Quantize down the input value in range [min, max]. */
+inline int32_t quantize_down_scale_by_fixedpoint(int32_t val, int32_t result_mult_int, int32_t result_shift,
+                                                 int32_t result_offset_after_shift, int32_t min, int32_t max)
+{
+    int32_t res = 0;
+    if(result_shift < 0)
+    {
+        res = asymm_int_mult(val * (1 << (-result_shift)), result_mult_int);
+    }
+    else
+    {
+        res = asymm_rounding_divide_by_pow2(asymm_int_mult(val, result_mult_int), result_shift);
+    }
+    res += result_offset_after_shift;
+    res = utility::clamp<int32_t>(res, min, max);
+    return res;
+}
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H__ */
+#endif /* ARM_COMPUTE_TEST_VALIDATION_UTILS_QUANTIZED_ASYMM_H */

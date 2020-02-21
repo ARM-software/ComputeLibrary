@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -145,6 +145,7 @@ NEON functions</h1>
 <li><a class="el" href="classarm__compute_1_1_n_e_scharr3x3.xhtml">NEScharr3x3</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_select.xhtml">NESelect</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_sobel3x3.xhtml">NESobel3x3</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_split.xhtml">NESplit</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_strided_slice.xhtml">NEStridedSlice</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_warp_affine.xhtml">NEWarpAffine</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_warp_perspective.xhtml">NEWarpPerspective</a></li>
@@ -173,6 +174,7 @@ NEON functions</h1>
 <li><a class="el" href="classarm__compute_1_1_n_e_gather.xhtml">NEGather</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_interleave4x4.xhtml">NEGEMMInterleave4x4</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8Scale</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w.xhtml">NEGEMMTranspose1xW</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector.xhtml">NEHOGDetector</a></li>
@@ -215,6 +217,7 @@ NEON functions</h1>
 <li><a class="el" href="classarm__compute_1_1_n_e_f_f_t1_d.xhtml">NEFFT1D</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_f_f_t2_d.xhtml">NEFFT2D</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_f_f_t_convolution_layer.xhtml">NEFFTConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_fill.xhtml">NEFill</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_fill_border.xhtml">NEFillBorder</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_fuse_batch_normalization.xhtml">NEFuseBatchNormalization</a></li>
@@ -262,7 +265,6 @@ NEON functions</h1>
 <li><a class="el" href="classarm__compute_1_1_n_e_softmax_layer_generic.xhtml">NESoftmaxLayerGeneric</a> &lt;IS_LOG&gt;</li>
 <li><a class="el" href="classarm__compute_1_1_n_e_space_to_batch_layer.xhtml">NESpaceToBatchLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_space_to_depth_layer.xhtml">NESpaceToDepthLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_split.xhtml">NESplit</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_stack_layer.xhtml">NEStackLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_unstack.xhtml">NEUnstack</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_upsample_layer.xhtml">NEUpsampleLayer</a></li>
@@ -378,6 +380,7 @@ OpenCL functions</h1>
 <li><a class="el" href="classarm__compute_1_1_c_l_elementwise_squared_diff.xhtml">CLElementwiseSquaredDiff</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_erode.xhtml">CLErode</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_exp_layer.xhtml">CLExpLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_fill.xhtml">CLFill</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_fill_border.xhtml">CLFillBorder</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_flatten_layer.xhtml">CLFlattenLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_floor.xhtml">CLFloor</a></li>
@@ -386,6 +389,7 @@ OpenCL functions</h1>
 <li><a class="el" href="classarm__compute_1_1_c_l_gaussian3x3.xhtml">CLGaussian3x3</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">CLGEMMLowpQuantizeDownInt32ToUint8Scale</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point.xhtml">CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float.xhtml">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_magnitude.xhtml">CLMagnitude</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_mean_std_dev_normalization_layer.xhtml">CLMeanStdDevNormalizationLayer</a></li>
@@ -481,7 +485,7 @@ CPP functions</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:49 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

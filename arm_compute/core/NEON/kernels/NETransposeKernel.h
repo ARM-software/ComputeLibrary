@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NETRANSPOSEKERNEL_H__
-#define __ARM_COMPUTE_NETRANSPOSEKERNEL_H__
+#ifndef ARM_COMPUTE_NETRANSPOSEKERNEL_H
+#define ARM_COMPUTE_NETRANSPOSEKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -57,13 +57,13 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  Input tensor. Data types supported: All
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NETransposeKernel
      *
-     * @param[in] input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input  Input tensor. Data types supported: All
      * @param[in] output Output tensor. Data type supported: Same as @p input
      *
      * @return a status
@@ -76,7 +76,7 @@ public:
 private:
     /** Common signature for all the transpose functions
      *
-     * @param[in]  input  An input tensor. Data types supported: U8/S8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  An input tensor. Data types supported: All
      * @param[out] output The output tensor. Data type supported: same as @p input
      * @param[in]  window Region on which to execute the kernel.
      */
@@ -87,4 +87,4 @@ private:
     ITensor           *_output;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NETRANSPOSEKERNEL_H__ */
+#endif /* ARM_COMPUTE_NETRANSPOSEKERNEL_H */

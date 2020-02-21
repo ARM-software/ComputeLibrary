@@ -195,11 +195,13 @@ public:
         consume_params(gemm_options);
         print_parameters_internal();
 
+        const bool is_quantized = is_data_type_quantized(data_type);
+
         // Calculate re-quantization parameters
-        if(data_type == DataType::QASYMM8)
+        if(is_quantized)
         {
             float multiplier = scale_src0 * scale_src1 / scale_dst;
-            quantization::calculate_quantized_multiplier_less_than_one(multiplier, &dst_multiplier, &dst_shift);
+            quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift);
         }
 
         // Initialize GEMM inputs/outputs
@@ -209,7 +211,7 @@ public:
         init_sgemm_output(dst, src0, src1, data_type);
 
         // Configure function
-        if(data_type == DataType::QASYMM8)
+        if(is_quantized)
         {
             src0.info()->set_quantization_info(QuantizationInfo(scale_src0, offset_src0));
             src1.info()->set_quantization_info(QuantizationInfo(scale_src1, offset_src1));
@@ -321,11 +323,11 @@ public:
                     SimpleTensor<int32_t> biases{ TensorShape(N), DataType::S32, 1 };
                     // Fill bias
                     fill(biases, 3);
-                    ref_dst = reference::gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint<int32_t>(ref_tmp_dst, biases, dst_multiplier_vec, dst_shift_vec, offset_dst);
+                    ref_dst = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, uint8_t>(ref_tmp_dst, biases, dst_multiplier_vec, dst_shift_vec, offset_dst);
                 }
                 else
                 {
-                    ref_dst = reference::gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint<int32_t>(ref_tmp_dst, dst_multiplier_vec, dst_shift_vec, offset_dst);
+                    ref_dst = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, uint8_t>(ref_tmp_dst, dst_multiplier_vec, dst_shift_vec, offset_dst);
                 }
                 validate(CLAccessor(dst), ref_dst);
                 break;

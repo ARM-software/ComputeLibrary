@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H__
-#define __ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H__
+#ifndef ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H
+#define ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H
 
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Basic function to execute NEGEMMTranspose1xWKernel. This function calls the following NEON kernels:
@@ -40,13 +41,13 @@ class NEGEMMTranspose1xW : public INESimpleFunctionNoBorder
 public:
     /** Initialise the kernel's inputs, output
      *
-     * @param[in]  input  First input tensor. Data type supported: U8/S8/QASYMM8/QSYMM8_PER_CHANNEL/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  First input tensor. Data type supported: All
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMTranspose1xW
      *
-     * @param[in] input  First input tensor. Data type supported: U8/S8/QASYMM8/QSYMM8_PER_CHANNEL/U16/S16/F16/U32/S32/F32
+     * @param[in] input  First input tensor. Data type supported: All
      * @param[in] output Output tensor. Data type supported: same as @p input
      *
      * @return a status
@@ -54,4 +55,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H__ */
+#endif /*ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H */

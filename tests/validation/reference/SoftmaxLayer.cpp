@@ -107,21 +107,21 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axi
     return softmax_layer_generic<T>(src, beta, axis, false);
 }
 
-template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type>
+template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int>::type>
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis)
 {
-    // Note: Output quantization info should always have scale = 1/256 and offset = 0
-    const QuantizationInfo output_quantization_info = QuantizationInfo(1.f / 256, 0);
+    const QuantizationInfo output_quantization_info = arm_compute::get_softmax_output_quantization_info(src.data_type(), false);
 
     SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float> dst_tmp = softmax_layer<float>(src_tmp, beta, axis);
-    SimpleTensor<T>     dst     = convert_to_asymmetric<uint8_t>(dst_tmp, output_quantization_info);
+    SimpleTensor<T>     dst     = convert_to_asymmetric<T>(dst_tmp, output_quantization_info);
     return dst;
 }
 
 template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float beta, size_t axis);
 template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta, size_t axis);
 template SimpleTensor<uint8_t> softmax_layer(const SimpleTensor<uint8_t> &src, float beta, size_t axis);
+template SimpleTensor<int8_t> softmax_layer(const SimpleTensor<int8_t> &src, float beta, size_t axis);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__
-#define __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__
+#ifndef ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H
+#define ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -40,13 +40,13 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches.
-     *                    Data types supported: QASYMM8/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
+     *                    Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
      * @param[out] output Destination tensor with the same dimensions of input. Data type supported: F16/F32.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDequantizationLayer
      *
-     * @param[in] input  Input tensor info. Data types supported: QASYMM8/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
      * @param[in] output Output tensor info. Data type supported: F16/F32.
      *
      * @return a status
@@ -54,4 +54,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__ */
+#endif /* ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H */

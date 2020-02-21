@@ -1,11 +1,11 @@
 var searchData=
 [
   ['l2_5fnormalize_2ecl',['l2_normalize.cl',['../l2__normalize_8cl.xhtml',1,'']]],
-  ['l2normalizelayer_2ecpp',['L2NormalizeLayer.cpp',['../benchmark_2_c_l_2_l2_normalize_layer_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_l2_normalize_layer_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_l2_normalize_layer_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_l2_normalize_layer_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2reference_2_l2_normalize_layer_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['l2normalizelayer_2ecpp',['L2NormalizeLayer.cpp',['../_c_l_2_l2_normalize_layer_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_l2_normalize_layer_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_l2_normalize_layer_8cpp.xhtml',1,'(Global Namespace)']]],
   ['l2normalizelayer_2eh',['L2NormalizeLayer.h',['../_l2_normalize_layer_8h.xhtml',1,'']]],
-  ['laplacianpyramid_2ecpp',['LaplacianPyramid.cpp',['../benchmark_2_c_l_2_laplacian_pyramid_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_laplacian_pyramid_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_laplacian_pyramid_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_laplacian_pyramid_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2reference_2_laplacian_pyramid_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['laplacianpyramid_2ecpp',['LaplacianPyramid.cpp',['../_c_l_2_laplacian_pyramid_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_laplacian_pyramid_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_laplacian_pyramid_8cpp.xhtml',1,'(Global Namespace)']]],
   ['laplacianpyramid_2eh',['LaplacianPyramid.h',['../_laplacian_pyramid_8h.xhtml',1,'']]],
-  ['laplacianreconstruct_2ecpp',['LaplacianReconstruct.cpp',['../benchmark_2_c_l_2_laplacian_reconstruct_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_laplacian_reconstruct_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_laplacian_reconstruct_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_laplacian_reconstruct_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2reference_2_laplacian_reconstruct_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['laplacianreconstruct_2ecpp',['LaplacianReconstruct.cpp',['../_c_l_2_laplacian_reconstruct_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_laplacian_reconstruct_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_laplacian_reconstruct_8cpp.xhtml',1,'(Global Namespace)']]],
   ['laplacianreconstruct_2eh',['LaplacianReconstruct.h',['../_laplacian_reconstruct_8h.xhtml',1,'']]],
   ['layerdescriptors_2eh',['LayerDescriptors.h',['../_layer_descriptors_8h.xhtml',1,'']]],
   ['layers_2eh',['Layers.h',['../_layers_8h.xhtml',1,'']]],
@@ -15,7 +15,6 @@ var searchData=
   ['load_2eh',['load.h',['../load_8h.xhtml',1,'']]],
   ['locallyconnected_2ecpp',['LocallyConnected.cpp',['../_c_l_2_locally_connected_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_locally_connected_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_locally_connected_8cpp.xhtml',1,'(Global Namespace)']]],
   ['locallyconnected_2eh',['LocallyConnected.h',['../_locally_connected_8h.xhtml',1,'']]],
-  ['locallyconnectedlayer_2ecpp',['LocallyConnectedLayer.cpp',['../_c_l_2_locally_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_locally_connected_layer_8cpp.xhtml',1,'(Global Namespace)']]],
   ['log_2eh',['Log.h',['../_log_8h.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2wrapper_2intrinsics_2_log_8h.xhtml',1,'(Global Namespace)']]],
   ['logger_2ecpp',['Logger.cpp',['../_logger_8cpp.xhtml',1,'']]],
   ['logger_2eh',['Logger.h',['../core_2utils_2logging_2_logger_8h.xhtml',1,'(Global Namespace)'],['../graph_2_logger_8h.xhtml',1,'(Global Namespace)']]],

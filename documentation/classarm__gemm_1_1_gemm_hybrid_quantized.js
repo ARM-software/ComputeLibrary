@@ -1,7 +1,7 @@
 var classarm__gemm_1_1_gemm_hybrid_quantized =
 [
     [ "GemmHybridQuantized", "classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#a098303a83577a09de148cfa3baaa763d", null ],
-    [ "GemmHybridQuantized", "classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#a449bf10d0a7b3d2e12d8d6345327b387", null ],
+    [ "GemmHybridQuantized", "classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#ab94f01495cd153734e125f2c6e48da4c", null ],
     [ "B_is_pretransposed", "classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#ac5dec5063a75604fdc60555f15577b94", null ],
     [ "B_pretranspose_required", "classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c", null ],
     [ "execute", "classarm__gemm_1_1_gemm_hybrid_quantized.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560", null ],

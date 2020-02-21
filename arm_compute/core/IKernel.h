@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_IKERNEL_H__
-#define __ARM_COMPUTE_IKERNEL_H__
+#ifndef ARM_COMPUTE_IKERNEL_H
+#define ARM_COMPUTE_IKERNEL_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
@@ -69,4 +69,4 @@ private:
     Window _window;
 };
 }
-#endif /*__ARM_COMPUTE_IKERNEL_H__ */
+#endif /*ARM_COMPUTE_IKERNEL_H */

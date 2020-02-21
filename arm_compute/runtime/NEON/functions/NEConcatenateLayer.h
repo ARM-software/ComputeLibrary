@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECONCATENATELAYER_H__
-#define __ARM_COMPUTE_NECONCATENATELAYER_H__
+#ifndef ARM_COMPUTE_NECONCATENATELAYER_H
+#define ARM_COMPUTE_NECONCATENATELAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -57,7 +57,7 @@ public:
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
      * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayerKernel, @ref NEHeightConcatenateLayerKernel and @ref NEDepthConcatenateLayerKernel.
      *
-     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
+     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
      * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
@@ -68,7 +68,7 @@ public:
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
      * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayerKernel, @ref NEHeightConcatenateLayerKernel and @ref NEDepthConcatenateLayerKernel.
      *
-     * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/F16/F32.
+     * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
      * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      *
@@ -93,4 +93,4 @@ private:
     unsigned int                            _axis;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NECONCATENATELAYER_H__ */
+#endif /* ARM_COMPUTE_NECONCATENATELAYER_H */

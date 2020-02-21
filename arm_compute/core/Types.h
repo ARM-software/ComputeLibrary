@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TYPES_H__
-#define __ARM_COMPUTE_TYPES_H__
+#ifndef ARM_COMPUTE_TYPES_H
+#define ARM_COMPUTE_TYPES_H
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/utils/misc/Macros.h"
 #include "support/Half.h"
 
 #include <cmath>
@@ -1206,19 +1207,93 @@ private:
     bool         _dequantize_scores;
 };
 
-/** Pooling Layer Information class */
-class PoolingLayerInfo
+/** Pooling Layer Information struct*/
+struct PoolingLayerInfo
 {
-public:
     /** Default Constructor */
     PoolingLayerInfo()
-        : _pool_type(PoolingType::MAX), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false), _fp_mixed_precision(false)
+        : pool_type(PoolingType::MAX),
+          pool_size(Size2D()),
+          data_layout(DataLayout::UNKNOWN),
+          pad_stride_info(PadStrideInfo()),
+          exclude_padding(false),
+          is_global_pooling(false),
+          fp_mixed_precision(false)
     {
     }
-    /** Default Constructor
+    /** Constructor
      *
      * @param[in] pool_type          Pooling type @ref PoolingType.
      * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(20.02, PoolingLayerInfo(PoolingType, unsigned int, DataLayout, PadStrideInfo, bool, bool))
+    explicit PoolingLayerInfo(PoolingType   pool_type,
+                              unsigned int  pool_size,
+                              PadStrideInfo pad_stride_info    = PadStrideInfo(),
+                              bool          exclude_padding    = false,
+                              bool          fp_mixed_precision = false)
+        : pool_type(pool_type),
+          pool_size(Size2D(pool_size, pool_size)),
+          data_layout(DataLayout::UNKNOWN),
+          pad_stride_info(pad_stride_info),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
+     *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                               Defaults to false;
+     * @param[in] fp_mixed_precision (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
+     */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(20.02, PoolingLayerInfo(PoolingType, Size2D, DataLayout, PadStrideInfo, bool, bool))
+    explicit PoolingLayerInfo(PoolingType   pool_type,
+                              Size2D        pool_size,
+                              PadStrideInfo pad_stride_info    = PadStrideInfo(),
+                              bool          exclude_padding    = false,
+                              bool          fp_mixed_precision = false)
+        : pool_type(pool_type),
+          pool_size(pool_size),
+          data_layout(DataLayout::UNKNOWN),
+          pad_stride_info(pad_stride_info),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision)
+    {
+    }
+    /** Constructor
+     *
+     * @note This constructor is used for global pooling
+     *
+     * @param[in] pool_type Pooling type @ref PoolingType.
+     */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(20.02, PoolingLayerInfo(PoolingType, DataLayout))
+    explicit PoolingLayerInfo(PoolingType pool_type)
+        : pool_type(pool_type),
+          pool_size(Size2D()),
+          data_layout(DataLayout::UNKNOWN),
+          pad_stride_info(PadStrideInfo(1, 1, 0, 0)),
+          exclude_padding(false),
+          is_global_pooling(true),
+          fp_mixed_precision(false)
+    {
+    }
+
+    /** Constructor
+     *
+     * @param[in] pool_type          Pooling type @ref PoolingType.
+     * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] data_layout        Data layout used by the layer @ref DataLayout
      * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
      * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
@@ -1227,17 +1302,25 @@ public:
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               unsigned int  pool_size,
+                              DataLayout    data_layout,
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
                               bool          fp_mixed_precision = false)
-        : _pool_type(pool_type), _pool_size(Size2D(pool_size, pool_size)), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false),
-          _fp_mixed_precision(fp_mixed_precision)
+        : pool_type(pool_type),
+          pool_size(Size2D(pool_size, pool_size)),
+          data_layout(data_layout),
+          pad_stride_info(pad_stride_info),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision)
     {
     }
-    /** Default Constructor
+
+    /** Constructor
      *
      * @param[in] pool_type          Pooling type @ref PoolingType.
      * @param[in] pool_size          Pooling size, in elements, across  x and y.
+     * @param[in] data_layout        Data layout used by the layer @ref DataLayout
      * @param[in] pad_stride_info    (Optional) Padding and stride information @ref PadStrideInfo
      * @param[in] exclude_padding    (Optional) Strategy when accounting padding in calculations.
      *                               True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
@@ -1246,60 +1329,45 @@ public:
      */
     explicit PoolingLayerInfo(PoolingType   pool_type,
                               Size2D        pool_size,
+                              DataLayout    data_layout,
                               PadStrideInfo pad_stride_info    = PadStrideInfo(),
                               bool          exclude_padding    = false,
                               bool          fp_mixed_precision = false)
-        : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false), _fp_mixed_precision(fp_mixed_precision)
+        : pool_type(pool_type),
+          pool_size(pool_size),
+          data_layout(data_layout),
+          pad_stride_info(pad_stride_info),
+          exclude_padding(exclude_padding),
+          is_global_pooling(false),
+          fp_mixed_precision(fp_mixed_precision)
     {
     }
-    /** Default Constructor
+
+    /** Constructor
      *
      * @note This constructor is used for global pooling
      *
-     * @param[in] pool_type Pooling type @ref PoolingType.
+     * @param[in] pool_type   Pooling type @ref PoolingType.
+     * @param[in] data_layout Data layout used by the layer @ref DataLayout
      */
-    explicit PoolingLayerInfo(PoolingType pool_type)
-        : _pool_type(pool_type), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true), _fp_mixed_precision(false)
+    explicit PoolingLayerInfo(PoolingType pool_type, DataLayout data_layout)
+        : pool_type(pool_type),
+          pool_size(Size2D()),
+          data_layout(data_layout),
+          pad_stride_info(PadStrideInfo(1, 1, 0, 0)),
+          exclude_padding(false),
+          is_global_pooling(true),
+          fp_mixed_precision(false)
     {
-    }
-    /** Get the pooling type */
-    PoolingType pool_type() const
-    {
-        return _pool_type;
-    }
-    /** Get the pooling size */
-    const Size2D &pool_size() const
-    {
-        return _pool_size;
-    }
-    /** Get the padding and stride */
-    PadStrideInfo pad_stride_info() const
-    {
-        return _pad_stride_info;
-    }
-    /** Check if padding is excluded in calculations */
-    bool exclude_padding() const
-    {
-        return _exclude_padding;
-    }
-    /** Check if a wider accumulator should be used. */
-    bool fp_mixed_precision() const
-    {
-        return _fp_mixed_precision;
-    }
-    /** Check if is global pooling */
-    bool is_global_pooling() const
-    {
-        return _is_global_pooling;
     }
 
-private:
-    PoolingType   _pool_type;
-    Size2D        _pool_size;
-    PadStrideInfo _pad_stride_info;
-    bool          _exclude_padding;
-    bool          _is_global_pooling;
-    bool          _fp_mixed_precision;
+    PoolingType   pool_type;
+    Size2D        pool_size;
+    DataLayout    data_layout;
+    PadStrideInfo pad_stride_info;
+    bool          exclude_padding;
+    bool          is_global_pooling;
+    bool          fp_mixed_precision;
 };
 
 /** ROI Pooling Layer Information class */
@@ -1866,24 +1934,25 @@ struct DepthwiseConvolutionReshapeInfo
 /** GEMMLowp output stage type */
 enum class GEMMLowpOutputStageType
 {
-    NONE,                     /**< No quantization to uint8 */
-    QUANTIZE_DOWN,            /**< Quantize to uint8 using an integer multiplication */
-    QUANTIZE_DOWN_FIXEDPOINT, /**< Quantize to uint8 using a fixed point multiplication */
-    QUANTIZE_DOWN_FLOAT       /**< Quantize to uint8 using a floating point multiplication */
+    NONE,                     /**< No quantization */
+    QUANTIZE_DOWN,            /**< Quantize using an integer multiplication */
+    QUANTIZE_DOWN_FIXEDPOINT, /**< Quantize using a fixed point multiplication */
+    QUANTIZE_DOWN_FLOAT       /**< Quantize using a floating point multiplication */
 };
 
 /** GEMMLowp output stage info */
 struct GEMMLowpOutputStageInfo
 {
     GEMMLowpOutputStageType type{ GEMMLowpOutputStageType::NONE }; /**< GEMMLowp output stage type */
-    int                     gemmlowp_offset{ 0 };                  /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
-    int                     gemmlowp_multiplier{ 0 };              /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
-    int                     gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
-    int                     gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
-    int                     gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
+    int32_t                 gemmlowp_offset{ 0 };                  /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
+    int32_t                 gemmlowp_multiplier{ 0 };              /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    int32_t                 gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
+    int32_t                 gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
+    int32_t                 gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
     std::vector<int32_t>    gemmlowp_multipliers{};                /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
     std::vector<int32_t>    gemmlowp_shifts{};                     /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
     bool                    is_quantized_per_channel{ false };     /**< GEMMLowp quantized per-channel flag */
+    DataType                output_data_type{ DataType::UNKNOWN }; /**< Output tensor data type to use if the output is not initialized */
 };
 
 /** GEMM LHS (Left Hand Side) matrix information */
@@ -2161,4 +2230,4 @@ struct IOFormatInfo
     bool align_columns;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TYPES_H__ */
+#endif /* ARM_COMPUTE_TYPES_H */

@@ -65,7 +65,7 @@ protected:
             std::uniform_real_distribution<> distribution(-1000.f, 1000.f);
             library->fill(tensor, distribution, 0);
         }
-        else // data type is quantized_asymmetric
+        else // data type is quantized_asymmetric (signed or unsigned)
         {
             std::uniform_int_distribution<> distribution(0, 100);
             library->fill(tensor, distribution, 0);
@@ -77,7 +77,7 @@ protected:
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
-        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(1.f / 256, 0));
+        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, get_softmax_output_quantization_info(data_type, IS_LOG));
 
         // Create and configure function
         FunctionType smx_layer;

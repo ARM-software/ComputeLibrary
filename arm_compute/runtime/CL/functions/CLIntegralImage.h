@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLINTEGRALIMAGE_H__
-#define __ARM_COMPUTE_CLINTEGRALIMAGE_H__
+#ifndef ARM_COMPUTE_CLINTEGRALIMAGE_H
+#define ARM_COMPUTE_CLINTEGRALIMAGE_H
 
 #include "arm_compute/core/CL/kernels/CLIntegralImageKernel.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -57,4 +57,4 @@ protected:
     CLIntegralImageVertKernel _integral_vert; /**< Integral Image Vertical kernel */
 };
 }
-#endif /*__ARM_COMPUTE_CLINTEGRALIMAGE_H__ */
+#endif /*ARM_COMPUTE_CLINTEGRALIMAGE_H */

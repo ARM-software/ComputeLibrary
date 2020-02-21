@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGAUSSIAN5X5KERNEL_H__
-#define __ARM_COMPUTE_CLGAUSSIAN5X5KERNEL_H__
+#ifndef ARM_COMPUTE_CLGAUSSIAN5X5KERNEL_H
+#define ARM_COMPUTE_CLGAUSSIAN5X5KERNEL_H
 
 #include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
 
@@ -64,4 +64,4 @@ private:
     using CLSeparableConvolution5x5VertKernel::configure;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLGAUSSIAN5X5KERNEL_H__ */
+#endif /*ARM_COMPUTE_CLGAUSSIAN5X5KERNEL_H */

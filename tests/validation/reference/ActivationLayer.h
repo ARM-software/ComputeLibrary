@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_ACTIVATION_LAYER_H__
-#define __ARM_COMPUTE_TEST_ACTIVATION_LAYER_H__
+#ifndef ARM_COMPUTE_TEST_ACTIVATION_LAYER_H
+#define ARM_COMPUTE_TEST_ACTIVATION_LAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -95,4 +95,4 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_ACTIVATION_LAYER_H__ */
+#endif /* ARM_COMPUTE_TEST_ACTIVATION_LAYER_H */

@@ -13,6 +13,7 @@ var _c_l_2_arithmetic_addition_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#a70e9a434b0d4e3e45a1c08a971125a31", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#af5c0a55a6d5580f082ada392c45d0f07", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#a923c53924a61a8e6783b2311e8f1119f", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#a832d154825c207d55e2644eb6efcee3f", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#a8b6b1355b4e424bd09f0c41de8d314b9", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#aa52346dd7e6765611a14aa7c292c21fa", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_arithmetic_addition_8cpp.xhtml#a6ee90e04dba9c7609a2d40e17ad5bbe1", null ],

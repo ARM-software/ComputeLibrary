@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_INODEVISITOR_H__
-#define __ARM_COMPUTE_GRAPH_INODEVISITOR_H__
+#ifndef ARM_COMPUTE_GRAPH_INODEVISITOR_H
+#define ARM_COMPUTE_GRAPH_INODEVISITOR_H
 
 #include "arm_compute/graph/nodes/NodesFwd.h"
 
@@ -131,11 +131,21 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(PermuteLayerNode &n) = 0;
+    /** Visit PreluLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(PReluLayerNode &n) = 0;
     /** Visit PoolingLayerNode.
      *
      * @param[in] n Node to visit.
      */
     virtual void visit(PoolingLayerNode &n) = 0;
+    /** Visit PrintLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(PrintLayerNode &n) = 0;
     /** Visit PriorBoxLayerNode.
      *
      * @param[in] n Node to visit.
@@ -261,6 +271,14 @@ public:
     {
         default_visit();
     }
+    virtual void visit(PReluLayerNode &) override
+    {
+        default_visit();
+    }
+    virtual void visit(PrintLayerNode &) override
+    {
+        default_visit();
+    }
     virtual void visit(PriorBoxLayerNode &) override
     {
         default_visit();
@@ -294,4 +312,4 @@ public:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_INODEVISITOR_H__ */
+#endif /* ARM_COMPUTE_GRAPH_INODEVISITOR_H */

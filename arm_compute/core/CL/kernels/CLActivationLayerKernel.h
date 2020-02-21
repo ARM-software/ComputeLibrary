@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__
-#define __ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H
+#define ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -51,7 +51,7 @@ public:
      * @note If the output tensor is a nullptr, the activation function will be performed in-place
      *
      * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
-     *                          of the activation function. Data types supported: QASYMM8/QSYMM16/F16/F32.
+     *                          of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
      * @param[out]     output   Destination tensor. Data type supported: same as @p input
      * @param[in]      act_info Activation layer information.
      */
@@ -59,7 +59,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLActivationLayerKernel
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result
-     *                     of the activation function. Data types supported: QASYMM8/QSYMM16/F16/F32.
+     *                     of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
      * @param[in] output   Destination tensor info. Data type supported: same as @p input
      * @param[in] act_info Activation layer information.
      *
@@ -77,4 +77,4 @@ private:
     CLCoreRuntimeContext *_ctx;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H */

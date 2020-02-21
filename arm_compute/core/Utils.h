@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_UTILS_H__
-#define __ARM_COMPUTE_UTILS_H__
+#ifndef ARM_COMPUTE_UTILS_H
+#define ARM_COMPUTE_UTILS_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/PixelValue.h"
@@ -549,6 +549,72 @@ inline DataType get_promoted_data_type(DataType dt)
     return DataType::UNKNOWN;
 }
 
+/** Compute the mininum and maximum values a data type can take
+ *
+ * @param[in] dt Data type to get the min/max bounds of
+ *
+ * @return A tuple (min,max) with the minimum and maximum values respectively wrapped in PixelValue.
+ */
+inline std::tuple<PixelValue, PixelValue> get_min_max(DataType dt)
+{
+    PixelValue min{};
+    PixelValue max{};
+    switch(dt)
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+        {
+            min = PixelValue(static_cast<int32_t>(std::numeric_limits<uint8_t>::lowest()));
+            max = PixelValue(static_cast<int32_t>(std::numeric_limits<uint8_t>::max()));
+            break;
+        }
+        case DataType::S8:
+        case DataType::QSYMM8:
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8_PER_CHANNEL:
+        {
+            min = PixelValue(static_cast<int32_t>(std::numeric_limits<int8_t>::lowest()));
+            max = PixelValue(static_cast<int32_t>(std::numeric_limits<int8_t>::max()));
+            break;
+        }
+        case DataType::U16:
+        case DataType::QASYMM16:
+        {
+            min = PixelValue(static_cast<int32_t>(std::numeric_limits<uint16_t>::lowest()));
+            max = PixelValue(static_cast<int32_t>(std::numeric_limits<uint16_t>::max()));
+            break;
+        }
+        case DataType::S16:
+        case DataType::QSYMM16:
+        {
+            min = PixelValue(static_cast<int32_t>(std::numeric_limits<int16_t>::lowest()));
+            max = PixelValue(static_cast<int32_t>(std::numeric_limits<int16_t>::max()));
+            break;
+        }
+        case DataType::U32:
+        {
+            min = PixelValue(std::numeric_limits<uint32_t>::lowest());
+            max = PixelValue(std::numeric_limits<uint32_t>::max());
+            break;
+        }
+        case DataType::S32:
+        {
+            min = PixelValue(std::numeric_limits<int32_t>::lowest());
+            max = PixelValue(std::numeric_limits<int32_t>::max());
+            break;
+        }
+        case DataType::F32:
+        {
+            min = PixelValue(std::numeric_limits<float>::lowest());
+            max = PixelValue(std::numeric_limits<float>::max());
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Undefined data type!");
+    }
+    return std::make_tuple(min, max);
+}
+
 /** Return true if the given format has horizontal subsampling.
  *
  * @param[in] format Format to determine subsampling.
@@ -877,8 +943,8 @@ std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned i
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
-std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height,
-                                                        unsigned int kernel_width, unsigned int kernel_height,
+std::pair<unsigned int, unsigned int> scaled_dimensions(int width, int height,
+                                                        int kernel_width, int kernel_height,
                                                         const PadStrideInfo &pad_stride_info,
                                                         const Size2D        &dilation = Size2D(1U, 1U));
 
@@ -891,6 +957,35 @@ std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsi
  * @return True if the given reduction operation should be handled in a serial way.
  */
 bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int axis);
+
+/** Returns output quantization information for softmax layer
+ *
+ * @param[in] input_type The data type of the input tensor
+ * @param[in] is_log     True for log softmax
+ *
+ * @return Quantization information for the output tensor
+ */
+QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool is_log);
+
+/** Returns resize ratio between input and output with consideration of aligned corners
+ *
+ * @param[in] input_size    The input size
+ * @param[in] output_size   the output size
+ * @param[in] align_corners True to align corners of input and output. Defaults to false.
+ *
+ * @return The ratio between input and output (i.e., the input size divided by the output size)
+ */
+float calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners = false);
+
+/** Returns a pair of minimum and maximum values for a quantized activation
+ *
+ * @param[in] act_info  The information for activation
+ * @param[in] data_type The used data type
+ * @param[in] oq_info   The output quantization information
+ *
+ * @return The pair with minimum and maximum values
+ */
+std::pair<int32_t, int32_t> get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info);
 
 /** Convert a tensor format into a string.
  *
@@ -1048,6 +1143,23 @@ inline bool is_data_type_quantized_asymmetric(DataType dt)
         case DataType::QASYMM8:
         case DataType::QASYMM8_SIGNED:
         case DataType::QASYMM16:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/** Check if a given data type is of asymmetric quantized signed type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of asymmetric quantized signed type, else false.
+ */
+inline bool is_data_type_quantized_asymmetric_signed(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QASYMM8_SIGNED:
             return true;
         default:
             return false;
@@ -1279,4 +1391,4 @@ void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr
 int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n);
 #endif /* ARM_COMPUTE_ASSERTS_ENABLED */
 }
-#endif /*__ARM_COMPUTE_UTILS_H__ */
+#endif /*ARM_COMPUTE_UTILS_H */

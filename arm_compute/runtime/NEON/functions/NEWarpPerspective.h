@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEWARPPERSPECTIVE_H__
-#define __ARM_COMPUTE_NEWARPPERSPECTIVE_H__
+#ifndef ARM_COMPUTE_NEWARPPERSPECTIVE_H
+#define ARM_COMPUTE_NEWARPPERSPECTIVE_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -49,4 +49,4 @@ public:
     void configure(ITensor *input, ITensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 }
-#endif /*__ARM_COMPUTE_NEWARPPERSPECTIVE_H__ */
+#endif /*ARM_COMPUTE_NEWARPPERSPECTIVE_H */

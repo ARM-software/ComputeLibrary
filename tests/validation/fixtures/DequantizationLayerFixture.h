@@ -106,6 +106,7 @@ protected:
                 fill(src);
                 return reference::dequantization_layer<T>(src);
             }
+            case DataType::QASYMM8_SIGNED:
             case DataType::QSYMM8_PER_CHANNEL:
             case DataType::QSYMM8:
             {
@@ -149,6 +150,8 @@ protected:
             }
             case DataType::QASYMM8:
                 return QuantizationInfo(1.f / distribution_scale_q8(gen), distribution_offset_q8(gen));
+            case DataType::QASYMM8_SIGNED:
+                return QuantizationInfo(1.f / distribution_scale_q8(gen), -distribution_offset_q8(gen));
             default:
                 ARM_COMPUTE_ERROR("Unsupported data type");
         }

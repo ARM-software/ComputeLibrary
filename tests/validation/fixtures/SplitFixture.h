@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -130,6 +130,115 @@ protected:
 
         for(unsigned int i = 0; i < splits; ++i)
         {
+            // Update coordinate on axis
+            start_coords.set(axis, axis_offset);
+            end_coords.set(axis, axis_offset + axis_split_step);
+
+            dsts.emplace_back(std::move(reference::slice(src, start_coords, end_coords)));
+
+            axis_offset += axis_split_step;
+        }
+
+        return dsts;
+    }
+
+    std::vector<TensorType>      _target{};
+    std::vector<SimpleTensor<T>> _reference{};
+};
+
+template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T>
+class SplitShapesFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
+    {
+        _target    = compute_target(shape, axis, split_shapes, data_type);
+        _reference = compute_reference(shape, axis, split_shapes, data_type);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        library->fill_tensor_uniform(tensor, i);
+    }
+
+    std::vector<TensorType> compute_target(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
+    {
+        // Create tensors
+        TensorType                 src = create_tensor<TensorType>(shape, data_type);
+        std::vector<TensorType>    dsts{};
+        std::vector<ITensorType *> dsts_ptr;
+
+        for(const auto &split_shape : split_shapes)
+        {
+            TensorType dst = create_tensor<TensorType>(split_shape, data_type);
+            dsts.push_back(std::move(dst));
+        }
+
+        for(auto &dst : dsts)
+        {
+            dsts_ptr.emplace_back(&dst);
+        }
+
+        // Create and configure function
+        FunctionType split;
+        split.configure(&src, dsts_ptr, axis);
+
+        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
+        {
+            return t.info()->is_resizable();
+        }),
+        framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        for(unsigned int i = 0; i < dsts.size(); ++i)
+        {
+            dsts[i].allocator()->allocate();
+        }
+
+        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
+        {
+            return !t.info()->is_resizable();
+        }),
+        framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(src), 0);
+
+        // Compute function
+        split.run();
+
+        return dsts;
+    }
+
+    std::vector<SimpleTensor<T>> compute_reference(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
+    {
+        // Create reference
+        SimpleTensor<T>              src{ shape, data_type };
+        std::vector<SimpleTensor<T>> dsts;
+
+        // Fill reference
+        fill(src, 0);
+
+        unsigned int axis_offset{ 0 };
+        for(const auto &split_shape : split_shapes)
+        {
+            // Calculate splice for each split
+            const size_t axis_split_step = split_shape[axis];
+
+            // Start/End coordinates
+            Coordinates start_coords;
+            Coordinates end_coords;
+            for(unsigned int d = 0; d < shape.num_dimensions(); ++d)
+            {
+                end_coords.set(d, -1);
+            }
+
             // Update coordinate on axis
             start_coords.set(axis, axis_offset);
             end_coords.set(axis, axis_offset + axis_split_step);

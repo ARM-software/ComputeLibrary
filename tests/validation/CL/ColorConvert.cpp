@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,7 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<uint8_t> tolerance_nv(2);
+constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 
 // Input data sets
 const auto RGBDataset  = framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 });
@@ -228,7 +229,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::Data
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
     {
-        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx], tolerance_u8);
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvert_RGB_to_U8))
@@ -236,7 +237,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::Data
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
     {
-        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx], tolerance_u8);
     }
 }
 TEST_SUITE_END()

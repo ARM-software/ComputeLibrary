@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLRESHAPELAYER_H__
-#define __ARM_COMPUTE_CLRESHAPELAYER_H__
+#ifndef ARM_COMPUTE_CLRESHAPELAYER_H
+#define ARM_COMPUTE_CLRESHAPELAYER_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -36,14 +36,14 @@ class CLReshapeLayer : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs and outputs
      *
-     * @param[in]  input  First tensor input. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in]  input  First tensor input. Data type supported: All
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayer
      *
-     * @param[in] input  First tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in] input  First tensor info. Data type supported: All
      * @param[in] output Output tensor info. Data type supported: Same as @p input
      *
      * @return a status
@@ -51,4 +51,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 }
-#endif /*__ARM_COMPUTE_CLRESHAPELAYER_H__ */
+#endif /*ARM_COMPUTE_CLRESHAPELAYER_H */

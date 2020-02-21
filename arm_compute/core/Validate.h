@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_VALIDATE_H__
-#define __ARM_COMPUTE_VALIDATE_H__
+#ifndef ARM_COMPUTE_VALIDATE_H
+#define ARM_COMPUTE_VALIDATE_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/HOGInfo.h"
@@ -978,4 +978,4 @@ arm_compute::Status error_on_invalid_subtensor_valid_region(const char *function
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(pv, sv) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
 }
-#endif /* __ARM_COMPUTE_VALIDATE_H__*/
+#endif /* ARM_COMPUTE_VALIDATE_H*/

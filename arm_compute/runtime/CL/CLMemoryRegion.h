@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_CL_CL_MEMORY_REGION_H__
-#define __ARM_COMPUTE_RUNTIME_CL_CL_MEMORY_REGION_H__
+#ifndef ARM_COMPUTE_RUNTIME_CL_CL_MEMORY_REGION_H
+#define ARM_COMPUTE_RUNTIME_CL_CL_MEMORY_REGION_H
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/IMemoryRegion.h"
@@ -83,7 +83,7 @@ public:
 
     // Inherited methods overridden :
     void                          *buffer() override;
-    void                          *buffer() const override;
+    const void                    *buffer() const override;
     std::unique_ptr<IMemoryRegion> extract_subregion(size_t offset, size_t size) override;
 
 protected:
@@ -183,4 +183,4 @@ public:
     void unmap(cl::CommandQueue &q) final;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_RUNTIME_CL_CL_MEMORY_REGION_H__ */
+#endif /* ARM_COMPUTE_RUNTIME_CL_CL_MEMORY_REGION_H */

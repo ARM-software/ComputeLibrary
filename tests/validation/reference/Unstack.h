@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_UNSTACK_H__
-#define __ARM_COMPUTE_TEST_UNSTACK_H__
+#ifndef ARM_COMPUTE_TEST_UNSTACK_H
+#define ARM_COMPUTE_TEST_UNSTACK_H
 
 #include "tests/SimpleTensor.h"
 
@@ -43,4 +43,4 @@ std::vector<SimpleTensor<T>> unstack(const SimpleTensor<T> &input_tensor, std::v
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_UNSTACK_H__ */
+#endif /* ARM_COMPUTE_TEST_UNSTACK_H */

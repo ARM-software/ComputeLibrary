@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -149,9 +149,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3d9d196240e9b0062c953c3abd534187"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187">buffer</a> () override</td></tr>
 <tr class="memdesc:a3d9d196240e9b0062c953c3abd534187"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the pointer to the allocated data.  <a href="#a3d9d196240e9b0062c953c3abd534187">More...</a><br /></td></tr>
 <tr class="separator:a3d9d196240e9b0062c953c3abd534187"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acdbd1d0a6ab2898e3b75231386c43f40"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_memory_region.xhtml#acdbd1d0a6ab2898e3b75231386c43f40">buffer</a> () const override</td></tr>
-<tr class="memdesc:acdbd1d0a6ab2898e3b75231386c43f40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the pointer to the allocated data.  <a href="#acdbd1d0a6ab2898e3b75231386c43f40">More...</a><br /></td></tr>
-<tr class="separator:acdbd1d0a6ab2898e3b75231386c43f40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad39124c7fd703b14af6f5bf5bc0762ec"><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_memory_region.xhtml#ad39124c7fd703b14af6f5bf5bc0762ec">buffer</a> () const override</td></tr>
+<tr class="memdesc:ad39124c7fd703b14af6f5bf5bc0762ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the pointer to the allocated data.  <a href="#ad39124c7fd703b14af6f5bf5bc0762ec">More...</a><br /></td></tr>
+<tr class="separator:ad39124c7fd703b14af6f5bf5bc0762ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_memory_region"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_memory_region')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml">IMemoryRegion</a></td></tr>
 <tr class="memitem:a92ee6f66a47e8ba4bd3d01579ad4ef42 inherit pub_methods_classarm__compute_1_1_i_memory_region"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#a92ee6f66a47e8ba4bd3d01579ad4ef42">IMemoryRegion</a> (size_t <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#a259cb5a711406a8c3e5d937eb9350cca">size</a>)</td></tr>
 <tr class="memdesc:a92ee6f66a47e8ba4bd3d01579ad4ef42 inherit pub_methods_classarm__compute_1_1_i_memory_region"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="classarm__compute_1_1_i_memory_region.xhtml#a92ee6f66a47e8ba4bd3d01579ad4ef42">More...</a><br /></td></tr>
@@ -320,8 +320,8 @@ Public Member Functions</h2></td></tr>
 <div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordflow">return</span> _mapping;</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
-<a id="acdbd1d0a6ab2898e3b75231386c43f40"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acdbd1d0a6ab2898e3b75231386c43f40">&#9670;&nbsp;</a></span>buffer() <span class="overload">[2/2]</span></h2>
+<a id="ad39124c7fd703b14af6f5bf5bc0762ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad39124c7fd703b14af6f5bf5bc0762ec">&#9670;&nbsp;</a></span>buffer() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -330,7 +330,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void * buffer </td>
+          <td class="memname">const void * buffer </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -346,7 +346,7 @@ Public Member Functions</h2></td></tr>
 <p>Returns the pointer to the allocated data. </p>
 <dl class="section return"><dt>Returns</dt><dd>Pointer to the allocated data </dd></dl>
 
-<p>Implements <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#aeb4cf01e5d74997a1994272225baeb05">IMemoryRegion</a>.</p>
+<p>Implements <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml#a19c5c30385ebe5a42755699ac1f90092">IMemoryRegion</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="_g_c_memory_region_8cpp_source.xhtml#l00045">45</a> of file <a class="el" href="_g_c_memory_region_8cpp_source.xhtml">GCMemoryRegion.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;{</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keywordflow">return</span> _mapping;</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;}</div></div><!-- fragment -->
@@ -543,7 +543,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_g_c_memory_region.xhtml">IGCMemoryRegion</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:54 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:28 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

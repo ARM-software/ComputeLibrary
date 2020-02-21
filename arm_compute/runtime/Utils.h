@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_UTILS_H__
-#define __ARM_COMPUTE_RUNTIME_UTILS_H__
+#ifndef ARM_COMPUTE_RUNTIME_UTILS_H
+#define ARM_COMPUTE_RUNTIME_UTILS_H
 
 #include "arm_compute/runtime/IRuntimeContext.h"
 #include "arm_compute/runtime/Scheduler.h"
@@ -46,5 +46,12 @@ const std::string &string_from_scheduler_type(Scheduler::Type t);
  * @param[in] hints  Hints to use.
  */
 void schedule_kernel_on_ctx(IRuntimeContext *ctx, ICPPKernel *kernel, const IScheduler::Hints &hints);
+
+/** Calculate number of stages for parallel implementations
+ *
+ * @param[in] input_x_dimension input tensor x dimension
+ * @param[in] axis              axis to be used
+ */
+unsigned int calculate_number_of_stages_only_x_axis(size_t input_x_dimension, unsigned int axis);
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_RUNTIME_UTILS_H__ */
+#endif /* ARM_COMPUTE_RUNTIME_UTILS_H */

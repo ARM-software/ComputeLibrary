@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_ADD_H__
-#define __ARM_COMPUTE_WRAPPER_ADD_H__
+#ifndef ARM_COMPUTE_WRAPPER_ADD_H
+#define ARM_COMPUTE_WRAPPER_ADD_H
 
 #include <arm_neon.h>
 
@@ -198,4 +198,4 @@ VPADD_IMPL(float16x4_t, float16x4_t, vpadd, f16)
 #undef VPADD_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_ADD_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_ADD_H */

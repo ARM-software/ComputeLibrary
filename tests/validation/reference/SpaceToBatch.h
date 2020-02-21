@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
- * Permission is hereby granted, free of charge, to any  person obtaining a copy
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H__
-#define __ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H__
+#ifndef ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H
+#define ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -41,4 +41,4 @@ SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<in
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H__ */
+#endif /* ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_H */

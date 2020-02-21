@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -115,7 +115,7 @@ $(document).ready(function(){initNavTree('core_2_c_l_2_c_l_helpers_8h.xhtml','')
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2020 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -129,9 +129,15 @@ Functions</h2></td></tr>
 <tr class="memitem:a237044b76803b058edd1b23d599bcc6d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a237044b76803b058edd1b23d599bcc6d">get_cl_unsigned_type_from_element_size</a> (size_t element_size)</td></tr>
 <tr class="memdesc:a237044b76803b058edd1b23d599bcc6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Translates the element size to an unsigned integer data type.  <a href="namespacearm__compute.xhtml#a237044b76803b058edd1b23d599bcc6d">More...</a><br /></td></tr>
 <tr class="separator:a237044b76803b058edd1b23d599bcc6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18e791fbf74924fee2ddf8da7790bacf"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a18e791fbf74924fee2ddf8da7790bacf">get_cl_signed_type_from_element_size</a> (size_t element_size)</td></tr>
+<tr class="memdesc:a18e791fbf74924fee2ddf8da7790bacf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Translates the element size to an signed integer data type.  <a href="namespacearm__compute.xhtml#a18e791fbf74924fee2ddf8da7790bacf">More...</a><br /></td></tr>
+<tr class="separator:a18e791fbf74924fee2ddf8da7790bacf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70d221fbff7bff840ef4d3fdc701cf53"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a70d221fbff7bff840ef4d3fdc701cf53">get_cl_select_type_from_data_type</a> (const DataType &amp;dt)</td></tr>
 <tr class="memdesc:a70d221fbff7bff840ef4d3fdc701cf53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Translates a tensor data type to the appropriate OpenCL select type.  <a href="namespacearm__compute.xhtml#a70d221fbff7bff840ef4d3fdc701cf53">More...</a><br /></td></tr>
 <tr class="separator:a70d221fbff7bff840ef4d3fdc701cf53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade3539162ad0f550f626939e8b67ccfd"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ade3539162ad0f550f626939e8b67ccfd">get_cl_dot8_acc_type_from_data_type</a> (const DataType &amp;dt)</td></tr>
+<tr class="memdesc:ade3539162ad0f550f626939e8b67ccfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Translates a tensor data type to the appropriate OpenCL dot8 accumulator type.  <a href="namespacearm__compute.xhtml#ade3539162ad0f550f626939e8b67ccfd">More...</a><br /></td></tr>
+<tr class="separator:ade3539162ad0f550f626939e8b67ccfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab631f49c436b1f18beff3248c4b1a19e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ab631f49c436b1f18beff3248c4b1a19e">get_data_size_from_data_type</a> (const DataType &amp;dt)</td></tr>
 <tr class="memdesc:ab631f49c436b1f18beff3248c4b1a19e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the size of a data type in number of bits.  <a href="namespacearm__compute.xhtml#ab631f49c436b1f18beff3248c4b1a19e">More...</a><br /></td></tr>
 <tr class="separator:ab631f49c436b1f18beff3248c4b1a19e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,9 +174,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a0c0eeab3eb098f019ae72268636dcc59"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a0c0eeab3eb098f019ae72268636dcc59">preferred_dummy_work_items_support</a> (const cl::Device &amp;device)</td></tr>
 <tr class="memdesc:a0c0eeab3eb098f019ae72268636dcc59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to check if "dummy work-items" are preferred to have a power of two NDRange In case dummy work-items is enabled, it is OpenCL kernel responsibility to check if the work-item is out-of range or not.  <a href="namespacearm__compute.xhtml#a0c0eeab3eb098f019ae72268636dcc59">More...</a><br /></td></tr>
 <tr class="separator:a0c0eeab3eb098f019ae72268636dcc59"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada43831ccb18a13573b5aa39ee06fbb6"><td class="memItemLeft" align="right" valign="top">cl::Kernel&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ada43831ccb18a13573b5aa39ee06fbb6">create_opencl_kernel</a> (CLCoreRuntimeContext *ctx, const std::string &amp;kernel_name, const CLBuildOptions &amp;build_opts)</td></tr>
+<tr class="memitem:ada43831ccb18a13573b5aa39ee06fbb6"><td class="memItemLeft" align="right" valign="top">cl::Kernel&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ada43831ccb18a13573b5aa39ee06fbb6">create_opencl_kernel</a> (CLCoreRuntimeContext *ctx, const std::string &amp;<a class="el" href="_c_l_im2_col_kernel_8cpp.xhtml#a624a24e6d361fe7b8b8b2f6b375683a4">kernel_name</a>, const CLBuildOptions &amp;build_opts)</td></tr>
 <tr class="memdesc:ada43831ccb18a13573b5aa39ee06fbb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an opencl kernel.  <a href="namespacearm__compute.xhtml#ada43831ccb18a13573b5aa39ee06fbb6">More...</a><br /></td></tr>
 <tr class="separator:ada43831ccb18a13573b5aa39ee06fbb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6832cb1809aaf22a65b2eca70f135230"><td class="memItemLeft" align="right" valign="top">cl::NDRange&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a6832cb1809aaf22a65b2eca70f135230">create_lws_hint_parallel_implementations</a> (unsigned int input_dimension, unsigned int vector_size)</td></tr>
+<tr class="memdesc:a6832cb1809aaf22a65b2eca70f135230"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a suitable LWS hint object for parallel implementations.  <a href="namespacearm__compute.xhtml#a6832cb1809aaf22a65b2eca70f135230">More...</a><br /></td></tr>
+<tr class="separator:a6832cb1809aaf22a65b2eca70f135230"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -178,7 +187,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_1633709b037eda5b8477677909f78129.xhtml">CL</a></li><li class="navelem"><a class="el" href="core_2_c_l_2_c_l_helpers_8h.xhtml">CLHelpers.h</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:47 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:20 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

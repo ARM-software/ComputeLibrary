@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -289,8 +289,17 @@ void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *w
                 acc.at(i) += *reinterpret_cast<int32_t *>(biases_it.ptr() + i * sizeof(int32_t));
             }
 
-            acc.at(i)   = rounding_divide_by_exp2(saturating_doubling_high_mul(acc.at(i), output_multiplier.at(id.x() + i)), output_shift.at(id.x() + i)) + output_qoffset;
-            out_vals[i] = static_cast<T>(utility::clamp<int32_t, uint8_t>(acc.at(i)));
+            const int out_mul   = output_multiplier.at(id.x() + i);
+            const int out_shift = output_shift.at(id.x() + i);
+            if(out_shift < 0)
+            {
+                acc.at(i) = saturating_doubling_high_mul(acc.at(i) * (1 << (-out_shift)), out_mul) + output_qoffset;
+            }
+            else
+            {
+                acc.at(i) = rounding_divide_by_exp2(saturating_doubling_high_mul(acc.at(i), out_mul), out_shift) + output_qoffset;
+            }
+            out_vals[i] = static_cast<T>(utility::clamp<int32_t, T>(acc.at(i)));
         }
 
         wrapper::vstore(reinterpret_cast<T *>(output_it.ptr()), out_vals);
@@ -381,21 +390,20 @@ void depthwise_loop_generic_quantized(const ITensor *input, const ITensor *weigh
 
             if(has_biases)
             {
-                const auto biases_val = *(reinterpret_cast<int32_t *>(biases_it.ptr() + m * sizeof(int32_t)));
+                acc.at(m) += *(reinterpret_cast<int32_t *>(biases_it.ptr() + m * sizeof(int32_t)));
+            }
 
-                int32_t out_val = acc.at(m) + biases_val;
-                out_val         = rounding_divide_by_exp2(saturating_doubling_high_mul(out_val, output_multiplier.at(id.x() + m)),
-                                                          output_shift.at(id.x() + m))
-                                  + output_qoffset;
-                *(reinterpret_cast<T *>(output_it.ptr() + m * sizeof(T))) = static_cast<T>(utility::clamp<int32_t, uint8_t>(out_val));
+            const int out_mul   = output_multiplier.at(id.x() + m);
+            const int out_shift = output_shift.at(id.x() + m);
+            if(out_shift < 0)
+            {
+                acc.at(m) = saturating_doubling_high_mul(acc.at(m) * (1 << (-out_shift)), out_mul) + output_qoffset;
             }
             else
             {
-                int32_t out_val = rounding_divide_by_exp2(saturating_doubling_high_mul(acc.at(m), output_multiplier.at(id.x() + m)),
-                                                          output_shift.at(id.x() + m))
-                                  + output_qoffset;
-                *(reinterpret_cast<T *>(output_it.ptr() + m * sizeof(T))) = static_cast<T>(utility::clamp<int32_t, uint8_t>(out_val));
+                acc.at(m) = rounding_divide_by_exp2(saturating_doubling_high_mul(acc.at(m), out_mul), out_shift) + output_qoffset;
             }
+            *(reinterpret_cast<T *>(output_it.ptr() + m * sizeof(T))) = static_cast<T>(utility::clamp<int32_t, T>(acc.at(m)));
         }
     },
     input_it, weights_it, biases_it, output_it);
@@ -407,7 +415,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(1) + (weights->dimension(1) - 1) * (dilation.x() - 1) > input->dimension(1) + conv_info.pad_left() + conv_info.pad_right());
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(2) + (weights->dimension(2) - 1) * (dilation.y() - 1) > input->dimension(2) + conv_info.pad_top() + conv_info.pad_bottom());
@@ -528,11 +536,10 @@ void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, co
 
         for(size_t i = 0; i < weights_scale.size(); ++i)
         {
-            int         out_mult   = 0;
-            int         out_shift  = 0;
+            int32_t     out_mult   = 0;
+            int32_t     out_shift  = 0;
             const float multiplier = input_scale * weights_scale.at(i) / output_scale;
-            ARM_COMPUTE_ERROR_ON(multiplier > 1.f);
-            arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &out_mult, &out_shift);
+            arm_compute::quantization::calculate_quantized_multiplier(multiplier, &out_mult, &out_shift);
 
             _output_multiplier.push_back(out_mult);
             _output_shift.push_back(out_shift);
@@ -546,9 +553,22 @@ void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, co
                     &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, uint8_t, 8, false, false>;
             pad_vectors(_output_multiplier, _output_shift, 8);
             break;
+        case DataType::QASYMM8_SIGNED:
+            _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8, true, false> :
+                    &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8, false, false>;
+            pad_vectors(_output_multiplier, _output_shift, 8);
+            break;
         case DataType::QSYMM8_PER_CHANNEL:
-            _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, int8_t, 8, true, true> :
-                    &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, int8_t, 8, false, true>;
+            if(_input->info()->data_type() == DataType::QASYMM8)
+            {
+                _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, int8_t, 8, true, true> :
+                        &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, int8_t, 8, false, true>;
+            }
+            else
+            {
+                _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8, true, true> :
+                        &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8, false, true>;
+            }
             pad_vectors(_output_multiplier, _output_shift, 8);
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -614,7 +634,7 @@ void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window
     }
 }
 
-template <typename T, typename TW, int S, bool has_biases, bool is_per_channel, typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type>
+template <typename T, typename TW, int S, bool has_biases, bool is_per_channel, typename>
 void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);

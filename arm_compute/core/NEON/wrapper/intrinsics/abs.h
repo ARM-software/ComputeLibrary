@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_ABS_H__
-#define __ARM_COMPUTE_WRAPPER_ABS_H__
+#ifndef ARM_COMPUTE_WRAPPER_ABS_H
+#define ARM_COMPUTE_WRAPPER_ABS_H
 
 #include <arm_neon.h>
 
@@ -72,4 +72,4 @@ VQABS_IMPL(int32x4_t, int32x4_t, vqabsq, s32)
 #undef VQABS_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_ABS_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_ABS_H */

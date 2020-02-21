@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEPOOLINGLAYER_H__
-#define __ARM_COMPUTE_NEPOOLINGLAYER_H__
+#ifndef ARM_COMPUTE_NEPOOLINGLAYER_H
+#define ARM_COMPUTE_NEPOOLINGLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -48,7 +48,7 @@ public:
      *
      * @note F16 is supported for pool sizes 2 and 3 only
      *
-     * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/F16/F32.
+     * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]     output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]      pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
@@ -57,7 +57,7 @@ public:
      *
      * @note F16 is supported for pool sizes 2 and 3 only
      *
-     * @param[in] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/F16/F32.
+     * @param[in] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *
@@ -75,4 +75,4 @@ private:
     DataLayout           _data_layout;
 };
 }
-#endif /* __ARM_COMPUTE_NEPOOLINGLAYER_H__ */
+#endif /* ARM_COMPUTE_NEPOOLINGLAYER_H */

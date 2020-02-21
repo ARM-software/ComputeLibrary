@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCGEMMTRANSPOSE1XW_H__
-#define __ARM_COMPUTE_GCGEMMTRANSPOSE1XW_H__
+#ifndef ARM_COMPUTE_GCGEMMTRANSPOSE1XW_H
+#define ARM_COMPUTE_GCGEMMTRANSPOSE1XW_H
 
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
 
@@ -44,4 +44,4 @@ public:
     void configure(const IGCTensor *input, IGCTensor *output);
 };
 }
-#endif /*__ARM_COMPUTE_GCGEMMTRANSPOSE1XW_H__ */
+#endif /*ARM_COMPUTE_GCGEMMTRANSPOSE1XW_H */

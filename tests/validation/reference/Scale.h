@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_SCALE_H__
-#define __ARM_COMPUTE_TEST_SCALE_H__
+#ifndef ARM_COMPUTE_TEST_SCALE_H
+#define ARM_COMPUTE_TEST_SCALE_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -37,9 +37,9 @@ namespace reference
 {
 template <typename T>
 SimpleTensor<T> scale(const SimpleTensor<T> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, T constant_border_value = 0,
-                      SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool ceil_policy_scale = false);
+                      SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool ceil_policy_scale = false, bool align_corners = false);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_SCALE_H__ */
+#endif /* ARM_COMPUTE_TEST_SCALE_H */

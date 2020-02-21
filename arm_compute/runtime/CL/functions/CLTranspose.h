@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLTRANSPOSE_H__
-#define __ARM_COMPUTE_CLTRANSPOSE_H__
+#ifndef ARM_COMPUTE_CLTRANSPOSE_H
+#define ARM_COMPUTE_CLTRANSPOSE_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -40,13 +40,13 @@ class CLTranspose : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  Input tensor. Data types supported: All.
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLTranspose
      *
-     * @param[in] input  The input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input  The input tensor. Data types supported: All.
      * @param[in] output The output tensor. Data types supported: Same as @p input
      *
      * @return a status
@@ -55,4 +55,4 @@ public:
 };
 }
 
-#endif /* __ARM_COMPUTE_CLTRANSPOSE_H__ */
+#endif /* ARM_COMPUTE_CLTRANSPOSE_H */

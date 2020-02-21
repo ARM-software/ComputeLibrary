@@ -144,6 +144,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLFFTConvolutionLayer.h", "_c_l_f_f_t_convolution_layer_8h.xhtml", [
       [ "CLFFTConvolutionLayer", "classarm__compute_1_1_c_l_f_f_t_convolution_layer.xhtml", "classarm__compute_1_1_c_l_f_f_t_convolution_layer" ]
     ] ],
+    [ "CLFill.h", "_c_l_fill_8h.xhtml", [
+      [ "CLFill", "classarm__compute_1_1_c_l_fill.xhtml", "classarm__compute_1_1_c_l_fill" ]
+    ] ],
     [ "CLFillBorder.h", "_c_l_fill_border_8h.xhtml", [
       [ "CLFillBorder", "classarm__compute_1_1_c_l_fill_border.xhtml", "classarm__compute_1_1_c_l_fill_border" ]
     ] ],
@@ -193,6 +196,7 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLGEMMLowpOutputStage.h", "_c_l_g_e_m_m_lowp_output_stage_8h.xhtml", [
       [ "CLGEMMLowpQuantizeDownInt32ToUint8Scale", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale" ],
       [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point" ],
+      [ "CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point" ],
       [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float" ],
       [ "CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point" ]
     ] ],

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MISC_RANDOM_H__
-#define __ARM_COMPUTE_MISC_RANDOM_H__
+#ifndef ARM_COMPUTE_MISC_RANDOM_H
+#define ARM_COMPUTE_MISC_RANDOM_H
 
 #include "arm_compute/core/Error.h"
 
@@ -95,4 +95,4 @@ private:
 } // namespace random
 } // namespace utils
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_MISC_RANDOM_H__ */
+#endif /* ARM_COMPUTE_MISC_RANDOM_H */

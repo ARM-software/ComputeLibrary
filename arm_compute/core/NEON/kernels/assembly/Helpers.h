@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ASSEMBLY_HELPERS_H__
-#define __ARM_COMPUTE_ASSEMBLY_HELPERS_H__
+#ifndef ARM_COMPUTE_ASSEMBLY_HELPERS_H
+#define ARM_COMPUTE_ASSEMBLY_HELPERS_H
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Utils.h"
@@ -119,4 +119,4 @@ BlockSizes calculate_block_sizes(const CPUInfo &ci, unsigned int M, unsigned int
 }
 
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_ASSEMBLY_HELPERS_H__ */
+#endif /* ARM_COMPUTE_ASSEMBLY_HELPERS_H */

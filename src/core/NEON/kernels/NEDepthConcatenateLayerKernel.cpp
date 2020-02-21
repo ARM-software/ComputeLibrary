@@ -66,6 +66,16 @@ void depth_concat(const ITensor *in, ITensor *out, int depth_offset, const Windo
         },
         input, output);
     }
+    else if(dt == DataType::QASYMM8_SIGNED && input_qinfo != output_qinfo)
+    {
+        execute_window_loop(window, [&](const Coordinates &)
+        {
+            const auto in_ptr  = reinterpret_cast<const int8_t *>(input_ptr + input.offset());
+            const auto out_ptr = reinterpret_cast<int8_t *>(output_ptr + output.offset());
+            vst1q_s8(out_ptr, vquantize_signed(vdequantize(vld1q_s8(in_ptr), input_qinfo), output_qinfo));
+        },
+        input, output);
+    }
     else
     {
         execute_window_loop(window, [&](const Coordinates &)
@@ -102,7 +112,7 @@ Status validate_arguments(const ITensorInfo *input, unsigned int depth_offset, c
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(Window::DimX) != output->dimension(Window::DimX));
@@ -133,6 +143,9 @@ void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int
     {
         case DataType::QASYMM8:
             _func = &depth_concat<uint8_t>;
+            break;
+        case DataType::QASYMM8_SIGNED:
+            _func = &depth_concat<int8_t>;
             break;
         case DataType::F16:
             _func = &depth_concat<uint16_t>;

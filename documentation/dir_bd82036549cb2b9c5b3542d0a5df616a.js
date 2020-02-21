@@ -18,5 +18,8 @@ var dir_bd82036549cb2b9c5b3542d0a5df616a =
     ] ],
     [ "SplitLayerSubTensorMutator.h", "_split_layer_sub_tensor_mutator_8h.xhtml", [
       [ "SplitLayerSubTensorMutator", "classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml", "classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator" ]
+    ] ],
+    [ "SyntheticDataTypeMutator.h", "_synthetic_data_type_mutator_8h.xhtml", [
+      [ "SyntheticDataTypeMutator", "classarm__compute_1_1graph_1_1_synthetic_data_type_mutator.xhtml", "classarm__compute_1_1graph_1_1_synthetic_data_type_mutator" ]
     ] ]
 ];

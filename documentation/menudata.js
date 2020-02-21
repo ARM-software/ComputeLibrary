@@ -121,7 +121,6 @@ var menudata={children:[
 {text:"s",url:"namespacemembers_type_s.xhtml#index_s"},
 {text:"t",url:"namespacemembers_type_t.xhtml#index_t"},
 {text:"u",url:"namespacemembers_type_u.xhtml#index_u"},
-{text:"v",url:"namespacemembers_type_v.xhtml#index_v"},
 {text:"w",url:"namespacemembers_type_w.xhtml#index_w"}]},
 {text:"Enumerations",url:"namespacemembers_enum.xhtml",children:[
 {text:"a",url:"namespacemembers_enum.xhtml#index_a"},
@@ -253,8 +252,7 @@ var menudata={children:[
 {text:"File List",url:"files.xhtml"},
 {text:"Globals",url:"globals.xhtml",children:[
 {text:"All",url:"globals.xhtml",children:[
-{text:"_",url:"globals.xhtml#index__5F"},
-{text:"a",url:"globals_a.xhtml#index_a"},
+{text:"a",url:"globals.xhtml#index_a"},
 {text:"b",url:"globals_b.xhtml#index_b"},
 {text:"c",url:"globals_c.xhtml#index_c"},
 {text:"d",url:"globals_d.xhtml#index_d"},
@@ -303,7 +301,19 @@ var menudata={children:[
 {text:"v",url:"globals_func_v.xhtml#index_v"},
 {text:"w",url:"globals_func_w.xhtml#index_w"},
 {text:"y",url:"globals_func_y.xhtml#index_y"}]},
-{text:"Variables",url:"globals_vars.xhtml"},
+{text:"Variables",url:"globals_vars.xhtml",children:[
+{text:"b",url:"globals_vars.xhtml#index_b"},
+{text:"c",url:"globals_vars.xhtml#index_c"},
+{text:"g",url:"globals_vars.xhtml#index_g"},
+{text:"i",url:"globals_vars.xhtml#index_i"},
+{text:"k",url:"globals_vars.xhtml#index_k"},
+{text:"l",url:"globals_vars.xhtml#index_l"},
+{text:"m",url:"globals_vars.xhtml#index_m"},
+{text:"n",url:"globals_vars.xhtml#index_n"},
+{text:"o",url:"globals_vars.xhtml#index_o"},
+{text:"p",url:"globals_vars.xhtml#index_p"},
+{text:"r",url:"globals_vars.xhtml#index_r"},
+{text:"t",url:"globals_vars.xhtml#index_t"}]},
 {text:"Typedefs",url:"globals_type.xhtml",children:[
 {text:"c",url:"globals_type.xhtml#index_c"},
 {text:"d",url:"globals_type.xhtml#index_d"},
@@ -314,8 +324,7 @@ var menudata={children:[
 {text:"t",url:"globals_type.xhtml#index_t"},
 {text:"v",url:"globals_type.xhtml#index_v"}]},
 {text:"Macros",url:"globals_defs.xhtml",children:[
-{text:"_",url:"globals_defs.xhtml#index__5F"},
-{text:"a",url:"globals_defs_a.xhtml#index_a"},
+{text:"a",url:"globals_defs.xhtml#index_a"},
 {text:"b",url:"globals_defs_b.xhtml#index_b"},
 {text:"c",url:"globals_defs_c.xhtml#index_c"},
 {text:"d",url:"globals_defs_d.xhtml#index_d"},

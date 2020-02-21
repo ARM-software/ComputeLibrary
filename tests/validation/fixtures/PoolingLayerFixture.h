@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,8 +52,11 @@ public:
     {
         std::mt19937                    gen(library->seed());
         std::uniform_int_distribution<> offset_dis(0, 20);
-        const QuantizationInfo          input_qinfo(1.f / 255.f, offset_dis(gen));
-        const QuantizationInfo          output_qinfo(1.f / 255.f, offset_dis(gen));
+        const float                     scale     = data_type == DataType::QASYMM8_SIGNED ? 1.f / 127.f : 1.f / 255.f;
+        const int                       scale_in  = data_type == DataType::QASYMM8_SIGNED ? -offset_dis(gen) : offset_dis(gen);
+        const int                       scale_out = data_type == DataType::QASYMM8_SIGNED ? -offset_dis(gen) : offset_dis(gen);
+        const QuantizationInfo          input_qinfo(scale, scale_in);
+        const QuantizationInfo          output_qinfo(scale, scale_out);
 
         _pool_info = pool_info;
         _target    = compute_target(shape, pool_info, data_type, data_layout, input_qinfo, output_qinfo);
@@ -135,7 +138,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, DataLayout data_layout)
     {
-        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding),
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, data_layout, pad_stride_info, exclude_padding),
                                                                                                data_type, data_layout);
     }
 };
@@ -147,7 +150,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, DataLayout data_layout, bool fp_mixed_precision = false)
     {
-        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding, fp_mixed_precision),
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, data_layout, pad_stride_info, exclude_padding, fp_mixed_precision),
                                                                                                data_type, data_layout);
     }
 };
@@ -159,7 +162,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, DataLayout data_layout = DataLayout::NCHW)
     {
-        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding),
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, data_layout, pad_stride_info, exclude_padding),
                                                                                                data_type, data_layout);
     }
 };
@@ -182,7 +185,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, PoolingType pool_type, DataType data_type, DataLayout data_layout = DataLayout::NCHW)
     {
-        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type), data_type, data_layout);
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, data_layout), data_type, data_layout);
     }
 };
 

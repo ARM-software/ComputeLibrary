@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__
-#define __ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H
+#define ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLSimple3DKernel.h"
 #include "arm_compute/core/KernelDescriptors.h"
@@ -187,10 +187,11 @@ public:
      * @param[in] input  Source tensor. Data types supported: S32/F16/F32
      * @param[in] sum    Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
      * @param[in] output Destination tensor. Data types supported: QASYMM8 for S32 @p input, or same as @p input
+     * @param[in] info   Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, const SoftmaxKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -201,4 +202,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLSOFTMAXLAYERKERNEL_H */

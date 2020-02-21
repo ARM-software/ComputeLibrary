@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,10 +67,8 @@ SimpleTensor<T> depthwise_convolution_fp(const SimpleTensor<T> &src, const Simpl
     const int input_depth   = src.shape().z();
     const int num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
-    const int pad_left   = conv_info.pad_left();
-    const int pad_top    = conv_info.pad_top();
-    const int pad_right  = conv_info.pad_right();
-    const int pad_bottom = conv_info.pad_bottom();
+    const int pad_left = conv_info.pad_left();
+    const int pad_top  = conv_info.pad_top();
 
     const float patch_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1));
     const float patch_height = (filter_height + (dilation.y() - 1) * (filter_height - 1));
@@ -83,8 +81,8 @@ SimpleTensor<T> depthwise_convolution_fp(const SimpleTensor<T> &src, const Simpl
 
     const int minimum_x = -pad_left + patch_half_width_floor;
     const int minimum_y = -pad_top + patch_half_height_floor;
-    const int maximum_x = input_width + pad_left + pad_right - static_cast<int>(patch_width);
-    const int maximum_y = input_height + pad_top + pad_bottom - static_cast<int>(patch_height);
+    const int maximum_x = (conv_info.stride().first * (dst_shape[0] - 1));
+    const int maximum_y = (conv_info.stride().second * (dst_shape[1] - 1));
 
     const T border_value(0);
 
@@ -132,8 +130,8 @@ SimpleTensor<T> depthwise_convolution_fp(const SimpleTensor<T> &src, const Simpl
  * - Third dimention is number of channels
  * - Depths of input tensor and filter are equals
  * - Padding, stride and output shape "match"
- * - QASYMM8 input, output
- * - QASYMM8 or QSYMM8_PER_CHANNEL filter
+ * - QASYMM8/QASYMM8_SIGNED input, output
+ * - QASYMM8/QASYMM8_SIGNED or QSYMM8_PER_CHANNEL filter
  *
  */
 template <typename T, typename TW, typename TB>
@@ -162,10 +160,8 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
     const int input_depth   = src.shape().z();
     const int num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
-    const int pad_left   = conv_info.pad_left();
-    const int pad_top    = conv_info.pad_top();
-    const int pad_right  = conv_info.pad_right();
-    const int pad_bottom = conv_info.pad_bottom();
+    const int pad_left = conv_info.pad_left();
+    const int pad_top  = conv_info.pad_top();
 
     const float patch_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1));
     const float patch_height = (filter_height + (dilation.y() - 1) * (filter_height - 1));
@@ -178,10 +174,13 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
 
     const int minimum_x = -pad_left + patch_half_width_floor;
     const int minimum_y = -pad_top + patch_half_height_floor;
-    const int maximum_x = input_width + pad_left + pad_right - static_cast<int>(patch_width);
-    const int maximum_y = input_height + pad_top + pad_bottom - static_cast<int>(patch_height);
+    const int maximum_x = (conv_info.stride().first * (dst_shape[0] - 1));
+    const int maximum_y = (conv_info.stride().second * (dst_shape[1] - 1));
 
     const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights.data_type());
+
+    const int min = std::numeric_limits<T>::lowest();
+    const int max = std::numeric_limits<T>::max();
 
     int out_pos = 0;
     for(int r = 0; r < num_batches; ++r)
@@ -197,7 +196,7 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
                 int         output_shift      = 0;
                 const float weights_scale     = (is_quantized_per_channel) ? weights_scale_vec[out_z] : weights_scale_vec[0];
                 const float multiplier        = input_scale * weights_scale / output_scale;
-                arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+                arm_compute::quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
 
                 for(int y = minimum_y; y <= minimum_y + maximum_y; y += conv_info.stride().second)
                 {
@@ -220,9 +219,8 @@ SimpleTensor<T> depthwise_convolution_quantized(const SimpleTensor<T> &src, cons
                             }
                         }
                         val += bias_val;
-                        val = asymm_rounding_divide_by_pow2(asymm_int_mult(val, output_multiplier), output_shift);
-                        val += output_offset;
-                        val = utility::clamp<int32_t>(val, 0, 255);
+                        // Quantize down
+                        val = quantize_down_scale_by_fixedpoint(val, output_multiplier, output_shift, output_offset, min, max);
 
                         // Store the result
                         dst[out_pos++] = val;
@@ -262,6 +260,13 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
                                             const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
 {
     return depthwise_convolution_quantized<uint8_t, int8_t, int32_t>(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation, out_quant_info);
+}
+
+template <>
+SimpleTensor<int8_t> depthwise_convolution(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
+                                           const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation, const QuantizationInfo &out_quant_info)
+{
+    return depthwise_convolution_quantized<int8_t, int8_t, int32_t>(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation, out_quant_info);
 }
 } // namespace reference
 } // namespace validation

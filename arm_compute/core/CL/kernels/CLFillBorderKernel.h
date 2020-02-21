@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFILLBORDERKERNEL_H__
-#define __ARM_COMPUTE_CLFILLBORDERKERNEL_H__
+#ifndef ARM_COMPUTE_CLFILLBORDERKERNEL_H
+#define ARM_COMPUTE_CLFILLBORDERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/PixelValue.h"
@@ -51,7 +51,7 @@ public:
 
     /** Initialise the kernel's input, output and border mode.
      *
-     * @param[in,out] tensor                Tensor to process Data types supported: U8/S16/S32/F16/F32.
+     * @param[in,out] tensor                Tensor to process Data types supported: U8/QASYMM8/S8/QASYMM8_SIGNED/U16/S16/U32/S32/F16/F32.
      * @param[in]     border_size           Size of the border to fill in elements.
      * @param[in]     border_mode           Border mode to use for the convolution.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
@@ -74,4 +74,4 @@ private:
     ICLTensor *_tensor;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLFILLBORDERKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLFILLBORDERKERNEL_H */

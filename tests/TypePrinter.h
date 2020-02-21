@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
-#define __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
+#ifndef ARM_COMPUTE_TEST_TYPE_PRINTER_H
+#define ARM_COMPUTE_TEST_TYPE_PRINTER_H
 
 #include "tests/Types.h"
 
@@ -69,4 +69,4 @@ inline std::string to_string(const arm_compute::GradientDimension &type)
 }
 
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */
+#endif /* ARM_COMPUTE_TEST_TYPE_PRINTER_H */

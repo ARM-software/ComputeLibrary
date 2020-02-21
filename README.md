@@ -27,6 +27,7 @@ Tutorials:
 
 Documentation (API, changelogs, build guide, contribution guide, errata, etc.) available here:
 
+- [v20.02](https://arm-software.github.io/ComputeLibrary/v20.02/)
 - [v19.11.1](https://arm-software.github.io/ComputeLibrary/v19.11.1/)
 - [v19.11](https://arm-software.github.io/ComputeLibrary/v19.11/)
 - [v19.08.1](https://arm-software.github.io/ComputeLibrary/v19.08.1/)
@@ -49,6 +50,8 @@ Documentation (API, changelogs, build guide, contribution guide, errata, etc.) a
 
 Binaries available here:
 
+- [v20.02-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v20.02/arm_compute-v20.02-bin-linux.tar.gz)
+- [v20.02-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v20.02/arm_compute-v20.02-bin-android.tar.gz)
 - [v19.11.1-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11.1/arm_compute-v19.11.1-bin-linux.tar.gz)
 - [v19.11.1-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11.1/arm_compute-v19.11.1-bin-android.tar.gz)
 - [v19.11-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11/arm_compute-v19.11-bin-linux.tar.gz)
@@ -95,3 +98,6 @@ To indicate that you agree to the the terms of the DCO, you "sign off" your cont
 ```Signed-off-by: John Doe <john.doe@example.org>```
 
 You must use your real name, no pseudonyms or anonymous contributions are accepted.
+
+### Security Issues
+If you believe you have discovered a security issue please contact MLG-Security@arm.com

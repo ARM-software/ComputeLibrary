@@ -68,7 +68,7 @@ class GemmHybridQuantized : public GemmCommon<To, Tr> {
 
     const NDRange<4> _window_range;
 
-    ARequantizeLayer32  _qp;
+    Requantize32  _qp;
     int32_t *row_bias = nullptr;
     int32_t *col_bias = nullptr;
 
@@ -140,7 +140,7 @@ public:
     GemmHybridQuantized & operator= (GemmHybridQuantized &) = delete;
 
     /* Constructor */
-    GemmHybridQuantized(const GemmArgs &args, const ARequantizeLayer32 &qp)
+    GemmHybridQuantized(const GemmArgs &args, const Requantize32 &qp)
               : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
                 _nbatches(args._nbatches), _nmulti(args._nmulti), _trB(args._trB),
                 _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),

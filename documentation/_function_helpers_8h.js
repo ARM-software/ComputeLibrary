@@ -22,6 +22,8 @@ var _function_helpers_8h =
     [ "create_pad_layer", "_function_helpers_8h.xhtml#a127d0cce11ed3d411eaa5bd25c7a3ac1", null ],
     [ "create_permute_layer", "_function_helpers_8h.xhtml#aa65a1becdfa5fc3533d79bba0cd4095c", null ],
     [ "create_pooling_layer", "_function_helpers_8h.xhtml#a0e51b62035e79b0f12964cae17ce0480", null ],
+    [ "create_prelu_layer", "_function_helpers_8h.xhtml#a6806f347d8b4c0986cdfe4c45918972b", null ],
+    [ "create_print_layer", "_function_helpers_8h.xhtml#a5567ed5ad9c8fb45d2748bab27163530", null ],
     [ "create_priorbox_layer", "_function_helpers_8h.xhtml#aaf28fee838c38cc4da407a4dbc62f7b0", null ],
     [ "create_quantization_layer", "_function_helpers_8h.xhtml#a31be99a5d0f75045fc411e211824baad", null ],
     [ "create_reorg_layer", "_function_helpers_8h.xhtml#a0331e6b2b68ea76e9415f7f148d92601", null ],

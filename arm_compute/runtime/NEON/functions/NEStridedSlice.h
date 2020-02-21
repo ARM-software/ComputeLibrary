@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NE_STRIDED_SLICE_H__
-#define __ARM_COMPUTE_NE_STRIDED_SLICE_H__
+#ifndef ARM_COMPUTE_NE_STRIDED_SLICE_H
+#define ARM_COMPUTE_NE_STRIDED_SLICE_H
 
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
@@ -39,7 +39,7 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in]  input            Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in]  input            Source tensor. Data type supported: All
      * @param[out] output           Destination tensor. Data type supported: Same as @p input
      * @param[in]  starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -57,7 +57,7 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in] input            Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in] input            Source tensor info. Data type supported: All
      * @param[in] output           Destination tensor info. Data type supported: Same as @p input
      * @param[in] starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in] ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -72,4 +72,4 @@ public:
                            int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_axis_mask = 0);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NE_STRIDED_SLICE_H__ */
+#endif /* ARM_COMPUTE_NE_STRIDED_SLICE_H */

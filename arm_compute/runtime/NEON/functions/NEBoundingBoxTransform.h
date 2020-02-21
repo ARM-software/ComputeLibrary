@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEBOUNDINGBOXTRANSOFORM_H__
-#define __ARM_COMPUTE_NEBOUNDINGBOXTRANSOFORM_H__
+#ifndef ARM_COMPUTE_NEBOUNDINGBOXTRANSOFORM_H
+#define ARM_COMPUTE_NEBOUNDINGBOXTRANSOFORM_H
 
 #include "arm_compute/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -66,4 +66,4 @@ public:
     static Status validate(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLBOUNDINGBOXTRANSFORM_H__ */
+#endif /* ARM_COMPUTE_CLBOUNDINGBOXTRANSFORM_H */

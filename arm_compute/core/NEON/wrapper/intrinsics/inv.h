@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_INV_H__
-#define __ARM_COMPUTE_WRAPPER_INV_H__
+#ifndef ARM_COMPUTE_WRAPPER_INV_H
+#define ARM_COMPUTE_WRAPPER_INV_H
 
 #include "arm_compute/core/NEON/NEMath.h"
 #include <arm_neon.h>
@@ -59,4 +59,4 @@ VINV_IMPL(float16x8_t, vinvq, f16)
 #undef VINV_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_INV_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_INV_H */

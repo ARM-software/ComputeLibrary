@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__
-#define __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__
+#ifndef ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H
+#define ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
-#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
@@ -36,8 +34,6 @@
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
-#include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
-#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/ITransformWeights.h"
 #include "arm_compute/runtime/IWeightsManager.h"
@@ -60,7 +56,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  weights    Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                        Data type supported: QASYMM8/QSYMM8_PER_CHANNEL/F16/F32.
+     *                        Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
      * @param[in]  biases     Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output     Destination tensor. Data types supported: Same as @p weights.
      * @param[in]  num_groups (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
@@ -69,7 +65,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvolutionLayerReshapeWeights
      *
      * @param[in] weights    Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                       Data type supported: QASYMM8/QSYMM8_PER_CHANNEL/F16/F32.
+     *                       Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
      * @param[in] biases     Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[in] output     Destination tensor. Data types supported: Same as @p weights.
      * @param[in] num_groups (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
@@ -92,7 +88,7 @@ class CLConvolutionLayerReshapeWeightsTransform : public ITransformWeights
 public:
     /** Configures the @ref CLConvolutionLayerReshapeWeights function
      *
-     * @param[in] input      Input tensor. Data type supported: QASYMM8/F16/F32.
+     * @param[in] input      Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] biases     Biases tensor. Data type supported: Same as @p input.
      * @param[in] num_groups Number of groups when performing a grouped convolution.
      */
@@ -143,7 +139,6 @@ private:
  * -# @ref CLGEMM (if the data type is FP32 or FP16)
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
  * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
- * -# @ref CLElementwiseOperationKernel for addition (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
  * -# @ref CLCol2ImKernel (if NCHW data layout)
  */
 class CLGEMMConvolutionLayer : public IFunction
@@ -267,4 +262,4 @@ private:
     bool _is_prepared;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */
+#endif /* ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H */

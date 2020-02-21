@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CL_SLICE_H__
-#define __ARM_COMPUTE_CL_SLICE_H__
+#ifndef ARM_COMPUTE_CL_SLICE_H
+#define ARM_COMPUTE_CL_SLICE_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -42,7 +42,7 @@ public:
      * @note End coordinates can be negative, which represents the number of elements before the end of that dimension.
      * @note End indices are not inclusive unless negative.
      *
-     * @param[in]  input  Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/QASYMM16/QSYMM16/U32/S32/F16/F32
+     * @param[in]  input  Source tensor. Data type supported: All.
      * @param[out] output Destination tensor. Data type supported: Same as @p input
      * @param[in]  starts The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  ends   The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -56,7 +56,7 @@ public:
      * @note End coordinates can be negative, which represents the number of elements before the end of that dimension.
      * @note End indices are not inclusive unless negative.
      *
-     * @param[in] input  Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/QASYMM16/QSYMM16/U32/S32/F16/F32
+     * @param[in] input  Source tensor info. Data type supported: All.
      * @param[in] output Destination tensor info. Data type supported: Same as @p input
      * @param[in] starts The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in] ends   The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -66,4 +66,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CL_SLICE_H__ */
+#endif /* ARM_COMPUTE_CL_SLICE_H */

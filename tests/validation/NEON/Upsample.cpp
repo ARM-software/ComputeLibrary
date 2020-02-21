@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,8 +149,20 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEUpsampleLayerQuantizedFixture<uint8_t>, frame
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // QASYMM8
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEUpsampleLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                     framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                     framework::dataset::make("PadInfo", { Size2D(2, 2) })),
+                                                                                                                     framework::dataset::make("UpsamplingPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR })),
+                                                                                                                     framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // UpsampleLayer
 TEST_SUITE_END() // NEON

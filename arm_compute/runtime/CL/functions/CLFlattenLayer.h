@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFLATTENLAYER_H__
-#define __ARM_COMPUTE_CLFLATTENLAYER_H__
+#ifndef ARM_COMPUTE_CLFLATTENLAYER_H
+#define ARM_COMPUTE_CLFLATTENLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -42,7 +42,7 @@ public:
     /** Initialise the kernel's input and output.
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
-     *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     *                    The dimensions above the third will be interpreted as batches. Data types supported: All.
      * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
      *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      */
@@ -50,7 +50,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLFlattenLayer
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
-     *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     *                    The dimensions above the third will be interpreted as batches. Data types supported: All.
      * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
      *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      *
@@ -60,4 +60,4 @@ public:
 };
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_CLFLATTENLAYER_H__ */
+#endif /* ARM_COMPUTE_CLFLATTENLAYER_H */

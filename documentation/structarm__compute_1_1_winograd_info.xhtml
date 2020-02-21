@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -142,7 +142,7 @@ Data Fields</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Winograd information. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02085">2085</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02154">2154</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af8cfb6ab1e028484d875995bf6c224e3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af8cfb6ab1e028484d875995bf6c224e3">&#9670;&nbsp;</a></span>WinogradInfo()</h2>
@@ -208,14 +208,14 @@ Data Fields</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02095">2095</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l02096"></a><span class="lineno"> 2096</span>&#160;        : <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#a5cd6561e9acc0cf9ba11bc2f51ec7a33">output_tile_size</a>(output_tile_sz), <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#aca57076ead1d06c47d3d32f4302b14ac">kernel_size</a>(kernel_sz), <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#af9ef316b2c98c946b47cd18f1319b93f">input_dimensions</a>(input_dims), <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#ad99e40b120f0a9e96821c08bf60a84f2">convolution_info</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a00525ff582f16038a1d3819aa44a23a3">conv_info</a>), <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#a0bc60aaf23b2d3ed3b344576a708e84e">output_data_layout</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acf5f12bbab64dd614bd8220c97fe484f">data_layout</a>)</div><div class="line"><a name="l02097"></a><span class="lineno"> 2097</span>&#160;    {</div><div class="line"><a name="l02098"></a><span class="lineno"> 2098</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acf5f12bbab64dd614bd8220c97fe484f"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acf5f12bbab64dd614bd8220c97fe484f">arm_compute::test::validation::data_layout</a></div><div class="ttdeci">const DataLayout data_layout</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_im2_col_8cpp_source.xhtml#l00146">Im2Col.cpp:146</a></div></div>
-<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_a0bc60aaf23b2d3ed3b344576a708e84e"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#a0bc60aaf23b2d3ed3b344576a708e84e">arm_compute::WinogradInfo::output_data_layout</a></div><div class="ttdeci">DataLayout output_data_layout</div><div class="ttdoc">Data layout to use for the output tensor once the convolution has been applied (NCHW or NHWC)</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02104">Types.h:2104</a></div></div>
-<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_ad99e40b120f0a9e96821c08bf60a84f2"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#ad99e40b120f0a9e96821c08bf60a84f2">arm_compute::WinogradInfo::convolution_info</a></div><div class="ttdeci">PadStrideInfo convolution_info</div><div class="ttdoc">Convolution info (Pads, strides,...)</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02103">Types.h:2103</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a00525ff582f16038a1d3819aa44a23a3"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a00525ff582f16038a1d3819aa44a23a3">arm_compute::test::validation::conv_info</a></div><div class="ttdeci">conv_info</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_winograd_8cpp_source.xhtml#l00599">Winograd.cpp:599</a></div></div>
-<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_a5cd6561e9acc0cf9ba11bc2f51ec7a33"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#a5cd6561e9acc0cf9ba11bc2f51ec7a33">arm_compute::WinogradInfo::output_tile_size</a></div><div class="ttdeci">Size2D output_tile_size</div><div class="ttdoc">Width and height of the output tile.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02100">Types.h:2100</a></div></div>
-<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_aca57076ead1d06c47d3d32f4302b14ac"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#aca57076ead1d06c47d3d32f4302b14ac">arm_compute::WinogradInfo::kernel_size</a></div><div class="ttdeci">Size2D kernel_size</div><div class="ttdoc">Width and height of the kernel.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02101">Types.h:2101</a></div></div>
-<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_af9ef316b2c98c946b47cd18f1319b93f"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#af9ef316b2c98c946b47cd18f1319b93f">arm_compute::WinogradInfo::input_dimensions</a></div><div class="ttdeci">Size2D input_dimensions</div><div class="ttdoc">Width and height of the input tensor before the convolution is applied.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02102">Types.h:2102</a></div></div>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02164">2164</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l02165"></a><span class="lineno"> 2165</span>&#160;        : <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#a5cd6561e9acc0cf9ba11bc2f51ec7a33">output_tile_size</a>(output_tile_sz), <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#aca57076ead1d06c47d3d32f4302b14ac">kernel_size</a>(kernel_sz), <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#af9ef316b2c98c946b47cd18f1319b93f">input_dimensions</a>(input_dims), <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#ad99e40b120f0a9e96821c08bf60a84f2">convolution_info</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a00525ff582f16038a1d3819aa44a23a3">conv_info</a>), <a class="code" href="structarm__compute_1_1_winograd_info.xhtml#a0bc60aaf23b2d3ed3b344576a708e84e">output_data_layout</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acf5f12bbab64dd614bd8220c97fe484f">data_layout</a>)</div><div class="line"><a name="l02166"></a><span class="lineno"> 2166</span>&#160;    {</div><div class="line"><a name="l02167"></a><span class="lineno"> 2167</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acf5f12bbab64dd614bd8220c97fe484f"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acf5f12bbab64dd614bd8220c97fe484f">arm_compute::test::validation::data_layout</a></div><div class="ttdeci">const DataLayout data_layout</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_im2_col_8cpp_source.xhtml#l00146">Im2Col.cpp:146</a></div></div>
+<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_a0bc60aaf23b2d3ed3b344576a708e84e"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#a0bc60aaf23b2d3ed3b344576a708e84e">arm_compute::WinogradInfo::output_data_layout</a></div><div class="ttdeci">DataLayout output_data_layout</div><div class="ttdoc">Data layout to use for the output tensor once the convolution has been applied (NCHW or NHWC)</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02173">Types.h:2173</a></div></div>
+<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_ad99e40b120f0a9e96821c08bf60a84f2"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#ad99e40b120f0a9e96821c08bf60a84f2">arm_compute::WinogradInfo::convolution_info</a></div><div class="ttdeci">PadStrideInfo convolution_info</div><div class="ttdoc">Convolution info (Pads, strides,...)</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02172">Types.h:2172</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a00525ff582f16038a1d3819aa44a23a3"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a00525ff582f16038a1d3819aa44a23a3">arm_compute::test::validation::conv_info</a></div><div class="ttdeci">conv_info</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_winograd_8cpp_source.xhtml#l00597">Winograd.cpp:597</a></div></div>
+<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_a5cd6561e9acc0cf9ba11bc2f51ec7a33"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#a5cd6561e9acc0cf9ba11bc2f51ec7a33">arm_compute::WinogradInfo::output_tile_size</a></div><div class="ttdeci">Size2D output_tile_size</div><div class="ttdoc">Width and height of the output tile.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02169">Types.h:2169</a></div></div>
+<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_aca57076ead1d06c47d3d32f4302b14ac"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#aca57076ead1d06c47d3d32f4302b14ac">arm_compute::WinogradInfo::kernel_size</a></div><div class="ttdeci">Size2D kernel_size</div><div class="ttdoc">Width and height of the kernel.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02170">Types.h:2170</a></div></div>
+<div class="ttc" id="structarm__compute_1_1_winograd_info_xhtml_af9ef316b2c98c946b47cd18f1319b93f"><div class="ttname"><a href="structarm__compute_1_1_winograd_info.xhtml#af9ef316b2c98c946b47cd18f1319b93f">arm_compute::WinogradInfo::input_dimensions</a></div><div class="ttdeci">Size2D input_dimensions</div><div class="ttdoc">Width and height of the input tensor before the convolution is applied.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l02171">Types.h:2171</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -234,7 +234,7 @@ Data Fields</h2></td></tr>
 
 <p>Convolution info (Pads, strides,...) </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02103">2103</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02172">2172</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 </div>
 </div>
@@ -252,7 +252,7 @@ Data Fields</h2></td></tr>
 
 <p>Width and height of the input tensor before the convolution is applied. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02102">2102</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02171">2171</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 </div>
 </div>
@@ -270,7 +270,7 @@ Data Fields</h2></td></tr>
 
 <p>Width and height of the kernel. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02101">2101</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02170">2170</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 </div>
 </div>
@@ -288,7 +288,7 @@ Data Fields</h2></td></tr>
 
 <p>Data layout to use for the output tensor once the convolution has been applied (NCHW or NHWC) </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02104">2104</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02173">2173</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 </div>
 </div>
@@ -306,7 +306,7 @@ Data Fields</h2></td></tr>
 
 <p>Width and height of the output tile. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02100">2100</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l02169">2169</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 </div>
 </div>
@@ -319,7 +319,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1_winograd_info.xhtml">WinogradInfo</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:57 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:31 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

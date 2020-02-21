@@ -41,10 +41,6 @@ namespace validation
 {
 namespace reference
 {
-namespace
-{
-} // namespace
-
 template <typename T, typename TW, typename TB>
 SimpleTensor<T> convolution_layer_nchw(const SimpleTensor<T> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &dst, const PadStrideInfo &info,
                                        const Size2D &dilation, unsigned int num_groups)
@@ -141,6 +137,8 @@ template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &sr
                                                  const PadStrideInfo &info, const Size2D &dilation, unsigned int num_groups, QuantizationInfo out_quant_info);
 template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
                                                  const PadStrideInfo &info, const Size2D &dilation, unsigned int num_groups, QuantizationInfo out_quant_info);
+template SimpleTensor<int8_t> convolution_layer(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
+                                                const PadStrideInfo &info, const Size2D &dilation, unsigned int num_groups, QuantizationInfo out_quant_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

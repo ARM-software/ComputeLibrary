@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_PIXELVALUE_H__
-#define __ARM_COMPUTE_PIXELVALUE_H__
+#ifndef ARM_COMPUTE_PIXELVALUE_H
+#define ARM_COMPUTE_PIXELVALUE_H
 
 #include "arm_compute/core/Types.h"
 
@@ -36,7 +36,7 @@ class PixelValue
 public:
     /** Default constructor: value initialized to 0 */
     PixelValue()
-        : value{ uint64_t(0) }
+        : value{ int64_t(0) }
     {
     }
     /** Initialize the union with a pixel value of chosen datatype
@@ -45,7 +45,7 @@ public:
      * @param[in] datatype DataType that @p v have to be stored
      * @param[in] qinfo    (Optional) QuantizationInfo to apply in case of quantized data types to @p v
      */
-    PixelValue(uint64_t v, DataType datatype, QuantizationInfo qinfo = QuantizationInfo())
+    PixelValue(int64_t v, DataType datatype, QuantizationInfo qinfo = QuantizationInfo())
         : PixelValue()
     {
         switch(datatype)
@@ -58,6 +58,9 @@ public:
                 break;
             case DataType::QASYMM8:
                 value.u8 = quantize_qasymm8(static_cast<uint8_t>(v), qinfo);
+                break;
+            case DataType::QASYMM8_SIGNED:
+                value.s8 = quantize_qasymm8_signed(static_cast<int8_t>(v), qinfo);
                 break;
             case DataType::QSYMM8:
                 value.s8 = quantize_qsymm8(static_cast<int8_t>(v), qinfo);
@@ -84,7 +87,7 @@ public:
                 value.u64 = static_cast<uint64_t>(v);
                 break;
             case DataType::S64:
-                value.s16 = static_cast<int64_t>(v);
+                value.s64 = static_cast<int64_t>(v);
                 break;
             case DataType::F16:
                 value.f16 = static_cast<half>(v);
@@ -96,9 +99,18 @@ public:
                 value.f64 = static_cast<double>(v);
                 break;
             default:
-                value.u64 = v;
+                value.s64 = v;
                 break;
         }
+    }
+    /** Initialize the union with a S8 pixel value
+     *
+     * @param[in] v S8 value.
+     */
+    PixelValue(int8_t v)
+        : PixelValue()
+    {
+        value.s8 = v;
     }
     /** Initialize the union with a U8 pixel value
      *
@@ -311,5 +323,5 @@ public:
         return val;
     }
 };
-}
-#endif /* __ARM_COMPUTE_PIXELVALUE_H__ */
+} // namespace arm_compute
+#endif /* ARM_COMPUTE_PIXELVALUE_H */

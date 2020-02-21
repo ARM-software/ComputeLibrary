@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCONVOLUTION_H__
-#define __ARM_COMPUTE_CLCONVOLUTION_H__
+#ifndef ARM_COMPUTE_CLCONVOLUTION_H
+#define ARM_COMPUTE_CLCONVOLUTION_H
 
 #include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
@@ -129,4 +129,4 @@ public:
     void configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t rows, uint32_t cols, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 }
-#endif /*__ARM_COMPUTE_CLCONVOLUTION_H__ */
+#endif /*ARM_COMPUTE_CLCONVOLUTION_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__
-#define __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__
+#ifndef ARM_COMPUTE_TEST_DEPTH_CONVERT_H
+#define ARM_COMPUTE_TEST_DEPTH_CONVERT_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -44,4 +44,4 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__ */
+#endif /* ARM_COMPUTE_TEST_DEPTH_CONVERT_H */

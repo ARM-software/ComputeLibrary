@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_GRAPH_BACKEND_REGISTRAR_H__
-#define ARM_COMPUTE_GRAPH_BACKEND_REGISTRAR_H__
+#ifndef ARM_COMPUTE_GRAPH_BACKEND_REGISTRAR_H
+#define ARM_COMPUTE_GRAPH_BACKEND_REGISTRAR_H
 
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
@@ -58,4 +58,4 @@ inline BackendRegistrar<T>::BackendRegistrar(Target target)
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_GRAPH_BACKEND_REGISTRAR_H__ */
+#endif /* ARM_COMPUTE_GRAPH_BACKEND_REGISTRAR_H */

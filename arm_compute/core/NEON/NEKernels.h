@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEKERNELS_H__
-#define __ARM_COMPUTE_NEKERNELS_H__
+#ifndef ARM_COMPUTE_NEKERNELS_H
+#define ARM_COMPUTE_NEKERNELS_H
 
 /* Header regrouping all the NEON kernels */
 #include "arm_compute/core/NEON/kernels/NEAbsoluteDifferenceKernel.h"
@@ -80,6 +80,7 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
@@ -150,4 +151,4 @@
 #include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEYOLOLayerKernel.h"
 
-#endif /* __ARM_COMPUTE_NEKERNELS_H__ */
+#endif /* ARM_COMPUTE_NEKERNELS_H */

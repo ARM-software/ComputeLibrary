@@ -1,6 +1,11 @@
 var _n_e_math_8inl =
 [
     [ "M_PI", "_n_e_math_8inl.xhtml#ae71449b1cc6e6250b91f539153a7a0d3", null ],
+    [ "convert_float32x4x3_to_uint8x8x3", "_n_e_math_8inl.xhtml#aa8065e7933c00bdbf860278643c9e953", null ],
+    [ "convert_float32x4x4_to_int8x16", "_n_e_math_8inl.xhtml#a9c673ade3003d5d4e28ebf5875795dc4", null ],
+    [ "convert_float32x4x4_to_uint8x16", "_n_e_math_8inl.xhtml#a4ee01955c2dd8c14a0d107a36cb62618", null ],
+    [ "convert_int8x16_to_float32x4x4", "_n_e_math_8inl.xhtml#a4a20779ec9b583a9468b4fa60575d52e", null ],
+    [ "convert_uint8x16_to_float32x4x4", "_n_e_math_8inl.xhtml#a1b362fecc52ac83bcfbb0850549edce4", null ],
     [ "rounding_divide_by_pow2", "_n_e_math_8inl.xhtml#a77e02c19b498c3ff4ee373b0825cfd19", null ],
     [ "rounding_divide_by_pow2", "_n_e_math_8inl.xhtml#a5e28a3911204ac952601f512c82b48f1", null ],
     [ "rounding_divide_by_pow2", "_n_e_math_8inl.xhtml#afe3908fe41d9f2559f4a9eab1997fe61", null ],

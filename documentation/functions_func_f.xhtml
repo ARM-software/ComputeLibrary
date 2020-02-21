@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -218,6 +218,9 @@ $(document).ready(function(){initNavTree('functions_func_f.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensorAccessor&lt; T &gt;</a>
 </li>
+<li>format_info()
+: <a class="el" href="classarm__compute_1_1graph_1_1_print_layer_node.xhtml#abf36a79fab2a42ff3830e207d6b0af7c">PrintLayerNode</a>
+</li>
 <li>forward_descriptors()
 : <a class="el" href="classarm__compute_1_1graph_1_1_activation_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">ActivationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">BatchNormalizationLayerNode</a>
@@ -246,6 +249,8 @@ $(document).ready(function(){initNavTree('functions_func_f.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_pad_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PadLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_permute_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PermuteLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PoolingLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_p_relu_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PReluLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_print_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PrintLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">PriorBoxLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_quantization_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">QuantizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_reorg_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b">ReorgLayerNode</a>
@@ -267,7 +272,6 @@ $(document).ready(function(){initNavTree('functions_func_f.xhtml','');});
 </li>
 <li>fp_mixed_precision()
 : <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml#a501521734ce4f9d81d91d0c7e35dcfe9">GEMMInfo</a>
-, <a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml#a501521734ce4f9d81d91d0c7e35dcfe9">PoolingLayerInfo</a>
 </li>
 <li>free()
 : <a class="el" href="classarm__compute_1_1_allocator.xhtml#abbd17af5b3fbeff226e4051433c1b929">Allocator</a>
@@ -291,7 +295,7 @@ $(document).ready(function(){initNavTree('functions_func_f.xhtml','');});
 : <a class="el" href="class_gemm_tuner_1_1_g_e_m_m_config_distribution.xhtml#abc89734bc6dee426b61a6463ecba9dbc">GEMMConfigDistribution</a>
 </li>
 <li>FullyConnectedLayer()
-: <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_fully_connected_layer.xhtml#a967453c6b06e1604672f4c719f5d1d77">FullyConnectedLayer</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_fully_connected_layer.xhtml#aed1efef2ff5d9d98937162e3220b9412">FullyConnectedLayer</a>
 </li>
 <li>FullyConnectedLayerNode()
 : <a class="el" href="classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml#af62c7158fbabce358a6f6f0efee791d0">FullyConnectedLayerNode</a>
@@ -321,7 +325,7 @@ $(document).ready(function(){initNavTree('functions_func_f.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 22 2020 18:08:02 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

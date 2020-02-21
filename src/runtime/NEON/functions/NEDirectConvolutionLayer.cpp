@@ -31,8 +31,8 @@
 #include <cmath>
 #include <tuple>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _output_stage_kernel(), _conv_kernel(), _input_border_handler(), _activationlayer_function(), _accumulator(), _has_bias(false),
       _is_activationlayer_enabled(false), _dim_split(Window::DimZ)
@@ -118,3 +118,4 @@ void NEDirectConvolutionLayer::run()
         _activationlayer_function.run();
     }
 }
+} // namespace arm_compute

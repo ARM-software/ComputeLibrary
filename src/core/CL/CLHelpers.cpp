@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ std::string get_cl_type_from_data_type(const DataType &dt)
         case DataType::QASYMM8:
             return "uchar";
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             return "char";
@@ -77,6 +78,7 @@ std::string get_cl_promoted_type_from_data_type(const DataType &dt)
         case DataType::QASYMM8:
             return "ushort";
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             return "short";
@@ -116,6 +118,24 @@ std::string get_cl_unsigned_type_from_element_size(size_t element_size)
     }
 }
 
+std::string get_cl_signed_type_from_element_size(size_t element_size)
+{
+    switch(element_size)
+    {
+        case 1:
+            return "char";
+        case 2:
+            return "short";
+        case 4:
+            return "int";
+        case 8:
+            return "long";
+        default:
+            ARM_COMPUTE_ERROR("Data type not supported");
+            return "";
+    }
+}
+
 std::string get_cl_select_type_from_data_type(const DataType &dt)
 {
     switch(dt)
@@ -124,6 +144,7 @@ std::string get_cl_select_type_from_data_type(const DataType &dt)
         case DataType::QASYMM8:
             return "uchar";
         case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             return "char";
@@ -149,6 +170,24 @@ std::string get_cl_select_type_from_data_type(const DataType &dt)
     }
 }
 
+std::string get_cl_dot8_acc_type_from_data_type(const DataType &dt)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+            return "uint";
+        case DataType::S8:
+        case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+            return "int";
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type.");
+            return "";
+    }
+}
+
 std::string get_data_size_from_data_type(const DataType &dt)
 {
     switch(dt)
@@ -157,6 +196,7 @@ std::string get_data_size_from_data_type(const DataType &dt)
         case DataType::S8:
         case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             return "8";
         case DataType::U16:
@@ -300,6 +340,7 @@ size_t preferred_vector_width(const cl::Device &device, const DataType dt)
         case DataType::U8:
         case DataType::S8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR>();
@@ -341,5 +382,13 @@ cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &ke
         // Legacy code through the singleton
         return static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
     }
+}
+
+cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size)
+{
+    const unsigned int width_leftover = input_dimension % vector_size;
+    const unsigned int border_width   = (width_leftover != 0) ? vector_size - width_leftover : 0;
+    const unsigned int num_of_threads = ((input_dimension + border_width) / 16);
+    return cl::NDRange(std::min(8U, num_of_threads));
 }
 } // namespace arm_compute

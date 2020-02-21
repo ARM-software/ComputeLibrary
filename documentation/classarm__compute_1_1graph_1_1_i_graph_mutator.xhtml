@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -97,6 +97,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1graph_1_1_i_graph
 
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">IGraphMutator Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
@@ -108,6 +109,14 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1graph_1_1_i_graph
 
 <p><code>#include &lt;<a class="el" href="_i_graph_mutator_8h_source.xhtml">IGraphMutator.h</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a15c294efeadfdffb6b0735dd93aedfd9"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a15c294efeadfdffb6b0735dd93aedfd9">MutationType</a> { <a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a15c294efeadfdffb6b0735dd93aedfd9a4f74d343f26bbd58a8cbbad2cab6a704">IR</a>, 
+<a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a15c294efeadfdffb6b0735dd93aedfd9a2e427c268ac1768b9add94b65e2d6c14">Backend</a>
+ }</td></tr>
+<tr class="memdesc:a15c294efeadfdffb6b0735dd93aedfd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutation type.  <a href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a15c294efeadfdffb6b0735dd93aedfd9">More...</a><br /></td></tr>
+<tr class="separator:a15c294efeadfdffb6b0735dd93aedfd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1054c29b61d56a4f33633230b844c4d8"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a1054c29b61d56a4f33633230b844c4d8">~IGraphMutator</a> ()=default</td></tr>
@@ -116,6 +125,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5cbaa2df97059f21e84c1d4f3fef4694"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a5cbaa2df97059f21e84c1d4f3fef4694">mutate</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g)=0</td></tr>
 <tr class="memdesc:a5cbaa2df97059f21e84c1d4f3fef4694"><td class="mdescLeft">&#160;</td><td class="mdescRight">Walk the graph and perform a specific mutation.  <a href="#a5cbaa2df97059f21e84c1d4f3fef4694">More...</a><br /></td></tr>
 <tr class="separator:a5cbaa2df97059f21e84c1d4f3fef4694"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a827f1f617c0eab4347324fa3b7256131"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a15c294efeadfdffb6b0735dd93aedfd9">MutationType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a827f1f617c0eab4347324fa3b7256131">type</a> () const =0</td></tr>
+<tr class="memdesc:a827f1f617c0eab4347324fa3b7256131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns mutation type.  <a href="#a827f1f617c0eab4347324fa3b7256131">More...</a><br /></td></tr>
+<tr class="separator:a827f1f617c0eab4347324fa3b7256131"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3690f13206df6f6103bae8ae3ceee528"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a3690f13206df6f6103bae8ae3ceee528">name</a> ()=0</td></tr>
 <tr class="memdesc:a3690f13206df6f6103bae8ae3ceee528"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns mutator name.  <a href="#a3690f13206df6f6103bae8ae3ceee528">More...</a><br /></td></tr>
 <tr class="separator:a3690f13206df6f6103bae8ae3ceee528"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -124,7 +136,40 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class.">Graph</a> mutator interface. </p>
 
 <p class="definition">Definition at line <a class="el" href="_i_graph_mutator_8h_source.xhtml#l00035">35</a> of file <a class="el" href="_i_graph_mutator_8h_source.xhtml">IGraphMutator.h</a>.</p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a15c294efeadfdffb6b0735dd93aedfd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15c294efeadfdffb6b0735dd93aedfd9">&#9670;&nbsp;</a></span>MutationType</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a15c294efeadfdffb6b0735dd93aedfd9">MutationType</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Mutation type. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a15c294efeadfdffb6b0735dd93aedfd9a4f74d343f26bbd58a8cbbad2cab6a704"></a>IR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a15c294efeadfdffb6b0735dd93aedfd9a2e427c268ac1768b9add94b65e2d6c14"></a>Backend&#160;</td><td class="fielddoc"><p>IR specific mutation. </p>
+<p>Backend specific mutation </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="_i_graph_mutator_8h_source.xhtml#l00039">39</a> of file <a class="el" href="_i_graph_mutator_8h_source.xhtml">IGraphMutator.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    {</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        IR,     <span class="comment">/** IR specific mutation */</span></div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        Backend <span class="comment">/** Backend specific mutation */</span></div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    };</div></div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1054c29b61d56a4f33633230b844c4d8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1054c29b61d56a4f33633230b844c4d8">&#9670;&nbsp;</a></span>~IGraphMutator()</h2>
 
@@ -185,9 +230,9 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">NodeExecutionMethodMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">DepthConcatSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">GroupedConvolutionMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">SplitLayerSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">NodeFusionMutator</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">InPlaceOperationMutator</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">NodeExecutionMethodMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">DepthConcatSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">GroupedConvolutionMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">SplitLayerSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">NodeFusionMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_synthetic_data_type_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">SyntheticDataTypeMutator</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce">InPlaceOperationMutator</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_pass_manager_8cpp_source.xhtml#l00073">PassManager::run()</a>, and <a class="el" href="_pass_manager_8cpp_source.xhtml#l00061">PassManager::run_all()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_pass_manager_8cpp_source.xhtml#l00061">PassManager::run_all()</a>, <a class="el" href="_pass_manager_8cpp_source.xhtml#l00085">PassManager::run_index()</a>, and <a class="el" href="_pass_manager_8cpp_source.xhtml#l00073">PassManager::run_type()</a>.</p>
 
 </div>
 </div>
@@ -217,9 +262,41 @@ Public Member Functions</h2></td></tr>
 <p>Returns mutator name. </p>
 <dl class="section return"><dt>Returns</dt><dd>Mutator name </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">NodeExecutionMethodMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">DepthConcatSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">GroupedConvolutionMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">SplitLayerSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">NodeFusionMutator</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">InPlaceOperationMutator</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">NodeExecutionMethodMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">DepthConcatSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">GroupedConvolutionMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">SplitLayerSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">NodeFusionMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_synthetic_data_type_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">SyntheticDataTypeMutator</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68">InPlaceOperationMutator</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_pass_manager_8cpp_source.xhtml#l00047">PassManager::append()</a>, and <a class="el" href="_pass_manager_8cpp_source.xhtml#l00061">PassManager::run_all()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_pass_manager_8cpp_source.xhtml#l00047">PassManager::append()</a>, <a class="el" href="_pass_manager_8cpp_source.xhtml#l00061">PassManager::run_all()</a>, <a class="el" href="_pass_manager_8cpp_source.xhtml#l00085">PassManager::run_index()</a>, and <a class="el" href="_pass_manager_8cpp_source.xhtml#l00073">PassManager::run_type()</a>.</p>
+
+</div>
+</div>
+<a id="a827f1f617c0eab4347324fa3b7256131"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a827f1f617c0eab4347324fa3b7256131">&#9670;&nbsp;</a></span>type()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a15c294efeadfdffb6b0735dd93aedfd9">MutationType</a> type </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns mutation type. </p>
+<dl class="section return"><dt>Returns</dt><dd>Mutation type enumeration </dd></dl>
+
+<p>Implemented in <a class="el" href="classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">NodeExecutionMethodMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">DepthConcatSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">GroupedConvolutionMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">SplitLayerSubTensorMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">NodeFusionMutator</a>, <a class="el" href="classarm__compute_1_1graph_1_1_synthetic_data_type_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">SyntheticDataTypeMutator</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml#ae8dc84fc3eb9c937069826830b13b06d">InPlaceOperationMutator</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="_pass_manager_8cpp_source.xhtml#l00073">PassManager::run_type()</a>.</p>
 
 </div>
 </div>
@@ -232,7 +309,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml">IGraphMutator</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:58 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:31 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

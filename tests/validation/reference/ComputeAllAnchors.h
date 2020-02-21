@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H__
-#define __ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H__
+#ifndef ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H
+#define ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -42,4 +42,4 @@ SimpleTensor<T> compute_all_anchors(const SimpleTensor<T> &anchors, const Comput
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H__ */
+#endif /* ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,9 +55,6 @@ public:
             return false;
         }
 
-        // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-
         // Print parameter values
         std::cout << common_params << std::endl;
 
@@ -70,8 +67,9 @@ public:
                                                                                                                    false /* Do not convert to BGR */);
 
         // Create input descriptor
-        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
-        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+        const auto        operation_layout = common_params.data_layout;
+        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, operation_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(operation_layout);
 
         // Set weights trained layout
         const DataLayout weights_layout = DataLayout::NCHW;
@@ -93,14 +91,14 @@ public:
                   0.0000100099996416f)
               .set_name("conv1/BatchNorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1/Relu")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool1/MaxPool");
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, operation_layout, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool1/MaxPool");
 
         add_residual_block(data_path, "block1", weights_layout, 64, 3, 2);
         add_residual_block(data_path, "block2", weights_layout, 128, 4, 2);
         add_residual_block(data_path, "block3", weights_layout, 256, 6, 2);
         add_residual_block(data_path, "block4", weights_layout, 512, 3, 1);
 
-        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("pool5")
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, operation_layout)).set_name("pool5")
               << ConvolutionLayer(
                   1U, 1U, 1000U,
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_weights.npy", weights_layout),
@@ -113,10 +111,11 @@ public:
 
         // Finalize graph
         GraphConfig config;
-        config.num_threads = common_params.threads;
-        config.use_tuner   = common_params.enable_tuner;
-        config.tuner_mode  = common_params.tuner_mode;
-        config.tuner_file  = common_params.tuner_file;
+        config.num_threads      = common_params.threads;
+        config.use_tuner        = common_params.enable_tuner;
+        config.tuner_mode       = common_params.tuner_mode;
+        config.tuner_file       = common_params.tuner_file;
+        config.convert_to_uint8 = (common_params.data_type == DataType::QASYMM8);
 
         graph.finalize(common_params.target, config);
 
@@ -222,7 +221,7 @@ private:
             else if(middle_stride > 1)
             {
                 SubStream left(graph);
-                left << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 1, PadStrideInfo(middle_stride, middle_stride, 0, 0), true)).set_name(unit_name + "shortcut/MaxPool");
+                left << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 1, common_params.data_layout, PadStrideInfo(middle_stride, middle_stride, 0, 0), true)).set_name(unit_name + "shortcut/MaxPool");
 
                 graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name(unit_name + "add");
             }

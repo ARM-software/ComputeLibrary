@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,16 +57,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        if(_data_type == DataType::QASYMM8)
-        {
-            const auto                             bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-            std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
-            library->fill(tensor, distribution, i);
-        }
-        else
-        {
-            library->fill_tensor_uniform(tensor, i);
-        }
+        library->fill_tensor_uniform(tensor, i);
     }
 
     TensorType compute_target(TensorShape input_shape, const Size2D &info, const InterpolationPolicy &policy,

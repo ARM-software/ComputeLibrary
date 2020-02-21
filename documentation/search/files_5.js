@@ -16,7 +16,7 @@ var searchData=
   ['elementwisepower_2ecpp',['ElementwisePower.cpp',['../_c_l_2_elementwise_power_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_elementwise_power_8cpp.xhtml',1,'(Global Namespace)']]],
   ['elementwiseround_2ecpp',['ElementwiseRound.cpp',['../_elementwise_round_8cpp.xhtml',1,'']]],
   ['elementwisersqrtlayer_2ecpp',['ElementwiseRsqrtLayer.cpp',['../_elementwise_rsqrt_layer_8cpp.xhtml',1,'']]],
-  ['elementwisesin_2ecpp',['ElementwiseSin.cpp',['../benchmark_2_n_e_o_n_2_elementwise_sin_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_elementwise_sin_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['elementwisesin_2ecpp',['ElementwiseSin.cpp',['../_elementwise_sin_8cpp.xhtml',1,'']]],
   ['elementwisesquareddiff_2ecpp',['ElementwiseSquaredDiff.cpp',['../_elementwise_squared_diff_8cpp.xhtml',1,'']]],
   ['elementwisesquarediff_2ecpp',['ElementwiseSquareDiff.cpp',['../_elementwise_square_diff_8cpp.xhtml',1,'']]],
   ['elementwiseunary_2ecpp',['ElementWiseUnary.cpp',['../_element_wise_unary_8cpp.xhtml',1,'']]],
@@ -26,7 +26,7 @@ var searchData=
   ['enumlistoption_2eh',['EnumListOption.h',['../_enum_list_option_8h.xhtml',1,'']]],
   ['enumoption_2eh',['EnumOption.h',['../_enum_option_8h.xhtml',1,'']]],
   ['eor_2eh',['eor.h',['../eor_8h.xhtml',1,'']]],
-  ['equalizehistogram_2ecpp',['EqualizeHistogram.cpp',['../benchmark_2_c_l_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2reference_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['equalizehistogram_2ecpp',['EqualizeHistogram.cpp',['../_c_l_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_equalize_histogram_8cpp.xhtml',1,'(Global Namespace)']]],
   ['equalizehistogram_2eh',['EqualizeHistogram.h',['../_equalize_histogram_8h.xhtml',1,'']]],
   ['erode_2ecl',['erode.cl',['../erode_8cl.xhtml',1,'']]],
   ['erode_2ecpp',['Erode.cpp',['../_c_l_2_erode_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_erode_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_erode_8cpp.xhtml',1,'(Global Namespace)']]],
@@ -38,5 +38,6 @@ var searchData=
   ['executionhelpers_2ecpp',['ExecutionHelpers.cpp',['../_execution_helpers_8cpp.xhtml',1,'']]],
   ['executionhelpers_2eh',['ExecutionHelpers.h',['../_execution_helpers_8h.xhtml',1,'']]],
   ['exp_2eh',['exp.h',['../exp_8h.xhtml',1,'']]],
-  ['explayer_2ecpp',['ExpLayer.cpp',['../_exp_layer_8cpp.xhtml',1,'']]]
+  ['explayer_2ecpp',['ExpLayer.cpp',['../_exp_layer_8cpp.xhtml',1,'']]],
+  ['ext_2eh',['ext.h',['../ext_8h.xhtml',1,'']]]
 ];

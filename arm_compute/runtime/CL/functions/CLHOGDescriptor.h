@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLHOGDESCRIPTOR_H__
-#define __ARM_COMPUTE_CLHOGDESCRIPTOR_H__
+#ifndef ARM_COMPUTE_CLHOGDESCRIPTOR_H
+#define ARM_COMPUTE_CLHOGDESCRIPTOR_H
 
 #include "arm_compute/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "arm_compute/core/Types.h"
@@ -74,4 +74,4 @@ private:
 };
 }
 
-#endif /* __ARM_COMPUTE_CLHOGDESCRIPTOR_H__ */
+#endif /* ARM_COMPUTE_CLHOGDESCRIPTOR_H */

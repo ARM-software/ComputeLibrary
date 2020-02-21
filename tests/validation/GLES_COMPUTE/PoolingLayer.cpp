@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,7 +73,16 @@ framework::dataset::make("OutputInfo",
 })),
 framework::dataset::make("PoolInfo",
 {
-    PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 2, 0)), PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 0, 2)), PoolingLayerInfo(PoolingType::L2, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG), PoolingLayerInfo(PoolingType::MAX), PoolingLayerInfo(PoolingType::AVG),
+    PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
+    PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
+    PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
+    PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
+    PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 2, 0)),
+    PoolingLayerInfo(PoolingType::AVG, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 2)),
+    PoolingLayerInfo(PoolingType::L2, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
+    PoolingLayerInfo(PoolingType::AVG, DataLayout::NCHW),
+    PoolingLayerInfo(PoolingType::MAX, DataLayout::NCHW),
+    PoolingLayerInfo(PoolingType::AVG, DataLayout::NCHW),
 })),
 framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, true })),
 input_info, output_info, pool_info, expected)

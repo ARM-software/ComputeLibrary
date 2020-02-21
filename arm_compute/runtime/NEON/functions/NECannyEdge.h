@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECANNYEDGE_H__
-#define __ARM_COMPUTE_NECANNYEDGE_H__
+#ifndef ARM_COMPUTE_NECANNYEDGE_H
+#define ARM_COMPUTE_NECANNYEDGE_H
 
 #include "arm_compute/core/NEON/kernels/NECannyEdgeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
@@ -96,4 +96,4 @@ private:
     ITensor                      *_output;              /**< Output tensor provided by the user. */
 };
 }
-#endif /* __ARM_COMPUTE_NECANNYEDGE_H */
+#endif /* ARM_COMPUTE_NECANNYEDGE_H */

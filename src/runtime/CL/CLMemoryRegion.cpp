@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,7 @@ void *ICLMemoryRegion::buffer()
     return _mapping;
 }
 
-void *ICLMemoryRegion::buffer() const
+const void *ICLMemoryRegion::buffer() const
 {
     return _mapping;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLMINMAXLOCATION_H__
-#define __ARM_COMPUTE_CLMINMAXLOCATION_H__
+#ifndef ARM_COMPUTE_CLMINMAXLOCATION_H
+#define ARM_COMPUTE_CLMINMAXLOCATION_H
 
 #include "arm_compute/core/CL/kernels/CLMinMaxLocationKernel.h"
 #include "arm_compute/runtime/CL/CLArray.h"
@@ -83,4 +83,4 @@ private:
     CLCoordinates2DArray *_max_loc;             /**< Maximum value occurrences  coordinates. */
 };
 }
-#endif /*__ARM_COMPUTE_CLMINMAXLOCATION_H__ */
+#endif /*ARM_COMPUTE_CLMINMAXLOCATION_H */

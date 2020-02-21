@@ -36,6 +36,6 @@ var searchData=
   ['stride_5fx',['stride_x',['../struct_vector.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e',1,'Vector::stride_x()'],['../struct_image.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e',1,'Image::stride_x()'],['../struct_tensor3_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e',1,'Tensor3D::stride_x()'],['../struct_tensor4_d.xhtml#ae01febbfd0689ef709f3ff6fdd2abc7e',1,'Tensor4D::stride_x()']]],
   ['stride_5fy',['stride_y',['../struct_image.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1',1,'Image::stride_y()'],['../struct_tensor3_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1',1,'Tensor3D::stride_y()'],['../struct_tensor4_d.xhtml#a4f0b90c9ecd6e57ceb3f37332fefe8f1',1,'Tensor4D::stride_y()']]],
   ['stride_5fz',['stride_z',['../struct_tensor3_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c',1,'Tensor3D::stride_z()'],['../struct_tensor4_d.xhtml#ad5ff7a2b2bd0eec50fe09c254b127d1c',1,'Tensor4D::stride_z()']]],
-  ['sub',['sub',['../namespacearm__compute_1_1test_1_1validation.xhtml#a5cf018925dff7200819397bf8a295a0f',1,'arm_compute::test::validation']]],
+  ['sub',['sub',['../namespacearm__compute_1_1test_1_1validation.xhtml#a306c2d0ce612405d1d4ee732534dc543',1,'arm_compute::test::validation']]],
   ['summarylevel',['SummaryLevel',['../class_gemm_tuner_1_1_g_e_m_m_benchmark_result_recorder.xhtml#a1d13ba4c90b1f13f78abc54d6c18bde4',1,'GemmTuner::GEMMBenchmarkResultRecorder']]]
 ];

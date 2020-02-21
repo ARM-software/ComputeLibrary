@@ -41,6 +41,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *block_info, const ITensorInfo *padddings, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, block_info, padddings, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(block_info, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(block_info->num_dimensions() > 1);
@@ -62,6 +63,7 @@ Status validate_arguments_static(const ITensorInfo *input, const int block_shape
                                  const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape_x < 1 || block_shape_y < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
 

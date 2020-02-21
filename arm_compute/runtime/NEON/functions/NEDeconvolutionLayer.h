@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__
-#define __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__
+#ifndef ARM_COMPUTE_NEDECONVOLUTIONLAYER_H
+#define ARM_COMPUTE_NEDECONVOLUTIONLAYER_H
 
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
@@ -133,4 +133,4 @@ private:
     bool                 _is_prepared;
 };
 } // arm_compute
-#endif /* __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__ */
+#endif /* ARM_COMPUTE_NEDECONVOLUTIONLAYER_H */

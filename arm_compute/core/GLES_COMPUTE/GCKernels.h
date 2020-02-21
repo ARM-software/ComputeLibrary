@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCKERNELS_H__
-#define __ARM_COMPUTE_GCKERNELS_H__
+#ifndef ARM_COMPUTE_GCKERNELS_H
+#define ARM_COMPUTE_GCKERNELS_H
 
 /* Header regrouping all the GLES compute kernels */
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCAbsoluteDifferenceKernel.h"
@@ -51,4 +51,4 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCWeightsReshapeKernel.h"
 
-#endif /* __ARM_COMPUTE_GCKERNELS_H__ */
+#endif /* ARM_COMPUTE_GCKERNELS_H */

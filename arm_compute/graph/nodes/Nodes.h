@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_H__
-#define __ARM_COMPUTE_GRAPH_NODES_H__
+#ifndef ARM_COMPUTE_GRAPH_NODES_H
+#define ARM_COMPUTE_GRAPH_NODES_H
 
 #include "arm_compute/graph/nodes/ActivationLayerNode.h"
 #include "arm_compute/graph/nodes/BatchNormalizationLayerNode.h"
@@ -47,9 +47,11 @@
 #include "arm_compute/graph/nodes/NormalizationLayerNode.h"
 #include "arm_compute/graph/nodes/NormalizePlanarYUVLayerNode.h"
 #include "arm_compute/graph/nodes/OutputNode.h"
+#include "arm_compute/graph/nodes/PReluLayerNode.h"
 #include "arm_compute/graph/nodes/PadLayerNode.h"
 #include "arm_compute/graph/nodes/PermuteLayerNode.h"
 #include "arm_compute/graph/nodes/PoolingLayerNode.h"
+#include "arm_compute/graph/nodes/PrintLayerNode.h"
 #include "arm_compute/graph/nodes/PriorBoxLayerNode.h"
 #include "arm_compute/graph/nodes/QuantizationLayerNode.h"
 #include "arm_compute/graph/nodes/ROIAlignLayerNode.h"
@@ -63,4 +65,4 @@
 #include "arm_compute/graph/nodes/UpsampleLayerNode.h"
 #include "arm_compute/graph/nodes/YOLOLayerNode.h"
 
-#endif /* __ARM_COMPUTE_GRAPH_NODES_H__ */
+#endif /* ARM_COMPUTE_GRAPH_NODES_H */

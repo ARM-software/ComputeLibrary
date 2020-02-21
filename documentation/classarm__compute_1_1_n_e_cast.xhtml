@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -183,28 +183,29 @@ Static Public Member Functions</h2></td></tr>
 <p>Input data type must be different than output data type.</p>
 <p>Valid conversions Input -&gt; Output :</p>
 <ul>
+<li>QASYMM8_SIGNED -&gt; S16, S32, F32, F16</li>
 <li>QASYMM8 -&gt; U16, S16, S32, F32, F16</li>
 <li>U8 -&gt; U16, S16, S32, F32, F16</li>
 <li>U16 -&gt; U8, U32</li>
-<li>S16 -&gt; U8, S32</li>
-<li>F16 -&gt; QASYMM8, F32, S32, U8</li>
-<li>S32 -&gt; QASYMM8, F16, F32, U8</li>
-<li>F32 -&gt; QASYMM8, F16, S32, U8</li>
+<li>S16 -&gt; QASYMM8_SIGNED, U8, S32</li>
+<li>F16 -&gt; QASYMM8_SIGNED, QASYMM8, F32, S32, U8</li>
+<li>S32 -&gt; QASYMM8_SIGNED, QASYMM8, F16, F32, U8</li>
+<li>F32 -&gt; QASYMM8_SIGNED, QASYMM8, F16, S32, U8</li>
 </ul>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Data types supported: QASYMM8, U8, U16, S16, F16, S32, F32. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Data types supported: S8/U16/S16/U32/S32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/F16/S32/F32. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/S8/U16/S16/U32/S32/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Conversion policy. </td></tr>
   </table>
   </dd>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_n_e_cast_8cpp_source.xhtml#l00035">35</a> of file <a class="el" href="_n_e_cast_8cpp_source.xhtml">NECast.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;{</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NEDepthConvertLayerKernel&gt;();</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    k-&gt;configure(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, output, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">policy</a>, 0);</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ad986b73e9d5f47a623a9b6d773c25e34"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">arm_compute::test::validation::policy</a></div><div class="ttdeci">policy</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00136">ArithmeticAddition.cpp:136</a></div></div>
+<div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;{</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NEDepthConvertLayerKernel&gt;();</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    k-&gt;configure(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, output, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">policy</a>, 0);</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ad986b73e9d5f47a623a9b6d773c25e34"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">arm_compute::test::validation::policy</a></div><div class="ttdeci">policy</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00139">ArithmeticAddition.cpp:139</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, and <a class="el" href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00136">arm_compute::test::validation::policy</a>.</p>
+<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, and <a class="el" href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00139">arm_compute::test::validation::policy</a>.</p>
 
 </div>
 </div>
@@ -251,8 +252,8 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_cast.xhtml">NECast</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: QASYMM8, U8, U16, S16, F16, S32, F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data type supported: S8/U16/S16/U32/S32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: QASYMM8_SIGNED/QASYMM8/U8/U16/S16/F16/S32/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data type supported: QASYMM8_SIGNED/QASYMM8/U8/S8/U16/S16/U32/S32/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Conversion policy.</td></tr>
   </table>
   </dd>
@@ -260,11 +261,11 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_n_e_cast_8cpp_source.xhtml#l00042">42</a> of file <a class="el" href="_n_e_cast_8cpp_source.xhtml">NECast.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_depth_convert_layer_kernel.xhtml#a87d58379bfe38d6845102cf762fbea63">NEDepthConvertLayerKernel::validate</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, output, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">policy</a>, 0);</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_depth_convert_layer_kernel_xhtml_a87d58379bfe38d6845102cf762fbea63"><div class="ttname"><a href="classarm__compute_1_1_n_e_depth_convert_layer_kernel.xhtml#a87d58379bfe38d6845102cf762fbea63">arm_compute::NEDepthConvertLayerKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift=0)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEDepthConvertLayerKerne...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_depth_convert_layer_kernel_8cpp_source.xhtml#l00127">NEDepthConvertLayerKernel.cpp:127</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ad986b73e9d5f47a623a9b6d773c25e34"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">arm_compute::test::validation::policy</a></div><div class="ttdeci">policy</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00136">ArithmeticAddition.cpp:136</a></div></div>
+<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_depth_convert_layer_kernel.xhtml#a87d58379bfe38d6845102cf762fbea63">NEDepthConvertLayerKernel::validate</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, output, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">policy</a>, 0);</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_depth_convert_layer_kernel_xhtml_a87d58379bfe38d6845102cf762fbea63"><div class="ttname"><a href="classarm__compute_1_1_n_e_depth_convert_layer_kernel.xhtml#a87d58379bfe38d6845102cf762fbea63">arm_compute::NEDepthConvertLayerKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift=0)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEDepthConvertLayerKerne...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_depth_convert_layer_kernel_8cpp_source.xhtml#l00135">NEDepthConvertLayerKernel.cpp:135</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ad986b73e9d5f47a623a9b6d773c25e34"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad986b73e9d5f47a623a9b6d773c25e34">arm_compute::test::validation::policy</a></div><div class="ttdeci">policy</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00139">ArithmeticAddition.cpp:139</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00136">arm_compute::test::validation::policy</a>, and <a class="el" href="_n_e_depth_convert_layer_kernel_8cpp_source.xhtml#l00127">NEDepthConvertLayerKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="_c_l_2_arithmetic_addition_8cpp_source.xhtml#l00139">arm_compute::test::validation::policy</a>, and <a class="el" href="_n_e_depth_convert_layer_kernel_8cpp_source.xhtml#l00135">NEDepthConvertLayerKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -278,7 +279,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_cast.xhtml">NECast</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:55 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:28 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

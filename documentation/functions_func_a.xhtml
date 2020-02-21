@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -136,6 +136,8 @@ $(document).ready(function(){initNavTree('functions_func_a.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_pad_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f">PadLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_permute_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f">PermuteLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f">PoolingLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_p_relu_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f">PReluLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_print_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f">PrintLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f">PriorBoxLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_quantization_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f">QuantizationLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_reorg_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f">ReorgLayerNode</a>
@@ -172,7 +174,7 @@ $(document).ready(function(){initNavTree('functions_func_a.xhtml','');});
 : <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a7bdc67f33b1dceb2c6d6d12ea784166a">Accessor</a>
 </li>
 <li>AccessWindowAutoPadding()
-: <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#ae196752aa67bd2acb53c83b48f22dcce">AccessWindowAutoPadding</a>
+: <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a55ae8ac3b55093b24fe30805828de164">AccessWindowAutoPadding</a>
 </li>
 <li>AccessWindowHorizontal()
 : <a class="el" href="classarm__compute_1_1_access_window_horizontal.xhtml#ae44d5d1d474ac5fa01159d24f7318f7f">AccessWindowHorizontal</a>
@@ -308,7 +310,7 @@ $(document).ready(function(){initNavTree('functions_func_a.xhtml','');});
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a639fab29a682a532ca20615210b366ad">GraphBuilder</a>
 </li>
 <li>add_fully_connected_layer()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aae4c638ec880f2bd9ff29e072e8f34e5">GraphBuilder</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a062b8d10479fc87e651ed240263b78df">GraphBuilder</a>
 </li>
 <li>add_generate_proposals_node()
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a8965f4ef424a3b9142706cfe50b7e6cf">GraphBuilder</a>
@@ -363,6 +365,12 @@ $(document).ready(function(){initNavTree('functions_func_a.xhtml','');});
 </li>
 <li>add_positional_option()
 : <a class="el" href="classarm__compute_1_1utils_1_1_command_line_parser.xhtml#abe52559b86ae874453f5a80b0828ec1c">CommandLineParser</a>
+</li>
+<li>add_prelu_node()
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a613c0d9db4a80d400c8dc220648d337e">GraphBuilder</a>
+</li>
+<li>add_print_node()
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a69a669c24a8f0db98f3f980e161ab890">GraphBuilder</a>
 </li>
 <li>add_printer()
 : <a class="el" href="classarm__compute_1_1logging_1_1_logger.xhtml#a1a5b7c4d38c6f9fd1550c62441b69648">Logger</a>
@@ -475,7 +483,7 @@ $(document).ready(function(){initNavTree('functions_func_a.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_size2_d.xhtml#a75026dc1fa3840404ae4553010efcd52">Size2D</a>
 </li>
 <li>Array()
-: <a class="el" href="classarm__compute_1_1_array.xhtml#aebf91d878dbda3d2416761fc6a4e3077">Array&lt; T &gt;</a>
+: <a class="el" href="classarm__compute_1_1_array.xhtml#af9474cac29f3177edf5e8d72ea4a440c">Array&lt; T &gt;</a>
 </li>
 <li>ArrayAccessor()
 : <a class="el" href="classarm__compute_1_1test_1_1_array_accessor.xhtml#ab3668a4ef621da1b5a02fd25c81fee3a">ArrayAccessor&lt; T &gt;</a>
@@ -526,7 +534,7 @@ $(document).ready(function(){initNavTree('functions_func_a.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 22 2020 18:08:02 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

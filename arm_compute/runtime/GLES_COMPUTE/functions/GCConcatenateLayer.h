@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H__
-#define __ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H__
+#ifndef ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H
+#define ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H
 
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthConcatenateLayerKernel.h"
@@ -65,4 +65,4 @@ private:
     unsigned int                            _axis;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H__ */
+#endif /* ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H */

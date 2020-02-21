@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -516,7 +516,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_ty
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &info)
 {
-    os << info.pool_type();
+    os << info.pool_type;
 
     return os;
 }
@@ -627,6 +627,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
             break;
         case DataType::QASYMM8:
             os << "QASYMM8";
+            break;
+        case DataType::QASYMM8_SIGNED:
+            os << "QASYMM8_SIGNED";
             break;
         case DataType::QSYMM8_PER_CHANNEL:
             os << "QSYMM8_PER_CHANNEL";
@@ -1617,13 +1620,14 @@ inline std::string to_string(const PoolingType &type)
 inline std::string to_string(const PoolingLayerInfo &info)
 {
     std::stringstream str;
-    str << "{Type=" << info.pool_type() << ","
-        << "IsGlobalPooling=" << info.is_global_pooling();
-    if(!info.is_global_pooling())
+    str << "{Type=" << info.pool_type << ","
+        << "DataLayout=" << info.data_layout << ","
+        << "IsGlobalPooling=" << info.is_global_pooling;
+    if(!info.is_global_pooling)
     {
         str << ","
-            << "PoolSize=" << info.pool_size().width << "," << info.pool_size().height << ","
-            << "PadStride=" << info.pad_stride_info();
+            << "PoolSize=" << info.pool_size.width << "," << info.pool_size.height << ","
+            << "PadStride=" << info.pad_stride_info;
     }
     str << "}";
     return str.str();

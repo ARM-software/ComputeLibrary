@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLHOG_H__
-#define __ARM_COMPUTE_CLHOG_H__
+#ifndef ARM_COMPUTE_CLHOG_H
+#define ARM_COMPUTE_CLHOG_H
 
 #include "arm_compute/core/CL/ICLHOG.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -77,4 +77,4 @@ private:
     cl::Buffer _buffer;
 };
 }
-#endif /* __ARM_COMPUTE_CLHOG_H__ */
+#endif /* ARM_COMPUTE_CLHOG_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -156,15 +156,25 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
         }
     }
 
-    framework.init(options.instruments->value(), options.iterations->value(), framework::DatasetMode::ALL, "", "", options.log_level->value());
+    // Initialize framework
+    framework::FrameworkConfig fconfig;
+    fconfig.instruments    = options.instruments->value();
+    fconfig.num_iterations = options.iterations->value();
+    fconfig.log_level      = options.log_level->value();
+    framework.init(fconfig);
+
     for(auto &p : printers)
     {
         framework.add_printer(p.get());
     }
     framework.set_throw_errors(options.throw_errors->value());
     arm_compute::test::framework::detail::TestSuiteRegistrar suite{ "Examples" };
-    framework.add_test_case<ExampleTest>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
 
+#ifdef BARE_METAL
+    framework.add_test_case<ExampleTest>(argv[0], framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+#else  /* BARE_METAL */
+    framework.add_test_case<ExampleTest>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+#endif /* BARE_METAL */
     //func(argc, argv);
     bool success = framework.run();
     if(options.log_level->value() > framework::LogLevel::NONE)

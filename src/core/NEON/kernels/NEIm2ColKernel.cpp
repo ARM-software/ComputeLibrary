@@ -49,8 +49,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                           bool has_bias, const Size2D &dilation, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::QASYMM8 && has_bias);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(input->data_type()) && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Number of groups greater than one are not supported on NEON");
 
@@ -381,6 +381,7 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float16_t, false, true> : &NEIm2ColKernel::run_im2col<float16_t, true, true>;
                 break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+            case DataType::QASYMM8_SIGNED:
             case DataType::QASYMM8:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<qasymm8_t, false, true> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, true>;
                 break;
@@ -402,7 +403,10 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                 break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::QASYMM8:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<qasymm8_t, false, false> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, false>;
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<uint8_t, false, false> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, false>;
+                break;
+            case DataType::QASYMM8_SIGNED:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<int8_t, false, false> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, false>;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Data type not supported");

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLEKERNEL_H__
-#define __ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLEKERNEL_H__
+#ifndef ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLEKERNEL_H
+#define ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLEKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -50,14 +50,14 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: All.
      * @param[out] output Destination tensor. Data types supported: same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]  info   Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PadStrideInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayerUpsample
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: All.
      * @param[in] output Destination tensor info. Data types supported: same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in] info   Contains padding and stride information described in @ref PadStrideInfo.
      *
@@ -75,4 +75,4 @@ private:
     DataLayout       _data_layout;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLEKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLEKERNEL_H */

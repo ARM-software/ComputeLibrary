@@ -34,7 +34,8 @@
 #include <memory>
 #include <tuple>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
@@ -216,3 +217,4 @@ void CLConvolutionLayer::prepare()
 {
     _function->prepare();
 }
+} // namespace arm_compute

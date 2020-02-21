@@ -263,6 +263,25 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, fra
 }
 TEST_SUITE_END() // QASYMM8
 
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::QASYMM8_SIGNED)),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::QASYMM8_SIGNED)),
+                                                                                                                     framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
 /** Input data sets. */
 const auto Int16QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LOGISTIC,
                                                                                                        ActivationLayerInfo::ActivationFunction::TANH

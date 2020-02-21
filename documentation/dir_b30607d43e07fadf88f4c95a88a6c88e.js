@@ -80,6 +80,12 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     [ "PoolingLayerNode.h", "_pooling_layer_node_8h.xhtml", [
       [ "PoolingLayerNode", "classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml", "classarm__compute_1_1graph_1_1_pooling_layer_node" ]
     ] ],
+    [ "PReluLayerNode.h", "_p_relu_layer_node_8h.xhtml", [
+      [ "PReluLayerNode", "classarm__compute_1_1graph_1_1_p_relu_layer_node.xhtml", "classarm__compute_1_1graph_1_1_p_relu_layer_node" ]
+    ] ],
+    [ "PrintLayerNode.h", "_print_layer_node_8h.xhtml", [
+      [ "PrintLayerNode", "classarm__compute_1_1graph_1_1_print_layer_node.xhtml", "classarm__compute_1_1graph_1_1_print_layer_node" ]
+    ] ],
     [ "PriorBoxLayerNode.h", "_prior_box_layer_node_8h.xhtml", [
       [ "PriorBoxLayerNode", "classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml", "classarm__compute_1_1graph_1_1_prior_box_layer_node" ]
     ] ],

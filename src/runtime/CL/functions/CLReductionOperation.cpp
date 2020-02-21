@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,30 +33,11 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/Utils.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {
-namespace
-{
-unsigned int calculate_number_of_stages(const ITensorInfo *input, unsigned int axis)
-{
-    // We need only 1 stage for all axis except x-axis and x-axis for QASYMM8.
-    if(axis != 0 || (axis == 0 && is_data_type_quantized(input->data_type())))
-    {
-        return 1;
-    }
-    // Calculate number of WGs. 16 elements per thread, 8 threads per WG
-    const unsigned int num_of_wg = ceil(input->dimension(0) / 128.f);
-
-    // Calculate number of stages. First stage performs op and the rest reduction sum
-    // depending on the size of the input. Last stage should have only 1 WG.
-    const unsigned int num_of_stages = num_of_wg / 128 + 2;
-
-    return num_of_stages;
-}
-} // namespace
-
 CLReductionOperation::CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _results_vector(), _reduction_kernels_vector(), _border_handlers_vector(), _reshape_kernel(), _op(), _num_of_stages(), _reduction_axis(), _is_serial(),
       _is_reshape_required(false)
@@ -65,15 +46,15 @@ CLReductionOperation::CLReductionOperation(std::shared_ptr<IMemoryManager> memor
 
 Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
 
-    const unsigned int num_of_stages       = calculate_number_of_stages(input, axis);
+    const unsigned int num_of_stages       = calculate_number_of_stages_only_x_axis(input->dimension(0), axis);
     const bool         is_serial           = needs_serialized_reduction(op, input->data_type(), axis);
-    const bool         is_arg_min_max      = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
-    const bool         is_reshape_required = !keep_dims || is_arg_min_max;
+    const bool         is_reshape_required = !keep_dims;
 
-    if(is_reshape_required)
+    if(is_reshape_required && output->total_size() != 0)
     {
         const TensorInfo expected_output_shape = output->clone()->set_tensor_shape(arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis, keep_dims));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output_shape, output);
@@ -86,7 +67,7 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
     const auto input_data_type    = input->data_type();
     const auto input_num_channles = input->num_channels();
     const auto input_qinfo        = input->quantization_info();
-    const auto output_data_type   = is_arg_min_max ? DataType::S32 : output->data_type();
+    const auto output_data_type   = output->data_type();
 
     auto initialize_tensorinfo = [](TensorInfo & ti, TensorShape shape, DataType data_type, int num_channels, QuantizationInfo qinfo)
     {
@@ -184,8 +165,7 @@ ICLTensor *CLReductionOperation::configure_intermediate_result_vector(ICLTensor 
         return output;
     }
 
-    auto       intermediate_result_vector_size = _is_serial ? 1 : _num_of_stages;
-    const auto is_arg_min_max                  = (_op == ReductionOperation::ARG_IDX_MAX || _op == ReductionOperation::ARG_IDX_MIN);
+    auto intermediate_result_vector_size = _is_serial ? 1 : _num_of_stages;
 
     if(!_is_reshape_required)
     {
@@ -206,30 +186,24 @@ ICLTensor *CLReductionOperation::configure_intermediate_result_vector(ICLTensor 
         v.allocator()->init(input->info()->clone()->set_tensor_shape(shape));
     }
 
-    if(is_arg_min_max)
-    {
-        _results_vector.back().info()->set_data_type(DataType::S32).set_is_resizable(true).reset_padding();
-    }
-
     return _is_reshape_required ? &_results_vector.back() : output;
 }
 
 void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
-    _op                       = op;
-    _num_of_stages            = calculate_number_of_stages(input->info(), axis);
-    _reduction_axis           = axis;
-    _is_serial                = needs_serialized_reduction(op, input->info()->data_type(), axis);
-    const bool is_arg_min_max = (op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN);
-    _is_reshape_required      = !keep_dims || is_arg_min_max;
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    _op                  = op;
+    _num_of_stages       = calculate_number_of_stages_only_x_axis(input->info()->dimension(0), axis);
+    _reduction_axis      = axis;
+    _is_serial           = needs_serialized_reduction(op, input->info()->data_type(), axis);
+    _is_reshape_required = !keep_dims;
 
     auto *output_internal = configure_intermediate_result_vector(input, output);
 
-    // ArgMinMax might not give initialized output tensor, so initialize here.
     if(_is_reshape_required)
     {
         const TensorShape output_shape     = arm_compute::misc::shape_calculator::compute_reduced_shape(input->info()->tensor_shape(), axis, false);
-        const auto        output_data_type = is_arg_min_max ? DataType::S32 : input->info()->data_type();
+        const auto        output_data_type = input->info()->data_type();
         auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
     }
 
@@ -294,7 +268,12 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
                     }
                     case DataType::QASYMM8:
                     {
-                        pixelValue = PixelValue(255, input->info()->data_type(), input->info()->quantization_info());
+                        pixelValue = std::get<1>(get_min_max(input->info()->data_type()));
+                        break;
+                    }
+                    case DataType::QASYMM8_SIGNED:
+                    {
+                        pixelValue = PixelValue(127, input->info()->data_type(), input->info()->quantization_info());
                         break;
                     }
                     default:
@@ -321,7 +300,12 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
                     }
                     case DataType::QASYMM8:
                     {
-                        pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
+                        pixelValue = std::get<0>(get_min_max(input->info()->data_type()));
+                        break;
+                    }
+                    case DataType::QASYMM8_SIGNED:
+                    {
+                        pixelValue = PixelValue(-128, input->info()->data_type(), input->info()->quantization_info());
                         break;
                     }
                     default:

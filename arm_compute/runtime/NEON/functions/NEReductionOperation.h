@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEREDUCTIONOPERATION_H__
-#define __ARM_COMPUTE_NEREDUCTIONOPERATION_H__
+#ifndef ARM_COMPUTE_NEREDUCTIONOPERATION_H
+#define ARM_COMPUTE_NEREDUCTIONOPERATION_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -83,4 +83,4 @@ private:
     bool                       _is_reshape_required;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEREDUCTIONOPERATION_H__ */
+#endif /* ARM_COMPUTE_NEREDUCTIONOPERATION_H */

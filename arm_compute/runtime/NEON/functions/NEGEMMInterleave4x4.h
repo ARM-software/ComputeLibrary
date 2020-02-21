@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H__
-#define __ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H__
+#ifndef ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H
+#define ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H
 
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
@@ -46,4 +46,4 @@ public:
     void configure(const ITensor *input, ITensor *output);
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H__ */
+#endif /*ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H */

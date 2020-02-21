@@ -8,7 +8,7 @@ var searchData=
   ['local_5fx_5fsize',['local_x_size',['../_c_l_histogram_kernel_8cpp.xhtml#a96106a3f026454bc01a9faf1738488bf',1,'CLHistogramKernel.cpp']]],
   ['log_5ffile',['log_file',['../classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#a065c10f895678f9b6736ae281d947f8f',1,'arm_compute::test::framework::CommonOptions']]],
   ['log_5fformat',['log_format',['../classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#acc1ed4a8cb9f3f7b10345fded373239c',1,'arm_compute::test::framework::CommonOptions']]],
-  ['log_5flevel',['log_level',['../classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#aa6a7c74a5e00e3846338fbcd5ea57094',1,'arm_compute::test::framework::CommonOptions']]],
+  ['log_5flevel',['log_level',['../classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#aa6a7c74a5e00e3846338fbcd5ea57094',1,'arm_compute::test::framework::CommonOptions::log_level()'],['../structarm__compute_1_1test_1_1framework_1_1_framework_config.xhtml#a16fda368866c2a2e2d5a54eda52050f9',1,'arm_compute::test::framework::FrameworkConfig::log_level()']]],
   ['log_5flevel_5f',['log_level_',['../structarm__compute_1_1logging_1_1_log_msg.xhtml#aef281b5a0efe131f21a1d5b6cbdf0d58',1,'arm_compute::logging::LogMsg']]],
   ['log_5fstreams',['log_streams',['../classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#aacb71cf86aa636b8775c876b2b1bad23',1,'arm_compute::test::framework::CommonOptions']]],
   ['log_5ftab',['log_tab',['../namespacearm__compute.xhtml#a48fb9cf404e8f7043235bf14105c9793',1,'arm_compute']]],

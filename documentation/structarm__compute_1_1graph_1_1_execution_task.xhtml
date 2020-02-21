@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -297,11 +297,11 @@ Data Fields</h2></td></tr>
 
 <p>Function operator. </p>
 
-<p class="definition">Definition at line <a class="el" href="_workload_8cpp_source.xhtml#l00033">33</a> of file <a class="el" href="_workload_8cpp_source.xhtml">Workload.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;{</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <a class="code" href="classarm__compute_1_1graph_1_1_task_executor.xhtml#a8814816f2d2940dbbc2817277eff42db">TaskExecutor::get</a>().<a class="code" href="classarm__compute_1_1graph_1_1_task_executor.xhtml#af356b3757a26ca474239624e161fb49c">execute_function</a>(*<span class="keyword">this</span>);</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1graph_1_1_task_executor_xhtml_a8814816f2d2940dbbc2817277eff42db"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_task_executor.xhtml#a8814816f2d2940dbbc2817277eff42db">arm_compute::graph::TaskExecutor::get</a></div><div class="ttdeci">static TaskExecutor &amp; get()</div><div class="ttdoc">Task executor accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_workload_8cpp_source.xhtml#l00059">Workload.cpp:59</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_workload_8cpp_source.xhtml#l00034">34</a> of file <a class="el" href="_workload_8cpp_source.xhtml">Workload.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <a class="code" href="classarm__compute_1_1graph_1_1_task_executor.xhtml#a8814816f2d2940dbbc2817277eff42db">TaskExecutor::get</a>().<a class="code" href="classarm__compute_1_1graph_1_1_task_executor.xhtml#af356b3757a26ca474239624e161fb49c">execute_function</a>(*<span class="keyword">this</span>);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1graph_1_1_task_executor_xhtml_a8814816f2d2940dbbc2817277eff42db"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_task_executor.xhtml#a8814816f2d2940dbbc2817277eff42db">arm_compute::graph::TaskExecutor::get</a></div><div class="ttdeci">static TaskExecutor &amp; get()</div><div class="ttdoc">Task executor accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_workload_8cpp_source.xhtml#l00074">Workload.cpp:74</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1_task_executor_xhtml_af356b3757a26ca474239624e161fb49c"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_task_executor.xhtml#af356b3757a26ca474239624e161fb49c">arm_compute::graph::TaskExecutor::execute_function</a></div><div class="ttdeci">std::function&lt; decltype(execute_task)&gt; execute_function</div><div class="ttdoc">Function that is responsible for executing tasks.</div><div class="ttdef"><b>Definition:</b> <a href="_workload_8h_source.xhtml#l00063">Workload.h:63</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_workload_8h_source.xhtml#l00063">TaskExecutor::execute_function</a>, and <a class="el" href="_workload_8cpp_source.xhtml#l00059">TaskExecutor::get()</a>.</p>
+<p class="reference">References <a class="el" href="_workload_8h_source.xhtml#l00063">TaskExecutor::execute_function</a>, and <a class="el" href="_workload_8cpp_source.xhtml#l00074">TaskExecutor::get()</a>.</p>
 
 </div>
 </div>
@@ -378,8 +378,8 @@ Data Fields</h2></td></tr>
 
 <p>Prepare execution task. </p>
 
-<p class="definition">Definition at line <a class="el" href="_workload_8cpp_source.xhtml#l00046">46</a> of file <a class="el" href="_workload_8cpp_source.xhtml">Workload.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordflow">if</span>(<a class="code" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#adb326630f97b4977df92f1e5ecf0db14">task</a>)</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    {</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <a class="code" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#adb326630f97b4977df92f1e5ecf0db14">task</a>-&gt;prepare();</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    }</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;}</div><div class="ttc" id="structarm__compute_1_1graph_1_1_execution_task_xhtml_adb326630f97b4977df92f1e5ecf0db14"><div class="ttname"><a href="structarm__compute_1_1graph_1_1_execution_task.xhtml#adb326630f97b4977df92f1e5ecf0db14">arm_compute::graph::ExecutionTask::task</a></div><div class="ttdeci">std::unique_ptr&lt; arm_compute::IFunction &gt; task</div><div class="ttdoc">Task to execute.</div><div class="ttdef"><b>Definition:</b> <a href="_workload_8h_source.xhtml#l00087">Workload.h:87</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_workload_8cpp_source.xhtml#l00061">61</a> of file <a class="el" href="_workload_8cpp_source.xhtml">Workload.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;{</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keywordflow">if</span>(<a class="code" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#adb326630f97b4977df92f1e5ecf0db14">task</a>)</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    {</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <a class="code" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#adb326630f97b4977df92f1e5ecf0db14">task</a>-&gt;prepare();</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;}</div><div class="ttc" id="structarm__compute_1_1graph_1_1_execution_task_xhtml_adb326630f97b4977df92f1e5ecf0db14"><div class="ttname"><a href="structarm__compute_1_1graph_1_1_execution_task.xhtml#adb326630f97b4977df92f1e5ecf0db14">arm_compute::graph::ExecutionTask::task</a></div><div class="ttdeci">std::unique_ptr&lt; arm_compute::IFunction &gt; task</div><div class="ttdoc">Task to execute.</div><div class="ttdef"><b>Definition:</b> <a href="_workload_8h_source.xhtml#l00087">Workload.h:87</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_workload_8h_source.xhtml#l00087">ExecutionTask::task</a>.</p>
 
@@ -402,6 +402,8 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_workload_8h_source.xhtml#l00088">88</a> of file <a class="el" href="_workload_8h_source.xhtml">Workload.h</a>.</p>
 
+<p class="reference">Referenced by <a class="el" href="_workload_8cpp_source.xhtml#l00039">arm_compute::graph::execute_task()</a>.</p>
+
 </div>
 </div>
 <a id="adb326630f97b4977df92f1e5ecf0db14"></a>
@@ -420,7 +422,7 @@ Data Fields</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_workload_8h_source.xhtml#l00087">87</a> of file <a class="el" href="_workload_8h_source.xhtml">Workload.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_workload_8cpp_source.xhtml#l00038">arm_compute::graph::execute_task()</a>, and <a class="el" href="_workload_8cpp_source.xhtml#l00046">ExecutionTask::prepare()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_workload_8cpp_source.xhtml#l00039">arm_compute::graph::execute_task()</a>, and <a class="el" href="_workload_8cpp_source.xhtml#l00061">ExecutionTask::prepare()</a>.</p>
 
 </div>
 </div>
@@ -434,7 +436,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1graph_1_1_execution_task.xhtml">ExecutionTask</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:58 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:31 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

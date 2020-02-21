@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -97,7 +97,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1graph_1_1_softmax
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a>  </div>
   <div class="headertitle">
 <div class="title">SoftmaxLayerNode Class Reference<span class="mlabels"><span class="mlabel">final</span></span></div>  </div>
 </div><!--header-->
@@ -231,6 +232,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa26cd423e8fc9233bd2bff46f82f46ab inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#aa26cd423e8fc9233bd2bff46f82f46ab">assigned_target</a> () const</td></tr>
 <tr class="memdesc:aa26cd423e8fc9233bd2bff46f82f46ab inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns assigned target for this node.  <a href="classarm__compute_1_1graph_1_1_i_node.xhtml#aa26cd423e8fc9233bd2bff46f82f46ab">More...</a><br /></td></tr>
 <tr class="separator:aa26cd423e8fc9233bd2bff46f82f46ab inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:ab61ddeea8b783f64c3881a123bd7e1f2"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16">NodeType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml#ab61ddeea8b783f64c3881a123bd7e1f2">node_type</a> = <a class="el" href="namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a4a9567bc4a6c28a527c973010eaf9a25">NodeType::SoftmaxLayer</a></td></tr>
+<tr class="separator:ab61ddeea8b783f64c3881a123bd7e1f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Softmax Layer node. </p>
@@ -331,7 +337,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_softmax_layer_node_8cpp_source.xhtml#l00041">41</a> of file <a class="el" href="_softmax_layer_node_8cpp_source.xhtml">SoftmaxLayerNode.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;{</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordflow">return</span> _beta;</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l01437">arm_compute::graph::backends::detail::create_softmax_layer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l01504">arm_compute::graph::backends::detail::create_softmax_layer()</a>.</p>
 
 </div>
 </div>
@@ -456,7 +462,32 @@ Public Member Functions</h2></td></tr>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a4a9567bc4a6c28a527c973010eaf9a25">arm_compute::graph::SoftmaxLayer</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l01437">arm_compute::graph::backends::detail::create_softmax_layer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l01504">arm_compute::graph::backends::detail::create_softmax_layer()</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Field Documentation</h2>
+<a id="ab61ddeea8b783f64c3881a123bd7e1f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab61ddeea8b783f64c3881a123bd7e1f2">&#9670;&nbsp;</a></span>node_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16">NodeType</a> node_type = <a class="el" href="namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a4a9567bc4a6c28a527c973010eaf9a25">NodeType::SoftmaxLayer</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_softmax_layer_node_8h_source.xhtml#l00055">55</a> of file <a class="el" href="_softmax_layer_node_8h_source.xhtml">SoftmaxLayerNode.h</a>.</p>
 
 </div>
 </div>
@@ -470,7 +501,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml">SoftmaxLayerNode</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:58 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL3x3_H__
-#define __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL3x3_H__
+#ifndef ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL3x3_H
+#define ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL3x3_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -53,7 +53,7 @@ public:
      *
      * @note Supported data layouts: NCHW and NHWC
      *
-     * @param[in]  input            Source tensor. DataType supported: QASYMM8/F16/F32.
+     * @param[in]  input            Source tensor. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  weights          Weights tensor. This is a 3D tensor with dimensions [3, 3, IFM] for NCHW or [IFM, 3, 3] if NHWC data layout. Data type supported: Same as @p input.
      * @param[out] output           Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info        Padding and stride information to use for the convolution.
@@ -66,7 +66,7 @@ public:
      *
      * @note Supported data layouts: NCHW and NHWC
      *
-     * @param[in] input            Source tensor info. DataType supported: QASYMM8/F16/F32.
+     * @param[in] input            Source tensor info. DataType supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] weights          Weights tensor info. This is a 3D tensor with dimensions [3, 3, IFM] for NCHW or [IFM, 3, 3] if NHWC data layout. Data type supported: Same as @p input.
      * @param[in] output           Destination tensor info. Data type supported: Same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
@@ -93,4 +93,4 @@ private:
     Size2D         _dilation;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL3x3_H__ */
+#endif /* ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL3x3_H */

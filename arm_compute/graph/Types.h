@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_TYPES_H__
-#define __ARM_COMPUTE_GRAPH_TYPES_H__
+#ifndef ARM_COMPUTE_GRAPH_TYPES_H
+#define ARM_COMPUTE_GRAPH_TYPES_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
@@ -81,6 +81,7 @@ struct GraphConfig
     bool        use_function_weights_manager{ true };  /**< Use a weights manager to manage transformed weights */
     bool        use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
     bool        use_tuner{ false };                    /**< Use a tuner in tunable backends */
+    bool        convert_to_uint8{ false };             /**< Convert graph to a synthetic uint8 graph */
     CLTunerMode tuner_mode{ CLTunerMode::EXHAUSTIVE }; /**< Tuner mode to be used by the CL tuner */
     int         num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
     std::string tuner_file{ "acl_tuner.csv" };         /**< File to load/store tuning values from */
@@ -152,6 +153,8 @@ enum class NodeType
     PadLayer,
     PermuteLayer,
     PoolingLayer,
+    PReluLayer,
+    PrintLayer,
     PriorBoxLayer,
     QuantizationLayer,
     ReorgLayer,
@@ -197,4 +200,4 @@ struct NodeParams
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_TYPES_H__ */
+#endif /* ARM_COMPUTE_GRAPH_TYPES_H */

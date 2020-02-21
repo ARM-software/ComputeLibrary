@@ -9,6 +9,7 @@ var classarm__compute_1_1graph_1_1_pass_manager =
     [ "operator=", "classarm__compute_1_1graph_1_1_pass_manager.xhtml#a80b283e26291370143876b3764724fa3", null ],
     [ "pass", "classarm__compute_1_1graph_1_1_pass_manager.xhtml#af35f89d9993703aef39df2e81dcadf95", null ],
     [ "passes", "classarm__compute_1_1graph_1_1_pass_manager.xhtml#aabefb9904d99405c34cff20956d247e9", null ],
-    [ "run", "classarm__compute_1_1graph_1_1_pass_manager.xhtml#a8eca648ee39ca1381dfb511c11b31d96", null ],
-    [ "run_all", "classarm__compute_1_1graph_1_1_pass_manager.xhtml#a8ff5886e2e39da2a4db7029e8dc143e2", null ]
+    [ "run_all", "classarm__compute_1_1graph_1_1_pass_manager.xhtml#a8ff5886e2e39da2a4db7029e8dc143e2", null ],
+    [ "run_index", "classarm__compute_1_1graph_1_1_pass_manager.xhtml#aee07cca18f9803c8a91646abb295ae32", null ],
+    [ "run_type", "classarm__compute_1_1graph_1_1_pass_manager.xhtml#ab57851a9f89c93f5dde79dd7fdabb105", null ]
 ];

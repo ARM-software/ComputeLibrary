@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPUPSAMPLE_H__
-#define __ARM_COMPUTE_CPPUPSAMPLE_H__
+#ifndef ARM_COMPUTE_CPPUPSAMPLE_H
+#define ARM_COMPUTE_CPPUPSAMPLE_H
 
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
@@ -45,4 +45,4 @@ public:
     void configure(const ITensor *input, ITensor *output, const PadStrideInfo &info);
 };
 }
-#endif /* __ARM_COMPUTE_CPPUPSAMPLE_H__ */
+#endif /* ARM_COMPUTE_CPPUPSAMPLE_H */

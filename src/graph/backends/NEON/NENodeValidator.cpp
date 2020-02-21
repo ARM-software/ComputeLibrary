@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,9 +70,11 @@ Status NENodeValidator::validate(INode *node)
         case NodeType::NormalizePlanarYUVLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : NormalizePlanarYUVLayer");
         case NodeType::PadLayer:
-            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PadLayer");
+            return detail::validate_pad_layer<NEPadLayer>(*polymorphic_downcast<PadLayerNode *>(node));
         case NodeType::PermuteLayer:
             return detail::validate_permute_layer<NEPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
+        case NodeType::PReluLayer:
+            return detail::validate_prelu_layer<NEPReluLayer>(*polymorphic_downcast<PReluLayerNode *>(node));
         case NodeType::PriorBoxLayer:
             return detail::validate_priorbox_layer<NEPriorBoxLayer>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:

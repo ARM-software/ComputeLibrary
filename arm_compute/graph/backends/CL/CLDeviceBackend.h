@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_CLDEVICEBACKEND_H__
-#define __ARM_COMPUTE_GRAPH_CLDEVICEBACKEND_H__
+#ifndef ARM_COMPUTE_GRAPH_CLDEVICEBACKEND_H
+#define ARM_COMPUTE_GRAPH_CLDEVICEBACKEND_H
 
 #include "arm_compute/graph/IDeviceBackend.h"
 
@@ -70,12 +70,12 @@ public:
     std::shared_ptr<arm_compute::IWeightsManager> create_weights_manager() override;
 
 private:
-    int                                   _context_count; /**< Counts how many contexts are currently using the backend */
-    CLTuner                               _tuner;         /**< CL kernel tuner */
-    std::unique_ptr<CLBufferAllocator>    _allocator;     /**< CL buffer affinity allocator */
-    std::string                           _tuner_file;    /**< Filename to load/store the tuner's values from */
+    int                                _context_count; /**< Counts how many contexts are currently using the backend */
+    CLTuner                            _tuner;         /**< CL kernel tuner */
+    std::unique_ptr<CLBufferAllocator> _allocator;     /**< CL buffer affinity allocator */
+    std::string                        _tuner_file;    /**< Filename to load/store the tuner's values from */
 };
 } // namespace backends
 } // namespace graph
 } // namespace arm_compute
-#endif //__ARM_COMPUTE_GRAPH_CLDEVICEBACKEND_H__
+#endif //ARM_COMPUTE_GRAPH_CLDEVICEBACKEND_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,18 +23,19 @@
  */
 #include "helpers.h"
 
+#if defined(DATA_TYPE) && defined(INITIAL_VALUE)
+#define VEC_TYPE(VEC_SIZE) VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
-#define VEC_FLOAT(VEC_SIZE) \
-    VEC_DATA_TYPE(float, VEC_SIZE)
+#define VEC_FLOAT(VEC_SIZE) VEC_DATA_TYPE(float, VEC_SIZE)
 #define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE)
-#define VEC_UCHAR(VEC_SIZE) VEC_DATA_TYPE(uchar, VEC_SIZE)
 #define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
 #define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
 #define REQUANTIZE(VEC_SIZE, input, in_offset, out_offset, in_scale, out_scale, res)                                                                                  \
     {                                                                                                                                                                 \
         const VEC_FLOAT(VEC_SIZE) in_f32  = (CONVERT(input, VEC_FLOAT(VEC_SIZE)) - (VEC_FLOAT(VEC_SIZE))((float)in_offset)) * (VEC_FLOAT(VEC_SIZE))((float)in_scale); \
         const VEC_FLOAT(VEC_SIZE) out_f32 = in_f32 / ((VEC_FLOAT(VEC_SIZE))(float)out_scale) + ((VEC_FLOAT(VEC_SIZE))((float)out_offset));                            \
-        res                               = CONVERT_SAT(CONVERT_DOWN(out_f32, VEC_INT(VEC_SIZE)), VEC_UCHAR(VEC_SIZE));                                               \
+        res                               = CONVERT_SAT(CONVERT_DOWN(out_f32, VEC_INT(VEC_SIZE)), VEC_TYPE(VEC_SIZE));                                                \
     }
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
@@ -74,8 +75,10 @@ int calculate_avg_scale(const int pool_size_x, const int pool_size_y, const int 
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
  *       -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
  *       -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
+ * @note Input data type must be passed at compile time using -DDAT_TYPE=type, e.g. -DDATA_TYPE=uchar
+ * @note The initial value for the pooling operation must be passed at compile time using -DINITIAL_VALUE e.g. -DINITIAL_VALUE=0
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -100,8 +103,8 @@ __kernel void pooling_layer_MxN_quantized_nchw(
     Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 
-    int8 vdata = 0;
-    int  sdata = 0;
+    int8 vdata = INITIAL_VALUE;
+    int  sdata = INITIAL_VALUE;
 
     // Load data
     for(int y = 0; y < POOL_SIZE_Y; y++)
@@ -109,17 +112,18 @@ __kernel void pooling_layer_MxN_quantized_nchw(
         int x = 0;
         for(; x <= ((int)POOL_SIZE_X - 8); x += 8)
         {
-            uchar8 data = vload8(0, (__global uchar *)tensor3D_offset(&input, x, y, 0));
-            int8 data0  = convert_int8(data);
-            vdata       = POOL_OP(vdata, data0);
+            VEC_TYPE(8)
+            data       = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, x, y, 0));
+            int8 data0 = convert_int8(data);
+            vdata      = POOL_OP(vdata, data0);
         }
 
         // Leftover
         for(; x < (int)POOL_SIZE_X; ++x)
         {
-            uchar data = *((__global uchar *)tensor3D_offset(&input, x, y, 0));
-            int data0  = convert_int(data);
-            sdata      = POOL_OP(sdata, data0);
+            DATA_TYPE data = *((__global DATA_TYPE *)tensor3D_offset(&input, x, y, 0));
+            int data0      = convert_int(data);
+            sdata          = POOL_OP(sdata, data0);
         }
     }
 
@@ -133,22 +137,22 @@ __kernel void pooling_layer_MxN_quantized_nchw(
     res = round(DIV_OP(res, calculate_avg_scale(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y)));
 #endif /* defined(POOL_AVG) */
 
-    uchar result_u8 = convert_uchar(res);
+    DATA_TYPE result_q8 = CONVERT(res, DATA_TYPE);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
 
-    const float result_f32   = convert_float(result_u8);
+    const float result_f32   = convert_float(result_q8);
     const float input_offset = (float)OFFSET_IN1;
     const float input_scale  = (float)SCALE_IN1;
     const float scale_out    = (float)SCALE_OUT;
     const float offset_out   = (float)OFFSET_OUT;
     const float in_f32       = (result_f32 - input_offset) * input_scale;
     const float out_f32      = in_f32 / scale_out + offset_out;
-    result_u8                = convert_uchar_sat(convert_int_rte(out_f32));
+    result_q8                = CONVERT_SAT(convert_int_rte(out_f32), DATA_TYPE);
 
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
-    *(__global uchar *)output.ptr = result_u8;
+    *(__global DATA_TYPE *)output.ptr = result_q8;
 }
 
 int calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int upper_bound_w, int upper_bound_h,
@@ -158,7 +162,7 @@ int calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int u
 #if defined(DST_DEPTH)
     int start_y = (get_global_id(2) % DST_DEPTH) * stride_y - pad_y;
 #else  /* defined(DST_DEPTH) */
-    int            start_y    = get_global_id(2) * stride_y - pad_y;
+    int       start_y    = get_global_id(2) * stride_y - pad_y;
 #endif /* defined(DST_DEPTH) */
 
     const int end_x = min(start_x + pool_size_x, upper_bound_w);
@@ -178,8 +182,9 @@ int calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int u
  * @note Pad values must be passed at compile time using -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
+ * @note The initial value for the pooling operation must be passed at compile time using -DINITIAL_VALUE e.g. -DINITIAL_VALUE=0
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -209,17 +214,17 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT(input, DST_DEPTH);
     Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT(output, DST_DEPTH);
 #else  /* defined(DST_DEPTH) */
-    Tensor3D       input      = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D       output     = CONVERT_TO_TENSOR3D_STRUCT(output);
+    Tensor3D  input      = CONVERT_TO_TENSOR3D_STRUCT(input);
+    Tensor3D  output     = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* defined(DST_DEPTH) */
 
-    int8 vdata = 0;
+    int8 vdata = INITIAL_VALUE;
 
     const int idx_width = get_global_id(1) * STRIDE_X;
 #if defined(DST_DEPTH)
     const int idx_height = (get_global_id(2) % DST_DEPTH) * STRIDE_Y;
 #else  /* defined(DST_DEPTH) */
-    const int      idx_height = get_global_id(2) * STRIDE_Y;
+    const int idx_height = get_global_id(2) * STRIDE_Y;
 #endif /* defined(DST_DEPTH) */
 
     for(int y = 0; y < POOL_SIZE_Y; ++y)
@@ -231,9 +236,11 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
             x1     = select(x1, PAD_X - idx_width - 1, y != y1);
 
 #if defined(DST_DEPTH)
-            uchar8 data = vload8(0, (__global uchar *)tensor4D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y, 0));
+            VEC_TYPE(8)
+            data = vload8(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y, 0));
 #else  /* defined(DST_DEPTH) */
-            uchar8 data       = vload8(0, (__global uchar *)tensor3D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y));
+            VEC_TYPE(8)
+            data = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y));
 #endif /* defined(DST_DEPTH) */
 
             int8 data0 = convert_int8(data);
@@ -246,11 +253,13 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     vdata = convert_int8(round(DIV_OP_NHWC(vdata, calculate_avg_scale_nhwc(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y))));
 #endif /* defined(POOL_AVG) */
 
-    uchar8 out_u8 = convert_uchar8(vdata);
+    VEC_TYPE(8)
+    out_q8 = CONVERT(vdata, VEC_TYPE(8));
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
-    REQUANTIZE(8, out_u8, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT, out_u8);
+    REQUANTIZE(8, out_q8, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT, out_q8);
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
     // Store result
-    vstore8(out_u8, 0, (__global uchar *)output.ptr);
+    vstore8(out_q8, 0, (__global DATA_TYPE *)output.ptr);
 }
+#endif /* defined(DATA_TYPE) && defined(INITIAL_VALUE) */

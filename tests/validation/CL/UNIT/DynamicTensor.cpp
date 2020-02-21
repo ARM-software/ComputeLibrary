@@ -50,14 +50,16 @@ namespace
 constexpr AbsoluteTolerance<float> absolute_tolerance_float(0.0001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<float>           tolerance_f32(0.1f);               /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 constexpr float                    tolerance_num = 0.07f;             /**< Tolerance number */
+} // namespace
 
+#ifndef DOXYGEN_SKIP_THIS
 using CLL2NormLayerWrapper = SimpleFunctionWrapper<MemoryManagerOnDemand, CLL2NormalizeLayer, ICLTensor>;
 template <>
 void CLL2NormLayerWrapper::configure(ICLTensor *src, ICLTensor *dst)
 {
     _func.configure(src, dst, 0, 0.0001f);
 }
-} // namespace
+#endif // DOXYGEN_SKIP_THIS
 TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(DynamicTensor)

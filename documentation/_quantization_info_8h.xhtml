@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -108,6 +108,7 @@ $(document).ready(function(){initNavTree('_quantization_info_8h.xhtml','');});
 <div class="textblock"><code>#include &quot;<a class="el" href="_rounding_8h_source.xhtml">arm_compute/core/Rounding.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_utility_8h_source.xhtml">utils/misc/Utility.h</a>&quot;</code><br />
 <code>#include &lt;cstddef&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="_quantization_info_8h_source.xhtml">Go to the source code of this file.</a></p>
@@ -120,15 +121,20 @@ Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantization information.  <a href="classarm__compute_1_1_quantization_info.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1_qasymm8_quantization_helper.xhtml">Qasymm8QuantizationHelper&lt; QUANTIZED_TYPE &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2020 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
+<tr class="memitem:af486d5eb4935eb5601d9c5fcc42be220"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#af486d5eb4935eb5601d9c5fcc42be220">qasymm8_signed_t</a> = int8_t</td></tr>
+<tr class="memdesc:af486d5eb4935eb5601d9c5fcc42be220"><td class="mdescLeft">&#160;</td><td class="mdescRight">8 bit signed quantized asymmetric scalar value  <a href="namespacearm__compute.xhtml#af486d5eb4935eb5601d9c5fcc42be220">More...</a><br /></td></tr>
+<tr class="separator:af486d5eb4935eb5601d9c5fcc42be220"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8938bcb3ec0f5f8d93285eb3a28b701"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ab8938bcb3ec0f5f8d93285eb3a28b701">qasymm8_t</a> = uint8_t</td></tr>
 <tr class="memdesc:ab8938bcb3ec0f5f8d93285eb3a28b701"><td class="mdescLeft">&#160;</td><td class="mdescRight">8 bit quantized asymmetric scalar value  <a href="namespacearm__compute.xhtml#ab8938bcb3ec0f5f8d93285eb3a28b701">More...</a><br /></td></tr>
 <tr class="separator:ab8938bcb3ec0f5f8d93285eb3a28b701"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -150,24 +156,28 @@ Functions</h2></td></tr>
 <tr class="memitem:a7b0d2413cd8bcca4ec5f8326bd227773"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a7b0d2413cd8bcca4ec5f8326bd227773">operator!=</a> (const UniformQuantizationInfo &amp;lhs, const UniformQuantizationInfo &amp;rhs)</td></tr>
 <tr class="memdesc:a7b0d2413cd8bcca4ec5f8326bd227773"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether two quantization info are not equal.  <a href="namespacearm__compute.xhtml#a7b0d2413cd8bcca4ec5f8326bd227773">More...</a><br /></td></tr>
 <tr class="separator:a7b0d2413cd8bcca4ec5f8326bd227773"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25591070cf041aff512719050c39e5ee"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a25591070cf041aff512719050c39e5ee">quantize_qasymm8</a> (float value, const UniformQuantizationInfo &amp;qinfo, RoundingPolicy rounding_policy=RoundingPolicy::TO_NEAREST_UP)</td></tr>
-<tr class="memdesc:a25591070cf041aff512719050c39e5ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a value given a 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#a25591070cf041aff512719050c39e5ee">More...</a><br /></td></tr>
-<tr class="separator:a25591070cf041aff512719050c39e5ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e46c0c81f4ee96218efbc399de1d2d1"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a5e46c0c81f4ee96218efbc399de1d2d1">quantize_qasymm8</a> (float value, const QuantizationInfo &amp;qinfo, RoundingPolicy rounding_policy=RoundingPolicy::TO_NEAREST_UP)</td></tr>
-<tr class="memdesc:a5e46c0c81f4ee96218efbc399de1d2d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a value given a 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#a5e46c0c81f4ee96218efbc399de1d2d1">More...</a><br /></td></tr>
-<tr class="separator:a5e46c0c81f4ee96218efbc399de1d2d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8cef8b31b552b532a14ab8815e06285"><td class="memTemplParams" colspan="2">template&lt;typename INFO_TYPE &gt; </td></tr>
+<tr class="memitem:ab8cef8b31b552b532a14ab8815e06285"><td class="memTemplItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ab8cef8b31b552b532a14ab8815e06285">quantize_qasymm8</a> (float value, const INFO_TYPE &amp;qinfo, RoundingPolicy rounding_policy=RoundingPolicy::TO_NEAREST_UP)</td></tr>
+<tr class="memdesc:ab8cef8b31b552b532a14ab8815e06285"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a value given an unsigned 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#ab8cef8b31b552b532a14ab8815e06285">More...</a><br /></td></tr>
+<tr class="separator:ab8cef8b31b552b532a14ab8815e06285"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a464ea9027ae01e64014040d69302800f"><td class="memTemplParams" colspan="2">template&lt;typename INFO_TYPE &gt; </td></tr>
+<tr class="memitem:a464ea9027ae01e64014040d69302800f"><td class="memTemplItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a464ea9027ae01e64014040d69302800f">quantize_qasymm8_signed</a> (float value, const INFO_TYPE &amp;qinfo, RoundingPolicy rounding_policy=RoundingPolicy::TO_NEAREST_UP)</td></tr>
+<tr class="memdesc:a464ea9027ae01e64014040d69302800f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a value given a signed 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#a464ea9027ae01e64014040d69302800f">More...</a><br /></td></tr>
+<tr class="separator:a464ea9027ae01e64014040d69302800f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea6dad9b7cd5d5028a50e2aceafa7d1d"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aea6dad9b7cd5d5028a50e2aceafa7d1d">quantize_qsymm8</a> (float value, const QuantizationInfo &amp;qinfo)</td></tr>
 <tr class="memdesc:aea6dad9b7cd5d5028a50e2aceafa7d1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a value given a 8-bit symmetric quantization scheme.  <a href="namespacearm__compute.xhtml#aea6dad9b7cd5d5028a50e2aceafa7d1d">More...</a><br /></td></tr>
 <tr class="separator:aea6dad9b7cd5d5028a50e2aceafa7d1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adcbb8a7cd81427846571f9bef039f953"><td class="memItemLeft" align="right" valign="top">int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#adcbb8a7cd81427846571f9bef039f953">quantize_qsymm8_per_channel</a> (float value, const QuantizationInfo &amp;qinfo, size_t channel_id=0)</td></tr>
 <tr class="memdesc:adcbb8a7cd81427846571f9bef039f953"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantize a value given a 8-bit symmetric per channel quantization scheme.  <a href="namespacearm__compute.xhtml#adcbb8a7cd81427846571f9bef039f953">More...</a><br /></td></tr>
 <tr class="separator:adcbb8a7cd81427846571f9bef039f953"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34725aa0412e6cc99193ceb6c8a8e439"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a34725aa0412e6cc99193ceb6c8a8e439">dequantize_qasymm8</a> (uint8_t value, const UniformQuantizationInfo &amp;qinfo)</td></tr>
-<tr class="memdesc:a34725aa0412e6cc99193ceb6c8a8e439"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a value given a 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#a34725aa0412e6cc99193ceb6c8a8e439">More...</a><br /></td></tr>
-<tr class="separator:a34725aa0412e6cc99193ceb6c8a8e439"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca1660b5409625f26c5e40683e2270d8"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aca1660b5409625f26c5e40683e2270d8">dequantize_qasymm8</a> (uint8_t value, const QuantizationInfo &amp;qinfo)</td></tr>
-<tr class="memdesc:aca1660b5409625f26c5e40683e2270d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a value given a 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#aca1660b5409625f26c5e40683e2270d8">More...</a><br /></td></tr>
-<tr class="separator:aca1660b5409625f26c5e40683e2270d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1d8253f8b422e143ab989ad2a4d29dd"><td class="memTemplParams" colspan="2">template&lt;typename INFO_TYPE &gt; </td></tr>
+<tr class="memitem:ac1d8253f8b422e143ab989ad2a4d29dd"><td class="memTemplItemLeft" align="right" valign="top">float&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ac1d8253f8b422e143ab989ad2a4d29dd">dequantize_qasymm8</a> (uint8_t value, const INFO_TYPE &amp;qinfo)</td></tr>
+<tr class="memdesc:ac1d8253f8b422e143ab989ad2a4d29dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a value given an unsigned 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#ac1d8253f8b422e143ab989ad2a4d29dd">More...</a><br /></td></tr>
+<tr class="separator:ac1d8253f8b422e143ab989ad2a4d29dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe6fcf1a0c6f6c2d2cb10a8c14fa9131"><td class="memTemplParams" colspan="2">template&lt;typename INFO_TYPE &gt; </td></tr>
+<tr class="memitem:afe6fcf1a0c6f6c2d2cb10a8c14fa9131"><td class="memTemplItemLeft" align="right" valign="top">float&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afe6fcf1a0c6f6c2d2cb10a8c14fa9131">dequantize_qasymm8_signed</a> (int8_t value, const INFO_TYPE &amp;qinfo)</td></tr>
+<tr class="memdesc:afe6fcf1a0c6f6c2d2cb10a8c14fa9131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a value given a signed 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#afe6fcf1a0c6f6c2d2cb10a8c14fa9131">More...</a><br /></td></tr>
+<tr class="separator:afe6fcf1a0c6f6c2d2cb10a8c14fa9131"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8005b943e23486a2000a7966d664df2"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ab8005b943e23486a2000a7966d664df2">dequantize</a> (uint8_t value, float scale, int32_t <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>)</td></tr>
 <tr class="memdesc:ab8005b943e23486a2000a7966d664df2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a value given an 8-bit asymmetric quantization scheme.  <a href="namespacearm__compute.xhtml#ab8005b943e23486a2000a7966d664df2">More...</a><br /></td></tr>
 <tr class="separator:ab8005b943e23486a2000a7966d664df2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -214,7 +224,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="_quantization_info_8h.xhtml">QuantizationInfo.h</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:47 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:20 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

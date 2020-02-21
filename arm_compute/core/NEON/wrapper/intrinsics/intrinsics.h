@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
-#define __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
+#ifndef ARM_COMPUTE_WRAPPER_INTRINSICS_H
+#define ARM_COMPUTE_WRAPPER_INTRINSICS_H
 
 #include "arm_compute/core/NEON/wrapper/intrinsics/abs.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/add.h"
@@ -37,6 +37,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/dup_n.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/eor.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/exp.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/ext.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/gethigh.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/getlane.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/getlow.h"
@@ -56,6 +57,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/pmax.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pmin.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pow.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/qmovun.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/reinterpret.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/rev64.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/round.h"
@@ -64,5 +66,6 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/sub.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/tanh.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/tbl.h"
 
-#endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_INTRINSICS_H */

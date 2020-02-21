@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,16 +61,21 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(!is_data_type_quantized(tensor.data_type()))
+        if(tensor.data_type() == DataType::QASYMM8)
         {
-            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+            std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+            std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+            library->fill(tensor, distribution, 0);
+        }
+        else if(tensor.data_type() == DataType::QASYMM8_SIGNED)
+        {
+            std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+            std::uniform_int_distribution<int8_t> distribution(bounds.first, bounds.second);
             library->fill(tensor, distribution, 0);
         }
         else
         {
-            std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-            std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
-
+            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
             library->fill(tensor, distribution, 0);
         }
     }

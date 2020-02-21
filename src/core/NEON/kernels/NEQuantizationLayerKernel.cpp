@@ -40,13 +40,15 @@ namespace arm_compute
 {
 namespace
 {
+constexpr auto window_step = 16;
+
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape().total_size() == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QASYMM16);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
     return Status{};
@@ -69,6 +71,25 @@ inline const float32x4x4_t load_value(const float16_t *input_ptr)
 }
 
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+template <typename element_type>
+using vector_type = wrapper::traits::neon_vector_t<element_type, window_step>;
+
+template <typename quantized_type>
+vector_type<quantized_type> vquantize_qasymm8(const float32x4x4_t &qv, const UniformQuantizationInfo &qi);
+
+template <>
+vector_type<uint8_t> vquantize_qasymm8<uint8_t>(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    return vquantize(qv, qi);
+}
+
+template <>
+vector_type<int8_t> vquantize_qasymm8<int8_t>(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    return vquantize_signed(qv, qi);
+}
+
 } // namespace
 
 NEQuantizationLayerKernel::NEQuantizationLayerKernel()
@@ -86,13 +107,15 @@ void NEQuantizationLayerKernel::configure(const ITensor *input, ITensor *output)
 
     static std::map<DataType, QuantizationFunctionExecutorPtr> quant_map_f32 =
     {
-        { DataType::QASYMM8, &NEQuantizationLayerKernel::run_quantize_qasymm8<float> },
+        { DataType::QASYMM8, &NEQuantizationLayerKernel::run_quantize_qasymm8<float, uint8_t> },
+        { DataType::QASYMM8_SIGNED, &NEQuantizationLayerKernel::run_quantize_qasymm8<float, int8_t> },
         { DataType::QASYMM16, &NEQuantizationLayerKernel::run_quantize_qasymm16<float> },
     };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     static std::map<DataType, QuantizationFunctionExecutorPtr> quant_map_f16 =
     {
-        { DataType::QASYMM8, &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t> },
+        { DataType::QASYMM8, &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t, uint8_t> },
+        { DataType::QASYMM8_SIGNED, &NEQuantizationLayerKernel::run_quantize_qasymm8<float16_t, int8_t> },
         { DataType::QASYMM16, &NEQuantizationLayerKernel::run_quantize_qasymm16<float16_t> },
     };
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
@@ -127,12 +150,11 @@ Status NEQuantizationLayerKernel::validate(const ITensorInfo *input, const ITens
     return Status{};
 }
 
-template <typename T>
+template <typename TIn, typename TOut>
 void NEQuantizationLayerKernel::run_quantize_qasymm8(const Window &window)
 {
-    constexpr auto window_step    = 16;
-    const auto     window_start_x = static_cast<int>(window.x().start());
-    const auto     window_end_x   = static_cast<int>(window.x().end());
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
 
     const UniformQuantizationInfo uqinfo = _output->info()->quantization_info().uniform();
 #ifdef __aarch64__
@@ -149,18 +171,18 @@ void NEQuantizationLayerKernel::run_quantize_qasymm8(const Window &window)
     Iterator output(_output, win_collapsed);
     execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
-        auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
-        auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
+        auto input_ptr  = reinterpret_cast<const TIn *>(input.ptr());
+        auto output_ptr = reinterpret_cast<TOut *>(output.ptr());
 
         int x = window_start_x;
         for(; x <= (window_end_x - window_step); x += window_step)
         {
-            wrapper::vstore(&output_ptr[x], vquantize(load_value(&input_ptr[x]), uqinfo));
+            wrapper::vstore(&output_ptr[x], vquantize_qasymm8<TOut>(load_value(&input_ptr[x]), uqinfo));
         }
         // Compute left-over elements
         for(; x < window_end_x; ++x)
         {
-            output_ptr[x] = quantize_qasymm8(input_ptr[x], uqinfo, rounding_policy);
+            output_ptr[x] = Qasymm8QuantizationHelper<TOut>::quantize(input_ptr[x], uqinfo, rounding_policy);
         }
     },
     input, output);
@@ -169,9 +191,8 @@ void NEQuantizationLayerKernel::run_quantize_qasymm8(const Window &window)
 template <typename T>
 void NEQuantizationLayerKernel::run_quantize_qasymm16(const Window &window)
 {
-    constexpr auto window_step    = 16;
-    const auto     window_start_x = static_cast<int>(window.x().start());
-    const auto     window_end_x   = static_cast<int>(window.x().end());
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
 
     const UniformQuantizationInfo uqinfo = _output->info()->quantization_info().uniform();
 #ifdef __aarch64__

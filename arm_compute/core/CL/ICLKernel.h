@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ICLKERNEL_H__
-#define __ARM_COMPUTE_ICLKERNEL_H__
+#ifndef ARM_COMPUTE_ICLKERNEL_H
+#define ARM_COMPUTE_ICLKERNEL_H
 
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
@@ -384,4 +384,4 @@ void ICLKernel::add_array_argument(unsigned &idx, const ICLArray<T> *array, cons
     ARM_COMPUTE_UNUSED(idx_start);
 }
 }
-#endif /*__ARM_COMPUTE_ICLKERNEL_H__ */
+#endif /*ARM_COMPUTE_ICLKERNEL_H */

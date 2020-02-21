@@ -25,6 +25,7 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include <cmath>
 #include <map>
 #include <string>
 
@@ -60,5 +61,21 @@ void schedule_kernel_on_ctx(IRuntimeContext *ctx, ICPPKernel *kernel, const ISch
     {
         NEScheduler::get().schedule(kernel, hints);
     }
+}
+
+unsigned int calculate_number_of_stages_only_x_axis(size_t input_x_dimension, unsigned int axis)
+{
+    // We need only 1 stage for all axis except x-axis
+    if(axis != 0)
+    {
+        return 1;
+    }
+    // Calculate number of WGs. 16 elements per thread, 8 threads per WG
+    const auto num_of_wg = static_cast<unsigned int>(ceil(input_x_dimension / 128.f));
+
+    // Calculate number of stages. First stage performs op and the rest reduction sum
+    // depending on the size of the input. Last stage should have only 1 WG.
+    const unsigned int num_of_stages = num_of_wg / 128 + 2;
+    return num_of_stages;
 }
 } // namespace arm_compute

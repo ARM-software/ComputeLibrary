@@ -11,7 +11,9 @@ var searchData=
   ['ppm',['PPM',['../namespacearm__compute_1_1utils.xhtml#a3154c405c975616503bac23f51b78fc0a4bb1ebdeeb70354069bc644b9c94ee5f',1,'arm_compute::utils']]],
   ['precommit',['PRECOMMIT',['../namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfab829534c7b40afdbd3c3ffea05202a97',1,'arm_compute::test::framework']]],
   ['prelu',['PRELU',['../namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f',1,'arm_compute']]],
+  ['prelulayer',['PReluLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a44da30946f36dcb01ca8be92a1420536',1,'arm_compute::graph']]],
   ['pretty',['PRETTY',['../namespacearm__compute_1_1test_1_1framework.xhtml#a043aa97de3c71ad015852f46ec4cc6ada2b908e3bfd5ebc739a3ce26d5045b76f',1,'arm_compute::test::framework']]],
+  ['printlayer',['PrintLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a415d76e29ed6d61c9f71cc6f7cf3f656',1,'arm_compute::graph']]],
   ['priorboxlayer',['PriorBoxLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a77329845031ba38f828a884f40beb69c',1,'arm_compute::graph']]],
   ['prod',['PROD',['../namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45bac8074bb318fb85693233e64acc64c1ed',1,'arm_compute']]]
 ];

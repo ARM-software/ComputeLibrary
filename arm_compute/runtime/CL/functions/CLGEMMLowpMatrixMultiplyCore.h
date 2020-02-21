@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
-#define __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
+#ifndef ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
+#define ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
 
 #include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
@@ -76,10 +76,10 @@ public:
      *  -# Compute the matrix product of the resulting a * b in int32.
      *  -# Quantize to uint8 if gemm_info.gemmlowp_output_stage != NONE
      *
-     * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8.
+     * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
      * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
      * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
-     * @param[out] output    Output tensor. Data type supported: S32 or QASYMM8 if gemm_info.gemmlowp_output_stage != NONE
+     * @param[out] output    Output tensor. Data type supported: S32 or QASYMM8/QASYMM8_SIGNED if gemm_info.gemmlowp_output_stage != NONE
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */
@@ -89,7 +89,7 @@ public:
      * @param[in] a         First input tensor info (Matrix A). Data type supported: QASYMM8.
      * @param[in] b         Second input tensor info (Matrix B). Data type supported: same as @p a
      * @param[in] c         Third input tensor info (Matrix C). It can be a nullptr. Data type supported: S32
-     * @param[in] output    Output tensor info. Data type supported: S32 or QASYMM8 if gemm_info.gemmlowp_output_stage != NONE
+     * @param[in] output    Output tensor info. Data type supported: S32 or QASYMM8/QASYMM8_SIGNED if gemm_info.gemmlowp_output_stage != NONE
      * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                      if the reshape of matrix B should be executed only for the first run
      *
@@ -139,4 +139,4 @@ private:
     bool    _convert_to_qasymm8;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__ */
+#endif /*ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H */

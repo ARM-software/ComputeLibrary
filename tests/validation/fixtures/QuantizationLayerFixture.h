@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,14 +43,14 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename Tin, typename Tout>
-class QuantizationValidationFixture : public framework::Fixture
+class QuantizationValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo)
+    void setup(TensorShape shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo, QuantizationInfo qinfo_in)
     {
-        _target    = compute_target(shape, data_type_in, data_type_out, qinfo);
-        _reference = compute_reference(shape, data_type_in, data_type_out, qinfo);
+        _target    = compute_target(shape, data_type_in, data_type_out, qinfo, qinfo_in);
+        _reference = compute_reference(shape, data_type_in, data_type_out, qinfo, qinfo_in);
     }
 
 protected:
@@ -60,10 +60,10 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo)
+    TensorType compute_target(const TensorShape &shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo, QuantizationInfo qinfo_in)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type_in);
+        TensorType src = create_tensor<TensorType>(shape, data_type_in, 1, qinfo_in);
         TensorType dst = create_tensor<TensorType>(shape, data_type_out, 1, qinfo);
 
         // Create and configure function
@@ -89,10 +89,10 @@ protected:
         return dst;
     }
 
-    SimpleTensor<Tout> compute_reference(const TensorShape &shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo)
+    SimpleTensor<Tout> compute_reference(const TensorShape &shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo, QuantizationInfo qinfo_in)
     {
         // Create reference
-        SimpleTensor<Tin> src{ shape, data_type_in };
+        SimpleTensor<Tin> src{ shape, data_type_in, 1, qinfo_in };
 
         // Fill reference
         fill(src);
@@ -102,6 +102,17 @@ protected:
 
     TensorType         _target{};
     SimpleTensor<Tout> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename Tin, typename Tout>
+class QuantizationValidationFixture : public QuantizationValidationGenericFixture<TensorType, AccessorType, FunctionType, Tin, Tout>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo)
+    {
+        QuantizationValidationGenericFixture<TensorType, AccessorType, FunctionType, Tin, Tout>::setup(shape, data_type_in, data_type_out, qinfo, QuantizationInfo());
+    }
 };
 
 } // namespace validation

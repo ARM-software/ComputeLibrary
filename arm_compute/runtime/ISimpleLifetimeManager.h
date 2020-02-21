@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H__
-#define __ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H__
+#ifndef ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H
+#define ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H
 
 #include "arm_compute/runtime/ILifetimeManager.h"
 
@@ -97,4 +97,4 @@ protected:
     std::map<IMemoryGroup *, std::map<void *, Element>> _finalized_groups; /**< A map that contains the finalized groups */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H__ */
+#endif /* ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H */

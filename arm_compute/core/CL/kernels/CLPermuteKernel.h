@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPERMUTEKERNEL_H__
-#define __ARM_COMPUTE_CLPERMUTEKERNEL_H__
+#ifndef ARM_COMPUTE_CLPERMUTEKERNEL_H
+#define ARM_COMPUTE_CLPERMUTEKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -49,14 +49,18 @@ public:
     CLPermuteKernel &operator=(CLPermuteKernel &&) = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in] input  The input tensor to permute. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
+     *
+     * @param[in] input  The input tensor to permute. Data types supported: All.
      * @param[in] output The output tensor. Data types supported: Same as @p input
      * @param[in] perm   Permutation vector
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPermuteKernel
      *
-     * @param[in] input  First tensor input info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
+     *
+     * @param[in] input  First tensor input info. Data types supported: All.
      * @param[in] output Output tensor info. Data types supported: same as @p input.
      * @param[in] perm   Permutation vector
      *
@@ -73,4 +77,4 @@ private:
     PermutationVector _perm;
 };
 } // arm_compute
-#endif /*__ARM_COMPUTE_CLPERMUTEKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLPERMUTEKERNEL_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_TYPE_LOADER_H__
-#define __ARM_COMPUTE_GRAPH_TYPE_LOADER_H__
+#ifndef ARM_COMPUTE_GRAPH_TYPE_LOADER_H
+#define ARM_COMPUTE_GRAPH_TYPE_LOADER_H
 
 #include "arm_compute/graph/Types.h"
 
@@ -149,4 +149,4 @@ inline ::std::istream &operator>>(::std::istream &stream, DepthwiseConvolutionMe
 
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_TYPE_LOADER_H__ */
+#endif /* ARM_COMPUTE_GRAPH_TYPE_LOADER_H */

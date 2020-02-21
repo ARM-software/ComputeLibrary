@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,9 +46,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
                           const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
     ARM_COMPUTE_UNUSED(dwc_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1 && dwc_weights_info.n0 != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().second < 1);
@@ -105,6 +106,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+
+    if(is_data_type_quantized(input->data_type()))
+    {
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = (output->total_size() != 0) ? output->quantization_info().uniform() : iq_info;
+
+        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
     }
 
     return Status{};
@@ -235,6 +249,14 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const ICLTensor *input, 
         build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-wq_info.offset));
         build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(oq_info.offset));
         build_opts.add_option_if(is_data_type_quantized_per_channel(weights->info()->data_type()), "-DPER_CHANNEL_QUANTIZATION");
+
+        // Compute non-per-channel multiplier and shift anyway to make OpenCL kernel simpler
+        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+        build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+        build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
 
         if(dwc_info.activation_info.enabled())
         {

@@ -140,6 +140,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[outptr0]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -214,6 +217,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[outptr0]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -311,6 +317,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[outptr0]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -430,6 +439,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[outptr0]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -572,6 +584,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[outptr0]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -737,6 +752,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[outptr0]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -926,6 +944,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[outptr0]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -1133,6 +1154,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[biasptr]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -1184,6 +1208,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[biasptr]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -1255,6 +1282,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[biasptr]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -1346,6 +1376,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[biasptr]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -1456,6 +1489,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[biasptr]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -1586,6 +1622,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[biasptr]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -1736,6 +1775,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[biasptr]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"
@@ -1907,6 +1949,9 @@ void MergeResults<24, 8, false>(__fp16 *out, const __fp16 *in, const int ldout, 
                         } else {
                             /* Optimized routine to copy an entire block */
                             __asm __volatile (
+#ifndef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                                ".arch  armv8.2-a+fp16\n"
+#endif
                                 "dup v0.8h, %[maxval].h[0]\n"
                                 "ldr q2, [%[biasptr]]\n"
                                 "dup v1.8h, %[minval].h[0]\n"

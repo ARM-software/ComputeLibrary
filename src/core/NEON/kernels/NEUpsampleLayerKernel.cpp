@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 
@@ -38,30 +39,16 @@ namespace arm_compute
 {
 namespace
 {
-std::pair<Status, Window> validate_and_configure_window_nchw(ITensorInfo *input, ITensorInfo *output, int num_elems_processed_per_iteration_x, const Size2D &info)
+template <typename T, int S>
+inline T get_data_out(T data, int offset)
 {
-    const int              num_elems_processed_per_iteration_x_out = num_elems_processed_per_iteration_x * info.x();
-    Window                 win                                     = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x_out));
-    AccessWindowRectangle  input_access(input, 0, 0, num_elems_processed_per_iteration_x, 1, 0.5f, 0.5f);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_x_out);
-    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, output->valid_region());
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-
-std::pair<Status, Window> validate_and_configure_window_nhwc(ITensorInfo *input, ITensorInfo *output, int num_elems_processed_per_iteration_x, const Size2D &info)
-{
-    ARM_COMPUTE_UNUSED(info);
-    Window                 win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x));
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration_x);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_x);
-    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, output->valid_region());
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    T out{ 0 };
+    for(int i = 0; i < S / 2; ++i)
+    {
+        out[2 * i]     = wrapper::vgetlane(data, i + offset);
+        out[2 * i + 1] = wrapper::vgetlane(data, i + offset);
+    }
+    return out;
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, int num_elems_processed_per_iteration_x, const Size2D &info)
@@ -70,13 +57,34 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     switch(input->data_layout())
     {
         case DataLayout::NCHW:
-            win_config = validate_and_configure_window_nchw(input, output, num_elems_processed_per_iteration_x, info);
+        {
+            const int              num_elems_processed_per_iteration_x_out = num_elems_processed_per_iteration_x * info.x();
+            Window                 win                                     = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x_out));
+            AccessWindowRectangle  input_access(input, 0, 0, num_elems_processed_per_iteration_x, 1, 0.5f, 0.5f);
+            AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_x_out);
+            bool                   window_changed = update_window_and_padding(win, input_access, output_access);
+            output_access.set_valid_region(win, output->valid_region());
+
+            Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+            win_config = std::make_pair(err, win);
             break;
+        }
         case DataLayout::NHWC:
-            win_config = validate_and_configure_window_nhwc(input, output, num_elems_processed_per_iteration_x, info);
+        {
+            Window                 win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x));
+            AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration_x);
+            AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_x);
+            bool                   window_changed = update_window_and_padding(win, input_access, output_access);
+            output_access.set_valid_region(win, output->valid_region());
+
+            Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+            win_config = std::make_pair(err, win);
             break;
+        }
         default:
+        {
             win_config = std::make_pair(ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported data layout!"), Window{});
+        }
     }
 
     return win_config;
@@ -97,7 +105,7 @@ Status NEUpsampleLayerKernel::validate(const ITensorInfo *input, const ITensorIn
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.x() != 2 || info.y() != 2, "Only stride 2 is supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(policy != InterpolationPolicy::NEAREST_NEIGHBOR, "Only nearest neighbor policy supported");
 
@@ -118,8 +126,11 @@ Status NEUpsampleLayerKernel::validate(const ITensorInfo *input, const ITensorIn
     return Status{};
 }
 
-void NEUpsampleLayerKernel::upsample_f32_nchw(const arm_compute::Window &window)
+template <typename T, int S>
+void NEUpsampleLayerKernel::upsample_nchw(const arm_compute::Window &window)
 {
+    using VectorType = typename wrapper::traits::neon_vector<T, S>::type;
+
     Window window_in(window);
     window_in.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _num_elems_processed_per_iteration_x));
 
@@ -128,25 +139,28 @@ void NEUpsampleLayerKernel::upsample_f32_nchw(const arm_compute::Window &window)
 
     Iterator  input(_input, window_in);
     Iterator  output(_output, window_out);
-    const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(float);
+    const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(T);
 
     execute_window_loop(window_out, [&](const Coordinates &)
     {
-        const float32x4_t data      = vld1q_f32(reinterpret_cast<const float *>(input.ptr()));
-        const float32x4_t data_out1 = { vgetq_lane_f32(data, 0), vgetq_lane_f32(data, 0), vgetq_lane_f32(data, 1), vgetq_lane_f32(data, 1) };
-        const float32x4_t data_out2 = { vgetq_lane_f32(data, 2), vgetq_lane_f32(data, 2), vgetq_lane_f32(data, 3), vgetq_lane_f32(data, 3) };
-        auto              out       = reinterpret_cast<float *>(output.ptr());
+        const VectorType data      = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr()));
+        const VectorType data_out1 = get_data_out<VectorType, S>(data, 0);
+        const VectorType data_out2 = get_data_out<VectorType, S>(data, S / 2);
+        auto              out       = reinterpret_cast<T *>(output.ptr());
 
-        vst1q_f32(out, data_out1);
-        vst1q_f32(out + 4, data_out2);
-        vst1q_f32(out + offset_y_out, data_out1);
-        vst1q_f32(out + offset_y_out + 4, data_out2);
+        wrapper::vstore(out, data_out1);
+        wrapper::vstore(out + S, data_out2);
+        wrapper::vstore(out + offset_y_out, data_out1);
+        wrapper::vstore(out + offset_y_out + S, data_out2);
     },
     input, output);
 }
 
-void NEUpsampleLayerKernel::upsample_f32_nhwc(const arm_compute::Window &window)
+template <typename T, int S>
+void NEUpsampleLayerKernel::upsample_nhwc(const arm_compute::Window &window)
 {
+    using VectorType = typename wrapper::traits::neon_vector<T, S>::type;
+
     Window window_out(window);
     window_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), _info.x()));
     window_out.set(Window::DimZ, Window::Dimension(0, _output->info()->dimension(2), _info.y()));
@@ -154,142 +168,19 @@ void NEUpsampleLayerKernel::upsample_f32_nhwc(const arm_compute::Window &window)
     Iterator input(_input, window);
     Iterator output(_output, window_out);
 
-    const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(float);
-    const int offset_z_out = _output->info()->strides_in_bytes().z() / sizeof(float);
-
+    const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(T);
+    const int offset_z_out = _output->info()->strides_in_bytes().z() / sizeof(T);
     execute_window_loop(window_out, [&](const Coordinates &)
     {
-        const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr()));
-        auto              out  = reinterpret_cast<float *>(output.ptr());
+        const VectorType data = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr()));
+        auto              out  = reinterpret_cast<T *>(output.ptr());
 
-        vst1q_f32(out, data);
-        vst1q_f32(out + offset_y_out, data);
-        vst1q_f32(out + offset_z_out, data);
-        vst1q_f32(out + offset_y_out + offset_z_out, data);
+        wrapper::vstore(out, data);
+        wrapper::vstore(out + offset_y_out, data);
+        wrapper::vstore(out + offset_z_out, data);
+        wrapper::vstore(out + offset_y_out + offset_z_out, data);
     },
     input, output);
-}
-
-void NEUpsampleLayerKernel::upsample_qasymm8_nchw(const arm_compute::Window &window)
-{
-    Window window_in(window);
-    window_in.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _num_elems_processed_per_iteration_x));
-
-    Window window_out(window);
-    window_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), _info.y()));
-
-    Iterator  input(_input, window_in);
-    Iterator  output(_output, window_out);
-    const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(uint8_t);
-
-    execute_window_loop(window_out, [&](const Coordinates &)
-    {
-        const uint8x16_t data      = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr()));
-        const uint8x16_t data_out1 = { vgetq_lane_u8(data, 0), vgetq_lane_u8(data, 0), vgetq_lane_u8(data, 1), vgetq_lane_u8(data, 1),
-                                       vgetq_lane_u8(data, 2), vgetq_lane_u8(data, 2), vgetq_lane_u8(data, 3), vgetq_lane_u8(data, 3),
-                                       vgetq_lane_u8(data, 4), vgetq_lane_u8(data, 4), vgetq_lane_u8(data, 5), vgetq_lane_u8(data, 5),
-                                       vgetq_lane_u8(data, 6), vgetq_lane_u8(data, 6), vgetq_lane_u8(data, 7), vgetq_lane_u8(data, 7)
-                                     };
-        const uint8x16_t data_out2 =
-        {
-            vgetq_lane_u8(data, 8), vgetq_lane_u8(data, 8), vgetq_lane_u8(data, 9), vgetq_lane_u8(data, 9),
-            vgetq_lane_u8(data, 10), vgetq_lane_u8(data, 10), vgetq_lane_u8(data, 11), vgetq_lane_u8(data, 11),
-            vgetq_lane_u8(data, 12), vgetq_lane_u8(data, 12), vgetq_lane_u8(data, 13), vgetq_lane_u8(data, 13),
-            vgetq_lane_u8(data, 14), vgetq_lane_u8(data, 14), vgetq_lane_u8(data, 15), vgetq_lane_u8(data, 15)
-        };
-        auto out = reinterpret_cast<uint8_t *>(output.ptr());
-
-        vst1q_u8(out, data_out1);
-        vst1q_u8(out + 16, data_out2);
-        vst1q_u8(out + offset_y_out, data_out1);
-        vst1q_u8(out + offset_y_out + 16, data_out2);
-    },
-    input, output);
-}
-
-void NEUpsampleLayerKernel::upsample_qasymm8_nhwc(const arm_compute::Window &window)
-{
-    Window window_out(window);
-    window_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), _info.x()));
-    window_out.set(Window::DimZ, Window::Dimension(0, _output->info()->dimension(2), _info.y()));
-
-    Iterator input(_input, window);
-    Iterator output(_output, window_out);
-
-    const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(uint8_t);
-    const int offset_z_out = _output->info()->strides_in_bytes().z() / sizeof(uint8_t);
-    execute_window_loop(window_out, [&](const Coordinates &)
-    {
-        const uint8x16_t data = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr()));
-        auto             out  = reinterpret_cast<uint8_t *>(output.ptr());
-
-        vst1q_u8(out, data);
-        vst1q_u8(out + offset_y_out, data);
-        vst1q_u8(out + offset_z_out, data);
-        vst1q_u8(out + offset_y_out + offset_z_out, data);
-    },
-    input, output);
-}
-
-void NEUpsampleLayerKernel::upsample_f16_nchw(const arm_compute::Window &window)
-{
-    ARM_COMPUTE_UNUSED(window);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    Window window_in(window);
-    window_in.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _num_elems_processed_per_iteration_x));
-
-    Window window_out(window);
-    window_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), _info.y()));
-
-    Iterator  input(_input, window_in);
-    Iterator  output(_output, window_out);
-    const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(float16_t);
-
-    execute_window_loop(window_out, [&](const Coordinates &)
-    {
-        const float16x8_t data      = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr()));
-        const float16x8_t data_out1 = { vgetq_lane_f16(data, 0), vgetq_lane_f16(data, 0), vgetq_lane_f16(data, 1), vgetq_lane_f16(data, 1),
-                                        vgetq_lane_f16(data, 2), vgetq_lane_f16(data, 2), vgetq_lane_f16(data, 3), vgetq_lane_f16(data, 3)
-                                      };
-        const float16x8_t data_out2 = { vgetq_lane_f16(data, 4), vgetq_lane_f16(data, 4), vgetq_lane_f16(data, 5), vgetq_lane_f16(data, 5),
-                                        vgetq_lane_f16(data, 6), vgetq_lane_f16(data, 6), vgetq_lane_f16(data, 7), vgetq_lane_f16(data, 7)
-                                      };
-        auto out = reinterpret_cast<float16_t *>(output.ptr());
-
-        vst1q_f16(out, data_out1);
-        vst1q_f16(out + 8, data_out2);
-        vst1q_f16(out + offset_y_out, data_out1);
-        vst1q_f16(out + offset_y_out + 8, data_out2);
-    },
-    input, output);
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-}
-
-void NEUpsampleLayerKernel::upsample_f16_nhwc(const arm_compute::Window &window)
-{
-    ARM_COMPUTE_UNUSED(window);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    Window window_out(window);
-    window_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), _info.x()));
-    window_out.set(Window::DimZ, Window::Dimension(0, _output->info()->dimension(2), _info.y()));
-
-    Iterator  input(_input, window);
-    Iterator  output(_output, window_out);
-    const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(float16_t);
-    const int offset_z_out = _output->info()->strides_in_bytes().z() / sizeof(float16_t);
-
-    execute_window_loop(window_out, [&](const Coordinates &)
-    {
-        const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr()));
-        auto              out  = reinterpret_cast<float16_t *>(output.ptr());
-
-        vst1q_f16(out, data);
-        vst1q_f16(out + offset_y_out, data);
-        vst1q_f16(out + offset_z_out, data);
-        vst1q_f16(out + offset_y_out + offset_z_out, data);
-    },
-    input, output);
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 }
 
 void NEUpsampleLayerKernel::configure(const ITensor *input, ITensor *output, const Size2D &info, const InterpolationPolicy policy)
@@ -318,15 +209,19 @@ void NEUpsampleLayerKernel::configure(const ITensor *input, ITensor *output, con
         {
             switch(input->info()->data_type())
             {
+                case DataType::QASYMM8_SIGNED:
+                    _func = &NEUpsampleLayerKernel::upsample_nchw<int8_t, 16>;
+                    break;
                 case DataType::QASYMM8:
-                    _func = &NEUpsampleLayerKernel::upsample_qasymm8_nchw;
+                    _func = &NEUpsampleLayerKernel::upsample_nchw<uint8_t, 16>;
                     break;
                 case DataType::F32:
-                    _func = &NEUpsampleLayerKernel::upsample_f32_nchw;
+                    _func = &NEUpsampleLayerKernel::upsample_nchw<float, 4>;
                     break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
-                    _func = &NEUpsampleLayerKernel::upsample_f16_nchw;
+                    _func = &NEUpsampleLayerKernel::upsample_nchw<float16_t, 8>;
+                    ;
                     break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
                 default:
@@ -338,15 +233,18 @@ void NEUpsampleLayerKernel::configure(const ITensor *input, ITensor *output, con
         {
             switch(input->info()->data_type())
             {
+                case DataType::QASYMM8_SIGNED:
+                    _func = &NEUpsampleLayerKernel::upsample_nhwc<int8_t, 16>;
+                    break;
                 case DataType::QASYMM8:
-                    _func = &NEUpsampleLayerKernel::upsample_qasymm8_nhwc;
+                    _func = &NEUpsampleLayerKernel::upsample_nhwc<uint8_t, 16>;
                     break;
                 case DataType::F32:
-                    _func = &NEUpsampleLayerKernel::upsample_f32_nhwc;
+                    _func = &NEUpsampleLayerKernel::upsample_nhwc<float, 4>;
                     break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
-                    _func = &NEUpsampleLayerKernel::upsample_f16_nhwc;
+                    _func = &NEUpsampleLayerKernel::upsample_nhwc<float16_t, 8>;
                     break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
                 default:

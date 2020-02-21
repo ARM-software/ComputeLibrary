@@ -1,6 +1,7 @@
 var searchData=
 [
   ['b',['B',['../namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa9d5ed678fe57bcca610140957afab571',1,'arm_compute']]],
+  ['backend',['Backend',['../classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a15c294efeadfdffb6b0735dd93aedfd9a2e427c268ac1768b9add94b65e2d6c14',1,'arm_compute::graph::IGraphMutator']]],
   ['base_5f10',['BASE_10',['../namespacearm__compute_1_1support_1_1cpp11.xhtml#aebc1ea57c14482b68dac0c0dab766126a329acff975f3cc434528bec43bd5b6aa',1,'arm_compute::support::cpp11']]],
   ['base_5f16',['BASE_16',['../namespacearm__compute_1_1support_1_1cpp11.xhtml#aebc1ea57c14482b68dac0c0dab766126a027219c7702304969c898aeffed504af',1,'arm_compute::support::cpp11']]],
   ['batches',['BATCHES',['../namespacearm__compute.xhtml#a74ce3f7420453d3446218ff3b7453e02a628bcf7e10fc1c2a984f379a1ec3393a',1,'arm_compute']]],

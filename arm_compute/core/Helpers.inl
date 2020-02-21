@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -348,9 +348,9 @@ inline size_t get_data_layout_dimension_index(const DataLayout data_layout, cons
             return 3;
             break;
         default:
-            ARM_COMPUTE_ERROR("Data layout index not supported!");
             break;
     }
+    ARM_COMPUTE_ERROR("Data layout index not supported!");
 }
 
 inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout data_layout, const size_t index)

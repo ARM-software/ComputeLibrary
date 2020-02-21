@@ -30,6 +30,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/NEMath.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -43,307 +44,38 @@
 
 namespace arm_compute
 {
-template <typename T, int N>
-struct vec_n_type;
+template <typename float_vec_type, typename int_vec_type>
+int_vec_type convert_float_to_int(const float_vec_type &in);
 
-#define DECLARE_NEON_VEC_TYPE(T, N, V) \
-    template <>                        \
-    struct vec_n_type<T, N>            \
-    {                                  \
-        using type = V;                \
-    };
-
-DECLARE_NEON_VEC_TYPE(uint8_t, 16, uint8x16_t)
-DECLARE_NEON_VEC_TYPE(uint8_t, 8, uint8x8_t)
-
-DECLARE_NEON_VEC_TYPE(int8_t, 16, int8x16_t)
-DECLARE_NEON_VEC_TYPE(int8_t, 8, int8x8_t)
-
-DECLARE_NEON_VEC_TYPE(uint16_t, 8, uint16x8_t)
-DECLARE_NEON_VEC_TYPE(uint16_t, 4, uint16x4_t)
-
-DECLARE_NEON_VEC_TYPE(int16_t, 8, int16x8_t)
-DECLARE_NEON_VEC_TYPE(int16_t, 4, int16x4_t)
-
-DECLARE_NEON_VEC_TYPE(int32_t, 4, int32x4_t)
-DECLARE_NEON_VEC_TYPE(int32_t, 2, int32x2_t)
-
-DECLARE_NEON_VEC_TYPE(uint32_t, 4, uint32x4_t)
-DECLARE_NEON_VEC_TYPE(uint32_t, 2, uint32x2_t)
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-DECLARE_NEON_VEC_TYPE(float16_t, 8, float16x8_t)
-DECLARE_NEON_VEC_TYPE(float16_t, 4, float16x4_t)
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
-DECLARE_NEON_VEC_TYPE(float, 4, float32x4_t)
-DECLARE_NEON_VEC_TYPE(float, 2, float32x2_t)
-
-template <typename T, int N>
-using vec_n_t = typename vec_n_type<T, N>::type;
-
-template <typename T, int N>
-using vec_n_byte_t = vec_n_t < T, N / sizeof(T) >;
-
-template <typename T>
-using vec_16_byte_t = vec_n_byte_t<T, 16>;
-
-template <typename T>
-using vec_8_byte_t = vec_n_byte_t<T, 8>;
-
-template <typename T>
-using const_ptr_t = const T *;
-
-template <typename T>
-using ptr_t = T *;
-
-#define FORWARD_DECLARE_VGET_LANE_FOR_TYPE(TYPE) \
-    template <int lane>                          \
-    TYPE vget_lane(vec_8_byte_t<TYPE> vec);      \
-    template <int lane>                          \
-    TYPE vget_lane(vec_16_byte_t<TYPE> vec);
-
-FORWARD_DECLARE_VGET_LANE_FOR_TYPE(uint8_t)
-FORWARD_DECLARE_VGET_LANE_FOR_TYPE(int8_t)
-FORWARD_DECLARE_VGET_LANE_FOR_TYPE(uint16_t)
-FORWARD_DECLARE_VGET_LANE_FOR_TYPE(int16_t)
-FORWARD_DECLARE_VGET_LANE_FOR_TYPE(uint32_t)
-FORWARD_DECLARE_VGET_LANE_FOR_TYPE(int32_t)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-FORWARD_DECLARE_VGET_LANE_FOR_TYPE(float16_t)
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-FORWARD_DECLARE_VGET_LANE_FOR_TYPE(float)
-template <int lane>
-float vget_lane(float32x4x4_t vec);
-
-template <typename V>
-using elem_type_t = decltype(vget_lane<0>(std::declval<V>()));
-
-template <typename V>
-constexpr size_t vec_size_of(const V &vec)
-{
-    return sizeof(vec) / sizeof(elem_type_t<V>);
-}
-
-template <typename V>
-V vdup_n(elem_type_t<V> val);
-template <typename V>
-V vld(const_ptr_t<elem_type_t<V>> ptr);
-
-#define DECLARE_NEON_FUNCTIONS_FOR_TYPE(TYPE, TAG)                                \
-    template <>                                                                   \
-    inline vec_8_byte_t<TYPE> vdup_n<vec_8_byte_t<TYPE>>(TYPE val)                \
-    {                                                                             \
-        return vdup_n_##TAG(val);                                                 \
-    }                                                                             \
-    template <>                                                                   \
-    inline vec_16_byte_t<TYPE> vdup_n<vec_16_byte_t<TYPE>>(TYPE val)              \
-    {                                                                             \
-        return vdupq_n_##TAG(val);                                                \
-    }                                                                             \
-    template <>                                                                   \
-    inline vec_8_byte_t<TYPE> vld<vec_8_byte_t<TYPE>>(const_ptr_t<TYPE> ptr)      \
-    {                                                                             \
-        return vld1_##TAG(ptr);                                                   \
-    }                                                                             \
-    template <>                                                                   \
-    inline vec_16_byte_t<TYPE> vld<vec_16_byte_t<TYPE>>(const_ptr_t<TYPE> ptr)    \
-    {                                                                             \
-        return vld1q_##TAG(ptr);                                                  \
-    }                                                                             \
-    inline void vst(ptr_t<TYPE> ptr, vec_8_byte_t<TYPE> vec)                      \
-    {                                                                             \
-        vst1_##TAG(ptr, vec);                                                     \
-    }                                                                             \
-    inline void vst(ptr_t<TYPE> ptr, vec_16_byte_t<TYPE> vec)                     \
-    {                                                                             \
-        vst1q_##TAG(ptr, vec);                                                    \
-    }                                                                             \
-    inline vec_16_byte_t<TYPE> vmax(vec_16_byte_t<TYPE> a, vec_16_byte_t<TYPE> b) \
-    {                                                                             \
-        return vmaxq_##TAG(a, b);                                                 \
-    }                                                                             \
-    inline vec_8_byte_t<TYPE> vpmax(vec_8_byte_t<TYPE> a, vec_8_byte_t<TYPE> b)   \
-    {                                                                             \
-        return vpmax_##TAG(a, b);                                                 \
-    }                                                                             \
-    inline vec_8_byte_t<TYPE> vget_low(vec_16_byte_t<TYPE> vec)                   \
-    {                                                                             \
-        return vget_low_##TAG(vec);                                               \
-    }                                                                             \
-    inline vec_8_byte_t<TYPE> vget_high(vec_16_byte_t<TYPE> vec)                  \
-    {                                                                             \
-        return vget_high_##TAG(vec);                                              \
-    }                                                                             \
-    template <int lane>                                                           \
-    inline TYPE vget_lane(vec_8_byte_t<TYPE> vec)                                 \
-    {                                                                             \
-        static_assert(lane >= 0, "lane is out of bounds");                        \
-        static_assert(lane < vec_size_of(vec), "lane is out of bounds");          \
-        return vget_lane_##TAG(vec, lane);                                        \
-    }                                                                             \
-    template <int lane>                                                           \
-    inline TYPE vget_lane(vec_16_byte_t<TYPE> vec)                                \
-    {                                                                             \
-        static_assert(lane >= 0, "lane is out of bounds");                        \
-        static_assert(lane < vec_size_of(vec), "lane is out of bounds");          \
-        return vgetq_lane_##TAG(vec, lane);                                       \
-    }
-
-template <typename T>
-T sqadd(T a, T b);
-template <typename T>
-T sqsub(T a, T b);
-template <typename T>
-T sqmul(T a, T b);
-
-#define DECLARE_NEON_FUNCTIONS_FOR_FLOAT(TYPE, TAG)                               \
-    inline vec_8_byte_t<TYPE> vadd(vec_8_byte_t<TYPE> a, vec_8_byte_t<TYPE> b)    \
-    {                                                                             \
-        return vadd_##TAG(a, b);                                                  \
-    }                                                                             \
-    inline vec_16_byte_t<TYPE> vadd(vec_16_byte_t<TYPE> a, vec_16_byte_t<TYPE> b) \
-    {                                                                             \
-        return vaddq_##TAG(a, b);                                                 \
-    }                                                                             \
-    inline vec_16_byte_t<TYPE> vsub(vec_16_byte_t<TYPE> a, vec_16_byte_t<TYPE> b) \
-    {                                                                             \
-        return vsubq_##TAG(a, b);                                                 \
-    }                                                                             \
-    inline vec_16_byte_t<TYPE> vmul_n(vec_16_byte_t<TYPE> vec, TYPE val)          \
-    {                                                                             \
-        return vmulq_n_##TAG(vec, val);                                           \
-    }
-
-DECLARE_NEON_FUNCTIONS_FOR_TYPE(uint8_t, u8)
-DECLARE_NEON_FUNCTIONS_FOR_TYPE(int8_t, s8)
-DECLARE_NEON_FUNCTIONS_FOR_TYPE(uint16_t, u16)
-DECLARE_NEON_FUNCTIONS_FOR_TYPE(int16_t, s16)
-DECLARE_NEON_FUNCTIONS_FOR_TYPE(uint32_t, u32)
-DECLARE_NEON_FUNCTIONS_FOR_TYPE(int32_t, s32)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-DECLARE_NEON_FUNCTIONS_FOR_TYPE(float16_t, f16)
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-DECLARE_NEON_FUNCTIONS_FOR_TYPE(float, f32)
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-DECLARE_NEON_FUNCTIONS_FOR_FLOAT(float16_t, f16)
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-DECLARE_NEON_FUNCTIONS_FOR_FLOAT(float, f32)
-
-template <typename VO, typename VI>
-VO vcvt(VI vec);
+template <typename float_vec_type, typename int_vec_type>
+float_vec_type convert_int_to_float(const int_vec_type &in);
 
 template <>
-float32x4x4_t vcvt<float32x4x4_t>(uint8x16_t vec)
+uint8x16_t convert_float_to_int<float32x4x4_t, uint8x16_t>(const float32x4x4_t &in)
 {
-    const auto    low  = vmovl_u8(vget_low(vec));
-    const auto    high = vmovl_u8(vget_high(vec));
-    float32x4x4_t res  = { {
-            vcvtq_f32_u32(vmovl_u16(vget_low(low))),
-            vcvtq_f32_u32(vmovl_u16(vget_high(low))),
-            vcvtq_f32_u32(vmovl_u16(vget_low(high))),
-            vcvtq_f32_u32(vmovl_u16(vget_high(high)))
-        }
-    };
-    return res;
+    uint8x16_t out;
+    convert_float32x4x4_to_uint8x16(in, out);
+    return out;
 }
 
 template <>
-uint8x16_t vcvt<uint8x16_t>(float32x4x4_t vec)
+int8x16_t convert_float_to_int<float32x4x4_t, int8x16_t>(const float32x4x4_t &in)
 {
-    uint16x8x2_t resU16 = { {
-            vcombine_u16(vqmovn_u32(vcvtq_u32_f32(vec.val[0])),
-            vqmovn_u32(vcvtq_u32_f32(vec.val[1]))),
-            vcombine_u16(vqmovn_u32(vcvtq_u32_f32(vec.val[2])),
-            vqmovn_u32(vcvtq_u32_f32(vec.val[3])))
-        }
-    };
-
-    uint8x16_t res = vcombine_u8(vqmovn_u16(resU16.val[0]), vqmovn_u16(resU16.val[1]));
-    return res;
+    int8x16_t out;
+    convert_float32x4x4_to_int8x16(in, out);
+    return out;
 }
-
-float32x4x4_t vexp(float32x4x4_t vec)
-{
-    float32x4x4_t res = { {
-            vexpq_f32(vec.val[0]),
-            vexpq_f32(vec.val[1]),
-            vexpq_f32(vec.val[2]),
-            vexpq_f32(vec.val[3])
-        }
-    };
-    return res;
-}
-
-float32x4_t vexp(const float32x4_t &vec)
-{
-    return vexpq_f32(vec);
-}
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-// TODO (COMPMID-1535) : Revisit FP16 approximations
-float16x8_t vexp(const float16x8_t &vec)
-{
-    float16x4x2_t res =
-    {
-        {
-            vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vget_low_f16(vec)))),
-            vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vget_high_f16(vec))))
-        }
-    };
-    return vcombine_f16(res.val[0], res.val[1]);
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 template <>
-float32x4x4_t vdup_n<float32x4x4_t>(float val)
+float32x4x4_t convert_int_to_float<float32x4x4_t, uint8x16_t>(const uint8x16_t &in)
 {
-    float32x4x4_t res = { {
-            vdupq_n_f32(val),
-            vdupq_n_f32(val),
-            vdupq_n_f32(val),
-            vdupq_n_f32(val)
-        }
-    };
-    return res;
+    return convert_uint8x16_to_float32x4x4(in);
 }
 
-float32x4x4_t vmul_n(float32x4x4_t vec, float val)
+template <>
+float32x4x4_t convert_int_to_float<float32x4x4_t, int8x16_t>(const int8x16_t &in)
 {
-    float32x4x4_t res = { {
-            vmulq_n_f32(vec.val[0], val),
-            vmulq_n_f32(vec.val[1], val),
-            vmulq_n_f32(vec.val[2], val),
-            vmulq_n_f32(vec.val[3], val)
-        }
-    };
-    return res;
-}
-
-float32x4x4_t vadd(float32x4x4_t a, float32x4x4_t b)
-{
-    float32x4x4_t res = { {
-            vaddq_f32(a.val[0], b.val[0]),
-            vaddq_f32(a.val[1], b.val[1]),
-            vaddq_f32(a.val[2], b.val[2]),
-            vaddq_f32(a.val[3], b.val[3])
-        }
-    };
-    return res;
-}
-
-float32x4x4_t vsub_n(float32x4x4_t a, float val)
-{
-    auto          scalar_vector = vdup_n<float32x4x4_t>(val);
-    float32x4x4_t res           = { {
-            vsubq_f32(a.val[0], scalar_vector.val[0]),
-            vsubq_f32(a.val[1], scalar_vector.val[1]),
-            vsubq_f32(a.val[2], scalar_vector.val[2]),
-            vsubq_f32(a.val[3], scalar_vector.val[3])
-        }
-    };
-    return res;
+    return convert_int8x16_to_float32x4x4(in);
 }
 
 namespace
@@ -351,7 +83,7 @@ namespace
 Status validate_arguments_logits_1d_max(const ITensorInfo &input, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
 
     // Validate in case of configured output
     if(output.total_size() != 0)
@@ -390,30 +122,20 @@ std::pair<Status, Window> validate_and_configure_window_logits_1d_max(ITensorInf
     return std::make_pair(err, win);
 }
 
-template <typename V>
-auto reduce_max(V vec) -> elem_type_t<V>
-{
-    constexpr int N = vec_size_of(vec);
-
-    auto carry_max = vpmax(vget_high(vec), vget_low(vec));
-
-    for(int k = N / 2; k > 1; k /= 2)
-    {
-        carry_max = vpmax(carry_max, carry_max);
-    }
-
-    return vget_lane<0>(carry_max);
-}
-
 template <typename T>
 void logits_1d_max(const ITensor &in, ITensor &out, const Window &window)
 {
     const auto   start_x     = in.info()->valid_region().anchor.x();
     const size_t input_width = in.info()->valid_region().shape.x();
 
+    /** NEON vector tag type. */
+    using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
+
     Iterator input(&in, window);
     Iterator output(&out, window);
 
+    constexpr int window_step_x = 16 / sizeof(T);
+    const int     sum_stages    = log2(window_step_x / 2);
     execute_window_loop(window, [&](const Coordinates &)
     {
         // Get pointers
@@ -421,16 +143,22 @@ void logits_1d_max(const ITensor &in, ITensor &out, const Window &window)
         const auto out_ptr = reinterpret_cast<T *>(output.ptr());
 
         // Init max value
-        auto vec_max = vdup_n<vec_16_byte_t<T>>(support::cpp11::lowest<T>());
+        auto vec_max = wrapper::vdup_n(support::cpp11::lowest<T>(), ExactTagType{});
 
         // Loop over input row
-        for(const T *it = in_ptr; it < (in_ptr + input_width); it += vec_size_of(vec_max))
+        for(const T *it = in_ptr; it < (in_ptr + input_width); it += window_step_x)
         {
-            const auto current_value = vld<vec_16_byte_t<T>>(it);
-            vec_max                  = vmax(vec_max, current_value);
+            const auto current_value = wrapper::vloadq(it);
+            vec_max                  = wrapper::vmax(vec_max, current_value);
         }
 
-        const T max_val = reduce_max(vec_max);
+        auto carry_max = wrapper::vpmax(wrapper::vgethigh(vec_max), wrapper::vgetlow(vec_max));
+
+        for(int i = 0; i < sum_stages; ++i)
+        {
+            carry_max = wrapper::vpmax(carry_max, carry_max);
+        }
+        const T max_val = wrapper::vgetlane(carry_max, 0);
         *out_ptr        = max_val;
     },
     input, output);
@@ -461,6 +189,9 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
     {
         case DataType::QASYMM8:
             _func = &logits_1d_max<qasymm8_t>;
+            break;
+        case DataType::QASYMM8_SIGNED:
+            _func = &logits_1d_max<qasymm8_signed_t>;
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
@@ -509,12 +240,12 @@ void NELogits1DMaxKernel::run(const Window &window, const ThreadInfo &info)
 namespace
 {
 Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensorInfo &max,
-                                         const ITensorInfo &output, const float beta, const ITensorInfo &tmp)
+                                         const ITensorInfo &output, const float beta, const ITensorInfo &tmp, bool is_log)
 {
     ARM_COMPUTE_UNUSED(beta);
     // Check input
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
 
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input.data_type());
 
@@ -526,7 +257,7 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
     // Check output if configured
     if(output.total_size() != 0)
     {
-        const QuantizationInfo output_quantization = is_quantized_asymmetric ? QuantizationInfo(1.f / 256.f, 0) : output.quantization_info();
+        const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(input.data_type(), is_log) : output.quantization_info();
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON(output.quantization_info() != output_quantization);
@@ -546,12 +277,12 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
 }
 
 std::pair<Status, Window> validate_and_configure_window_logits_softmax(ITensorInfo &input, ITensorInfo &max,
-                                                                       ITensorInfo &output, ITensorInfo &tmp)
+                                                                       ITensorInfo &output, ITensorInfo &tmp, bool is_log)
 {
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input.data_type());
 
     // Output auto initialization if not yet initialized
-    const QuantizationInfo output_quantization = is_quantized_asymmetric ? QuantizationInfo(1.f / 256.f, 0) : output.quantization_info();
+    const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(input.data_type(), is_log) : output.quantization_info();
     auto_init_if_empty(output, TensorInfo(input).set_quantization_info(output_quantization).reset_padding());
 
     // Tmp auto initialization if not yet initialized
@@ -575,51 +306,29 @@ std::pair<Status, Window> validate_and_configure_window_logits_softmax(ITensorIn
     return std::make_pair(err, win);
 }
 
-template <typename T, int N, int S, int E>
-struct reduce_add_impl
-{
-    template <typename F>
-    static T reduce(F add_fn, vec_n_t<T, N> vec)
-    {
-        constexpr int H            = (S + E + 1) / 2;
-        const auto    reduced_high = reduce_add_impl < T, N, S, H - 1 >::reduce(add_fn, vec);
-        const auto    reduced_low  = reduce_add_impl<T, N, H, E>::reduce(add_fn, vec);
-        return add_fn(reduced_high, reduced_low);
-    }
-};
-template <typename T, int N, int I>
-struct reduce_add_impl<T, N, I, I>
-{
-    template <typename F>
-    static T reduce(F /*add_fn*/, vec_n_t<T, N> vec)
-    {
-        return vget_lane<I>(vec);
-    }
-};
-template <typename V, typename F>
-elem_type_t<V> reduce_add(F add_fn, V vec)
-{
-    constexpr int N = vec_size_of(vec);
-    return reduce_add_impl < elem_type_t<V>, N, 0, N - 1 >::reduce(add_fn, vec);
-}
-
-template <bool is_log>
+template <typename T, bool is_log>
 void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *const tmp, ITensor &out, const float beta, const Window &window)
 {
+    static_assert(std::is_same<T, qasymm8_t>::value
+                  || std::is_same<T, qasymm8_signed_t>::value,
+                  "quantized type should be either qasymm8_t or qasymm8_signed_t.");
+
     const int start_x     = in.info()->valid_region().anchor.x();
     const int input_width = in.info()->valid_region().shape.x();
 
-    const float scale_beta = -beta * in.info()->quantization_info().uniform().scale;
+    const float scale_beta     = -beta * in.info()->quantization_info().uniform().scale;
+    const auto  scale_beta_vec = vdupq_n_f32(scale_beta);
 
-    Iterator in_it(&in, window);
-    Iterator max_it(&max, window);
-    Iterator out_it(&out, window);
+    Iterator      in_it(&in, window);
+    Iterator      max_it(&max, window);
+    Iterator      out_it(&out, window);
+    constexpr int vec_size = 16;
 
     execute_window_loop(window, [&](const Coordinates &)
     {
         /* Get pointers */
-        const auto in_ptr  = reinterpret_cast<const qasymm8_t *>(in_it.ptr()) + start_x;
-        const auto out_ptr = reinterpret_cast<qasymm8_t *>(out_it.ptr()) + start_x;
+        const auto in_ptr  = reinterpret_cast<const T *>(in_it.ptr()) + start_x;
+        const auto out_ptr = reinterpret_cast<T *>(out_it.ptr()) + start_x;
         const auto tmp_ptr = reinterpret_cast<float *>(tmp);
 
         float sum{};
@@ -628,58 +337,74 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
         /* Compute exponentials and sum */
         {
             /* Get max value */
-            const auto max_val = *reinterpret_cast<const qasymm8_t *>(max_it.ptr());
-            const auto vec_max = vdup_n<vec_16_byte_t<qasymm8_t>>(max_val);
+            const auto max_val = *reinterpret_cast<const T *>(max_it.ptr());
+            const auto vec_max = wrapper::vdup_n(max_val, wrapper::traits::vector_128_tag{});
 
             /* Init sum to zero */
-            auto vec_sum = vdup_n<float32x4x4_t>(0.f);
+            float32x4x4_t vec_sum =
+            {
+                vdupq_n_f32(0.f),
+                vdupq_n_f32(0.f),
+                vdupq_n_f32(0.f),
+                vdupq_n_f32(0.f),
+            };
 
             /* Loop over row and compute exponentials and sum */
-            int           i        = 0;
-            constexpr int vec_size = vec_size_of(vec_max);
-
-            for(; i <= (input_width - vec_size); i += vec_size)
+            int x = 0;
+            for(; x <= (input_width - vec_size); x += vec_size)
             {
-                auto vec_elements = vld<vec_16_byte_t<qasymm8_t>>(in_ptr + i);
-                vec_elements      = vsubq_u8(vec_max, vec_elements);
-
-                auto vec_elements_flt = vcvt<float32x4x4_t>(vec_elements);
+                auto vec_elements     = wrapper::vloadq(in_ptr + x);
+                vec_elements          = wrapper::vsub(vec_max, vec_elements);
+                auto vec_elements_flt = convert_int_to_float<float32x4x4_t>(vec_elements);
 
                 if(is_log)
                 {
-                    vec_elements_flt = vmul_n(vec_elements_flt, scale_beta);
-                    vec_sum          = vadd(vec_sum, vexp(vec_elements_flt));
+                    vec_elements_flt.val[0] = vmulq_f32(vec_elements_flt.val[0], scale_beta_vec);
+                    vec_elements_flt.val[1] = vmulq_f32(vec_elements_flt.val[1], scale_beta_vec);
+                    vec_elements_flt.val[2] = vmulq_f32(vec_elements_flt.val[2], scale_beta_vec);
+                    vec_elements_flt.val[3] = vmulq_f32(vec_elements_flt.val[3], scale_beta_vec);
+                    vec_sum.val[0]          = vaddq_f32(vec_sum.val[0], vexpq_f32(vec_elements_flt.val[0]));
+                    vec_sum.val[1]          = vaddq_f32(vec_sum.val[1], vexpq_f32(vec_elements_flt.val[1]));
+                    vec_sum.val[2]          = vaddq_f32(vec_sum.val[2], vexpq_f32(vec_elements_flt.val[2]));
+                    vec_sum.val[3]          = vaddq_f32(vec_sum.val[3], vexpq_f32(vec_elements_flt.val[3]));
                 }
                 else
                 {
-                    vec_elements_flt = vexp(vmul_n(vec_elements_flt, scale_beta));
-                    vec_sum          = vadd(vec_sum, vec_elements_flt);
+                    vec_elements_flt.val[0] = vexpq_f32(vmulq_f32(vec_elements_flt.val[0], scale_beta_vec));
+                    vec_elements_flt.val[1] = vexpq_f32(vmulq_f32(vec_elements_flt.val[1], scale_beta_vec));
+                    vec_elements_flt.val[2] = vexpq_f32(vmulq_f32(vec_elements_flt.val[2], scale_beta_vec));
+                    vec_elements_flt.val[3] = vexpq_f32(vmulq_f32(vec_elements_flt.val[3], scale_beta_vec));
+                    vec_sum.val[0]          = vaddq_f32(vec_sum.val[0], vec_elements_flt.val[0]);
+                    vec_sum.val[1]          = vaddq_f32(vec_sum.val[1], vec_elements_flt.val[1]);
+                    vec_sum.val[2]          = vaddq_f32(vec_sum.val[2], vec_elements_flt.val[2]);
+                    vec_sum.val[3]          = vaddq_f32(vec_sum.val[3], vec_elements_flt.val[3]);
                 }
-                vst4q_f32(tmp_ptr + i, vec_elements_flt);
+
+                vst4q_f32(tmp_ptr + x, vec_elements_flt);
             }
 
             /* Reduce sum */
-            const auto sum_16_byte = vaddq_f32(vaddq_f32(vec_sum.val[0], vec_sum.val[1]),
-                                               vaddq_f32(vec_sum.val[2], vec_sum.val[3]));
-            const auto sum_8_byte = vadd_f32(vget_low(sum_16_byte), vget_high(sum_16_byte));
-            sum                   = reduce_add(std::plus<float>(), sum_8_byte);
+            const auto sum_16_byte = vaddq_f32(vaddq_f32(vec_sum.val[0], vec_sum.val[1]), vaddq_f32(vec_sum.val[2], vec_sum.val[3]));
+            auto       sum_res     = vpadd_f32(vget_high_f32(sum_16_byte), vget_low_f32(sum_16_byte));
+            sum_res                = vpadd_f32(sum_res, sum_res);
+            sum                    = wrapper::vgetlane(sum_res, 0);
 
             /* Run remaining elements */
-            for(; i < input_width; ++i)
+            for(; x < input_width; ++x)
             {
                 float element{};
                 if(is_log)
                 {
-                    element = (max_val - in_ptr[i]) * scale_beta;
+                    element = (max_val - in_ptr[x]) * scale_beta;
                     sum += std::exp(element);
                 }
                 else
                 {
-                    element = std::exp((max_val - in_ptr[i]) * scale_beta);
+                    element = std::exp((max_val - in_ptr[x]) * scale_beta);
                     sum += element;
                 }
 
-                tmp_ptr[i] = element;
+                tmp_ptr[x] = element;
             }
 
             if(!is_log)
@@ -690,36 +415,58 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
 
         /* Normalize exponentials */
         {
+            constexpr bool is_qasymm8_signed = std::is_same<T, qasymm8_signed_t>::value;
             /* Loop over row and compute softmax */
-            int i = 0;
+            int x = 0;
+            for(; x <= (input_width - vec_size); x += vec_size)
             {
-                constexpr int vec_size = 16;
-
-                for(; i <= (input_width - vec_size); i += vec_size)
-                {
-                    float32x4x4_t            vec_in = vld4q_f32(tmp_ptr + i);
-                    vec_16_byte_t<qasymm8_t> normalized_value{};
-                    if(is_log)
-                    {
-                        normalized_value = vcvt<vec_16_byte_t<qasymm8_t>>(vsub_n(vec_in, sum));
-                    }
-                    else
-                    {
-                        normalized_value = vcvt<vec_16_byte_t<qasymm8_t>>(vmul_n(vec_in, sum_inversed));
-                    }
-                    vst(out_ptr + i, normalized_value);
-                }
-            }
-            /* Run remaining elements */
-            for(; i < input_width; ++i)
-            {
+                using int_vec_type   = wrapper::traits::neon_vector_t<T, 16>;
+                float32x4x4_t vec_in = vld4q_f32(tmp_ptr + x);
+                int_vec_type  normalized_value{};
                 if(is_log)
                 {
-                    out_ptr[i] = utils::cast::saturate_cast<qasymm8_t>(tmp_ptr[i] - sum);
+                    const float32x4x4_t sub =
+                    {
+                        vsubq_f32(vec_in.val[0], vdupq_n_f32(sum)),
+                        vsubq_f32(vec_in.val[1], vdupq_n_f32(sum)),
+                        vsubq_f32(vec_in.val[2], vdupq_n_f32(sum)),
+                        vsubq_f32(vec_in.val[3], vdupq_n_f32(sum)),
+                    };
+                    normalized_value = convert_float_to_int<float32x4x4_t, int_vec_type>(sub);
                 }
                 else
                 {
-                    out_ptr[i] = utils::cast::saturate_cast<qasymm8_t>(tmp_ptr[i] * sum_inversed);
+                    float32x4x4_t mul =
+                    {
+                        vmulq_f32(vec_in.val[0], vdupq_n_f32(sum_inversed)),
+                        vmulq_f32(vec_in.val[1], vdupq_n_f32(sum_inversed)),
+                        vmulq_f32(vec_in.val[2], vdupq_n_f32(sum_inversed)),
+                        vmulq_f32(vec_in.val[3], vdupq_n_f32(sum_inversed)),
+                    };
+
+                    if(is_qasymm8_signed)
+                    {
+                        const auto offset_vec = wrapper::vdup_n(128.f, wrapper::traits::vector_128_tag{});
+                        mul.val[0]            = wrapper::vsub(mul.val[0], offset_vec);
+                        mul.val[1]            = wrapper::vsub(mul.val[1], offset_vec);
+                        mul.val[2]            = wrapper::vsub(mul.val[2], offset_vec);
+                        mul.val[3]            = wrapper::vsub(mul.val[3], offset_vec);
+                    }
+
+                    normalized_value = convert_float_to_int<float32x4x4_t, int_vec_type>(mul);
+                }
+                wrapper::vstore(out_ptr + x, normalized_value);
+            }
+            /* Run remaining elements */
+            for(; x < input_width; ++x)
+            {
+                if(is_log)
+                {
+                    out_ptr[x] = utils::cast::saturate_cast<T>(tmp_ptr[x] - sum);
+                }
+                else
+                {
+                    out_ptr[x] = utils::cast::saturate_cast<T>((tmp_ptr[x] * sum_inversed) - (is_qasymm8_signed ? 128.f : 0));
                 }
             }
         }
@@ -738,6 +485,12 @@ void logits_1d_softmax_float(const ITensor &in, const ITensor &max, void *const 
     Iterator max_it(&max, window);
     Iterator out_it(&out, window);
 
+    /** NEON vector tag type. */
+    using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
+
+    constexpr int vec_size   = 16 / sizeof(T);
+    const int     sum_stages = log2(vec_size / 2);
+
     execute_window_loop(window, [&](const Coordinates &)
     {
         /* Get pointers */
@@ -752,53 +505,54 @@ void logits_1d_softmax_float(const ITensor &in, const ITensor &max, void *const 
         {
             /* Get max value */
             const auto max_val = *reinterpret_cast<const T *>(max_it.ptr());
-            const auto vec_max = vdup_n<vec_16_byte_t<T>>(max_val);
+            const auto vec_max = wrapper::vdup_n(max_val, ExactTagType{});
 
             /* Init sum to zero */
-            auto vec_sum = vdup_n<vec_16_byte_t<T>>(0);
+            auto vec_sum = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
 
             /* Loop over row and compute exponentials and sum */
-            int           i        = 0;
-            constexpr int vec_size = vec_size_of(vec_sum);
-
-            for(; i <= (input_width - vec_size); i += vec_size)
+            int x = 0;
+            for(; x <= (input_width - vec_size); x += vec_size)
             {
-                auto vec_elements = vld<vec_16_byte_t<T>>(in_ptr + i);
-                vec_elements      = vsub(vec_elements, vec_max);
+                auto vec_elements = wrapper::vloadq(in_ptr + x);
+                vec_elements      = wrapper::vsub(vec_elements, vec_max);
                 if(is_log)
                 {
-                    vec_elements = vmul_n(vec_elements, static_cast<T>(beta));
-                    vec_sum      = vadd(vec_sum, vexp(vec_elements));
+                    vec_elements = wrapper::vmul(vec_elements, wrapper::vdup_n(static_cast<T>(beta), ExactTagType{}));
+                    vec_sum      = wrapper::vadd(vec_sum, wrapper::vexpq(vec_elements));
                 }
                 else
                 {
-                    vec_elements = vexp(vmul_n(vec_elements, static_cast<T>(beta)));
-                    vec_sum      = vadd(vec_sum, vec_elements);
+                    vec_elements = wrapper::vexpq(wrapper::vmul(vec_elements, wrapper::vdup_n(static_cast<T>(beta), ExactTagType{})));
+                    vec_sum      = wrapper::vadd(vec_sum, vec_elements);
                 }
-                vst(tmp_ptr + i, vec_elements);
+                wrapper::vstore(tmp_ptr + x, vec_elements);
             }
 
             /* Reduce sum */
-            const auto sum_8_byte = vadd(vget_high(vec_sum), vget_low(vec_sum));
-            sum                   = reduce_add([](T a, T b) -> T { return a + b; }, sum_8_byte);
+            auto sum_res = wrapper::vpadd(wrapper::vgethigh(vec_sum), wrapper::vgetlow(vec_sum));
+            for(int i = 0; i < sum_stages; ++i)
+            {
+                sum_res = wrapper::vpadd(sum_res, sum_res);
+            }
+            sum = wrapper::vgetlane(sum_res, 0);
 
             /* Run remaining elements */
-
-            for(; i < input_width; ++i)
+            for(; x < input_width; ++x)
             {
                 T element{};
 
                 if(is_log)
                 {
-                    element = (in_ptr[i] - max_val) * beta;
+                    element = (in_ptr[x] - max_val) * beta;
                     sum += std::exp(element);
                 }
                 else
                 {
-                    element = std::exp((in_ptr[i] - max_val) * beta);
+                    element = std::exp((in_ptr[x] - max_val) * beta);
                     sum += element;
                 }
-                tmp_ptr[i] = element;
+                tmp_ptr[x] = element;
             }
 
             if(!is_log)
@@ -810,36 +564,31 @@ void logits_1d_softmax_float(const ITensor &in, const ITensor &max, void *const 
         /* Normalize exponentials */
         {
             /* Loop over row and compute softmax */
-            int i = 0;
-
+            int x = 0;
+            for(; x <= (input_width - vec_size); x += vec_size)
             {
-                constexpr int vec_size = vec_size_of(vec_16_byte_t<T> {});
-
-                for(; i <= (input_width - vec_size); i += vec_size)
-                {
-                    auto             vec_in = vld<vec_16_byte_t<T>>(tmp_ptr + i);
-                    vec_16_byte_t<T> normalized_value{};
-                    if(is_log)
-                    {
-                        normalized_value = vsub(vec_in, vdup_n<vec_16_byte_t<T>>(sum));
-                    }
-                    else
-                    {
-                        normalized_value = vmul_n(vec_in, sum_inversed);
-                    }
-                    vst(out_ptr + i, normalized_value);
-                }
-            }
-            /* Run remaining elements */
-            for(; i < input_width; ++i)
-            {
+                auto vec_in           = wrapper::vloadq(tmp_ptr + x);
+                auto normalized_value = wrapper::vdup_n(static_cast<T>(0), ExactTagType{});
                 if(is_log)
                 {
-                    out_ptr[i] = tmp_ptr[i] - sum;
+                    normalized_value = wrapper::vsub(vec_in, wrapper::vdup_n(static_cast<T>(sum), ExactTagType{}));
                 }
                 else
                 {
-                    out_ptr[i] = tmp_ptr[i] * sum_inversed;
+                    normalized_value = wrapper::vmul(vec_in, wrapper::vdup_n(static_cast<T>(sum_inversed), ExactTagType{}));
+                }
+                wrapper::vstore(out_ptr + x, normalized_value);
+            }
+            /* Run remaining elements */
+            for(; x < input_width; ++x)
+            {
+                if(is_log)
+                {
+                    out_ptr[x] = tmp_ptr[x] - sum;
+                }
+                else
+                {
+                    out_ptr[x] = tmp_ptr[x] * sum_inversed;
                 }
             }
         }
@@ -860,15 +609,18 @@ void NELogits1DSoftmaxKernel<IS_LOG>::configure(const ITensor *input, const ITen
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, output, tmp);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), max->info(), output->info(), tmp->info());
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_softmax(*input->info(), *max->info(), *output->info(), beta, *tmp->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_softmax(*input->info(), *max->info(), *output->info(), beta, *tmp->info(), IS_LOG));
     // Configure kernel window
-    auto win_config = validate_and_configure_window_logits_softmax(*input->info(), *max->info(), *output->info(), *tmp->info());
+    auto win_config = validate_and_configure_window_logits_softmax(*input->info(), *max->info(), *output->info(), *tmp->info(), IS_LOG);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     switch(input->info()->data_type())
     {
         case DataType::QASYMM8:
-            _func = &logits_1d_softmax_qasymm8<IS_LOG>;
+            _func = &logits_1d_softmax_qasymm8<qasymm8_t, IS_LOG>;
+            break;
+        case DataType::QASYMM8_SIGNED:
+            _func = &logits_1d_softmax_qasymm8<qasymm8_signed_t, IS_LOG>;
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
@@ -898,8 +650,8 @@ Status NELogits1DSoftmaxKernel<IS_LOG>::validate(const ITensorInfo *input, const
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, output, tmp);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_softmax(*input, *max, *output, beta, *tmp));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_softmax(*input->clone(), *max->clone(), *output->clone(), *tmp->clone()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_softmax(*input, *max, *output, beta, *tmp, IS_LOG));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_softmax(*input->clone(), *max->clone(), *output->clone(), *tmp->clone(), IS_LOG).first);
 
     return Status{};
 }

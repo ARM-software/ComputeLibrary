@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -225,10 +225,16 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_fused_depthwise_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(*polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node), ctx);
         case NodeType::NormalizationLayer:
             return detail::create_normalization_layer<NENormalizationLayer, NETargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
+        case NodeType::PadLayer:
+            return detail::create_pad_layer<NEPadLayer, NETargetInfo>(*polymorphic_downcast<PadLayerNode *>(node));
         case NodeType::PermuteLayer:
             return detail::create_permute_layer<NEPermute, NETargetInfo>(*polymorphic_downcast<PermuteLayerNode *>(node));
         case NodeType::PoolingLayer:
             return detail::create_pooling_layer<NEPoolingLayer, NETargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
+        case NodeType::PReluLayer:
+            return detail::create_prelu_layer<NEPReluLayer, NETargetInfo>(*polymorphic_downcast<PReluLayerNode *>(node));
+        case NodeType::PrintLayer:
+            return detail::create_print_layer<NETargetInfo>(*polymorphic_downcast<PrintLayerNode *>(node));
         case NodeType::PriorBoxLayer:
             return detail::create_priorbox_layer<NEPriorBoxLayer, NETargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::QuantizationLayer:

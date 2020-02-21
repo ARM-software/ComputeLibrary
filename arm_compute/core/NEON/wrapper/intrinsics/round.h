@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_ROUND_H__
-#define __ARM_COMPUTE_WRAPPER_ROUND_H__
+#ifndef ARM_COMPUTE_WRAPPER_ROUND_H
+#define ARM_COMPUTE_WRAPPER_ROUND_H
 
 #include "arm_compute/core/NEON/NEMath.h"
 #include <arm_neon.h>
@@ -31,10 +31,10 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VROUNDQ_IMPL(vtype, postfix)    \
-    inline vtype vround(const vtype &a) \
-    {                                   \
-        return vroundq_rte_##postfix(a);    \
+#define VROUNDQ_IMPL(vtype, postfix)     \
+    inline vtype vround(const vtype &a)  \
+    {                                    \
+        return vroundq_rte_##postfix(a); \
     }
 
 VROUNDQ_IMPL(float32x4_t, f32)
@@ -45,4 +45,4 @@ VROUNDQ_IMPL(float16x8_t, f16)
 
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_ROUND_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_ROUND_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLBATCHTOSPACELAYERKERNEL_H__
-#define __ARM_COMPUTE_CLBATCHTOSPACELAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLBATCHTOSPACELAYERKERNEL_H
+#define ARM_COMPUTE_CLBATCHTOSPACELAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -49,14 +49,14 @@ public:
     ~CLBatchToSpaceLayerKernel() = default;
     /** Initialise the kernel's inputs and output.
      *
-     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape 1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output      Tensor output. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
     /** Initialise the kernel's inputs and output (Static block shape).
      *
-     * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in]  block_shape_x Block shape x value.
      * @param[in]  block_shape_y Block shape y value.
      * @param[out] output        Tensor output. Data types supported: same as @p input
@@ -64,7 +64,7 @@ public:
     void configure(const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayerKernel
      *
-     * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in] block_shape 1-D tensor with shape [M]. Data types supported: S32
      * @param[in] output      Tensor output. Data types supported: same as @p input
      *
@@ -73,7 +73,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayerKernel (Static block shape).
      *
-     * @param[in] input         Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input         Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[in] block_shape_x Block shape x value.
      * @param[in] block_shape_y Block shape y value.
      * @param[in] output        Tensor output. Data types supported: same as @p input
@@ -91,4 +91,4 @@ private:
     ICLTensor       *_output;      /**< Destination tensor */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLBATCHTOSPACELAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLBATCHTOSPACELAYERKERNEL_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H__
-#define __ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H__
+#ifndef ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H
+#define ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -75,7 +75,8 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QASYMM8/QSYMM8_PER_CHANNEL/FP16/F32
+     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared.
+     *                    Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/FP16/F32
      * @param[in]  bias   The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
      *                    dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
      *                    @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
@@ -85,7 +86,8 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEWeightsReshapeKernel
      *
      * @param[in] input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                   and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QASYMM8/QSYMM8_PER_CHANNEL/F16/F32
+     *                   and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared.
+     *                   Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32
      * @param[in] biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
      *                   dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
      *                   @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
@@ -104,4 +106,4 @@ private:
     ITensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H__ */
+#endif /*ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H */

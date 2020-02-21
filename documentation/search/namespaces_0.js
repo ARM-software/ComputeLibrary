@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['arm_5fcompute',['arm_compute',['../namespacearm__compute.xhtml',1,'']]],
+  ['arm_5fcompute',['arm_compute',['../namespacearm__compute.xhtml',1,'arm_compute'],['../namespacearm__compute_1_1arm__compute.xhtml',1,'arm_compute::arm_compute']]],
   ['arm_5fgemm',['arm_gemm',['../namespacearm__gemm.xhtml',1,'']]],
   ['backends',['backends',['../namespacearm__compute_1_1graph_1_1backends.xhtml',1,'arm_compute::graph']]],
   ['benchmark',['benchmark',['../namespacearm__compute_1_1test_1_1benchmark.xhtml',1,'arm_compute::test']]],
@@ -31,12 +31,12 @@ var searchData=
   ['math',['math',['../namespacearm__compute_1_1utils_1_1math.xhtml',1,'arm_compute::utils']]],
   ['misc',['misc',['../namespacearm__compute_1_1misc.xhtml',1,'arm_compute']]],
   ['mmap_5fio',['mmap_io',['../namespacearm__compute_1_1utils_1_1mmap__io.xhtml',1,'arm_compute::utils']]],
-  ['nightlysuite',['NIGHTLYSuite',['../namespacearm__compute_1_1test_1_1benchmark_1_1_c_l_suite_1_1_n_i_g_h_t_l_y_suite.xhtml',1,'arm_compute::test::benchmark::CLSuite']]],
   ['quantization',['quantization',['../namespacearm__compute_1_1quantization.xhtml',1,'arm_compute']]],
   ['random',['random',['../namespacearm__compute_1_1utils_1_1random.xhtml',1,'arm_compute::utils']]],
   ['reference',['reference',['../namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml',1,'arm_compute::test::validation']]],
   ['requires',['requires',['../namespacearm__compute_1_1utils_1_1requires.xhtml',1,'arm_compute::utils']]],
   ['rounding',['rounding',['../namespacearm__compute_1_1utils_1_1rounding.xhtml',1,'arm_compute::utils']]],
+  ['scalesuite',['ScaleSuite',['../namespacearm__compute_1_1test_1_1benchmark_1_1_c_l_suite_1_1_scale_suite.xhtml',1,'arm_compute::test::benchmark::CLSuite']]],
   ['shape_5fcalculator',['shape_calculator',['../namespacearm__compute_1_1misc_1_1shape__calculator.xhtml',1,'arm_compute::misc']]],
   ['support',['support',['../namespacearm__compute_1_1support.xhtml',1,'arm_compute']]],
   ['tensor_5finfo',['tensor_info',['../namespacearm__compute_1_1helpers_1_1tensor__info.xhtml',1,'arm_compute::helpers']]],

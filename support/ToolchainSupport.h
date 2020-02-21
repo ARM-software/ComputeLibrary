@@ -155,7 +155,7 @@ inline std::string to_string(T && value)
 template <typename T>
 inline T nearbyint(T value)
 {
-    return ::nearbyint(value);
+    return static_cast<T>(::nearbyint(value));
 }
 
 /** Convert string values to float.
@@ -286,7 +286,7 @@ inline std::string to_string(T &&value)
 template <typename T>
 inline T nearbyint(T value)
 {
-    return std::nearbyint(value);
+    return static_cast<T>(std::nearbyint(value));
 }
 
 /** Convert string values to float.

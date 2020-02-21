@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ICLDISTRIBUTION1D_H__
-#define __ARM_COMPUTE_ICLDISTRIBUTION1D_H__
+#ifndef ARM_COMPUTE_ICLDISTRIBUTION1D_H
+#define ARM_COMPUTE_ICLDISTRIBUTION1D_H
 
 #include "arm_compute/core/IDistribution1D.h"
 
@@ -99,4 +99,4 @@ protected:
     uint32_t *_mapping; /**< The distribution data. */
 };
 }
-#endif /* __ARM_COMPUTE_ICLDISTRIBUTION1D_H__ */
+#endif /* ARM_COMPUTE_ICLDISTRIBUTION1D_H */

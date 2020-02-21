@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_IGCSIMPLEFUNCTION_H__
-#define __ARM_COMPUTE_IGCSIMPLEFUNCTION_H__
+#ifndef ARM_COMPUTE_IGCSIMPLEFUNCTION_H
+#define ARM_COMPUTE_IGCSIMPLEFUNCTION_H
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
@@ -60,4 +60,4 @@ protected:
     GCRuntimeContext          *_ctx;            /**< Context to use */
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_IGCSIMPLEFUNCTION_H__ */
+#endif /*ARM_COMPUTE_IGCSIMPLEFUNCTION_H */

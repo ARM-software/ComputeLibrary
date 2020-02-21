@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_TENSOR_LIBRARY_H__
-#define __ARM_COMPUTE_TEST_TENSOR_LIBRARY_H__
+#ifndef ARM_COMPUTE_TEST_TENSOR_LIBRARY_H
+#define ARM_COMPUTE_TEST_TENSOR_LIBRARY_H
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
@@ -846,6 +846,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         }
         case DataType::S8:
         case DataType::QSYMM8:
+        case DataType::QASYMM8_SIGNED:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<int8_t, D>::value));
             std::uniform_int_distribution<int8_t> distribution_s8(low, high);
@@ -999,4 +1000,4 @@ void AssetsLibrary::fill_tensor_value(T &&tensor, D value) const
 }
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_TENSOR_LIBRARY_H__ */
+#endif /* ARM_COMPUTE_TEST_TENSOR_LIBRARY_H */

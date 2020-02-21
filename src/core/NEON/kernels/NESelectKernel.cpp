@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -197,7 +197,7 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
         };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         map_function["op_F16"] = &select_op_16<float16_t, uint16x8_t>;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     }
     else
     {
@@ -213,7 +213,7 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
         };
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         map_function["op_F16"] = &select_op_not_same_rank<float16_t>;
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     }
 
     auto it = map_function.find(function_to_call);
@@ -229,13 +229,9 @@ void NESelectKernel::configure(const ITensor *c, const ITensor *x, const ITensor
 
 Status NESelectKernel::validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(c, x, y); 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(x);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(x,
-                                                         1,
-                                                         DataType::U8, DataType::S8,
-                                                         DataType::U16, DataType::S16,
-                                                         DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(x->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(x, y);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(x, y);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(c, 1, DataType::U8);

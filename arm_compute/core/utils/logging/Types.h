@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_LOGGING_TYPES_H__
-#define __ARM_COMPUTE_LOGGING_TYPES_H__
+#ifndef ARM_COMPUTE_LOGGING_TYPES_H
+#define ARM_COMPUTE_LOGGING_TYPES_H
 
 #include <string>
 
@@ -65,4 +65,4 @@ struct LogMsg
 };
 } // namespace logging
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TYPES_H__ */
+#endif /* ARM_COMPUTE_TYPES_H */

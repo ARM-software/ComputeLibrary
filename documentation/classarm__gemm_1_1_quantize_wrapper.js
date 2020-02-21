@@ -1,7 +1,7 @@
 var classarm__gemm_1_1_quantize_wrapper =
 [
     [ "QuantizeWrapper", "classarm__gemm_1_1_quantize_wrapper.xhtml#a6977a84e4e509fa3bcd39662cfb03d9a", null ],
-    [ "QuantizeWrapper", "classarm__gemm_1_1_quantize_wrapper.xhtml#a6bb07801b1b08fa23ffa65055ef5633e", null ],
+    [ "QuantizeWrapper", "classarm__gemm_1_1_quantize_wrapper.xhtml#a8bf38de8dffa2ee89dc39ca7a5113a2f", null ],
     [ "B_is_pretransposed", "classarm__gemm_1_1_quantize_wrapper.xhtml#ac5dec5063a75604fdc60555f15577b94", null ],
     [ "B_pretranspose_required", "classarm__gemm_1_1_quantize_wrapper.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c", null ],
     [ "execute", "classarm__gemm_1_1_quantize_wrapper.xhtml#a0b21ce5febc3f7eed9c7b37c0b9a3560", null ],

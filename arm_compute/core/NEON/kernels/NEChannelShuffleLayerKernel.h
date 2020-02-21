@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECHANNELSHUFFLELAYERKERNEL_H__
-#define __ARM_COMPUTE_NECHANNELSHUFFLELAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NECHANNELSHUFFLELAYERKERNEL_H
+#define ARM_COMPUTE_NECHANNELSHUFFLELAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -53,14 +53,14 @@ public:
     ~NEChannelShuffleLayerKernel() = default;
     /** Configure function's inputs and outputs.
      *
-     * @param[in]  input      Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input      Input tensor. Data types supported: All
      * @param[out] output     Output tensor. Data type supported: Same as @p input
      * @param[in]  num_groups Number of groups. Must be greater than 1 and the number of channels of the tensors must be a multiple of the number of groups.
      */
     void configure(const ITensor *input, ITensor *output, unsigned int num_groups);
     /** Static function to check if given info will lead to a valid configuration of @ref NEChannelShuffleLayerKernel
      *
-     * @param[in]  input      Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input      Input tensor. Data types supported: All
      * @param[out] output     Output tensor. Data type supported: Same as @p input
      * @param[in]  num_groups Number of groups. Must be greater than 1 and the number of channels of the tensors must be a multiple of the number of groups.
      *
@@ -77,4 +77,4 @@ private:
     unsigned int   _num_groups;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NECHANNELSHUFFLELAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_NECHANNELSHUFFLELAYERKERNEL_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_TYPES_H__
-#define __ARM_COMPUTE_RUNTIME_TYPES_H__
+#ifndef ARM_COMPUTE_RUNTIME_TYPES_H
+#define ARM_COMPUTE_RUNTIME_TYPES_H
 
 #include "arm_compute/runtime/IMemory.h"
 
@@ -59,4 +59,4 @@ struct BlobInfo
     size_t owners;    /**< Number of owners in parallel of the blob */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_RUNTIME_TYPES_H__ */
+#endif /* ARM_COMPUTE_RUNTIME_TYPES_H */

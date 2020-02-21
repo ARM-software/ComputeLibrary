@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,15 +32,15 @@ CLInstanceNormalizationLayer::CLInstanceNormalizationLayer()
 {
 }
 
-void CLInstanceNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, float gamma, float beta, float epsilon)
+void CLInstanceNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLInstanceNormalizationLayerKernel>();
-    k->configure(input, output, gamma, beta, epsilon);
+    k->configure(input, output, InstanceNormalizationLayerKernelInfo(gamma, beta, epsilon, use_mixed_precision));
     _kernel = std::move(k);
 }
 
-Status CLInstanceNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon)
+Status CLInstanceNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon, bool use_mixed_precision)
 {
-    return CLInstanceNormalizationLayerKernel::validate(input, output, gamma, beta, epsilon);
+    return CLInstanceNormalizationLayerKernel::validate(input, output, InstanceNormalizationLayerKernelInfo(gamma, beta, epsilon, use_mixed_precision));
 }
 } // namespace arm_compute

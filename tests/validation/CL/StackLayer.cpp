@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,9 +49,6 @@ namespace
 {
 // *INDENT-OFF*
 // clang-format off
-/** Data types */
-const auto data_types = framework::dataset::make("DataType", { DataType::QASYMM8, DataType::F16, DataType::F32 });
-
 /** Num tensors values to test */
 const auto n_values = framework::dataset::make("NumTensors", { 3, 4 });
 

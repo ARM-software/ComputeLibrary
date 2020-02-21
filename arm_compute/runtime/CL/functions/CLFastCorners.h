@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFASTCORNERS_H__
-#define __ARM_COMPUTE_CLFASTCORNERS_H__
+#ifndef ARM_COMPUTE_CLFASTCORNERS_H
+#define ARM_COMPUTE_CLFASTCORNERS_H
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/CL/kernels/CLFastCornersKernel.h"
@@ -89,4 +89,4 @@ private:
     uint8_t                   _constant_border_value;
 };
 }
-#endif /*__ARM_COMPUTE_CLFASTCORNERS_H__ */
+#endif /*ARM_COMPUTE_CLFASTCORNERS_H */

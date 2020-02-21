@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,8 +27,8 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NEIm2Col::NEIm2Col()
     : _kernel(), _y_dim(1)
 {
@@ -51,3 +51,4 @@ void NEIm2Col::run()
 {
     NEScheduler::get().schedule(&_kernel, _y_dim);
 }
+} // namespace arm_compute

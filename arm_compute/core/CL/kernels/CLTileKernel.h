@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLTILEKERNEL_H__
-#define __ARM_COMPUTE_CLTILEKERNEL_H__
+#ifndef ARM_COMPUTE_CLTILEKERNEL_H
+#define ARM_COMPUTE_CLTILEKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -48,7 +48,7 @@ public:
     ~CLTileKernel() = default;
     /** Set the source, destination of the kernel
      *
-     * @param[in]  input     Source tensor. Data type supported:  U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input     Source tensor. Data type supported: All.
      * @param[in]  multiples Contains the number of times the input tensor should be replicated on the given dimension.
      *                       Cannot have more than 4 elements (tiling in dimensions greater than 4 is not supported).
      * @param[out] output    Destination tensor. Same as @p input
@@ -57,7 +57,7 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, const Multiples &multiples);
     /** Static function to check if given info will lead to a valid configuration of @ref CLTileKernel
      *
-     * @param[in] input     Source tensor info. Data type supported:  U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input     Source tensor info. Data type supported: All.
      * @param[in] multiples Contains the number of times the input tensor should be replicated on the given dimension.
      *                      Cannot have more than 4 elements (tiling in dimensions greater than 4 is not supported).
      * @param[in] output    Destination tensor info. Same as @p input
@@ -75,4 +75,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLTILEKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLTILEKERNEL_H */

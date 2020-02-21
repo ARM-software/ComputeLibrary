@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLHOGDETECTOR_H__
-#define __ARM_COMPUTE_CLHOGDETECTOR_H__
+#ifndef ARM_COMPUTE_CLHOGDETECTOR_H
+#define ARM_COMPUTE_CLHOGDETECTOR_H
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/CL/kernels/CLHOGDetectorKernel.h"
@@ -75,4 +75,4 @@ private:
 };
 }
 
-#endif /* __ARM_COMPUTE_CLHOGDETECTOR_H__ */
+#endif /* ARM_COMPUTE_CLHOGDETECTOR_H */

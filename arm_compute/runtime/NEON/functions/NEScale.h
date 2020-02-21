@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESCALEIMAGE_H__
-#define __ARM_COMPUTE_NESCALEIMAGE_H__
+#ifndef ARM_COMPUTE_NESCALEIMAGE_H
+#define ARM_COMPUTE_NESCALEIMAGE_H
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
@@ -54,9 +54,10 @@ public:
      * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      * @param[in]      sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
      * @param[in]      use_padding           (Optional) Is padding in use or not. Defaults to true.
+     * @param[in]      align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      */
     void configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
-                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true);
+                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
     /** Static function to check if given info will lead to a valid configuration of @ref NEScale
      *
      * @param[in] input                 Source tensor. Data type supported: U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
@@ -66,11 +67,12 @@ public:
      * @param[in] constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      * @param[in] sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
      * @param[in] use_padding           (Optional) Is padding in use or not. Defaults to true.
+     * @param[in] align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode,
-                           PixelValue constant_border_value = PixelValue(), SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true);
+                           PixelValue constant_border_value = PixelValue(), SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
 
     // Inherited methods overridden:
     void run() override;
@@ -82,6 +84,7 @@ private:
     NEScaleKernel      _scale_kernel;   /**< Kernel to perform the scaling */
     NEFillBorderKernel _border_handler; /**< kernel to handle tensor borders */
     bool               _use_padding;    /**< Is padding used on the tensors */
+    bool               _align_corners;  /**< Align corners of input and output */
 };
-}
-#endif /*__ARM_COMPUTE_NESCALEIMAGE_H__ */
+} // namespace arm_compute
+#endif /*ARM_COMPUTE_NESCALEIMAGE_H */

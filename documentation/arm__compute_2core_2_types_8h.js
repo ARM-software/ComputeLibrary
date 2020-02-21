@@ -13,7 +13,7 @@ var arm__compute_2core_2_types_8h =
     [ "PriorBoxLayerInfo", "classarm__compute_1_1_prior_box_layer_info.xhtml", "classarm__compute_1_1_prior_box_layer_info" ],
     [ "DetectionOutputLayerInfo", "classarm__compute_1_1_detection_output_layer_info.xhtml", "classarm__compute_1_1_detection_output_layer_info" ],
     [ "DetectionPostProcessLayerInfo", "classarm__compute_1_1_detection_post_process_layer_info.xhtml", "classarm__compute_1_1_detection_post_process_layer_info" ],
-    [ "PoolingLayerInfo", "classarm__compute_1_1_pooling_layer_info.xhtml", "classarm__compute_1_1_pooling_layer_info" ],
+    [ "PoolingLayerInfo", "structarm__compute_1_1_pooling_layer_info.xhtml", "structarm__compute_1_1_pooling_layer_info" ],
     [ "ROIPoolingLayerInfo", "classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml", "classarm__compute_1_1_r_o_i_pooling_layer_info" ],
     [ "GenerateProposalsInfo", "classarm__compute_1_1_generate_proposals_info.xhtml", "classarm__compute_1_1_generate_proposals_info" ],
     [ "ComputeAnchorsInfo", "classarm__compute_1_1_compute_anchors_info.xhtml", "classarm__compute_1_1_compute_anchors_info" ],

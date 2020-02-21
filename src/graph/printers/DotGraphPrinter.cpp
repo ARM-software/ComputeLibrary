@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,11 +103,11 @@ void DotGraphVisitor::visit(NormalizationLayerNode &n)
 void DotGraphVisitor::visit(PoolingLayerNode &n)
 {
     std::stringstream ss;
-    ss << n.pooling_info().pool_type();
+    ss << n.pooling_info().pool_type;
     ss << R"( \n )";
-    ss << n.pooling_info().pool_size();
+    ss << n.pooling_info().pool_size;
     ss << R"( \n )";
-    ss << n.pooling_info().pad_stride_info();
+    ss << n.pooling_info().pad_stride_info;
     _info = ss.str();
 }
 

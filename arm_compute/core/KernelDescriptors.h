@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__
-#define __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__
+#ifndef ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H
+#define ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H
 
 #include "arm_compute/core/Types.h"
 
@@ -79,8 +79,43 @@ struct DWCWeightsKernelInfo
 /** Descriptor used by the softmax kernels */
 struct SoftmaxKernelInfo
 {
-    float beta{ 1.f };     /**< A scaling factor for the exponent with default value 1.0 */
-    bool  is_log{ false }; /**< Flag used to perform Log Softmax operation */
+    float    beta{ 1.f };                          /**< A scaling factor for the exponent with default value 1.0 */
+    bool     is_log{ false };                      /**< Flag used to perform Log Softmax operation */
+    DataType input_data_type{ DataType::UNKNOWN }; /**< Input tensor data type */
+};
+
+/** Descriptor used by the direct convolution layer output stage kernels */
+struct DirectConvolutionLayerOutputStageKernelInfo
+{
+    int32_t  result_fixedpoint_multiplier{ 0 };     /**< Result output stage multiplier used for quantizing */
+    int32_t  result_shift{ 0 };                     /**< Result output stage shift used for quantizing */
+    int32_t  result_offset_after_shift{ 0 };        /**< Result offset used for quantizing */
+    DataType output_data_type{ DataType::UNKNOWN }; /**< Output tensor data type to use if the output is not initialized */
+};
+
+struct InstanceNormalizationLayerKernelInfo
+{
+    /** Default constructor */
+    InstanceNormalizationLayerKernelInfo()
+        : InstanceNormalizationLayerKernelInfo(1.f, 0.f, 1e-12, true)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] gamma               The scale scalar value applied to the normalized tensor.
+     * @param[in] beta                The offset scalar value applied to the normalized tensor
+     * @param[in] epsilon             Lower bound value for the normalization.
+     * @param[in] use_mixed_precision Use mixed precision in case of FP16 execution.
+     */
+    InstanceNormalizationLayerKernelInfo(float gamma, float beta, float epsilon, bool use_mixed_precision)
+        : gamma(gamma), beta(beta), epsilon(epsilon), use_mixed_precision(use_mixed_precision)
+    {
+    }
+
+    float gamma;               /**< The scale scalar value applied to the normalized tensor. Defaults to 1.0 */
+    float beta;                /**< The offset scalar value applied to the normalized tensor. Defaults to 0.0 */
+    float epsilon;             /**< Lower bound value for the normalization. Defaults to 1e-12 */
+    bool  use_mixed_precision; /**< Use mixed precision in case of FP16 execution. Defaults to true */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__ */
+#endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */

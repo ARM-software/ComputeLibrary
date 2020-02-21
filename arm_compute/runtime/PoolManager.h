@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_POOLMANAGER_H__
-#define __ARM_COMPUTE_POOLMANAGER_H__
+#ifndef ARM_COMPUTE_POOLMANAGER_H
+#define ARM_COMPUTE_POOLMANAGER_H
 
 #include "arm_compute/runtime/IPoolManager.h"
 
@@ -67,4 +67,4 @@ private:
     mutable arm_compute::Mutex              _mtx;            /**< Mutex to control access to the queues */
 };
 } // arm_compute
-#endif /*__ARM_COMPUTE_POOLMANAGER_H__ */
+#endif /*ARM_COMPUTE_POOLMANAGER_H */

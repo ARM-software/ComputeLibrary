@@ -1,6 +1,7 @@
 var searchData=
 [
   ['_5fadd_5fbias',['_add_bias',['../classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a94e30ed1aed47fae8430cc4d3cd2b6c7',1,'arm_compute::CLGEMMMatrixMultiplyKernel']]],
+  ['_5falign_5fcorners',['_align_corners',['../classarm__compute_1_1_c_l_scale_kernel.xhtml#aa7aaaee824b8d5cc7c66fa6a7e0daece',1,'arm_compute::CLScaleKernel']]],
   ['_5faxis',['_axis',['../classarm__compute_1_1_c_l_reverse_kernel.xhtml#af40315449e153ebfdebe4393138dc74e',1,'arm_compute::CLReverseKernel']]],
   ['_5fbiases',['_biases',['../classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a95ba9da2ab49208dfa0d4642c8f7b23b',1,'arm_compute::CLDirectConvolutionLayerKernel']]],
   ['_5fborder_5fsize',['_border_size',['../classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4',1,'arm_compute::CLDirectConvolutionLayerKernel::_border_size()'],['../classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4',1,'arm_compute::CLPoolingLayerKernel::_border_size()']]],

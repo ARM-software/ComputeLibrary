@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -111,7 +111,7 @@ $(document).ready(function(){initNavTree('store_8h.xhtml','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2020 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1wrapper"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml">arm_compute::wrapper</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,8 +125,12 @@ Macros</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ae7943ea9c1f74dc72c62d4cc3966a459"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#ae7943ea9c1f74dc72c62d4cc3966a459">vstore</a> (uint8_t *ptr, uint8x8_t val)</td></tr>
 <tr class="separator:ae7943ea9c1f74dc72c62d4cc3966a459"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc33d70f4aa4ba22e19177febcf67e3e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#acc33d70f4aa4ba22e19177febcf67e3e">vstore</a> (uint8_t *ptr, uint8x8x2_t val)</td></tr>
+<tr class="separator:acc33d70f4aa4ba22e19177febcf67e3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a256a55d40b65c0a2a22b3f64045716be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#a256a55d40b65c0a2a22b3f64045716be">vstore</a> (int8_t *ptr, int8x8_t val)</td></tr>
 <tr class="separator:a256a55d40b65c0a2a22b3f64045716be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07e94869e50439dbe78060ec374939e7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#a07e94869e50439dbe78060ec374939e7">vstore</a> (int8_t *ptr, int8x8x2_t val)</td></tr>
+<tr class="separator:a07e94869e50439dbe78060ec374939e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2a18e2f73c6066ec4af6ff793dc854c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#ab2a18e2f73c6066ec4af6ff793dc854c">vstore</a> (uint16_t *ptr, uint16x4_t val)</td></tr>
 <tr class="separator:ab2a18e2f73c6066ec4af6ff793dc854c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acbd85567ac69618d6ac0fe06fb72af44"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1wrapper.xhtml#acbd85567ac69618d6ac0fe06fb72af44">vstore</a> (int16_t *ptr, int16x4_t val)</td></tr>
@@ -190,7 +194,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1wrapper.xhtml#a9d16581b2d731ab0217ba7bd77b573d8">vstore</a>(stype *ptr, vtype val)      \</div><div class="line">    {                                              \</div><div class="line">        prefix##_##postfix(ptr, val);              \</div><div class="line">    }</div><div class="ttc" id="namespacearm__compute_1_1wrapper_xhtml_a9d16581b2d731ab0217ba7bd77b573d8"><div class="ttname"><a href="namespacearm__compute_1_1wrapper.xhtml#a9d16581b2d731ab0217ba7bd77b573d8">arm_compute::wrapper::vstore</a></div><div class="ttdeci">void vstore(float *ptr, float32x4_t val)</div><div class="ttdef"><b>Definition:</b> <a href="store_8h_source.xhtml#l00060">store.h:60</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="namespacearm__compute_1_1wrapper.xhtml#a9d16581b2d731ab0217ba7bd77b573d8">vstore</a>(stype *ptr, vtype val)      \</div><div class="line">    {                                              \</div><div class="line">        prefix##_##postfix(ptr, val);              \</div><div class="line">    }</div><div class="ttc" id="namespacearm__compute_1_1wrapper_xhtml_a9d16581b2d731ab0217ba7bd77b573d8"><div class="ttname"><a href="namespacearm__compute_1_1wrapper.xhtml#a9d16581b2d731ab0217ba7bd77b573d8">arm_compute::wrapper::vstore</a></div><div class="ttdeci">void vstore(float *ptr, float32x4_t val)</div><div class="ttdef"><b>Definition:</b> <a href="store_8h_source.xhtml#l00062">store.h:62</a></div></div>
 </div><!-- fragment -->
 <p class="definition">Definition at line <a class="el" href="store_8h_source.xhtml#l00033">33</a> of file <a class="el" href="store_8h_source.xhtml">store.h</a>.</p>
 
@@ -202,7 +206,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_9eca3c725728e372597fcd0d17c1ea0f.xhtml">wrapper</a></li><li class="navelem"><a class="el" href="dir_36bd1941057d7130e210a25993eacc69.xhtml">intrinsics</a></li><li class="navelem"><a class="el" href="store_8h.xhtml">store.h</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:47 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:20 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

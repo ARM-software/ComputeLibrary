@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGAUSSIANPYRAMID_H__
-#define __ARM_COMPUTE_CLGAUSSIANPYRAMID_H__
+#ifndef ARM_COMPUTE_CLGAUSSIANPYRAMID_H
+#define ARM_COMPUTE_CLGAUSSIANPYRAMID_H
 
 #include "arm_compute/core/CL/kernels/CLGaussianPyramidKernel.h"
 
@@ -116,4 +116,4 @@ private:
     std::vector<CLScaleKernel> _scale_nearest;
 };
 }
-#endif /*__ARM_COMPUTE_CLGAUSSIANPYRAMID_H__ */
+#endif /*ARM_COMPUTE_CLGAUSSIANPYRAMID_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPIXELWISEMULTIPLICATIONKERNEL_H__
-#define __ARM_COMPUTE_CLPIXELWISEMULTIPLICATIONKERNEL_H__
+#ifndef ARM_COMPUTE_CLPIXELWISEMULTIPLICATIONKERNEL_H
+#define ARM_COMPUTE_CLPIXELWISEMULTIPLICATIONKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -48,7 +48,7 @@ public:
     CLPixelWiseMultiplicationKernel &operator=(CLPixelWiseMultiplicationKernel &&) = default;
     /** Initialise the kernel's input, output and border mode.
      *
-     * @param[in]  input1          An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
+     * @param[in]  input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in]  input2          An input tensor. Data types supported: same as @p input1.
      * @param[out] output          The output tensor, Data types supported: same as @p input1. Note: U8 requires both inputs to be U8.
      * @param[in]  scale           Scale to apply after multiplication.
@@ -60,7 +60,7 @@ public:
                    ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPixelWiseMultiplicationKernel
      *
-     * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
+     * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in] input2          An input tensor info. Data types supported: same as @p input1.
      * @param[in] output          The output tensor info, Data types supported: same as @p input1. Note: U8 requires both inputs to be U8.
      * @param[in] scale           Scale to apply after multiplication.
@@ -124,4 +124,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLPIXELWISEMULTIPLICATIONKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLPIXELWISEMULTIPLICATIONKERNEL_H */

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -113,15 +113,15 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a5367d66fa8e4648db3f690e9cfa7d498"><td class="memTemplParams" colspan="2">template&lt;typename Tin , typename Tout &gt; </td></tr>
-<tr class="memitem:a5367d66fa8e4648db3f690e9cfa7d498"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a5367d66fa8e4648db3f690e9cfa7d498">requantize_block_32</a> (const ARequantizeLayer32 &amp;qp, unsigned int width, unsigned int height, const Tin *input, unsigned int in_stride, Tout *output, unsigned int out_stride, const int32_t *row_bias, const int32_t *col_bias)</td></tr>
-<tr class="separator:a5367d66fa8e4648db3f690e9cfa7d498"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79d7971bf26ac0d4df7662a47d65d068"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a79d7971bf26ac0d4df7662a47d65d068"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a79d7971bf26ac0d4df7662a47d65d068">compute_row_sums</a> (const ARequantizeLayer32 &amp;qp, unsigned int width, unsigned int height, const T *input, unsigned int in_stride, int32_t *row_bias)</td></tr>
-<tr class="separator:a79d7971bf26ac0d4df7662a47d65d068"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0b4b7759cb0829cb2a54e73b1555a01"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:af0b4b7759cb0829cb2a54e73b1555a01"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#af0b4b7759cb0829cb2a54e73b1555a01">compute_col_sums</a> (const ARequantizeLayer32 &amp;qp, unsigned int width, unsigned int height, const T *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col)</td></tr>
-<tr class="separator:af0b4b7759cb0829cb2a54e73b1555a01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb9cd50b5b5a169f145d264c4111655e"><td class="memTemplParams" colspan="2">template&lt;typename Tin , typename Tout &gt; </td></tr>
+<tr class="memitem:afb9cd50b5b5a169f145d264c4111655e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#afb9cd50b5b5a169f145d264c4111655e">requantize_block_32</a> (const Requantize32 &amp;qp, unsigned int width, unsigned int height, const Tin *input, unsigned int in_stride, Tout *output, unsigned int out_stride, const int32_t *row_bias, const int32_t *col_bias)</td></tr>
+<tr class="separator:afb9cd50b5b5a169f145d264c4111655e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a283c57cffc3c8e60d00b41f10e4b7476"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a283c57cffc3c8e60d00b41f10e4b7476"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a283c57cffc3c8e60d00b41f10e4b7476">compute_row_sums</a> (const Requantize32 &amp;qp, unsigned int width, unsigned int height, const T *input, unsigned int in_stride, int32_t *row_bias)</td></tr>
+<tr class="separator:a283c57cffc3c8e60d00b41f10e4b7476"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f7c3bb1a6bbcb34dc0988ef61510c38"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a0f7c3bb1a6bbcb34dc0988ef61510c38"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a0f7c3bb1a6bbcb34dc0988ef61510c38">compute_col_sums</a> (const Requantize32 &amp;qp, unsigned int width, unsigned int height, const T *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col)</td></tr>
+<tr class="separator:a0f7c3bb1a6bbcb34dc0988ef61510c38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -129,7 +129,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_1ce938f580a6f304b99685e2c1dd19db.xhtml">kernels</a></li><li class="navelem"><a class="el" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="quantized_8hpp.xhtml">quantized.hpp</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:48 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GCTENSOR_H__
-#define __ARM_COMPUTE_GCTENSOR_H__
+#ifndef ARM_COMPUTE_GCTENSOR_H
+#define ARM_COMPUTE_GCTENSOR_H
 
 #include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensorAllocator.h"
@@ -103,4 +103,4 @@ private:
 /** OpenGL ES Image */
 using GCImage = GCTensor;
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_GCTENSOR_H__ */
+#endif /*ARM_COMPUTE_GCTENSOR_H */

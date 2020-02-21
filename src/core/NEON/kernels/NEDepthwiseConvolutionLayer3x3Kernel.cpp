@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,7 @@ public:
         const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
         const int          output_w        = output->info()->dimension(0);
         const int          output_h        = output->info()->dimension(1);
-        const int          delta_input     = detail::get_input_num_elems_processed<stridex>(num_elems_written_per_iteration);
+        const int          delta_input     = detail::get_input_num_elems_processed(num_elems_written_per_iteration, stridex);
         const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
         const unsigned int conv_pad_x      = conv_info.pad_left();
         const unsigned int conv_pad_y      = conv_info.pad_top();
@@ -107,8 +107,8 @@ public:
             {
                 auto in_top = reinterpret_cast<const T1 *>(input_ptr + (ih + 0) * input_stride_y);
                 auto in_mid = reinterpret_cast<const T1 *>(input_ptr + (ih + dilation.y()) * input_stride_y);
-                auto in_low = reinterpret_cast<const T1 *>(input_ptr + (ih + 2 * dilation.y()) * input_stride_y); //uint8
-                auto p_out  = reinterpret_cast<T2 *>(out.ptr() + oh * output_stride_y);                           //int32
+                auto in_low = reinterpret_cast<const T1 *>(input_ptr + (ih + 2 * dilation.y()) * input_stride_y); // uint8/int8
+                auto p_out  = reinterpret_cast<T2 *>(out.ptr() + oh * output_stride_y);                           // int32
 
                 for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration,
                     in_top += delta_input, in_mid += delta_input, in_low += delta_input,
@@ -116,12 +116,12 @@ public:
                 {
                     if(dilation == Size2D(1U, 1U))
                     {
-                        auto vres = detail::convolve_3x3<stridex>(in_top, in_mid, in_low, vw_r0, vw_r1, vw_r2, input_offset);
+                        auto vres = detail::convolve_3x3(in_top, in_mid, in_low, vw_r0, vw_r1, vw_r2, stridex, input_offset);
                         detail::store_results<stridex>(p_out, vres);
                     }
                     else
                     {
-                        auto vres = detail::convolve_3x3_dilation<stridex>(in_top, in_mid, in_low, vw_r0, vw_r1, vw_r2, dilation.x(), input_offset);
+                        auto vres = detail::convolve_3x3_dilation(in_top, in_mid, in_low, vw_r0, vw_r1, vw_r2, dilation.x(), stridex, input_offset);
                         detail::store_results<stridex>(p_out, vres);
                     }
                 }
@@ -156,7 +156,7 @@ inline void convolve_3x3(const Window &window, unsigned int num_elems_written_pe
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
     const DataLayout   data_layout = input->data_layout();
@@ -192,7 +192,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     // Get convolved dimensions
     const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
-    const DataType    output_dt    = (input->data_type() == DataType::QASYMM8) ? DataType::S32 : input->data_type();
+    const DataType    output_dt    = is_data_type_quantized_asymmetric(input->data_type()) ? DataType::S32 : input->data_type();
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_type(output_dt).set_quantization_info(output->quantization_info()));
@@ -209,6 +209,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     switch(input->data_type())
     {
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
             num_elems_read_per_iteration = 16 + 15 * (dilation.x() - 1);
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -263,6 +264,7 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const
     switch(input->info()->data_type())
     {
         case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
         case DataType::F32:
             _num_elems_written_per_iteration = 16 >> _conv_info.stride().first;
             break;
@@ -306,6 +308,9 @@ void NEDepthwiseConvolutionLayer3x3Kernel::run(const Window &window, const Threa
             break;
         case DataType::QASYMM8:
             convolve_3x3<uint8_t, int32_t>(window, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info, _depth_multiplier, _dilation);
+            break;
+        case DataType::QASYMM8_SIGNED:
+            convolve_3x3<int8_t, int32_t>(window, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info, _depth_multiplier, _dilation);
             break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");

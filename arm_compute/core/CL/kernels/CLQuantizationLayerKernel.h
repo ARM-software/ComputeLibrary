@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLQUANTIZATIONLAYERKERNEL_H__
-#define __ARM_COMPUTE_CLQUANTIZATIONLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLQUANTIZATIONLAYERKERNEL_H
+#define ARM_COMPUTE_CLQUANTIZATIONLAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -51,16 +51,16 @@ public:
     ~CLQuantizationLayerKernel() = default;
     /** Set the input, output.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32/F16.
-     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM16.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
      * @note Output auto initialization is not supported by this kernel
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLQuantizationLayerKernel
      *
-     * @param[in] input  Input tensor info. Data types supported: F32/F16.
-     * @param[in] output Destination tensor info with the same dimensions of input. Data types supported: QASYMM8/QASYMM16.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
+     * @param[in] output Destination tensor info with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
      * @return a status
      */
@@ -74,4 +74,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLQUANTIZATIONLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLQUANTIZATIONLAYERKERNEL_H */

@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NESTACKLAYERKERNEL_H__
-#define __ARM_COMPUTE_NESTACKLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NESTACKLAYERKERNEL_H
+#define ARM_COMPUTE_NESTACKLAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -56,7 +56,7 @@ public:
      *
      * @note Supported input tensor rank: up to 4
      *
-     * @param[in]  input       Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input       Input tensor. Data types supported: All
      * @param[in]  axis        The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
      * @param[in]  idx_input   Index of the input tensor in the list of tensors to stack.
      *                         All tensors in the list must have the same shape
@@ -69,7 +69,7 @@ public:
      *
      * @note Supported input tensor rank: up to 4
      *
-     * @param[in] input       Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input       Input tensor info. Data types supported: All
      * @param[in] axis        The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
      * @param[in] idx_input   Index of the input tensor in the list of tensors to stack
      *                        All tensors in the list must have the same shape
@@ -90,4 +90,4 @@ private:
     unsigned int   _idx_input;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NESTACKLAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_NESTACKLAYERKERNEL_H */

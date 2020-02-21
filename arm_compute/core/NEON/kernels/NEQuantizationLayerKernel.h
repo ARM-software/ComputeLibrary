@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__
-#define __ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H
+#define ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -84,7 +84,7 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    template <typename T>
+    template <typename TIn, typename TOut>
     void run_quantize_qasymm8(const Window &window);
     /** Function to apply QASYMM16 quantization on a tensor.
      *
@@ -99,4 +99,4 @@ private:
     QuantizationFunctionExecutorPtr _func;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H */

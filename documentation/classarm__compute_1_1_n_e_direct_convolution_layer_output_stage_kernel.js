@@ -4,7 +4,7 @@ var classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel =
     [ "NEDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#ac9bdca54a1108e75fc382b3ada46429e", null ],
     [ "NEDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#ac8b91f71cdcafc2a9fa40062ade2ea0a", null ],
     [ "~NEDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#a8f25d5c2ce83702200fc268fd9649426", null ],
-    [ "configure", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#a470bdfe5ac891c030b8d196574ba17ef", null ],
+    [ "configure", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#a0d94568d084cedcd32eda6cf0d7c9363", null ],
     [ "name", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#ab02c33a0e6c13a21c8b8ceed03fd8b6d", null ],
     [ "operator=", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#ac03d137048cbb1394dab3a761cc0357d", null ],

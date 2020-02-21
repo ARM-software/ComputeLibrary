@@ -24,6 +24,7 @@ var dir_9847dd9cb7a28e46201717fa7336cf62 =
     [ "gemm_native.hpp", "gemm__native_8hpp.xhtml", [
       [ "GemmNative", "classarm__gemm_1_1_gemm_native.xhtml", "classarm__gemm_1_1_gemm_native" ]
     ] ],
+    [ "gemm_qint8.cpp", "gemm__qint8_8cpp.xhtml", null ],
     [ "gemm_quint8.cpp", "gemm__quint8_8cpp.xhtml", null ],
     [ "gemm_uint16.cpp", "gemm__uint16_8cpp.xhtml", null ],
     [ "gemm_uint8.cpp", "gemm__uint8_8cpp.xhtml", null ],

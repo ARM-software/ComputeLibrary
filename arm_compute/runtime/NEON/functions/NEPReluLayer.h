@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEPRELULAYER_H__
-#define __ARM_COMPUTE_NEPRELULAYER_H__
+#ifndef ARM_COMPUTE_NEPRELULAYER_H
+#define ARM_COMPUTE_NEPRELULAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
@@ -40,14 +40,14 @@ class NEPReluLayer : public INESimpleFunction
 public:
     /** Set the input and output tensor.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  alpha  Source alpha tensor. Data types supported: same of @p input.
      * @param[out] output Destination tensor. Data type supported: same as @p input
      */
     void configure(const ITensor *input, const ITensor *alpha, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEPReluLayer
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] alpha  Source alpha tensor info. Data types supported: same of @p input.
      * @param[in] output Destination tensor info. Data type supported: same as @p input
      *
@@ -56,4 +56,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEPRELULAYER_H__ */
+#endif /* ARM_COMPUTE_NEPRELULAYER_H */

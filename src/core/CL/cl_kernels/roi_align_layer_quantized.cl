@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,16 +86,17 @@ inline DATA_TYPE roi_align_1x1(const Tensor3D *input, float region_start_x,
             const DATA_TYPE data3                 = *(__global DATA_TYPE *)tensor3D_offset(input, x_low, y_high, pz);
             const DATA_TYPE data4                 = *(__global DATA_TYPE *)tensor3D_offset(input, x_high, y_high, pz);
 #endif // defined(NHWC)
-            const float data1_f32 = dequantize_qasymm8(data1, OFFSET_IN, SCALE_IN);
-            const float data2_f32 = dequantize_qasymm8(data2, OFFSET_IN, SCALE_IN);
-            const float data3_f32 = dequantize_qasymm8(data3, OFFSET_IN, SCALE_IN);
-            const float data4_f32 = dequantize_qasymm8(data4, OFFSET_IN, SCALE_IN);
+
+            const float data1_f32 = DEQUANTIZE(data1, OFFSET_IN, SCALE_IN, DATA_TYPE, 1);
+            const float data2_f32 = DEQUANTIZE(data2, OFFSET_IN, SCALE_IN, DATA_TYPE, 1);
+            const float data3_f32 = DEQUANTIZE(data3, OFFSET_IN, SCALE_IN, DATA_TYPE, 1);
+            const float data4_f32 = DEQUANTIZE(data4, OFFSET_IN, SCALE_IN, DATA_TYPE, 1);
             sum += w1 * data1_f32 + w2 * data2_f32 + w3 * data3_f32 + w4 * data4_f32;
         }
     }
 
     const float res_f32 = sum / (grid_size_x * grid_size_y);
-    return quantize_qasymm8(res_f32, OFFSET_OUT, SCALE_OUT);
+    return QUANTIZE(res_f32, OFFSET_OUT, SCALE_OUT, DATA_TYPE, 1);
 }
 
 /** Performs a roi align function.

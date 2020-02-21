@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ Stream::Stream(size_t id, std::string name)
 
 void Stream::finalize(Target target, const GraphConfig &config)
 {
-    PassManager pm = create_default_pass_manager(target);
+    PassManager pm = create_default_pass_manager(target, config);
     _ctx.set_config(config);
     _manager.finalize_graph(_g, _ctx, pm, target);
 }

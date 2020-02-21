@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLHELPERS_H__
-#define __ARM_COMPUTE_CLHELPERS_H__
+#ifndef ARM_COMPUTE_CLHELPERS_H
+#define ARM_COMPUTE_CLHELPERS_H
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
@@ -66,6 +66,14 @@ std::string get_cl_promoted_type_from_data_type(const DataType &dt);
  */
 std::string get_cl_unsigned_type_from_element_size(size_t element_size);
 
+/** Translates the element size to an signed integer data type
+ *
+ * @param[in] element_size Size in bytes of an element.
+ *
+ * @return The string specifying the OpenCL type to be used.
+ */
+std::string get_cl_signed_type_from_element_size(size_t element_size);
+
 /** Translates a tensor data type to the appropriate OpenCL select type.
  *
  * @param[in] dt @ref DataType to be translated to OpenCL select type.
@@ -73,6 +81,14 @@ std::string get_cl_unsigned_type_from_element_size(size_t element_size);
  * @return The string specifying the OpenCL select type to be used.
  */
 std::string get_cl_select_type_from_data_type(const DataType &dt);
+
+/** Translates a tensor data type to the appropriate OpenCL dot8 accumulator type.
+ *
+ * @param[in] dt @ref DataType to be translated to OpenCL dot8 accumulator type.
+ *
+ * @return The string specifying the OpenCL dot8 accumulator type to be used.
+ */
+std::string get_cl_dot8_acc_type_from_data_type(const DataType &dt);
 
 /** Get the size of a data type in number of bits.
  *
@@ -182,5 +198,16 @@ bool preferred_dummy_work_items_support(const cl::Device &device);
  * @return An opencl kernel
  */
 cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts);
+
+/** Creates a suitable LWS hint object for parallel implementations. Sets the number of WG based on the input size.
+ *  If input width is smaller than 128 we can use fewer threads than 8.
+ *
+ * @param[in] input_dimension number of elements along the dimension to apply the parallellization
+ * @param[in] vector_size     size of the vector in OpenCL
+ *
+ * @return An LWS hint object
+ */
+cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size);
+
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLHELPERS_H__ */
+#endif /* ARM_COMPUTE_CLHELPERS_H */

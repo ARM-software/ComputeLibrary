@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_MLA_H__
-#define __ARM_COMPUTE_WRAPPER_MLA_H__
+#ifndef ARM_COMPUTE_WRAPPER_MLA_H
+#define ARM_COMPUTE_WRAPPER_MLA_H
 
 #include <arm_neon.h>
 
@@ -68,4 +68,4 @@ VMLA_IMPL2(float16x8_t, float16x8_t, vaddq, vmulq, f16)
 #undef VMLA_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_MLA_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_MLA_H */

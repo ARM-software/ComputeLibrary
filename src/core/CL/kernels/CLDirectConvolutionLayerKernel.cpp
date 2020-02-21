@@ -38,8 +38,8 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
@@ -69,7 +69,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     {
         const auto supported_data_layout = is_data_type_quantized(data_type) ? DataLayout::NCHW : DataLayout::NHWC;
         const auto error_message         = std::string("Only " + string_from_data_layout(supported_data_layout) + " layout is supported for 9x9 convolution with " + string_from_data_type(
-                                                           data_type) + " type");
+                                                           data_type)
+                                                       + " type");
 
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((supported_data_layout != data_layout), error_message.c_str());
     }
@@ -98,6 +99,17 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
+    if(is_data_type_quantized(data_type))
+    {
+        const UniformQuantizationInfo iqinfo = input->quantization_info().uniform();
+        const UniformQuantizationInfo wqinfo = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oqinfo = output->quantization_info().uniform();
+
+        float multiplier        = iqinfo.scale * wqinfo.scale / oqinfo.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
+    }
     return Status{};
 }
 
@@ -483,8 +495,6 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     }
     else
     {
-        const bool is_quantized_asymm = is_data_type_quantized_asymmetric(data_type);
-        build_options.add_option_if(is_quantized_asymm, std::string("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size)));
         build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
         build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));
         build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(channel_idx))));
@@ -508,36 +518,41 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
             }
         }
         build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(data_type)));
-        // Create kernel
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(is_quantized_asymm ? "direct_convolution_quantized" : kernel_name.str(),
-                                                                               build_options.options()));
+
+        if(is_data_type_quantized(data_type))
+        {
+            const UniformQuantizationInfo iqinfo = _input->info()->quantization_info().uniform();
+            const UniformQuantizationInfo wqinfo = _weights->info()->quantization_info().uniform();
+            const UniformQuantizationInfo oqinfo = _output->info()->quantization_info().uniform();
+
+            float multiplier        = iqinfo.scale * wqinfo.scale / oqinfo.scale;
+            int   output_multiplier = 0;
+            int   output_shift      = 0;
+            quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+            build_options.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+            build_options.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
+            build_options.add_option("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size));
+
+            // Create kernel
+            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("direct_convolution_quantized", build_options.options()));
+
+            // Set static kernel arguments
+            unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0) + 1;
+            _kernel.setArg(idx++, -iqinfo.offset);
+            _kernel.setArg(idx++, -wqinfo.offset);
+            _kernel.setArg(idx++, oqinfo.offset);
+        }
+        else
+        {
+            // Create kernel
+            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_options.options()));
+        }
     }
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, gpu_target);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
-
-    // Set static kernel arguments
-    if(is_data_type_quantized_asymmetric(data_type))
-    {
-        const UniformQuantizationInfo iqinfo = _input->info()->quantization_info().uniform();
-        const UniformQuantizationInfo wqinfo = _weights->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oqinfo = _output->info()->quantization_info().uniform();
-
-        int output_multiplier = 0;
-        int output_shift      = 0;
-
-        float multiplier = iqinfo.scale * wqinfo.scale / oqinfo.scale;
-        ARM_COMPUTE_THROW_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
-
-        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0) + 1;
-        _kernel.setArg(idx++, -iqinfo.offset);
-        _kernel.setArg(idx++, -wqinfo.offset);
-        _kernel.setArg(idx++, oqinfo.offset);
-        _kernel.setArg(idx++, output_multiplier);
-        _kernel.setArg(idx++, output_shift);
-    }
 
     // Set config_id for enabling LWS tuning
     _config_id = "direct_convolution_";
@@ -613,3 +628,4 @@ void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue 
     }
     while(window.slide_window_slice_3D(slice) && win_in.slide_window_slice_3D(slice_in));
 }
+} // namespace arm_compute

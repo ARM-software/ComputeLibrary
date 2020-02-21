@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_LUTALLOCATOR_H__
-#define __ARM_COMPUTE_LUTALLOCATOR_H__
+#ifndef ARM_COMPUTE_LUTALLOCATOR_H
+#define ARM_COMPUTE_LUTALLOCATOR_H
 
 #include "arm_compute/runtime/ILutAllocator.h"
 
@@ -58,4 +58,4 @@ private:
     mutable std::vector<uint8_t> _buffer; /**< CPU memory allocation. */
 };
 }
-#endif /* __ARM_COMPUTE_LUTALLOCATOR_H__ */
+#endif /* ARM_COMPUTE_LUTALLOCATOR_H */

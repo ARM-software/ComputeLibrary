@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_GET_LANE_H__
-#define __ARM_COMPUTE_WRAPPER_GET_LANE_H__
+#ifndef ARM_COMPUTE_WRAPPER_GET_LANE_H
+#define ARM_COMPUTE_WRAPPER_GET_LANE_H
 
 #include <arm_neon.h>
 
@@ -205,4 +205,4 @@ VGETQLANE_IMPL_8(float16_t, float16x8_t, f16)
 #undef VGETQLANE_IMPL_4
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_GET_LANE_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_GET_LANE_H */

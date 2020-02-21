@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,11 +90,11 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
     _output = output;
 
     // Check if is a quantized operation
-    bool is_quantized = is_data_type_quantized_asymmetric(_input0->info()->data_type());
+    const bool is_quantized = is_data_type_quantized_asymmetric(_input0->info()->data_type());
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option_if(!is_quantized, "-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
     build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input0->info()->dimension(0)));
     build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input0->info()->dimension(1)));
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H__
-#define __ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H__
+#ifndef ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H
+#define ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -67,13 +67,13 @@ class CLGEMMLowpMatrixAReductionKernel : public ICLGEMMLowpReductionKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_a          Input tensor. Data type supported: QASYMM8
+     * @param[in]  mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[out] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      */
     void configure(const ICLTensor *mtx_a, ICLTensor *vector_sum_row) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixAReductionKernel
      *
-     * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8
+     * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
      *
      * @return a status
@@ -94,13 +94,13 @@ class CLGEMMLowpMatrixBReductionKernel : public ICLGEMMLowpReductionKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in]  mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[out] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      */
     void configure(const ICLTensor *mtx_b, ICLTensor *vector_sum_col) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixBReductionKernel
      *
-     * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
      *
      * @return a status
@@ -111,4 +111,4 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H */

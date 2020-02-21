@@ -59,6 +59,7 @@ var dir_1ce938f580a6f304b99685e2c1dd19db =
     [ "NEGEMMLowpOffsetContributionKernel.cpp", "_n_e_g_e_m_m_lowp_offset_contribution_kernel_8cpp.xhtml", null ],
     [ "NEGEMMLowpOffsetContributionOutputStageKernel.cpp", "_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel_8cpp.xhtml", null ],
     [ "NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.cpp", "_n_e_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel_8cpp.xhtml", null ],
+    [ "NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.cpp", "_n_e_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel_8cpp.xhtml", null ],
     [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.cpp", "_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel_8cpp.xhtml", null ],
     [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.cpp", "_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel_8cpp.xhtml", null ],
     [ "NEGEMMLowpReductionKernel.cpp", "_n_e_g_e_m_m_lowp_reduction_kernel_8cpp.xhtml", null ],

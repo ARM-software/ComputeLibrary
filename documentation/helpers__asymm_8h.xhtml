@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -167,6 +167,8 @@ Macros</h2></td></tr>
 <tr class="separator:aa43fc359dea64362f3016384f4269845"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5483aefd5e07244661178bfd3f434448"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(a,  b,  size)&#160;&#160;&#160;<a class="el" href="softmax__layer__quantized_8cl.xhtml#a525a42d38133b1051b8924b456add4a1">asymm_mult</a>##size(a, b)</td></tr>
 <tr class="separator:a5483aefd5e07244661178bfd3f434448"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1e2d1a27e885c3840b9258f5416078d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#aa1e2d1a27e885c3840b9258f5416078d">ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE</a>(x,  quantized_multiplier,  left_shift,  size)&#160;&#160;&#160;<a class="el" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x *((<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(int, size))(1) &lt;&lt; (-left_shift)), quantized_multiplier, size)</td></tr>
+<tr class="separator:aa1e2d1a27e885c3840b9258f5416078d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86de0ffca367bfcf27a8ae5dd1fdef2d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a86de0ffca367bfcf27a8ae5dd1fdef2d">ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE</a>(x,  quantized_multiplier,  right_shift,  size)&#160;&#160;&#160;<a class="el" href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a>(<a class="el" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x, quantized_multiplier, size), right_shift, size)</td></tr>
 <tr class="separator:a86de0ffca367bfcf27a8ae5dd1fdef2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeebdcd88f4320931cd4a599ad1527e83"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#aeebdcd88f4320931cd4a599ad1527e83">ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL</a>(a,  size)&#160;&#160;&#160;asymm_exp_on_interval_between_negative_one_quarter_and_0_excl##size(a)</td></tr>
@@ -198,18 +200,61 @@ Functions</h2></td></tr>
 <tr class="memitem:afbec2094d42590b94e7eead93710411d"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#afbec2094d42590b94e7eead93710411d">dequantize_qasymm8</a> (uchar input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
 <tr class="memdesc:afbec2094d42590b94e7eead93710411d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a scalar value from 8-bit asymmetric to floating-point.  <a href="#afbec2094d42590b94e7eead93710411d">More...</a><br /></td></tr>
 <tr class="separator:afbec2094d42590b94e7eead93710411d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3dc07539dda26f6cd2dcdc08a222292d"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a3dc07539dda26f6cd2dcdc08a222292d">dequantize_qasymm8_signed</a> (char input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="memdesc:a3dc07539dda26f6cd2dcdc08a222292d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dequantize a scalar value from signed 8-bit asymmetric to floating-point.  <a href="#a3dc07539dda26f6cd2dcdc08a222292d">More...</a><br /></td></tr>
+<tr class="separator:a3dc07539dda26f6cd2dcdc08a222292d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdcd79880ad2122f402e423db5cbfc12"><td class="memItemLeft" align="right" valign="top">uchar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#afdcd79880ad2122f402e423db5cbfc12">quantize_uchar1</a> (float input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:afdcd79880ad2122f402e423db5cbfc12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a580997664d0abbd5218bb945693d2bc8"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a580997664d0abbd5218bb945693d2bc8">quantize_char1</a> (float input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a580997664d0abbd5218bb945693d2bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99762c72030fc4c734ae3aa2d35ce166"><td class="memItemLeft" align="right" valign="top">uint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a99762c72030fc4c734ae3aa2d35ce166">quantize_uint1</a> (float input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a99762c72030fc4c734ae3aa2d35ce166"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c770e1d8aa92b0e657ec0991c9aae88"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a3c770e1d8aa92b0e657ec0991c9aae88">quantize_int1</a> (float input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a3c770e1d8aa92b0e657ec0991c9aae88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada9b2f95d7b2bb6add361832cc0251df"><td class="memItemLeft" align="right" valign="top">uchar4&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#ada9b2f95d7b2bb6add361832cc0251df">quantize_uchar4</a> (float4 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
 <tr class="separator:ada9b2f95d7b2bb6add361832cc0251df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a933a58d69e18da275156602365d37fc9"><td class="memItemLeft" align="right" valign="top">ushort4&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a933a58d69e18da275156602365d37fc9">quantize_ushort4</a> (float4 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
 <tr class="separator:a933a58d69e18da275156602365d37fc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3c37581d89f0873428d938792254e30"><td class="memItemLeft" align="right" valign="top">short4&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#af3c37581d89f0873428d938792254e30">quantize_short4</a> (float4 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
 <tr class="separator:af3c37581d89f0873428d938792254e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23634278911241d201636e02e64a2523"><td class="memItemLeft" align="right" valign="top">uchar16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a23634278911241d201636e02e64a2523">quantize_uchar16</a> (float16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a23634278911241d201636e02e64a2523"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0950af41907c8d7c7b8f39fdf12145e1"><td class="memItemLeft" align="right" valign="top">char16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a0950af41907c8d7c7b8f39fdf12145e1">quantize_char16</a> (float16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a0950af41907c8d7c7b8f39fdf12145e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a869021a7dfce258c22cfc5a74ab402de"><td class="memItemLeft" align="right" valign="top">ushort16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a869021a7dfce258c22cfc5a74ab402de">quantize_ushort16</a> (float16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a869021a7dfce258c22cfc5a74ab402de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5ecf32f039d9becada79ec71d0fe49b"><td class="memItemLeft" align="right" valign="top">short16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#ad5ecf32f039d9becada79ec71d0fe49b">quantize_short16</a> (float16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:ad5ecf32f039d9becada79ec71d0fe49b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52149e12d683650129212d59169d05a4"><td class="memItemLeft" align="right" valign="top">uint16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a52149e12d683650129212d59169d05a4">quantize_uint16</a> (float16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a52149e12d683650129212d59169d05a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af01ebd15f22ff00d7f901ae3ceac0919"><td class="memItemLeft" align="right" valign="top">int16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#af01ebd15f22ff00d7f901ae3ceac0919">quantize_int16</a> (float16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:af01ebd15f22ff00d7f901ae3ceac0919"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bb6724728c01a91aa349dba2a4edcc1"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a3bb6724728c01a91aa349dba2a4edcc1">dequantize_uchar1</a> (uchar input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a3bb6724728c01a91aa349dba2a4edcc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaeaa2ffe6aff77e6cc0289406678b3d1"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#aaeaa2ffe6aff77e6cc0289406678b3d1">dequantize_char1</a> (char input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:aaeaa2ffe6aff77e6cc0289406678b3d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac870997ee5c5ea925bbe14f8b966f02e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#ac870997ee5c5ea925bbe14f8b966f02e">dequantize_uint1</a> (uint input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:ac870997ee5c5ea925bbe14f8b966f02e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a186295336a93a0072b3f72d89a74b5c8"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a186295336a93a0072b3f72d89a74b5c8">dequantize_int1</a> (int input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a186295336a93a0072b3f72d89a74b5c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a951a47a7d1115404d183490f2aa11e40"><td class="memItemLeft" align="right" valign="top">float4&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a951a47a7d1115404d183490f2aa11e40">dequantize_uchar4</a> (uchar4 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
 <tr class="separator:a951a47a7d1115404d183490f2aa11e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cdb515b62ef19a88f83d779240a02f4"><td class="memItemLeft" align="right" valign="top">float4&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a5cdb515b62ef19a88f83d779240a02f4">dequantize_ushort4</a> (ushort4 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
 <tr class="separator:a5cdb515b62ef19a88f83d779240a02f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b106b11a5f1e2e5b6a70e0afe1d9e5a"><td class="memItemLeft" align="right" valign="top">float4&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a2b106b11a5f1e2e5b6a70e0afe1d9e5a">dequantize_short4</a> (short4 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
 <tr class="separator:a2b106b11a5f1e2e5b6a70e0afe1d9e5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d9cac9c87356624d52b00c2e6950ec9"><td class="memItemLeft" align="right" valign="top">float16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a2d9cac9c87356624d52b00c2e6950ec9">dequantize_uchar16</a> (uchar16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a2d9cac9c87356624d52b00c2e6950ec9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52ea79d99e2dc0bf986efc815842847c"><td class="memItemLeft" align="right" valign="top">float16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a52ea79d99e2dc0bf986efc815842847c">dequantize_char16</a> (char16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a52ea79d99e2dc0bf986efc815842847c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad554c256832e2b36d187912753c83b14"><td class="memItemLeft" align="right" valign="top">float16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#ad554c256832e2b36d187912753c83b14">dequantize_ushort16</a> (ushort16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:ad554c256832e2b36d187912753c83b14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4cd9c562aa288b7c2b54c22a60fba04"><td class="memItemLeft" align="right" valign="top">float16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#ab4cd9c562aa288b7c2b54c22a60fba04">dequantize_short16</a> (short16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:ab4cd9c562aa288b7c2b54c22a60fba04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4b7d00ffe62fa241cd5c3519467e6ac"><td class="memItemLeft" align="right" valign="top">float16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#ac4b7d00ffe62fa241cd5c3519467e6ac">dequantize_uint16</a> (uint16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:ac4b7d00ffe62fa241cd5c3519467e6ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a103447344df3d2d2cfffc8ab997b6bcd"><td class="memItemLeft" align="right" valign="top">float16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#a103447344df3d2d2cfffc8ab997b6bcd">dequantize_int16</a> (int16 input, float <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, float scale)</td></tr>
+<tr class="separator:a103447344df3d2d2cfffc8ab997b6bcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf71dc45cca316d4fbde2665cb49919c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#aaf71dc45cca316d4fbde2665cb49919c">asymm_rounding_divide_by_POW2_1</a> (int x, int exponent)</td></tr>
 <tr class="separator:aaf71dc45cca316d4fbde2665cb49919c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1ed2d7eea67b60ff64ed119fe273e2b"><td class="memItemLeft" align="right" valign="top">int2&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="helpers__asymm_8h.xhtml#ae1ed2d7eea67b60ff64ed119fe273e2b">asymm_rounding_divide_by_POW2_2</a> (int2 x, int2 exponent)</td></tr>
@@ -338,7 +383,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00374">374</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00389">389</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -357,8 +402,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_exp_on_interval_between_negative_one_quarter_and_0_excl##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) a) \</div><div class="line">    {                                                                                                                               \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) constant_term     = 1895147668;                                                              \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) constant_1_over_3 = 715827883;                                                               \</div><div class="line">        const <span class="keywordtype">int</span> k_fractional_bits = 31;                                                                                           \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x = a + (1 &lt;&lt; (k_fractional_bits - 3));                                                                                     \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x2 = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x, x, size);                                                                                                \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x3 = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x2, x, size);                                                                                               \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x4 = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x2, x2, size);                                                                                              \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x4_over_4 = <a class="code" href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a>(x4, 2, size);                                                                     \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x4_over_24_plus_x3_over_6_plus_x2 = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>((x4_over_4 + x3), constant_1_over_3, size) + x2;                             \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x4_over_24_plus_x3_over_6_plus_x2_over_2 = <a class="code" href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a>(x4_over_24_plus_x3_over_6_plus_x2, 1, size);       \</div><div class="line">        return constant_term + <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(constant_term, x + x4_over_24_plus_x3_over_6_plus_x2_over_2, size);                       \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_a5483aefd5e07244661178bfd3f434448"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a></div><div class="ttdeci">#define ASYMM_MULT(a, b, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00371">helpers_asymm.h:371</a></div></div>
-<div class="ttc" id="helpers__asymm_8h_xhtml_aa43fc359dea64362f3016384f4269845"><div class="ttname"><a href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a></div><div class="ttdeci">#define ASYMM_ROUNDING_DIVIDE_BY_POW2(x, exponent, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00370">helpers_asymm.h:370</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_exp_on_interval_between_negative_one_quarter_and_0_excl##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) a) \</div><div class="line">    {                                                                                                                               \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) constant_term     = 1895147668;                                                              \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) constant_1_over_3 = 715827883;                                                               \</div><div class="line">        const <span class="keywordtype">int</span> k_fractional_bits = 31;                                                                                           \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x = a + (1 &lt;&lt; (k_fractional_bits - 3));                                                                                     \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x2 = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x, x, size);                                                                                                \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x3 = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x2, x, size);                                                                                               \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x4 = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x2, x2, size);                                                                                              \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x4_over_4 = <a class="code" href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a>(x4, 2, size);                                                                     \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x4_over_24_plus_x3_over_6_plus_x2 = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>((x4_over_4 + x3), constant_1_over_3, size) + x2;                             \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                                    \</div><div class="line">        x4_over_24_plus_x3_over_6_plus_x2_over_2 = <a class="code" href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a>(x4_over_24_plus_x3_over_6_plus_x2, 1, size);       \</div><div class="line">        return constant_term + <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(constant_term, x + x4_over_24_plus_x3_over_6_plus_x2_over_2, size);                       \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_a5483aefd5e07244661178bfd3f434448"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a></div><div class="ttdeci">#define ASYMM_MULT(a, b, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00384">helpers_asymm.h:384</a></div></div>
+<div class="ttc" id="helpers__asymm_8h_xhtml_aa43fc359dea64362f3016384f4269845"><div class="ttname"><a href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a></div><div class="ttdeci">#define ASYMM_ROUNDING_DIVIDE_BY_POW2(x, exponent, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00383">helpers_asymm.h:383</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00255">helpers.h:255</a></div></div>
 </div><!-- fragment -->
 <p>Calculates \( exp(x) \) for x in [-1/4, 0). </p>
@@ -370,7 +415,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result in fixed-point format Q0. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00147">147</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00160">160</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -406,7 +451,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00379">379</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00394">394</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -435,7 +480,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result in fixed-point format Q0. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00234">234</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00247">247</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -465,7 +510,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00377">377</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00392">392</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -496,7 +541,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Output vector with bits set when corresponding bit in <code>a</code> is non zero. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00206">206</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00219">219</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -526,7 +571,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00376">376</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00391">391</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -557,7 +602,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Output vector with bits set when corresponding bit in <code>a</code> is zero. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00191">191</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00204">204</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -593,7 +638,49 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00371">371</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00384">384</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="aa1e2d1a27e885c3840b9258f5416078d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1e2d1a27e885c3840b9258f5416078d">&#9670;&nbsp;</a></span>ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">quantized_multiplier, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">left_shift, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">size&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x *((<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(int, size))(1) &lt;&lt; (-left_shift)), quantized_multiplier, size)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00385">385</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -635,7 +722,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00372">372</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00387">387</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -668,7 +755,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Product of two fixed-point numbers. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00124">124</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00137">137</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -698,7 +785,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00380">380</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00395">395</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -717,9 +804,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_one_over_one_plus_x_for_x_in_0_1##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) a) \</div><div class="line">    {                                                                                                        \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) Q0_one = INT_MAX;                                                     \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) Q2_one = 1 &lt;&lt; (31 - 2);                                               \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                             \</div><div class="line">        half_denominator = <a class="code" href="helpers__asymm_8h.xhtml#ad47fa44c1566aa4678fe524478490612">ASYMM_ROUNDING_HALF_SUM</a>(a, Q0_one, size);                                         \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) Q2_48_over_17     = 1515870810;                                       \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) Q2_neg_32_over_17 = -1010580540;                                      \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                             \</div><div class="line">        x = Q2_48_over_17 + <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(half_denominator, Q2_neg_32_over_17, size);                           \</div><div class="line">        for(<span class="keywordtype">int</span> i = 0; i &lt; 3; i++)                                                                           \</div><div class="line">        {                                                                                                    \</div><div class="line">            VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                         \</div><div class="line">            half_denominator_times_x = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(half_denominator, x, size);                                \</div><div class="line">            VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                         \</div><div class="line">            one_minus_half_denominator_times_x = Q2_one - half_denominator_times_x;                          \</div><div class="line">            VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                         \</div><div class="line">            tmp = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x, one_minus_half_denominator_times_x, size);                                   \</div><div class="line">            x   = x + <a class="code" href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a>(tmp, 2, size);                                  \</div><div class="line">        }                                                                                                    \</div><div class="line">        return <a class="code" href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a>(x, 1, size);                                           \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_a5483aefd5e07244661178bfd3f434448"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a></div><div class="ttdeci">#define ASYMM_MULT(a, b, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00371">helpers_asymm.h:371</a></div></div>
-<div class="ttc" id="helpers__asymm_8h_xhtml_a4cc3ff3a2eeb5f5e9d6743e08f632928"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a></div><div class="ttdeci">#define ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(x, exponent, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00381">helpers_asymm.h:381</a></div></div>
-<div class="ttc" id="helpers__asymm_8h_xhtml_ad47fa44c1566aa4678fe524478490612"><div class="ttname"><a href="helpers__asymm_8h.xhtml#ad47fa44c1566aa4678fe524478490612">ASYMM_ROUNDING_HALF_SUM</a></div><div class="ttdeci">#define ASYMM_ROUNDING_HALF_SUM(a, b, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00382">helpers_asymm.h:382</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_one_over_one_plus_x_for_x_in_0_1##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) a) \</div><div class="line">    {                                                                                                        \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) Q0_one = INT_MAX;                                                     \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) Q2_one = 1 &lt;&lt; (31 - 2);                                               \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                             \</div><div class="line">        half_denominator = <a class="code" href="helpers__asymm_8h.xhtml#ad47fa44c1566aa4678fe524478490612">ASYMM_ROUNDING_HALF_SUM</a>(a, Q0_one, size);                                         \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) Q2_48_over_17     = 1515870810;                                       \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) Q2_neg_32_over_17 = -1010580540;                                      \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                             \</div><div class="line">        x = Q2_48_over_17 + <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(half_denominator, Q2_neg_32_over_17, size);                           \</div><div class="line">        for(<span class="keywordtype">int</span> i = 0; i &lt; 3; i++)                                                                           \</div><div class="line">        {                                                                                                    \</div><div class="line">            VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                         \</div><div class="line">            half_denominator_times_x = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(half_denominator, x, size);                                \</div><div class="line">            VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                         \</div><div class="line">            one_minus_half_denominator_times_x = Q2_one - half_denominator_times_x;                          \</div><div class="line">            VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                         \</div><div class="line">            tmp = <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(x, one_minus_half_denominator_times_x, size);                                   \</div><div class="line">            x   = x + <a class="code" href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a>(tmp, 2, size);                                  \</div><div class="line">        }                                                                                                    \</div><div class="line">        return <a class="code" href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a>(x, 1, size);                                           \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_a5483aefd5e07244661178bfd3f434448"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a></div><div class="ttdeci">#define ASYMM_MULT(a, b, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00384">helpers_asymm.h:384</a></div></div>
+<div class="ttc" id="helpers__asymm_8h_xhtml_a4cc3ff3a2eeb5f5e9d6743e08f632928"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a></div><div class="ttdeci">#define ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(x, exponent, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00396">helpers_asymm.h:396</a></div></div>
+<div class="ttc" id="helpers__asymm_8h_xhtml_ad47fa44c1566aa4678fe524478490612"><div class="ttname"><a href="helpers__asymm_8h.xhtml#ad47fa44c1566aa4678fe524478490612">ASYMM_ROUNDING_HALF_SUM</a></div><div class="ttdeci">#define ASYMM_ROUNDING_HALF_SUM(a, b, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00397">helpers_asymm.h:397</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00255">helpers.h:255</a></div></div>
 </div><!-- fragment -->
 <p>Calculates \( 1 / (1 + x) \) for x in (0, 1). </p>
@@ -731,7 +818,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result in fixed-point format Q0. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00328">328</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00341">341</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -773,7 +860,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00383">383</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00398">398</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -792,7 +879,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) <a class="code" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a>##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) value, <span class="keywordtype">int</span> src_integer_bits, <span class="keywordtype">int</span> dst_integer_bits) \</div><div class="line">    {                                                                                                                               \</div><div class="line">        int exponent = src_integer_bits - dst_integer_bits;                                                                         \</div><div class="line">        return <a class="code" href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a>(value, exponent, size);                                                       \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_a4cc3ff3a2eeb5f5e9d6743e08f632928"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a></div><div class="ttdeci">#define ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(x, exponent, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00381">helpers_asymm.h:381</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) <a class="code" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a>##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) value, <span class="keywordtype">int</span> src_integer_bits, <span class="keywordtype">int</span> dst_integer_bits) \</div><div class="line">    {                                                                                                                               \</div><div class="line">        int exponent = src_integer_bits - dst_integer_bits;                                                                         \</div><div class="line">        return <a class="code" href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a>(value, exponent, size);                                                       \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_a4cc3ff3a2eeb5f5e9d6743e08f632928"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">ASYMM_SATURATING_ROUNDING_MULT_BY_POW2</a></div><div class="ttdeci">#define ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(x, exponent, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00396">helpers_asymm.h:396</a></div></div>
 <div class="ttc" id="softmax__layer__quantized_8cl_xhtml_ad57ea340cdcfeb2e1375b70c3ae59bae"><div class="ttname"><a href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a></div><div class="ttdeci">#define asymm_rescale(value, src_integer_bits, dst_integer_bits)</div><div class="ttdef"><b>Definition:</b> <a href="softmax__layer__quantized_8cl_source.xhtml#l00059">softmax_layer_quantized.cl:59</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00255">helpers.h:255</a></div></div>
 </div><!-- fragment -->
@@ -805,7 +892,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Rescaled value. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00358">358</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00371">371</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -841,7 +928,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00370">370</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00383">383</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -873,7 +960,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Correctly-rounded-to-nearest division by a power-of-two. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00103">103</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00116">116</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -909,7 +996,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00382">382</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00397">397</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -929,7 +1016,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_rounding_half_sum##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) a, <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa76b4a6e74940dabc5b7fc6b2dab3545">b</a>) \</div><div class="line">    {                                                                                                                     \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">long</span>, size)                                                                                         \</div><div class="line">        a64 = convert_long##size(a);                                                                                      \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">long</span>, size)                                                                                         \</div><div class="line">        b64 = convert_long##size(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa76b4a6e74940dabc5b7fc6b2dab3545">b</a>);                                                                                      \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">long</span>, size)                                                                                         \</div><div class="line">        sum = a64 + b64;                                                                                                  \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">long</span>, size) one       = 1;                                                                    \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">long</span>, size) minus_one = -1;                                                                   \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">long</span>, size)                                                                                         \</div><div class="line">        sign = <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#af77145fbdc6b0c8931148f5597d9de53">select</a>(minus_one, one, <a class="code" href="reduction__operation_8cl.xhtml#ab0df00f5333da51860deb93deb44a782">sum</a> &gt;= 0);                                                                          \</div><div class="line">        return convert_int##size((<a class="code" href="reduction__operation_8cl.xhtml#ab0df00f5333da51860deb93deb44a782">sum</a> + sign) / 2);                                                                       \</div><div class="line">    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_aa76b4a6e74940dabc5b7fc6b2dab3545"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#aa76b4a6e74940dabc5b7fc6b2dab3545">arm_compute::test::validation::b</a></div><div class="ttdeci">SimpleTensor&lt; float &gt; b</div><div class="ttdef"><b>Definition:</b> <a href="_c_p_p_2_d_f_t_8cpp_source.xhtml#l00157">DFT.cpp:157</a></div></div>
-<div class="ttc" id="reduction__operation_8cl_xhtml_ab0df00f5333da51860deb93deb44a782"><div class="ttname"><a href="reduction__operation_8cl.xhtml#ab0df00f5333da51860deb93deb44a782">sum</a></div><div class="ttdeci">DATA_TYPE sum(__global const DATA_TYPE *input)</div><div class="ttdoc">Calculate sum of a vector.</div><div class="ttdef"><b>Definition:</b> <a href="reduction__operation_8cl_source.xhtml#l00065">reduction_operation.cl:65</a></div></div>
+<div class="ttc" id="reduction__operation_8cl_xhtml_ab0df00f5333da51860deb93deb44a782"><div class="ttname"><a href="reduction__operation_8cl.xhtml#ab0df00f5333da51860deb93deb44a782">sum</a></div><div class="ttdeci">DATA_TYPE sum(__global const DATA_TYPE *input)</div><div class="ttdoc">Calculate sum of a vector.</div><div class="ttdef"><b>Definition:</b> <a href="reduction__operation_8cl_source.xhtml#l00066">reduction_operation.cl:66</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_af77145fbdc6b0c8931148f5597d9de53"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#af77145fbdc6b0c8931148f5597d9de53">arm_compute::test::validation::select</a></div><div class="ttdeci">CLSelect select</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_select_8cpp_source.xhtml#l00164">Select.cpp:164</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00255">helpers.h:255</a></div></div>
 </div><!-- fragment -->
@@ -943,7 +1030,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>(a+b)/2, rounded to the nearest integer. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00306">306</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00319">319</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -979,7 +1066,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00381">381</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00396">396</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -998,9 +1085,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_saturating_rounding_mult_by_pow2##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) x, <span class="keywordtype">int</span> exponent) \</div><div class="line">    {                                                                                                                      \</div><div class="line">        if(exponent &lt; 0)                                                                                                   \</div><div class="line">        {                                                                                                                  \</div><div class="line">            return <a class="code" href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a>(x, -exponent, size);                                                      \</div><div class="line">        }                                                                                                                  \</div><div class="line">        \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) min = INT_MIN;                                                                      \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) max = INT_MAX;                                                                      \</div><div class="line">        int <a class="code" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6cae310822a46019ba25a00ddb0f7e62">threshold</a> = ((1 &lt;&lt; (31 - exponent)) - 1);                                                                      \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                           \</div><div class="line">        positive_mask = <a class="code" href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a>(x &gt; <a class="code" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6cae310822a46019ba25a00ddb0f7e62">threshold</a>, size);                                                       \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                           \</div><div class="line">        negative_mask = <a class="code" href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a>(x &lt; -<a class="code" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6cae310822a46019ba25a00ddb0f7e62">threshold</a>, size);                                                      \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                           \</div><div class="line">        result = x &lt;&lt; exponent;                                                                                            \</div><div class="line">        result = <a class="code" href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a>(positive_mask, max, result, size);                                                \</div><div class="line">        result = <a class="code" href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a>(negative_mask, min, result, size);                                                \</div><div class="line">        return result;                                                                                                     \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_aa43fc359dea64362f3016384f4269845"><div class="ttname"><a href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a></div><div class="ttdeci">#define ASYMM_ROUNDING_DIVIDE_BY_POW2(x, exponent, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00370">helpers_asymm.h:370</a></div></div>
-<div class="ttc" id="helpers__asymm_8h_xhtml_af1d5450c9c4c13a6b7aa52af197b54b2"><div class="ttname"><a href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a></div><div class="ttdeci">#define ASYMM_MASK_IF_NON_ZERO(a, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00377">helpers_asymm.h:377</a></div></div>
-<div class="ttc" id="helpers__asymm_8h_xhtml_a9bc08a8c1833c5e6055ad6665e3ccf12"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a></div><div class="ttdeci">#define ASYMM_SELECT_USING_MASK(if_mask, then_val, else_val, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00375">helpers_asymm.h:375</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_saturating_rounding_mult_by_pow2##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) x, <span class="keywordtype">int</span> exponent) \</div><div class="line">    {                                                                                                                      \</div><div class="line">        if(exponent &lt; 0)                                                                                                   \</div><div class="line">        {                                                                                                                  \</div><div class="line">            return <a class="code" href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a>(x, -exponent, size);                                                      \</div><div class="line">        }                                                                                                                  \</div><div class="line">        \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) min = INT_MIN;                                                                      \</div><div class="line">        const <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) max = INT_MAX;                                                                      \</div><div class="line">        int <a class="code" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6cae310822a46019ba25a00ddb0f7e62">threshold</a> = ((1 &lt;&lt; (31 - exponent)) - 1);                                                                      \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                           \</div><div class="line">        positive_mask = <a class="code" href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a>(x &gt; <a class="code" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6cae310822a46019ba25a00ddb0f7e62">threshold</a>, size);                                                       \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                           \</div><div class="line">        negative_mask = <a class="code" href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a>(x &lt; -<a class="code" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6cae310822a46019ba25a00ddb0f7e62">threshold</a>, size);                                                      \</div><div class="line">        VEC_DATA_TYPE(<span class="keywordtype">int</span>, size)                                                                                           \</div><div class="line">        result = x &lt;&lt; exponent;                                                                                            \</div><div class="line">        result = <a class="code" href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a>(positive_mask, max, result, size);                                                \</div><div class="line">        result = <a class="code" href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a>(negative_mask, min, result, size);                                                \</div><div class="line">        return result;                                                                                                     \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_aa43fc359dea64362f3016384f4269845"><div class="ttname"><a href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">ASYMM_ROUNDING_DIVIDE_BY_POW2</a></div><div class="ttdeci">#define ASYMM_ROUNDING_DIVIDE_BY_POW2(x, exponent, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00383">helpers_asymm.h:383</a></div></div>
+<div class="ttc" id="helpers__asymm_8h_xhtml_af1d5450c9c4c13a6b7aa52af197b54b2"><div class="ttname"><a href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a></div><div class="ttdeci">#define ASYMM_MASK_IF_NON_ZERO(a, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00392">helpers_asymm.h:392</a></div></div>
+<div class="ttc" id="helpers__asymm_8h_xhtml_a9bc08a8c1833c5e6055ad6665e3ccf12"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a></div><div class="ttdeci">#define ASYMM_SELECT_USING_MASK(if_mask, then_val, else_val, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00390">helpers_asymm.h:390</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_1_1reference_xhtml_a6cae310822a46019ba25a00ddb0f7e62"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6cae310822a46019ba25a00ddb0f7e62">arm_compute::test::validation::reference::threshold</a></div><div class="ttdeci">SimpleTensor&lt; T &gt; threshold(const SimpleTensor&lt; T &gt; &amp;src, T threshold, T false_value, T true_value, ThresholdType type, T upper)</div><div class="ttdef"><b>Definition:</b> <a href="reference_2_threshold_8cpp_source.xhtml#l00035">Threshold.cpp:35</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00255">helpers.h:255</a></div></div>
 </div><!-- fragment -->
@@ -1013,7 +1100,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Arithmetic left or right shift. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00277">277</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00290">290</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1055,7 +1142,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00375">375</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00390">390</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1086,7 +1173,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result contaning bits from <code>then_val</code> or from <code>else_val</code> depending on corresponding bit in <code>if_mask</code> is set or not. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00178">178</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00191">191</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1204,7 +1291,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00368">368</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00381">381</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1233,10 +1320,10 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">float</span>, size) dequantize_##<a class="code" href="namespace_gemm_tuner.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">type</a>##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="namespace_gemm_tuner.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">type</a>, size) <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, <span class="keywordtype">float</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, <span class="keywordtype">float</span> <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">scale</a>) \</div><div class="line">    {                                                                                                                     \</div><div class="line">        return (<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">CONVERT</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">float</span>, 4)) - <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>) * <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">scale</a>;                                                \</div><div class="line">    }</div><div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">helpers.h:510</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">float</span>, size) dequantize_##<a class="code" href="namespace_gemm_tuner.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">type</a>##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="namespace_gemm_tuner.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">type</a>, size) <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, <span class="keywordtype">float</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>, <span class="keywordtype">float</span> <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">scale</a>) \</div><div class="line">    {                                                                                                                     \</div><div class="line">        return (<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">CONVERT</a>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">float</span>, size)) - <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>) * <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">scale</a>;                                             \</div><div class="line">    }</div><div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">helpers.h:510</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_aa8d95ba04fc73845abc6045952cae5be"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">CONVERT</a></div><div class="ttdeci">#define CONVERT(x, type)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00261">helpers.h:261</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00317">PixelWiseMultiplication.cpp:317</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00375">PixelWiseMultiplication.cpp:375</a></div></div>
 <div class="ttc" id="namespace_gemm_tuner_xhtml_a7aead736a07eaf25623ad7bfa1f0ee2d"><div class="ttname"><a href="namespace_gemm_tuner.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">GemmTuner.type</a></div><div class="ttdeci">type</div><div class="ttdef"><b>Definition:</b> <a href="_gemm_tuner_8py_source.xhtml#l00527">GemmTuner.py:527</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00255">helpers.h:255</a></div></div>
 </div><!-- fragment -->
@@ -1250,7 +1337,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>dequantized values in floating point </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00091">91</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00104">104</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1298,7 +1385,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00367">367</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00380">380</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1358,7 +1445,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00378">378</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00393">393</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1377,12 +1464,12 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) exp_barrel_shifter##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) result, <span class="keywordtype">int</span> exponent, <span class="keywordtype">int</span> fp_multiplier, <span class="keywordtype">int</span> k_integer_bits, <span class="keywordtype">int</span> k_fractional_bits, <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) remainder) \</div><div class="line">    {                                                                                                                                                                                                         \</div><div class="line">        if(k_integer_bits &gt; exponent)                                                                                                                                                                         \</div><div class="line">        {                                                                                                                                                                                                     \</div><div class="line">            const <span class="keywordtype">int</span> k_shift_amount = k_integer_bits &gt; exponent ? k_fractional_bits + exponent : 0;                                                                                                          \</div><div class="line">            return <a class="code" href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a>(                                                                                                                                                                   \</div><div class="line">                    <a class="code" href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a>(remainder &amp; (1 &lt;&lt; k_shift_amount), size),                                                                                                                              \</div><div class="line">                    <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(result, fp_multiplier, size), result, size);                                                                                                                                       \</div><div class="line">        }                                                                                                                                                                                                     \</div><div class="line">        \</div><div class="line">        return result;                                                                                                                                                                                        \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_a5483aefd5e07244661178bfd3f434448"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a></div><div class="ttdeci">#define ASYMM_MULT(a, b, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00371">helpers_asymm.h:371</a></div></div>
-<div class="ttc" id="helpers__asymm_8h_xhtml_af1d5450c9c4c13a6b7aa52af197b54b2"><div class="ttname"><a href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a></div><div class="ttdeci">#define ASYMM_MASK_IF_NON_ZERO(a, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00377">helpers_asymm.h:377</a></div></div>
-<div class="ttc" id="helpers__asymm_8h_xhtml_a9bc08a8c1833c5e6055ad6665e3ccf12"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a></div><div class="ttdeci">#define ASYMM_SELECT_USING_MASK(if_mask, then_val, else_val, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00375">helpers_asymm.h:375</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) exp_barrel_shifter##size(<a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) result, <span class="keywordtype">int</span> exponent, <span class="keywordtype">int</span> fp_multiplier, <span class="keywordtype">int</span> k_integer_bits, <span class="keywordtype">int</span> k_fractional_bits, <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) remainder) \</div><div class="line">    {                                                                                                                                                                                                         \</div><div class="line">        if(k_integer_bits &gt; exponent)                                                                                                                                                                         \</div><div class="line">        {                                                                                                                                                                                                     \</div><div class="line">            const <span class="keywordtype">int</span> k_shift_amount = k_integer_bits &gt; exponent ? k_fractional_bits + exponent : 0;                                                                                                          \</div><div class="line">            return <a class="code" href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a>(                                                                                                                                                                   \</div><div class="line">                    <a class="code" href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a>(remainder &amp; (1 &lt;&lt; k_shift_amount), size),                                                                                                                              \</div><div class="line">                    <a class="code" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a>(result, fp_multiplier, size), result, size);                                                                                                                                       \</div><div class="line">        }                                                                                                                                                                                                     \</div><div class="line">        \</div><div class="line">        return result;                                                                                                                                                                                        \</div><div class="line">    }</div><div class="ttc" id="helpers__asymm_8h_xhtml_a5483aefd5e07244661178bfd3f434448"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">ASYMM_MULT</a></div><div class="ttdeci">#define ASYMM_MULT(a, b, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00384">helpers_asymm.h:384</a></div></div>
+<div class="ttc" id="helpers__asymm_8h_xhtml_af1d5450c9c4c13a6b7aa52af197b54b2"><div class="ttname"><a href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">ASYMM_MASK_IF_NON_ZERO</a></div><div class="ttdeci">#define ASYMM_MASK_IF_NON_ZERO(a, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00392">helpers_asymm.h:392</a></div></div>
+<div class="ttc" id="helpers__asymm_8h_xhtml_a9bc08a8c1833c5e6055ad6665e3ccf12"><div class="ttname"><a href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">ASYMM_SELECT_USING_MASK</a></div><div class="ttdeci">#define ASYMM_SELECT_USING_MASK(if_mask, then_val, else_val, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00390">helpers_asymm.h:390</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00255">helpers.h:255</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00214">214</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00227">227</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1430,7 +1517,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00366">366</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00379">379</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1463,7 +1550,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="direct__convolution1x1_8cl_xhtml_a1f15728672380ade7a238f5e783d54d2"><div class="ttname"><a href="direct__convolution1x1_8cl.xhtml#a1f15728672380ade7a238f5e783d54d2">CONVERT_SAT</a></div><div class="ttdeci">#define CONVERT_SAT(a, b)</div><div class="ttdef"><b>Definition:</b> <a href="direct__convolution1x1_8cl_source.xhtml#l00030">direct_convolution1x1.cl:30</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
 <div class="ttc" id="helpers__asymm_8h_xhtml_ae41349ddba7d47794bba4d2fcf659872"><div class="ttname"><a href="helpers__asymm_8h.xhtml#ae41349ddba7d47794bba4d2fcf659872">CONVERT_DOWN_RTE</a></div><div class="ttdeci">#define CONVERT_DOWN_RTE(x, type)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00037">helpers_asymm.h:37</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00317">PixelWiseMultiplication.cpp:317</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00375">PixelWiseMultiplication.cpp:375</a></div></div>
 <div class="ttc" id="namespace_gemm_tuner_xhtml_a7aead736a07eaf25623ad7bfa1f0ee2d"><div class="ttname"><a href="namespace_gemm_tuner.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">GemmTuner.type</a></div><div class="ttdeci">type</div><div class="ttdef"><b>Definition:</b> <a href="_gemm_tuner_8py_source.xhtml#l00527">GemmTuner.py:527</a></div></div>
 <div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00255">helpers.h:255</a></div></div>
 </div><!-- fragment -->
@@ -1477,7 +1564,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>quantized values </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00074">74</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00087">87</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1525,7 +1612,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00365">365</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00378">378</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1554,7 +1641,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00408">408</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00443">443</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1582,7 +1669,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00405">405</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00440">440</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1610,7 +1697,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00406">406</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00441">441</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1638,7 +1725,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00407">407</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00442">442</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1676,7 +1763,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00433">433</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00468">468</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1714,7 +1801,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00430">430</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00465">465</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1752,7 +1839,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00431">431</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00466">466</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1790,7 +1877,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00432">432</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00467">467</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1818,7 +1905,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00423">423</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00458">458</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1846,7 +1933,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00420">420</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00455">455</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1874,7 +1961,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00421">421</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00456">456</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1902,7 +1989,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00422">422</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00457">457</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1930,7 +2017,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00418">418</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00453">453</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1958,7 +2045,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00415">415</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00450">450</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1986,7 +2073,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00416">416</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00451">451</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2014,7 +2101,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00417">417</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00452">452</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2052,7 +2139,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00399">399</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00434">434</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2090,7 +2177,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00403">403</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00438">438</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2128,7 +2215,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00400">400</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00435">435</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2166,7 +2253,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00401">401</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00436">436</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2204,7 +2291,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00402">402</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00437">437</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2232,7 +2319,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00448">448</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00483">483</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2260,7 +2347,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00445">445</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00480">480</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2288,7 +2375,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00446">446</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00481">481</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2316,7 +2403,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00447">447</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00482">482</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2360,7 +2447,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00453">453</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00488">488</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2404,7 +2491,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00450">450</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00485">485</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2448,7 +2535,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00451">451</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00486">486</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2492,7 +2579,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00452">452</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00487">487</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2530,7 +2617,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00393">393</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00428">428</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2568,7 +2655,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00397">397</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00432">432</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2606,7 +2693,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00394">394</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00429">429</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2644,7 +2731,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00395">395</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00430">430</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2682,7 +2769,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00396">396</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00431">431</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2720,7 +2807,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00443">443</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00478">478</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2758,7 +2845,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00440">440</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00475">475</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2796,7 +2883,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00441">441</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00476">476</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2834,7 +2921,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00442">442</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00477">477</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2872,7 +2959,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00438">438</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00473">473</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2910,7 +2997,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00435">435</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00470">470</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2948,7 +3035,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00436">436</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00471">471</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2986,7 +3073,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00437">437</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00472">472</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3030,7 +3117,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00413">413</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00448">448</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3074,7 +3161,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00410">410</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00445">445</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3118,7 +3205,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00411">411</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00446">446</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3162,7 +3249,183 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00412">412</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00447">447</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="aaeaa2ffe6aff77e6cc0289406678b3d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaeaa2ffe6aff77e6cc0289406678b3d1">&#9670;&nbsp;</a></span>dequantize_char1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float dequantize_char1 </td>
+          <td>(</td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00415">415</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a52ea79d99e2dc0bf986efc815842847c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52ea79d99e2dc0bf986efc815842847c">&#9670;&nbsp;</a></span>dequantize_char16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float16 dequantize_char16 </td>
+          <td>(</td>
+          <td class="paramtype">char16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00422">422</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a186295336a93a0072b3f72d89a74b5c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a186295336a93a0072b3f72d89a74b5c8">&#9670;&nbsp;</a></span>dequantize_int1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float dequantize_int1 </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00417">417</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a103447344df3d2d2cfffc8ab997b6bcd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a103447344df3d2d2cfffc8ab997b6bcd">&#9670;&nbsp;</a></span>dequantize_int16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float16 dequantize_int16 </td>
+          <td>(</td>
+          <td class="paramtype">int16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00426">426</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3220,9 +3483,113 @@ Functions</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00062">62</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keywordflow">return</span> ((<span class="keywordtype">float</span>)<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a> - <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>) * <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">scale</a>;</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;}</div><div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">helpers.h:510</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00317">PixelWiseMultiplication.cpp:317</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00375">PixelWiseMultiplication.cpp:375</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">offset()</a>, and <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00317">arm_compute::test::validation::scale</a>.</p>
+<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">offset()</a>, and <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00375">arm_compute::test::validation::scale</a>.</p>
+
+</div>
+</div>
+<a id="a3dc07539dda26f6cd2dcdc08a222292d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3dc07539dda26f6cd2dcdc08a222292d">&#9670;&nbsp;</a></span>dequantize_qasymm8_signed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float dequantize_qasymm8_signed </td>
+          <td>(</td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Dequantize a scalar value from signed 8-bit asymmetric to floating-point. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input value to quantize </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">offset</td><td>Quantization offset </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>Quantization scale</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>quantized value </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00075">75</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;{</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <span class="keywordflow">return</span> ((<span class="keywordtype">float</span>)<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a> - <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a>) * <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">scale</a>;</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;}</div><div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a009469e4d9b8fce3b6d5e97d2077827d"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a009469e4d9b8fce3b6d5e97d2077827d">offset</a></div><div class="ttdeci">__global uchar * offset(const Image *img, int x, int y)</div><div class="ttdoc">Get the pointer position of a Image.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">helpers.h:510</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00375">PixelWiseMultiplication.cpp:375</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">offset()</a>, and <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00375">arm_compute::test::validation::scale</a>.</p>
+
+</div>
+</div>
+<a id="ab4cd9c562aa288b7c2b54c22a60fba04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4cd9c562aa288b7c2b54c22a60fba04">&#9670;&nbsp;</a></span>dequantize_short16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float16 dequantize_short16 </td>
+          <td>(</td>
+          <td class="paramtype">short16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00424">424</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3266,7 +3633,95 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00391">391</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00420">420</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a3bb6724728c01a91aa349dba2a4edcc1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bb6724728c01a91aa349dba2a4edcc1">&#9670;&nbsp;</a></span>dequantize_uchar1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float dequantize_uchar1 </td>
+          <td>(</td>
+          <td class="paramtype">uchar&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00414">414</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a2d9cac9c87356624d52b00c2e6950ec9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d9cac9c87356624d52b00c2e6950ec9">&#9670;&nbsp;</a></span>dequantize_uchar16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float16 dequantize_uchar16 </td>
+          <td>(</td>
+          <td class="paramtype">uchar16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00421">421</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3310,7 +3765,139 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00389">389</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00418">418</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="ac870997ee5c5ea925bbe14f8b966f02e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac870997ee5c5ea925bbe14f8b966f02e">&#9670;&nbsp;</a></span>dequantize_uint1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float dequantize_uint1 </td>
+          <td>(</td>
+          <td class="paramtype">uint&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00416">416</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="ac4b7d00ffe62fa241cd5c3519467e6ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4b7d00ffe62fa241cd5c3519467e6ac">&#9670;&nbsp;</a></span>dequantize_uint16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float16 dequantize_uint16 </td>
+          <td>(</td>
+          <td class="paramtype">uint16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00425">425</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="ad554c256832e2b36d187912753c83b14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad554c256832e2b36d187912753c83b14">&#9670;&nbsp;</a></span>dequantize_ushort16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float16 dequantize_ushort16 </td>
+          <td>(</td>
+          <td class="paramtype">ushort16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00423">423</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3354,7 +3941,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00390">390</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00419">419</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3416,7 +4003,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00428">428</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00463">463</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3478,7 +4065,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00425">425</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00460">460</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3540,7 +4127,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00426">426</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00461">461</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3602,7 +4189,183 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00427">427</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00462">462</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a580997664d0abbd5218bb945693d2bc8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a580997664d0abbd5218bb945693d2bc8">&#9670;&nbsp;</a></span>quantize_char1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">char quantize_char1 </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00401">401</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a0950af41907c8d7c7b8f39fdf12145e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0950af41907c8d7c7b8f39fdf12145e1">&#9670;&nbsp;</a></span>quantize_char16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">char16 quantize_char16 </td>
+          <td>(</td>
+          <td class="paramtype">float16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00408">408</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a3c770e1d8aa92b0e657ec0991c9aae88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c770e1d8aa92b0e657ec0991c9aae88">&#9670;&nbsp;</a></span>quantize_int1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int quantize_int1 </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00403">403</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="af01ebd15f22ff00d7f901ae3ceac0919"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af01ebd15f22ff00d7f901ae3ceac0919">&#9670;&nbsp;</a></span>quantize_int16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int16 quantize_int16 </td>
+          <td>(</td>
+          <td class="paramtype">float16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00412">412</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3662,9 +4425,53 @@ Functions</h2></td></tr>
 <div class="ttc" id="direct__convolution1x1_8cl_xhtml_a1f15728672380ade7a238f5e783d54d2"><div class="ttname"><a href="direct__convolution1x1_8cl.xhtml#a1f15728672380ade7a238f5e783d54d2">CONVERT_SAT</a></div><div class="ttdeci">#define CONVERT_SAT(a, b)</div><div class="ttdef"><b>Definition:</b> <a href="direct__convolution1x1_8cl_source.xhtml#l00030">direct_convolution1x1.cl:30</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
 <div class="ttc" id="helpers__asymm_8h_xhtml_ae41349ddba7d47794bba4d2fcf659872"><div class="ttname"><a href="helpers__asymm_8h.xhtml#ae41349ddba7d47794bba4d2fcf659872">CONVERT_DOWN_RTE</a></div><div class="ttdeci">#define CONVERT_DOWN_RTE(x, type)</div><div class="ttdef"><b>Definition:</b> <a href="helpers__asymm_8h_source.xhtml#l00037">helpers_asymm.h:37</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00317">PixelWiseMultiplication.cpp:317</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_acec6d8ad52a28972fa74e071c1a63b6a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#acec6d8ad52a28972fa74e071c1a63b6a">arm_compute::test::validation::scale</a></div><div class="ttdeci">scale</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00375">PixelWiseMultiplication.cpp:375</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="helpers__asymm_8h_source.xhtml#l00037">CONVERT_DOWN_RTE</a>, <a class="el" href="direct__convolution1x1_8cl_source.xhtml#l00030">CONVERT_SAT</a>, <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">offset()</a>, and <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00317">arm_compute::test::validation::scale</a>.</p>
+<p class="reference">References <a class="el" href="helpers__asymm_8h_source.xhtml#l00037">CONVERT_DOWN_RTE</a>, <a class="el" href="direct__convolution1x1_8cl_source.xhtml#l00030">CONVERT_SAT</a>, <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00510">offset()</a>, and <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00375">arm_compute::test::validation::scale</a>.</p>
+
+</div>
+</div>
+<a id="ad5ecf32f039d9becada79ec71d0fe49b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5ecf32f039d9becada79ec71d0fe49b">&#9670;&nbsp;</a></span>quantize_short16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">short16 quantize_short16 </td>
+          <td>(</td>
+          <td class="paramtype">float16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00410">410</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3708,7 +4515,95 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00387">387</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00406">406</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="afdcd79880ad2122f402e423db5cbfc12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdcd79880ad2122f402e423db5cbfc12">&#9670;&nbsp;</a></span>quantize_uchar1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uchar quantize_uchar1 </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00400">400</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a23634278911241d201636e02e64a2523"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23634278911241d201636e02e64a2523">&#9670;&nbsp;</a></span>quantize_uchar16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uchar16 quantize_uchar16 </td>
+          <td>(</td>
+          <td class="paramtype">float16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00407">407</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3752,7 +4647,139 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00385">385</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00404">404</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a99762c72030fc4c734ae3aa2d35ce166"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99762c72030fc4c734ae3aa2d35ce166">&#9670;&nbsp;</a></span>quantize_uint1()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint quantize_uint1 </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00402">402</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a52149e12d683650129212d59169d05a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52149e12d683650129212d59169d05a4">&#9670;&nbsp;</a></span>quantize_uint16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16 quantize_uint16 </td>
+          <td>(</td>
+          <td class="paramtype">float16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00411">411</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+
+</div>
+</div>
+<a id="a869021a7dfce258c22cfc5a74ab402de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a869021a7dfce258c22cfc5a74ab402de">&#9670;&nbsp;</a></span>quantize_ushort16()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ushort16 quantize_ushort16 </td>
+          <td>(</td>
+          <td class="paramtype">float16&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00409">409</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3796,7 +4823,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00386">386</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00405">405</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -3806,7 +4833,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="helpers__asymm_8h.xhtml">helpers_asymm.h</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:48 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

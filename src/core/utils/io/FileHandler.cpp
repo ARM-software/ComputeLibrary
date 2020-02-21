@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,6 @@ FileHandler::~FileHandler()
 void FileHandler::open(const std::string &filename, std::ios_base::openmode mode)
 {
     close();
-    ;
     _filestream.open(filename, mode);
     ARM_COMPUTE_ERROR_ON(!_filestream.good());
     _filename = filename;

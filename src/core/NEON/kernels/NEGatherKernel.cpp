@@ -52,6 +52,32 @@ void validate_indices(const ITensor *indices)
     }
 }
 
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, indices, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(indices->num_dimensions() > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
+
+    if(axis < 0)
+    {
+        axis += input->num_dimensions();
+    }
+
+    ARM_COMPUTE_RETURN_ERROR_ON(0 > axis || axis >= static_cast<int32_t>(input->num_dimensions()));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+        TensorShape output_shape = arm_compute::misc::shape_calculator::compute_gather_shape(input->tensor_shape(), indices->tensor_shape(), axis);
+        ARM_COMPUTE_RETURN_ERROR_ON(output_shape.total_size() != output->tensor_shape().total_size());
+    }
+
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32, DataType::S32);
+
+    return Status{};
+}
 } // namespace
 
 NEGatherKernel::NEGatherKernel()
@@ -107,9 +133,7 @@ void NEGatherKernel::gather_n_axis(const Window &window, const ThreadInfo &info)
 void NEGatherKernel::configure(const ITensor *input, const ITensor *indices, ITensor *output, int axis)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, indices);
-    ARM_COMPUTE_ERROR_ON(indices->info()->num_dimensions() != 1);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32, DataType::S32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), indices->info(), output->info(), axis));
 
     _input   = input;
     _indices = indices;
@@ -154,7 +178,7 @@ void NEGatherKernel::configure(const ITensor *input, const ITensor *indices, ITe
     }
     // Output auto initialization if not yet initialized
     TensorShape output_shape = arm_compute::misc::shape_calculator::compute_gather_shape(input->info()->tensor_shape(), indices->info()->tensor_shape(), _axis);
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     // Create window
     Window win = calculate_max_window(*output->info(), Steps());
@@ -165,31 +189,7 @@ void NEGatherKernel::configure(const ITensor *input, const ITensor *indices, ITe
 
 Status NEGatherKernel::validate(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, indices, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(indices->num_dimensions() > 1);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
-
-    if(axis < 0)
-    {
-        axis += input->num_dimensions();
-    }
-
-    ARM_COMPUTE_RETURN_ERROR_ON(0 > axis || axis >= static_cast<int32_t>(input->num_dimensions()));
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
-                                                         DataType::U16, DataType::S16,
-                                                         DataType::U32, DataType::S32, DataType::F16, DataType::F32);
-
-    if(output->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-        TensorShape output_shape = arm_compute::misc::shape_calculator::compute_gather_shape(input->tensor_shape(), indices->tensor_shape(), axis);
-        ARM_COMPUTE_RETURN_ERROR_ON(output_shape.total_size() != output->tensor_shape().total_size());
-    }
-
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32, DataType::S32);
-
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, indices, output, axis));
     return Status{};
 }
 

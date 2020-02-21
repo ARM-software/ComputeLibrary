@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@
 
 #define VEC_TYPE(size) VEC_DATA_TYPE(DATA_TYPE, size)
 
-#if defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && (defined(OUTPUT_OFFSET) || defined(REAL_MULTIPLIER))
+#if defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && ((defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)) || defined(REAL_MULTIPLIER))
 
 #if defined(WEIGHTS_PROMOTED_TYPE)
 #define VEC_WEIGHTS_PROMOTED_TYPE(size) VEC_DATA_TYPE(WEIGHTS_PROMOTED_TYPE, size)
@@ -224,9 +224,6 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 #if defined(PER_CHANNEL_QUANTIZATION)
     const int output_multiplier = *((__global int *)vector_offset(&output_multipliers, channel));
     const int output_shift      = *((__global int *)vector_offset(&output_shifts, channel));
-#else  // defined(PER_CHANNEL_QUANTIZATION)
-    const int output_multiplier = *((__global int *)vector_offset(&output_multipliers, 0));
-    const int output_shift      = *((__global int *)vector_offset(&output_shifts, 0));
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
     int8 values0 = 0;
@@ -335,7 +332,17 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 
 #else // defined(REAL_MULTIPLIER)
 
-    values0                            = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values0, output_multiplier, output_shift, 8);
+#if defined(PER_CHANNEL_QUANTIZATION)
+    int8 res0_shift_lt0                = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(values0, output_multiplier, output_shift, 8);
+    int8 res0_shift_gt0                = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values0, output_multiplier, output_shift, 8);
+    values0                            = select(res0_shift_lt0, res0_shift_gt0, (int8)(output_shift) >= 0);
+#else // defined(PER_CHANNEL_QUANTIZATION)
+#if OUTPUT_SHIFT < 0
+    values0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(values0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#else  // OUTPUT_SHIFT < 0
+    values0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#endif // OUTPUT_OFFSET < 0
+#endif // defined(PER_CHANNEL_QUANTIZATION)
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -351,7 +358,17 @@ __kernel void dwc_3x3_native_quantized8_nchw(
 
 #else // defined(REAL_MULTIPLIER)
 
-    values1                           = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, output_multiplier, output_shift, 8);
+#if defined(PER_CHANNEL_QUANTIZATION)
+    int8 res1_shift_lt0      = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(values1, output_multiplier, output_shift, 8);
+    int8 res1_shift_gt0      = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, output_multiplier, output_shift, 8);
+    values1                  = select(res1_shift_lt0, res1_shift_gt0, (int8)(output_shift) >= 0);
+#else // defined(PER_CHANNEL_QUANTIZATION)
+#if OUTPUT_SHIFT < 0
+    values1 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(values1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#else  // OUTPUT_SHIFT < 0
+    values1 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#endif // OUTPUT_OFFSET < 0
+#endif // defined(PER_CHANNEL_QUANTIZATION)
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -667,7 +684,17 @@ __kernel void dwc_3x3_native_quantized8_dot8_nchw(
 
 #else // defined(REAL_MULTIPLIER)
 
-    values0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values0, output_multiplier, output_shift, 8);
+#if defined(PER_CHANNEL_QUANTIZATION)
+    int8 res0_shift_lt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(values0, output_multiplier, output_shift, 8);
+    int8 res0_shift_gt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values0, output_multiplier, output_shift, 8);
+    values0             = select(res0_shift_lt0, res0_shift_gt0, (int8)(output_shift) >= 0);
+#else // defined(PER_CHANNEL_QUANTIZATION)
+#if OUTPUT_SHIFT < 0
+    values0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(values0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#else  // OUTPUT_SHIFT < 0
+    values0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#endif // OUTPUT_OFFSET < 0
+#endif // defined(PER_CHANNEL_QUANTIZATION)
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -684,7 +711,17 @@ __kernel void dwc_3x3_native_quantized8_dot8_nchw(
 
 #else // defined(REAL_MULTIPLIER)
 
-    values1 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, output_multiplier, output_shift, 8);
+#if defined(PER_CHANNEL_QUANTIZATION)
+    int8 res1_shift_lt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(values1, output_multiplier, output_shift, 8);
+    int8 res1_shift_gt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, output_multiplier, output_shift, 8);
+    values1             = select(res1_shift_lt0, res1_shift_gt0, (int8)(output_shift) >= 0);
+#else // defined(PER_CHANNEL_QUANTIZATION)
+#if OUTPUT_SHIFT < 0
+    values1 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(values1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#else  // OUTPUT_SHIFT < 0
+    values1 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#endif // OUTPUT_OFFSET < 0
+#endif // defined(PER_CHANNEL_QUANTIZATION)
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -943,17 +980,23 @@ __kernel void dwc_3x3_reshaped_quantized8_nhwc(
     acc = CONVERT(round(CONVERT(acc, VEC_FLOAT) * (VEC_FLOAT)REAL_MULTIPLIER), VEC_INT);
 
 #else // defined(REAL_MULTIPLIER)
+
 #if defined(PER_CHANNEL_QUANTIZATION)
     Vector          output_multipliers = CONVERT_TO_VECTOR_STRUCT(output_multipliers);
     Vector          output_shifts      = CONVERT_TO_VECTOR_STRUCT(output_shifts);
     VEC_INT         output_multiplier  = VLOAD(VEC_SIZE)(0, (__global int *)output_multipliers.ptr);
     VEC_INT         output_shift       = VLOAD(VEC_SIZE)(0, (__global int *)output_shifts.ptr);
-#else  // defined(PER_CHANNEL_QUANTIZATION)
-    const int output_multiplier = *((__global int *)(output_multipliers_ptr + output_multipliers_offset_first_element_in_bytes));
-    const int output_shift      = *((__global int *)(output_shifts_ptr + output_shifts_offset_first_element_in_bytes));
-#endif // defined(PER_CHANNEL_QUANTIZATION)
 
-    acc                                = asymm_mult_by_quant_multiplier_less_than_one(acc, output_multiplier, output_shift);
+    VEC_INT res_shift_lt0              = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res_shift_gt0              = asymm_mult_by_quant_multiplier_less_than_one(acc, output_multiplier, output_shift);
+    acc                                = select(res_shift_lt0, res_shift_gt0, output_shift >= 0);
+#else // defined(PER_CHANNEL_QUANTIZATION)
+#if OUTPUT_SHIFT < 0
+    acc     = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+#else  // OUTPUT_SHIFT < 0
+    acc     = asymm_mult_by_quant_multiplier_less_than_one(acc, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+#endif // OUTPUT_SHIFT < 0
+#endif // defined(PER_CHANNEL_QUANTIZATION)
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -1255,15 +1298,32 @@ __kernel void dwc_3x3_reshaped_quantized8_stride1_nhwc(
     Vector          output_shifts      = CONVERT_TO_VECTOR_STRUCT(output_shifts);
     VEC_INT         output_multiplier  = VLOAD(VEC_SIZE)(0, (__global int *)output_multipliers.ptr);
     VEC_INT         output_shift       = VLOAD(VEC_SIZE)(0, (__global int *)output_shifts.ptr);
-#else  // defined(PER_CHANNEL_QUANTIZATION)
-    const int output_multiplier = *((__global int *)(output_multipliers_ptr + output_multipliers_offset_first_element_in_bytes));
-    const int output_shift      = *((__global int *)(output_shifts_ptr + output_shifts_offset_first_element_in_bytes));
-#endif // defined(PER_CHANNEL_QUANTIZATION)
 
-    acc0                     = asymm_mult_by_quant_multiplier_less_than_one(acc0, output_multiplier, output_shift);
-    acc1                     = asymm_mult_by_quant_multiplier_less_than_one(acc1, output_multiplier, output_shift);
-    acc2                     = asymm_mult_by_quant_multiplier_less_than_one(acc2, output_multiplier, output_shift);
-    acc3                     = asymm_mult_by_quant_multiplier_less_than_one(acc3, output_multiplier, output_shift);
+    VEC_INT res0_shift_lt0   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc0, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res1_shift_lt0   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc1, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res2_shift_lt0   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc2, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res3_shift_lt0   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc3, output_multiplier, output_shift, VEC_SIZE);
+    VEC_INT res0_shift_gt0   = asymm_mult_by_quant_multiplier_less_than_one(acc0, output_multiplier, output_shift);
+    VEC_INT res1_shift_gt0   = asymm_mult_by_quant_multiplier_less_than_one(acc1, output_multiplier, output_shift);
+    VEC_INT res2_shift_gt0   = asymm_mult_by_quant_multiplier_less_than_one(acc2, output_multiplier, output_shift);
+    VEC_INT res3_shift_gt0   = asymm_mult_by_quant_multiplier_less_than_one(acc3, output_multiplier, output_shift);
+    acc0                     = select(res0_shift_lt0, res0_shift_gt0, output_shift >= 0);
+    acc1                     = select(res1_shift_lt0, res1_shift_gt0, output_shift >= 0);
+    acc2                     = select(res2_shift_lt0, res2_shift_gt0, output_shift >= 0);
+    acc3                     = select(res3_shift_lt0, res3_shift_gt0, output_shift >= 0);
+#else // defined(PER_CHANNEL_QUANTIZATION)
+#if OUTPUT_SHIFT < 0
+    acc0    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+    acc1    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+    acc2    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc2, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+    acc3    = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc3, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+#else  // OUTPUT_SHIFT < 0
+    acc0    = asymm_mult_by_quant_multiplier_less_than_one(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc1    = asymm_mult_by_quant_multiplier_less_than_one(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc2    = asymm_mult_by_quant_multiplier_less_than_one(acc2, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc3    = asymm_mult_by_quant_multiplier_less_than_one(acc3, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+#endif // OUTPUT_SHIFT < 0
+#endif // defined(PER_CHANNEL_QUANTIZATION)
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -1375,7 +1435,7 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
 #else                                          // defined(DST_DEPTH)
-    int      z                        = get_global_id(2); // spatial coordinate y
+    int      z               = get_global_id(2); // spatial coordinate y
 #endif                                         // defined(DST_DEPTH)
 
     __global uchar *weights_addr = weights_ptr + weights_offset_first_element_in_bytes + x * weights_stride_y;
@@ -1383,7 +1443,7 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
 #if defined(DST_DEPTH)
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE + b * src_stride_w;
 #else  /* defined(DST_DEPTH) */
-    __global uchar *src_addr          = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE;
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE;
 #endif /* defined(DST_DEPTH) */
 
     int  z_coord = 0;
@@ -1519,11 +1579,14 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
     acc1 = CONVERT(round(CONVERT(acc1, VEC_FLOAT) * (VEC_FLOAT)REAL_MULTIPLIER), VEC_INT);
 
 #else // defined(REAL_MULTIPLIER)
-    const int       output_multiplier = *((__global int *)(output_multipliers_ptr + output_multipliers_offset_first_element_in_bytes));
-    const int       output_shift      = *((__global int *)(output_shifts_ptr + output_shifts_offset_first_element_in_bytes));
 
-    acc0                     = asymm_mult_by_quant_multiplier_less_than_one(acc0, output_multiplier, output_shift);
-    acc1                     = asymm_mult_by_quant_multiplier_less_than_one(acc1, output_multiplier, output_shift);
+#if OUTPUT_SHIFT < 0
+    acc0                     = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+    acc1                     = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, VEC_SIZE);
+#else  // OUTPUT_SHIFT < 0
+    acc0    = asymm_mult_by_quant_multiplier_less_than_one(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc1    = asymm_mult_by_quant_multiplier_less_than_one(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+#endif // OUTPUT_SHIFT < 0
 
 #endif // defined(REAL_MULTIPLIER)
     acc0 += (VEC_INT)OUTPUT_OFFSET;
@@ -1553,9 +1616,9 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
 
 #endif // defined(WEIGHTS_PROMOTED_TYPE)
 
-#endif // defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && (defined(OUTPUT_OFFSET) || defined(REAL_MULTIPLIER))
+#endif // defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && ((defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)) || defined(REAL_MULTIPLIER))
 
-#if defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET)
+#if defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_SHIFT) && defined(OUTPUT_MULTIPLIER)
 /** This function computes the depthwise convolution for NHWC data layout. This kernel assumes that the weights tensor is NOT reshaped
  *
  * @note The number of elements processed must be passed at compile time using -DN0 (e.g. -DN0=2)
@@ -1571,7 +1634,7 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
  * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
- * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_ptr                                          Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in] src_stride_x                                     Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                       src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                                     Stride of the source tensor in Y dimension (in bytes)
@@ -1591,7 +1654,7 @@ __kernel void dwc_3x3_reshaped_quantized8_dot8_stride1_nhwc(
  * @param[in] dst_stride_w                                     Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                                       dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes                The offset of the first element in the destination tensor
- * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QSYMM8_PER_CHANNEL
+ * @param[in] weights_ptr                                      Pointer to the weights tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL
  * @param[in] weights_stride_x                                 Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                                   weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                                 Stride of the weights tensor in Y dimension (in bytes)
@@ -1630,7 +1693,7 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
 #else                                          // defined(DST_DEPTH)
-    int       z                 = get_global_id(2); // spatial coordinate y
+    int z = get_global_id(2); // spatial coordinate y
 #endif                                         // defined(DST_DEPTH)
 
     __global uchar *s_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * (int)N0;
@@ -1646,12 +1709,6 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
 #if defined(PER_CHANNEL_QUANTIZATION)
     __global uchar *out_mul_addr   = output_multipliers_ptr + output_multipliers_offset_first_element_in_bytes + x * sizeof(int) * (int)DEPTH_MULTIPLIER * (int)N0;
     __global uchar *out_shift_addr = output_shifts_ptr + output_shifts_offset_first_element_in_bytes + x * sizeof(int) * (int)DEPTH_MULTIPLIER * (int)N0;
-
-    VEC_INT output_multiplier = (VEC_INT)0;
-    VEC_INT output_shift      = (VEC_INT)0;
-#else  // defined(PER_CHANNEL_QUANTIZATION)
-    const int output_multiplier = *((__global int *)(output_multipliers_ptr + output_multipliers_offset_first_element_in_bytes));
-    const int output_shift      = *((__global int *)(output_shifts_ptr + output_shifts_offset_first_element_in_bytes));
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
 #if defined(DST_DEPTH)
@@ -1700,11 +1757,20 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
 #endif // defined(HAS_BIAS)
 
 #if defined(PER_CHANNEL_QUANTIZATION)
-        output_multiplier = VLOAD(N0)(0, (__global int *)(out_mul_addr));
-        output_shift      = VLOAD(N0)(0, (__global int *)(out_shift_addr));
+        VEC_INT output_multiplier = VLOAD(N0)(0, (__global int *)(out_mul_addr));
+        VEC_INT output_shift      = VLOAD(N0)(0, (__global int *)(out_shift_addr));
+
+        VEC_INT res_shift_lt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(res, output_multiplier, output_shift, N0);
+        VEC_INT res_shift_gt0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(res, output_multiplier, output_shift, N0);
+        res                   = select(res_shift_lt0, res_shift_gt0, (VEC_INT)(output_shift) >= 0);
+#else // defined(PER_CHANNEL_QUANTIZATION)
+#if OUTPUT_SHIFT < 0
+        res   = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(res, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, N0);
+#else  // OUTPUT_SHIFT < 0
+        res = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(res, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, N0);
+#endif // OUTPUT_OFFSET < 0
 #endif // defined(PER_CHANNEL_QUANTIZATION)
 
-        res = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(res, output_multiplier, output_shift, N0);
         res += (VEC_INT)OUTPUT_OFFSET;
 
         VEC_TYPE(VEC_SIZE)
@@ -1726,5 +1792,5 @@ __kernel void dwc_MxN_native_quantized8_nhwc(
     }
 #endif // DEPTH_MULTIPLIER > 1
 }
-#endif // defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defiend(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET)
+#endif // defined(SRC_DIM1) && defined(SRC_DIM2) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defiend(N0) && defined(DILATION_X) && defined(DILATION_Y) && defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(CONV_PAD_LEFT) && defined(CONV_PAD_TOP) && defined(INPUT_OFFSET) && defined(WEIGHTS_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_SHIFT) && defined(OUTPUT_MULTIPLIER)
 #endif // defined(DATA_TYPE) && defined(WEIGHTS_TYPE)

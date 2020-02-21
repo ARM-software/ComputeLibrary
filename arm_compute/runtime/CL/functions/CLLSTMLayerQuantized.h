@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H__
-#define __ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H__
+#ifndef ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H
+#define ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -200,4 +200,4 @@ private:
     bool _is_prepared;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H__ */
+#endif /* ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H */

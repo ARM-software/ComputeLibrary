@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,7 +70,19 @@ void PassManager::run_all(Graph &g)
     }
 }
 
-void PassManager::run(Graph &g, size_t index)
+void PassManager::run_type(Graph &g, IGraphMutator::MutationType type)
+{
+    for(auto &pass : _passes)
+    {
+        if(pass && (pass->type() == type))
+        {
+            ARM_COMPUTE_LOG_GRAPH_INFO("Running mutating pass : " << pass->name() << std::endl);
+            pass->mutate(g);
+        }
+    }
+}
+
+void PassManager::run_index(Graph &g, size_t index)
 {
     if(index >= _passes.size())
     {
@@ -78,9 +90,9 @@ void PassManager::run(Graph &g, size_t index)
     }
 
     auto &pass = _passes.at(index);
-
     if(pass != nullptr)
     {
+        ARM_COMPUTE_LOG_GRAPH_INFO("Running mutating pass : " << pass->name() << std::endl);
         pass->mutate(g);
     }
 }

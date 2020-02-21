@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,8 @@
 #include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEPermute::configure(const ITensor *input, ITensor *output, const PermutationVector &perm)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEPermuteKernel>();
@@ -39,3 +39,4 @@ Status NEPermute::validate(const ITensorInfo *input, const ITensorInfo *output, 
 {
     return NEPermuteKernel::validate(input, output, perm);
 }
+} // namespace arm_compute

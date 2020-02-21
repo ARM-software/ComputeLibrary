@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_REINTERPRET_H__
-#define __ARM_COMPUTE_WRAPPER_REINTERPRET_H__
+#ifndef ARM_COMPUTE_WRAPPER_REINTERPRET_H
+#define ARM_COMPUTE_WRAPPER_REINTERPRET_H
 
 #include <arm_neon.h>
 
@@ -30,14 +30,20 @@ namespace arm_compute
 {
 namespace wrapper
 {
-inline int32x4_t vreinterpret_s32(const uint32x4_t &val)
-{
-    return vreinterpretq_s32_u32(val);
-}
-inline int32x4_t vreinterpret_s32(const int32x4_t &val)
-{
-    return val;
-}
+#define VREINTERPRET_IMPL(ptype, vtype, prefix, postfix1, postfix2) \
+    inline ptype vreinterpret(const vtype &a)                       \
+    {                                                               \
+        return prefix##_##postfix1##_##postfix2(a);                 \
+    }                                                               \
+    \
+    inline ptype vreinterpret(const ptype &a)                       \
+    {                                                               \
+        return a;                                                   \
+    }
+
+VREINTERPRET_IMPL(int16x4_t, uint16x4_t, vreinterpret, s16, u16)
+
+VREINTERPRET_IMPL(int32x4_t, uint32x4_t, vreinterpretq, s32, u32)
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_REINTERPRET_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_REINTERPRET_H */

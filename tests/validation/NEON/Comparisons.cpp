@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,6 +45,7 @@ namespace
 {
 const auto configure_dataset = combine(datasets::SmallShapes(),
                                        framework::dataset::make("DataType", { DataType::QASYMM8,
+                                                                              DataType::QASYMM8_SIGNED,
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                                                                               DataType::F16,
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -162,6 +163,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        combine(combine(combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8)),
                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END()
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEComparisonQuantizedFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(run_small_dataset, framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo() })),
+                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.3f, 2) })))
 {
     // Validate output
     validate(Accessor(_target), _reference);

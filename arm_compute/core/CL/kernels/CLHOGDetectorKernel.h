@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLHOGDETECTORKERNEL_H__
-#define __ARM_COMPUTE_CLHOGDETECTORKERNEL_H__
+#ifndef ARM_COMPUTE_CLHOGDETECTORKERNEL_H
+#define ARM_COMPUTE_CLHOGDETECTORKERNEL_H
 
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/ICLHOG.h"
@@ -78,4 +78,4 @@ private:
     cl::Buffer              *_num_detection_windows;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLHOGDETECTORKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLHOGDETECTORKERNEL_H */

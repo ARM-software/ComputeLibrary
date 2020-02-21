@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_LOGGING_LOGGER_REGISTRY_H__
-#define __ARM_COMPUTE_LOGGING_LOGGER_REGISTRY_H__
+#ifndef ARM_COMPUTE_LOGGING_LOGGER_REGISTRY_H
+#define ARM_COMPUTE_LOGGING_LOGGER_REGISTRY_H
 
 #include "arm_compute/core/utils/logging/Logger.h"
 #include "arm_compute/core/utils/logging/Printers.h"
@@ -87,4 +87,4 @@ private:
 };
 } // namespace logging
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_LOGGING_LOGGER_REGISTRY_H__ */
+#endif /* ARM_COMPUTE_LOGGING_LOGGER_REGISTRY_H */

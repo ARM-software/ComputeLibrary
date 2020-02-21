@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFILLBORDERKERNEL_H__
-#define __ARM_COMPUTE_NEFILLBORDERKERNEL_H__
+#ifndef ARM_COMPUTE_NEFILLBORDERKERNEL_H
+#define ARM_COMPUTE_NEFILLBORDERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/PixelValue.h"
@@ -30,6 +30,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the kernel to fill borders */
@@ -57,7 +58,7 @@ public:
      *
      * @note This kernel fills the borders within the XY-planes.
      *
-     * @param[in,out] tensor                Tensor to process. Data types supported: U8/S8/QASYMM8/S16/S32/F32.
+     * @param[in,out] tensor                Tensor to process. Data types supported: All.
      * @param[in]     border_size           Size of the border to fill in elements.
      * @param[in]     border_mode           Border mode to use for the convolution.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
@@ -78,4 +79,4 @@ private:
     PixelValue _constant_border_value;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEFILLBORDERKERNEL_H__ */
+#endif /*ARM_COMPUTE_NEFILLBORDERKERNEL_H */

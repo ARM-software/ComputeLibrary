@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_GCIM2COLKERNEL_H__
-#define __ARM_COMPUTE_GCIM2COLKERNEL_H__
+#ifndef ARM_COMPUTE_GCIM2COLKERNEL_H
+#define ARM_COMPUTE_GCIM2COLKERNEL_H
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 
@@ -125,4 +125,4 @@ private:
 };
 }
 
-#endif /*__ARM_COMPUTE_GCIM2COLKERNEL_H__ */
+#endif /*ARM_COMPUTE_GCIM2COLKERNEL_H */

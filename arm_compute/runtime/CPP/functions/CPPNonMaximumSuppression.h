@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H__
-#define __ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H__
+#ifndef ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H
+#define ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H
 
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
@@ -64,4 +64,4 @@ public:
                            const float score_threshold, const float nms_threshold);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H__ */
+#endif /* ARM_COMPUTE_CPP_NONMAXIMUMSUPPRESSION_LAYER_H */

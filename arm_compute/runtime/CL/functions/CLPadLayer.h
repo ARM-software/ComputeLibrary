@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPADLAYER_H__
-#define __ARM_COMPUTE_CLPADLAYER_H__
+#ifndef ARM_COMPUTE_CLPADLAYER_H
+#define ARM_COMPUTE_CLPADLAYER_H
 
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
@@ -54,7 +54,7 @@ public:
 
     /** Initialize the function
      *
-     * @param[in]  input          Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input          Source tensor. Data types supported: All.
      * @param[out] output         Output tensor. Data type supported: same as @p input
      * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                            specifies the front and the end padding in the i-th dimension.
@@ -66,7 +66,7 @@ public:
 
     /**  Static function to check if given info will lead to a valid configuration of @ref CLPadLayer.
      *
-     * @param[in] input          Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input          Source tensor info. Data types supported: All.
      * @param[in] output         Output tensor info. Data type supported: same as @p input
      * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                           specifies the front and the end padding in the i-th dimension.
@@ -87,4 +87,4 @@ private:
     bool             _perform_pad;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_PADLAYER_H__ */
+#endif /*ARM_COMPUTE_PADLAYER_H */

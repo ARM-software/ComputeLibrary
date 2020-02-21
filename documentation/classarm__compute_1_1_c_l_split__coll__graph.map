@@ -1,4 +1,6 @@
 <map id="CLSplit" name="CLSplit">
-<area shape="rect" id="node1" title="Basic function to split a tensor along a given axis." alt="" coords="11,80,78,107"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="5,5,84,32"/>
+<area shape="rect" id="node1" title="Basic function to split a tensor along a given axis." alt="" coords="42,276,109,303"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_p_p_split.xhtml" title=" " alt="" coords="5,185,145,227"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="53,5,132,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_c_p_p_split.xhtml" title="Basic function to split a tensor along a given axis." alt="" coords="92,81,259,123"/>
 </map>

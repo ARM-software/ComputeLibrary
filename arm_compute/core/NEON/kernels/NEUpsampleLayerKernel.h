@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEUPSAMPLELAYERKERNEL_H__
-#define __ARM_COMPUTE_NEUPSAMPLELAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NEUPSAMPLELAYERKERNEL_H
+#define ARM_COMPUTE_NEUPSAMPLELAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -74,40 +74,19 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Function to run upsample layer for FP32 (NCHW)
+    /** Function to run upsample layer (NCHW)
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
-    void upsample_f32_nchw(const Window &window);
-    /** Function to run upsample layer for FP32 (NHWC)
+    template <typename T, int S>
+    void upsample_nchw(const Window &window);
+    /** Function to run upsample layer (NHWC)
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
-    void upsample_f32_nhwc(const Window &window);
-    /** Function to run upsample layer for FP16 (NCHW)
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    void upsample_f16_nchw(const Window &window);
-    /** Function to run upsample layer for FP16 (NHWC)
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    void upsample_f16_nhwc(const Window &window);
-    /** Function to run upsample layer for QASYMM8 (NCHW)
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    void upsample_qasymm8_nchw(const Window &window);
-    /** Function to run upsample layer for QASYMM8 (NHWC)
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    void upsample_qasymm8_nhwc(const Window &window);
-    /** Common signature for all the upsample layer functions
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
+    template <typename T, int S>
+    void upsample_nhwc(const Window &window);
+
     using UpsampleFunctionPtr = void (NEUpsampleLayerKernel::*)(const Window &window);
 
 private:
@@ -118,4 +97,4 @@ private:
     unsigned int        _num_elems_processed_per_iteration_x;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEUPSAMPLELAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_NEUPSAMPLELAYERKERNEL_H */

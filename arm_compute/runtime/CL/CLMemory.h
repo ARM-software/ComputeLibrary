@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__
-#define __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__
+#ifndef ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H
+#define ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H
 
 #include "arm_compute/runtime/IMemory.h"
 
@@ -83,4 +83,4 @@ private:
     std::shared_ptr<ICLMemoryRegion> _region_owned;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__ */
+#endif /* ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CL_HELPERS_H__
-#define __ARM_COMPUTE_CL_HELPERS_H__
+#ifndef ARM_COMPUTE_CL_HELPERS_H
+#define ARM_COMPUTE_CL_HELPERS_H
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/IScheduler.h"
@@ -50,4 +50,4 @@ std::tuple<cl::Context, cl::Device, cl_int> create_opencl_context_and_device();
  */
 void schedule_kernel_on_ctx(CLRuntimeContext *ctx, ICLKernel *kernel, bool flush = true);
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CL_HELPERS_H__ */
+#endif /* ARM_COMPUTE_CL_HELPERS_H */

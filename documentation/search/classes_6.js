@@ -13,6 +13,7 @@ var searchData=
   ['flattenlayer',['FlattenLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_flatten_layer.xhtml',1,'arm_compute::graph::frontend']]],
   ['flattenlayernode',['FlattenLayerNode',['../classarm__compute_1_1graph_1_1_flatten_layer_node.xhtml',1,'arm_compute::graph']]],
   ['framework',['Framework',['../classarm__compute_1_1test_1_1framework_1_1_framework.xhtml',1,'arm_compute::test::framework']]],
+  ['frameworkconfig',['FrameworkConfig',['../structarm__compute_1_1test_1_1framework_1_1_framework_config.xhtml',1,'arm_compute::test::framework']]],
   ['frameworkparams',['FrameworkParams',['../structarm__compute_1_1utils_1_1_framework_params.xhtml',1,'arm_compute::utils']]],
   ['fullyconnectedlayer',['FullyConnectedLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_fully_connected_layer.xhtml',1,'arm_compute::graph::frontend']]],
   ['fullyconnectedlayerinfo',['FullyConnectedLayerInfo',['../structarm__compute_1_1_fully_connected_layer_info.xhtml',1,'arm_compute']]],

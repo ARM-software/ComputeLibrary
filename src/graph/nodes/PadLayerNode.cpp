@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ namespace arm_compute
 {
 namespace graph
 {
-PadLayerNode::PadLayerNode(PaddingList &padding)
+PadLayerNode::PadLayerNode(const PaddingList &padding)
     : _padding(padding)
 {
     _input_edges.resize(1, EmptyEdgeID);

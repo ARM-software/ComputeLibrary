@@ -2,7 +2,9 @@ var store_8h =
 [
     [ "VSTORE_IMPL", "store_8h.xhtml#aa3acf4387755a828f7f220975d5e6367", null ],
     [ "vstore", "store_8h.xhtml#ae7943ea9c1f74dc72c62d4cc3966a459", null ],
+    [ "vstore", "store_8h.xhtml#acc33d70f4aa4ba22e19177febcf67e3e", null ],
     [ "vstore", "store_8h.xhtml#a256a55d40b65c0a2a22b3f64045716be", null ],
+    [ "vstore", "store_8h.xhtml#a07e94869e50439dbe78060ec374939e7", null ],
     [ "vstore", "store_8h.xhtml#ab2a18e2f73c6066ec4af6ff793dc854c", null ],
     [ "vstore", "store_8h.xhtml#acbd85567ac69618d6ac0fe06fb72af44", null ],
     [ "vstore", "store_8h.xhtml#a65e75ff8f4d05960e50761a5a58dd386", null ],

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEMEMSETKERNEL_H__
-#define __ARM_COMPUTE_NEMEMSETKERNEL_H__
+#ifndef ARM_COMPUTE_NEMEMSETKERNEL_H
+#define ARM_COMPUTE_NEMEMSETKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/PixelValue.h"
@@ -55,7 +55,7 @@ public:
     NEMemsetKernel &operator=(NEMemsetKernel &&) = default;
     /** Initialise the kernel's tensor and filling value
      *
-     * @param[in,out] tensor         Input tensor to fill. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in,out] tensor         Input tensor to fill. Supported data types: All
      * @param[in]     constant_value The value used to fill the planes of the tensor
      */
     void configure(ITensor *tensor, const PixelValue &constant_value);
@@ -68,4 +68,4 @@ private:
     PixelValue _constant_value;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEMEMSETKERNEL_H__ */
+#endif /*ARM_COMPUTE_NEMEMSETKERNEL_H */

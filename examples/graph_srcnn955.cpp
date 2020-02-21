@@ -75,9 +75,6 @@ public:
         std::cout << "Image width: " << image_width << std::endl;
         std::cout << "Image height: " << image_height << std::endl;
 
-        // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-
         // Get trainable parameters data path
         const std::string data_path  = common_params.data_path;
         const std::string model_path = "/cnn_data/srcnn955_model/";
@@ -120,10 +117,11 @@ public:
 
         // Finalize graph
         GraphConfig config;
-        config.num_threads = common_params.threads;
-        config.use_tuner   = common_params.enable_tuner;
-        config.tuner_mode  = common_params.tuner_mode;
-        config.tuner_file  = common_params.tuner_file;
+        config.num_threads      = common_params.threads;
+        config.use_tuner        = common_params.enable_tuner;
+        config.tuner_mode       = common_params.tuner_mode;
+        config.tuner_file       = common_params.tuner_file;
+        config.convert_to_uint8 = (common_params.data_type == DataType::QASYMM8);
 
         graph.finalize(common_params.target, config);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEPOOLINGLAYERKERNEL_H__
-#define __ARM_COMPUTE_NEPOOLINGLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NEPOOLINGLAYERKERNEL_H
+#define ARM_COMPUTE_NEPOOLINGLAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -54,7 +54,7 @@ public:
      *
      * @note F16 are supported for pool sizes 2 and 3 only
      *
-     * @param[in]  input     Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
@@ -63,7 +63,7 @@ public:
      *
      * @note F16 are supported for pool sizes 2 and 3 only
      *
-     * @param[in] input     Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *
@@ -148,38 +148,42 @@ private:
      * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
      */
     void poolingMxN_f16_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform 2x2 pooling for 8bit asymmetric fixed point.
+    /** Template function to perform 2x2 pooling for 8bit quantized fixed point. (NCHW)
      *
      * @param[in] window_input    Input region on which to execute the kernel.
      * @param[in] window          Output region on which to execute the kernel.
      * @param[in] pooling_type    Pooling operation to be computed.
      * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
      */
-    void pooling2_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform 3x3 pooling for 8bit quantized fixed point.
+    template <typename T>
+    void pooling2_q8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
+    /** Template function to perform 3x3 pooling for 8bit quantized fixed point. (NCHW)
      *
      * @param[in] window_input    Input region on which to execute the kernel.
      * @param[in] window          Output region on which to execute the kernel.
      * @param[in] pooling_type    Pooling operation to be computed.
      * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
      */
-    void pooling3_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform MxN pooling for 8-bit quantized.
+    template <typename T>
+    void pooling3_q8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
+    /** Template function to perform MxN pooling for 8-bit quantized. (NCHW)
      *
      * @param[in] window_input    Input region on which to execute the kernel.
      * @param[in] window          Output region on which to execute the kernel.
      * @param[in] pooling_type    Pooling operation to be computed.
      * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
      */
-    void poolingMxN_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
-    /** Function to perform MxN pooling for 8-bit quantized. (NHWC)
+    template <typename T>
+    void poolingMxN_q8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
+    /** Template function to perform MxN pooling for 8-bit quantized. (NHWC)
      *
      * @param[in] window_input    Input region on which to execute the kernel.
      * @param[in] window          Output region on which to execute the kernel.
      * @param[in] pooling_type    Pooling operation to be computed.
      * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
      */
-    void poolingMxN_qasymm8_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
+    template <typename T>
+    void poolingMxN_q8_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
     /** Common signature for all the specialised Pooling functions
      *
      * @param[in] window_input    Input region on which to execute the kernel.
@@ -200,4 +204,4 @@ private:
     bool             _is_square;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEPOOLINGLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_NEPOOLINGLAYERKERNEL_H */

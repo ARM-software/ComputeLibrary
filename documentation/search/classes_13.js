@@ -47,5 +47,6 @@ var searchData=
   ['stringdecorator',['StringDecorator',['../classarm__compute_1_1logging_1_1_string_decorator.xhtml',1,'arm_compute::logging']]],
   ['substream',['SubStream',['../classarm__compute_1_1graph_1_1frontend_1_1_sub_stream.xhtml',1,'arm_compute::graph::frontend']]],
   ['subtensor',['SubTensor',['../classarm__compute_1_1_sub_tensor.xhtml',1,'arm_compute']]],
-  ['subtensorinfo',['SubTensorInfo',['../classarm__compute_1_1_sub_tensor_info.xhtml',1,'arm_compute']]]
+  ['subtensorinfo',['SubTensorInfo',['../classarm__compute_1_1_sub_tensor_info.xhtml',1,'arm_compute']]],
+  ['syntheticdatatypemutator',['SyntheticDataTypeMutator',['../classarm__compute_1_1graph_1_1_synthetic_data_type_mutator.xhtml',1,'arm_compute::graph']]]
 ];

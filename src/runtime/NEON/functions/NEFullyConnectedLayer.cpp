@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,8 @@
 #include <algorithm>
 #include <cmath>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
@@ -140,9 +141,8 @@ void NEFullyConnectedLayer::configure_fc_fc(const ITensor *input, const ITensor 
 void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
                                       FullyConnectedLayerInfo fc_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-
     // Perform validate step
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEFullyConnectedLayer::validate(input->info(),
                                                                weights->info(),
                                                                biases != nullptr ? biases->info() : nullptr,
@@ -255,11 +255,17 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
         const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        int   output_multiplier;
-        int   output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, oq_info.offset);
+        float   multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        int32_t output_multiplier;
+        int32_t output_shift;
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+
+        GEMMLowpOutputStageInfo gemmlowp_output_stage_info;
+        gemmlowp_output_stage_info.gemmlowp_multiplier = output_multiplier;
+        gemmlowp_output_stage_info.gemmlowp_shift      = output_shift;
+        gemmlowp_output_stage_info.gemmlowp_offset     = oq_info.offset;
+        gemmlowp_output_stage_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+        _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, gemmlowp_output_stage_info);
         _gemmlowp_output.allocator()->allocate();
     }
 
@@ -271,7 +277,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
 {
     ARM_COMPUTE_UNUSED(fc_info.retain_internal_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
 
@@ -352,14 +358,21 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     // Validate output stage for asymmetric quantized types
     if(is_quantized)
     {
-        const UniformQuantizationInfo iq_info    = input->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info    = weights->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info    = output->quantization_info().uniform();
-        const float                   multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
 
-        ARM_COMPUTE_UNUSED(multiplier);
-        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&gemmlowp_output, biases, output));
+        float   multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        int32_t output_multiplier;
+        int32_t output_shift;
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
+
+        GEMMLowpOutputStageInfo gemmlowp_output_stage_info;
+        gemmlowp_output_stage_info.gemmlowp_multiplier = output_multiplier;
+        gemmlowp_output_stage_info.gemmlowp_shift      = output_shift;
+        gemmlowp_output_stage_info.gemmlowp_offset     = oq_info.offset;
+        gemmlowp_output_stage_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOutputStage::validate(&gemmlowp_output, biases, output, gemmlowp_output_stage_info));
     }
 
     return Status{};
@@ -476,3 +489,4 @@ void NEFullyConnectedLayer::prepare()
         _is_prepared = true;
     }
 }
+} // namespace arm_compute

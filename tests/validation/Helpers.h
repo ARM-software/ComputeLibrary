@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__
-#define __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__
+#ifndef ARM_COMPUTE_TEST_VALIDATION_HELPERS_H
+#define ARM_COMPUTE_TEST_VALIDATION_HELPERS_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
@@ -177,21 +177,14 @@ void fill_lookuptable(T &&table)
     }
 }
 
-/** Convert 8-bit asymmetric quantized simple tensor into float using tensor quantization information.
+/** Convert an asymmetric quantized simple tensor into float using tensor quantization information.
  *
  * @param[in] src Quantized tensor.
  *
  * @return Float tensor.
  */
-SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src);
-
-/** Convert 16-bit asymmetric quantized simple tensor into float using tensor quantization information.
- *
- * @param[in] src Quantized tensor.
- *
- * @return Float tensor.
- */
-SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src);
+template <typename T>
+SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<T> &src);
 
 /** Convert float simple tensor into quantized using specified quantization information.
  *
@@ -202,14 +195,6 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src);
  */
 template <typename T>
 SimpleTensor<T> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
-
-/** Convert quantized simple tensor into float using tensor quantization information.
- *
- * @param[in] src Quantized tensor.
- *
- * @return Float tensor.
- */
-SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src);
 
 /** Convert quantized simple tensor into float using tensor quantization information.
  *
@@ -277,6 +262,14 @@ void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &sh
  */
 std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, float min, float max);
 
+/** Helper function to compute asymmetric quantized signed min and max bounds
+ *
+ * @param[in] quant_info Quantization info to be used for conversion
+ * @param[in] min        Floating point minimum value to be quantized
+ * @param[in] max        Floating point maximum value to be quantized
+ */
+std::pair<int, int> get_quantized_qasymm8_signed_bounds(const QuantizationInfo &quant_info, float min, float max);
+
 /** Helper function to compute symmetric quantized min and max bounds
  *
  * @param[in] quant_info Quantization info to be used for conversion
@@ -288,4 +281,4 @@ std::pair<int, int> get_symm_quantized_per_channel_bounds(const QuantizationInfo
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_VALIDATION_HELPERS_H__ */
+#endif /* ARM_COMPUTE_TEST_VALIDATION_HELPERS_H */

@@ -292,6 +292,7 @@ MEMBERFN(void)::run(
   // Parallelise over blocks of channels
   const auto start_channel = CHANNEL_BLOCK * start;
   const auto stop_channel = std::min<unsigned int>(_n_channels, CHANNEL_BLOCK * stop);
+  const auto params_size_per_channel = this->get_packed_params_size()/_n_channels;
 
   // Compute top and bottom padding for input and output
   const int input_pad_top = _padding_top;
@@ -325,7 +326,7 @@ MEMBERFN(void)::run(
 
       // Get the offset into the packed parameters
       const auto params_ptr = static_cast<const uint8_t*>(_packed_parameters) +
-        start_channel*(sizeof(TIn)*KernelRows*KernelColumns + sizeof(TBias));
+        start_channel*params_size_per_channel;
 
       // Process the row
       process_tile_row(

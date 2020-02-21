@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,6 +51,8 @@ TensorShape get_output_shape(const ITensorInfo *input, const PermutationVector &
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output); 
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() < 1 || input->num_dimensions() > 4,
                                     "Permutation upto 4-D input tensor is supported");

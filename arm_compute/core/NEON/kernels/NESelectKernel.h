@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -14,21 +14,22 @@
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INNEUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY NEAIM, DAMAGES OR OTHER
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NESELECTKERNEL_H__
-#define __ARM_COMPUTE_NESELECTKERNEL_H__
+#ifndef ARM_COMPUTE_NESELECTKERNEL_H
+#define ARM_COMPUTE_NESELECTKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the select kernel
@@ -60,7 +61,7 @@ public:
     /** Common signature for all the specialised elementwise functions
      *
      * @param[in]  c      Condition input tensor. Data types supported: U8.
-     * @param[in]  x      First input tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  x      First input tensor. Data types supported: All.
      * @param[out] y      Second input tensor. Data types supported: Same as @p x
      * @param[in]  output Output tensor. Data types supported: Same as @p x
      */
@@ -69,7 +70,7 @@ public:
     /** Validate the argument passed to the kernel
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.
-     * @param[in] x      First input tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in] x      First input tensor. Data types supported: All.
      * @param[in] y      Second input tensor. Data types supported: Same as @p x
      * @param[in] output Output tensor. Data types supported: Same as @p x.
      *
@@ -84,7 +85,7 @@ private:
     /** Common signature for all the specialised select functions
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.
-     * @param[in] x      First input tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in] x      First input tensor. Data types supported: All.
      * @param[in] y      Second input tensor. Data types supported: Same as @p x
      * @param[in] output Output tensor. Data types supported: Same as @p x.
      */
@@ -99,4 +100,4 @@ private:
     bool            _has_same_rank; /**< Flag that indicates if condition tensor and other inputs have the same rank */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NESELECTKERNEL_H__ */
+#endif /* ARM_COMPUTE_NESELECTKERNEL_H */

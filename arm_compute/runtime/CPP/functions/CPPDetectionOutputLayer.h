@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H__
-#define __ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H__
+#ifndef ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H
+#define ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H
 
 #include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
@@ -90,4 +90,4 @@ private:
     std::vector<std::map<int, std::vector<int>>> _all_indices;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H__ */
+#endif /* ARM_COMPUTE_CPP_DETECTION_OUTPUT_LAYER_H */

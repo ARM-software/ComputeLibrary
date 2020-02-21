@@ -41,8 +41,6 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
 template <typename AllocatorType,
           typename LifetimeMgrType,
           typename PoolMgrType,
@@ -114,7 +112,6 @@ public:
 private:
     FuncType _func;
 };
-} // namespace
 
 /** Simple test case to run a single function with different shapes twice.
  *

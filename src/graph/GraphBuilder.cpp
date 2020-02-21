@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -581,9 +581,28 @@ NodeID GraphBuilder::add_permute_node(Graph &g, NodeParams params, NodeIdxPair i
     return create_simple_single_input_output_node<PermuteLayerNode>(g, params, input, perm, layout);
 }
 
+NodeID GraphBuilder::add_prelu_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair alpha)
+{
+    check_nodeidx_pair(input, g);
+    check_nodeidx_pair(alpha, g);
+
+    NodeID prelu_nid = g.add_node<PReluLayerNode>();
+    g.add_connection(input.node_id, input.index, prelu_nid, 0);
+    g.add_connection(alpha.node_id, alpha.index, prelu_nid, 1);
+
+    set_node_params(g, prelu_nid, params);
+
+    return prelu_nid;
+}
+
 NodeID GraphBuilder::add_pooling_node(Graph &g, NodeParams params, NodeIdxPair input, PoolingLayerInfo pool_info)
 {
     return create_simple_single_input_output_node<PoolingLayerNode>(g, params, input, pool_info);
+}
+
+NodeID GraphBuilder::add_print_node(Graph &g, NodeParams params, NodeIdxPair input, std::ostream &stream, const IOFormatInfo &format_info, const std::function<ITensor *(ITensor *)> transform)
+{
+    return create_simple_single_input_output_node<PrintLayerNode>(g, params, input, stream, format_info, transform);
 }
 
 NodeID GraphBuilder::add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, const PriorBoxLayerInfo &prior_info)

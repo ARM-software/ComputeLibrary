@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_PASSMANAGER_H__
-#define __ARM_COMPUTE_GRAPH_PASSMANAGER_H__
+#ifndef ARM_COMPUTE_GRAPH_PASSMANAGER_H
+#define ARM_COMPUTE_GRAPH_PASSMANAGER_H
 
 #include "arm_compute/graph/IGraphMutator.h"
 
@@ -78,16 +78,22 @@ public:
      * @param[in, out] g Graph to run the mutations on
      */
     void run_all(Graph &g);
+    /** Runs a mutation passes of a specific type on a given graph
+     *
+     * @param[in, out] g    Graph to run the mutation on
+     * @param[in]      type Type of the mutations to execute
+     */
+    void run_type(Graph &g, IGraphMutator::MutationType type);
     /** Runs a specific mutation pass on a given graph
      *
      * @param[in, out] g     Graph to run the mutation on
      * @param[in]      index Index of the mutation to execute
      */
-    void run(Graph &g, size_t index);
+    void run_index(Graph &g, size_t index);
 
 private:
     std::vector<std::unique_ptr<IGraphMutator>> _passes; /**< Vector of graph passes */
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_PASSMANAGER_H__ */
+#endif /* ARM_COMPUTE_GRAPH_PASSMANAGER_H */

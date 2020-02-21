@@ -41,5 +41,6 @@ var dir_9e71e2da941d3cafc4d98a9f6ae3de4f =
     [ "TestResult.h", "_test_result_8h.xhtml", [
       [ "TestResult", "structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml", "structarm__compute_1_1test_1_1framework_1_1_test_result" ]
     ] ],
+    [ "Utils.cpp", "tests_2framework_2_utils_8cpp.xhtml", "tests_2framework_2_utils_8cpp" ],
     [ "Utils.h", "tests_2framework_2_utils_8h.xhtml", "tests_2framework_2_utils_8h" ]
 ];

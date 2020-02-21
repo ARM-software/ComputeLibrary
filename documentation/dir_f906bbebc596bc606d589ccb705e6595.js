@@ -11,6 +11,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLActivationLayerKernel.h", "_c_l_activation_layer_kernel_8h.xhtml", [
       [ "CLActivationLayerKernel", "classarm__compute_1_1_c_l_activation_layer_kernel.xhtml", "classarm__compute_1_1_c_l_activation_layer_kernel" ]
     ] ],
+    [ "CLArgMinMaxLayerKernel.h", "_c_l_arg_min_max_layer_kernel_8h.xhtml", [
+      [ "CLArgMinMaxLayerKernel", "classarm__compute_1_1_c_l_arg_min_max_layer_kernel.xhtml", "classarm__compute_1_1_c_l_arg_min_max_layer_kernel" ]
+    ] ],
     [ "CLBatchConcatenateLayerKernel.h", "_c_l_batch_concatenate_layer_kernel_8h.xhtml", [
       [ "CLBatchConcatenateLayerKernel", "classarm__compute_1_1_c_l_batch_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_c_l_batch_concatenate_layer_kernel" ]
     ] ],
@@ -180,6 +183,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h", "_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel_8h.xhtml", [
       [ "CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int16_scale_by_fixed_point_kernel" ]
+    ] ],
+    [ "CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h", "_c_l_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel_8h.xhtml", [
+      [ "CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel" ]
     ] ],
     [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h", "_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel_8h.xhtml", [
       [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel" ]

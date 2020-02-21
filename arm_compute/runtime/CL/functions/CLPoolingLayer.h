@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPOOLINGLAYER_H__
-#define __ARM_COMPUTE_CLPOOLINGLAYER_H__
+#ifndef ARM_COMPUTE_CLPOOLINGLAYER_H
+#define ARM_COMPUTE_CLPOOLINGLAYER_H
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
@@ -43,14 +43,14 @@ class CLPoolingLayer : public ICLSimpleFunction
 public:
     /** Set the input and output tensors.
      *
-     * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/F16/F32.
+     * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayer
      *
-     * @param[in] input     Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *
@@ -59,4 +59,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLPOOLINGLAYER_H__ */
+#endif /* ARM_COMPUTE_CLPOOLINGLAYER_H */

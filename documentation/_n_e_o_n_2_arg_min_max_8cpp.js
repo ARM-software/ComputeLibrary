@@ -1,9 +1,8 @@
 var _n_e_o_n_2_arg_min_max_8cpp =
 [
     [ "NEArgMinMaxValidationFixture", "_n_e_o_n_2_arg_min_max_8cpp.xhtml#aaa0528c7bea5cf2459c16d15e8418045", null ],
-    [ "combine", "_n_e_o_n_2_arg_min_max_8cpp.xhtml#a29391eb7c5b25fd49ac485564502edd9", null ],
+    [ "combine", "_n_e_o_n_2_arg_min_max_8cpp.xhtml#a9b560a2597afefb5b26dd93e2d8115d4", null ],
     [ "DATA_TEST_CASE", "_n_e_o_n_2_arg_min_max_8cpp.xhtml#a2c9767fa8091d865f4ce1d8af0e88821", null ],
-    [ "DATA_TEST_CASE", "_n_e_o_n_2_arg_min_max_8cpp.xhtml#a5ed8b4681b5e026cbac93b871e7ade81", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_arg_min_max_8cpp.xhtml#a819a77f8b5d28cdabeff16b9c7ec0f2b", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_arg_min_max_8cpp.xhtml#a2460e84cb936595d5ff082d7919eb78f", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_arg_min_max_8cpp.xhtml#ab8a7eeef577c6c6d5beac9a318971423", null ],

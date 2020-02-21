@@ -66,6 +66,7 @@ namespace arm_compute
         - @ref NEScharr3x3
         - @ref NESelect
         - @ref NESobel3x3
+        - @ref NESplit
         - @ref NEStridedSlice
         - @ref NEWarpAffine
         - @ref NEWarpPerspective
@@ -92,6 +93,7 @@ namespace arm_compute
         - @ref NEGather
         - @ref NEGEMMInterleave4x4
         - @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
+        - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref NEGEMMTranspose1xW
         - @ref NEHOGDetector
@@ -132,6 +134,7 @@ namespace arm_compute
     - @ref NEFFT1D
     - @ref NEFFT2D
     - @ref NEFFTConvolutionLayer
+    - @ref NEFill
     - @ref NEFillBorder
     - @ref NEFullyConnectedLayer
     - @ref NEFuseBatchNormalization
@@ -177,7 +180,6 @@ namespace arm_compute
     - @ref NESoftmaxLayerGeneric &lt;IS_LOG&gt;
     - @ref NESpaceToBatchLayer
     - @ref NESpaceToDepthLayer
-    - @ref NESplit
     - @ref NEStackLayer
     - @ref NEUnstack
     - @ref NEUpsampleLayer
@@ -288,6 +290,7 @@ namespace arm_compute
         - @ref CLElementwiseSquaredDiff
         - @ref CLErode
         - @ref CLExpLayer
+        - @ref CLFill
         - @ref CLFillBorder
         - @ref CLFlattenLayer
         - @ref CLFloor
@@ -296,6 +299,7 @@ namespace arm_compute
         - @ref CLGaussian3x3
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+        - @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
         - @ref CLMagnitude
         - @ref CLMeanStdDevNormalizationLayer

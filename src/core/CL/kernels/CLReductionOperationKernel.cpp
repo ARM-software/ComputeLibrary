@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     if(input->num_channels() == 1)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S32, DataType::F16, DataType::F32);
     }
     else
     {
@@ -59,20 +59,13 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op == ReductionOperation::SUM_SQUARE && input->data_type() == DataType::QASYMM8, "Not supported reduction operation for QASYMM8");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
-    ARM_COMPUTE_RETURN_ERROR_ON(op == ReductionOperation::MEAN_SUM && axis == 0 && width == 0 && input->data_type() != DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON((op == ReductionOperation::MEAN_SUM) && (axis == 0) && (width == 0) && (input->data_type() != DataType::QASYMM8) && (input->data_type() != DataType::QASYMM8_SIGNED));
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((op == ReductionOperation::ARG_IDX_MAX) || (op == ReductionOperation::ARG_IDX_MIN), "Not supported reduction operation, use CLArgMinMaxLayer");
 
     if(output->total_size() != 0)
     {
-        if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN)
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8, "Not supported operation for QASYMM8");
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32, DataType::S32);
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-        }
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
 
     return Status{};
@@ -81,9 +74,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
     // Output tensor auto initialization if not yet initialized
-    const bool        is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
-    const TensorShape output_shape     = arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis, !is_arg_min_max);
-    const DataType    output_data_type = is_arg_min_max ? DataType::S32 : input->data_type();
+    const TensorShape output_shape     = arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis, true);
+    DataType          output_data_type = input->data_type();
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
 
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;
@@ -155,23 +147,30 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
 
     // Set build options
     CLBuildOptions build_opts;
-    std::string    data_type_promoted = get_cl_type_from_data_type(input->info()->data_type());
-    if(is_data_type_quantized(input->info()->data_type()))
+    DataType       data_type = input->info()->data_type();
+    std::string    data_type_promoted{};
+
+    if(is_data_type_quantized(data_type))
     {
-        data_type_promoted = "uint";
+        data_type_promoted = "int";
+    }
+    else
+    {
+        data_type_promoted = get_cl_type_from_data_type(data_type);
     }
 
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DDATA_TYPE_PROMOTED=" + data_type_promoted);
-    build_opts.add_option_if(is_data_type_float(input->info()->data_type()), "-DFLOAT_DATA_TYPE");
+    build_opts.add_option_if(is_data_type_float(data_type), "-DFLOAT_DATA_TYPE");
     build_opts.add_option_if(op == ReductionOperation::SUM_SQUARE, "-DSUM_SQUARE");
     build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DMEAN");
-    build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX");
-    build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MIN, "-DARG_MIN");
+    build_opts.add_option_if(op == ReductionOperation::SUM, "-DSUM");
     build_opts.add_option_if(op == ReductionOperation::PROD, "-DPROD");
     build_opts.add_option_if(op == ReductionOperation::MIN, "-DMIN");
     build_opts.add_option_if(op == ReductionOperation::MAX, "-DMAX");
     build_opts.add_option_if(input->info()->num_channels() == 2, "-DCOMPLEX");
+    build_opts.add_option_if(is_data_type_quantized(data_type), "-DOFFSET=" + support::cpp11::to_string(input->info()->quantization_info().uniform().offset));
+    build_opts.add_option_if(is_data_type_quantized(data_type), "-DSCALE=" + float_to_string_with_full_precision(input->info()->quantization_info().uniform().scale));
 
     switch(op)
     {
@@ -182,8 +181,6 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
         case ReductionOperation::MEAN_SUM:
             build_opts.add_option(("-DOPERATION=sum"));
             break;
-        case ReductionOperation::ARG_IDX_MAX:
-        case ReductionOperation::ARG_IDX_MIN:
         case ReductionOperation::MIN:
         case ReductionOperation::MAX:
             break;
@@ -214,12 +211,9 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
                 build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DWIDTH=" + support::cpp11::to_string(width));
                 const unsigned int width_leftover = input->info()->dimension(0) % border_val;
                 const unsigned int border_width   = (width_leftover != 0) ? border_val - width_leftover : 0;
-                const unsigned int num_of_threads = ((input->info()->dimension(0) + border_width) / 16);
                 kernel_axis_name                  = "x";
 
-                // Set the number of WG based on the input size. If input width is < 128
-                // we can use fewer threads than 8.
-                lws_hint     = cl::NDRange(std::min(8U, num_of_threads));
+                lws_hint     = create_lws_hint_parallel_implementations(input->info()->dimension(0), border_val);
                 _border_size = BorderSize(0, border_width, 0, 0);
             }
         }

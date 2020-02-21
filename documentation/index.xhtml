@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -162,7 +162,7 @@ Pre-built binaries</h1>
 <h1><a class="anchor" id="S1_file_organisation"></a>
 File organisation</h1>
 <p>This archive contains:</p><ul>
-<li>The <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> header and source files</li>
+<li>The <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a> header and source files</li>
 <li>The latest Khronos OpenCL 1.2 C headers from the <a href="https://www.khronos.org/registry/cl/">Khronos OpenCL registry</a></li>
 <li>The latest Khronos cl2.hpp from the <a href="https://www.khronos.org/registry/cl/">Khronos OpenCL registry</a> (API version 2.1 when this document was written)</li>
 <li>The latest Khronos OpenGL ES 3.1 C headers from the <a href="https://www.khronos.org/registry/gles/">Khronos OpenGL ES registry</a></li>
@@ -177,9 +177,10 @@ File organisation</h1>
 │   ├── graph.h --&gt; Includes all the Graph headers at once.
 │   ├── core
 │   │   ├── CL
+│   │   │   ├── CLCoreRuntimeContext.h --&gt; Manages all core OpenCL objects needed for kernel execution (cl_context, cl_kernel, cl_command_queue, etc).
 │   │   │   ├── CLKernelLibrary.h --&gt; Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
 │   │   │   ├── CLKernels.h --&gt; Includes all the OpenCL kernels at once
-│   │   │   ├── CL specialisation of all the generic objects interfaces (ICLTensor, ICLImage, etc.)
+│   │   │   ├── CL specialisation of all the generic objects interfaces (ICLTensor, ICLArray, etc.)
 │   │   │   ├── kernels --&gt; Folder containing all the OpenCL kernels
 │   │   │   │   └── CL*Kernel.h
 │   │   │   └── OpenCL.h --&gt; Wrapper to configure the Khronos OpenCL C++ header
@@ -188,9 +189,10 @@ File organisation</h1>
 │   │   │   └── kernels --&gt; Folder containing all the CPP kernels
 │   │   │       └── CPP*Kernel.h
 │   │   ├── GLES_COMPUTE
+│   │   │   ├── GCCoreRuntimeContext.h --&gt; Manages all core GLES objects needed for kernel execution.
 │   │   │   ├── GCKernelLibrary.h --&gt; Manages all the GLES kernels compilation and caching, provides accessors for the GLES Context.
 │   │   │   ├── GCKernels.h --&gt; Includes all the GLES kernels at once
-│   │   │   ├── GLES specialisation of all the generic objects interfaces (IGCTensor, IGCImage, etc.)
+│   │   │   ├── GLES specialisation of all the generic objects interfaces (IGCTensor etc.)
 │   │   │   ├── kernels --&gt; Folder containing all the GLES kernels
 │   │   │   │   └── GC*Kernel.h
 │   │   │   └── OpenGLES.h --&gt; Wrapper to configure the Khronos EGL and OpenGL ES C header
@@ -203,10 +205,15 @@ File organisation</h1>
 │   │   │   │   │   └── winograd --&gt; headers for Winograd convolution assembly implementation
 │   │   │   │   ├── detail --&gt; Common code for several intrinsics implementations.
 │   │   │   │   └── NE*Kernel.h
+│   │   │   ├── wrapper --&gt; NEON wrapper used to simplify code
+│   │   │   │   ├── intrinsics --&gt; NEON instrincs' wrappers
+│   │   │   │   ├── scalar --&gt; Scalar operations
+│   │   │   │   ├── traits.h --&gt; Traits defined on NEON vectors
+│   │   │   │   └── wrapper.h --&gt; Includes all wrapper headers at once
 │   │   │   └── NEKernels.h --&gt; Includes all the NEON kernels at once
 │   │   ├── All common basic types (Types.h, Window, Coordinates, Iterator, etc.)
-│   │   ├── All generic objects interfaces (ITensor, IImage, etc.)
-│   │   └── Objects metadata classes (ImageInfo, TensorInfo, MultiImageInfo)
+│   │   ├── All generic objects interfaces (ITensor, IArray, etc.)
+│   │   └── Objects metadata classes (TensorInfo, MultiImageInfo)
 │   ├── graph
 │   │   ├── algorithms
 │   │   │   └── Generic algorithms used by the graph backend (e.g Order of traversal)
@@ -226,12 +233,15 @@ File organisation</h1>
 │   │   │   └── Debug printers
 │   │   └── Graph objects ( INode, ITensorAccessor, Graph, etc.)
 │   └── runtime
+│       ├── common
+│       │   └── Common utility code used by all backends
 │       ├── CL
-│       │   ├── CL objects &amp; allocators (CLArray, CLImage, CLTensor, etc.)
+│       │   ├── CL objects &amp; allocators (CLArray, CLTensor, etc.)
 │       │   ├── functions --&gt; Folder containing all the OpenCL functions
 │       │   │   └── CL*.h
 │       │   ├── CLScheduler.h --&gt; Interface to enqueue OpenCL kernels and get/set the OpenCL CommandQueue and ICLTuner.
 │       │   ├── CLFunctions.h --&gt; Includes all the OpenCL functions at once
+│       │   ├── ICLTuner.h --&gt; Interface used to tune the local work-group size of OpenCL kernels
 │       │   └── tuners
 │       │       └── Local workgroup size tuners for specific architectures / GPUs
 │       ├── CPP
@@ -240,7 +250,7 @@ File organisation</h1>
 │       │   └── functions --&gt; Folder containing all the CPP functions
 │       │       └── CPP*.h
 │       ├── GLES_COMPUTE
-│       │   ├── GLES objects &amp; allocators (GCArray, GCImage, GCTensor, etc.)
+│       │   ├── GLES objects &amp; allocators (GCArray, GCTensor, etc.)
 │       │   ├── functions --&gt; Folder containing all the GLES functions
 │       │   │   └── GC*.h
 │       │   ├── GCScheduler.h --&gt; Interface to enqueue GLES kernels and get/set the GLES CommandQueue.
@@ -251,14 +261,14 @@ File organisation</h1>
 │       │   └── NEFunctions.h --&gt; Includes all the NEON functions at once
 │       ├── OMP
 │       │   └── OMPScheduler.h --&gt; OpenMP scheduler (Alternative to the CPPScheduler)
-│       ├── Memory manager files (LifetimeManager, PoolManager, etc.)
-│       └── Basic implementations of the generic object interfaces (Array, Image, Tensor, etc.)
-├── data -&gt; Contains test images and reference data dumps used by validation tests
-├── docs -&gt; Contains Doxyfile and Doxygen sources used to generate the HTML pages in the documentation folder.
+│       ├── Memory &amp; weights manager files (LifetimeManager, PoolManager, etc.)
+│       └── Basic implementations of the generic object interfaces (Array, Tensor, etc.)
+├── data --&gt; Contains test images and reference data dumps used by validation tests
+├── docs --&gt; Contains Doxyfile and Doxygen sources used to generate the HTML pages in the documentation folder.
 ├── documentation
 │   ├── index.xhtml
 │   └── ...
-├── documentation.xhtml -&gt; documentation/index.xhtml
+├── documentation.xhtml --&gt; documentation/index.xhtml
 ├── examples
 │   ├── cl_*.cpp --&gt; OpenCL examples
 │   ├── gc_*.cpp --&gt; GLES compute shaders examples
@@ -270,13 +280,10 @@ File organisation</h1>
 │   │   └── Khronos OpenCL C headers and C++ wrapper
 │   ├── half --&gt; FP16 library available from http://half.sourceforge.net
 │   ├── libnpy --&gt; Library to load / write npy buffers, available from https://github.com/llohse/libnpy
-│   └── linux --&gt; Headers only needed for Linux builds
-│       └── Khronos EGL and OpenGLES headers
-├── opencl-1.2-stubs
-│   └── opencl_stubs.c --&gt; OpenCL stubs implementation
-├── opengles-3.1-stubs
-│   ├── EGL.c --&gt; EGL stubs implementation
-│   └── GLESv2.c --&gt; GLESv2 stubs implementation
+│   ├── linux --&gt; Headers only needed for Linux builds
+│   │   └── Khronos EGL and OpenGLES headers
+│   └── stb
+│        └── stb_image.h --&gt; Single header library to load image files, available from https://github.com/nothings/stb
 ├── scripts
 │   ├── caffe_data_extractor.py --&gt; Basic script to export weights from Caffe to npy files
 │   └── tensorflow_data_extractor.py --&gt; Basic script to export weights from Tensor Flow to npy files
@@ -302,6 +309,7 @@ File organisation</h1>
 │   │   ├── CL --&gt; OpenCL benchmarking tests
 │   │   ├── GLES_COMPUTE --&gt; GLES benchmarking tests
 │   │   └── NEON --&gt; NEON benchmarking tests
+│   ├── benchmark_examples --&gt; Sources needed to wrap examples to run through our benchmarking framework.
 │   ├── CL --&gt; OpenCL accessors
 │   ├── GLES_COMPUTE --&gt; GLES accessors
 │   ├── NEON --&gt; NEON accessors
@@ -309,6 +317,8 @@ File organisation</h1>
 │   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
 │   ├── framework
 │   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
+│   ├── instruments --&gt; User defined instruments that can be registered to the framework.
+│   ├── validate_examples --&gt; Sources needed to wrap examples to run through our validation framework.
 │   └── validation --&gt; Sources for validation
 │       ├── Validation specific files
 │       ├── fixtures
@@ -331,6 +341,65 @@ v17.04 (First release of April 2017)
 </pre><dl class="section note"><dt>Note</dt><dd>We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.</dd></dl>
 <h2><a class="anchor" id="S2_2_changelog"></a>
 Changelog</h2>
+<p>v20.02 Public major release</p><ul>
+<li>Various bug fixes.</li>
+<li>Various optimisations.</li>
+<li>Added new data type QASYMM8_SIGNED support for:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml">CLGEMMConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_core.xhtml">CLGEMMLowpMatrixMultiplyCore</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_only_r_h_s_kernel.xhtml">CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_native_kernel.xhtml">CLGEMMLowpMatrixMultiplyNativeKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_activation_layer.xhtml">NEActivationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_comparison_operation_kernel.xhtml">NEComparisonOperationKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">NEConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml">NEDirectConvolutionLayerOutputStageKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_elementwise_comparison.xhtml">NEElementwiseComparison</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_elementwise_max.xhtml">NEElementwiseMax</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_elementwise_min.xhtml">NEElementwiseMin</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_elementwise_squared_diff.xhtml">NEElementwiseSquaredDiff</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml">NEGEMMMatrixVectorMultiplyKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml">NEPixelWiseMultiplication</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">NEPoolingLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_p_relu_layer.xhtml">NEPReluLayer</a></li>
+</ul>
+</li>
+<li>Added support for QSYMM8_PER_CHANNEL in:<ul>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a></li>
+</ul>
+</li>
+<li>Added support for split sizes in:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_split.xhtml">CLSplit</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_split.xhtml">NESplit</a></li>
+</ul>
+</li>
+<li>New OpenCL kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_fill.xhtml">CLFill</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml">CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point.xhtml">CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint</a></li>
+</ul>
+</li>
+<li>New NEON kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_n_e_fill.xhtml">NEFill</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point_kernel.xhtml">NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_int8_scale_by_fixed_point.xhtml">NEGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint</a></li>
+</ul>
+</li>
+<li>Deprecated NEON functions / interfaces:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer_optimized.xhtml">NEDepthwiseConvolutionLayerOptimized</a></li>
+<li><a class="el" href="structarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a> constructors without Data Layout.</li>
+</ul>
+</li>
+<li>Added support for quantization with multiplier greater than 1 on NEON and CL.</li>
+<li>Added support for quantized inputs of type QASYMM8_SIGNED and QASYMM8 to <a class="el" href="classarm__compute_1_1_c_l_quantization_layer.xhtml">CLQuantizationLayer</a>.</li>
+<li>Added the ability to build bootcode for bare metal.</li>
+<li>Added support for generating synthetic QASYMM8 graphs.</li>
+<li>Added support for F16 datatype in VGG16.</li>
+<li>Removed pre-built binaries for GLES.</li>
+</ul>
 <p>v19.11.1 Public maintenance release</p><ul>
 <li>Fix offset calculation in <a class="el" href="classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml" title="NEON kernel to perform a reduction operation.">NEReductionOperationKernel</a>.</li>
 <li>Fix data layout in <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml" title="NEON kernel to perform scaling on a tensor.">NEScaleKernel</a> for nhwc.</li>
@@ -1116,7 +1185,7 @@ Changelog</h2>
 <li><a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml">NENonMaximaSuppression3x3Kernel</a></li>
 </ul>
 <p>v17.03.1 First Major public release of the sources</p><ul>
-<li>Renamed the library to <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a></li>
+<li>Renamed the library to <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a></li>
 <li>New CPP target introduced for C++ kernels shared between NEON and CL functions.</li>
 <li>New padding calculation interface introduced and ported most kernels / functions to use it.</li>
 <li>New OpenCL kernels / functions:<ul>
@@ -1322,7 +1391,7 @@ scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=armv7a build=native
 <h3><a class="anchor" id="S3_2_2_examples"></a>
 How to manually build the examples ?</h3>
 <p>The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.</p>
-<dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a> binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
 <p>To cross compile a NEON example for Linux 32bit: </p><pre class="fragment">arm-linux-gnueabihf-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>To cross compile a NEON example for Linux 64bit: </p><pre class="fragment">aarch64-linux-gnu-g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)</p>
@@ -1336,7 +1405,7 @@ How to manually build the examples ?</h3>
 <p>i.e. to cross compile the "graph_lenet" example for Linux 32bit: </p><pre class="fragment">arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 </pre><p>i.e. to cross compile the "graph_lenet" example for Linux 64bit: </p><pre class="fragment">aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)</p>
-<dl class="section note"><dt>Note</dt><dd>If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a>, arm_compute_core</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a>, arm_compute_core</dd></dl>
 <p>To compile natively (i.e directly on an ARM device) for NEON for Linux 32bit: </p><pre class="fragment">g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>To compile natively (i.e directly on an ARM device) for NEON for Linux 64bit: </p><pre class="fragment">g++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -o neon_convolution
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option)</p>
@@ -1346,9 +1415,11 @@ How to manually build the examples ?</h3>
 <p>i.e. to natively compile the "graph_lenet" example for Linux 32bit: </p><pre class="fragment">g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 </pre><p>i.e. to natively compile the "graph_lenet" example for Linux 64bit: </p><pre class="fragment">g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 </pre><p>(notice the only difference with the 32 bit command is that we don't need the -mfpu option)</p>
-<dl class="section note"><dt>Note</dt><dd>If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a>, arm_compute_core</dd>
+<dl class="section note"><dt>Note</dt><dd>If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a>, arm_compute_core</dd>
 <dd>
-These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L</dd></dl>
+These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L </dd>
+<dd>
+You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was build with OpenCL enabled.</dd></dl>
 <p>To run the built executable simply run: </p><pre class="fragment">LD_LIBRARY_PATH=build ./neon_convolution
 </pre><p>or </p><pre class="fragment">LD_LIBRARY_PATH=build ./cl_convolution
 </pre><dl class="section note"><dt>Note</dt><dd>Examples accept different types of arguments, to find out what they are run the example with <em>&ndash;help</em> as an argument. If no arguments are specified then random values will be used to execute the graph.</dd></dl>
@@ -1356,20 +1427,20 @@ These two commands assume libarm_compute.so is available in your library path, i
 </pre><p>Below is a list of the common parameters among the graph examples : </p><div class="fragment"><div class="line"><span class="comment">/* Common graph parameters</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * --help             : Print the example&#39;s help message.</span></div><div class="line"><span class="comment"> * --threads          : The number of threads to be used by the example during execution.</span></div><div class="line"><span class="comment"> * --target           : Execution target to be used by the examples. Supported target options: NEON, CL, GC.</span></div><div class="line"><span class="comment"> * --type             : Data type to be used by the examples. Supported data type options: QASYMM8, F16, F32.</span></div><div class="line"><span class="comment"> * --layout           : Data layout to be used by the examples. Supported data layout options : NCHW, NHWC.</span></div><div class="line"><span class="comment"> * --enable-tuner     : Toggle option to enable the OpenCL dynamic tuner.</span></div><div class="line"><span class="comment"> * --enable-cl-cache  : Toggle option to load the prebuilt opencl kernels from a cache file.</span></div><div class="line"><span class="comment"> * --fast-math        : Toggle option to enable the fast math option.</span></div><div class="line"><span class="comment"> * --data             : Path that contains the trainable parameter files of graph layers.</span></div><div class="line"><span class="comment"> * --image            : Image to load and operate on. Image types supported: PPM, JPEG, NPY.</span></div><div class="line"><span class="comment"> * --labels           : File that contains the labels that classify upon.</span></div><div class="line"><span class="comment"> * --validation-file  : File that contains a list of image names with their corresponding label id (e.g. image0.jpg 5).</span></div><div class="line"><span class="comment"> *                      This is used to run the graph over a number of images and report top-1 and top-5 metrics.</span></div><div class="line"><span class="comment"> * --validation-path  : The path where the validation images specified in the validation file reside.</span></div><div class="line"><span class="comment"> * --validation-range : The range of the images to validate from the validation file (e.g 0,9).</span></div><div class="line"><span class="comment"> *                      If not specified all the images will be validated.</span></div><div class="line"><span class="comment"> * --tuner-file       : The file to store the OpenCL dynamic tuner tuned parameters.</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * Note that data, image and labels options should be provided to perform an inference run on an image.</span></div><div class="line"><span class="comment"> * Note that validation-file and validation-path should be provided to perform a graph accuracy estimation.</span></div><div class="line"><span class="comment"> * Note GLES target is not supported for most of the networks.</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * Example execution commands:</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * Execute a single inference given an image and a file containing the correspondence between label ids and human readable labels:</span></div><div class="line"><span class="comment"> * ./graph_vgg16 --data=data/ --target=cl --layout=nhwc --image=kart.jpeg --labels=imagenet1000_clsid_to_human.txt</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * Perform a graph validation on a list of images:</span></div><div class="line"><span class="comment"> * ./graph_vgg16 --data=data/ --target=neon --threads=4 --layout=nchw --validation-file=val.txt --validation-path=ilsvrc_test_images/</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * File formats:</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * Validation file should be a plain file containing the names of the images followed by the correct label id.</span></div><div class="line"><span class="comment"> * For example:</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * image0.jpeg 882</span></div><div class="line"><span class="comment"> * image1.jpeg 34</span></div><div class="line"><span class="comment"> * image2.jpeg 354</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * Labels file should be a plain file where each line is the respective human readable label (counting starts from 0).</span></div><div class="line"><span class="comment"> * For example:</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * 0: label0_name            label0_name</span></div><div class="line"><span class="comment"> * 1: label1_name     or     label1_name</span></div><div class="line"><span class="comment"> * 2: label2_name            label2_name</span></div><div class="line"><span class="comment"> */</span></div></div><!-- fragment --> <h2><a class="anchor" id="S3_3_android"></a>
 Building for Android</h2>
 <p>For Android, the library was successfully built and tested using Google's standalone toolchains:</p><ul>
-<li>clang++ from NDK r17b for armv7a</li>
-<li>clang++ from NDK r17b for arm64-v8a</li>
+<li>clang++ from NDK r17c for armv7a</li>
+<li>clang++ from NDK r17c for arm64-v8a</li>
 <li>clang++ from NDK r18-beta1 for arm64-v8.2-a with FP16 support</li>
 </ul>
 <p>Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a></p>
 <ul>
-<li>Download the NDK r17b from here: <a href="https://developer.android.com/ndk/downloads/index.html">https://developer.android.com/ndk/downloads/index.html</a></li>
+<li>Download the NDK r17c from here: <a href="https://developer.android.com/ndk/downloads/index.html">https://developer.android.com/ndk/downloads/index.html</a></li>
 <li>Make sure you have Python 2.7 installed on your machine.</li>
 <li>Generate the 32 and/or 64 toolchains by running the following commands:</li>
 </ul>
-<pre class="fragment">$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b --stl libc++ --api 21
-$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r17b --stl libc++ --api 21
+<pre class="fragment">$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r17c --stl libc++ --api 21
+$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r17c --stl libc++ --api 21
 </pre><dl class="section attention"><dt>Attention</dt><dd>We used to use gnustl but as of NDK r17 it is deprecated so we switched to libc++</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Make sure to add the toolchains to your PATH: <pre class="fragment">export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r17b/bin
+<dl class="section note"><dt>Note</dt><dd>Make sure to add the toolchains to your PATH: <pre class="fragment">export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r17c/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r17c/bin
 </pre></dd></dl>
 <h3><a class="anchor" id="S3_3_1_library"></a>
 How to build the library ?</h3>
@@ -1379,7 +1450,7 @@ How to build the library ?</h3>
 </pre><h3><a class="anchor" id="S3_3_2_examples"></a>
 How to manually build the examples ?</h3>
 <p>The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.</p>
-<dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The following command lines assume the <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a> binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.</dd></dl>
 <p>Once you've got your Android standalone toolchain built and added to your path you can do the following:</p>
 <p>To cross compile a NEON example: </p><pre class="fragment">#32 bit:
 arm-linux-androideabi-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o neon_convolution_arm -static-libstdc++ -pie
@@ -1397,7 +1468,7 @@ aarch64-linux-android-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iincl
 arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
 #64 bit:
 aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
-</pre><dl class="section note"><dt>Note</dt><dd>Due to some issues in older versions of the Mali OpenCL DDK (&lt;= r13p0), we recommend to link <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> statically on Android. </dd>
+</pre><dl class="section note"><dt>Note</dt><dd>Due to some issues in older versions of the Mali OpenCL DDK (&lt;= r13p0), we recommend to link <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a> statically on Android. </dd>
 <dd>
 When linked statically the arm_compute_graph library currently needs the &ndash;whole-archive linker flag in order to work properly</dd></dl>
 <p>Then you need to do is upload the executable and the shared library to the device using ADB: </p><pre class="fragment">adb push neon_convolution_arm /data/local/tmp/
@@ -1442,9 +1513,9 @@ Cygwin</h3>
 <p>If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a> can be used to install and run <code>scons</code>, the minimum Cygwin version must be 3.0.7 or later. In addition to the default packages installed by Cygwin <code>scons</code> has to be selected in the installer. (<code>git</code> might also be useful but is not strictly required if you already have got the source code of the library.) Linaro provides pre-built versions of <a href="http://releases.linaro.org/components/toolchain/binaries/">GCC cross-compilers</a> that can be used from the Cygwin terminal. When building for Android the compiler is included in the Android standalone toolchain. After everything has been set up in the Cygwin terminal the general guide on building the library can be followed.</p>
 <h2><a class="anchor" id="S3_6_cl_stub_library"></a>
 The OpenCL stub library</h2>
-<p>In the opencl-1.2-stubs folder you will find the sources to build a stub OpenCL library which then can be used to link your application or <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> against.</p>
+<p>In the opencl-1.2-stubs folder you will find the sources to build a stub OpenCL library which then can be used to link your application or <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a> against.</p>
 <p>If you preferred you could retrieve the OpenCL library from your device and link against this one but often this library will have dependencies on a range of system libraries forcing you to link your application against those too even though it is not using them.</p>
-<dl class="section warning"><dt>Warning</dt><dd>This OpenCL library provided is a stub and <em>not</em> a real implementation. You can use it to resolve OpenCL's symbols in <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> while building the example but you must make sure the real libOpenCL.so is in your PATH when running the example or it will not work.</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This OpenCL library provided is a stub and <em>not</em> a real implementation. You can use it to resolve OpenCL's symbols in <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a> while building the example but you must make sure the real libOpenCL.so is in your PATH when running the example or it will not work.</dd></dl>
 <p>To cross-compile the stub OpenCL library simply run: </p><pre class="fragment">&lt;target-prefix&gt;-gcc -o libOpenCL.so -Iinclude opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
 </pre><p>For example: </p><pre class="fragment">#Linux 32bit
 arm-linux-gnueabihf-gcc -o libOpenCL.so -Iinclude opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
@@ -1456,7 +1527,7 @@ arm-linux-androideabi-clang -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/o
 aarch64-linux-android-clang -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
 </pre><h2><a class="anchor" id="S3_7_gles_stub_library"></a>
 The Linux OpenGLES and EGL stub libraries</h2>
-<p>In the opengles-3.1-stubs folder you will find the sources to build stub EGL and OpenGLES libraries which then can be used to link your Linux application of <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2019 ARM Limited.">arm_compute</a> against.</p>
+<p>In the opengles-3.1-stubs folder you will find the sources to build stub EGL and OpenGLES libraries which then can be used to link your Linux application of <a class="el" href="namespacearm__compute.xhtml" title="Copyright (c) 2017-2020 ARM Limited.">arm_compute</a> against.</p>
 <dl class="section note"><dt>Note</dt><dd>The stub libraries are only needed on Linux. For Android, the NDK toolchains already provide the meta-EGL and meta-GLES libraries.</dd></dl>
 <p>To cross-compile the stub OpenGLES and EGL libraries simply run: </p><pre class="fragment">&lt;target-prefix&gt;-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
 &lt;target-prefix&gt;-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
@@ -1513,7 +1584,7 @@ How to use it</h3>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 22 2020 18:08:01 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

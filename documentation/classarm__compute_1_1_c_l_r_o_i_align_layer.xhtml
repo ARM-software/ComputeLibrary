@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -202,8 +202,8 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the input and output tensors. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: QASYMM8/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">rois</td><td>ROIs tensor, it is a 2D tensor of size [5, N] (where N is the number of ROIs) containing top left and bottom right corner as coordinate of an image and batch_id of ROI [ batch_id, x1, y1, x2, y2 ]. Data types supported: QASYMM16 with scale of 0.125 and 0 offset if <code>input</code> is QASYMM8, otherwise same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rois</td><td>ROIs tensor, it is a 2D tensor of size [5, N] (where N is the number of ROIs) containing top left and bottom right corner as coordinate of an image and batch_id of ROI [ batch_id, x1, y1, x2, y2 ]. Data types supported: QASYMM16 with scale of 0.125 and 0 offset if <code>input</code> is QASYMM8/QASYMM8_SIGNED, otherwise same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pool_info</td><td>Contains pooling operation information described in <a class="el" href="classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml">ROIPoolingLayerInfo</a>.</td></tr>
   </table>
@@ -271,8 +271,8 @@ The fourth dimension of <code>output</code> tensor must be the same as the numbe
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_r_o_i_align_layer.xhtml">CLROIAlignLayer</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: QASYMM8/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">rois</td><td>ROIs tensor info. Data types supported: QASYMM16 with scale of 0.125 and 0 offset if <code>input</code> is QASYMM8, otherwise same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rois</td><td>ROIs tensor info. Data types supported: QASYMM16 with scale of 0.125 and 0 offset if <code>input</code> is QASYMM8/QASYMM8_SIGNED, otherwise same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data types supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pool_info</td><td>Contains pooling operation information described in <a class="el" href="classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml">ROIPoolingLayerInfo</a>.</td></tr>
   </table>
@@ -304,7 +304,7 @@ The fourth dimension of <code>output</code> tensor must be the same as the numbe
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_r_o_i_align_layer.xhtml">CLROIAlignLayer</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:53 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

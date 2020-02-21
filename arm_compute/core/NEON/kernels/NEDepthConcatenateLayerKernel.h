@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H__
-#define __ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H__
+#ifndef ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H
+#define ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the depth concatenate kernel.
@@ -55,7 +56,7 @@ public:
     ~NEDepthConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]     input        Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]     depth_offset The offset on the Z axis.
      * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
      *
@@ -66,7 +67,7 @@ public:
     void configure(const ITensor *input, unsigned int depth_offset, ITensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEDepthConcatenateLayerKernel
      *
-     * @param[in] input        Input tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input        Input tensor info. Data types supported:  QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] depth_offset The offset on the Z axis.
      * @param[in] output       Output tensor info. Data types supported: Same as @p input.
      *
@@ -87,4 +88,4 @@ private:
     unsigned int         _depth_offset;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H__ */
+#endif /* ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H */

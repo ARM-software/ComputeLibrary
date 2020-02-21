@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H__
-#define __ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H__
+#ifndef ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H
+#define ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -37,13 +37,14 @@ class ITensor;
  * This kernel takes a final int32 accumulator value (the output of @ref NEGEMMLowpMatrixMultiplyKernel),
  * and adds to it the offset contribution of matrix A and matrix B in-place.
  *
- * The output stage can perform either QuantizeDownInt32ToUint8Scale or QuantizeDownInt32ToUint8ScaleByFixedPoint.
+ * The output stage can perform either QuantizeDownInt32ToUint8Scale or QuantizeDownInt32ToUint8ScaleByFixedPoint for Uint8.
+ * The output stage can perform either QuantizeDownInt32ToInt8Scale or QuantizeDownInt32ToInt8ScaleByFixedPoint for Int8.
  *
- * For QuantizeDownInt32ToUint8Scale the final result is:
+ * For QuantizeDownInt32ToUint8Scale/QuantizeDownInt32ToInt8Scale the final result is:
  *
  * ((mm_result'[i][k] + result_offset) * result_mult_int) >> result_shift
  *
- * For QuantizeDownInt32ToUint8ScaleByFixedPoint the final result is:
+ * For QuantizeDownInt32ToUint8ScaleByFixedPoint/QuantizeDownInt32ToInt8ScaleByFixedPoint the final result is:
  *
  * (FixedPointMul(mm_result'[i][k], result_fixedpoint_multiplier) >> result_shift) + result_offset_after_shift
  *
@@ -83,7 +84,7 @@ public:
      * @param[in]  vector_sum_row Input row-vector of sums of all the entries in each row of matrix A.
      * @param[in]  bias           Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
      *                            Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p mm_result.
-     * @param[out] output         Output tensor containing the final quantized result. Data type supported: QASYMM8
+     * @param[out] output         Output tensor containing the final quantized result. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in]  k              Number of matrix A columns or Matrix B rows
      * @param[in]  a_offset       Offset to be added to each element of the matrix A.
      * @param[in]  b_offset       Offset to be added to each element of the matrix B.
@@ -100,7 +101,7 @@ public:
      *                           Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
      * @param[in] bias           Biases tensor info. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
      *                           Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p mm_result.
-     * @param[in] output         Output tensor info containing the final quantized result. Data type supported: QASYMM8
+     * @param[in] output         Output tensor info containing the final quantized result. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in] a_offset       Offset to be added to each element of the matrix A.
      * @param[in] b_offset       Offset to be added to each element of the matrix B.
      * @param[in] output_stage   GEMMLowp output stage info, providing the type of quantization and the necessary parameters.
@@ -133,4 +134,4 @@ private:
 };
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H__ */
+#endif /* ARM_COMPUTE_NEGEMMLOWPOFFSETCONTRIBUTIONOUTPUTSTAGEKERNEL_H */

@@ -25,7 +25,7 @@
 
 #undef CONVERT_SAT
 
-#if defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
+#if defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)
 
 #if KERNEL_SIZE == 9
 
@@ -194,6 +194,8 @@ inline uchar8 extract_input_stride3(__global const uchar *input_pixel)
  * @note The convolution stride x must be passed at compile time using -DSTRIDE_X e.g. -DSTRIDE_X=1
  * @note The third dimensions of the weights tensors must be passed at compile time using -DWEIGHTS_DEPTH
  * @note If biases are used then -DHAS_BIAS has to be passed at compile time
+ * @note The output quantization multiplier must be passed at compile time using -DOUTPUT_MULTIPLIER e.g. -DOUTPUT_MULTIPLIER=1234
+ * @note The output quantization shift must be passed at compile time using -DOUTPUT_SHIFT e.g. -DOUTPUT_SHIFT=4
  *
  * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
  * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -227,8 +229,6 @@ inline uchar8 extract_input_stride3(__global const uchar *input_pixel)
  * @param[in]  input_offset                          Input offset quantization parameter
  * @param[in]  weight_offset                         Weights offset quantization parameter
  * @param[in]  output_offset                         Output offset quantization parameter
- * @param[in]  output_multiplier                     Output integer multiplier quantization parameter
- * @param[in]  output_shift                          Output integer shift quantization parameter
  */
 __kernel void direct_convolution_quantized(
     TENSOR3D_DECLARATION(src),
@@ -240,9 +240,7 @@ __kernel void direct_convolution_quantized(
     unsigned int weights_stride_w,
     int          input_offset,
     int          weight_offset,
-    int          output_offset,
-    int          output_multiplier,
-    int          output_shift)
+    int          output_offset)
 {
     Image    src     = CONVERT_TO_IMAGE_STRUCT(src);
     Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
@@ -294,9 +292,13 @@ __kernel void direct_convolution_quantized(
     pixels0 += (int8)(*bias_addr);
 #endif /* defined(HAS_BIAS) */
 
-    pixels0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(pixels0, output_multiplier, output_shift, 8);
+#if OUTPUT_SHIFT < 0
+    pixels0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(pixels0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#else  // OUTPUT_SHIFT < 0
+    pixels0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(pixels0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+#endif // OUTPUT_SHIFT < 0
     pixels0 = pixels0 + output_offset;
 
     vstore8(convert_uchar8_sat(pixels0), 0, (__global uchar *)dst.ptr);
 }
-#endif // defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
+#endif // defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)

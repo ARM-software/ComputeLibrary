@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NECOPYKERNEL_H__
-#define __ARM_COMPUTE_NECOPYKERNEL_H__
+#ifndef ARM_COMPUTE_NECOPYKERNEL_H
+#define ARM_COMPUTE_NECOPYKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -51,14 +51,14 @@ public:
     NECopyKernel &operator=(NECopyKernel &&) = default;
     /** Initialize the kernel's input, output.
      *
-     * @param[in]  input   Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input   Source tensor. Data types supported: All
      * @param[out] output  Destination tensor. Data types supported: same as @p input.
      * @param[in]  padding (Optional) Padding to be applied to the input tensor
      */
     void configure(const ITensor *input, ITensor *output, const PaddingList &padding = PaddingList());
     /** Static function to check if given info will lead to a valid configuration of @ref NECopyKernel
      *
-     * @param[in] input   Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input   Source tensor. Data types supported: All
      * @param[in] output  Destination tensor. Data types supported: same as @p input.
      * @param[in] padding (Optional) Padding to be applied to the input tensor
      *
@@ -75,4 +75,4 @@ private:
     PaddingList    _padding;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NECOPYKERNEL_H__ */
+#endif /*ARM_COMPUTE_NECOPYKERNEL_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFIXEDPOINT_H__
-#define __ARM_COMPUTE_NEFIXEDPOINT_H__
+#ifndef ARM_COMPUTE_NEFIXEDPOINT_H
+#define ARM_COMPUTE_NEFIXEDPOINT_H
 
 #include <arm_neon.h>
 
@@ -38,4 +38,4 @@ namespace arm_compute
 float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b);
 } // namespace arm_compute
 #include "arm_compute/core/NEON/NEFixedPoint.inl"
-#endif /* __ARM_COMPUTE_NEFIXEDPOINT_H__ */
+#endif /* ARM_COMPUTE_NEFIXEDPOINT_H */

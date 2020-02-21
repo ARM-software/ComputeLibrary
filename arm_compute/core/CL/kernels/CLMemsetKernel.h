@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLMEMSETKERNEL_H__
-#define __ARM_COMPUTE_CLMEMSETKERNEL_H__
+#ifndef ARM_COMPUTE_CLMEMSETKERNEL_H
+#define ARM_COMPUTE_CLMEMSETKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/PixelValue.h"
@@ -51,14 +51,14 @@ public:
 
     /** Initialise the kernel's tensor and filling value
      *
-     * @param[in,out] tensor         Input tensor to fill. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in,out] tensor         Input tensor to fill. Supported data types: All.
      * @param[in]     constant_value The value used to fill the planes of the tensor
      * @param[in]     window         Window to be used in case setting only part of a tensor. Default is nullptr.
      */
     void configure(ICLTensor *tensor, const PixelValue &constant_value, Window *window = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLMemsetKernel
      *
-     * @param[in] tensor         Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] tensor         Source tensor info. Data types supported: All.
      * @param[in] constant_value The value used to fill the planes of the tensor
      * @param[in] window         Window to be used in case setting only part of a tensor. Default is nullptr.
      *
@@ -74,4 +74,4 @@ private:
     Window     _full_window;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLMEMSETRKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLMEMSETRKERNEL_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,8 +39,11 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
                                     unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    if(!is_data_type_quantized_per_channel(weights->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    }
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() < 1 || dilation.y() < 1);
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
@@ -55,18 +58,7 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(channel_idx));
     }
 
-    const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
-
-    if(is_quantized)
-    {
-        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
-
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        ARM_COMPUTE_UNUSED(multiplier);
-        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
-    }
+    const bool is_quantized = (!is_data_type_quantized_per_channel(weights->data_type())) && is_data_type_quantized_asymmetric(input->data_type());
 
     if(!NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(input, weights, conv_info, depth_multiplier, dilation))
     {
@@ -75,7 +67,9 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
 
         if(is_quantized)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, biases, output));
+            DirectConvolutionLayerOutputStageKernelInfo direct_conv_info;
+            direct_conv_info.output_data_type = input->data_type();
+            ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, biases, output, direct_conv_info));
         }
     }
     else
@@ -88,7 +82,6 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
     }
-
     return Status{};
 }
 } // namespace
@@ -201,11 +194,17 @@ void NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::
         const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
         const UniformQuantizationInfo oq_info = (output->info()->total_size() == 0) ? iq_info : output->info()->quantization_info().uniform();
 
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        int   output_multiplier;
-        int   output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, output_multiplier, output_shift, oq_info.offset);
+        float   multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        int32_t output_multiplier;
+        int32_t output_shift;
+        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
+
+        DirectConvolutionLayerOutputStageKernelInfo direct_conv_info;
+        direct_conv_info.result_fixedpoint_multiplier = output_multiplier;
+        direct_conv_info.result_shift                 = output_shift;
+        direct_conv_info.result_offset_after_shift    = oq_info.offset;
+        direct_conv_info.output_data_type             = input->info()->data_type();
+        _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, direct_conv_info);
         _accumulator.allocator()->allocate();
     }
     else if(_has_bias)

@@ -5,7 +5,7 @@ var classarm__compute_1_1_i_c_l_memory_region =
     [ "ICLMemoryRegion", "classarm__compute_1_1_i_c_l_memory_region.xhtml#af1759d36be2abbe1002a68ddc2255fad", null ],
     [ "ICLMemoryRegion", "classarm__compute_1_1_i_c_l_memory_region.xhtml#a4e5aaebd133c159b70f757d6ba7c4dc5", null ],
     [ "buffer", "classarm__compute_1_1_i_c_l_memory_region.xhtml#a3d9d196240e9b0062c953c3abd534187", null ],
-    [ "buffer", "classarm__compute_1_1_i_c_l_memory_region.xhtml#acdbd1d0a6ab2898e3b75231386c43f40", null ],
+    [ "buffer", "classarm__compute_1_1_i_c_l_memory_region.xhtml#ad39124c7fd703b14af6f5bf5bc0762ec", null ],
     [ "cl_data", "classarm__compute_1_1_i_c_l_memory_region.xhtml#ac7e247b94ceae35db2a172961ab83df9", null ],
     [ "extract_subregion", "classarm__compute_1_1_i_c_l_memory_region.xhtml#a000cbaa76e2cb0ae0aeee0b95b6470b7", null ],
     [ "map", "classarm__compute_1_1_i_c_l_memory_region.xhtml#a929af627a6a0430539998d12024d6c69", null ],

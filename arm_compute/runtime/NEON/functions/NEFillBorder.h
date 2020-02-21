@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFILLBORDER_H__
-#define __ARM_COMPUTE_NEFILLBORDER_H__
+#ifndef ARM_COMPUTE_NEFILLBORDER_H
+#define ARM_COMPUTE_NEFILLBORDER_H
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/PixelValue.h"
@@ -31,6 +31,7 @@
 
 namespace arm_compute
 {
+// Forward declaration
 class ITensor;
 
 /** Basic function to run @ref NEFillBorderKernel */
@@ -41,7 +42,7 @@ public:
      *
      * @note This function fills the borders within the XY-planes.
      *
-     * @param[in, out] input                 Source tensor. Data type supported: U8/S16/S32/F32
+     * @param[in, out] input                 Source tensor. Data type supported: All
      * @param[in]      border_width          Width of the tensor border in pixels.
      * @param[in]      border_mode           Strategy to use for borders.
      * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
@@ -54,5 +55,5 @@ public:
 private:
     NEFillBorderKernel _border_handler; /**< Kernel to handle image borders */
 };
-}
-#endif /*__ARM_COMPUTE_NEFILLBORDER_H__ */
+} // namespace arm_compute
+#endif /*ARM_COMPUTE_NEFILLBORDER_H */

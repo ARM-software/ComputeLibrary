@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMRESHAPELHSMATRIXKERNEL_H__
-#define __ARM_COMPUTE_CLGEMMRESHAPELHSMATRIXKERNEL_H__
+#ifndef ARM_COMPUTE_CLGEMMRESHAPELHSMATRIXKERNEL_H
+#define ARM_COMPUTE_CLGEMMRESHAPELHSMATRIXKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -49,7 +49,7 @@ public:
     CLGEMMReshapeLHSMatrixKernel &operator=(CLGEMMReshapeLHSMatrixKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input                   Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input                   Input tensor. Data types supported: All
      * @param[out] output                  Output tensor. Data type supported: same as @p input
      * @param[in]  lhs_info                LHS matrix information to be used for reshaping. This object contains all the necessary
      *                                     information to reshape the input tensor. Only the following values are supported:
@@ -63,7 +63,7 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMReshapeLHSMatrixKernel
      *
-     * @param[in] input                   Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input                   Input tensor info. Data types supported: All
      * @param[in] output                  Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
      * @param[in] lhs_info                LHS matrix information to be used for reshaping. This object contains all the necessary
      *                                    information to reshape the input tensor. Only the following values are supported:
@@ -87,4 +87,4 @@ private:
     bool             _reinterpret_input_as_3d;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLGEMMRESHAPELHSMATRIXKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLGEMMRESHAPELHSMATRIXKERNEL_H */

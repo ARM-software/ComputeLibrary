@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -12,7 +12,7 @@
  *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *gc
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCBUFFERALLOCATOR_H__
-#define __ARM_COMPUTE_GCBUFFERALLOCATOR_H__
+#ifndef ARM_COMPUTE_GCBUFFERALLOCATOR_H
+#define ARM_COMPUTE_GCBUFFERALLOCATOR_H
 
 #include "arm_compute/runtime/IAllocator.h"
 
@@ -46,4 +46,4 @@ public:
     std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) override;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_GCBUFFERALLOCATOR_H__ */
+#endif /*ARM_COMPUTE_GCBUFFERALLOCATOR_H */

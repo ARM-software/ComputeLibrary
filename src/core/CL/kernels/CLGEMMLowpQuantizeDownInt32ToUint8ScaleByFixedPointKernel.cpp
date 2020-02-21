@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -34,8 +35,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "support/ToolchainSupport.h"
-
-using namespace arm_compute;
 
 namespace arm_compute
 {
@@ -77,15 +76,13 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
 
-    bool window_changed = update_window_and_padding(win,
-                                                    input_access);
+    bool window_changed = update_window_and_padding(win, input_access);
 
     if(output->total_size() != 0)
     {
         Window                 win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
         AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
         window_changed = window_changed || update_window_and_padding(win_out, output_result_access);
-
         output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
     }
 
@@ -99,9 +96,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     return std::make_pair(err, win);
 }
 } // namespace
-
-class Coordinates;
-} // namespace arm_compute
 
 CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel()
     : _input(nullptr), _bias(nullptr), _output(nullptr)
@@ -127,8 +121,10 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(),
-                                                  min, max));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), min, max));
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     _input  = input;
     _bias   = bias;
@@ -139,6 +135,7 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     build_opts.add_option("-DRESULT_OFFSET_AFTER_SHIFT=" + support::cpp11::to_string(result_offset_after_shift));
     build_opts.add_option("-DRESULT_FIXEDPOINT_MULTIPLIER=" + support::cpp11::to_string(result_fixedpoint_multiplier));
     build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(result_shift));
+    build_opts.add_option("-DOUTPUT_DATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
     build_opts.add_option_if((min != 0) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
     build_opts.add_option_if((max != 255) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
@@ -146,9 +143,6 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down_fixedpoint", build_opts.options()));
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 }
 
@@ -180,3 +174,4 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

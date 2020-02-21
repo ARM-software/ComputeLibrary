@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_IARRAY_H__
-#define __ARM_COMPUTE_IARRAY_H__
+#ifndef ARM_COMPUTE_IARRAY_H
+#define ARM_COMPUTE_IARRAY_H
 
 #include "arm_compute/core/Error.h"
 #include <cstddef>
@@ -156,4 +156,4 @@ using IInt32Array = IArray<int32_t>;
 /** Interface for Array of floats. */
 using IFloatArray = IArray<float>;
 }
-#endif /* __ARM_COMPUTE_IARRAY_H__ */
+#endif /* ARM_COMPUTE_IARRAY_H */

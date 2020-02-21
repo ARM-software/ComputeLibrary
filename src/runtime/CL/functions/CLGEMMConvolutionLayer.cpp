@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,7 @@ void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const
 Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
     if(biases != nullptr)
@@ -345,11 +345,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         {
             if(supported_acts.count(act_info.activation()) != 0)
             {
-                const int a_const_int = quantize_qasymm8(act_info.a(), output_quant_info);
-                const int b_const_int = quantize_qasymm8(act_info.b(), output_quant_info);
-
-                min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
-                max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
+                std::tie(min_activation, max_activation) = get_quantized_activation_min_max(act_info, data_type, output_quant_info);
             }
             else
             {
@@ -402,7 +398,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     const bool is_quantized_per_channel = is_data_type_quantized_per_channel(weights->data_type());
 
     if(is_quantized_per_channel)
@@ -559,11 +555,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         {
             if(supported_acts.count(act_info.activation()) != 0)
             {
-                const int a_const_int = quantize_qasymm8(act_info.a(), output_quant_info);
-                const int b_const_int = quantize_qasymm8(act_info.b(), output_quant_info);
-
-                min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
-                max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
+                std::tie(min_activation, max_activation) = get_quantized_activation_min_max(act_info, data_type, output_quant_info);
             }
             else
             {

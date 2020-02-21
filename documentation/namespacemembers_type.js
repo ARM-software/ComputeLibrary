@@ -19,6 +19,5 @@ var namespacemembers_type =
     [ "s", "namespacemembers_type_s.xhtml", null ],
     [ "t", "namespacemembers_type_t.xhtml", null ],
     [ "u", "namespacemembers_type_u.xhtml", null ],
-    [ "v", "namespacemembers_type_v.xhtml", null ],
     [ "w", "namespacemembers_type_w.xhtml", null ]
 ];

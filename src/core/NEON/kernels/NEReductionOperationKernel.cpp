@@ -32,6 +32,7 @@
 #include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/SaturateCast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
@@ -690,14 +691,19 @@ struct RedOpX_qasymm8
 
                 auto carry_paddition = wrapper::vpadd(wrapper::vgethigh(carry_res), wrapper::vgetlow(carry_res));
                 carry_paddition      = wrapper::vpadd(carry_paddition, carry_paddition);
-                auto res             = wrapper::vgetlane(carry_paddition, 0);
+                auto res             = static_cast<int32_t>(wrapper::vgetlane(carry_paddition, 0));
 
                 if(op == ReductionOperation::MEAN_SUM)
                 {
                     res /= in_info.dimension(0);
                 }
+                else
+                {
+                    // Subtract accumulated offsets
+                    res -= (in_info.dimension(0) - 1) * iq_info.offset;
+                }
 
-                *(output.ptr()) = static_cast<uint8_t>(res);
+                *(output.ptr()) = utils::cast::saturate_cast<uint8_t>(res);
             }
         }
     }
@@ -878,15 +884,15 @@ struct RedOpYZW_qasymm8
         execute_window_loop(in_slice, [&](const Coordinates &)
         {
             uint32x4x4_t vec_res_idx{ { 0 } };
-            auto         vec_res_value1 = vdupq_n_u32(0);
-            auto         vec_res_value2 = vdupq_n_u32(0);
-            auto         vec_res_value3 = vdupq_n_u32(0);
-            auto         vec_res_value4 = vdupq_n_u32(0);
+            auto         vec_res_value1 = wrapper::vdup_n(static_cast<uint32_t>(0), wrapper::traits::vector_128_tag{});
+            auto         vec_res_value2 = wrapper::vdup_n(static_cast<uint32_t>(0), wrapper::traits::vector_128_tag{});
+            auto         vec_res_value3 = wrapper::vdup_n(static_cast<uint32_t>(0), wrapper::traits::vector_128_tag{});
+            auto         vec_res_value4 = wrapper::vdup_n(static_cast<uint32_t>(0), wrapper::traits::vector_128_tag{});
 
-            auto vec_res_value1_f = vdupq_n_f32(1);
-            auto vec_res_value2_f = vdupq_n_f32(1);
-            auto vec_res_value3_f = vdupq_n_f32(1);
-            auto vec_res_value4_f = vdupq_n_f32(1);
+            auto vec_res_value1_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+            auto vec_res_value2_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+            auto vec_res_value3_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
+            auto vec_res_value4_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
 
             auto vec_res_value = wrapper::vloadq(input.ptr());
 
@@ -915,16 +921,16 @@ struct RedOpYZW_qasymm8
                     }
                     case ReductionOperation::PROD:
                     {
-                        const auto offset32x4f_4 = vdupq_n_f32(iq_info.offset);
-                        const auto scale32x4f_4  = vdupq_n_f32(iq_info.scale);
+                        const auto offset32x4f_4 = wrapper::vdup_n(static_cast<float>(iq_info.offset), wrapper::traits::vector_128_tag{});
+                        const auto scale32x4f_4  = wrapper::vdup_n(iq_info.scale, wrapper::traits::vector_128_tag{});
 
-                        const auto temp16x8t_1 = vmovl_u8(vget_low_u8(vec_elements));
-                        const auto temp16x8t_2 = vmovl_u8(vget_high_u8(vec_elements));
+                        const auto temp16x8t_1 = wrapper::vmovl(wrapper::vgetlow(vec_elements));
+                        const auto temp16x8t_2 = wrapper::vmovl(wrapper::vgethigh(vec_elements));
 
-                        const auto temp32x4t_1 = vmovl_u16(vget_low_u16(temp16x8t_1));
-                        const auto temp32x4t_2 = vmovl_u16(vget_high_u16(temp16x8t_1));
-                        const auto temp32x4t_3 = vmovl_u16(vget_low_u16(temp16x8t_2));
-                        const auto temp32x4t_4 = vmovl_u16(vget_high_u16(temp16x8t_2));
+                        const auto temp32x4t_1 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_1));
+                        const auto temp32x4t_2 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_1));
+                        const auto temp32x4t_3 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_2));
+                        const auto temp32x4t_4 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_2));
 
                         auto temp32x4f_1 = vcvtq_f32_u32(temp32x4t_1);
                         auto temp32x4f_2 = vcvtq_f32_u32(temp32x4t_2);
@@ -932,15 +938,15 @@ struct RedOpYZW_qasymm8
                         auto temp32x4f_4 = vcvtq_f32_u32(temp32x4t_4);
 
                         //de-quantize vec_elements
-                        temp32x4f_1 = vmulq_f32(vsubq_f32(temp32x4f_1, offset32x4f_4), scale32x4f_4);
-                        temp32x4f_2 = vmulq_f32(vsubq_f32(temp32x4f_2, offset32x4f_4), scale32x4f_4);
-                        temp32x4f_3 = vmulq_f32(vsubq_f32(temp32x4f_3, offset32x4f_4), scale32x4f_4);
-                        temp32x4f_4 = vmulq_f32(vsubq_f32(temp32x4f_4, offset32x4f_4), scale32x4f_4);
+                        temp32x4f_1 = wrapper::vmul(wrapper::vsub(temp32x4f_1, offset32x4f_4), scale32x4f_4);
+                        temp32x4f_2 = wrapper::vmul(wrapper::vsub(temp32x4f_2, offset32x4f_4), scale32x4f_4);
+                        temp32x4f_3 = wrapper::vmul(wrapper::vsub(temp32x4f_3, offset32x4f_4), scale32x4f_4);
+                        temp32x4f_4 = wrapper::vmul(wrapper::vsub(temp32x4f_4, offset32x4f_4), scale32x4f_4);
 
-                        vec_res_value1_f = vmulq_f32(temp32x4f_1, vec_res_value1_f);
-                        vec_res_value2_f = vmulq_f32(temp32x4f_2, vec_res_value2_f);
-                        vec_res_value3_f = vmulq_f32(temp32x4f_3, vec_res_value3_f);
-                        vec_res_value4_f = vmulq_f32(temp32x4f_4, vec_res_value4_f);
+                        vec_res_value1_f = wrapper::vmul(temp32x4f_1, vec_res_value1_f);
+                        vec_res_value2_f = wrapper::vmul(temp32x4f_2, vec_res_value2_f);
+                        vec_res_value3_f = wrapper::vmul(temp32x4f_3, vec_res_value3_f);
+                        vec_res_value4_f = wrapper::vmul(temp32x4f_4, vec_res_value4_f);
                         break;
                     }
                     case ReductionOperation::ARG_IDX_MIN:
@@ -974,7 +980,7 @@ struct RedOpYZW_qasymm8
 
             if(op == ReductionOperation::MEAN_SUM)
             {
-                const auto vec_width_inv = wrapper::vinv(vdupq_n_f32(in_info.dimension(axis)));
+                const auto vec_width_inv = wrapper::vinv(wrapper::vdup_n(static_cast<float>(in_info.dimension(axis)), wrapper::traits::vector_128_tag{}));
                 vec_res_value1_f         = wrapper::vmul(vcvtq_f32_u32(vec_res_value1), vec_width_inv);
                 vec_res_value2_f         = wrapper::vmul(vcvtq_f32_u32(vec_res_value2), vec_width_inv);
                 vec_res_value3_f         = wrapper::vmul(vcvtq_f32_u32(vec_res_value3), vec_width_inv);
@@ -987,14 +993,14 @@ struct RedOpYZW_qasymm8
             }
             else if(op == ReductionOperation::PROD)
             {
-                const auto offset32x4f_4 = vdupq_n_f32(iq_info.offset);
+                const auto offset32x4f_4 = wrapper::vdup_n(static_cast<float>(iq_info.offset), wrapper::traits::vector_128_tag{});
                 const auto iscale32x4f_4 = vinvq_f32(vdupq_n_f32(iq_info.scale));
 
                 //re-quantize
-                vec_res_value1_f = vaddq_f32(vmulq_f32(vec_res_value1_f, iscale32x4f_4), offset32x4f_4);
-                vec_res_value2_f = vaddq_f32(vmulq_f32(vec_res_value2_f, iscale32x4f_4), offset32x4f_4);
-                vec_res_value3_f = vaddq_f32(vmulq_f32(vec_res_value3_f, iscale32x4f_4), offset32x4f_4);
-                vec_res_value4_f = vaddq_f32(vmulq_f32(vec_res_value4_f, iscale32x4f_4), offset32x4f_4);
+                vec_res_value1_f = wrapper::vadd(wrapper::vmul(vec_res_value1_f, iscale32x4f_4), offset32x4f_4);
+                vec_res_value2_f = wrapper::vadd(wrapper::vmul(vec_res_value2_f, iscale32x4f_4), offset32x4f_4);
+                vec_res_value3_f = wrapper::vadd(wrapper::vmul(vec_res_value3_f, iscale32x4f_4), offset32x4f_4);
+                vec_res_value4_f = wrapper::vadd(wrapper::vmul(vec_res_value4_f, iscale32x4f_4), offset32x4f_4);
 
                 vec_res_value1 = vcvtq_u32_f32(vec_res_value1_f);
                 vec_res_value2 = vcvtq_u32_f32(vec_res_value2_f);
@@ -1015,10 +1021,33 @@ struct RedOpYZW_qasymm8
             }
             else
             {
-                const auto temp16x8t_1 = vcombine_u16(wrapper::vqmovn(vec_res_value1), wrapper::vqmovn(vec_res_value2));
-                const auto temp16x8t_2 = vcombine_u16(wrapper::vqmovn(vec_res_value3), wrapper::vqmovn(vec_res_value4));
-                auto       res         = vcombine_u8(wrapper::vqmovn(temp16x8t_1), wrapper::vqmovn(temp16x8t_2));
-                wrapper::vstore(output.ptr(), res);
+                if(op == ReductionOperation::SUM)
+                {
+                    // Subtract offsets
+                    auto offsets = vdupq_n_s32((in_info.dimension(axis) - 1) * iq_info.offset);
+
+                    auto vec_res_s_value1 = vreinterpretq_s32_u32(vec_res_value1);
+                    auto vec_res_s_value2 = vreinterpretq_s32_u32(vec_res_value2);
+                    auto vec_res_s_value3 = vreinterpretq_s32_u32(vec_res_value3);
+                    auto vec_res_s_value4 = vreinterpretq_s32_u32(vec_res_value4);
+
+                    vec_res_s_value1 = wrapper::vsub(vec_res_s_value1, offsets);
+                    vec_res_s_value2 = wrapper::vsub(vec_res_s_value2, offsets);
+                    vec_res_s_value3 = wrapper::vsub(vec_res_s_value3, offsets);
+                    vec_res_s_value4 = wrapper::vsub(vec_res_s_value4, offsets);
+
+                    const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_s_value1), wrapper::vqmovn(vec_res_s_value2));
+                    const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_s_value3), wrapper::vqmovn(vec_res_s_value4));
+                    auto       res         = wrapper::vcombine(wrapper::vqmovun(temp16x8t_1), wrapper::vqmovun(temp16x8t_2));
+                    wrapper::vstore(output.ptr(), res);
+                }
+                else
+                {
+                    const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_value1), wrapper::vqmovn(vec_res_value2));
+                    const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_value3), wrapper::vqmovn(vec_res_value4));
+                    auto       res         = wrapper::vcombine(wrapper::vqmovn(temp16x8t_1), wrapper::vqmovn(temp16x8t_2));
+                    wrapper::vstore(output.ptr(), res);
+                }
             }
 
         },

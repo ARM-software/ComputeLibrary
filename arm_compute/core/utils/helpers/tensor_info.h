@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_UTILS_HELPERS_TENSOR_INFO_H__
-#define __ARM_COMPUTE_UTILS_HELPERS_TENSOR_INFO_H__
+#ifndef ARM_COMPUTE_UTILS_HELPERS_TENSOR_INFO_H
+#define ARM_COMPUTE_UTILS_HELPERS_TENSOR_INFO_H
 
 #include "arm_compute/core/ITensorInfo.h"
 
@@ -54,4 +54,4 @@ inline bool tensors_have_different_quantization_info(const ITensorInfo *tensor_i
 } // namespace tensor_info
 } // namespace helpers
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_UTILS_HELPERS_TENSOR_INFO_H__ */
+#endif /* ARM_COMPUTE_UTILS_HELPERS_TENSOR_INFO_H */

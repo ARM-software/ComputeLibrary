@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H__
-#define __ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H__
+#ifndef ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H
+#define ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H
 
 #include "tests/SimpleTensor.h"
 
@@ -41,4 +41,4 @@ SimpleTensor<int> non_max_suppression(const SimpleTensor<float> &bboxes, const S
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H__ */
+#endif /* ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NERANGE_H__
-#define __ARM_COMPUTE_NERANGE_H__
+#ifndef ARM_COMPUTE_NERANGE_H
+#define ARM_COMPUTE_NERANGE_H
 
 #include "arm_compute/core/NEON/kernels/NERangeKernel.h"
 #include "arm_compute/core/Types.h"
@@ -68,4 +68,4 @@ private:
     NERangeKernel _kernel;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NERANGE_H__ */
+#endif /* ARM_COMPUTE_NERANGE_H */

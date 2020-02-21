@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 #include "helpers.h"
+#include "helpers_asymm.h"
 
-#if FLOAT_DATA_TYPE
+#if defined(FLOAT_DATA_TYPE)
 #define ISGREATER(x, y) isgreater(x, y)
 #define ISLESS(x, y) isless(x, y)
 #else // !FLOAT_DATA_TYPE
@@ -34,7 +35,7 @@
 #define ISGREATER(x, y) select((int16)0, (int16)-1, x > y)
 #define ISLESS(x, y) select((int16)0, (int16)-1, x < y)
 #endif // defined(WIDTH)
-#endif // FLOAT_DATA_TYPE
+#endif // defined(FLOAT_DATA_TYPE)
 
 /** Calculate square sum of a vector
  *
@@ -164,7 +165,7 @@ __kernel void reduction_operation_x(
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width size must be passed at compile time using -DWIDTH e.g. -DWIDTH=128
  * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
- * @note In case of ARG_MIN and ARG_MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
+ * @note In case of MIN and MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
  *
  * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: S32/F16/F32 and QASYMM8 for operation MEAN
  * @param[in] src_stride_x                         Stride of the source tensor in X dimension (in bytes)
@@ -182,43 +183,51 @@ __kernel void reduction_operation_non_parallel_x(
     Vector src    = CONVERT_TO_VECTOR_STRUCT(src);
     Vector output = CONVERT_TO_VECTOR_STRUCT(output);
 
-    DATA_TYPE_PROMOTED res = *((__global DATA_TYPE *)vector_offset(&src, 0));
+    DATA_TYPE_PROMOTED res = CONVERT(*((__global DATA_TYPE *)vector_offset(&src, 0)), DATA_TYPE_PROMOTED);
 
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    uint indx = 0;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+    // Convert input into F32 in order to perform quantized multiplication
+#if defined(PROD) && defined(OFFSET) && defined(SCALE)
+    float res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, 1);
+#endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
 
     for(unsigned int x = 1; x < WIDTH; ++x)
     {
-        DATA_TYPE_PROMOTED in = *((__global DATA_TYPE *)vector_offset(&src, x));
-#if defined(ARG_MAX)
-        indx = select(indx, x, ISGREATER(in, res));
-        res  = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
-#elif defined(ARG_MIN)
-        indx = select(indx, x, ISLESS(in, res));
-        res  = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
-#elif defined(MIN)
+        DATA_TYPE_PROMOTED in = CONVERT(*((__global DATA_TYPE *)vector_offset(&src, x)), DATA_TYPE_PROMOTED);
+#if defined(MIN)
         res = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
 #elif defined(MAX)
-        res = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
-#else  // !(defined(ARG_MAX) || defined(ARG_MIN))
+        res                             = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
+#elif defined(PROD)
+#if defined(OFFSET) && defined(SCALE)
+        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 1);
+#else  // !(defined(OFFSET) && defined(SCALE))
+        res *= in;
+#endif //  defined(OFFSET) && defined(SCALE)
+#else  // defined(SUM))
         res += in;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+#endif // defined(MAX) || defined(MIN) || defined(PROD)
     }
 
     // Store result
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    *((__global uint *)output.ptr) = indx;
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(MEAN)
     res /= WIDTH;
 #endif // defined(MEAN)
+
+    // Subtract the offsets in case of quantized SUM
+#if defined(SUM) && defined(OFFSET) && defined(SCALE)
+    res -= (WIDTH - 1) * OFFSET;
+#endif // defined(OFFSET) && defined(OFFSET) && defined(SCALE)
+
+    // Re-quantize
+#if defined(PROD) && defined(OFFSET) && defined(SCALE)
+    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, 1);
+#endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
+
 #if defined(MIN) || defined(MAX)
     *((__global DATA_TYPE_PROMOTED *)output.ptr) = res;
-#else  // defined(MIN) || defined(MAX)
-    *((__global uchar *)output.ptr) = convert_uchar(res);
+#else  // !(defined(MIN) || defined(MAX))
+    *((__global DATA_TYPE *)output.ptr) = CONVERT_SAT(res, DATA_TYPE);
 #endif // defined(MIN) || defined(MAX)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif // defined(WIDTH)
 
@@ -251,51 +260,57 @@ __kernel void reduction_operation_y(
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
     res = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 
+    // Convert input into F32 in order to perform quantized multiplication
+#if defined(PROD) && defined(OFFSET) && defined(SCALE)
+    float16 res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
+
 #if defined(SUM_SQUARE)
     res *= res;
 #endif // defined(SUM_SQUARE)
-
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    uint16 indx = 0;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 
     for(unsigned int y = 1; y < HEIGHT; ++y)
     {
         VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
         in = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, y)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
-#if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
-        indx             = select(indx, y, cond_conv);
-        res              = select(res, in, ISGREATER(in, res));
-#elif defined(ARG_MIN)
-        uint16 cond_conv                         = CONVERT(ISLESS(in, res), uint16);
-        indx                                     = select(indx, y, cond_conv);
-        res                                      = select(res, in, ISLESS(in, res));
-#elif defined(MIN)
+#if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res = select(res, in, ISGREATER(in, res));
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
+        res                             = select(res, in, ISGREATER(in, res));
+#else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
 #if defined(PROD)
+
+#if defined(OFFSET) && defined(SCALE)
+        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#else  // !(defined(OFFSET) && defined(SCALE))
         res *= in;
+#endif //  defined(OFFSET) && defined(SCALE)
+
 #else  // !defined(PROD)
         res += in;
 #endif // defined(PROD)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+#endif // defined(MAX) || defined(MIN)
     }
 
-    // Store result
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    vstore16(indx, 0, (__global uint *)output.ptr);
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(MEAN)
     res /= HEIGHT;
 #endif // defined(MEAN)
-    vstore16(CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+
+    // Subtract the offsets in case of quantized SUM
+#if defined(SUM) && defined(OFFSET) && defined(SCALE)
+    res -= (HEIGHT - 1) * OFFSET;
+#endif // defined(OFFSET) && defined(OFFSET) && defined(SCALE)
+
+    // Re-quantize
+#if defined(PROD) && defined(OFFSET) && defined(SCALE)
+    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
+
+    // Store result
+    vstore16(CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
 }
 #endif // defined(HEIGHT)
 
@@ -332,6 +347,11 @@ __kernel void reduction_operation_z(
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
     res = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 
+    // Convert input into F32 in order to perform quantized multiplication
+#if defined(PROD) && defined(OFFSET) && defined(SCALE)
+    float16 res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
+
 #if defined(COMPLEX)
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
     res1 = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 8, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
@@ -339,10 +359,6 @@ __kernel void reduction_operation_z(
 #if defined(SUM_SQUARE)
     res *= res;
 #endif // defined(SUM_SQUARE)
-
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    uint16 indx = 0;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 
     for(unsigned int z = 1; z < DEPTH; ++z)
     {
@@ -354,45 +370,50 @@ __kernel void reduction_operation_z(
         in1 = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 8, 0, z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 #endif // defined(COMPLEX)
 
-#if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
-        indx             = select(indx, z, cond_conv);
-        res              = select(res, in, ISGREATER(in, res));
-#elif defined(ARG_MIN)
-        uint16 cond_conv = CONVERT(ISLESS(in, res), uint16);
-        indx             = select(indx, z, cond_conv);
-        res              = select(res, in, ISLESS(in, res));
-#elif defined(MIN)
+#if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res = select(res, in, ISGREATER(in, res));
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
+        res                             = select(res, in, ISGREATER(in, res));
+#else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
 #if defined(PROD)
+
+#if defined(OFFSET) && defined(SCALE)
+        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#else  // !(defined(OFFSET) && defined(SCALE))
         res *= in;
-#else //!defined(PROD)
+#endif //  defined(OFFSET) && defined(SCALE)
+
+#else // !defined(PROD)
         res += in;
 #if defined(COMPLEX)
         res1 += in1;
 #endif // defined(COMPLEX)
-#endif //defined(PROD)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+#endif // defined(PROD)
+#endif // defined(MAX) || defined(MIN)
     }
 
-    // Store result
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    vstore16(indx, 0, (__global uint *)output.ptr);
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(MEAN)
     res /= DEPTH;
 #endif // defined(MEAN)
-    vstore16(CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
+
+    // Subtract the offsets in case of quantized SUM
+#if defined(SUM) && defined(OFFSET) && defined(SCALE)
+    res -= (DEPTH - 1) * OFFSET;
+#endif // defined(OFFSET) && defined(OFFSET) && defined(SCALE)
+
+    // Re-quantize
+#if defined(PROD) && defined(OFFSET) && defined(SCALE)
+    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
+
+    // Store result
+    vstore16(CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
 #if defined(COMPLEX)
     vstore16(CONVERT(res1, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)tensor3D_offset(&output, 8, 0, 0));
 #endif // defined(COMPLEX)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif /* defined(DEPTH) */
 
@@ -434,51 +455,57 @@ __kernel void reduction_operation_w(
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
     res = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 
+    // Convert input into F32 in order to perform quantized multiplication
+#if defined(PROD) && defined(OFFSET) && defined(SCALE)
+    float16 res_f = DEQUANTIZE(res, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
+
 #if defined(SUM_SQUARE)
     res *= res;
 #endif // defined(SUM_SQUARE)
-
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    uint16 indx = 0;
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
 
     for(unsigned int w = 1; w < BATCH; ++w)
     {
         VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
         in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, w)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 
-#if defined(ARG_MAX)
-        uint16 cond_conv = CONVERT(ISGREATER(in, res), uint16);
-        indx             = select(indx, w, cond_conv);
-        res              = select(res, in, ISGREATER(in, res));
-#elif defined(ARG_MIN)
-        uint16 cond_conv = CONVERT(ISLESS(in, res), uint16);
-        indx             = select(indx, w, cond_conv);
-        res              = select(res, in, ISLESS(in, res));
-#elif defined(MIN)
+#if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res = select(res, in, ISGREATER(in, res));
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
+        res                             = select(res, in, ISGREATER(in, res));
+#else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
 #if defined(PROD)
+
+#if defined(OFFSET) && defined(SCALE)
+        res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#else  // !(defined(OFFSET) && defined(SCALE))
         res *= in;
-#else  //!defined(PROD)
+#endif //  defined(OFFSET) && defined(SCALE)
+
+#else  // !defined(PROD)
         res += in;
 #endif //defined(PROD)
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+#endif // defined(MAX) || defined(MIN)
     }
 
-    // Store result
-#if defined(ARG_MAX) || defined(ARG_MIN)
-    vstore16(indx, 0, (__global uint *)output.ptr);
-#else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(MEAN)
     res /= BATCH;
 #endif // defined(MEAN)
-    vstore16(CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
-#endif // defined(ARG_MAX) || defined(ARG_MIN)
+
+    // Subtract the offsets in case of quantized SUM
+#if defined(SUM) && defined(OFFSET) && defined(SCALE)
+    res -= (BATCH - 1) * OFFSET;
+#endif // defined(OFFSET) && defined(OFFSET) && defined(SCALE)
+
+    // Re-quantize
+#if defined(PROD) && defined(OFFSET) && defined(SCALE)
+    res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, 16);
+#endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
+
+    // Store result
+    vstore16(CONVERT_SAT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
 }
 #endif /* defined(BATCH) && defined(DEPTH) */

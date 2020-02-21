@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,6 +75,48 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> get_qasymm8_convolver(int kern
                 case 2:
                     return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 2, 2>>(
                                n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+                default:
+                    return nullptr;
+            }
+        }
+        default:
+            return nullptr;
+    }
+}
+
+std::unique_ptr<depthwise::IDepthwiseConvolution> get_qsymm8_perchannel_convolver(int kernel_size, int stride_x,
+                                                                                  int n_batches, int in_rows, int in_cols, int n_channels,
+                                                                                  neon_convolution_kernels::ActivationFunction activation,
+                                                                                  const qsymm8::QSymm8PerChannelParams &wqinfo, const qasymm8::QAsymm8Params &iqinfo, const qasymm8::QAsymm8Params &oqinfo,
+                                                                                  const qsymm8::QSymm8PerChannelRescaleParams &rescale_params,
+                                                                                  int padding_top, int padding_left, int padding_bottom, int padding_right)
+{
+    switch(kernel_size)
+    {
+        case 3:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 3, 3, 1, 1>>(
+                               n_batches, in_rows, in_cols, n_channels, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 3, 3, 2, 2>>(
+                               n_batches, in_rows, in_cols, n_channels, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+                default:
+                    return nullptr;
+            }
+        }
+        case 5:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 5, 5, 1, 1>>(
+                               n_batches, in_rows, in_cols, n_channels, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<depthwise::QSymm8HybridPerChannelDepthwiseConvolution<2, 2, 5, 5, 2, 2>>(
+                               n_batches, in_rows, in_cols, n_channels, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
                 default:
                     return nullptr;
             }
@@ -187,6 +229,9 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
     const int padding_bottom  = conv_info.pad_bottom();
     const int padding_right   = conv_info.pad_right();
 
+    const bool is_uniform_quantized    = (data_type == DataType::QASYMM8) && (weights->info()->data_type() == DataType::QASYMM8);
+    const bool is_perchannel_quantized = (data_type == DataType::QASYMM8) && (weights->info()->data_type() == DataType::QSYMM8_PER_CHANNEL);
+
     const unsigned int stride_x    = conv_info.stride().first;
     const unsigned int kernel_size = weights->info()->tensor_shape().y();
 
@@ -202,7 +247,7 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
     }
 
     // Create quantized convolver
-    if(data_type == DataType::QASYMM8)
+    if(is_uniform_quantized)
     {
         const UniformQuantizationInfo input_qinfo   = input->info()->quantization_info().uniform();
         const UniformQuantizationInfo weights_qinfo = weights->info()->quantization_info().uniform();
@@ -218,13 +263,47 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
 
         // Calculate rescale parameters
         const float fmultipler  = iqinfo.scale * wqinfo.scale / oqinfo.scale;
-        int         qmultiplier = 0;
-        int         qshift      = 0;
+        int32_t     qmultiplier = 0;
+        int32_t     qshift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(fmultipler, &qmultiplier, &qshift);
         qasymm8::QAsymm8RescaleParams rescale_params(qshift, qmultiplier, fmultipler);
 
         return get_qasymm8_convolver(kernel_size, stride_x, n_batches, in_rows, in_cols, n_channels, dilation_factor, activation,
                                      wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+    }
+    else if(is_perchannel_quantized)
+    {
+        const UniformQuantizationInfo input_qinfo   = input->info()->quantization_info().uniform();
+        const QuantizationInfo        weights_qinfo = weights->info()->quantization_info();
+        const UniformQuantizationInfo output_qinfo  = output->info()->quantization_info().uniform();
+
+        // Check that quantization info are in the range [0, 255]
+        ARM_COMPUTE_ERROR_ON(input_qinfo.offset < 0 || input_qinfo.offset > 255);
+        ARM_COMPUTE_ERROR_ON(output_qinfo.offset < 0 || output_qinfo.offset > 255);
+        const qasymm8::QAsymm8Params         iqinfo{ static_cast<uint8_t>(input_qinfo.offset), input_qinfo.scale };
+        const qsymm8::QSymm8PerChannelParams wqinfo{ weights_qinfo.scale() };
+        const qasymm8::QAsymm8Params         oqinfo{ static_cast<uint8_t>(output_qinfo.offset), output_qinfo.scale };
+
+        // Calculate rescale parameters
+        std::vector<float>   fmultipliers;
+        std::vector<int32_t> qmultipliers;
+        std::vector<int32_t> qshifts;
+
+        for(auto const s : wqinfo.scales)
+        {
+            const float fmultipler  = iqinfo.scale * s / oqinfo.scale;
+            int32_t     qmultiplier = 0;
+            int32_t     qshift      = 0;
+            quantization::calculate_quantized_multiplier_less_than_one(fmultipler, &qmultiplier, &qshift);
+            fmultipliers.push_back(fmultipler);
+            qmultipliers.push_back(qmultiplier);
+            qshifts.push_back(qshift);
+        }
+
+        qsymm8::QSymm8PerChannelRescaleParams rescale_params(qshifts, qmultipliers, fmultipliers);
+
+        return get_qsymm8_perchannel_convolver(kernel_size, stride_x, n_batches, in_rows, in_cols, n_channels, activation,
+                                               wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
     }
     else
     {
@@ -328,7 +407,10 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    if(weights->data_type() != DataType::QSYMM8_PER_CHANNEL)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
 
     // Validate convolver
@@ -355,6 +437,16 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
+    // The uniform quantization case will only have 1 scale value in the weights quantization info
+    const UniformQuantizationInfo input_qinfo   = input->quantization_info().uniform();
+    const QuantizationInfo        weights_qinfo = weights->quantization_info();
+    const UniformQuantizationInfo output_qinfo  = output->quantization_info().uniform();
+    for(auto const s : weights_qinfo.scale())
+    {
+        const float fmultipler = input_qinfo.scale * s / output_qinfo.scale;
+        ARM_COMPUTE_RETURN_ERROR_ON(fmultipler > 1.f);
+    }
+
     return Status{};
 }
 
@@ -377,8 +469,12 @@ bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITenso
     }
 
     // Check data type
-    const DataType data_type          = weights->data_type();
-    bool           is_data_type_valid = is_data_type_float(data_type) || is_data_type_quantized_asymmetric(data_type);
+    // TODO (COMPMID-3004): Add assembly optimized routine for QASYMM8_SIGNED NEDepthwiseConvolutionLayer
+    const DataType input_type            = input->data_type();
+    const bool     is_input_type_valid   = is_data_type_float(input_type) || input_type == DataType::QASYMM8;
+    const DataType weights_type          = weights->data_type();
+    const bool     is_weights_type_valid = is_data_type_float(weights_type) || weights_type == DataType::QASYMM8 || weights_type == DataType::QASYMM8_SIGNED
+                                           || weights_type == DataType::QSYMM8_PER_CHANNEL;
 
     // Check weighs size
     std::set<unsigned int> supported_kernel_sizes = { 3, 5 };
@@ -402,9 +498,14 @@ bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITenso
     bool          is_valid_padding  = (pad_top == 0) && (pad_right == 0) && (pad_bottom == 0) && (pad_left == 0);
     bool          supported_padding = is_same_padding || is_valid_padding;
     // TODO(COMPMID-2464): Enable once dilated conv with stride 2 is supported
-    bool is_dilation_supported = (dilation == Size2D(1U, 1U)) || ((dilation.x() == dilation.y()) && strides.first == 1);
+    bool is_dilation_supported = ((dilation == Size2D(1U, 1U)) || ((dilation.x() == dilation.y()) && strides.first == 1));
 
-    return is_data_type_valid && weights_supported && supported_strides && supported_padding && (depth_multiplier == 1) && is_dilation_supported;
+    if(weights_type == DataType::QSYMM8_PER_CHANNEL)
+    {
+        is_dilation_supported = is_dilation_supported && (dilation == Size2D(1U, 1U));
+    }
+
+    return is_input_type_valid && is_weights_type_valid && weights_supported && supported_strides && supported_padding && (depth_multiplier == 1) && is_dilation_supported;
 }
 
 void NEDepthwiseConvolutionAssemblyDispatch::run()

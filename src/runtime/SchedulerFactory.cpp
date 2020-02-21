@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,9 +74,9 @@ std::unique_ptr<IScheduler> SchedulerFactory::create(Type type)
         }
         default:
         {
-            ARM_COMPUTE_ERROR("Invalid Scheduler type");
             break;
         }
     }
+    ARM_COMPUTE_ERROR("Invalid Scheduler type");
 }
 } // namespace arm_compute

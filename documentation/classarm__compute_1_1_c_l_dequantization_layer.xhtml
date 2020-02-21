@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -187,7 +187,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the input and output tensors. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor with the same dimensions of input. Data type supported: F16/F32. </td></tr>
   </table>
   </dd>
@@ -239,7 +239,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_dequantization_layer.xhtml">CLDequantizationLayer</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor info. Data types supported: QASYMM8/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data type supported: F16/F32.</td></tr>
   </table>
   </dd>
@@ -266,7 +266,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_dequantization_layer.xhtml">CLDequantizationLayer</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:50 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:24 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GPUTARGET_H__
-#define __ARM_COMPUTE_GPUTARGET_H__
+#ifndef ARM_COMPUTE_GPUTARGET_H
+#define ARM_COMPUTE_GPUTARGET_H
 
 #include "arm_compute/core/Helpers.h"
 
@@ -104,4 +104,4 @@ inline bool gpu_target_is_in(GPUTarget target_to_check, GPUTarget target)
     return target_to_check == target;
 }
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GPUTARGET_H__ */
+#endif /* ARM_COMPUTE_GPUTARGET_H */

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -111,7 +111,7 @@ $(document).ready(function(){initNavTree('_g_e_m_m_lowp_8h.xhtml','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2020 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -128,27 +128,21 @@ Functions</h2></td></tr>
 <tr class="memitem:a6f53995c189821e40cefceb87513ffa4"><td class="memTemplParams" colspan="2">template&lt;typename T1 , typename T2 , typename T3 &gt; </td></tr>
 <tr class="memitem:a6f53995c189821e40cefceb87513ffa4"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T1 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6f53995c189821e40cefceb87513ffa4">gemmlowp</a> (const SimpleTensor&lt; T2 &gt; &amp;a, const SimpleTensor&lt; T3 &gt; &amp;b, TensorShape shape_c)</td></tr>
 <tr class="separator:a6f53995c189821e40cefceb87513ffa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d6844085db8ca5e627404f7b6e6d25b"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a6d6844085db8ca5e627404f7b6e6d25b"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6d6844085db8ca5e627404f7b6e6d25b">gemmlowp_quantize_down_int32_to_uint8_scale</a> (const SimpleTensor&lt; T &gt; &amp;in, int32_t result_offset, std::vector&lt; int32_t &gt; result_mult_int, std::vector&lt; int32_t &gt; result_shift)</td></tr>
-<tr class="separator:a6d6844085db8ca5e627404f7b6e6d25b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a43d2af3fc2eea377c5e066e0594e967c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a43d2af3fc2eea377c5e066e0594e967c"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a43d2af3fc2eea377c5e066e0594e967c">gemmlowp_quantize_down_int32_to_uint8_scale</a> (const SimpleTensor&lt; T &gt; &amp;in, int32_t result_offset, std::vector&lt; int32_t &gt; result_mult_int, std::vector&lt; int32_t &gt; result_shift, int32_t min, int32_t max)</td></tr>
-<tr class="separator:a43d2af3fc2eea377c5e066e0594e967c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae34e6313324e8c3d9962056a156e6ea9"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ae34e6313324e8c3d9962056a156e6ea9"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ae34e6313324e8c3d9962056a156e6ea9">gemmlowp_quantize_down_int32_to_uint8_scale</a> (const SimpleTensor&lt; T &gt; &amp;in, const SimpleTensor&lt; T &gt; &amp;bias, int32_t result_offset, std::vector&lt; int32_t &gt; result_mult_int, std::vector&lt; int32_t &gt; result_shift, int32_t min, int32_t max)</td></tr>
-<tr class="separator:ae34e6313324e8c3d9962056a156e6ea9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e19344d5a2c9d5694c6e268d3536693"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a8e19344d5a2c9d5694c6e268d3536693"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a8e19344d5a2c9d5694c6e268d3536693">gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint</a> (const SimpleTensor&lt; T &gt; &amp;in, std::vector&lt; int32_t &gt; result_fixedpoint_multiplier, std::vector&lt; int32_t &gt; result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max)</td></tr>
-<tr class="separator:a8e19344d5a2c9d5694c6e268d3536693"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a823c01a79955f160fc91a1d699cffdf2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a823c01a79955f160fc91a1d699cffdf2"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a823c01a79955f160fc91a1d699cffdf2">gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint</a> (const SimpleTensor&lt; T &gt; &amp;in, const SimpleTensor&lt; T &gt; &amp;bias, std::vector&lt; int32_t &gt; result_fixedpoint_multiplier, std::vector&lt; int32_t &gt; result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max)</td></tr>
-<tr class="separator:a823c01a79955f160fc91a1d699cffdf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a344296b0ad06f8e867f95658d59ecdeb"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a344296b0ad06f8e867f95658d59ecdeb"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; int16_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a344296b0ad06f8e867f95658d59ecdeb">gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint</a> (const SimpleTensor&lt; T &gt; &amp;in, int32_t result_fixedpoint_multiplier, int32_t result_shift, int32_t min, int32_t max)</td></tr>
-<tr class="separator:a344296b0ad06f8e867f95658d59ecdeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac64d1c55d1ebc90fe55a46c35682e759"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ac64d1c55d1ebc90fe55a46c35682e759"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; int16_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ac64d1c55d1ebc90fe55a46c35682e759">gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint</a> (const SimpleTensor&lt; T &gt; &amp;in, const SimpleTensor&lt; T &gt; &amp;bias, int32_t result_fixedpoint_multiplier, int32_t result_shift, int32_t min, int32_t max)</td></tr>
-<tr class="separator:ac64d1c55d1ebc90fe55a46c35682e759"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a619e65d654eec271638e7cc4c88c70b7"><td class="memTemplParams" colspan="2">template&lt;typename TIn , typename TOut &gt; </td></tr>
+<tr class="memitem:a619e65d654eec271638e7cc4c88c70b7"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a619e65d654eec271638e7cc4c88c70b7">gemmlowp_quantize_down_scale</a> (const SimpleTensor&lt; TIn &gt; &amp;in, int32_t result_offset, std::vector&lt; int32_t &gt; result_mult_int, std::vector&lt; int32_t &gt; result_shift)</td></tr>
+<tr class="separator:a619e65d654eec271638e7cc4c88c70b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46d87b59de10d14019d82682936fcb72"><td class="memTemplParams" colspan="2">template&lt;typename TIn , typename TOut &gt; </td></tr>
+<tr class="memitem:a46d87b59de10d14019d82682936fcb72"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; TOut &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a46d87b59de10d14019d82682936fcb72">gemmlowp_quantize_down_scale</a> (const SimpleTensor&lt; TIn &gt; &amp;in, int32_t result_offset, std::vector&lt; int32_t &gt; result_mult_int, std::vector&lt; int32_t &gt; result_shift, int32_t min, int32_t max)</td></tr>
+<tr class="separator:a46d87b59de10d14019d82682936fcb72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3cb182ade2ddd106f688d1892876a0b"><td class="memTemplParams" colspan="2">template&lt;typename TIn , typename TOut &gt; </td></tr>
+<tr class="memitem:aa3cb182ade2ddd106f688d1892876a0b"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; TOut &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aa3cb182ade2ddd106f688d1892876a0b">gemmlowp_quantize_down_scale</a> (const SimpleTensor&lt; TIn &gt; &amp;in, const SimpleTensor&lt; TIn &gt; &amp;bias, int32_t result_offset, std::vector&lt; int32_t &gt; result_mult_int, std::vector&lt; int32_t &gt; result_shift, int32_t min, int32_t max)</td></tr>
+<tr class="separator:aa3cb182ade2ddd106f688d1892876a0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc20df3bafb985ea3722b47b48dbb135"><td class="memTemplParams" colspan="2">template&lt;typename TIn , typename TOut &gt; </td></tr>
+<tr class="memitem:afc20df3bafb985ea3722b47b48dbb135"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; TOut &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#afc20df3bafb985ea3722b47b48dbb135">gemmlowp_quantize_down_scale_by_fixedpoint</a> (const SimpleTensor&lt; TIn &gt; &amp;in, std::vector&lt; int32_t &gt; result_fixedpoint_multiplier, std::vector&lt; int32_t &gt; result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max)</td></tr>
+<tr class="separator:afc20df3bafb985ea3722b47b48dbb135"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66413f62c4b74b6e10833778ace09001"><td class="memTemplParams" colspan="2">template&lt;typename TIn , typename TOut &gt; </td></tr>
+<tr class="memitem:a66413f62c4b74b6e10833778ace09001"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; TOut &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a66413f62c4b74b6e10833778ace09001">gemmlowp_quantize_down_scale_by_fixedpoint</a> (const SimpleTensor&lt; TIn &gt; &amp;in, const SimpleTensor&lt; TIn &gt; &amp;bias, std::vector&lt; int32_t &gt; result_fixedpoint_multiplier, std::vector&lt; int32_t &gt; result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max)</td></tr>
+<tr class="separator:a66413f62c4b74b6e10833778ace09001"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -156,7 +150,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="_g_e_m_m_lowp_8h.xhtml">GEMMLowp.h</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:49 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

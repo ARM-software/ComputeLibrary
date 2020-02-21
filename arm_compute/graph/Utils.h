@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_UTILS_H__
-#define __ARM_COMPUTE_GRAPH_UTILS_H__
+#ifndef ARM_COMPUTE_GRAPH_UTILS_H
+#define ARM_COMPUTE_GRAPH_UTILS_H
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/PassManager.h"
@@ -33,6 +33,12 @@ namespace graph
 {
 // Forward Declaration
 class GraphContext;
+
+inline bool is_utility_node(INode *node)
+{
+    std::set<NodeType> utility_node_types = { NodeType::PrintLayer };
+    return utility_node_types.find(node->type()) != utility_node_types.end();
+}
 
 /** Returns the tensor descriptor of a given tensor
  *
@@ -85,10 +91,11 @@ void force_target_to_graph(Graph &g, Target target);
 /** Creates a default @ref PassManager
  *
  * @param[in] target Target to create the pass manager for
+ * @param[in] cfg    Graph configuration meta-data
  *
  * @return A PassManager with default mutating passes
  */
-PassManager create_default_pass_manager(Target target);
+PassManager create_default_pass_manager(Target target, const GraphConfig &cfg);
 /** Setups requested backend context if it exists, is supported and hasn't been initialized already.
  *
  * @param[in,out] ctx    Graph Context.
@@ -130,4 +137,4 @@ std::vector<NodeIdxPair> get_driving_nodes(const INode &node);
 void configure_tensor(Tensor *tensor);
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_UTILS_H__ */
+#endif /* ARM_COMPUTE_GRAPH_UTILS_H */

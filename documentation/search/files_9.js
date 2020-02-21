@@ -104,7 +104,7 @@ var searchData=
   ['instrumentsstats_2ecpp',['InstrumentsStats.cpp',['../_instruments_stats_8cpp.xhtml',1,'']]],
   ['instrumentsstats_2eh',['InstrumentsStats.h',['../_instruments_stats_8h.xhtml',1,'']]],
   ['integral_5fimage_2ecl',['integral_image.cl',['../integral__image_8cl.xhtml',1,'']]],
-  ['integralimage_2ecpp',['IntegralImage.cpp',['../benchmark_2_c_l_2_integral_image_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_integral_image_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_integral_image_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_integral_image_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2reference_2_integral_image_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['integralimage_2ecpp',['IntegralImage.cpp',['../_c_l_2_integral_image_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_integral_image_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_integral_image_8cpp.xhtml',1,'(Global Namespace)']]],
   ['integralimage_2eh',['IntegralImage.h',['../_integral_image_8h.xhtml',1,'']]],
   ['intrinsics_2eh',['intrinsics.h',['../intrinsics_8h.xhtml',1,'']]],
   ['inv_2eh',['inv.h',['../inv_8h.xhtml',1,'']]],

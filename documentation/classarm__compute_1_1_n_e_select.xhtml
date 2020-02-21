@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -188,15 +188,15 @@ Static Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Condition input tensor. Data types supported: U8. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>First input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>First input tensor. Data types supported: All. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Second input tensor. Data types supported: Same as <code>x</code> </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>x</code>. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_select_8cpp_source.xhtml#l00033">33</a> of file <a class="el" href="_n_e_select_8cpp_source.xhtml">NESelect.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;{</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NESelectKernel&gt;();</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    k-&gt;configure(c, x, y, output);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_n_e_select_8cpp_source.xhtml#l00031">31</a> of file <a class="el" href="_n_e_select_8cpp_source.xhtml">NESelect.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;{</div><div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NESelectKernel&gt;();</div><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    k-&gt;configure(c, x, y, output);</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a id="af5ad0300bd3400444dce993099c61685"></a>
@@ -249,7 +249,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Condition input tensor. Data types supported: U8. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>First input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>First input tensor. Data types supported: All. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Second input tensor. Data types supported: Same as <code>x</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>x</code>.</td></tr>
   </table>
@@ -257,8 +257,8 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_select_8cpp_source.xhtml#l00040">40</a> of file <a class="el" href="_n_e_select_8cpp_source.xhtml">NESelect.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_select_kernel.xhtml#af5ad0300bd3400444dce993099c61685">NESelectKernel::validate</a>(c, x, y, output);</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_select_kernel_xhtml_af5ad0300bd3400444dce993099c61685"><div class="ttname"><a href="classarm__compute_1_1_n_e_select_kernel.xhtml#af5ad0300bd3400444dce993099c61685">arm_compute::NESelectKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)</div><div class="ttdoc">Validate the argument passed to the kernel.</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_select_kernel_8cpp_source.xhtml#l00230">NESelectKernel.cpp:230</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_n_e_select_8cpp_source.xhtml#l00038">38</a> of file <a class="el" href="_n_e_select_8cpp_source.xhtml">NESelect.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_select_kernel.xhtml#af5ad0300bd3400444dce993099c61685">NESelectKernel::validate</a>(c, x, y, output);</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_select_kernel_xhtml_af5ad0300bd3400444dce993099c61685"><div class="ttname"><a href="classarm__compute_1_1_n_e_select_kernel.xhtml#af5ad0300bd3400444dce993099c61685">arm_compute::NESelectKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)</div><div class="ttdoc">Validate the argument passed to the kernel.</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_select_kernel_8cpp_source.xhtml#l00230">NESelectKernel.cpp:230</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_n_e_select_kernel_8cpp_source.xhtml#l00230">NESelectKernel::validate()</a>.</p>
 
@@ -274,7 +274,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_select.xhtml">NESelect</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:57 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

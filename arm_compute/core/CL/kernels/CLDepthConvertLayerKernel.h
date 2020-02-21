@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H__
-#define __ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H__
+#ifndef ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H
+#define ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H
 
 #include "arm_compute/core/CL/ICLSimple3DKernel.h"
 #include "arm_compute/core/Types.h"
@@ -68,4 +68,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift);
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H */

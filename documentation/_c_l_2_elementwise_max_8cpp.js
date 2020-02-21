@@ -9,6 +9,7 @@ var _c_l_2_elementwise_max_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_elementwise_max_8cpp.xhtml#a4dbf0da7b126e94071b585212021952b", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_elementwise_max_8cpp.xhtml#a5e5e4eb448be2d30b789000b79e7a76c", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_elementwise_max_8cpp.xhtml#af5439e7a8eb02e1102bbe08cb605d3fc", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_elementwise_max_8cpp.xhtml#a098a13d0a3cbae8603c533e37e897937", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_elementwise_max_8cpp.xhtml#a0a2b98b346fd990f96f5702ed9014f70", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_elementwise_max_8cpp.xhtml#a21a1ee860b586f6f45a366acbc6d8a9e", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_elementwise_max_8cpp.xhtml#a740cb3946164b82663de43246413b9da", null ],

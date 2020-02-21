@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEOPTICALFLOW_H__
-#define __ARM_COMPUTE_NEOPTICALFLOW_H__
+#ifndef ARM_COMPUTE_NEOPTICALFLOW_H
+#define ARM_COMPUTE_NEOPTICALFLOW_H
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"
@@ -99,4 +99,4 @@ private:
     unsigned int                   _num_levels;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEOPTICALFLOW_H__ */
+#endif /*ARM_COMPUTE_NEOPTICALFLOW_H */

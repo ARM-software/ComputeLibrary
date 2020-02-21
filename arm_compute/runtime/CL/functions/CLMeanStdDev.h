@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLMEANSTDDEV_H__
-#define __ARM_COMPUTE_CLMEANSTDDEV_H__
+#ifndef ARM_COMPUTE_CLMEANSTDDEV_H
+#define ARM_COMPUTE_CLMEANSTDDEV_H
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
@@ -91,4 +91,4 @@ private:
     cl::Buffer           _global_sum_squared;         /**< Variable that holds the global sum of squared values among calls in order to ease reduction */
 };
 }
-#endif /*__ARM_COMPUTE_CLMEANSTDDEV_H__ */
+#endif /*ARM_COMPUTE_CLMEANSTDDEV_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H__
-#define __ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H__
+#ifndef ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H
+#define ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/NEON/INEKernel.h"
@@ -90,4 +90,4 @@ private:
     const ITensor                     *_idx;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H__ */
+#endif /*ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H */

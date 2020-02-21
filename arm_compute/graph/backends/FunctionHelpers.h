@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H__
-#define __ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H__
+#ifndef ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
+#define ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H
 
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/Tensor.h"
@@ -1143,10 +1143,77 @@ std::unique_ptr<IFunction> create_pooling_layer(PoolingLayerNode &node)
                                << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
-                               << " Pooling info: " << pool_info.pool_type()
+                               << " Pooling info: " << pool_info.pool_type
                                << std::endl);
 
     return std::move(func);
+}
+
+/** Create a backend PRelu layer function
+ *
+ * @tparam PReluFunction Backend PRelu function
+ * @tparam TargetInfo    Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend PRelu layer function
+ */
+template <typename PReluFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_prelu_layer(PReluLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 2 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *alpha  = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    ARM_COMPUTE_ERROR_ON(input == nullptr || alpha == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<PReluFunction>();
+    func->configure(input, alpha, output);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(func);
+}
+
+/** Create a backend print layer function
+ *
+ * @tparam TargetInfo Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend print layer function
+ */
+template <typename TargetInfo>
+std::unique_ptr<IFunction> create_print_layer(PrintLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    typename TargetInfo::TensorType *input = get_backing_tensor<TargetInfo>(node.input(0));
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_UNUSED(input);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << std::endl);
+
+    return nullptr;
 }
 
 /** Create a backend priorbox layer function
@@ -1596,4 +1663,4 @@ std::unique_ptr<IFunction> create_yolo_layer(YOLOLayerNode &node, GraphContext &
 } // namespace graph
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H__ */
+#endif /* ARM_COMPUTE_GRAPH_BACKENDS_DETAIL_FUNCTION_HELPERS_H */

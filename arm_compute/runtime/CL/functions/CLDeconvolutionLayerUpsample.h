@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H__
-#define __ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H__
+#ifndef ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H
+#define ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -59,14 +59,14 @@ public:
 
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
-     * @param[in, out] input  Source tensor. Data type supported: QASYMM8/F16/F32.
+     * @param[in, out] input  Source tensor. Data type supported: All.
      * @param[out]     output Destination tensor. Data type supported: same as @p input.
      * @param[in]      info   Contains padding and policies to be used in the deconvolution.
      */
     void configure(ICLTensor *input, ICLTensor *output, const PadStrideInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayerUpsample
      *
-     * @param[in] input  Source tensor info. Data type supported: QASYMM8/F16/F32.
+     * @param[in] input  Source tensor info. Data type supported: All.
      * @param[in] output Destination tensor info. Data type supported: same as @p input.
      * @param[in] info   Contains padding and policies to be used in the deconvolution.
      *
@@ -83,4 +83,4 @@ private:
     ICLTensor                         *_output;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H__ */
+#endif /* ARM_COMPUTE_CLDECONVOLUTIONLAYERUPSAMPLE_H */

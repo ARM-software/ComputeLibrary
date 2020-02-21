@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_EOR_H__
-#define __ARM_COMPUTE_WRAPPER_EOR_H__
+#ifndef ARM_COMPUTE_WRAPPER_EOR_H
+#define ARM_COMPUTE_WRAPPER_EOR_H
 
 #include <arm_neon.h>
 
@@ -53,4 +53,4 @@ VEOR_IMPL(int32x4_t, veorq, s32)
 #undef VEOR_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_EOR_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_EOR_H */

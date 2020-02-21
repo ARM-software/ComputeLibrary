@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -195,7 +195,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: QASYMM8/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>PRelu layer parameters. Data types supported: same of <code>input</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: same as <code>input</code> </td></tr>
   </table>
@@ -254,7 +254,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_p_relu_layer.xhtml">CLPReluLayer</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: QASYMM8/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>PRelu layer parameters. Data types supported: same of <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data type supported: same as <code>input</code> </td></tr>
   </table>
@@ -263,12 +263,12 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_p_relu_layer_8cpp_source.xhtml#l00056">56</a> of file <a class="el" href="_c_l_p_relu_layer_8cpp_source.xhtml">CLPReluLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;{</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a52095bfe8f4fc368d3ec84a8dac4d616">CLArithmeticOperationKernel::validate</a>(<a class="code" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f">ArithmeticOperation::PRELU</a>, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">alpha</a>, output);</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_arithmetic_operation_kernel_xhtml_a52095bfe8f4fc368d3ec84a8dac4d616"><div class="ttname"><a href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a52095bfe8f4fc368d3ec84a8dac4d616">arm_compute::CLArithmeticOperationKernel::validate</a></div><div class="ttdeci">static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLArithmeticOperationKer...</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_elementwise_operation_kernel_8cpp_source.xhtml#l00373">CLElementwiseOperationKernel.cpp:373</a></div></div>
+<div class="fragment"><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;{</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a52095bfe8f4fc368d3ec84a8dac4d616">CLArithmeticOperationKernel::validate</a>(<a class="code" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f">ArithmeticOperation::PRELU</a>, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">alpha</a>, output);</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_c_l_arithmetic_operation_kernel_xhtml_a52095bfe8f4fc368d3ec84a8dac4d616"><div class="ttname"><a href="classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml#a52095bfe8f4fc368d3ec84a8dac4d616">arm_compute::CLArithmeticOperationKernel::validate</a></div><div class="ttdeci">static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of CLArithmeticOperationKer...</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_elementwise_operation_kernel_8cpp_source.xhtml#l00377">CLElementwiseOperationKernel.cpp:377</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a3161c2c93c655dd30953372064ec627b"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b">arm_compute::test::validation::alpha</a></div><div class="ttdeci">const float alpha</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00103">Accumulate.cpp:103</a></div></div>
 <div class="ttc" id="namespacearm__compute_xhtml_a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f"><div class="ttname"><a href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f">arm_compute::ArithmeticOperation::PRELU</a></div><div class="ttdoc">y*x if x &lt; 0, x otherwise</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00103">arm_compute::test::validation::alpha</a>, <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f">arm_compute::PRELU</a>, and <a class="el" href="_c_l_elementwise_operation_kernel_8cpp_source.xhtml#l00373">CLArithmeticOperationKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00103">arm_compute::test::validation::alpha</a>, <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea25c5689f5cf73ac778d6aec298e02a7f">arm_compute::PRELU</a>, and <a class="el" href="_c_l_elementwise_operation_kernel_8cpp_source.xhtml#l00377">CLArithmeticOperationKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -282,7 +282,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_p_relu_layer.xhtml">CLPReluLayer</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:52 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

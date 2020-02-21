@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHTOSPACELAYERKERNEL_H__
-#define __ARM_COMPUTE_CLDEPTHTOSPACELAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLDEPTHTOSPACELAYERKERNEL_H
+#define ARM_COMPUTE_CLDEPTHTOSPACELAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -49,14 +49,14 @@ public:
     ~CLDepthToSpaceLayerKernel() = default;
     /** Initialise the kernel's inputs and output.
      *
-     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input       Tensor input. Supported tensor rank: 4. Data types supported: All.
      * @param[out] output      Tensor output. Data types supported: same as @p input
      * @param[in]  block_shape Block shape value.
      */
     void configure(const ICLTensor *input, ICLTensor *output, int32_t block_shape);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthToSpaceLayerKernel.
      *
-     * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: All.
      * @param[in] output      Tensor output info. Data types supported: same as @p input
      * @param[in] block_shape Block shape value.
      *
@@ -73,4 +73,4 @@ private:
     int32_t          _block_shape; /**< Block shape */
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLDEPTHTOSPACELAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLDEPTHTOSPACELAYERKERNEL_H */

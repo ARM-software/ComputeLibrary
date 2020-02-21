@@ -21,20 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_QUANTIZATION_INFO_H__
-#define __ARM_COMPUTE_QUANTIZATION_INFO_H__
+#ifndef ARM_COMPUTE_QUANTIZATION_INFO_H
+#define ARM_COMPUTE_QUANTIZATION_INFO_H
 
 #include "arm_compute/core/Rounding.h"
 #include "utils/misc/Utility.h"
 
 #include <cstddef>
+#include <type_traits>
 #include <vector>
 
 namespace arm_compute
 {
-using qasymm8_t  = uint8_t;  /**< 8 bit quantized asymmetric scalar value */
-using qsymm16_t  = int16_t;  /**< 16 bit quantized symmetric scalar value */
-using qasymm16_t = uint16_t; /**< 16 bit quantized asymmetric scalar value */
+using qasymm8_signed_t = int8_t;   /**< 8 bit signed quantized asymmetric scalar value */
+using qasymm8_t        = uint8_t;  /**< 8 bit quantized asymmetric scalar value */
+using qsymm16_t        = int16_t;  /**< 16 bit quantized symmetric scalar value */
+using qasymm16_t       = uint16_t; /**< 16 bit quantized asymmetric scalar value */
 
 /** Quantization info when assuming per layer quantization */
 struct UniformQuantizationInfo
@@ -204,8 +206,71 @@ inline bool operator!=(const UniformQuantizationInfo &lhs, const UniformQuantiza
 {
     return !(operator==(lhs, rhs));
 }
+template <typename QUANTIZED_TYPE = uint8_t>
+struct Qasymm8QuantizationHelper
+{
+    static_assert(std::is_same<QUANTIZED_TYPE, uint8_t>::value
+                  || std::is_same<QUANTIZED_TYPE, int8_t>::value,
+                  "quantized type should be either uint8_t or int8_t.");
 
-/** Quantize a value given a 8-bit asymmetric quantization scheme
+    /** Quantize a value given a 8-bit asymmetric quantization scheme
+     *
+     * @param[in] value           Value to quantize
+     * @param[in] qinfo           Quantization information to use for quantizing
+     * @param[in] rounding_policy (Optional) Rounding policy to use. Default: nearest up
+     *
+     * @return Quantized value
+     */
+    static inline QUANTIZED_TYPE quantize(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+    {
+        ARM_COMPUTE_ERROR_ON(qinfo.scale == 0);
+        const int quantized = arm_compute::round(value / qinfo.scale, rounding_policy) + qinfo.offset;
+        return static_cast<QUANTIZED_TYPE>(arm_compute::utility::clamp<decltype(quantized), QUANTIZED_TYPE>(quantized));
+    }
+
+    /** Quantize a value given a 8-bit asymmetric quantization scheme
+     *
+     * @param[in] value           Value to quantize
+     * @param[in] qinfo           Quantization information to use for quantizing
+     * @param[in] rounding_policy (Optional) Rounding policy to use. Default: nearest up
+     *
+     * @return Quantized value
+     */
+    static inline QUANTIZED_TYPE quantize(float value, const QuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+    {
+        const UniformQuantizationInfo uqinfo = qinfo.uniform();
+        ARM_COMPUTE_ERROR_ON(uqinfo.scale == 0);
+        const int quantized = arm_compute::round(value / uqinfo.scale, rounding_policy) + uqinfo.offset;
+        return static_cast<QUANTIZED_TYPE>(arm_compute::utility::clamp<decltype(quantized), QUANTIZED_TYPE>(quantized));
+    }
+
+    /** Dequantize a value given a 8-bit asymmetric quantization scheme
+     *
+     * @param[in] value Value to dequantize
+     * @param[in] qinfo Quantization information to use for dequantizing
+     *
+     * @return Dequantized value
+     */
+    static inline float dequantize(QUANTIZED_TYPE value, const UniformQuantizationInfo &qinfo)
+    {
+        return (static_cast<int>(value) - qinfo.offset) * qinfo.scale;
+    }
+
+    /** Dequantize a value given a 8-bit asymmetric quantization scheme
+     *
+     * @param[in] value Value to dequantize
+     * @param[in] qinfo Quantization information to use for dequantizing
+     *
+     * @return Dequantized value
+     */
+    static inline float dequantize(QUANTIZED_TYPE value, const QuantizationInfo &qinfo)
+    {
+        const UniformQuantizationInfo uqinfo = qinfo.uniform();
+        return (static_cast<int>(value) - uqinfo.offset) * uqinfo.scale;
+    }
+};
+
+/** Quantize a value given an unsigned 8-bit asymmetric quantization scheme
  *
  * @param[in] value           Value to quantize
  * @param[in] qinfo           Quantization information to use for quantizing
@@ -213,14 +278,13 @@ inline bool operator!=(const UniformQuantizationInfo &lhs, const UniformQuantiza
  *
  * @return Quantized value
  */
-inline uint8_t quantize_qasymm8(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+template <typename INFO_TYPE>
+inline uint8_t quantize_qasymm8(float value, const INFO_TYPE &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
 {
-    int quantized = arm_compute::round(value / qinfo.scale, rounding_policy) + qinfo.offset;
-    quantized     = std::max(0, std::min(quantized, 255));
-    return quantized;
+    return Qasymm8QuantizationHelper<uint8_t>::quantize(value, qinfo, rounding_policy);
 }
 
-/** Quantize a value given a 8-bit asymmetric quantization scheme
+/** Quantize a value given a signed 8-bit asymmetric quantization scheme
  *
  * @param[in] value           Value to quantize
  * @param[in] qinfo           Quantization information to use for quantizing
@@ -228,12 +292,10 @@ inline uint8_t quantize_qasymm8(float value, const UniformQuantizationInfo &qinf
  *
  * @return Quantized value
  */
-inline uint8_t quantize_qasymm8(float value, const QuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+template <typename INFO_TYPE>
+inline int8_t quantize_qasymm8_signed(float value, const INFO_TYPE &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
 {
-    UniformQuantizationInfo uqinfo    = qinfo.uniform();
-    int                     quantized = arm_compute::round(value / uqinfo.scale, rounding_policy) + uqinfo.offset;
-    quantized                         = std::max(0, std::min(quantized, 255));
-    return quantized;
+    return Qasymm8QuantizationHelper<int8_t>::quantize(value, qinfo, rounding_policy);
 }
 
 /** Quantize a value given a 8-bit symmetric quantization scheme
@@ -265,29 +327,30 @@ inline int8_t quantize_qsymm8_per_channel(float value, const QuantizationInfo &q
     return quantized;
 }
 
-/** Dequantize a value given a 8-bit asymmetric quantization scheme
+/** Dequantize a value given an unsigned 8-bit asymmetric quantization scheme
  *
  * @param[in] value Value to dequantize
  * @param[in] qinfo Quantization information to use for dequantizing
  *
  * @return Dequantized value
  */
-inline float dequantize_qasymm8(uint8_t value, const UniformQuantizationInfo &qinfo)
+template <typename INFO_TYPE>
+inline float dequantize_qasymm8(uint8_t value, const INFO_TYPE &qinfo)
 {
-    return (static_cast<int>(value) - qinfo.offset) * qinfo.scale;
+    return Qasymm8QuantizationHelper<uint8_t>::dequantize(value, qinfo);
 }
 
-/** Dequantize a value given a 8-bit asymmetric quantization scheme
+/** Dequantize a value given a signed 8-bit asymmetric quantization scheme
  *
  * @param[in] value Value to dequantize
  * @param[in] qinfo Quantization information to use for dequantizing
  *
  * @return Dequantized value
  */
-inline float dequantize_qasymm8(uint8_t value, const QuantizationInfo &qinfo)
+template <typename INFO_TYPE>
+inline float dequantize_qasymm8_signed(int8_t value, const INFO_TYPE &qinfo)
 {
-    UniformQuantizationInfo uqinfo = qinfo.uniform();
-    return (static_cast<int>(value) - uqinfo.offset) * uqinfo.scale;
+    return Qasymm8QuantizationHelper<int8_t>::dequantize(value, qinfo);
 }
 
 /** Dequantize a value given an 8-bit asymmetric quantization scheme
@@ -454,4 +517,4 @@ inline float dequantize_qasymm16(uint16_t value, const QuantizationInfo &qinfo)
     return dequantize_qasymm16(value, qinfo.uniform());
 }
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_QUANTIZATION_INFO_H__ */
+#endif /* ARM_COMPUTE_QUANTIZATION_INFO_H */

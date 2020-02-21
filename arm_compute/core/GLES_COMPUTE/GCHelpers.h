@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCHELPERS_H__
-#define __ARM_COMPUTE_GCHELPERS_H__
+#ifndef ARM_COMPUTE_GCHELPERS_H
+#define ARM_COMPUTE_GCHELPERS_H
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
@@ -56,4 +56,4 @@ GPUTarget get_target_from_device();
  */
 GCKernel create_opengl_kernel(GCCoreRuntimeContext *ctx, const std::string &kernel_name, const std::set<std::string> &build_opts);
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GCHELPERS_H__ */
+#endif /* ARM_COMPUTE_GCHELPERS_H */

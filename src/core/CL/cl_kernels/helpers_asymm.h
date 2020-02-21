@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,19 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
     return ((float)input - offset) * scale;
 }
 
+/** Dequantize a scalar value from signed 8-bit asymmetric to floating-point
+ *
+ * @param[in] input  Input value to quantize
+ * @param[in] offset Quantization offset
+ * @param[in] scale  Quantization scale
+ *
+ * @return quantized value
+ */
+inline float dequantize_qasymm8_signed(char input, float offset, float scale)
+{
+    return ((float)input - offset) * scale;
+}
+
 /** Quantize a vector of values from floating-point
  *
  * @param[in] type Output data type.
@@ -91,7 +104,7 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
 #define DEQUANTIZE_IMPL(type, size)                                                                                       \
     inline VEC_DATA_TYPE(float, size) dequantize_##type##size(VEC_DATA_TYPE(type, size) input, float offset, float scale) \
     {                                                                                                                     \
-        return (CONVERT(input, VEC_DATA_TYPE(float, 4)) - offset) * scale;                                                \
+        return (CONVERT(input, VEC_DATA_TYPE(float, size)) - offset) * scale;                                             \
     }
 
 /** Correctly-rounded-to-nearest division by a power-of-two.
@@ -369,6 +382,8 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
 
 #define ASYMM_ROUNDING_DIVIDE_BY_POW2(x, exponent, size) asymm_rounding_divide_by_POW2_##size(x, exponent)
 #define ASYMM_MULT(a, b, size) asymm_mult##size(a, b)
+#define ASYMM_MULT_BY_QUANT_MULTIPLIER_GREATER_THAN_ONE(x, quantized_multiplier, left_shift, size) \
+    ASYMM_MULT(x *((VEC_DATA_TYPE(int, size))(1) << (-left_shift)), quantized_multiplier, size)
 #define ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(x, quantized_multiplier, right_shift, size) \
     ASYMM_ROUNDING_DIVIDE_BY_POW2(ASYMM_MULT(x, quantized_multiplier, size), right_shift, size)
 #define ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL(a, size) asymm_exp_on_interval_between_negative_one_quarter_and_0_excl##size(a)
@@ -382,13 +397,33 @@ inline float dequantize_qasymm8(uchar input, float offset, float scale)
 #define ASYMM_ROUNDING_HALF_SUM(a, b, size) asymm_rounding_half_sum##size(a, b)
 #define ASYMM_RESCALE(value, src_integer_bits, dst_integer_bits, size) asymm_rescale##size(value, src_integer_bits, dst_integer_bits)
 
+QUANTIZE_IMPL(uchar, 1)
+QUANTIZE_IMPL(char, 1)
+QUANTIZE_IMPL(uint, 1)
+QUANTIZE_IMPL(int, 1)
 QUANTIZE_IMPL(uchar, 4)
 QUANTIZE_IMPL(ushort, 4)
 QUANTIZE_IMPL(short, 4)
+QUANTIZE_IMPL(uchar, 16)
+QUANTIZE_IMPL(char, 16)
+QUANTIZE_IMPL(ushort, 16)
+QUANTIZE_IMPL(short, 16)
+QUANTIZE_IMPL(uint, 16)
+QUANTIZE_IMPL(int, 16)
 
+DEQUANTIZE_IMPL(uchar, 1)
+DEQUANTIZE_IMPL(char, 1)
+DEQUANTIZE_IMPL(uint, 1)
+DEQUANTIZE_IMPL(int, 1)
 DEQUANTIZE_IMPL(uchar, 4)
 DEQUANTIZE_IMPL(ushort, 4)
 DEQUANTIZE_IMPL(short, 4)
+DEQUANTIZE_IMPL(uchar, 16)
+DEQUANTIZE_IMPL(char, 16)
+DEQUANTIZE_IMPL(ushort, 16)
+DEQUANTIZE_IMPL(short, 16)
+DEQUANTIZE_IMPL(uint, 16)
+DEQUANTIZE_IMPL(int, 16)
 
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(1)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(2)

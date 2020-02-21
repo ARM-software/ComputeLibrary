@@ -12,9 +12,11 @@ var _n_e_g_e_m_m_assembly_dispatch_8cpp =
     [ "_kernel_info", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#afc565d633552dac5bec15e41e84f83fa", null ],
     [ "_ldb", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#a60c7b5848d652f8bc6d2abfd4f867090", null ],
     [ "_multi_stride_b", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#a98f2ed11af1753f4f5627b275f21adc7", null ],
+    [ "_multipliers", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#af45a8b2443595999c6bc32a1aa1fa278", null ],
     [ "_optimised_kernel", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#a25380d912475d0de9f812208470ed658", null ],
     [ "_output", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#a3dabf3ed8ba88fd21df90126b2ddf7c7", null ],
     [ "_pretranspose", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#a5bdfad560ce4bc3d80c8c5182eba0f47", null ],
+    [ "_shifts", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#a49d9bfa46abdf6d8e221412675f27513", null ],
     [ "_weights_manager", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#a8fecde6baf5c3fa6626dd4b2b8dc12f0", null ],
     [ "_weights_transform", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#a8f52336774376ab381f53b3cca0e0882", null ],
     [ "_workspace", "_n_e_g_e_m_m_assembly_dispatch_8cpp.xhtml#ab0f157bb6782f455f9dba5655c67879b", null ]

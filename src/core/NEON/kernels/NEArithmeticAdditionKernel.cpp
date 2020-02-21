@@ -335,6 +335,193 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
     }
 }
 
+void add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolicy policy, const Window &window)
+{
+    ARM_COMPUTE_UNUSED(policy);
+
+    // Create input windows
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+
+    // Clear X Dimension on execution window as we handle manually
+    Window win = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    const int  window_step_x         = 16;
+    const auto window_start_x        = static_cast<int>(window.x().start());
+    const auto window_end_x          = static_cast<int>(window.x().end());
+    const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+
+    const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
+
+    const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
+    const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
+    const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
+    const int32x4_t   voffset1   = vdupq_n_s32(iq1_info.offset);
+    const int32x4_t   voffset2   = vdupq_n_s32(iq2_info.offset);
+    const float32x4_t voffseto   = vdupq_n_f32(oq_info.offset);
+
+    if(is_broadcast_across_x)
+    {
+        const bool                    is_broadcast_input_2 = input2_win.x().step() == 0;
+        Window                        broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
+        Window                        non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
+        const ITensor                *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
+        const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
+        const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
+        const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
+
+        // Clear X Dimension on execution window as we handle manually
+        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator broadcast_input(broadcast_tensor, broadcast_win);
+        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto non_broadcast_input_ptr = reinterpret_cast<const int8_t *>(non_broadcast_input.ptr());
+            const auto output_ptr              = reinterpret_cast<int8_t *>(output.ptr());
+
+            const int8_t    broadcast_value     = *reinterpret_cast<const int8_t *>(broadcast_input.ptr());
+            const int8x16_t broadcast_value_vec = vdupq_n_s8(broadcast_value);
+
+            const float32x4x4_t bf =
+            {
+                {
+                    vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(broadcast_value_vec)))), voffset2)), vscale2),
+                    vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(broadcast_value_vec)))), voffset2)), vscale2),
+                    vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(broadcast_value_vec)))), voffset2)), vscale2),
+                    vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(broadcast_value_vec)))), voffset2)), vscale2),
+                }
+            };
+            const float bfs = static_cast<int32_t>(broadcast_value - broadcast_qinfo.offset) * broadcast_qinfo.scale;
+
+            // Compute S elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const int8x16_t     a = vld1q_s8(non_broadcast_input_ptr + x);
+                const float32x4x4_t af =
+                {
+                    {
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(a)))), voffset1)), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(a)))), voffset1)), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(a)))), voffset1)), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(a)))), voffset1)), vscale1),
+                    }
+                };
+
+                const int32x4x4_t rf =
+                {
+                    {
+#ifdef __aarch64__
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#else  //__aarch64__
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#endif //__aarch64__
+                    }
+                };
+
+                const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+                const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
+                vst1q_s8(output_ptr + x, vcombine_s8(pa, pb));
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                const float afs   = static_cast<int32_t>(*(non_broadcast_input_ptr + x) - non_broadcast_qinfo.offset) * non_broadcast_qinfo.scale;
+                *(output_ptr + x) = quantize_qasymm8_signed((afs + bfs), oq_info);
+            }
+        },
+        broadcast_input, non_broadcast_input, output);
+    }
+    else
+    {
+        // Clear X Dimension on execution window as we handle manually
+        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input1(in1, input1_win);
+        Iterator input2(in2, input2_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto input1_ptr = reinterpret_cast<const int8_t *>(input1.ptr());
+            const auto input2_ptr = reinterpret_cast<const int8_t *>(input2.ptr());
+            const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
+
+            // Compute S elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const int8x16_t a = vld1q_s8(input1_ptr + x);
+                const int8x16_t b = vld1q_s8(input2_ptr + x);
+
+                const float32x4x4_t af =
+                {
+                    {
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(a)))), voffset1)), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(a)))), voffset1)), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(a)))), voffset1)), vscale1),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(a)))), voffset1)), vscale1),
+                    }
+                };
+
+                const float32x4x4_t bf =
+                {
+                    {
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_low_s8(b)))), voffset2)), vscale2),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_low_s8(b)))), voffset2)), vscale2),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_low_s16(vmovl_s8(vget_high_s8(b)))), voffset2)), vscale2),
+                        vmulq_f32(vcvtq_f32_s32(vsubq_s32(vmovl_s16(vget_high_s16(vmovl_s8(vget_high_s8(b)))), voffset2)), vscale2),
+                    }
+                };
+
+                const int32x4x4_t rf =
+                {
+                    {
+#ifdef __aarch64__
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#else  //__aarch64__
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#endif //__aarch64__
+                    }
+                };
+
+                const int8x8_t pa = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+                const int8x8_t pb = vqmovn_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
+                vst1q_s8(output_ptr + x, vcombine_s8(pa, pb));
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                const float afs   = static_cast<int32_t>((*(input1_ptr + x)) - iq1_info.offset) * iq1_info.scale;
+                const float bfs   = static_cast<int32_t>((*(input2_ptr + x)) - iq2_info.offset) * iq2_info.scale;
+                *(output_ptr + x) = quantize_qasymm8_signed((afs + bfs), out->info()->quantization_info());
+            }
+        },
+        input1, input2, output);
+    }
+}
+
 void add_QSYMM16_QSYMM16_QSYMM16(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolicy policy, const Window &window)
 {
     ARM_COMPUTE_UNUSED(policy);
@@ -641,8 +828,8 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
     ARM_COMPUTE_UNUSED(policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
 
@@ -663,6 +850,7 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
             && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32 && output.data_type() == DataType::F32)
             && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16 && output.data_type() == DataType::F16)
             && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8)
+            && !(input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED && output.data_type() == DataType::QASYMM8_SIGNED)
             && !(input1.data_type() == DataType::QSYMM16 && input2.data_type() == DataType::QSYMM16 && output.data_type() == DataType::QSYMM16),
             "You called addition with the wrong image formats");
 
@@ -687,7 +875,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
         {
             set_format_if_unknown(output, Format::S16);
         }
-        else if(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16)
+        else if(input1.data_type() == DataType::F16 || input2.data_type() == DataType::F16)
         {
             set_format_if_unknown(output, Format::F16);
         }
@@ -695,11 +883,15 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
         {
             set_format_if_unknown(output, Format::F32);
         }
-        else if(input1.data_type() == DataType::QASYMM8)
+        else if(input1.data_type() == DataType::QASYMM8 || input2.data_type() == DataType::QASYMM8)
         {
             set_data_type_if_unknown(output, DataType::QASYMM8);
         }
-        else if(input1.data_type() == DataType::QSYMM16)
+        else if(input1.data_type() == DataType::QASYMM8_SIGNED || input2.data_type() == DataType::QASYMM8_SIGNED)
+        {
+            set_data_type_if_unknown(output, DataType::QASYMM8_SIGNED);
+        }
+        else if(input1.data_type() == DataType::QSYMM16 || input2.data_type() == DataType::QSYMM16)
         {
             set_data_type_if_unknown(output, DataType::QSYMM16);
         }
@@ -733,6 +925,8 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
     {
         { "add_wrap_QASYMM8_QASYMM8_QASYMM8", &add_QASYMM8_QASYMM8_QASYMM8 },
         { "add_saturate_QASYMM8_QASYMM8_QASYMM8", &add_QASYMM8_QASYMM8_QASYMM8 },
+        { "add_wrap_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED },
+        { "add_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED },
         { "add_wrap_QSYMM16_QSYMM16_QSYMM16", &add_QSYMM16_QSYMM16_QSYMM16 },
         { "add_saturate_QSYMM16_QSYMM16_QSYMM16", &add_QSYMM16_QSYMM16_QSYMM16 },
         { "add_wrap_U8_U8_U8", &add_same<uint8_t, false> },

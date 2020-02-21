@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -563,9 +563,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<uin
                        combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
                                                                        depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10) })),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10), QuantizationInfo(2.2f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })), // NCHW is tested with int8
                                ActivationFunctionsDataset))
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -574,7 +574,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uin
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
                                                                        large_depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10), QuantizationInfo(2.2f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.7f, 2) })),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                ActivationFunctionsDataset))
@@ -586,9 +586,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<uin
                        combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset(),
                                                                        depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10), QuantizationInfo(2.2f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.8, 1) })),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })), // NCHW is tested with int8
                                ActivationFunctionsDataset))
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -597,7 +597,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uin
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset(),
                                                                        large_depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10), QuantizationInfo(1.3f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.9f, 11) })),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                ActivationFunctionsDataset))
@@ -611,7 +611,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<uin
                        combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                        depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10) })),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10), QuantizationInfo(2.2f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                ActivationFunctionsDataset))
@@ -622,7 +622,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uin
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
                                                                        large_depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10), QuantizationInfo(2.2f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                ActivationFunctionsDataset))
@@ -634,7 +634,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<uin
                        combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(),
                                                                        depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10), QuantizationInfo(2.2f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                ActivationFunctionsDataset))
@@ -645,7 +645,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uin
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
                                                                        large_depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10), QuantizationInfo(2.2f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                ActivationFunctionsDataset))
@@ -655,6 +655,35 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uin
 TEST_SUITE_END() // Dilation
 TEST_SUITE_END() // W3x3
 TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+TEST_SUITE(Generic)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
+                                                                       depth_multipliers),
+                                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.3f, 10), QuantizationInfo(2.2f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 4) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE(Dilation)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset(),
+                                                                       depth_multipliers),
+                                                               framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10), QuantizationInfo(2.2f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.8, 1) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                               ActivationFunctionsDataset))
+{
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // Dilation
+TEST_SUITE_END() // Generic
+TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE(QSYMM8_PER_CHANNEL)
 TEST_SUITE(Generic)

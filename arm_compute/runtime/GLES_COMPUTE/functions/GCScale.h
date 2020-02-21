@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCSCALE_H__
-#define __ARM_COMPUTE_GCSCALE_H__
+#ifndef ARM_COMPUTE_GCSCALE_H
+#define ARM_COMPUTE_GCSCALE_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
@@ -46,9 +46,11 @@ public:
      * @param[in]     border_mode           Strategy to use for borders.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      * @param[in]     sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     * @param[in]     use_padding           (Optional) Is padding in use or not. Defaults to true.
+     * @param[in]     align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      */
     void configure(IGCTensor *input, IGCTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
-                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
 };
 }
-#endif /*__ARM_COMPUTE_GCSCALE_H__ */
+#endif /*ARM_COMPUTE_GCSCALE_H */

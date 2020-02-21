@@ -40,7 +40,7 @@ private:
     UniqueGemmCommon<To, Tgemm>  _subgemm = nullptr;
     int32_t                     *_row_sums = nullptr;
     int32_t                     *_col_sums = nullptr;
-    ARequantizeLayer32           _params;
+    Requantize32                 _params;
     GemmArgs                     _args;
     barrier                      _barrier;
 
@@ -125,7 +125,7 @@ public:
     QuantizeWrapper(const QuantizeWrapper &) = delete;
     QuantizeWrapper operator=(const QuantizeWrapper &) = delete;
 
-    QuantizeWrapper(const GemmArgs &args, const ARequantizeLayer32 &qp) : _params(qp), _args(args), _barrier(args._maxthreads) {
+    QuantizeWrapper(const GemmArgs &args, const Requantize32 &qp) : _params(qp), _args(args), _barrier(args._maxthreads) {
         GemmArgs newargs = GemmArgs(args._ci, args._Msize, args._Nsize, args._Ksize, args._nbatches, args._nmulti, args._trA, args._trB, Activation(), args._maxthreads, args._pretransposed_hint, nullptr);
         _subgemm = gemm<To, Tgemm>(newargs);
 

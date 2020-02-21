@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_DIMENSIONS_H__
-#define __ARM_COMPUTE_DIMENSIONS_H__
+#ifndef ARM_COMPUTE_DIMENSIONS_H
+#define ARM_COMPUTE_DIMENSIONS_H
 
 #include "arm_compute/core/Error.h"
 
@@ -269,4 +269,4 @@ inline bool operator!=(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
     return !(lhs == rhs);
 }
 }
-#endif /*__ARM_COMPUTE_DIMENSIONS_H__*/
+#endif /*ARM_COMPUTE_DIMENSIONS_H*/

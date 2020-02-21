@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPYRAMID_H__
-#define __ARM_COMPUTE_CLPYRAMID_H__
+#ifndef ARM_COMPUTE_CLPYRAMID_H
+#define ARM_COMPUTE_CLPYRAMID_H
 
 #include "arm_compute/core/IPyramid.h"
 #include "arm_compute/core/PyramidInfo.h"
@@ -79,4 +79,4 @@ private:
     mutable std::vector<CLTensor> _pyramid;
 };
 }
-#endif /*__ARM_COMPUTE_CLPYRAMID_H__ */
+#endif /*ARM_COMPUTE_CLPYRAMID_H */

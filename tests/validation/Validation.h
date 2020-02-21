@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_VALIDATION_H__
-#define __ARM_COMPUTE_TEST_VALIDATION_H__
+#ifndef ARM_COMPUTE_TEST_VALIDATION_H
+#define ARM_COMPUTE_TEST_VALIDATION_H
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
@@ -859,4 +859,4 @@ void validate_detection_windows(T target_first, T target_last, U reference_first
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_REFERENCE_VALIDATION_H__ */
+#endif /* ARM_COMPUTE_TEST_REFERENCE_VALIDATION_H */

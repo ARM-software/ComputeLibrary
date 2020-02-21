@@ -118,15 +118,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEHeightConcatenateLayerFixture<uint8_t>, frame
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEHeightConcatenateLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::ConcatenateLayerShapes(),
-                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                            DataType::QASYMM8)),
-                                                                                                                    framework::dataset::make("Axis", 1)))
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEHeightConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::QASYMM8_SIGNED)),
+                                                                                                                     framework::dataset::make("Axis", 1)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END()

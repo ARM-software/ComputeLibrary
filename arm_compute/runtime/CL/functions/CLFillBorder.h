@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFILLBORDER_H__
-#define __ARM_COMPUTE_CLFILLBORDER_H__
+#ifndef ARM_COMPUTE_CLFILLBORDER_H
+#define ARM_COMPUTE_CLFILLBORDER_H
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
@@ -46,4 +46,4 @@ public:
     void configure(ICLTensor *tensor, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
 };
 }
-#endif /*__ARM_COMPUTE_FILLBORDER_H__ */
+#endif /*ARM_COMPUTE_FILLBORDER_H */

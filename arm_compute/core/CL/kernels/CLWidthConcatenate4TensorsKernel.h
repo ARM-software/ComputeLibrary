@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_CLWIDTHCONCATENATE_4TENSORS_KERNEL_H__
-#define __ARM_COMPUTE_CLWIDTHCONCATENATE_4TENSORS_KERNEL_H__
+#ifndef ARM_COMPUTE_CLWIDTHCONCATENATE_4TENSORS_KERNEL_H
+#define ARM_COMPUTE_CLWIDTHCONCATENATE_4TENSORS_KERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -52,7 +52,7 @@ public:
     ~CLWidthConcatenate4TensorsKernel() = default;
     /** Initialise the kernel's input1s and output
      *
-     * @param[in]  input1 First input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input1 First input tensor. Data types supported: All.
      * @param[in]  input2 Second input tensor. Data types supported: same as @p input1
      * @param[in]  input3 Third input tensor. Data types supported: same as @p input1
      * @param[in]  input4 Fourth input tensor. Data types supported: same as @p input1
@@ -61,7 +61,7 @@ public:
     void configure(const ICLTensor *input1, const ICLTensor *input2, const ICLTensor *input3, const ICLTensor *input4, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLWidthConcatenate4TensorsKernel
      *
-     * @param[in] input1 First tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input1 First tensor info. Data types supported: All.
      * @param[in] input2 Second tensor info. Data types supported: same as @p input1
      * @param[in] input3 Third tensor info. Data types supported: same as @p input1
      * @param[in] input4 Fourth tensor info. Data types supported: same as @p input1
@@ -82,4 +82,4 @@ private:
     ICLTensor       *_output;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLWIDTHCONCATENATE_4TENSORS_KERNEL_H__ */
+#endif /* ARM_COMPUTE_CLWIDTHCONCATENATE_4TENSORS_KERNEL_H */

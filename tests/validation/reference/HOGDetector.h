@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_HOG_DETECTOR_H__
-#define __ARM_COMPUTE_TEST_HOG_DETECTOR_H__
+#ifndef ARM_COMPUTE_TEST_HOG_DETECTOR_H
+#define ARM_COMPUTE_TEST_HOG_DETECTOR_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
@@ -45,4 +45,4 @@ std::vector<DetectionWindow> hog_detector(const SimpleTensor<T> &src, const std:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_HOG_DETECTOR_H__ */
+#endif /* ARM_COMPUTE_TEST_HOG_DETECTOR_H */

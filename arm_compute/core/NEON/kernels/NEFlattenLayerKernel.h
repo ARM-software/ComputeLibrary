@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFLATTENLAYERKERNEL_H__
-#define __ARM_COMPUTE_NEFLATTENLAYERKERNEL_H__
+#ifndef ARM_COMPUTE_NEFLATTENLAYERKERNEL_H
+#define ARM_COMPUTE_NEFLATTENLAYERKERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -54,7 +54,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
-     *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     *                    The dimensions above the third will be interpreted as batches. Data types supported: All
      * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
      *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      */
@@ -62,7 +62,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEFlattenLayerKernel
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
-     *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     *                    The dimensions above the third will be interpreted as batches. Data types supported: All
      * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
      *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      *
@@ -78,4 +78,4 @@ private:
     ITensor       *_output;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEFLATTENLAYERKERNEL_H__ */
+#endif /*ARM_COMPUTE_NEFLATTENLAYERKERNEL_H */

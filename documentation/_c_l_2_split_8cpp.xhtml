@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -122,7 +122,7 @@ $(document).ready(function(){initNavTree('_c_l_2_split_8cpp.xhtml','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></td></tr>
-<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2019 ARM Limited. <br /></td></tr>
+<tr class="memdesc:namespacearm__compute"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copyright (c) 2017-2020 ARM Limited. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,13 +134,20 @@ Typedefs</h2></td></tr>
 <tr class="memitem:af677be2cf1bacfa405863a3405a41394"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:af677be2cf1bacfa405863a3405a41394"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af677be2cf1bacfa405863a3405a41394">CLSplitFixture</a> = SplitFixture&lt; CLTensor, ICLTensor, CLAccessor, CLSplit, T &gt;</td></tr>
 <tr class="separator:af677be2cf1bacfa405863a3405a41394"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38c3b1f624a62f4377452ed35de3a7d2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a38c3b1f624a62f4377452ed35de3a7d2"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a38c3b1f624a62f4377452ed35de3a7d2">CLSplitShapesFixture</a> = SplitShapesFixture&lt; CLTensor, ICLTensor, CLAccessor, CLSplit, T &gt;</td></tr>
+<tr class="separator:a38c3b1f624a62f4377452ed35de3a7d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:af0b36b976c5b2f378f229b4c9db95170"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af0b36b976c5b2f378f229b4c9db95170">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(framework::dataset::make(&quot;InputInfo&quot;, { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32) }), framework::dataset::make(&quot;Axis&quot;, { 4, 2, 2 })), framework::dataset::make(&quot;Splits&quot;, { 4, 5, 4 })), framework::dataset::make(&quot;Expected&quot;, { false, false, true })), input_info, axis, splits, expected)</td></tr>
 <tr class="separator:af0b36b976c5b2f378f229b4c9db95170"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab920f8b777413b1e0b153eeba0e6ec3c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab920f8b777413b1e0b153eeba0e6ec3c">DATA_TEST_CASE</a> (ValidateSplitShapes, framework::DatasetMode::ALL, zip(zip(zip(framework::dataset::make(&quot;InputInfo&quot;, { TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 16U, 2U), 1, DataType::F32) }), framework::dataset::make(&quot;Axis&quot;, { 2, 2 })), framework::dataset::make(&quot;Splits&quot;, { std::vector&lt; TensorInfo &gt;{TensorInfo(TensorShape(27U, 3U, 4U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 4U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 8U, 2U), 1, DataType::F32)}, std::vector&lt; TensorInfo &gt;{TensorInfo(TensorShape(27U, 3U, 3U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 3U, 13U, 2U), 1, DataType::F32)} })), framework::dataset::make(&quot;Expected&quot;, { true, true })), input_info, axis, splits, expected)</td></tr>
+<tr class="separator:ab920f8b777413b1e0b153eeba0e6ec3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ed1389e2305dbba938bf6b9b95b0e3a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1ed1389e2305dbba938bf6b9b95b0e3a">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, combine(datasets::SmallSplitDataset(), framework::dataset::make(&quot;DataType&quot;, { DataType::F16, DataType::F32 })), shape, axis, splits, data_type)</td></tr>
 <tr class="separator:a1ed1389e2305dbba938bf6b9b95b0e3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc54e1705da03da268a238171fbc03b7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#acc54e1705da03da268a238171fbc03b7">DATA_TEST_CASE</a> (ConfigurationSplitShapes, framework::DatasetMode::ALL, combine(datasets::SmallSplitShapesDataset(), framework::dataset::make(&quot;DataType&quot;, { DataType::F16, DataType::F32 })), shape, axis, split_shapes, data_type)</td></tr>
+<tr class="separator:acc54e1705da03da268a238171fbc03b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b760c0c74854b6cb612f1312666e72f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2b760c0c74854b6cb612f1312666e72f">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLSplitFixture&lt; half &gt;, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSplitDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)))</td></tr>
 <tr class="separator:a2b760c0c74854b6cb612f1312666e72f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23c204d95c55898b10d64cba4e591e58"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a23c204d95c55898b10d64cba4e591e58">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLSplitFixture&lt; half &gt;, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSplitDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)))</td></tr>
@@ -152,6 +159,8 @@ Functions</h2></td></tr>
 <tr class="separator:aab35736f0cb483539bcebbc70e73bbb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35b909896da99858085753417fae8ca4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a35b909896da99858085753417fae8ca4">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLSplitFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSplitDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
 <tr class="separator:a35b909896da99858085753417fae8ca4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a404cfae582d9a7ca09d3bb32f37cbf8f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a404cfae582d9a7ca09d3bb32f37cbf8f">FIXTURE_DATA_TEST_CASE</a> (RunSmallSplitShapes, CLSplitShapesFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSplitShapesDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
+<tr class="separator:a404cfae582d9a7ca09d3bb32f37cbf8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -164,7 +173,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_2_split_8cpp.xhtml">Split.cpp</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:49 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

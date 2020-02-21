@@ -6,5 +6,6 @@ var tests_2framework_2_utils_8h =
     [ "join", "tests_2framework_2_utils_8h.xhtml#aa18932675cbb5eb9c9dbf8ff4d7106c7", null ],
     [ "join", "tests_2framework_2_utils_8h.xhtml#a898a0423aace06af0f3a18a26a972a1a", null ],
     [ "join", "tests_2framework_2_utils_8h.xhtml#a69835710fc772315f4e65ce156034530", null ],
+    [ "sleep_in_seconds", "tests_2framework_2_utils_8h.xhtml#a33ac4283b9c9c207c968dbd286a87e50", null ],
     [ "tolower", "tests_2framework_2_utils_8h.xhtml#a5b67cbf475b1e1d3bec9b0b937fdafac", null ]
 ];

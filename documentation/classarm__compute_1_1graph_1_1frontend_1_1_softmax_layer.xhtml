@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.11.1</span>
+   &#160;<span id="projectnumber">20.02</span>
    </div>
   </td>
  </tr>
@@ -136,7 +136,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Softmax Layer. </p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01115">1115</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01200">1200</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae12d901b385c3facc7b19ac809ad6b20"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae12d901b385c3facc7b19ac809ad6b20">&#9670;&nbsp;</a></span>SoftmaxLayer()</h2>
@@ -170,8 +170,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01122">1122</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01123"></a><span class="lineno"> 1123</span>&#160;        : _beta(beta)</div><div class="line"><a name="l01124"></a><span class="lineno"> 1124</span>&#160;    {</div><div class="line"><a name="l01125"></a><span class="lineno"> 1125</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01207">1207</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01208"></a><span class="lineno"> 1208</span>&#160;        : _beta(beta)</div><div class="line"><a name="l01209"></a><span class="lineno"> 1209</span>&#160;    {</div><div class="line"><a name="l01210"></a><span class="lineno"> 1210</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -210,12 +210,12 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01127">1127</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01128"></a><span class="lineno"> 1128</span>&#160;    {</div><div class="line"><a name="l01129"></a><span class="lineno"> 1129</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l01130"></a><span class="lineno"> 1130</span>&#160;        NodeIdxPair <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>         = { s.tail_node(), 0 };</div><div class="line"><a name="l01131"></a><span class="lineno"> 1131</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#af06fa4df1027c97658c0c26570b2bdb5">GraphBuilder::add_softmax_node</a>(s.graph(), common_params, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, _beta);</div><div class="line"><a name="l01132"></a><span class="lineno"> 1132</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
-<div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_af06fa4df1027c97658c0c26570b2bdb5"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#af06fa4df1027c97658c0c26570b2bdb5">arm_compute::graph::GraphBuilder::add_softmax_node</a></div><div class="ttdeci">static NodeID add_softmax_node(Graph &amp;g, NodeParams params, NodeIdxPair input, float beta=1.f)</div><div class="ttdoc">Adds a softmax node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00669">GraphBuilder.cpp:669</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01212">1212</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01213"></a><span class="lineno"> 1213</span>&#160;    {</div><div class="line"><a name="l01214"></a><span class="lineno"> 1214</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l01215"></a><span class="lineno"> 1215</span>&#160;        NodeIdxPair <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>         = { s.tail_node(), 0 };</div><div class="line"><a name="l01216"></a><span class="lineno"> 1216</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#af06fa4df1027c97658c0c26570b2bdb5">GraphBuilder::add_softmax_node</a>(s.graph(), common_params, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">input</a>, _beta);</div><div class="line"><a name="l01217"></a><span class="lineno"> 1217</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a8fcf2ddd9a1d58b1b280f5c0aed71845"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8fcf2ddd9a1d58b1b280f5c0aed71845">arm_compute::test::validation::input</a></div><div class="ttdeci">auto input</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">LSTMLayerQuantized.cpp:487</a></div></div>
+<div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_af06fa4df1027c97658c0c26570b2bdb5"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#af06fa4df1027c97658c0c26570b2bdb5">arm_compute::graph::GraphBuilder::add_softmax_node</a></div><div class="ttdeci">static NodeID add_softmax_node(Graph &amp;g, NodeParams params, NodeIdxPair input, float beta=1.f)</div><div class="ttdoc">Adds a softmax node to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00688">GraphBuilder.cpp:688</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_ad8227ba86a01f26e4f173cd5e219d5d1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const</div><div class="ttdoc">Layer name accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00669">GraphBuilder::add_softmax_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
+<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00688">GraphBuilder::add_softmax_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_c_l_2_l_s_t_m_layer_quantized_8cpp_source.xhtml#l00487">arm_compute::test::validation::input</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
 
 </div>
 </div>
@@ -228,7 +228,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_softmax_layer.xhtml">SoftmaxLayer</a></li>
-    <li class="footer">Generated on Wed Jan 22 2020 18:07:58 for Compute Library by
+    <li class="footer">Generated on Fri Feb 21 2020 11:10:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

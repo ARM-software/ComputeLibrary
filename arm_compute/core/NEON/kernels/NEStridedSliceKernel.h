@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NE_STRIDED_SLICE_KERNEL_H__
-#define __ARM_COMPUTE_NE_STRIDED_SLICE_KERNEL_H__
+#ifndef ARM_COMPUTE_NE_STRIDED_SLICE_KERNEL_H
+#define ARM_COMPUTE_NE_STRIDED_SLICE_KERNEL_H
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
@@ -58,7 +58,7 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in]  input            Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/QASYMM16/QSYMM16/U32/S32/F16/F32
+     * @param[in]  input            Source tensor. Data type supported: All
      * @param[out] output           Destination tensor. Data type supported: Same as @p input
      * @param[in]  starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -72,11 +72,11 @@ public:
                    const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                    int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSliceKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref NEStridedSliceKernel
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in] input            Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/QASYMM16/QSYMM16/U32/S32/F16/F32
+     * @param[in] input            Source tensor info. Data type supported: All
      * @param[in] output           Destination tensor info. Data type supported: Same as @p input
      * @param[in] starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in] ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -101,4 +101,4 @@ private:
     int32_t        _shrink_mask;   /**< Shrink axis mask */
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NE_STRIDED_SLICE_KERNEL_H__ */
+#endif /*ARM_COMPUTE_NE_STRIDED_SLICE_KERNEL_H */

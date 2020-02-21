@@ -13,6 +13,7 @@ var dir_36bd1941057d7130e210a25993eacc69 =
     [ "dup_n.h", "dup__n_8h.xhtml", "dup__n_8h" ],
     [ "eor.h", "eor_8h.xhtml", "eor_8h" ],
     [ "exp.h", "exp_8h.xhtml", "exp_8h" ],
+    [ "ext.h", "ext_8h.xhtml", "ext_8h" ],
     [ "gethigh.h", "gethigh_8h.xhtml", "gethigh_8h" ],
     [ "getlane.h", "getlane_8h.xhtml", "getlane_8h" ],
     [ "getlow.h", "getlow_8h.xhtml", "getlow_8h" ],
@@ -33,6 +34,7 @@ var dir_36bd1941057d7130e210a25993eacc69 =
     [ "pmax.h", "pmax_8h.xhtml", "pmax_8h" ],
     [ "pmin.h", "pmin_8h.xhtml", "pmin_8h" ],
     [ "pow.h", "pow_8h.xhtml", "pow_8h" ],
+    [ "qmovun.h", "qmovun_8h.xhtml", "qmovun_8h" ],
     [ "reinterpret.h", "reinterpret_8h.xhtml", "reinterpret_8h" ],
     [ "rev64.h", "rev64_8h.xhtml", "rev64_8h" ],
     [ "round.h", "round_8h.xhtml", "round_8h" ],
@@ -40,5 +42,6 @@ var dir_36bd1941057d7130e210a25993eacc69 =
     [ "sin.h", "sin_8h.xhtml", "sin_8h" ],
     [ "store.h", "store_8h.xhtml", "store_8h" ],
     [ "sub.h", "sub_8h.xhtml", "sub_8h" ],
-    [ "tanh.h", "tanh_8h.xhtml", "tanh_8h" ]
+    [ "tanh.h", "tanh_8h.xhtml", "tanh_8h" ],
+    [ "tbl.h", "tbl_8h.xhtml", "tbl_8h" ]
 ];

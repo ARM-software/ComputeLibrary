@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_PADLAYER_H__
-#define __ARM_COMPUTE_TEST_PADLAYER_H__
+#ifndef ARM_COMPUTE_TEST_PADLAYER_H
+#define ARM_COMPUTE_TEST_PADLAYER_H
 
 #include "arm_compute/core/Types.h"
 #include "tests/SimpleTensor.h"
@@ -52,4 +52,4 @@ SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &padding
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_PADLAYER_H__ */
+#endif /* ARM_COMPUTE_TEST_PADLAYER_H */

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_LOGGING_LOG_MSG_DECORATORS_H__
-#define __ARM_COMPUTE_LOGGING_LOG_MSG_DECORATORS_H__
+#ifndef ARM_COMPUTE_LOGGING_LOG_MSG_DECORATORS_H
+#define ARM_COMPUTE_LOGGING_LOG_MSG_DECORATORS_H
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/logging/Helpers.h"
@@ -142,4 +142,4 @@ public:
 };
 } // namespace logging
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_LOGGING_LOG_MSG_DECORATORS_H__ */
+#endif /* ARM_COMPUTE_LOGGING_LOG_MSG_DECORATORS_H */

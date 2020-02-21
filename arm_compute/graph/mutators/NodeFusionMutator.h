@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODE_FUSION_MUTATOR_H__
-#define __ARM_COMPUTE_GRAPH_NODE_FUSION_MUTATOR_H__
+#ifndef ARM_COMPUTE_GRAPH_NODE_FUSION_MUTATOR_H
+#define ARM_COMPUTE_GRAPH_NODE_FUSION_MUTATOR_H
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/IGraphMutator.h"
@@ -37,8 +37,9 @@ class NodeFusionMutator final : public IGraphMutator
 public:
     // Inherited methods overridden
     virtual void mutate(Graph &g) override;
+    MutationType type() const override;
     const char *name() override;
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODE_FUSION_MUTATOR_H__ */
+#endif /* ARM_COMPUTE_GRAPH_NODE_FUSION_MUTATOR_H */

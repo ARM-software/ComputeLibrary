@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H__
-#define __ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H__
+#ifndef ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H
+#define ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H
 
 #include "arm_compute/core/CL/kernels/CLConvertFullyConnectedWeightsKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -39,7 +39,7 @@ class CLConvertFullyConnectedWeights : public ICLSimpleFunction
 public:
     /** Initialize the function.
      *
-     * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: All.
      * @param[out] output               The converted weights tensor. Shape and Data Type: Same as @p input.
      * @param[in]  original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in]  data_layout          The data layout the weights have been trained in.
@@ -49,7 +49,7 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape, DataLayout data_layout);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvertFullyConnectedWeights
      *
-     * @param[in] input                Source weights tensor info to convert. Must be 2 dimensional. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input                Source weights tensor info to convert. Must be 2 dimensional. Data types supported: All.
      * @param[in] output               The converted weights tensor info. Shape and Data Type: Same as @p input.
      * @param[in] original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in] data_layout          The data layout the weights have been trained in.
@@ -90,7 +90,7 @@ public:
     }
     /** Configures the @ref CLConvertFullyConnectedWeights function
      *
-     * @param[in] input                Source weights tensor info to convert.  Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input                Source weights tensor info to convert.  Data type supported: All.
      * @param[in] original_input_shape Shape of the original input tensor (the one entering fully connected layer).
      * @param[in] data_layout          The data layout the weights have been trained in.
      */
@@ -106,4 +106,4 @@ private:
 };
 } // namespace weights_transformations
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H__ */
+#endif /* ARM_COMPUTE_CLCONVERTFULLYCONNECTEDWEIGHTS_H */

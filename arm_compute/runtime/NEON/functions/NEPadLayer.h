@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEPADLAYER_H__
-#define __ARM_COMPUTE_NEPADLAYER_H__
+#ifndef ARM_COMPUTE_NEPADLAYER_H
+#define ARM_COMPUTE_NEPADLAYER_H
 
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
@@ -53,7 +53,7 @@ public:
     NEPadLayer();
     /** Initialize the function
      *
-     * @param[in]  input          Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input          Source tensor. Data types supported: All.
      * @param[out] output         Output tensor. Data type supported: same as @p input
      * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                            specifies the front and the end padding in the i-th dimension.
@@ -64,7 +64,7 @@ public:
     void configure(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value = PixelValue(), const PaddingMode mode = PaddingMode::CONSTANT);
     /**  Static function to check if given info will lead to a valid configuration of @ref NEPadLayer.
      *
-     * @param[in] input          Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input          Source tensor info. Data types supported: All.
      * @param[in] output         Output tensor info. Data type supported: same as @p input
      * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                           specifies the front and the end padding in the i-th dimension.
@@ -82,7 +82,7 @@ public:
 private:
     /** Configure kernels for when constant padding is used.
      *
-     * @param[in]  input          Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input          Source tensor. Data types supported: All.
      * @param[out] output         Output tensor. Data type supported: same as @p input
      * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                            specifies the front and the end padding in the i-th dimension.
@@ -91,7 +91,7 @@ private:
     void configure_constant_mode(ITensor *input, ITensor *output, const PaddingList &padding, const PixelValue constant_value);
     /** Configure functions for when reflect or symmetric padding is used.
      *
-     * @param[in]  input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in]  input  Source tensor. Data types supported: All.
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure_reflect_symmetric_mode(ITensor *input, ITensor *output);
@@ -108,4 +108,4 @@ private:
     std::vector<Tensor>             _concat_results;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEPADLAYER_H__ */
+#endif /*ARM_COMPUTE_NEPADLAYER_H */

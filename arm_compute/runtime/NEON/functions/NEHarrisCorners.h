@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEHARRISCORNERS_H__
-#define __ARM_COMPUTE_NEHARRISCORNERS_H__
+#ifndef ARM_COMPUTE_NEHARRISCORNERS_H
+#define ARM_COMPUTE_NEHARRISCORNERS_H
 
 #include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
@@ -104,4 +104,4 @@ private:
     int32_t                               _num_corner_candidates; /**< Number of potential corner candidates */
 };
 }
-#endif /*__ARM_COMPUTE_NEHARRISCORNERS_H__ */
+#endif /*ARM_COMPUTE_NEHARRISCORNERS_H */

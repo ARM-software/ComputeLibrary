@@ -1,5 +1,8 @@
 var reinterpret_8h =
 [
-    [ "vreinterpret_s32", "reinterpret_8h.xhtml#a200ec15e0f9c15a562ab17c763e459b1", null ],
-    [ "vreinterpret_s32", "reinterpret_8h.xhtml#a1af266b73298b4c9d018ba2da8c7c988", null ]
+    [ "VREINTERPRET_IMPL", "reinterpret_8h.xhtml#a0ecab5fef49d31c3cf296fe5a1ee16b2", null ],
+    [ "vreinterpret", "reinterpret_8h.xhtml#a57b24ba39d5191e1946dcc87a7e88b10", null ],
+    [ "vreinterpret", "reinterpret_8h.xhtml#a87a249805030d40cfed4e369d8d26334", null ],
+    [ "vreinterpret", "reinterpret_8h.xhtml#a34eaaf6ffbf37abcaa83887289b4bd10", null ],
+    [ "vreinterpret", "reinterpret_8h.xhtml#a6cd5f9fc8ea49bd3d8309ccecc2a68e3", null ]
 ];

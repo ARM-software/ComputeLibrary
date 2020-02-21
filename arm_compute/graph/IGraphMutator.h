@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H__
-#define __ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H__
+#ifndef ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H
+#define ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H
 
 namespace arm_compute
 {
@@ -35,6 +35,14 @@ class Graph;
 class IGraphMutator
 {
 public:
+    /** Mutation type */
+    enum class MutationType
+    {
+        IR,     /** IR specific mutation */
+        Backend /** Backend specific mutation */
+    };
+
+public:
     /** Virtual Destructor */
     virtual ~IGraphMutator() = default;
     /** Walk the graph and perform a specific mutation
@@ -42,6 +50,11 @@ public:
      * @param[in, out] g Graph to walk and mutate
      */
     virtual void mutate(Graph &g) = 0;
+    /** Returns mutation type
+     *
+     * @return Mutation type enumeration
+     */
+    virtual MutationType type() const = 0;
     /** Returns mutator name
      *
      * @return Mutator name
@@ -50,4 +63,4 @@ public:
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H__ */
+#endif /* ARM_COMPUTE_GRAPH_IGRAPHMUTATOR_H */

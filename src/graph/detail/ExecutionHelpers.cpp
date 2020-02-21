@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/GraphManager.h"
 #include "arm_compute/graph/Tensor.h"
+#include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
 
 namespace arm_compute
@@ -147,7 +148,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
             Target                     assigned_target = node->assigned_target();
             backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
             std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
-            if(func != nullptr)
+            if(func != nullptr || is_utility_node(node))
             {
                 workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
             }

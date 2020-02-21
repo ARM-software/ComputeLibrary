@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -45,9 +46,6 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
                           int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage, const ITensorInfo *output_multipliers, const ITensorInfo *output_shifts)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.type == GEMMLowpOutputStageType::NONE);
-    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > 255);
-    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < 0 || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
 
     if(bias != nullptr)
     {
@@ -108,26 +106,42 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
         }
     }
 
-    if(output->total_size() != 0)
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.type == GEMMLowpOutputStageType::NONE);
+    // Checks performed when output is configured
+    if((output != nullptr) && (output->total_size() != 0))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.output_data_type != output->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mm_result, output);
+        PixelValue min_val{};
+        PixelValue max_val{};
+        std::tie(min_val, max_val) = get_min_max(output->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > max_val.get<int32_t>());
+        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < min_val.get<int32_t>() || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
+    }
+    else
+    {
+        // Output will be configured as depending on the chosen output data type in the output stage
+        PixelValue min_val{};
+        PixelValue max_val{};
+        std::tie(min_val, max_val) = get_min_max(output_stage.output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > max_val.get<int32_t>());
+        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < min_val.get<int32_t>() || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
     }
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_stage.gemmlowp_multipliers.size() != output_stage.gemmlowp_shifts.size(),
-                                    "per channel quantization info is incorrect");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_stage.gemmlowp_multipliers.size() != output_stage.gemmlowp_shifts.size(), "per channel quantization info is incorrect");
 
     return Status{};
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, ITensorInfo *bias, ITensorInfo *output,
-                                                        int32_t a_offset, int32_t b_offset, ITensorInfo *output_multipliers, ITensorInfo *output_shifts)
+                                                        int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage, ITensorInfo *output_multipliers, ITensorInfo *output_shifts)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 4;
     bool                   window_changed                    = false;
 
     // Auto initialize the output
-    auto_init_if_empty(*output, mm_result->clone()->set_data_type(DataType::QASYMM8));
+    auto_init_if_empty(*output, mm_result->clone()->set_data_type(output_stage.output_data_type));
 
     // Configure kernel window
     Window win = calculate_max_window(*mm_result, Steps(num_elems_processed_per_iteration));
@@ -229,20 +243,16 @@ void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const ICLTensor *m
     build_opts.add_option("-DRESULT_MULTIPLIER=" + support::cpp11::to_string(output_stage.gemmlowp_multipliers[0]));
     build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(output_stage.gemmlowp_shifts[0]));
     build_opts.add_option_if(_is_quantized_per_channel, "-DPER_CHANNEL_QUANTIZATION");
-    build_opts.add_option_if((min != 0) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
-    build_opts.add_option_if((max != 255) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
+    build_opts.add_option("-DOUTPUT_DATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
+
+    PixelValue min_val{};
+    PixelValue max_val{};
+    std::tie(min_val, max_val) = get_min_max(output->info()->data_type());
+    build_opts.add_option_if((min != min_val.get<int32_t>()) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
+    build_opts.add_option_if((max != max_val.get<int32_t>()) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
 
     std::string kernel_name("gemmlowp_offset_contribution");
-
-    // Fuse output stage
-    if(output_stage.type != GEMMLowpOutputStageType::NONE)
-    {
-        kernel_name += "_" + string_from_gemmlowp_output_stage(output_stage.type);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("GEMMLowpOutputStage can not be NONE!");
-    }
+    kernel_name += "_" + string_from_gemmlowp_output_stage(output_stage.type);
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
@@ -253,7 +263,7 @@ void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const ICLTensor *m
                                                     vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
                                                     bias != nullptr ? bias->info() : nullptr,
                                                     output->info(),
-                                                    a_offset, b_offset,
+                                                    a_offset, b_offset, output_stage,
                                                     output_multipliers->info(), output_shifts->info()); // NOLINT
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
@@ -277,7 +287,7 @@ Status CLGEMMLowpOffsetContributionOutputStageKernel::validate(const ITensorInfo
                                                               vector_sum_row != nullptr ? vector_sum_row->clone().get() : nullptr,
                                                               bias != nullptr ? bias->clone().get() : nullptr,
                                                               output->clone().get(),
-                                                              a_offset, b_offset,
+                                                              a_offset, b_offset, output_stage,
                                                               output_multipliers->clone().get(), output_shifts->clone().get())
                                 .first); // NOLINT
 

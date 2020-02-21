@@ -55,6 +55,8 @@ var arm__compute_2graph_2_types_8h =
       [ "PadLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a979ac8e70d367e1e442d76f00b6f0ad1", null ],
       [ "PermuteLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16aa84a001cb23ac473e7aae73a9eaf369a", null ],
       [ "PoolingLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16aea068ae5aae640d018c4300bc7619575", null ],
+      [ "PReluLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a44da30946f36dcb01ca8be92a1420536", null ],
+      [ "PrintLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a415d76e29ed6d61c9f71cc6f7cf3f656", null ],
       [ "PriorBoxLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a77329845031ba38f828a884f40beb69c", null ],
       [ "QuantizationLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a399e260d5d6886e9917d4313cd05f6fe", null ],
       [ "ReorgLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16af119c4b7a889a65e39ef53786dce0c84", null ],

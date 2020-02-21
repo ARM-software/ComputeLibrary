@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYNATIVEKERNEL_H__
-#define __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYNATIVEKERNEL_H__
+#ifndef ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYNATIVEKERNEL_H
+#define ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYNATIVEKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -30,7 +30,7 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** OpenCL kernel to multiply matrices with QASYMM8 data type */
+/** OpenCL kernel to multiply matrices with QASYMM8/QASYMM8_SIGNED data type */
 class CLGEMMLowpMatrixMultiplyNativeKernel : public ICLKernel
 {
 public:
@@ -46,7 +46,7 @@ public:
     CLGEMMLowpMatrixMultiplyNativeKernel &operator=(CLGEMMLowpMatrixMultiplyNativeKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input0    Input tensor containing the LHS matrix. Data type supported: QASYMM8
+     * @param[in]  input0    Input tensor containing the LHS matrix. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in]  input1    Input tensor containing the RHS matrix. Data type supported: same as @p input0
      * @param[out] output    Output tensor to store the result of matrix multiplication. Data type supported: S32
      * @param[in]  lhs_info  LHS matrix information used to retrieve the number of rows to be processed by each thread
@@ -60,7 +60,7 @@ public:
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const GEMMReshapeInfo &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyNativeKernel
      *
-     * @param[in] input0    Input tensor info for the LHS matrix. Data type supported: QASYMM8
+     * @param[in] input0    Input tensor info for the LHS matrix. Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in] input1    Input tensor info for the RHS matrix. Data type supported: same as @p input0
      * @param[in] output    Output tensor info. Data type supported: S32
      * @param[in] lhs_info  LHS matrix information used to retrieve the number of rows to be processed by each thread
@@ -89,4 +89,4 @@ private:
     bool             _use_dummy_work_items;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYNATIVEKERNEL_H__*/
+#endif /*ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYNATIVEKERNEL_H*/

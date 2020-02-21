@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_CLHEIGHTCONCATENATELAYERKERNEL_H__
-#define __ARM_COMPUTE_CLHEIGHTCONCATENATELAYERKERNEL_H__
+#ifndef ARM_COMPUTE_CLHEIGHTCONCATENATELAYERKERNEL_H
+#define ARM_COMPUTE_CLHEIGHTCONCATENATELAYERKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
@@ -52,7 +52,7 @@ public:
     ~CLHeightConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]  input         Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input         Input tensor. Data types supported: All.
      * @param[in]  height_offset The starting offset on the Y axis for the output tensor.
      * @param[out] output        Output tensor. Data types supported: Same as @p input.
      *
@@ -60,7 +60,7 @@ public:
     void configure(const ICLTensor *input, unsigned int height_offset, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLHeightConcatenateLayerKernel
      *
-     * @param[in] input         Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input         Input tensor info. Data types supported: All.
      * @param[in] height_offset The starting offset on the Y axis for the output tensor.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
      *
@@ -78,4 +78,4 @@ private:
     unsigned int     _num_elems_processed_per_iteration;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLHEIGHTCONCATENATELAYERKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLHEIGHTCONCATENATELAYERKERNEL_H */

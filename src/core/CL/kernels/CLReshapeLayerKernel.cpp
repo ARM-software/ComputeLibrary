@@ -44,11 +44,9 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
-                                                         DataType::U16, DataType::S16,
-                                                         DataType::U32, DataType::S32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
@@ -73,7 +71,7 @@ void CLReshapeLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
     _output = output;
 
     // Create kernel
-    std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()) };
+    std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()) };
     _kernel                          = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_layer", build_opts));
 
     // Add static arguments

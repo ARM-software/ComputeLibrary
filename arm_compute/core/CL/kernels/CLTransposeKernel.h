@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLTRANSPOSEKERNEL_H__
-#define __ARM_COMPUTE_CLTRANSPOSEKERNEL_H__
+#ifndef ARM_COMPUTE_CLTRANSPOSEKERNEL_H
+#define ARM_COMPUTE_CLTRANSPOSEKERNEL_H
 
 #include "arm_compute/core/CL/ICLSimple2DKernel.h"
 
@@ -40,13 +40,13 @@ class CLTransposeKernel : public ICLSimple2DKernel
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  Input tensor. Data types supported: All.
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLTransposeKernel
      *
-     * @param[in] input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input  Input tensor. Data types supported: All.
      * @param[in] output Output tensor. Data type supported: Same as @p input
      *
      * @return a status
@@ -54,4 +54,4 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLTRANSPOSEKERNEL_H__ */
+#endif /* ARM_COMPUTE_CLTRANSPOSEKERNEL_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCOL2IMKERNEL_H__
-#define __ARM_COMPUTE_CLCOL2IMKERNEL_H__
+#ifndef ARM_COMPUTE_CLCOL2IMKERNEL_H
+#define ARM_COMPUTE_CLCOL2IMKERNEL_H
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -65,7 +65,7 @@ public:
     ~CLCol2ImKernel() = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input          The input tensor to convert. Data types supported: QASYMM8/F16/F32
+     * @param[in]  input          The input tensor to convert. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                            while the rest represent batch of outputs. Data types supported: Same as @p input. Data layout: NCHW
      * @param[in]  convolved_dims Output convolved dimensions.
@@ -74,7 +74,7 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCol2ImKernel
      *
-     * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/F16/F32
+     * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                           while the rest represent batch of outputs. Data types supported: Same as @p input. Data layout: NCHW
      * @param[in] convolved_dims Output convolved dimensions.
@@ -93,4 +93,4 @@ public:
     Size2D           _convolved_dims;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLCOL2IMKERNEL_H__ */
+#endif /*ARM_COMPUTE_CLCOL2IMKERNEL_H */

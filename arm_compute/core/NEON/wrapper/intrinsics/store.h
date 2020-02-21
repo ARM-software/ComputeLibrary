@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_STORE_H__
-#define __ARM_COMPUTE_WRAPPER_STORE_H__
+#ifndef ARM_COMPUTE_WRAPPER_STORE_H
+#define ARM_COMPUTE_WRAPPER_STORE_H
 
 #include <arm_neon.h>
 
@@ -37,7 +37,9 @@ namespace wrapper
     }
 
 VSTORE_IMPL(uint8_t, uint8x8_t, vst1, u8)
+VSTORE_IMPL(uint8_t, uint8x8x2_t, vst2, u8)
 VSTORE_IMPL(int8_t, int8x8_t, vst1, s8)
+VSTORE_IMPL(int8_t, int8x8x2_t, vst2, s8)
 VSTORE_IMPL(uint16_t, uint16x4_t, vst1, u16)
 VSTORE_IMPL(int16_t, int16x4_t, vst1, s16)
 VSTORE_IMPL(uint32_t, uint32x2_t, vst1, u32)
@@ -65,4 +67,4 @@ VSTORE_IMPL(float16_t, float16x8_t, vst1q, f16)
 #undef VSTORE_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_STORE_H__ */
+#endif /* ARM_COMPUTE_WRAPPER_STORE_H */

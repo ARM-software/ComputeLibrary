@@ -64,7 +64,9 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
       [ "GEMMKernelInfo", "structarm__compute_1_1_g_e_m_m_kernel_info.xhtml", "structarm__compute_1_1_g_e_m_m_kernel_info" ],
       [ "DWCKernelInfo", "structarm__compute_1_1_d_w_c_kernel_info.xhtml", "structarm__compute_1_1_d_w_c_kernel_info" ],
       [ "DWCWeightsKernelInfo", "structarm__compute_1_1_d_w_c_weights_kernel_info.xhtml", "structarm__compute_1_1_d_w_c_weights_kernel_info" ],
-      [ "SoftmaxKernelInfo", "structarm__compute_1_1_softmax_kernel_info.xhtml", "structarm__compute_1_1_softmax_kernel_info" ]
+      [ "SoftmaxKernelInfo", "structarm__compute_1_1_softmax_kernel_info.xhtml", "structarm__compute_1_1_softmax_kernel_info" ],
+      [ "DirectConvolutionLayerOutputStageKernelInfo", "structarm__compute_1_1_direct_convolution_layer_output_stage_kernel_info.xhtml", "structarm__compute_1_1_direct_convolution_layer_output_stage_kernel_info" ],
+      [ "InstanceNormalizationLayerKernelInfo", "structarm__compute_1_1_instance_normalization_layer_kernel_info.xhtml", "structarm__compute_1_1_instance_normalization_layer_kernel_info" ]
     ] ],
     [ "Log.h", "_log_8h.xhtml", "_log_8h" ],
     [ "MultiImageInfo.h", "_multi_image_info_8h.xhtml", [

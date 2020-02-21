@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/graph/ITensorHandle.h"
+#include "arm_compute/graph/nodes/PrintLayerNode.h"
 
 namespace arm_compute
 {
@@ -41,6 +42,20 @@ void execute_task(ExecutionTask &task)
     {
         task.task->run();
     }
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+    // COMPMID-3012 - Hide the printing logic from the execute_task method in the graph API
+    else if(task.node->type() == NodeType::PrintLayer)
+    {
+        auto print_node   = dynamic_cast<PrintLayerNode *>(task.node);
+        auto input_handle = print_node->input(0)->handle();
+        auto transform    = print_node->transform();
+
+        input_handle->map(true);
+        ITensor *input = transform ? transform(&input_handle->tensor()) : &input_handle->tensor();
+        input->print(print_node->stream(), print_node->format_info());
+        input_handle->unmap();
+    }
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
 }
 
 void ExecutionTask::prepare()

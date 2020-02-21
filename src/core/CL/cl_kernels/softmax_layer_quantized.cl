@@ -63,6 +63,7 @@ __constant uint16 idx__ = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
 #define VEC_UCHAR VEC_DATA_TYPE(uchar, VECTOR_SIZE)
 #define VEC_UINT VEC_DATA_TYPE(uint, VECTOR_SIZE)
 #define VEC_INT VEC_DATA_TYPE(int, VECTOR_SIZE)
+#define VEC_BASE VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
 
 #if defined(DIFF_MIN)
 
@@ -141,43 +142,43 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
     Image maxo = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(maxo);
     Image sum  = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(sum);
 
-    VEC_UCHAR max_val_vec = 0;
+    VEC_BASE max_val_vec = (VEC_BASE)(MIN_VALUE);
 
     // Calculate max of row
     const uint width4 = width >> LOG_VECTOR_SIZE;
     for(uint i = 0; i < width4; i++)
     {
-        VEC_UCHAR data = VLOAD(VECTOR_SIZE)(0, (__global uchar *)offset(&src, i << LOG_VECTOR_SIZE, 0));
-        max_val_vec    = MAX_OP(data, max_val_vec, uchar, 16);
+        VEC_BASE data = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)offset(&src, i << LOG_VECTOR_SIZE, 0));
+        max_val_vec   = MAX_OP(data, max_val_vec, DATA_TYPE, 16);
     }
 
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
     // Handle non multiple of 16
-    VEC_UCHAR uchar_min = (VEC_UCHAR)0;
-    VEC_UCHAR data      = VLOAD(VECTOR_SIZE)(0, (__global uchar *)offset(&src, width4 << LOG_VECTOR_SIZE, 0));
-    VEC_UCHAR widx      = CONVERT(((VEC_UINT)(width4 << LOG_VECTOR_SIZE) + idx__) < width, VEC_UCHAR);
-    max_val_vec         = MAX_OP(max_val_vec, select(uchar_min, data, widx), uchar, 16);
+    VEC_BASE vec_min_val = (VEC_BASE)(MIN_VALUE);
+    VEC_BASE data        = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)offset(&src, width4 << LOG_VECTOR_SIZE, 0));
+    VEC_UCHAR widx       = CONVERT(((VEC_UINT)(width4 << LOG_VECTOR_SIZE) + idx__) < width, VEC_UCHAR);
+    max_val_vec          = MAX_OP(max_val_vec, select(vec_min_val, data, widx), DATA_TYPE, 16);
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 
     // Perform max reduction
 #if VECTOR_SIZE == 16
-    max_val_vec.s01234567 = MAX_OP(max_val_vec.s01234567, max_val_vec.s89ABCDEF, uchar, 8);
+    max_val_vec.s01234567 = MAX_OP(max_val_vec.s01234567, max_val_vec.s89ABCDEF, DATA_TYPE, 8);
 #endif /* VECTOR SIZE 16 END */
 #if VECTOR_SIZE >= 8
-    max_val_vec.s0123 = MAX_OP(max_val_vec.s0123, max_val_vec.s4567, uchar, 4);
+    max_val_vec.s0123 = MAX_OP(max_val_vec.s0123, max_val_vec.s4567, DATA_TYPE, 4);
 #endif /* VECTOR SIZE 8 END */
 #if VECTOR_SIZE >= 4
-    max_val_vec.s01 = MAX_OP(max_val_vec.s01, max_val_vec.s23, uchar, 2);
+    max_val_vec.s01 = MAX_OP(max_val_vec.s01, max_val_vec.s23, DATA_TYPE, 2);
 #endif /* VECTOR SIZE 4 END */
-    max_val_vec.s0 = MAX_OP(max_val_vec.s0, max_val_vec.s1, uchar, 1);
+    max_val_vec.s0 = MAX_OP(max_val_vec.s0, max_val_vec.s1, DATA_TYPE, 1);
 
     // Store result
-    *((__global uchar *)maxo.ptr) = max_val_vec.s0;
+    *((__global DATA_TYPE *)maxo.ptr) = max_val_vec.s0;
 
     // Second part
 
     // Load max value of 1D logits vector (row)
-    int max_val = convert_int(*((__global uchar *)offset(&maxo, 0, 0)));
+    int max_val = convert_int(*((__global DATA_TYPE *)offset(&maxo, 0, 0)));
 
     // Set sum vector, Q(EXP_ACCUMULATION_INT_BITS)
     VEC_INT sum1D = 0;
@@ -185,7 +186,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
     // Shift values, exp and sum
     for(uint i = 0; i < width4; i++)
     {
-        VEC_UCHAR data         = VLOAD(VECTOR_SIZE)(0, (__global uchar *)offset(&src, i << LOG_VECTOR_SIZE, 0));
+        VEC_BASE data          = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)offset(&src, i << LOG_VECTOR_SIZE, 0));
         VEC_INT data_fp        = CONVERT(data, VEC_INT);
         VEC_INT data_diff      = data_fp - max_val;
         VEC_INT data_diff_mult = mult_by_quantized_multiplier_serial(data_diff);
@@ -193,12 +194,12 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
         data_fp                = asymm_rescale(data_fp, 0, EXP_ACCUMULATION_INT_BITS);
         VSTORE(VECTOR_SIZE)
         (data_diff, 0, (__global int *)offset(&dst, i << LOG_VECTOR_SIZE, 0));
-        sum1D = sum1D + select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
+        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
     }
 
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
     // Handle non multiple of 16
-    data                   = VLOAD(VECTOR_SIZE)(0, (__global uchar *)offset(&src, width4 << LOG_VECTOR_SIZE, 0));
+    data                   = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)offset(&src, width4 << LOG_VECTOR_SIZE, 0));
     VEC_INT data_fp        = CONVERT(data, VEC_INT);
     VEC_INT data_diff      = data_fp - max_val;
     VEC_INT data_diff_mult = mult_by_quantized_multiplier_serial(data_diff);
@@ -207,21 +208,21 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
     VEC_INT widx_          = CONVERT(((VEC_UINT)(width4 << LOG_VECTOR_SIZE) + idx__) < width, VEC_INT);
     VSTORE(VECTOR_SIZE)
     (data_diff, 0, (__global int *)offset(&dst, width4 << LOG_VECTOR_SIZE, 0));
-    data_fp = select(0, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
-    sum1D   = sum1D + select(0, data_fp, widx_);
+    data_fp = select(MIN_VALUE, data_fp, data_diff >= (VEC_INT)(DIFF_MIN));
+    sum1D   = sum1D + select(MIN_VALUE, data_fp, widx_);
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 
     // Perform sum reduction
 #if VECTOR_SIZE == 16
-    sum1D.s01234567 = ADD_OP(sum1D.s01234567, sum1D.s89ABCDEF, uchar, 8);
+    sum1D.s01234567 = ADD_OP(sum1D.s01234567, sum1D.s89ABCDEF, DATA_TYPE, 8);
 #endif /* VECTOR SIZE 16 END */
 #if VECTOR_SIZE >= 8
-    sum1D.s0123 = ADD_OP(sum1D.s0123, sum1D.s4567, uchar, 4);
+    sum1D.s0123 = ADD_OP(sum1D.s0123, sum1D.s4567, DATA_TYPE, 4);
 #endif /* VECTOR SIZE 8 END */
 #if VECTOR_SIZE >= 4
-    sum1D.s01 = ADD_OP(sum1D.s01, sum1D.s23, uchar, 2);
+    sum1D.s01 = ADD_OP(sum1D.s01, sum1D.s23, DATA_TYPE, 2);
 #endif /* VECTOR SIZE 4 END */
-    sum1D.s0 = ADD_OP(sum1D.s0, sum1D.s1, uchar, 1);
+    sum1D.s0 = ADD_OP(sum1D.s0, sum1D.s1, DATA_TYPE, 1);
 
     // Calculate and store result
     *((__global int *)sum.ptr) = sum1D.s0;
@@ -284,10 +285,12 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
 
     // Define one temporary vector per work-item.
     __local int4 tmp_local[GRID_SIZE];
-    __local uchar max_local;
+    __local DATA_TYPE max_local;
 
-    uchar4 uchar_min   = (uchar4)0;
-    uchar4 max_val_vec = uchar_min;
+    VEC_DATA_TYPE(DATA_TYPE, 4)
+    vec_min_val = (VEC_DATA_TYPE(DATA_TYPE, 4))(MIN_VALUE);
+    VEC_DATA_TYPE(DATA_TYPE, 4)
+    max_val_vec = vec_min_val;
 
     // Number of elements per work-item.
     const uint row = width / GRID_SIZE;
@@ -297,8 +300,9 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
     uint i = 0;
     for(; i < width_; i++)
     {
-        uchar4 data_max = vload4(0, (__global uchar *)offset(&src, i * GRID_SIZE * 4, 0));
-        max_val_vec     = MAX_OP(data_max, max_val_vec, uchar, 4);
+        VEC_DATA_TYPE(DATA_TYPE, 4)
+        data_max    = vload4(0, (__global DATA_TYPE *)offset(&src, i * GRID_SIZE * 4, 0));
+        max_val_vec = MAX_OP(data_max, max_val_vec, DATA_TYPE, 4);
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
     // How many work-items needed to complete the computation.
@@ -306,8 +310,9 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
     int boundary_workitems = (width % (GRID_SIZE * 4)) / 4;
     if(lid < boundary_workitems)
     {
-        uchar4 data_max = vload4(0, (__global uchar *)offset(&src, i * GRID_SIZE * 4, 0));
-        max_val_vec     = MAX_OP(data_max, max_val_vec, uchar, 4);
+        VEC_DATA_TYPE(DATA_TYPE, 4)
+        data_max    = vload4(0, (__global DATA_TYPE *)offset(&src, i * GRID_SIZE * 4, 0));
+        max_val_vec = MAX_OP(data_max, max_val_vec, DATA_TYPE, 4);
     }
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
     if(boundary_workitems == 0)
@@ -318,9 +323,11 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
     if(lid == (boundary_workitems - 1))
     {
         // Handle non multiple of 4
-        uchar4 data_max = vload4(0, (__global uchar *)offset(&src, (GRID_SIZE * i * 4) + 4, 0));
-        uchar4 widx     = convert_uchar4(((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width);
-        max_val_vec     = MAX_OP(max_val_vec, select(uchar_min, data_max, widx), uchar, 4);
+        VEC_DATA_TYPE(DATA_TYPE, 4)
+        data_max = vload4(0, (__global DATA_TYPE *)offset(&src, (GRID_SIZE * i * 4) + 4, 0));
+        VEC_DATA_TYPE(DATA_TYPE, 4)
+        widx        = CONVERT((((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width), VEC_DATA_TYPE(DATA_TYPE, 4));
+        max_val_vec = MAX_OP(max_val_vec, select(vec_min_val, data_max, widx), DATA_TYPE, 4);
     }
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 #endif /* NON_MULTIPLE_OF_GRID_SIZE */
@@ -386,9 +393,9 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
     }
     if(lid == 0)
     {
-        max_val_vec     = MAX_OP(convert_uchar4(tmp_local[lid + 1]), convert_uchar4(tmp_local[lid]), uchar, 4);
-        max_val_vec.s01 = MAX_OP(max_val_vec.s01, max_val_vec.s23, uchar, 2);
-        max_val_vec.s0  = MAX_OP(max_val_vec.s0, max_val_vec.s1, uchar, 1);
+        max_val_vec     = MAX_OP(CONVERT((tmp_local[lid + 1]), VEC_DATA_TYPE(DATA_TYPE, 4)), CONVERT((tmp_local[lid]), VEC_DATA_TYPE(DATA_TYPE, 4)), DATA_TYPE, 4);
+        max_val_vec.s01 = MAX_OP(max_val_vec.s01, max_val_vec.s23, DATA_TYPE, 2);
+        max_val_vec.s0  = MAX_OP(max_val_vec.s0, max_val_vec.s1, DATA_TYPE, 1);
         max_local       = max_val_vec.s0;
     }
     barrier(CLK_LOCAL_MEM_FENCE);
@@ -402,28 +409,30 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
     // Shift values, exp and sum
     for(i = 0; i < width_; i++)
     {
-        uchar4 data         = vload4(0, (__global uchar *)offset(&src, i * GRID_SIZE * 4, 0));
+        VEC_DATA_TYPE(DATA_TYPE, 4)
+        data                = vload4(0, (__global DATA_TYPE *)offset(&src, i * GRID_SIZE * 4, 0));
         int4 data_fp        = convert_int4(data);
         int4 data_diff      = data_fp - max_val;
         int4 data_diff_mult = mult_by_quantized_multiplier_parallel(data_diff);
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4, 0));
-        sum1D = sum1D + select(0, data_fp, data_diff >= (int4)(DIFF_MIN));
+        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
     //TODO: Optimize the calculation (avoid %).
     boundary_workitems = (width % (GRID_SIZE * 4)) / 4;
     if(lid < boundary_workitems)
     {
-        uchar4 data         = vload4(0, (__global uchar *)offset(&src, i * GRID_SIZE * 4, 0));
+        VEC_DATA_TYPE(DATA_TYPE, 4)
+        data                = vload4(0, (__global DATA_TYPE *)offset(&src, i * GRID_SIZE * 4, 0));
         int4 data_fp        = convert_int4(data);
         int4 data_diff      = data_fp - max_val;
         int4 data_diff_mult = mult_by_quantized_multiplier_parallel(data_diff);
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4, 0));
-        sum1D = sum1D + select(0, data_fp, data_diff >= (int4)(DIFF_MIN));
+        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
     }
 #ifdef NON_MULTIPLE_OF_VECTOR_SIZE
     if(boundary_workitems == 0)
@@ -434,16 +443,17 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
     if(lid == (boundary_workitems - 1))
     {
         // Handle non multiple of vector size ((GRID_SIZE * i * 4) + 4, 0); move 4 float positions ahead, *4 is due to the stride
-        uchar4 data         = vload4(0, (__global uchar *)offset(&src, i * GRID_SIZE * 4 + 4, 0));
+        VEC_DATA_TYPE(DATA_TYPE, 4)
+        data                = vload4(0, (__global DATA_TYPE *)offset(&src, i * GRID_SIZE * 4 + 4, 0));
         int4 data_fp        = convert_int4(data);
         int4 data_diff      = data_fp - max_val;
         int4 data_diff_mult = mult_by_quantized_multiplier_parallel(data_diff);
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
         int4 widx           = convert_int4(((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width);
-        data_fp             = select(0, data_fp, widx);
+        data_fp             = select(MIN_VALUE, data_fp, widx);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4 + 4, 0));
-        sum1D = sum1D + select(0, data_fp, data_diff >= (int4)(DIFF_MIN));
+        sum1D = sum1D + select(MIN_VALUE, data_fp, data_diff >= (int4)(DIFF_MIN));
     }
 #endif /* NON_MULTIPLE_OF_VECTOR_SIZE */
 #endif /* NON_MULTIPLE_OF_GRID_SIZE */
@@ -582,13 +592,16 @@ __kernel void softmax_layer_norm_quantized(
 #ifdef LOG_SOFTMAX
     long16 data = SUB_OP(convert_long16(data_diff_mult), (long16)(sum_val), long, 16);
     data        = select(0L, data, convert_long16(data_diff) >= (long16)(DIFF_MIN));
-#else  /* LOG_SOFTMAX */
+#else /* LOG_SOFTMAX */
     int16 data = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 16);
     data       = ASYMM_MULT(shifted_scale, data, 16);
     data       = ASYMM_ROUNDING_DIVIDE_BY_POW2(data, num_bits_over_unit + 31 - 8, 16);
-    data       = select(0, data, data_diff >= (int16)(DIFF_MIN));
+#ifdef QASYMM8_SIGNED
+    data       = ADD_OP(data, (int16)(MIN_VALUE), int, 16);
+#endif /* QASYMM8_SIGNED */
+    data       = select(MIN_VALUE, data, data_diff >= (int16)(DIFF_MIN));
 #endif /* LOG_SOFTMAX */
-    vstore16(convert_uchar16_sat(data), 0, (__global uchar *)offset(&dst, 0, 0));
+    vstore16(CONVERT_SAT(data, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)offset(&dst, 0, 0));
 }
 
 #endif /* defined(DIFF_MIN) */

@@ -1,7 +1,6 @@
 var searchData=
 [
   ['_5f_5fadd_5f_5f',['__add__',['../class_gemm_tuner_1_1_measurement.xhtml#a547cf97e438ebc6734fd6d1ea2b21b6d',1,'GemmTuner::Measurement']]],
-  ['_5f_5farm_5fcompute_5fgcnormalizeplanaryuvlayerkernel_5fh_5f_5f',['__ARM_COMPUTE_GCNORMALIZEPLANARYUVLAYERKERNEL_H__',['../_g_c_normalize_planar_y_u_v_layer_kernel_8h.xhtml#ad3f75bcf86b2136eddd259ebfd476d5f',1,'GCNormalizePlanarYUVLayerKernel.h']]],
   ['_5f_5ffloordiv_5f_5f',['__floordiv__',['../class_gemm_tuner_1_1_measurement.xhtml#a5855279dfdcb183a472784ad7afeed88',1,'GemmTuner::Measurement']]],
   ['_5f_5finit_5f_5f',['__init__',['../class_gemm_tuner_1_1_g_e_m_m_benchmark_result_recorder.xhtml#ae625b46930454abeb72e1526955462b6',1,'GemmTuner.GEMMBenchmarkResultRecorder.__init__()'],['../class_gemm_tuner_1_1_g_e_m_m_config_distribution.xhtml#ae64f0875afe3067b97ba370b354b9213',1,'GemmTuner.GEMMConfigDistribution.__init__()']]],
   ['_5f_5fmul_5f_5f',['__mul__',['../class_gemm_tuner_1_1_measurement.xhtml#a96fd98a8997501189d60829abc0257cb',1,'GemmTuner::Measurement']]],
@@ -10,6 +9,7 @@ var searchData=
   ['_5f_5fsub_5f_5f',['__sub__',['../class_gemm_tuner_1_1_measurement.xhtml#ae03b88268c88fb1edfdb3f5353478d7b',1,'GemmTuner::Measurement']]],
   ['_5f_5ftruediv_5f_5f',['__truediv__',['../class_gemm_tuner_1_1_measurement.xhtml#ad6e2319d03d3d5e39f9808eda9eecabf',1,'GemmTuner::Measurement']]],
   ['_5fadd_5fbias',['_add_bias',['../classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a94e30ed1aed47fae8430cc4d3cd2b6c7',1,'arm_compute::CLGEMMMatrixMultiplyKernel']]],
+  ['_5falign_5fcorners',['_align_corners',['../classarm__compute_1_1_c_l_scale_kernel.xhtml#aa7aaaee824b8d5cc7c66fa6a7e0daece',1,'arm_compute::CLScaleKernel']]],
   ['_5faxis',['_axis',['../classarm__compute_1_1_c_l_reverse_kernel.xhtml#af40315449e153ebfdebe4393138dc74e',1,'arm_compute::CLReverseKernel']]],
   ['_5fbiases',['_biases',['../classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a95ba9da2ab49208dfa0d4642c8f7b23b',1,'arm_compute::CLDirectConvolutionLayerKernel']]],
   ['_5fborder_5fsize',['_border_size',['../classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4',1,'arm_compute::CLDirectConvolutionLayerKernel::_border_size()'],['../classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4',1,'arm_compute::CLPoolingLayerKernel::_border_size()']]],
