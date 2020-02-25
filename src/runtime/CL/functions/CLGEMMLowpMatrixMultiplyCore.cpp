@@ -142,6 +142,7 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
         }
 
         // Pick up the GEMM configuration
+        // Datatype is DataType::QASYMM8 or DataType::QASYMM8_SIGNED doesn't matter, since it only affect the shape configuration
         std::tie(lhs_info, rhs_info) = CLGEMMReshapedOnlyRHSKernelConfigurationFactory::create(gpu_target)->configure(m, n, k, batch_size, DataType::QASYMM8);
 
         // Configure reshape RHS kernel

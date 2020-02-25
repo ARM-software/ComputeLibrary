@@ -62,6 +62,33 @@ std::pair<Coordinates, Coordinates> compute_start_end_slice_coordinates(const IT
 
     return { start, end };
 }
+Status construct_gemmlowp_output_stage(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, GEMMLowpOutputStageInfo &output_stage_info)
+{
+        const auto data_type = input->data_type();
+
+        if(is_data_type_quantized_asymmetric(data_type))
+        {
+            const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+            const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+            const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+
+            float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
+            int   output_multiplier(0);
+            int   output_shift(0);
+            ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
+
+            output_stage_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+            output_stage_info.gemmlowp_multiplier = output_multiplier;
+            output_stage_info.gemmlowp_shift      = output_shift;
+            output_stage_info.gemmlowp_offset     = oq_info.offset;
+            const auto min_max_bound              = get_min_max(data_type);
+            output_stage_info.gemmlowp_min_bound  = (std::get<0>(min_max_bound)).get<int32_t>();
+            output_stage_info.gemmlowp_max_bound  = (std::get<1>(min_max_bound)).get<int32_t>();
+            output_stage_info.output_data_type    = data_type;
+        }
+        return Status{};
+}
+
 } // namespace
 
 CLGEMMDeconvolutionLayer::CLGEMMDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
@@ -93,7 +120,7 @@ CLGEMMDeconvolutionLayer::CLGEMMDeconvolutionLayer(std::shared_ptr<IMemoryManage
 Status CLGEMMDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
 
@@ -141,10 +168,14 @@ Status CLGEMMDeconvolutionLayer::validate(const ITensorInfo *input, const ITenso
     TensorInfo gemm_output_info = reshaped_t_info.clone()->set_tensor_shape(gemm_output_shape).set_is_resizable(true);
     GEMMInfo   gemm_info(false, false, true, input->dimension(idx_h), true);
 
+    GEMMLowpOutputStageInfo output_stage_info;
+
     if(is_quantized)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyCore::validate(&input->clone()->set_tensor_shape(nhwc_input_shape), &reshaped_t_info, nullptr, &gemm_output_info.set_data_type(DataType::S32),
                                                                            gemm_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(construct_gemmlowp_output_stage(input, weights, output, output_stage_info));
+
     }
     else
     {
@@ -160,9 +191,8 @@ Status CLGEMMDeconvolutionLayer::validate(const ITensorInfo *input, const ITenso
     {
         const auto start_end = compute_start_end_slice_coordinates(col2im_output_info, deconv_info, is_nchw);
         ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionReshapeOutputKernel::validate(&gemm_output_info, bias, &col2im_output_info, input, weights, deconv_info));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&col2im_output_info, nullptr,
-                                                                                                  &col2im_output_info.clone()->set_is_resizable(true).set_data_type(DataType::QASYMM8)));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLSlice::validate(&col2im_output_info.clone()->set_is_resizable(true).set_data_type(DataType::QASYMM8), output, start_end.first, start_end.second));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOutputStage::validate(&col2im_output_info, nullptr, &col2im_output_info.clone()->set_is_resizable(true).set_data_type(input->data_type()), output_stage_info));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLSlice::validate(&col2im_output_info.clone()->set_is_resizable(true).set_data_type(input->data_type()), output, start_end.first, start_end.second));
     }
     else if(padded_input)
     {
@@ -173,16 +203,7 @@ Status CLGEMMDeconvolutionLayer::validate(const ITensorInfo *input, const ITenso
     else if(is_quantized)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionReshapeOutputKernel::validate(&gemm_output_info, bias, &col2im_output_info, input, weights, deconv_info));
-
-        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
-
-        float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
-        int   output_multiplier(0);
-        int   output_shift(0);
-        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&col2im_output_info, nullptr, output));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOutputStage::validate(&col2im_output_info, nullptr, output, output_stage_info));
     }
     else
     {
@@ -297,15 +318,9 @@ void CLGEMMDeconvolutionLayer::configure(const ICLTensor *input, const ICLTensor
 
     if(_is_quantized)
     {
-        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
-
-        float multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
-        int   output_multiplier(0);
-        int   output_shift(0);
-        quantization::calculate_quantized_multiplier(multiplier, &output_multiplier, &output_shift);
-        _gemmlowp_output_stage.configure(&_gemmlowp_final, nullptr, output_stage_output, output_multiplier, output_shift, oq_info.offset);
+        GEMMLowpOutputStageInfo output_stage_info;
+        construct_gemmlowp_output_stage(input->info(), weights->info(), output->info(), output_stage_info);
+        _gemmlowp_output_stage.configure(&_gemmlowp_final, nullptr, output_stage_output, output_stage_info);
         _gemmlowp_final.allocator()->allocate();
     }
 

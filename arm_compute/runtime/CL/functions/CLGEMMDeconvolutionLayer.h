@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,7 @@ class ICLTensor;
  * This function calls the following OpenCL kernels/functions:
  *
  * -# @ref CLGEMMLowpMatrixMultiplyCore
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+ * -# @ref CLGEMMLowpOutputStage
  * -# @ref CLPermute
  * -# @ref CLPermute
  * -# @ref CLReshapeLayer
@@ -91,7 +91,8 @@ public:
     CLGEMMDeconvolutionLayer &operator=(CLGEMMDeconvolutionLayer &&) = default;
     /** Set the input, weights, biases and output tensors.
      *
-     * @param[in,out] input       Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F16/F32. Data layout supported: NHWC
+     * @param[in,out] input       Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
+     *                            Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. Data layout supported: NHWC
      * @param[in]     weights     The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input. Data layout supported: same as @p input.
      * @param[in]     bias        (Optional) The biases have one dimension. Data type supported: Same as @p input. Data layout supported: same as @p input.
      * @param[out]    output      Output tensor. The output has the same number of dimensions as the @p input. Data layout supported: same as @p input.
@@ -100,7 +101,8 @@ public:
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayer
      *
-     * @param[in] input       Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F16/F32. Data layout supported: NHWC
+     * @param[in] input       Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
+     *                        Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. Data layout supported: NHWC
      * @param[in] weights     The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input. Data layout supported: same as @p input.
      * @param[in] bias        (Optional) The biases have one dimension. Data type supported: Same as @p input. Data layout supported: same as @p input.
      * @param[in] output      Output tensor info. The output has the same number of dimensions as the @p input. Data layout supported: same as @p input.
@@ -117,15 +119,15 @@ public:
 private:
     MemoryGroup _memory_group;
 
-    CLGEMM                                              _mm_gemm;
-    CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
-    CLPermute                                           _permute_input_to_nhwc;
-    CLPermute                                           _permute_weights_to_nhwc;
-    CLReshapeLayer                                      _reshape_weights;
-    CLTranspose                                         _transpose_weights;
-    CLDeconvolutionReshapeOutputKernel                  _deconv_reshape;
-    CLSlice                                             _slice_gemm;
+    CLGEMM                             _mm_gemm;
+    CLGEMMLowpMatrixMultiplyCore       _mm_gemmlowp;
+    CLGEMMLowpOutputStage              _gemmlowp_output_stage;
+    CLPermute                          _permute_input_to_nhwc;
+    CLPermute                          _permute_weights_to_nhwc;
+    CLReshapeLayer                     _reshape_weights;
+    CLTranspose                        _transpose_weights;
+    CLDeconvolutionReshapeOutputKernel _deconv_reshape;
+    CLSlice                            _slice_gemm;
 
     CLTensor _gemmlowp_final;
     CLTensor _reshaped_weights;

@@ -105,4 +105,48 @@ Status CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(const ITens
     return CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::validate(input, bias, output, min, max);
 }
 
+void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON(info.type != GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT);
+
+    switch(info.output_data_type)
+    {
+        case DataType::QASYMM8:
+        {
+            auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
+            k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
+            _kernel = std::move(k);
+            break;
+        }
+        case DataType::QASYMM8_SIGNED:
+        {
+            auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
+            k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
+            _kernel = std::move(k);
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Unsupported output data type.");
+    }
+
+}
+
+Status CLGEMMLowpOutputStage::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo &info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON(info.type != GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT);
+
+    switch(output->data_type())
+    {
+        case DataType::QASYMM8:
+            return CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(input, bias, output, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
+        case DataType::QASYMM8_SIGNED:
+            return CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::validate(input, bias, output, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
+        default:
+            return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported output data type.");
+    }
+
+}
 } // namespace arm_compute
