@@ -199,7 +199,7 @@
 #define VECTOR_TYPE VEC_DATA_TYPE(DATA_TYPE, NUM_ELEMS_PROCESSED_PER_THREAD_X)
 #define VECTOR_ACC_TYPE VEC_DATA_TYPE(ACC_DATA_TYPE, NUM_ELEMS_PROCESSED_PER_THREAD_X)
 #define VECTOR_INT VEC_DATA_TYPE(int, NUM_ELEMS_PROCESSED_PER_THREAD_X)
-/** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
+/** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in case both matrices have not been reshaped
  *
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
  *
@@ -481,7 +481,7 @@ __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
 #endif // defined(NUM_ELEMS_PROCESSED_PER_THREAD_X) && defined(NUM_ELEMS_PROCESSED_PER_THREAD_Y) && defined(COLS_A)
 
 #if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N)
-/** This OpenCL kernel computes the matrix multiplication between 2 matrices with QASYMM data type.
+/** This OpenCL kernel computes the matrix multiplication between 2 matrices with QASYMM/QASYMM_SIGNED data type.
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
  *
@@ -507,7 +507,7 @@ __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns LHS matrix NOT reshaped
  *
- * @param[in]  lhs_ptr                           Pointer to the LHS reshaped matrix. Supported data type: QASYMM8
+ * @param[in]  lhs_ptr                           Pointer to the LHS reshaped matrix. Supported data type: QASYMM8/QASYMM_SIGNED
  * @param[in]  lhs_stride_x                      Stride of the LHS reshaped matrix in X dimension (in bytes)
  * @param[in]  lhs_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  lhs_stride_y                      Stride of the LHS reshaped matrix in Y dimension (in bytes)
@@ -519,7 +519,7 @@ __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
  * @param[in]  rhs_stride_y                      Stride of the RHS reshaped matrix in Y dimension (in bytes)
  * @param[in]  rhs_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  rhs_offset_first_element_in_bytes The offset of the first element in the RHS reshaped matrix
- * @param[out] dst_ptr                           Pointer to the destination matrix Supported data type: same as @p lhs_ptr
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data type: S32
  * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
@@ -583,10 +583,10 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
-    __global uchar *lhs_addr = lhs_ptr + lhs_offset_first_element_in_bytes + (y % V0) * (uint)LHS_OFFSET_X + (y / V0) * (uint)lhs_stride_y + (z * lhs_stride_z);
+    __global DATA_TYPE *lhs_addr = lhs_ptr + lhs_offset_first_element_in_bytes + (y % V0) * (uint)LHS_OFFSET_X + (y / V0) * (uint)lhs_stride_y + (z * lhs_stride_z);
 
     // Compute RHS matrix address
-    __global uchar *rhs_addr = rhs_ptr + rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X + (x / (uint)H0) * rhs_stride_y;
+    __global DATA_TYPE *rhs_addr = rhs_ptr + rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X + (x / (uint)H0) * rhs_stride_y;
 
 #if defined(MATRIX_B_DEPTH)
     // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
