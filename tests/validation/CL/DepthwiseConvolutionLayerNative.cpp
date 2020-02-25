@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ RelativeTolerance<float> rel_tolerance_f32(0.001f);
 constexpr float          abs_tolerance_f32(0.0001f);
 
 RelativeTolerance<half_float::half>  rel_tolerance_f16(half_float::half(0.01f));
-const float                          abs_tolerance_f16(half_float::half(0.02f));
+constexpr float                      abs_tolerance_f16(0.03f);
 
 /** Width values to test - Precommit */
 const auto width_values_precommit = framework::dataset::make("width", { 37U } );
