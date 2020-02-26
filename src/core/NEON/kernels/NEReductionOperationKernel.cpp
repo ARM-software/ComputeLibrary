@@ -1047,7 +1047,7 @@ struct RedOpYZW_quantized
                 wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 8, vec_res_idx.val[2]);
                 wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 12, vec_res_idx.val[3]);
             }
-            else if(op == ReductionOperation::ARG_IDX_MIN)
+            else if(op == ReductionOperation::MIN || op == ReductionOperation::MAX)
             {
                 wrapper::vstore(reinterpret_cast<T *>(output.ptr()), vec_res_value);
             }
