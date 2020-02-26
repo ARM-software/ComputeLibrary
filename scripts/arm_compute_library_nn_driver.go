@@ -17,6 +17,10 @@ func globalFlags(ctx android.BaseContext) []string {
         cppflags = append(cppflags, "-fno-addrsig")
     }
 
+    if ctx.AConfig().PlatformVersionName() == "R" || ctx.AConfig().PlatformVersionName() == "11" {
+        cppflags = append(cppflags, "-fno-addrsig")
+    }
+
     return cppflags
 }
 
