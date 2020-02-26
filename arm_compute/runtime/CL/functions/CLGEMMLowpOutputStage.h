@@ -51,7 +51,7 @@ class ITensor;
  *
  *  This function calls the following OpenCL kernels:
  *
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel
+ * -# @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
  *
  * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
  *       after the result is shifted right by result_shift
@@ -72,6 +72,7 @@ public:
      * @param[in]  max             (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
      *                             Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to the maximum possible 32-bit signed integer.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.05)
     void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_offset, int result_mult_int, int result_shift, int min = std::numeric_limits<int32_t>::lowest(),
                    int max = std::numeric_limits<int32_t>::max());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale
@@ -86,6 +87,7 @@ public:
      *
      * @return a status
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.05)
     static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = std::numeric_limits<int32_t>::lowest(), int max = std::numeric_limits<int32_t>::max());
 };
 
@@ -314,6 +316,7 @@ public:
  *
  *  This function calls the following CL kernels:
  *
+ * -# @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
  * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
  * -# @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel
 */

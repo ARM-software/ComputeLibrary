@@ -861,7 +861,6 @@ v17.12 Public major release
  - New OpenCL kernels / functions
     - @ref CLGEMMLowpOffsetContributionKernel / @ref CLGEMMLowpMatrixAReductionKernel / @ref CLGEMMLowpMatrixBReductionKernel / @ref CLGEMMLowpMatrixMultiplyCore
     - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
-    - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale
 
  - New graph nodes for NEON and OpenCL
     - graph::BranchLayer

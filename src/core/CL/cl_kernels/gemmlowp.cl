@@ -2042,9 +2042,9 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
 #endif // defined(K_OFFSET)
 
 #if defined(RESULT_OFFSET) && defined(RESULT_MULT_INT) && defined(RESULT_SHIFT)
-/** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8
+/** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8/QASYMM8_SIGNED
  *
- * This kernel takes a final int32 accumulator value and processes it to obtain the final QASYMM8 value.
+ * This kernel takes a final int32 accumulator value and processes it to obtain the final QASYMM8/QASYMM8_SIGNED value.
  * The following computations will be performed by the kernel:
  *
  *  -# Add offset terms to final result
@@ -2052,11 +2052,14 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
  *  -# Add bias to final result (if -DADD_BIAS is passed at compile time)
  *  -# Shift the int32 accumulator by result_shift
  *  -# Clamp the value between the specified min and max bounds (if -DMIN_BOUND and/or -DMAX_BOUND are passed at compile time)
- *  -# Clamp the resulting int32 values to the [0..255] range and cast to QASYMM8.
+ *  -# Clamp the resulting int32 values:
+ *  -#  - to the [0..255] range and cast to QASYMM8.
+ *  -#  - to the [-128..127] range and cast to QASYMM8_SIGNED.
  *
  * @attention The offset, scalar scale factor and number of bits to shift right of output tensor must be passed at compile time using -DRESULT_OFFSET, -RESULT_MULT_INT and -DRESULT_SHIFT
  *
  * @note In case the addition of int32 biases is required, -DADD_BIAS should be passed at compile time
+ * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
  *
@@ -2072,7 +2075,7 @@ __kernel void gemmlowp_offset_contribution_quantize_down_fixedpoint(TENSOR3D_DEC
  * @param[in]  biases_stride_x                      (Optional) Stride of the biases tensor in X dimension (in bytes)
  * @param[in]  biases_step_x                        (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  biases_offset_first_element_in_bytes (Optional) The offset of the first element in the biases tensor
- * @param[out] dst_ptr                              Pointer to the destination tensor Supported data type: QASYMM8
+ * @param[out] dst_ptr                              Pointer to the destination tensor Supported data type: QASYMM8/QASYMM8_SIGNED
  * @param[in]  dst_stride_x                         Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                           dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                         Stride of the destination tensor in Y dimension (in bytes)
@@ -2118,13 +2121,14 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
     input_values >>= RESULT_SHIFT;
 #endif // RESULT_SHIFT < 0
 
-    uchar4 res = convert_uchar4_sat(input_values);
+    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
+    res = CONVERT_SAT(input_values, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
 
 #if defined(MIN_BOUND)
-    res = max(res, (uchar4)MIN_BOUND);
+    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (uchar4)MAX_BOUND);
+    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result

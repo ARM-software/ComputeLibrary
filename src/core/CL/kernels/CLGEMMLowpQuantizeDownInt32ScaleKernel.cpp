@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "support/StringSupport.h"
-
-using namespace arm_compute;
 
 namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo *output_stage)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON(min > max);
+    ARM_COMPUTE_RETURN_ERROR_ON((output_stage->output_data_type != DataType::QASYMM8) && (output_stage->output_data_type != DataType::QASYMM8_SIGNED));
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage->gemmlowp_max_bound > std::get<1>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type)));
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage->gemmlowp_min_bound < std::get<0>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type))
+                                || output_stage->gemmlowp_min_bound > output_stage->gemmlowp_max_bound);
 
     // Check biases if exist
     if(bias != nullptr)
@@ -53,15 +56,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() != output_stage->output_data_type, "Mismatching output data type");
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
     }
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output, DataType output_data_type)
 {
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_data_type(output_data_type));
+
     constexpr unsigned int num_elems_processed_per_iteration = 4;
 
     // Configure kernel window
@@ -72,13 +78,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     bool window_changed = update_window_and_padding(win,
                                                     input_access);
 
-    if(output->total_size() != 0)
-    {
-        AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, output_result_access);
-
-        output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-    }
+    AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
+    window_changed = window_changed || update_window_and_padding(win, output_result_access);
+    output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
     if(bias != nullptr)
     {
@@ -89,65 +91,59 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
-} // namespace
+} //namespace
 
-class Coordinates;
-} // namespace arm_compute
-
-CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel()
-    : _input(nullptr), _bias(nullptr), _output(nullptr)
+CLGEMMLowpQuantizeDownInt32ScaleKernel::CLGEMMLowpQuantizeDownInt32ScaleKernel()
+    : _input(nullptr), _bias(nullptr), _output(nullptr), _output_stage(nullptr)
 {
 }
-Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status CLGEMMLowpQuantizeDownInt32ScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const GEMMLowpOutputStageInfo *output_stage)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
-                                                              (bias != nullptr) ? bias->clone().get() : nullptr,
-                                                              output->clone().get())
-                                .first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, output_stage));
 
     return Status{};
 }
 
-void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_offset, int result_mult_int, int result_shift, int min,
-                                                              int max)
+void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *output_stage)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8));
-
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
                                                   (bias != nullptr) ? bias->info() : nullptr,
                                                   output->info(),
-                                                  min,
-                                                  max));
+                                                  output_stage));
 
-    _input  = input;
-    _bias   = bias;
-    _output = output;
+    _input        = input;
+    _bias         = bias;
+    _output       = output;
+    _output_stage = output_stage;
 
     // Set the arguments to pass at compile time
+    auto           min = output_stage->gemmlowp_min_bound;
+    auto           max = output_stage->gemmlowp_max_bound;
     CLBuildOptions build_opts;
-    build_opts.add_option("-DRESULT_OFFSET=" + support::cpp11::to_string(result_offset));
-    build_opts.add_option("-DRESULT_MULT_INT=" + support::cpp11::to_string(result_mult_int));
-    build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(result_shift));
-    build_opts.add_option_if((min > 0), "-DMIN_BOUND=" + support::cpp11::to_string(min));
-    build_opts.add_option_if((max < 255), "-DMAX_BOUND=" + support::cpp11::to_string(max));
+    build_opts.add_option("-DRESULT_OFFSET=" + support::cpp11::to_string(output_stage->gemmlowp_offset));
+    build_opts.add_option("-DRESULT_MULT_INT=" + support::cpp11::to_string(output_stage->gemmlowp_multiplier));
+    build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(output_stage->gemmlowp_shift));
+    build_opts.add_option_if((min > std::get<0>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type))) && (min != max),
+                             "-DMIN_BOUND=" + support::cpp11::to_string(min));
+    build_opts.add_option_if((max < std::get<1>(quantization::get_min_max_values_from_quantized_data_type(output_stage->output_data_type))) && (min != max),
+                             "-DMAX_BOUND=" + support::cpp11::to_string(max));
+    build_opts.add_option("-DOUTPUT_DATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down", build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
+    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), output_stage->output_data_type);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 }
 
-void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLGEMMLowpQuantizeDownInt32ScaleKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
@@ -172,4 +168,5 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window, cl
         enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice));
+}
 }
