@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
  * @attention Absolute start coordinates for each dimension should be given as preprocessor -DSTART_index=value e.g. -DSTART_0=2
  * @attention Strides for each dimension should be given as preprocessor -DSTRIDE_index=value e.g. -DSTRIDE_1=1
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/QASYMM16/QSYMM16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)

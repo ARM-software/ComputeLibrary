@@ -333,6 +333,80 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, fr
 TEST_SUITE_END() // W1x1
 
 TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+
+// QASYMM8_SIGNED: zero-point in range [-128, 127]
+// QASYMM8       : zero-point in range [0   , 255]
+
+TEST_SUITE(W4x4)
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data4x4, framework::dataset::make("DataType",
+                                                                                                                      DataType::QASYMM8_SIGNED)),
+                                                                                                                      data_layouts_dataset),
+                                                                                                                      framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 5) })),
+                                                                                                                      framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 5), QuantizationInfo(4.f / 255.f, 10) })),
+                                                                                                                      add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W4x4
+
+TEST_SUITE(W3x3)
+// DirectDeconvolution
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture3x3<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(data3x3_precommit,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8_SIGNED)),
+                       data_layouts_dataset),
+                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 10), QuantizationInfo(2.f / 255.f, 4) })),
+                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 10), QuantizationInfo(4.f / 255.f, 5) })),
+                       add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerQuantizedFixture3x3<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data3x3,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8_SIGNED)),
+                       data_layouts_dataset),
+                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, -10), QuantizationInfo(2.f / 255.f, 127) })),
+                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 64), QuantizationInfo(4.f / 255.f, -128) })),
+                       add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W3x3
+
+TEST_SUITE(W2x2) // GEMMDeconvolution
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture2x2<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(data2x2_precommit,
+                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                       data_layouts_dataset),
+                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127), QuantizationInfo(2.f / 255.f, -128) })),
+                       framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, -10), QuantizationInfo(4.f / 255.f, 64) })),
+                       add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W2x2
+
+TEST_SUITE(W1x1) // DirectDeconvolution and GEMMDeconvolution
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(data1x1, framework::dataset::make("DataType",
+                                                                                                                      DataType::QASYMM8_SIGNED)),
+                                                                                                                      data_layouts_dataset),
+                                                                                                                      framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 0), QuantizationInfo(2.f / 255.f, 0) })),
+                                                                                                                      framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(3.f / 255.f, 0), QuantizationInfo(4.f / 255.f, 0) })),
+                                                                                                                      add_bias_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W1x1
+
+TEST_SUITE_END() // QASYMM8_SIGNED
+
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // DeconvolutionLayer

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@
  * @attention Input tensor depth should be given as a preprocessor argument using -DDEPTH_IN=size. e.g. -DDEPTH_IN=16
  * @attention Permutation vector is passed as a preprocessor arguement using -DP1, -DP2, -DP3 and -DP4=int, e.g. -DP1=2, -DP2=1, -DP3=0 and -DP4=3.
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)

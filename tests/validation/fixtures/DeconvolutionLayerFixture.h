@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DeconvolutionLayerFixtureBase : public framework::Fixture
 {
 public:
-    using TBias = typename std::conditional<std::is_same<typename std::decay<T>::type, uint8_t>::value, int32_t, T>::type;
+    using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
 
 public:
     template <typename...>
@@ -73,6 +73,13 @@ protected:
             {
                 std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
                 std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            case DataType::QASYMM8_SIGNED:
+            {
+                std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::uniform_int_distribution<int8_t> distribution(bounds.first, bounds.second);
                 library->fill(tensor, distribution, i);
                 break;
             }
