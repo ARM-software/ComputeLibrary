@@ -87,14 +87,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     {
         case 0:
         {
-            if(is_serial_op)
-            {
-                AccessWindowHorizontal input_access(input, 0, input->dimension(0));
-                AccessWindowHorizontal output_access(output, 0, 1);
-                window_changed = update_window_and_padding(win, input_access, output_access);
-                output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-            }
-            else
+            if(!is_serial_op)
             {
                 const unsigned int     border_width = ((input->dimension(0) % border_val) != 0) ? border_val - input->dimension(0) % border_val : 0;
                 AccessWindowStatic     input_access(input, 0, 0, input->dimension(0) + border_width, 1);
@@ -269,8 +262,11 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
                 Window window_in{ window };
                 window_in.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _input->info()->dimension(0)));
 
-                Window in_slice  = window.first_slice_window_1D();
-                Window out_slice = window.first_slice_window_1D();
+                Window out_window{ window };
+                out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
+
+                Window in_slice  = window_in.first_slice_window_1D();
+                Window out_slice = out_window.first_slice_window_1D();
 
                 do
                 {
@@ -279,7 +275,7 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
                     add_1D_tensor_argument(idx, _output, out_slice);
                     enqueue(queue, *this, in_slice, lws_hint());
                 }
-                while(window_in.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(out_slice));
+                while(window_in.slide_window_slice_1D(in_slice) && out_window.slide_window_slice_1D(out_slice));
             }
             else
             {
