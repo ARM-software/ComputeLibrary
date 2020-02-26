@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -712,6 +712,13 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_s64, seed_offset);
             break;
         }
+        case DataType::BFLOAT16:
+        {
+            // It doesn't make sense to check [-inf, inf], so hard code it to a big number
+            std::uniform_real_distribution<float> distribution_bf16(-1000.f, 1000.f);
+            fill(tensor, distribution_bf16, seed_offset);
+            break;
+        }
         case DataType::F16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
@@ -810,6 +817,14 @@ void AssetsLibrary::fill_tensor_uniform_ranged(T                                
             fill(tensor, distribution_s32, seed_offset);
             break;
         }
+        case DataType::BFLOAT16:
+        {
+            // It doesn't make sense to check [-inf, inf], so hard code it to a big number
+            const auto                       converted_pairs = detail::convert_range_pair<float>(excluded_range_pairs);
+            RangedUniformDistribution<float> distribution_bf16(-1000.f, 1000.f, converted_pairs);
+            fill(tensor, distribution_bf16, seed_offset);
+            break;
+        }
         case DataType::F16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
@@ -894,6 +909,12 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             ARM_COMPUTE_ERROR_ON(!(std::is_same<int64_t, D>::value));
             std::uniform_int_distribution<int64_t> distribution_s64(low, high);
             fill(tensor, distribution_s64, seed_offset);
+            break;
+        }
+        case DataType::BFLOAT16:
+        {
+            std::uniform_real_distribution<float> distribution_bf16(low, high);
+            fill(tensor, distribution_bf16, seed_offset);
             break;
         }
         case DataType::F16:

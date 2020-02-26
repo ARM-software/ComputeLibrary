@@ -89,6 +89,9 @@ public:
             case DataType::S64:
                 value.s64 = static_cast<int64_t>(v);
                 break;
+            case DataType::BFLOAT16:
+                value.bf16 = static_cast<bfloat16>(v);
+                break;
             case DataType::F16:
                 value.f16 = static_cast<half>(v);
                 break;
@@ -174,6 +177,15 @@ public:
     {
         value.s64 = v;
     }
+    /** Initialize the union with a BFLOAT16 pixel value
+     *
+     * @param[in] v F16 value.
+     */
+    PixelValue(bfloat16 v)
+        : PixelValue()
+    {
+        value.bf16 = v;
+    }
     /** Initialize the union with a F16 pixel value
      *
      * @param[in] v F16 value.
@@ -214,6 +226,7 @@ public:
             double   f64;     /**< Single channel double */
             float    f32;     /**< Single channel float 32 */
             half     f16;     /**< Single channel F16 */
+            bfloat16 bf16;    /**< Single channel brain floating-point number */
             uint8_t  u8;      /**< Single channel U8 */
             int8_t   s8;      /**< Single channel S8 */
             uint16_t u16;     /**< Single channel U16 */
@@ -284,6 +297,14 @@ public:
     void get(int64_t &v) const
     {
         v = value.s64;
+    }
+    /** Interpret the pixel value as a BFLOAT16
+     *
+     * @param[out] v Returned value
+     */
+    void get(bfloat16 &v) const
+    {
+        v = value.bf16;
     }
     /** Interpret the pixel value as a F16
      *

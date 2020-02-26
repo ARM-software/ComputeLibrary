@@ -30,6 +30,7 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/utils/misc/Macros.h"
+#include "support/Bfloat16.h"
 #include "support/Half.h"
 
 #include <cmath>
@@ -58,6 +59,7 @@ enum class Format
     U16,      /**< 1 channel, 1 U16 per channel */
     S32,      /**< 1 channel, 1 S32 per channel */
     U32,      /**< 1 channel, 1 U32 per channel */
+    BFLOAT16, /**< 16-bit brain floating-point number */
     F16,      /**< 1 channel, 1 F16 per channel */
     F32,      /**< 1 channel, 1 F32 per channel */
     UV88,     /**< 2 channel, 1 U8 per channel */
@@ -89,6 +91,7 @@ enum class DataType
     S32,                /**< signed 32-bit number */
     U64,                /**< unsigned 64-bit number */
     S64,                /**< signed 64-bit number */
+    BFLOAT16,           /**< 16-bit brain floating-point number */
     F16,                /**< 16-bit floating-point number */
     F32,                /**< 32-bit floating-point number */
     F64,                /**< 64-bit floating-point number */

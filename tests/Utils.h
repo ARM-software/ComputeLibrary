@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -382,6 +382,9 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
             break;
         case DataType::S64:
             *reinterpret_cast<int64_t *>(ptr) = value;
+            break;
+        case DataType::BFLOAT16:
+            *reinterpret_cast<bfloat16 *>(ptr) = bfloat16(value);
             break;
         case DataType::F16:
             *reinterpret_cast<half *>(ptr) = value;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,7 @@
 #include <arm_neon.h>
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
+#include "support/Bfloat16.h"
 #include "support/Half.h"
 
 namespace arm_compute
@@ -428,6 +429,12 @@ inline __fp16 lowest<__fp16>()
 }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
+template <>
+inline bfloat16 lowest<bfloat16>()
+{
+    return bfloat16::lowest();
+}
+
 // std::isfinite
 template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
 inline bool isfinite(T value)
@@ -438,6 +445,11 @@ inline bool isfinite(T value)
 inline bool isfinite(half_float::half value)
 {
     return half_float::isfinite(value);
+}
+
+inline bool isfinite(bfloat16 value)
+{
+    return std::isfinite(float(value));
 }
 } // namespace cpp11
 

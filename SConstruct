@@ -205,7 +205,7 @@ elif 'v8' in env['arch']:
         env.Append(CXXFLAGS = ['-march=armv8-a'])
 
     if 'v8.6-a' in env['arch']:
-        env.Append(CXXFLAGS = ['-DV8P6'])
+        env.Append(CPPDEFINES = ['V8P6', 'ARM_COMPUTE_FORCE_BF16'])
 
 elif 'x86' in env['arch']:
     if env['estate'] == '32':

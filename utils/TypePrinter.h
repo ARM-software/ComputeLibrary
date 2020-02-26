@@ -665,6 +665,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
         case DataType::S64:
             os << "S64";
             break;
+        case DataType::BFLOAT16:
+            os << "BFLOAT16";
+            break;
         case DataType::F16:
             os << "F16";
             break;

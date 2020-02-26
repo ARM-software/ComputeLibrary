@@ -114,6 +114,7 @@ inline size_t data_size_from_type(DataType data_type)
         case DataType::S16:
         case DataType::QSYMM16:
         case DataType::QASYMM16:
+        case DataType::BFLOAT16:
         case DataType::F16:
             return 2;
         case DataType::F32:
@@ -146,6 +147,7 @@ inline size_t pixel_size_from_format(Format format)
             return 1;
         case Format::U16:
         case Format::S16:
+        case Format::BFLOAT16:
         case Format::F16:
         case Format::UV88:
         case Format::YUYV422:
@@ -191,6 +193,7 @@ inline size_t element_size_from_data_type(DataType dt)
         case DataType::S16:
         case DataType::QSYMM16:
         case DataType::QASYMM16:
+        case DataType::BFLOAT16:
         case DataType::F16:
             return 2;
         case DataType::U32:
@@ -228,6 +231,8 @@ inline DataType data_type_from_format(Format format)
             return DataType::U32;
         case Format::S32:
             return DataType::S32;
+        case Format::BFLOAT16:
+            return DataType::BFLOAT16;
         case Format::F16:
             return DataType::F16;
         case Format::F32:
@@ -260,6 +265,7 @@ inline int plane_idx_from_channel(Format format, Channel channel)
         case Format::S16:
         case Format::U32:
         case Format::S32:
+        case Format::BFLOAT16:
         case Format::F16:
         case Format::F32:
         case Format::UV88:
@@ -447,6 +453,7 @@ inline size_t num_planes_from_format(Format format)
         case Format::U16:
         case Format::S32:
         case Format::U32:
+        case Format::BFLOAT16:
         case Format::F16:
         case Format::F32:
         case Format::RGB888:
@@ -481,6 +488,7 @@ inline size_t num_channels_from_format(Format format)
         case Format::S16:
         case Format::U32:
         case Format::S32:
+        case Format::BFLOAT16:
         case Format::F16:
         case Format::F32:
             return 1;
@@ -531,6 +539,7 @@ inline DataType get_promoted_data_type(DataType dt)
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QSYMM16:
         case DataType::QASYMM16:
+        case DataType::BFLOAT16:
         case DataType::F16:
         case DataType::U32:
         case DataType::S32:
@@ -594,6 +603,12 @@ inline std::tuple<PixelValue, PixelValue> get_min_max(DataType dt)
         {
             min = PixelValue(std::numeric_limits<int32_t>::lowest());
             max = PixelValue(std::numeric_limits<int32_t>::max());
+            break;
+        }
+        case DataType::BFLOAT16:
+        {
+            min = PixelValue(bfloat16::lowest());
+            max = PixelValue(bfloat16::max());
             break;
         }
         case DataType::F16:
@@ -1284,6 +1299,8 @@ bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = Quantization
             const auto val_s32 = static_cast<int32_t>(val);
             return ((val_s32 == val) && val_s32 >= std::numeric_limits<int32_t>::lowest() && val_s32 <= std::numeric_limits<int32_t>::max());
         }
+        case DataType::BFLOAT16:
+            return (val >= bfloat16::lowest() && val <= bfloat16::max());
         case DataType::F16:
             return (val >= std::numeric_limits<half>::lowest() && val <= std::numeric_limits<half>::max());
         case DataType::F32:
@@ -1323,6 +1340,11 @@ void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int
             // We use T instead of print_type here is because the std::is_floating_point<half> returns false and then the print_type becomes int.
             s << std::right << static_cast<T>(ptr[i]) << element_delim;
         }
+        else if(std::is_same<typename std::decay<T>::type, bfloat16>::value)
+        {
+            // We use T instead of print_type here is because the std::is_floating_point<bfloat> returns false and then the print_type becomes int.
+            s << std::right << float(ptr[i]) << element_delim;
+        }
         else
         {
             s << std::right << static_cast<print_type>(ptr[i]) << element_delim;
@@ -1356,6 +1378,11 @@ int max_consecutive_elements_display_width_impl(std::ostream &s, const T *ptr, u
         {
             // We use T instead of print_type here is because the std::is_floating_point<half> returns false and then the print_type becomes int.
             ss << static_cast<T>(ptr[i]);
+        }
+        else if(std::is_same<typename std::decay<T>::type, bfloat16>::value)
+        {
+            // We use T instead of print_type here is because the std::is_floating_point<bfloat> returns false and then the print_type becomes int.
+            ss << float(ptr[i]);
         }
         else
         {

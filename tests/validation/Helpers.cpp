@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -209,6 +209,18 @@ SimpleTensor<float> convert_from_symmetric(const SimpleTensor<int16_t> &src)
     {
         dst[i] = dequantize_qsymm16(src[i], quantization_info);
     }
+    return dst;
+}
+
+SimpleTensor<float> convert_from_bfloat16(const SimpleTensor<int16_t> &src)
+{
+    SimpleTensor<float> dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
+    return dst;
+}
+
+SimpleTensor<int16_t> convert_to_bfloat(const SimpleTensor<float> &src)
+{
+    SimpleTensor<int16_t> dst{ src.shape(), DataType::BFLOAT16, 1, QuantizationInfo(), src.data_layout() };
     return dst;
 }
 
