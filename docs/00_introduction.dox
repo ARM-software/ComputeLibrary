@@ -1278,7 +1278,7 @@ i.e. to natively compile the "graph_lenet" example for Linux 64bit:
 @note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
 
 @note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L
-@note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was build with OpenCL enabled.
+@note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was built with OpenCL enabled.
 
 To run the built executable simply run:
 
@@ -1409,7 +1409,7 @@ In this case the first argument of LeNet (like all the graph examples) is the ta
 
 @subsection S3_4_bare_metal Building for bare metal
 
-For bare metal, the library was successfully built using linaros's latest (gcc-linaro-6.3.1-2017.05) bare metal toolchains:
+For bare metal, the library was successfully built using linaro's latest (gcc-linaro-6.3.1-2017.05) bare metal toolchains:
  - arm-eabi for armv7a
  - aarch64-elf for arm64-v8a
 
