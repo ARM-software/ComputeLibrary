@@ -391,6 +391,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::IDENTITY:
             os << "IDENTITY";
             break;
+        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
+            os << "HARD_SWISH";
+            break;
+
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
