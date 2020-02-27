@@ -54,25 +54,6 @@ TensorShape transposed_tensor_shape(const TensorShape &in)
     return output_shape;
 }
 
-unsigned int num_elems_processed(size_t element_size)
-{
-    switch(element_size)
-    {
-        case 1:
-            return 8;
-            break;
-        case 2:
-            return 4;
-            break;
-        case 4:
-            return 4;
-            break;
-        default:
-            break;
-    }
-    ARM_COMPUTE_ERROR("Element size not supported");
-}
-
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
@@ -90,32 +71,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+unsigned int num_elems_processed(size_t element_size)
 {
-    // Note: This kernel performs 16 elements per iteration.
-    // However, since we use a left-over for loop on both dimensions (X and Y), we cannot have any read or write out of memory
-    // For this reason num_elems_processed_per_iteration_x is set to 1
-    const unsigned int num_elems_processed_per_iteration_x = 1;
-    const unsigned int num_elems_processed_per_iteration_y = num_elems_processed(input->element_size());
-
-    // Configure kernel window
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-
-    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-    bool                  window_changed = update_window_and_padding(win, input_access);
-
-    if(output->total_size() != 0)
+    switch(element_size)
     {
-        AccessWindowTranspose output_access(output, 0, 0, num_elems_processed_per_iteration_y, num_elems_processed_per_iteration_x);
-
-        window_changed = window_changed || update_window_and_padding(win, output_access);
-
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+        case 1:
+            return 8;
+        case 2:
+        case 4:
+            return 4;
+        default:
+            break;
     }
 
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    ARM_COMPUTE_ERROR("Element size not supported");
 }
 
 void transpose_8bit_elements(const ITensor *in, ITensor *out, const Window &window)
@@ -487,7 +456,6 @@ Status NETransposeKernel::validate(const ITensorInfo *input, const ITensorInfo *
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
     return Status{};
 }
 
@@ -525,9 +493,20 @@ void NETransposeKernel::configure(const ITensor *input, ITensor *output)
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+
+    // Note: This kernel performs 16 elements per iteration.
+    // However, since we use a left-over for loop on both dimensions (X and Y), we cannot have any read or write out of memory
+    // For this reason num_elems_processed_per_iteration_x is set to 1
+    const unsigned int num_elems_processed_per_iteration_x = 1;
+    const unsigned int num_elems_processed_per_iteration_y = num_elems_processed(input->info()->element_size());
+
+    // Configure kernel window
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+
+    INEKernel::configure(win);
 }
 
 void NETransposeKernel::run(const Window &window, const ThreadInfo &info)
