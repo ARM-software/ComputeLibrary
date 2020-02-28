@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,28 +77,18 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    /** Function to run YOLO layer on fp16
+    /** Function to run YOLO layer
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    void yolo_layer_fp16_nchw(const Window &window);
-    /** Function to run batch normalization on fp16 on tensors with NHWC format
+    template <typename T, int S>
+    void yolo_layer_nchw(const Window &window);
+    /** Function to run YOLO layer on tensors with NHWC format
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    void yolo_layer_fp16_nhwc(const Window &window);
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    /** Function to run YOLO layer on fp32
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    void yolo_layer_fp32_nchw(const Window &window);
-    /** Function to run YOLO layer on fp32 on tensors with NHWC format
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    void yolo_layer_fp32_nhwc(const Window &window);
+    template <typename T>
+    void yolo_layer_nhwc(const Window &window);
     /** Common signature for all the yolo layer functions
      *
      * @param[in] window Region on which to execute the kernel.
