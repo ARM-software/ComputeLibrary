@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,70 +96,52 @@ Status validate_arguments_logits_1d_max(const ITensorInfo &input, const ITensorI
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window_logits_1d_max(ITensorInfo &input, ITensorInfo &output)
-{
-    // Softmax across the x dimension
-    const TensorShape output_shape = TensorShape(input.tensor_shape()).set(0, 1);
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(output, output_shape, 1, input.data_type(), input.quantization_info());
-
-    // Configure kernel window
-    const int input_width                       = input.valid_region().shape.x();
-    const int num_elems_processed_per_iteration = 16U / data_size_from_type(input.data_type());
-    const int num_elems_read_per_iteration      = ceil_to_multiple(input_width, num_elems_processed_per_iteration);
-
-    const ValidRegion out_valid_region(ValidRegion(input.valid_region()).set(0, 0, 1));
-    output.set_valid_region(out_valid_region);
-
-    Window win = calculate_max_window(output);
-
-    AccessWindowHorizontal input_access(&input, input.valid_region().anchor.x(), num_elems_read_per_iteration);
-    AccessWindowHorizontal output_access(&output, 0, 1);
-
-    const bool window_changed = update_window_and_padding(win, input_access, output_access);
-
-    const Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-
 template <typename T>
 void logits_1d_max(const ITensor &in, ITensor &out, const Window &window)
 {
-    const auto   start_x     = in.info()->valid_region().anchor.x();
-    const size_t input_width = in.info()->valid_region().shape.x();
-
     /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
-    Iterator input(&in, window);
-    Iterator output(&out, window);
+    constexpr int window_step_x  = 16 / sizeof(T);
+    const auto    window_start_x = static_cast<int>(window.x().start());
+    const auto    window_end_x   = static_cast<int>(window.x().end());
 
-    constexpr int window_step_x = 16 / sizeof(T);
-    const int     sum_stages    = log2(window_step_x / 2);
-    execute_window_loop(window, [&](const Coordinates &)
+    Window win{ window };
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Iterator input(&in, win);
+    Iterator output(&out, win);
+
+    const int sum_stages = log2(window_step_x / 2);
+    execute_window_loop(win, [&](const Coordinates &)
     {
         // Get pointers
-        const auto in_ptr  = reinterpret_cast<const T *>(input.ptr()) + start_x;
+        const auto in_ptr  = reinterpret_cast<const T *>(input.ptr());
         const auto out_ptr = reinterpret_cast<T *>(output.ptr());
 
         // Init max value
         auto vec_max = wrapper::vdup_n(support::cpp11::lowest<T>(), ExactTagType{});
+        int  x       = window_start_x;
 
-        // Loop over input row
-        for(const T *it = in_ptr; it < (in_ptr + input_width); it += window_step_x)
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
-            const auto current_value = wrapper::vloadq(it);
+            const auto current_value = wrapper::vloadq(in_ptr + x);
             vec_max                  = wrapper::vmax(vec_max, current_value);
         }
-
         auto carry_max = wrapper::vpmax(wrapper::vgethigh(vec_max), wrapper::vgetlow(vec_max));
 
         for(int i = 0; i < sum_stages; ++i)
         {
             carry_max = wrapper::vpmax(carry_max, carry_max);
         }
-        const T max_val = wrapper::vgetlane(carry_max, 0);
-        *out_ptr        = max_val;
+        T max_val = wrapper::vgetlane(carry_max, 0);
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            max_val = *(in_ptr + x) > max_val ? *(in_ptr + x) : max_val;
+        }
+
+        *out_ptr = max_val;
     },
     input, output);
 }
@@ -182,8 +164,16 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_1d_max(*input->info(), *output->info()));
     // Configure kernel window
-    auto win_config = validate_and_configure_window_logits_1d_max(*input->info(), *output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+
+    // Softmax across the x dimension
+    const TensorShape output_shape = TensorShape(input->info()->tensor_shape()).set(0, 1);
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
+
+    Window      win = calculate_max_window(*input->info(), Steps());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     switch(input->info()->data_type())
     {
@@ -214,15 +204,13 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
 
     _border_size = BorderSize(0, num_elems_read_per_iteration - input_width, 0, 0);
 
-    INEKernel::configure(win_config.second);
+    INEKernel::configure(win);
 }
 
 Status NELogits1DMaxKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_1d_max(*input, *output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_1d_max(*input->clone(), *output->clone()).first);
 
     return Status{};
 }
@@ -275,37 +263,6 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window_logits_softmax(ITensorInfo &input, ITensorInfo &max,
-                                                                       ITensorInfo &output, ITensorInfo &tmp, bool is_log)
-{
-    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input.data_type());
-
-    // Output auto initialization if not yet initialized
-    const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(input.data_type(), is_log) : output.quantization_info();
-    auto_init_if_empty(output, TensorInfo(input).set_quantization_info(output_quantization).reset_padding());
-
-    // Tmp auto initialization if not yet initialized
-    const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : input.data_type();
-    auto_init_if_empty(tmp, TensorInfo(input).set_data_type(tmp_data_type).reset_padding());
-
-    const int input_width = input.valid_region().shape.x();
-
-    Window win = calculate_max_window(max);
-
-    AccessWindowHorizontal input_access(&input, input.valid_region().anchor.x(), input_width);
-    AccessWindowHorizontal max_access(&input, 0, 1);
-    AccessWindowHorizontal output_access(&output, input.valid_region().anchor.x(), input_width);
-    AccessWindowHorizontal tmp_access(&tmp, input.valid_region().anchor.x(), input_width);
-
-    const bool window_changed = update_window_and_padding(win, input_access, max_access, output_access, tmp_access);
-
-    output.set_valid_region(input.valid_region());
-
-    const Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-
 template <typename T, bool is_log>
 void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *const tmp, ITensor &out, const float beta, const Window &window)
 {
@@ -610,9 +567,23 @@ void NELogits1DSoftmaxKernel<IS_LOG>::configure(const ITensor *input, const ITen
     ARM_COMPUTE_ERROR_ON_NULLPTR(input->info(), max->info(), output->info(), tmp->info());
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_logits_softmax(*input->info(), *max->info(), *output->info(), beta, *tmp->info(), IS_LOG));
+
     // Configure kernel window
-    auto win_config = validate_and_configure_window_logits_softmax(*input->info(), *max->info(), *output->info(), *tmp->info(), IS_LOG);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input->info()->data_type());
+
+    // Output auto initialization if not yet initialized
+    const QuantizationInfo output_quantization = is_quantized_asymmetric ? arm_compute::get_softmax_output_quantization_info(input->info()->data_type(), IS_LOG) : output->info()->quantization_info();
+    auto_init_if_empty(*output->info(), TensorInfo(*input->info()).set_quantization_info(output_quantization).reset_padding());
+
+    // Tmp auto initialization if not yet initialized
+    const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : input->info()->data_type();
+    auto_init_if_empty(*tmp->info(), TensorInfo(*input->info()).set_data_type(tmp_data_type).reset_padding());
+
+    // Configure kernel window
+    Window      win = calculate_max_window(*max->info(), Steps());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     switch(input->info()->data_type())
     {
@@ -641,7 +612,7 @@ void NELogits1DSoftmaxKernel<IS_LOG>::configure(const ITensor *input, const ITen
     _beta   = beta;
     _tmp    = tmp;
 
-    INEKernel::configure(win_config.second);
+    INEKernel::configure(win);
 }
 
 template <bool IS_LOG>
@@ -649,9 +620,7 @@ Status NELogits1DSoftmaxKernel<IS_LOG>::validate(const ITensorInfo *input, const
                                                  const ITensorInfo *output, const float beta, const ITensorInfo *tmp)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, output, tmp);
-
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_logits_softmax(*input, *max, *output, beta, *tmp, IS_LOG));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_logits_softmax(*input->clone(), *max->clone(), *output->clone(), *tmp->clone(), IS_LOG).first);
 
     return Status{};
 }
