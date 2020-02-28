@@ -117,7 +117,7 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F32,
 });
 
-const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions(), framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH) );
+const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions(), framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH));
 
 /** Input data sets. */
 const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
@@ -242,7 +242,10 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
                                                                                                   ActivationLayerInfo::ActivationFunction::LOGISTIC,
                                                                                                   ActivationLayerInfo::ActivationFunction::TANH
                                                                                                 });
-const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), QuantizedActivationFunctionsDataset),
+const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions(), framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH));
+
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }),
+                                                        concat(QuantizedActivationFunctionsDataset, framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH))),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 TEST_SUITE(Quantized)
