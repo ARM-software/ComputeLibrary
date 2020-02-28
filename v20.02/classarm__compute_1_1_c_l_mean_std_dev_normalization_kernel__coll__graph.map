@@ -1,0 +1,5 @@
+<map id="CLMeanStdDevNormalizationKernel" name="CLMeanStdDevNormalizationKernel">
+<area shape="rect" id="node1" title="Interface for the kernel to normalize the input 2D tensor across the first dimension with respect to ..." alt="" coords="5,155,215,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="70,80,150,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="78,5,142,32"/>
+</map>

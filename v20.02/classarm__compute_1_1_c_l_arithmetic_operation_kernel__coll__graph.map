@@ -1,0 +1,6 @@
+<map id="CLArithmeticOperationKernel" name="CLArithmeticOperationKernel">
+<area shape="rect" id="node1" title=" " alt="" coords="12,229,219,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_elementwise_operation_kernel.xhtml" title="Interface for an element&#45;wise operation kernel." alt="" coords="5,155,225,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="75,80,155,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="83,5,147,32"/>
+</map>

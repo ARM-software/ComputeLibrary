@@ -1,0 +1,11 @@
+<map id="CLPoolingLayerKernel" name="CLPoolingLayerKernel">
+<area shape="rect" id="node1" title="Interface for the pooling layer kernel." alt="" coords="131,199,290,225"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="5,95,85,121"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="13,5,77,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor." alt="" coords="109,95,189,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor." alt="" coords="116,5,183,32"/>
+<area shape="rect" id="node6" href="$structarm__compute_1_1_border_size.xhtml" title="Container for 2D border size." alt="" coords="214,95,306,121"/>
+<area shape="rect" id="node7" href="$structarm__compute_1_1_pooling_layer_info.xhtml" title="Pooling Layer Information struct." alt="" coords="330,95,457,121"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1_pad_stride_info.xhtml" title="Padding and stride information class." alt="" coords="273,5,380,32"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1_size2_d.xhtml" title="Class for specifying the size of an image or rectangle." alt="" coords="425,5,492,32"/>
+</map>
