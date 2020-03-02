@@ -509,6 +509,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
             build_options.add_option(std::string("-DSRC_WIDTH=" + support::cpp11::to_string(_input->info()->dimension(width_idx))));
             build_options.add_option(std::string("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left())));
             build_options.add_option(std::string("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top())));
+            build_options.add_option(std::string("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom())));
             build_options.add_option(std::string("-DSTRIDE_Y=" + support::cpp11::to_string(_conv_stride_y)));
             if(run_optimized_for_bifrost_nhwc)
             {

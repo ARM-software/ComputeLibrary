@@ -321,18 +321,18 @@ __kernel void direct_convolution_quantized(
 
     int8 values0 = 0;
 
+    const int id0     = get_global_id(0);
     const int y_coord = (get_global_id(2) * STRIDE_Y) - PAD_TOP;
 
     __global DATA_TYPE *weights_addr = (__global DATA_TYPE *)tensor3D_offset(&weights, 0, 0, 0);
-    __global DATA_TYPE *src_addr     = (__global DATA_TYPE *)offset(&src, 0, 0) - src_stride_x * get_global_id(0) + y_coord * (int)src_stride_z;
+    __global DATA_TYPE *src_addr     = (__global DATA_TYPE *)offset(&src, 0, 0) - src_stride_x * id0 + y_coord * (int)src_stride_z;
 
-    const int kernel_index = get_global_id(2);
-    weights_addr += kernel_index * weights_stride_w;
+    weights_addr += id0 * weights_stride_w;
 
     for(volatile int d = 0; d < WEIGHTS_DEPTH; ++d)
     {
 #if KERNEL_SIZE == 5
-#if(PAD_TOP == 1)
+#if(PAD_TOP == 1) || (PAD_BOTTM == 1)
         if(y_coord < 0) // special case Z = -1 doesn't exists
         {
             CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_z));
@@ -355,7 +355,7 @@ __kernel void direct_convolution_quantized(
             CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 3 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 3 * weights_stride_z));
             CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 4 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 4 * weights_stride_z));
         }
-#elif(PAD_TOP == 2)
+#elif(PAD_TOP == 2) || (PAD_BOTTM == 2)
         if(y_coord < -1)
         {
             CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_z));
@@ -390,22 +390,22 @@ __kernel void direct_convolution_quantized(
             CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 3 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 3 * weights_stride_z));
             CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 4 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 4 * weights_stride_z));
         }
-#else  /*  PAD_TOP == 2 */
+#else  /*  PAD_TOP == 2 ||  || PAD_BOTTM == 2 */
         CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 0 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_z));
         CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_z));
         CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_z));
         CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 3 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 3 * weights_stride_z));
         CONVOLUTION1x5(values0, (__global DATA_TYPE *)(src_addr + 4 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 4 * weights_stride_z));
-#endif /*  PAD_TOP == 1 */
+#endif /*  PAD_TOP == 1 ||  || PAD_BOTTM == 1 */
 #elif KERNEL_SIZE == 3
-#if PAD_TOP > 0
+#if(PAD_TOP > 0) || (PAD_BOTTOM > 0)
         if(y_coord < 0) // special case Z = -1 doesn't exists
         {
             //skip first row and load the two next ones
             CONVOLUTION1x3(values0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_z));
             CONVOLUTION1x3(values0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_z));
         }
-        else if(y_coord == (SRC_HEIGHT - PAD_TOP - 1))
+        else if(y_coord == (SRC_HEIGHT - PAD_BOTTOM - 1))
         {
             // special case when computing the last row of the output we must read the last three rows from the input buffer (including padding) but the
             // Z axis has no padding at all.
@@ -418,11 +418,11 @@ __kernel void direct_convolution_quantized(
             CONVOLUTION1x3(values0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_z));
             CONVOLUTION1x3(values0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_z));
         }
-#else  // PAD_TOP > 0
+#else  // PAD_TOP > 0 || PAD_BOTTOM > 0
         CONVOLUTION1x3(values0, (__global DATA_TYPE *)(src_addr + 0 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 0 * weights_stride_z));
         CONVOLUTION1x3(values0, (__global DATA_TYPE *)(src_addr + 1 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 1 * weights_stride_z));
         CONVOLUTION1x3(values0, (__global DATA_TYPE *)(src_addr + 2 * src_stride_z), (__global DATA_TYPE *)(weights_addr + 2 * weights_stride_z));
-#endif // PAD_TOP > 0
+#endif // PAD_TOP > 0 || PAD_BOTTOM > 0
 #elif KERNEL_SIZE == 1
         int weight       = convert_int(*(__global DATA_TYPE *)weights_addr);
         int8 input_value = convert_int8(INPUT_VALUE((__global DATA_TYPE *)src_addr, src_stride_y));
@@ -435,7 +435,7 @@ __kernel void direct_convolution_quantized(
 
 #ifdef HAS_BIAS
     Vector        biases    = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
-    __global int *bias_addr = ((__global int *)(vector_offset(&biases, get_global_id(0))));
+    __global int *bias_addr = ((__global int *)(vector_offset(&biases, id0)));
     values0 += (int8)(*bias_addr);
 #endif /* defined(HAS_BIAS) */
 
