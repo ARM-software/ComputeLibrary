@@ -162,9 +162,9 @@ public:
     void prepare() override;
 
 private:
-    void configure_fc_fc(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output);
-    void configure_conv_fc(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output);
-    void configure_mm(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output);
+    void configure_fc_fc(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act);
+    void configure_conv_fc(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act);
+    void configure_mm(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act);
 
     MemoryGroup                                                         _memory_group;
     IWeightsManager                                                    *_weights_manager;
@@ -182,7 +182,7 @@ private:
     bool                                                                _are_weights_converted;
     bool                                                                _are_weights_reshaped;
     bool                                                                _is_fc_after_conv;
-    bool                                                                _is_quantized;
+    bool                                                                _is_quantized_asymmetric;
     bool                                                                _is_prepared;
 };
 } // namespace arm_compute

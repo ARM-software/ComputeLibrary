@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -174,6 +174,10 @@ void convert_special_tensors(Graph &g)
         if(act_node->activation_info().activation() == ActivationLayerInfo::ActivationFunction::TANH)
         {
             tensor->desc().quant_info = QuantizationInfo(1.f / 128.f, 128);
+        }
+        else if(act_node->activation_info().activation() == ActivationLayerInfo::ActivationFunction::LOGISTIC)
+        {
+            tensor->desc().quant_info = QuantizationInfo(1.f / 256.f, 0);
         }
         return true;
     };

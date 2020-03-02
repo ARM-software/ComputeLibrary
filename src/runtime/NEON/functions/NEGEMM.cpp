@@ -336,25 +336,33 @@ void NEGEMM::prepare()
 {
     if(!_is_prepared)
     {
+        const bool original_b_managed_by_weights_manager = _weights_manager && _weights_manager->are_weights_managed(_original_b);
         if(_asm_glue.is_configured())
         {
-            if(!_weights_manager || !_weights_manager->are_weights_managed(_original_b))
+            if(!original_b_managed_by_weights_manager)
             {
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
             _asm_glue.prepare();
+            if(!original_b_managed_by_weights_manager)
+            {
+                _original_b->mark_as_unused();
+            }
         }
         else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue.is_configured())
         {
-            if(!_weights_manager || !_weights_manager->are_weights_managed(_original_b))
+            if(!original_b_managed_by_weights_manager)
             {
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
             _tmp_b.allocator()->allocate();
             NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
-            _original_b->mark_as_unused();
+            if(!original_b_managed_by_weights_manager)
+            {
+                _original_b->mark_as_unused();
+            }
         }
 
         _is_prepared = true;

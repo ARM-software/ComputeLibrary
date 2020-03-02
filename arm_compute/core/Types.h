@@ -2140,6 +2140,14 @@ public:
     {
         return _activation_info;
     }
+    /** Set activation layer info
+     *
+     * @param[in] activation_info ActivationLayerInfo object to set
+     */
+    void set_activation_info(const ActivationLayerInfo &activation_info)
+    {
+        _activation_info = activation_info;
+    }
 
 private:
     bool                    _is_a_reshaped;

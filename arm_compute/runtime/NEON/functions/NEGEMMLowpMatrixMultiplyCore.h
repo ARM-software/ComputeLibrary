@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,12 @@
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -60,7 +63,7 @@ class NEGEMMLowpMatrixMultiplyCore : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMLowpMatrixMultiplyCore(const NEGEMMLowpMatrixMultiplyCore &) = delete;
     /** Default move constructor */
@@ -109,10 +112,11 @@ public:
 
 private:
     MemoryGroup                                   _memory_group;
+    IWeightsManager                              *_weights_manager;
     NEGEMMAssemblyDispatch                        _asm_glue;
-    std::unique_ptr<INEKernel>                    _mm_kernel;
-    std::unique_ptr<INEKernel>                    _mtx_a_reshape_kernel;
-    std::unique_ptr<INEKernel>                    _mtx_b_reshape_kernel;
+    NEGEMMLowpMatrixMultiplyKernel                _mm_kernel;
+    NEGEMMInterleave4x4Kernel                     _mtx_a_reshape_kernel;
+    NEGEMMTranspose1xWKernel                      _mtx_b_reshape_kernel;
     NEGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
     NEGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;
     NEGEMMLowpOffsetContributionKernel            _offset_contribution_kernel;
