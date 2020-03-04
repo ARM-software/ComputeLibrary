@@ -27,6 +27,7 @@ Tutorials:
 
 Documentation (API, changelogs, build guide, contribution guide, errata, etc.) available here:
 
+- [v20.02.1](https://arm-software.github.io/ComputeLibrary/v20.02.1/)
 - [v20.02](https://arm-software.github.io/ComputeLibrary/v20.02/)
 - [v19.11.1](https://arm-software.github.io/ComputeLibrary/v19.11.1/)
 - [v19.11](https://arm-software.github.io/ComputeLibrary/v19.11/)
@@ -50,6 +51,8 @@ Documentation (API, changelogs, build guide, contribution guide, errata, etc.) a
 
 Binaries available here:
 
+- [v20.02.1-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v20.02.1/arm_compute-v20.02.1-bin-linux.tar.gz)
+- [v20.02.1-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v20.02.1/arm_compute-v20.02.1-bin-android.tar.gz)
 - [v20.02-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v20.02/arm_compute-v20.02-bin-linux.tar.gz)
 - [v20.02-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v20.02/arm_compute-v20.02-bin-android.tar.gz)
 - [v19.11.1-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.11.1/arm_compute-v19.11.1-bin-linux.tar.gz)
