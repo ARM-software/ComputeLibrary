@@ -242,7 +242,6 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
                                                                                                   ActivationLayerInfo::ActivationFunction::LOGISTIC,
                                                                                                   ActivationLayerInfo::ActivationFunction::TANH
                                                                                                 });
-const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions(), framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH));
 
 const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }),
                                                         concat(QuantizedActivationFunctionsDataset, framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH))),

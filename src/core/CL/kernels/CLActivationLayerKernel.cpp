@@ -54,7 +54,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
         ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::LOGISTIC,
-        ActivationLayerInfo::ActivationFunction::TANH
+        ActivationLayerInfo::ActivationFunction::TANH,
+        ActivationLayerInfo::ActivationFunction::HARD_SWISH
     };
     const DataType                                data_type = input->data_type();
     const QuantizationInfo                       &oq_info   = (output != nullptr) ? output->quantization_info() : input->quantization_info();
@@ -139,9 +140,10 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     float              a_const                           = act_info.a();
     float              b_const                           = act_info.b();
 
-    const ActivationLayerInfo::ActivationFunction f_act                       = act_info.activation();
-    const bool                                    is_quantized                = is_data_type_quantized(dt);
-    const bool                                    perform_activation_in_float = (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) || (f_act == ActivationLayerInfo::ActivationFunction::TANH);
+    const ActivationLayerInfo::ActivationFunction f_act        = act_info.activation();
+    const bool                                    is_quantized = is_data_type_quantized(dt);
+    const bool                                    perform_activation_in_float =
+        (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) || (f_act == ActivationLayerInfo::ActivationFunction::TANH) || (f_act == ActivationLayerInfo::ActivationFunction::HARD_SWISH);
 
     // Set build options
     CLBuildOptions build_opts;
