@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,22 +76,23 @@ public:
      * @param[out] cell_state_out              2D tensor with dimensions [num_units, batch_size]. Data type supported: Same as @p input.
      * @param[out] output                      Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size].
      *                                         Data types supported: Same as @p input.
-     * @param[in]  lstm_params                 (Optional) Weights tensors used in peephole optimization:
-     *                                         input_to_input_weights         2D weights tensor with dimensions [input_size, num_units]. Data type supported: Same as @p input.
-     *                                         recurrent_to_input_weights     2D weights tensor with dimensions [output_size, num_units]. Data type supported: Same as @p input.
-     *                                         cell_to_input_weights          1D weights tensor with dimensions [num_units]. Can be nullptr. Data type supported: Same as @p input.
-     *                                         cell_to_forget_weights         1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                         cell_to_output_weights         1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                         input_gate_bias                1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input
-     *                                         projection_weights             2D weights tensor with dimensions [output_size, num_units]. Data type supported: Same as @p input.
-     *                                         projection_bias                1D weights tensor with dimensions [output_size]. Data type supported: Same as @p input.
-     *                                         input_layer_norm_coefficients  1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                         forget_layer_norm_coefficients 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                         cell_layer_norm_coefficients   1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                         output_layer_norm_coefficients 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
+     * @param[in]  lstm_params                 Weights tensors used in peephole optimization:
+     *                                         input_to_input_weights     2D weights tensor with dimensions [input_size, num_units]. Data type supported: Same as @p input.
+     *                                         recurrent_to_input_weights 2D weights tensor with dimensions [output_size, num_units]. Data type supported: Same as @p input.
+     *                                         cell_to_input_weights      1D weights tensor with dimensions [num_units]. Can be nullptr. Data type supported: Same as @p input.
+     *                                         cell_to_forget_weights     1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                         cell_to_output_weights     1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                         input_gate_bias            1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input
+     *                                         projection_weights         2D weights tensor with dimensions [output_size, num_units]. Data type supported: Same as @p input.
+     *                                         projection_bias            1D weights tensor with dimensions [output_size]. Data type supported: Same as @p input.
+     *                                         input_layer_norm_weights   1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                         forget_layer_norm_weights  1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                         cell_layer_norm_weights    1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                         output_layer_norm_weights  1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input.
      * @param[in]  activation_info             Contains activation information described in @ref ActivationLayerInfo.
-     * @param[in]  cell_threshold              The clipping threshold for the cell state, such that values are bound within [-cell_clip, cell_clip]. If set to 0.0f then clipping is disabled.
-     * @param[in]  projection_threshold        The clipping threshold for the output from the projection layer, such that values are bound within [-proj_clip, proj_clip].
+     * @param[in]  cell_threshold              (Optional) The clipping threshold for the cell state, such that values are bound within [-cell_clip, cell_clip].
+     *                                         If set to 0.0f then clipping is disabled.
+     * @param[in]  projection_threshold        (Optional) The clipping threshold for the output from the projection layer, such that values are bound within [-proj_clip, proj_clip].
      *                                         If set to 0.0f then clipping is disabled.
      */
     void configure(const ICLTensor *input,
@@ -121,22 +122,23 @@ public:
      * @param[in] output_state_out            2D weights tensor info with dimensions [output_size, batch_size]. Data type supported: Same as @p input.
      * @param[in] cell_state_out              2D tensor info with dimensions [num_units, batch_size]. Data type supported: Same as @p input.
      * @param[in] output                      Destination tensor info. Output is a 2D tensor with dimensions [output_size, batch_size]. Data types supported: Same as @p input.
-     * @param[in] lstm_params                 (Optional) Weights tensors info used in peephole optimization:
-     *                                        input_to_input_weights         2D weights tensor info with dimensions [input_size, num_units]. Data type supported: Same as @p input.
-     *                                        recurrent_to_input_weights     2D weights tensor info with dimensions [output_size, num_units]. Data type supported: Same as @p input.
-     *                                        cell_to_input_weights          1D weights tensor info with dimensions [num_units]. Can be nullptr. Data type supported: Same as @p input.
-     *                                        cell_to_forget_weights         1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                        cell_to_output_weights         1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                        input_gate_bias                1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input
-     *                                        projection_weights             2D weights tensor info with dimensions [output_size, num_units]. Data type supported: Same as @p input.
-     *                                        projection_bias                1D weights tensor info with dimensions [output_size]. Data type supported: Same as @p input.
-     *                                        input_layer_norm_coefficients  1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                        forget_layer_norm_coefficients 1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                        cell_layer_norm_coefficients   1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
-     *                                        output_layer_norm_coefficients 1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
+     * @param[in] lstm_params                 Weights tensors info used in peephole optimization:
+     *                                        input_to_input_weights     2D weights tensor info with dimensions [input_size, num_units]. Data type supported: Same as @p input.
+     *                                        recurrent_to_input_weights 2D weights tensor info with dimensions [output_size, num_units]. Data type supported: Same as @p input.
+     *                                        cell_to_input_weights      1D weights tensor info with dimensions [num_units]. Can be nullptr. Data type supported: Same as @p input.
+     *                                        cell_to_forget_weights     1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                        cell_to_output_weights     1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                        input_gate_bias            1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input
+     *                                        projection_weights         2D weights tensor info with dimensions [output_size, num_units]. Data type supported: Same as @p input.
+     *                                        projection_bias            1D weights tensor info with dimensions [output_size]. Data type supported: Same as @p input.
+     *                                        input_layer_norm_weights   1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                        forget_layer_norm_weights  1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                        cell_layer_norm_weights    1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
+     *                                        output_layer_norm_weights  1D weights tensor info with dimensions [num_units]. Data type supported: Same as @p input.
      * @param[in] activation_info             Contains activation information described in @ref ActivationLayerInfo.
-     * @param[in] cell_threshold              The clipping threshold for the cell state, such that values are bound within [-cell_clip, cell_clip]. If set to 0.0f then clipping is disabled.
-     * @param[in] projection_threshold        The clipping threshold for the output from the projection layer, such that values are bound within [-proj_clip, proj_clip].
+     * @param[in] cell_threshold              (Optional) The clipping threshold for the cell state, such that values are bound within [-cell_clip, cell_clip].
+     *                                        If set to 0.0f then clipping is disabled.
+     * @param[in] projection_threshold        (Optional) The clipping threshold for the output from the projection layer, such that values are bound within [-proj_clip, proj_clip].
      *                                        If set to 0.0f then clipping is disabled.
      *
      * @return a status
