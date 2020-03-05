@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['edgeid',['EdgeID',['../namespacearm__compute_1_1graph.xhtml#abba17a56bbf16c7cbc7acd4aa54abcea',1,'arm_compute::graph']]],
+  ['eglbindapi_5ffunc',['eglBindAPI_func',['../_open_g_l_e_s_8cpp.xhtml#a39bb058fb4f13b0ceb51a30c2e7c13ba',1,'OpenGLES.cpp']]],
+  ['eglchooseconfig_5ffunc',['eglChooseConfig_func',['../_open_g_l_e_s_8cpp.xhtml#a45bcdc2fee472f58603654d00fac7fea',1,'OpenGLES.cpp']]],
+  ['eglcreatecontext_5ffunc',['eglCreateContext_func',['../_open_g_l_e_s_8cpp.xhtml#ae40fe14e93e58a809bbf1f8bebcee62b',1,'OpenGLES.cpp']]],
+  ['egldestroycontext_5ffunc',['eglDestroyContext_func',['../_open_g_l_e_s_8cpp.xhtml#ad9a1fc168717a342b9e39793605ada2b',1,'OpenGLES.cpp']]],
+  ['eglgetdisplay_5ffunc',['eglGetDisplay_func',['../_open_g_l_e_s_8cpp.xhtml#a26e9fec0fd229ae63fd93edb24cb9f3a',1,'OpenGLES.cpp']]],
+  ['eglgeterror_5ffunc',['eglGetError_func',['../_open_g_l_e_s_8cpp.xhtml#a3645a2eb4da58ba0c3ed5c295913caf3',1,'OpenGLES.cpp']]],
+  ['eglgetprocaddress_5ffunc',['eglGetProcAddress_func',['../_open_g_l_e_s_8cpp.xhtml#addae612338f2d0f234acaa34df861926',1,'OpenGLES.cpp']]],
+  ['eglinitialize_5ffunc',['eglInitialize_func',['../_open_g_l_e_s_8cpp.xhtml#a73309e644fd9f860f55ca14d24119cdf',1,'OpenGLES.cpp']]],
+  ['eglmakecurrent_5ffunc',['eglMakeCurrent_func',['../_open_g_l_e_s_8cpp.xhtml#a3e001bb1fbd825f9e9553b5d17ffb9f1',1,'OpenGLES.cpp']]],
+  ['eglquerystring_5ffunc',['eglQueryString_func',['../_open_g_l_e_s_8cpp.xhtml#ac02a0be24c3d1f37e5983f057355b192',1,'OpenGLES.cpp']]],
+  ['eglterminate_5ffunc',['eglTerminate_func',['../_open_g_l_e_s_8cpp.xhtml#ab45761847d030754739c1b3b63cdbeab',1,'OpenGLES.cpp']]],
+  ['elementwisefunction',['ElementwiseFunction',['../classarm__compute_1_1_n_e_elementwise_operation_kernel.xhtml#aa5fcf9ebe19c4a2282c79ced2ac72096',1,'arm_compute::NEElementwiseOperationKernel']]],
+  ['elementwiseunaryfunction',['ElementwiseUnaryFunction',['../classarm__compute_1_1_n_e_elementwise_unary_kernel.xhtml#a1f1d3e1890cb945fc3a5fafbb5d93ec2',1,'arm_compute::NEElementwiseUnaryKernel']]],
+  ['exacttagtype',['ExactTagType',['../structarm__compute_1_1detail_1_1linear.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::linear::ExactTagType()'],['../structarm__compute_1_1detail_1_1square.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::square::ExactTagType()'],['../structarm__compute_1_1detail_1_1logistic.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::logistic::ExactTagType()'],['../structarm__compute_1_1detail_1_1relu.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::relu::ExactTagType()'],['../structarm__compute_1_1detail_1_1brelu.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::brelu::ExactTagType()'],['../structarm__compute_1_1detail_1_1lubrelu.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::lubrelu::ExactTagType()']]],
+  ['exacttype',['ExactType',['../structarm__compute_1_1detail_1_1dummy.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::dummy::ExactType()'],['../structarm__compute_1_1detail_1_1linear.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::linear::ExactType()'],['../structarm__compute_1_1detail_1_1square.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::square::ExactType()'],['../structarm__compute_1_1detail_1_1logistic.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::logistic::ExactType()'],['../structarm__compute_1_1detail_1_1relu.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::relu::ExactType()'],['../structarm__compute_1_1detail_1_1brelu.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::brelu::ExactType()'],['../structarm__compute_1_1detail_1_1lubrelu.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::lubrelu::ExactType()'],['../structarm__compute_1_1misc_1_1_c_r_t_p.xhtml#a338528dd60e909145fcb3bbd65e50df6',1,'arm_compute::misc::CRTP::ExactType()']]]
+];

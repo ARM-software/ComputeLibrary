@@ -1,0 +1,5 @@
+<map id="CLFFTDigitReverseKernel" name="CLFFTDigitReverseKernel">
+<area shape="rect" id="node1" title="Interface for the digit reverse operation kernel." alt="" coords="5,155,183,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="54,80,134,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="62,5,126,32"/>
+</map>

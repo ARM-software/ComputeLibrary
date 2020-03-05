@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['gamma',['gamma',['../structarm__compute_1_1_instance_normalization_layer_kernel_info.xhtml#a44978e15ba7fdb6b664ea10411fbe69d',1,'arm_compute::InstanceNormalizationLayerKernelInfo']]],
+  ['gamma_5finfo',['gamma_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1f276657689eabe34429cb9d767560cb',1,'arm_compute::test::validation']]],
+  ['gaussian3x3',['gaussian3x3',['../cl__convolution_8cpp.xhtml#a282820d9d081a04a78f602de4d41520a',1,'gaussian3x3():&#160;cl_convolution.cpp'],['../neon__convolution_8cpp.xhtml#a282820d9d081a04a78f602de4d41520a',1,'gaussian3x3():&#160;neon_convolution.cpp']]],
+  ['gaussian5x5',['gaussian5x5',['../cl__convolution_8cpp.xhtml#a1ff25aea7e858eb83e7af7cefb60bb82',1,'gaussian5x5():&#160;cl_convolution.cpp'],['../neon__convolution_8cpp.xhtml#a1ff25aea7e858eb83e7af7cefb60bb82',1,'gaussian5x5():&#160;neon_convolution.cpp']]],
+  ['gemm_5fconfig_5ffactory',['GEMM_CONFIG_FACTORY',['../namespace_gemm_tuner.xhtml#a3c0f164b66e196f940f4b9e206d586d5',1,'GemmTuner']]],
+  ['gemm_5fexample_5fargs_5ffactory',['GEMM_EXAMPLE_ARGS_FACTORY',['../namespace_gemm_tuner.xhtml#abfd6c8b5e818f3a2a5dac6717b853018',1,'GemmTuner']]],
+  ['gemmconfigt',['GEMMConfigT',['../namespace_gemm_tuner.xhtml#a696b6940cef01d03e1fc064d8be3727b',1,'GemmTuner']]],
+  ['gemmlowp_5fmax_5fbound',['gemmlowp_max_bound',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a6db94040329f1dedcd348ec7de072e2a',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fmin_5fbound',['gemmlowp_min_bound',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a155d27c75f14a82a74e5039c9657c8eb',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fmultiplier',['gemmlowp_multiplier',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a1cfb92f1c287bf099c3fca0ef0391a2b',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fmultipliers',['gemmlowp_multipliers',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#ae5bd6bebbc0c7ebd9e7dbfd47d939c2a',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5foffset',['gemmlowp_offset',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a01934c5087f5193aaf3ea9bf41d1a8dc',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fshift',['gemmlowp_shift',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a3f0613aeb69c326e7d8ffb34b44fae94',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gemmlowp_5fshifts',['gemmlowp_shifts',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#ab269b182588a158cd256f9d4bb2a00dd',1,'arm_compute::GEMMLowpOutputStageInfo']]],
+  ['gpu_5fid',['gpu_id',['../_mali_counter_8cpp.xhtml#a0169f78cfbefd7d7d6dee6d1df40ee58',1,'MaliCounter.cpp']]],
+  ['gpu_5ftarget',['gpu_target',['../structarm__compute_1_1_c_l_device_options.xhtml#aadf3b16e351860b4ba10a540a621b392',1,'arm_compute::CLDeviceOptions']]],
+  ['graph',['graph',['../structarm__compute_1_1graph_1_1_execution_workload.xhtml#a2360aba01fa93c8493ba96683c4fb89c',1,'arm_compute::graph::ExecutionWorkload::graph()'],['../classarm__compute_1_1utils_1_1_graph_validate_example.xhtml#a07594d6d567cdd219788762307f60941',1,'arm_compute::utils::GraphValidateExample::graph()']]],
+  ['green_5fcoef2_5fbt709',['green_coef2_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a27e073d020236f5a325762985b10f8d0',1,'arm_compute::test::colorconvert_helper::detail']]],
+  ['green_5fcoef_5fbt709',['green_coef_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a5e59bd8be31e871da2db7572e8b788ce',1,'arm_compute::test::colorconvert_helper::detail']]]
+];
