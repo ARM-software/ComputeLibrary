@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,12 +53,8 @@ public:
     Stream(size_t id, std::string name);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     Stream(const Stream &) = delete;
-    /** Default move constructor */
-    Stream(Stream &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     Stream &operator=(const Stream &) = delete;
-    /** Default move assignment operator */
-    Stream &operator=(Stream &&) = default;
     /** Finalizes the stream for an execution target
      *
      * @param[in] target Execution target

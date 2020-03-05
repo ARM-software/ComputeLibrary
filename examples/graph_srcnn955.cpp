@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,9 +47,7 @@ public:
     }
     GraphSRCNN955Example(const GraphSRCNN955Example &) = delete;
     GraphSRCNN955Example &operator=(const GraphSRCNN955Example &) = delete;
-    GraphSRCNN955Example(GraphSRCNN955Example &&)                 = default; // NOLINT
-    GraphSRCNN955Example &operator=(GraphSRCNN955Example &&) = default;      // NOLINT
-    ~GraphSRCNN955Example() override                         = default;
+    ~GraphSRCNN955Example() override                              = default;
     bool do_setup(int argc, char **argv) override
     {
         // Parse arguments

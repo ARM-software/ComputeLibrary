@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,12 +65,8 @@ public:
     CLGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLGenerateProposalsLayer(const CLGenerateProposalsLayer &) = delete;
-    /** Default move constructor */
-    CLGenerateProposalsLayer(CLGenerateProposalsLayer &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLGenerateProposalsLayer &operator=(const CLGenerateProposalsLayer &) = delete;
-    /** Default move assignment operator */
-    CLGenerateProposalsLayer &operator=(CLGenerateProposalsLayer &&) = default;
 
     /** Set the input and output tensors.
      *

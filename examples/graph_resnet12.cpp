@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,9 +47,7 @@ public:
     }
     GraphResNet12Example(const GraphResNet12Example &) = delete;
     GraphResNet12Example &operator=(const GraphResNet12Example &) = delete;
-    GraphResNet12Example(GraphResNet12Example &&)                 = default; // NOLINT
-    GraphResNet12Example &operator=(GraphResNet12Example &&) = default;      // NOLINT
-    ~GraphResNet12Example() override                         = default;
+    ~GraphResNet12Example() override                              = default;
     bool do_setup(int argc, char **argv) override
     {
         // Parse arguments

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,12 +44,8 @@ public:
     ~CLRuntimeContext() = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLRuntimeContext(const CLRuntimeContext &) = delete;
-    /** Default move constructor */
-    CLRuntimeContext(CLRuntimeContext &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLRuntimeContext &operator=(const CLRuntimeContext &) = delete;
-    /** Default move assignment operator */
-    CLRuntimeContext &operator=(CLRuntimeContext &&) = default;
     /** CPU Scheduler setter */
     void set_gpu_scheduler(CLScheduler *scheduler);
 

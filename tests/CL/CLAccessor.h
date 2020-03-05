@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,8 +50,6 @@ public:
     CLAccessor &operator=(const CLAccessor &) = delete;
     /** Allow instances of this class to be move constructed */
     CLAccessor(CLAccessor &&) = default;
-    /** Allow instances of this class to be moved */
-    CLAccessor &operator=(CLAccessor &&) = default;
 
     /** Destructor that unmaps the CL memory. */
     ~CLAccessor();

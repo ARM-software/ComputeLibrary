@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,12 +64,8 @@ public:
     NEGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGenerateProposalsLayer(const NEGenerateProposalsLayer &) = delete;
-    /** Default move constructor */
-    NEGenerateProposalsLayer(NEGenerateProposalsLayer &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGenerateProposalsLayer &operator=(const NEGenerateProposalsLayer &) = delete;
-    /** Default move assignment operator */
-    NEGenerateProposalsLayer &operator=(NEGenerateProposalsLayer &&) = default;
 
     /** Set the input and output tensors.
      *

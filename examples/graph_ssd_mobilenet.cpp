@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,9 +54,7 @@ public:
     }
     GraphSSDMobilenetExample(const GraphSSDMobilenetExample &) = delete;
     GraphSSDMobilenetExample &operator=(const GraphSSDMobilenetExample &) = delete;
-    GraphSSDMobilenetExample(GraphSSDMobilenetExample &&)                 = default; // NOLINT
-    GraphSSDMobilenetExample &operator=(GraphSSDMobilenetExample &&) = default;      // NOLINT
-    ~GraphSSDMobilenetExample() override                             = default;
+    ~GraphSSDMobilenetExample() override                                  = default;
     bool do_setup(int argc, char **argv) override
     {
         // Parse arguments

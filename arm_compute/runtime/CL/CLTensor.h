@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,12 +52,12 @@ public:
 
     /** Destructor */
     ~CLTensor() = default;
-    /** Default copy constructor */
-    CLTensor(const CLTensor &) = default;
+    /** Prevent copying by construction */
+    CLTensor(const CLTensor &) = delete;
     /** Default move constructor */
     CLTensor(CLTensor &&) = default;
-    /** Default copy assignment */
-    CLTensor &operator=(const CLTensor &) = default;
+    /** Prevent copaingy by assignment */
+    CLTensor &operator=(const CLTensor &) = delete;
     /** Default move assignment operator */
     CLTensor &operator=(CLTensor &&) = default;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,9 +48,7 @@ public:
     }
     GraphVDSRExample(const GraphVDSRExample &) = delete;
     GraphVDSRExample &operator=(const GraphVDSRExample &) = delete;
-    GraphVDSRExample(GraphVDSRExample &&)                 = default; // NOLINT
-    GraphVDSRExample &operator=(GraphVDSRExample &&) = default;      // NOLINT
-    ~GraphVDSRExample() override                     = default;
+    ~GraphVDSRExample() override                          = default;
     bool do_setup(int argc, char **argv) override
     {
         // Parse arguments

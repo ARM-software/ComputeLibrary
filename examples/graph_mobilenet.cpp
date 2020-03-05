@@ -45,9 +45,7 @@ public:
     }
     GraphMobilenetExample(const GraphMobilenetExample &) = delete;
     GraphMobilenetExample &operator=(const GraphMobilenetExample &) = delete;
-    GraphMobilenetExample(GraphMobilenetExample &&)                 = default; // NOLINT
-    GraphMobilenetExample &operator=(GraphMobilenetExample &&) = default;      // NOLINT
-    ~GraphMobilenetExample() override                          = default;
+    ~GraphMobilenetExample() override                               = default;
     bool do_setup(int argc, char **argv) override
     {
         // Parse arguments
