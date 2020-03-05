@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -539,10 +539,32 @@ void colorconvert_iyuv_to_rgb(const void *__restrict input, void *__restrict out
 
     execute_window_loop(win, [&](const Coordinates &)
     {
-        const auto ta_y_top    = vld2q_u8(in_y.ptr());
-        const auto ta_y_bottom = vld2q_u8(in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y());
-        const auto ta_u        = vld1q_u8(in_u.ptr());
-        const auto ta_v        = vld1q_u8(in_v.ptr());
+        const auto *y_top_ptr    = in_y.ptr();
+        const auto *y_bottom_ptr = in_y.ptr() + input_ptr->plane(0)->info()->strides_in_bytes().y();
+        const auto *u_ptr        = in_u.ptr();
+        const auto *v_ptr        = in_v.ptr();
+
+        // Work-around issue in gcc 9(>=) where vld2q might cause issues with register allocation
+#if defined(__arch64__)
+        const auto ta0_y_top    = vld1q_u8(y_top_ptr);
+        const auto ta1_y_top    = vld1q_u8(y_top_ptr + 16);
+        const auto ta0_y_bottom = vld1q_u8(y_bottom_ptr);
+        const auto ta1_y_bottom = vld1q_u8(y_bottom_ptr + 16);
+        const auto ta_u         = vld1q_u8(u_ptr);
+        const auto ta_v         = vld1q_u8(v_ptr);
+
+        // Convert the uint8x16x4_t to float32x4x4_t
+        float32x4x4_t yvec_top     = arm_compute::convert_uint8x16_to_float32x4x4(vuzp1q_u8(ta0_y_top, ta1_y_top));
+        float32x4x4_t yyvec_top    = arm_compute::convert_uint8x16_to_float32x4x4(vuzp2q_u8(ta0_y_top, ta1_y_top));
+        float32x4x4_t yvec_bottom  = arm_compute::convert_uint8x16_to_float32x4x4(vuzp1q_u8(ta0_y_bottom, ta1_y_bottom));
+        float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(vuzp2q_u8(ta0_y_bottom, ta1_y_bottom));
+        float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_u);
+        float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_v);
+#else  /* defined(__arch64__) */
+        const auto ta_y_top    = vld2q_u8(y_top_ptr);
+        const auto ta_y_bottom = vld2q_u8(y_bottom_ptr);
+        const auto ta_u        = vld1q_u8(u_ptr);
+        const auto ta_v        = vld1q_u8(v_ptr);
         //ta_y.val[0] = Y0 Y2 Y4 Y6 ...
         //ta_y.val[1] = Y1 Y3 Y5 Y7 ...
         //ta_u.val[0] = U0 U2 U4 U6 ...
@@ -555,6 +577,7 @@ void colorconvert_iyuv_to_rgb(const void *__restrict input, void *__restrict out
         float32x4x4_t yyvec_bottom = arm_compute::convert_uint8x16_to_float32x4x4(ta_y_bottom.val[1]);
         float32x4x4_t uvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_u);
         float32x4x4_t vvec         = arm_compute::convert_uint8x16_to_float32x4x4(ta_v);
+#endif /* defined(__arch64__) */
 
         yuyv_to_rgb_calculation(yvec_top.val[0], uvec.val[0], yyvec_top.val[0], vvec.val[0], out.ptr() + 0 * element_size, alpha);
         yuyv_to_rgb_calculation(yvec_top.val[1], uvec.val[1], yyvec_top.val[1], vvec.val[1], out.ptr() + 1 * element_size, alpha);
