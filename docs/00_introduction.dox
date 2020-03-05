@@ -246,6 +246,9 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v20.02.1 Maintenance release
+ - Added Android-NN build script.
+
 v20.02 Public major release
  - Various bug fixes.
  - Various optimisations.
