@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,12 +25,12 @@
 
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-
 void NEFill::configure(ITensor *tensor, PixelValue constant_value)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEMemsetKernel>();

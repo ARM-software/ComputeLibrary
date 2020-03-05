@@ -30,6 +30,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "src/core/NEON/kernels/convolution/depthwise/impl_qa8_qa8.hpp"
+#include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {

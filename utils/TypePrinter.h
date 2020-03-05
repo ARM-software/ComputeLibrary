@@ -34,6 +34,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
+#include "support/StringSupport.h"
 
 #include <ostream>
 #include <sstream>

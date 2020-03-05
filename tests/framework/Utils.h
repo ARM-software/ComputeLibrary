@@ -24,7 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_UTILS
 #define ARM_COMPUTE_TEST_UTILS
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <algorithm>
 #include <cmath>

@@ -26,9 +26,6 @@
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/GPUTarget.h"
-#include "arm_compute/core/Helpers.h"
-#include "support/ToolchainSupport.h"
 
 #include <string>
 

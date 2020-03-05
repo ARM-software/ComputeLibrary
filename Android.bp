@@ -402,6 +402,7 @@ cc_library_static {
         "src/core/NEON/kernels/convolution/winograd/winograd_transforms/weights_6_3_fp32_fp32_integers.cpp",
         "src/core/PyramidInfo.cpp",
         "src/core/Rounding.cpp",
+        "src/core/Size2D.cpp",
         "src/core/SubTensorInfo.cpp",
         "src/core/TensorInfo.cpp",
         "src/core/TracePoint.cpp",

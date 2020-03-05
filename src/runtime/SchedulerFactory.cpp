@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/SchedulerFactory.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include "arm_compute/core/Error.h"
 #if ARM_COMPUTE_CPP_SCHEDULER

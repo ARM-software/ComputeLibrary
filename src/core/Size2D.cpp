@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,23 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NEPReluLayer.h"
-
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEElementwiseOperationKernel.h"
-#include "support/MemorySupport.h"
+#include "arm_compute/core/Size2D.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
-void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor *output)
+std::string Size2D::to_string() const
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::PRELU, input, alpha, output);
-    _kernel = std::move(k);
+    return support::cpp11::to_string(width) + std::string("x") + support::cpp11::to_string(height);
 }
-
-Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
-{
-    return NEArithmeticOperationKernel::validate(ArithmeticOperation::PRELU, input, alpha, output);
 }
-} // namespace arm_compute

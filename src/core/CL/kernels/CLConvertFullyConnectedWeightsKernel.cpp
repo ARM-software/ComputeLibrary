@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {

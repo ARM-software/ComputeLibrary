@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,9 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IMemoryPool.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
+#include <algorithm>
 #include <list>
 
 using namespace arm_compute;

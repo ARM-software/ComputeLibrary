@@ -25,8 +25,9 @@
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Error.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <cstring>

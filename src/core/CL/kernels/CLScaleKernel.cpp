@@ -33,6 +33,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>

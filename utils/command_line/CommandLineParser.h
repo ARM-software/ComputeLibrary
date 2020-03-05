@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 
 #include "Option.h"
 #include "arm_compute/core/utils/misc/Utility.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <iostream>
 #include <map>

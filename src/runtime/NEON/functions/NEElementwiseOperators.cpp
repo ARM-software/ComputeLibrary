@@ -26,7 +26,7 @@
 #include <arm_compute/core/NEON/kernels/NEElementwiseOperationKernel.h>
 
 #include "arm_compute/core/ITensor.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 

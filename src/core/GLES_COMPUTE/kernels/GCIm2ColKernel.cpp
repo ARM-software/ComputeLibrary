@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <cmath>
 #include <tuple>
@@ -91,7 +91,7 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const 
     int stride_y = 0;
 
     std::tie(stride_x, stride_y) = conv_info.stride();
-    _kernel_dims = std::make_pair(kernel_dims.width, kernel_dims.height);
+    _kernel_dims                 = std::make_pair(kernel_dims.width, kernel_dims.height);
 
     const bool run_img2col_reduced = (output->info()->dimension(0) == (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))) && (TensorShape::num_max_dimensions >= 4)
                                      && (std::equal(input->info()->tensor_shape().cbegin() + 3,
@@ -109,9 +109,9 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const 
         }
 
         build_opts.emplace("#define IM2COL_GENERIC");
-        _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
-                                            kernel_dims.width, kernel_dims.height,
-                                            conv_info, dilation);
+        _convolved_dims                    = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
+                                                               kernel_dims.width, kernel_dims.height,
+                                                               conv_info, dilation);
         _num_elems_processed_per_iteration = (input->info()->data_type() == DataType::F32) ? 1 : 2;
 
         build_opts.emplace("#define KERNEL_WIDTH " + support::cpp11::to_string(kernel_dims.width));

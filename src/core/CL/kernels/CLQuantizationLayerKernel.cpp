@@ -33,6 +33,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {

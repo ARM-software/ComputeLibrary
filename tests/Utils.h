@@ -32,6 +32,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "support/StringSupport.h"
 #include "support/ToolchainSupport.h"
 
 #ifdef ARM_COMPUTE_CL

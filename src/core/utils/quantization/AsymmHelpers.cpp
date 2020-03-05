@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/Helpers.h"
+#include "support/ToolchainSupport.h"
 
 #include <cmath>
 #include <limits>

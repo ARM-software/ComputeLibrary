@@ -32,6 +32,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <cmath>
 #include <cstdlib>

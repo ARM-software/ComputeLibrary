@@ -33,6 +33,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>
@@ -76,8 +77,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
-        unsigned int pooled_w = 0;
-        unsigned int pooled_h = 0;
+        unsigned int pooled_w        = 0;
+        unsigned int pooled_h        = 0;
         std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
                                                          input->dimension(1),
                                                          pool_size,
@@ -92,14 +93,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
 std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x      = 0;
-    int                 pool_pad_y      = 0;
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    unsigned int        pooled_w        = 0;
-    unsigned int        pooled_h        = 0;
-    int                 pool_size       = pool_info.pool_size.width;
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
+    int                 pool_pad_x         = 0;
+    int                 pool_pad_y         = 0;
+    int                 pool_stride_x      = 0;
+    int                 pool_stride_y      = 0;
+    unsigned int        pooled_w           = 0;
+    unsigned int        pooled_h           = 0;
+    int                 pool_size          = pool_info.pool_size.width;
+    const PadStrideInfo pad_stride_info    = pool_info.pad_stride_info;
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
@@ -225,16 +226,16 @@ BorderSize GCPoolingLayerKernel::border_size() const
 
 void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x      = 0;
-    int                 pool_pad_y      = 0;
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    unsigned int        pooled_w        = 0;
-    unsigned int        pooled_h        = 0;
-    const PoolingType   pool_type       = pool_info.pool_type;
-    int                 pool_size       = pool_info.pool_size.width;
-    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
-    const bool          exclude_padding = pool_info.exclude_padding;
+    int                 pool_pad_x         = 0;
+    int                 pool_pad_y         = 0;
+    int                 pool_stride_x      = 0;
+    int                 pool_stride_y      = 0;
+    unsigned int        pooled_w           = 0;
+    unsigned int        pooled_h           = 0;
+    const PoolingType   pool_type          = pool_info.pool_type;
+    int                 pool_size          = pool_info.pool_size.width;
+    const PadStrideInfo pad_stride_info    = pool_info.pad_stride_info;
+    const bool          exclude_padding    = pool_info.exclude_padding;
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 

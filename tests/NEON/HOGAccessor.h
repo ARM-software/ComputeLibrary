@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,10 +46,6 @@ public:
     HOGAccessor(const HOGAccessor &) = delete;
     /** Prevent instances of this class from being copied (As this class contains references). */
     HOGAccessor &operator=(const HOGAccessor &) = delete;
-    /** Allow instances of this class to be moved */
-    HOGAccessor(HOGAccessor &&) = default;
-    /** Allow instances of this class to be moved */
-    HOGAccessor &operator=(HOGAccessor &&) = default;
 
     /** Pointer to the first element of the array which stores the linear SVM coefficients of HOG descriptor
      *
