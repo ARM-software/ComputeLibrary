@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,11 +36,12 @@ class EltwiseLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] op       Element-wise operation to perform
-     * @param[in] c_policy (Optional) Convert policy used for the operation
-     * @param[in] r_policy (Optional) Rounding policy used for the operation
+     * @param[in] op             Element-wise operation to perform
+     * @param[in] out_quant_info (Optional) Output quantization information
+     * @param[in] c_policy       (Optional) Convert policy used for the operation
+     * @param[in] r_policy       (Optional) Rounding policy used for the operation
      */
-    EltwiseLayerNode(EltwiseOperation op, ConvertPolicy c_policy = ConvertPolicy::SATURATE, RoundingPolicy r_policy = RoundingPolicy::TO_ZERO);
+    EltwiseLayerNode(EltwiseOperation op, QuantizationInfo out_quant_info = QuantizationInfo(), ConvertPolicy c_policy = ConvertPolicy::SATURATE, RoundingPolicy r_policy = RoundingPolicy::TO_ZERO);
     /** Eltwise operation accessor
      *
      * @return Eltwise operation that is to be performed by the node
@@ -67,6 +68,7 @@ public:
 
 private:
     EltwiseOperation _op;
+    QuantizationInfo _out_quant_info;
     ConvertPolicy    _convert_policy;
     RoundingPolicy   _rounding_policy;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,10 @@ class DeconvolutionLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] info DeConvolution layer attributes
+     * @param[in] info           DeConvolution layer attributes
+     * @param[in] out_quant_info (Optional) Output quantization infomation
      */
-    DeconvolutionLayerNode(PadStrideInfo info);
+    DeconvolutionLayerNode(PadStrideInfo info, QuantizationInfo out_quant_info = QuantizationInfo());
     /** Deconvolution metadata accessor
      *
      * @return Deconvolution information
@@ -63,7 +64,8 @@ public:
     void accept(INodeVisitor &v) override;
 
 private:
-    PadStrideInfo _info;
+    PadStrideInfo    _info;
+    QuantizationInfo _out_quant_info;
 };
 } // namespace graph
 } // namespace arm_compute

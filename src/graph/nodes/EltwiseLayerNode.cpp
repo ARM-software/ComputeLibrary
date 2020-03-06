@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,8 @@ namespace arm_compute
 {
 namespace graph
 {
-EltwiseLayerNode::EltwiseLayerNode(EltwiseOperation op, ConvertPolicy c_policy, RoundingPolicy r_policy)
-    : _op(op), _convert_policy(c_policy), _rounding_policy(r_policy)
+EltwiseLayerNode::EltwiseLayerNode(EltwiseOperation op, QuantizationInfo out_quant_info, ConvertPolicy c_policy, RoundingPolicy r_policy)
+    : _op(op), _out_quant_info(out_quant_info), _convert_policy(c_policy), _rounding_policy(r_policy)
 {
     _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -71,7 +71,14 @@ TensorDescriptor EltwiseLayerNode::configure_output(size_t idx) const
     const Tensor *src = input(0);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
-    return src->desc();
+    auto output_info = src->desc();
+
+    if(!_out_quant_info.empty())
+    {
+        output_info.set_quantization_info(_out_quant_info);
+    }
+
+    return output_info;
 }
 
 NodeType EltwiseLayerNode::type() const

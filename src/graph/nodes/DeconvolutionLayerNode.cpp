@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,8 @@ namespace arm_compute
 {
 namespace graph
 {
-DeconvolutionLayerNode::DeconvolutionLayerNode(PadStrideInfo info)
-    : _info(std::move(info))
+DeconvolutionLayerNode::DeconvolutionLayerNode(PadStrideInfo info, QuantizationInfo out_quant_info)
+    : _info(std::move(info)), _out_quant_info(std::move(out_quant_info))
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -88,6 +88,12 @@ TensorDescriptor DeconvolutionLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(src == nullptr || weights == nullptr);
 
     TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), _info);
+
+    if(!_out_quant_info.empty())
+    {
+        output_info.set_quantization_info(_out_quant_info);
+    }
+
     return output_info;
 }
 
