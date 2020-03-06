@@ -89,56 +89,6 @@ const auto ActivationFunctionsQuantizedDataset = framework::dataset::make("Activ
 TEST_SUITE(CL)
 TEST_SUITE(FullyConnectedLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                                                                           FullyConnectedParameters),
-                                                                   CNNDataTypes),
-               src_shape, weights_shape, bias_shape, dst_shape, transpose_weights, reshape_weights, data_type)
-{
-    const DataType         bias_data_type    = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
-    const QuantizationInfo quantization_info = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(2.f / 255.f, 127) : QuantizationInfo();
-
-    TensorShape ws(weights_shape);
-
-    // Transpose weights if not done in the function
-    if(!reshape_weights || !transpose_weights)
-    {
-        const size_t shape_x = ws.x();
-        ws.set(0, ws.y());
-        ws.set(1, shape_x);
-    }
-
-    // Create tensors
-    CLTensor src     = create_tensor<CLTensor>(src_shape, data_type, 1, quantization_info);
-    CLTensor weights = create_tensor<CLTensor>(ws, data_type, 1, quantization_info);
-    CLTensor bias    = create_tensor<CLTensor>(bias_shape, bias_data_type, 1, quantization_info);
-    CLTensor dst     = create_tensor<CLTensor>(dst_shape, data_type, 1, quantization_info);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    const QuantizationInfo src_quantization_info     = src.info()->quantization_info();
-    const QuantizationInfo weights_quantization_info = weights.info()->quantization_info();
-
-    // Create Fully Connected layer info
-    FullyConnectedLayerInfo fc_info;
-    fc_info.transpose_weights    = transpose_weights;
-    fc_info.are_weights_reshaped = !reshape_weights;
-
-    // Create and configure function.
-    CLFullyConnectedLayer fc;
-    fc.configure(&src, &weights, &bias, &dst, fc_info);
-
-    // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
-    validate(dst.info()->valid_region(), dst_valid_region);
-
-    // Validate QuantizationInfo
-    ARM_COMPUTE_EXPECT(src.info()->quantization_info() == src_quantization_info, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
-}
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(

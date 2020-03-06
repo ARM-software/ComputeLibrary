@@ -160,21 +160,11 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
             }
         }
 
-        PixelValue min_val{};
-        PixelValue max_val{};
         if(output->total_size() != 0)
         {
             ARM_COMPUTE_RETURN_ERROR_ON(output_stage.output_data_type != output->data_type());
-            std::tie(min_val, max_val) = get_min_max(output->data_type());
-            ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > max_val.get<int32_t>());
-            ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < min_val.get<int32_t>() || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
         }
-        else
-        {
-            std::tie(min_val, max_val) = get_min_max(output_stage.output_data_type);
-            ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > max_val.get<int32_t>());
-            ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < min_val.get<int32_t>() || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
-        }
+        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
 
         if(output_multipliers != nullptr && output_shifts != nullptr)
         {
@@ -425,8 +415,8 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *i
         PixelValue min_val{};
         PixelValue max_val{};
         std::tie(min_val, max_val) = get_min_max(output->info()->data_type());
-        build_opts.add_option_if((min != min_val.get<int32_t>()) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
-        build_opts.add_option_if((max != max_val.get<int32_t>()) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
+        build_opts.add_option_if(min != min_val.get<int32_t>(), "-DMIN_BOUND=" + support::cpp11::to_string(min));
+        build_opts.add_option_if(max != max_val.get<int32_t>(), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     }
 
     // Create kernel
