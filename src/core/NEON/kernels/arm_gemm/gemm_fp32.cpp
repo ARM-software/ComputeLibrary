@@ -44,6 +44,7 @@
 #include "kernels/sve_hybrid_fp32_mla_4VLx4.hpp"
 #include "kernels/sve_interleaved_fp32_mla_3VLx8.hpp"
 #include "kernels/sve_native_fp32_mla_4VLx4.hpp"
+#include "kernels/sve_smallK_hybrid_fp32_mla_1VLx8.hpp"
 
 namespace arm_gemm {
 
@@ -73,7 +74,14 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 
 #ifdef __ARM_FEATURE_SVE
-// SVE native / hybrid methods
+// SVE smallk / native / hybrid methods
+{
+    GemmMethod::GEMM_HYBRID,
+    "smallK_hybrid_fp32_mla_1VLx8",
+    [](const GemmArgs &args) { return (args._Ksize <= 24) && !args._trA && args._pretransposed_hint; },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_fp32_mla_1VLx8, float, float>(args); }
+},
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_fp32_mla_4VLx4",

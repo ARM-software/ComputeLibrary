@@ -77,7 +77,7 @@ inline float bf16_to_float(const uint16_t &v)
 }
 
 /** Brain floating point representation class */
-class bfloat16
+class bfloat16 final
 {
 public:
     /** Default Constructor */

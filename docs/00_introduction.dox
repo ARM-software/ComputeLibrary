@@ -246,6 +246,21 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v20.02 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - Added Bfloat16 type support
+ - Added Bfloat16 support in:
+     - @ref NEWeightsReshapeKernel
+     - @ref NEConvolutionLayerReshapeWeights
+     - @ref NEIm2ColKernel
+     - @ref NEIm2Col
+     - @ref NEDepthConvertLayerKernel
+     - @ref NEDepthConvertLayer
+     - @ref NEGEMMConvolutionLayer
+     - @ref NEGEMMConvolutionLayer
+     - @ref NEGEMMAssemblyDispatch
+
 v20.02.1 Maintenance release
  - Added Android-NN build script.
 

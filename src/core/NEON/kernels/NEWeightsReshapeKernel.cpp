@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, c
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1,
                                                          DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL,
-                                                         DataType::F16, DataType::F32);
+                                                         DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
     if(biases != nullptr)

@@ -29,7 +29,7 @@ template<>
 void MergeResults<3, 8, true>(float *out, const float *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const float *bias, Activation act, bool append)
 {
     const float *inptr = in;
-    float nullbias[192] = { 0 };
+    float nullbias[192];
     float minval = - std::numeric_limits<float>::infinity();
     float maxval =   std::numeric_limits<float>::infinity();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -382,6 +382,20 @@ template <typename T>
 using NEGEMMConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
 
 TEST_SUITE(Float)
+#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+TEST_SUITE(BFLOAT16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                  framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                  framework::dataset::make("DataType", DataType::BFLOAT16)),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                  ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
+}
+TEST_SUITE_END() // BFLOAT16
+#endif           /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),

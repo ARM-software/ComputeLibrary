@@ -353,26 +353,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToF32Fixture<bfloat16>, fram
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToF32Fixture<bfloat16>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerBF16toF32Dataset),
-                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                                                                     DepthConvertLayerZeroShiftDataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
 TEST_SUITE_END() // BFLOAT16_to_F32
 
 TEST_SUITE(F32_to_BFLOAT16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConvertLayerToBF16Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerF32toBF16Dataset),
                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                      DepthConvertLayerZeroShiftDataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConvertLayerToBF16Fixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerF32toBF16Dataset),
-                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                                                                                                                   DepthConvertLayerZeroShiftDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);

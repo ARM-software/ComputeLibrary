@@ -1342,7 +1342,7 @@ void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int
         }
         else if(std::is_same<typename std::decay<T>::type, bfloat16>::value)
         {
-            // We use T instead of print_type here is because the std::is_floating_point<bfloat> returns false and then the print_type becomes int.
+            // We use T instead of print_type here is because the std::is_floating_point<bfloat16> returns false and then the print_type becomes int.
             s << std::right << float(ptr[i]) << element_delim;
         }
         else
