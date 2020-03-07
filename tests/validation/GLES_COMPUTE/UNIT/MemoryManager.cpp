@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCFullyConnectedLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCSoftmaxLayer.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/GLES_COMPUTE/GCAccessor.h"
 #include "tests/Globals.h"

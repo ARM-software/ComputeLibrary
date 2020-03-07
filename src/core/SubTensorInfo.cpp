@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
-#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -127,7 +126,7 @@ int32_t SubTensorInfo::offset_element_in_bytes(const Coordinates &pos) const
 {
     ARM_COMPUTE_ERROR_ON_COORDINATES_DIMENSIONS_GTE(pos, _tensor_shape.num_dimensions());
 
-    int32_t         offset  = offset_first_element_in_bytes();
+    int32_t        offset  = offset_first_element_in_bytes();
     const Strides &strides = strides_in_bytes();
 
     for(size_t i = 0; i < _tensor_shape.num_dimensions(); ++i)

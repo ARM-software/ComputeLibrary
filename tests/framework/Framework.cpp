@@ -24,7 +24,7 @@
 #include "Framework.h"
 
 #include "arm_compute/runtime/Scheduler.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 #include "tests/framework/ParametersLibrary.h"
 
 #ifdef ARM_COMPUTE_CL

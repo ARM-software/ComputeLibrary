@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
 #include "arm_compute/runtime/CL/functions/CLSobel3x3.h"
 #include "arm_compute/runtime/CL/functions/CLSobel5x5.h"
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 

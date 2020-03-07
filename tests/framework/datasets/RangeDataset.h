@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_TEST_DATASET_RANGE
 
 #include "Dataset.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <string>
 #include <tuple>

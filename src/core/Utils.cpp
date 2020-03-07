@@ -25,7 +25,6 @@
 #include "arm_compute/core/Helpers.h"
 
 #include "arm_compute/core/Utils.h"
-#include "support/ToolchainSupport.h"
 
 #include <algorithm>
 #include <cmath>

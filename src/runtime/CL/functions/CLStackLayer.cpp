@@ -33,8 +33,6 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-#include "support/ToolchainSupport.h"
-
 namespace arm_compute
 {
 CLStackLayer::CLStackLayer() // NOLINT

@@ -27,7 +27,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPoolingLayerKernel.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 

@@ -27,7 +27,7 @@
 #include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCScaleKernel.h"
 #include "arm_compute/core/Validate.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 

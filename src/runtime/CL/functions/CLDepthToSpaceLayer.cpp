@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLDepthToSpaceLayer.h"
 
 #include "arm_compute/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 

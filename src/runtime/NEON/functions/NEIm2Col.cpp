@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {

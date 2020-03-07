@@ -21,7 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
+#include "support/StringSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/framework/DatasetModes.h"
 #include "tests/framework/Exceptions.h"

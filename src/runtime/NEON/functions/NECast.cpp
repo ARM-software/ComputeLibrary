@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/kernels/NEDepthConvertLayerKernel.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 

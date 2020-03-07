@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd.hpp"
@@ -235,27 +235,26 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 
 inline bool fuse_function_supported(const ActivationLayerInfo &act_info)
 {
-    return act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ||
-           act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU;
+    return act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU || act_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU;
 }
 
 arm_gemm::Activation arm_gemm_activation_from_acl_activation(const ActivationLayerInfo &act_info)
 {
-        switch(act_info.activation())
+    switch(act_info.activation())
+    {
+        case ActivationLayerInfo::ActivationFunction::RELU:
         {
-            case ActivationLayerInfo::ActivationFunction::RELU:
-            {
-                return arm_gemm::Activation(arm_gemm::Activation::Type::ReLU, act_info.a(), act_info.b());
-            }
-            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-            {
-                return arm_gemm::Activation(arm_gemm::Activation::Type::BoundedReLU, act_info.a(), act_info.b());
-            }
-            default:
-            {
-                return arm_gemm::Activation(arm_gemm::Activation::Type::None);
-            }
+            return arm_gemm::Activation(arm_gemm::Activation::Type::ReLU, act_info.a(), act_info.b());
         }
+        case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+        {
+            return arm_gemm::Activation(arm_gemm::Activation::Type::BoundedReLU, act_info.a(), act_info.b());
+        }
+        default:
+        {
+            return arm_gemm::Activation(arm_gemm::Activation::Type::None);
+        }
+    }
 }
 
 } //namespace
@@ -282,8 +281,6 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const Size2D input_dims  = Size2D(input->info()->dimension(width_idx), input->info()->dimension(height_idx));
     const Size2D kernel_size = Size2D(weights->info()->dimension(width_idx), weights->info()->dimension(height_idx));
     const Size2D output_tile = winograd_output_tile(input_dims, kernel_size);
-
-
 
     // Check if the Winograd configuration requires fast math
     if(!enable_fast_math)
@@ -511,7 +508,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         _memory_group.manage(&_output_nhwc);
         output_to_use = &_output_nhwc;
     }
-    const  arm_gemm::Activation activation = arm_gemm_activation_from_acl_activation(act_info);
+    const arm_gemm::Activation activation = arm_gemm_activation_from_acl_activation(act_info);
 
     transform_output_kernel->configure(biases,
                                        &_output_transformed,
@@ -542,7 +539,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     _transform_output_kernel  = std::move(transform_output_kernel);
 
     //Configure Activation Layer
-    _is_activationlayer_enabled = act_info.enabled() && ! fuse_function_supported(act_info);
+    _is_activationlayer_enabled = act_info.enabled() && !fuse_function_supported(act_info);
     if(_is_activationlayer_enabled)
     {
         _activationlayer_function.configure(_output, nullptr, act_info);
@@ -578,7 +575,7 @@ void NEWinogradConvolutionLayer::run()
         _permute_output.run();
     }
 
-    if(_is_activationlayer_enabled )
+    if(_is_activationlayer_enabled)
     {
         _activationlayer_function.run();
     }

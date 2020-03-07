@@ -26,8 +26,6 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-#include "support/ToolchainSupport.h"
-
 using namespace arm_compute;
 
 NEPoolingLayer::NEPoolingLayer()

@@ -25,7 +25,7 @@
 #include "arm_compute/runtime/CL/functions/CLNormalizePlanarYUVLayer.h"
 
 #include "arm_compute/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
