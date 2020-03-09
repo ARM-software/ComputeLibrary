@@ -26,6 +26,7 @@
 #include "arm_compute/runtime/Scheduler.h"
 #include "support/MemorySupport.h"
 #include "tests/framework/ParametersLibrary.h"
+#include "tests/framework/TestFilter.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
@@ -49,6 +50,7 @@ namespace framework
 std::unique_ptr<InstrumentsInfo> instruments_info;
 
 Framework::Framework()
+    : _test_filter(nullptr)
 {
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimestamps, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::TIME_MS),
@@ -127,7 +129,7 @@ Framework &Framework::get()
 
 void Framework::init(const FrameworkConfig &config)
 {
-    _test_filter    = TestFilter(config.mode, config.name_filter, config.id_filter);
+    _test_filter.reset(new TestFilter(config.mode, config.name_filter, config.id_filter));
     _num_iterations = config.num_iterations;
     _log_level      = config.log_level;
     _cooldown_sec   = config.cooldown_sec;
@@ -558,7 +560,7 @@ bool Framework::run()
         const std::string test_case_name = test_factory->name();
         const TestInfo    test_info{ id, test_case_name, test_factory->mode(), test_factory->status() };
 
-        if(_test_filter.is_selected(test_info))
+        if(_test_filter->is_selected(test_info))
         {
 #ifdef ARM_COMPUTE_CL
             // Every 100 tests, reset the OpenCL context to release the allocated memory
@@ -678,7 +680,7 @@ std::vector<TestInfo> Framework::test_infos() const
     {
         TestInfo test_info{ id, factory->name(), factory->mode(), factory->status() };
 
-        if(_test_filter.is_selected(test_info))
+        if(_test_filter->is_selected(test_info))
         {
             ids.emplace_back(std::move(test_info));
         }
