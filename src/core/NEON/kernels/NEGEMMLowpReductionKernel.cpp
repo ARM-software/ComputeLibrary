@@ -45,7 +45,7 @@ namespace
 Status validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8);
 
     if(output->total_size() > 0)
     {
@@ -77,7 +77,7 @@ std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITens
 Status validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
 
     if(output->total_size() > 0)
     {
@@ -287,6 +287,7 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
             run_internal<uint8_t>(window);
             break;
         case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             run_internal<int8_t>(window);
             break;
@@ -535,6 +536,7 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
             run_internal<uint8_t>(window, info);
             break;
         case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             run_internal<int8_t>(window, info);
             break;

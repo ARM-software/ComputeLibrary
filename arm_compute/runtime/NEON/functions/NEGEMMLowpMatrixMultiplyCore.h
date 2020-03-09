@@ -84,7 +84,7 @@ public:
      * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8/QASYMM8_SIGNED otherwise
      *
      * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
-     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[in]  b         Second input tensor (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL.
      * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
      * @param[out] output    Output tensor. Data type supported: Data type supported: S32/QASYMM8/QASYMM8_SIGNED
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
@@ -96,7 +96,7 @@ public:
      * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8/QASYMM8_SIGNED otherwise
      *
      * @param[in] a         First input tensor info  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
-     * @param[in] b         Second input tensor info (Matrix B). Data type supported: same as @p a
+     * @param[in] b         Second input tensor info (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL.
      * @param[in] c         Third input tensor  info (Matrix C). It can be a nullptr. Data type supported: S32
      * @param[in] output    Output tensor info. Data type supported: Data type supported: S32/QASYMM8/QASYMM8_SIGNED
      * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and

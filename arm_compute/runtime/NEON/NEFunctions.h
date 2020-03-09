@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -120,6 +120,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPriorBoxLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEQLSTMLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NERNNLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEROIAlignLayer.h"

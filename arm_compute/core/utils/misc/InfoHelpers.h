@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/common/LSTMParams.h"
 
 namespace arm_compute
 {
@@ -57,6 +58,38 @@ inline bool is_relu6(ActivationLayerInfo activation_info)
     const bool is_bounded_relu = activation_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
                                  && activation_info.a() == 6.f;
     return activation_info.enabled() && (is_lu_bounded_relu || is_bounded_relu);
+}
+
+/** Build LSTMParams<ITensorInfo> object by extracting the metadata from each
+ * tensor.
+ *
+ * @param[in]  lstm_params      The LSTMParams<T> object containing the tensors.
+ * @param[out] lstm_params_info The LSTMParams<ITensorInfo> to be constructed.
+ *
+ */
+template <typename T>
+inline void build_lstm_params_tensor_info(const LSTMParams<T>     &lstm_params,
+                                          LSTMParams<ITensorInfo> *lstm_params_info)
+{
+    if(lstm_params.has_peephole_opt())
+    {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(lstm_params.cell_to_forget_weights(), lstm_params.cell_to_output_weights());
+        lstm_params_info->set_peephole_params(lstm_params.cell_to_forget_weights()->info(), lstm_params.cell_to_output_weights()->info());
+    }
+    if(lstm_params.has_projection())
+    {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(lstm_params.projection_weights());
+        lstm_params_info->set_projection_params(lstm_params.projection_weights()->info(),
+                                                lstm_params.projection_bias() != nullptr ? lstm_params.projection_bias()->info() : nullptr);
+    }
+    if(!lstm_params.has_cifg_opt())
+    {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), lstm_params.input_gate_bias());
+
+        const ITensorInfo *cell_to_input_weights_info = (lstm_params.has_peephole_opt()) ? lstm_params.cell_to_input_weights()->info() : nullptr;
+        lstm_params_info->set_cifg_params(lstm_params.input_to_input_weights()->info(), lstm_params.recurrent_to_input_weights()->info(),
+                                          cell_to_input_weights_info, lstm_params.input_gate_bias()->info());
+    }
 }
 } // namespace info_helpers
 } // namespace utils

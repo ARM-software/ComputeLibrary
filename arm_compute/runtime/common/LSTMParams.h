@@ -54,10 +54,10 @@ public:
           _output_layer_norm_weights(nullptr),
           _cell_clip(0.f),
           _projection_clip(0.0f),
-          _input_gate_matmul_scale(0.0f),
-          _forget_gate_matmul_scale(0.0f),
-          _cell_gate_matmul_scale(0.0f),
-          _output_gate_matmul_scale(0.0f),
+          _input_intermediate_scale(0.0f),
+          _forget_intermediate_scale(0.0f),
+          _cell_intermediate_scale(0.0f),
+          _output_intermediate_scale(0.0f),
           _hidden_state_zero(0.0f),
           _hidden_state_scale(0),
           _has_peephole_opt(false),
@@ -74,10 +74,10 @@ public:
     ~LSTMParams() = default;
     /** Set CIFG tensor parameters.
      *
-     * @param[in] input_to_input_weights     2D weights tensor with dimensions [input_size, num_units]. Data types supported: F16/F32.
+     * @param[in] input_to_input_weights     2D weights tensor with dimensions [input_size, num_units]. Data types supported: QSYMM8/F16/F32.
      * @param[in] recurrent_to_input_weights 2D weights tensor with dimensions [output_size, num_units]. Data type supported: Same as @p input_to_input_weights.
      * @param[in] cell_to_input_weights      1D weights tensor with dimensions [num_units]. Can be nullptr. Data type supported: Same as @p input_to_input_weights.
-     * @param[in] input_gate_bias            1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input_to_input_weights
+     * @param[in] input_gate_bias            1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input_to_input_weights, S32 when @p input_to_input_weights is QSYMM8
      *
      * @return Reference to this LSTMParams object
      */
@@ -92,8 +92,8 @@ public:
     }
     /** Set projection tensor parameters.
      *
-     * @param[in] projection_weights 2D weights tensor with dimensions [output_size, num_units]. Data type supported: Data types supported: F16/F32.
-     * @param[in] projection_bias    1D weights tensor with dimensions [output_size]. Data type supported: Same as @p projection_weights.
+     * @param[in] projection_weights 2D weights tensor with dimensions [output_size, num_units]. Data type supported: Data types supported: QSYMM8/F16/F32.
+     * @param[in] projection_bias    1D weights tensor with dimensions [output_size]. Data type supported: Same as @p projection_weights, S32 when @p input_to_input_weights is QSYMM8.
      *
      * @return Reference to this LSTMParams object
      */
@@ -106,8 +106,8 @@ public:
     }
     /** Set peephole tensor parameters.
      *
-     * @param[in] cell_to_forget_weights 1D weights tensor with dimensions [num_units]. Data type supported: Data types supported: F16/F32.
-     * @param[in] cell_to_output_weights 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p cell_to_input_weights.
+     * @param[in] cell_to_forget_weights 1D weights tensor with dimensions [num_units]. Data type supported: Data types supported: QSYMM16/F16/F32.
+     * @param[in] cell_to_output_weights 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p cell_to_forget_weights.
      *
      * @return Reference to this LSTMParams object
      */
@@ -120,7 +120,7 @@ public:
     }
     /** Set layer normalization tensor parameters.
      *
-     * @param[in] input_layer_norm_weights  1D weights tensor with dimensions [num_units]. Data type supported: Data types supported: F16/F32.
+     * @param[in] input_layer_norm_weights  1D weights tensor with dimensions [num_units]. Data type supported: Data types supported: QSYMM16/F16/F32.
      * @param[in] forget_layer_norm_weights 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input_layer_norm_weights.
      * @param[in] cell_layer_norm_weights   1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input_layer_norm_weights.
      * @param[in] output_layer_norm_weights 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p input_layer_norm_weights.
@@ -164,19 +164,19 @@ public:
 
     /** Set scale of the intermediate results of matmul of each layer parameters.
      *
-     * @param[in] input_gate_matmul_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at input gate.
-     * @param[in] forget_gate_matmul_scale Scale of the intermediate result of matmul, i.e. input to layer normalization, at forget gate.
-     * @param[in] cell_gate_matmul_scale   Scale of the intermediate result of matmul, i.e. input to layer normalization, at cell gate.
-     * @param[in] output_gate_matmul_scale Scale of the intermediate result of matmul, i.e. input to layer normalization, at output gate.
+     * @param[in] input_intermediate_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at input gate.
+     * @param[in] forget_intermediate_scale Scale of the intermediate result of matmul, i.e. input to layer normalization, at forget gate.
+     * @param[in] cell_intermediate_scale   Scale of the intermediate result of matmul, i.e. input to layer normalization, at cell gate.
+     * @param[in] output_intermediate_scale Scale of the intermediate result of matmul, i.e. input to layer normalization, at output gate.
      *
      * @return Reference to this LSTMParams object
      */
-    LSTMParams &set_matmul_scale_params(float input_gate_matmul_scale, float forget_gate_matmul_scale, float cell_gate_matmul_scale, float output_gate_matmul_scale)
+    LSTMParams &set_matmul_scale_params(float input_intermediate_scale, float forget_intermediate_scale, float cell_intermediate_scale, float output_intermediate_scale)
     {
-        _input_gate_matmul_scale  = input_gate_matmul_scale;
-        _forget_gate_matmul_scale = forget_gate_matmul_scale;
-        _cell_gate_matmul_scale   = cell_gate_matmul_scale;
-        _output_gate_matmul_scale = output_gate_matmul_scale;
+        _input_intermediate_scale  = input_intermediate_scale;
+        _forget_intermediate_scale = forget_intermediate_scale;
+        _cell_intermediate_scale   = cell_intermediate_scale;
+        _output_intermediate_scale = output_intermediate_scale;
         return *this;
     }
 
@@ -187,7 +187,7 @@ public:
      *
      * @return Reference to this LSTMParams object
      */
-    LSTMParams &set_matmul_scale_params(int32_t hidden_state_zero, float hidden_state_scale)
+    LSTMParams &set_hidden_state_params(int32_t hidden_state_zero, float hidden_state_scale)
     {
         _hidden_state_zero  = hidden_state_zero;
         _hidden_state_scale = hidden_state_scale;
@@ -264,24 +264,24 @@ public:
         return _projection_clip;
     }
 
-    float input_gate_matmul_scale() const
+    float input_intermediate_scale() const
     {
-        return _input_gate_matmul_scale;
+        return _input_intermediate_scale;
     }
 
-    float forget_gate_matmul_scale() const
+    float forget_intermediate_scale() const
     {
-        return _forget_gate_matmul_scale;
+        return _forget_intermediate_scale;
     }
 
-    float cell_gate_matmul_scale() const
+    float cell_intermediate_scale() const
     {
-        return _cell_gate_matmul_scale;
+        return _cell_intermediate_scale;
     }
 
-    float output_gate_matmul_scale() const
+    float output_intermediate_scale() const
     {
-        return _output_gate_matmul_scale;
+        return _output_intermediate_scale;
     }
 
     int32_t hidden_state_zero() const
@@ -329,10 +329,10 @@ private:
     const T *_output_layer_norm_weights;
     float    _cell_clip;
     float    _projection_clip;
-    float    _input_gate_matmul_scale;
-    float    _forget_gate_matmul_scale;
-    float    _cell_gate_matmul_scale;
-    float    _output_gate_matmul_scale;
+    float    _input_intermediate_scale;
+    float    _forget_intermediate_scale;
+    float    _cell_intermediate_scale;
+    float    _output_intermediate_scale;
     float    _hidden_state_zero;
     int32_t  _hidden_state_scale;
     bool     _has_peephole_opt;

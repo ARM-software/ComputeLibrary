@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,14 +63,14 @@ public:
      * kernels change the layout of the original matrices to be more cache-friendly.
      *
      * @param[in]  input0 Input tensor containing the interleaved Matrix A. Data type supported: U8/QASYMM8/S8/QASYMM8_SIGNED
-     * @param[in]  input1 Input tensor containing the transposed1xW Matrix B. Data type supported: U8/QASYMM8/S8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL
+     * @param[in]  input1 Input tensor containing the transposed1xW Matrix B. Data type supported: U8/QASYMM8/S8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[out] output Output tensor to store the result of matrix multiplication. Data type supported: S32
      */
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyKernel
      *
      * @param[in] input0 Input tensor info containing the interleaved Matrix A. Data type supported: U8/QASYMM8/S8/QASYMM8_SIGNED
-     * @param[in] input1 Input tensor info containing the transposed Matrix B. Data type supported: U8/QASYMM8/S8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL
+     * @param[in] input1 Input tensor info containing the transposed Matrix B. Data type supported: U8/QASYMM8/S8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[in] output Output tensor info to store the result of matrix multiplication. Data type supported: S32
      *
      * @return a status

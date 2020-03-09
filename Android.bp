@@ -694,6 +694,7 @@ cc_library_static {
         "src/runtime/NEON/functions/NEPixelWiseMultiplication.cpp",
         "src/runtime/NEON/functions/NEPoolingLayer.cpp",
         "src/runtime/NEON/functions/NEPriorBoxLayer.cpp",
+        "src/runtime/NEON/functions/NEQLSTMLayer.cpp",
         "src/runtime/NEON/functions/NEQuantizationLayer.cpp",
         "src/runtime/NEON/functions/NERNNLayer.cpp",
         "src/runtime/NEON/functions/NEROIAlignLayer.cpp",

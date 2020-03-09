@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,19 +23,17 @@
  */
 #include "arm_compute/runtime/NEON/functions/NELSTMLayer.h"
 
-#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/InfoHelpers.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 
-#include <cmath>
-#include <memory>
-#include <tuple>
-
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
+using namespace arm_compute::utils::info_helpers;
 
 NELSTMLayer::NELSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _fully_connected_input_gate(), _accum_input_gate1(), _subtract_input_gate(), _pixelwise_mul_input_gate(), _activation_input_gate(),
@@ -71,22 +69,8 @@ void NELSTMLayer::configure(const ITensor *input,
     _is_layer_norm_lstm = lstm_params.use_layer_norm();
 
     // Set lstm parameters
-    LSTMParams<ITensorInfo> lstm_params_info;
-    if(lstm_params.has_peephole_opt())
-    {
-        lstm_params_info.set_peephole_params(lstm_params.cell_to_forget_weights()->info(), lstm_params.cell_to_output_weights()->info());
-    }
-    if(lstm_params.has_projection())
-    {
-        lstm_params_info.set_projection_params(lstm_params.projection_weights()->info(),
-                                               lstm_params.projection_bias() != nullptr ? lstm_params.projection_bias()->info() : nullptr);
-    }
-    if(!lstm_params.has_cifg_opt())
-    {
-        const ITensorInfo *cell_to_input_weights_info = (lstm_params.has_peephole_opt()) ? lstm_params.cell_to_input_weights()->info() : nullptr;
-        lstm_params_info.set_cifg_params(lstm_params.input_to_input_weights()->info(), lstm_params.recurrent_to_input_weights()->info(),
-                                         cell_to_input_weights_info, lstm_params.input_gate_bias()->info());
-    }
+    LSTMParams<ITensorInfo> lstm_params_info{};
+    build_lstm_params_tensor_info(lstm_params, &lstm_params_info);
 
     // Validate
     ARM_COMPUTE_ERROR_THROW_ON(NELSTMLayer::validate(input->info(), input_to_forget_weights->info(),
@@ -726,3 +710,4 @@ void NELSTMLayer::prepare()
         _is_prepared = true;
     }
 }
+} // namespace arm_compute
