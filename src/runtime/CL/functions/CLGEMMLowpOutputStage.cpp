@@ -24,11 +24,11 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ScaleKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel.h"
 #include "support/MemorySupport.h"
 
 namespace arm_compute
@@ -90,15 +90,24 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::configure(const ICLTensor *
                                                                float multiplier, int offset,
                                                                int min, int max)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel>();
-    k->configure(input, bias, output, multiplier, offset, min, max);
+    GEMMLowpOutputStageInfo info  = GEMMLowpOutputStageInfo();
+    info.gemmlowp_offset          = offset;
+    info.gemmlowp_real_multiplier = multiplier;
+    info.gemmlowp_min_bound       = min;
+    info.gemmlowp_max_bound       = max;
+
+    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel>();
+    k->configure(input, bias, output, &info);
     _kernel = std::move(k);
 }
 
 Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
                                                                 int min, int max)
 {
-    return CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel::validate(input, bias, output, min, max);
+    GEMMLowpOutputStageInfo info = GEMMLowpOutputStageInfo();
+    info.gemmlowp_min_bound      = min;
+    info.gemmlowp_max_bound      = max;
+    return CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::validate(input, bias, output, &info);
 }
 
 void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
@@ -165,6 +174,13 @@ void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *b
             }
             break;
         }
+        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
+        {
+            auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel>();
+            k->configure(input, bias, output, &info);
+            _kernel = std::move(k);
+            break;
+        }
         default:
             ARM_COMPUTE_ERROR("Unsupported GEMMLowpOutputStage type.");
     }
@@ -201,6 +217,10 @@ Status CLGEMMLowpOutputStage::validate(const ITensorInfo *input, const ITensorIn
                 default:
                     return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported output data type.");
             }
+        }
+        case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
+        {
+            return CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::validate(input, bias, output, &info);
         }
         default:
             return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported GEMMLowpOutputStage type.");

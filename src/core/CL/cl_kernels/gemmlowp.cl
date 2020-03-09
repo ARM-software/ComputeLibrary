@@ -2317,9 +2317,9 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
 #endif // defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 
 #if defined(REAL_MULTIPLIER) && defined(OUTPUT_OFFSET)
-/** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8
+/** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8/QASYMM8_SIGNED
  *
- * This kernel takes a final int32 accumulator value (the output of matrix multiplication), and processes it to obtain the final QASYMM8 value.
+ * This kernel takes a final int32 accumulator value (the output of matrix multiplication), and processes it to obtain the final QASYMM8/QASYMM8_SIGNED value.
  * The following computations will be performed by the kernel:
  *
  *  -# Compute fixed point multiplication between each entry of input by result_fixedpoint_multiplier
@@ -2327,11 +2327,14 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
  *  -# Requantize
  *  -# Add offset to each result
  *  -# Clamp the value between the specified min and max bounds
- *  -# Clamp the resulting int32 values to the [0..255] range and cast to QASYMM8.
+ *  -# Clamp the resulting int32 values:
+ *      - to the [0..255] range and cast to QASYMM8.
+ *      - to the [-128..127] range and cast to QASYMM8_SIGNED.
  *
  * @attention The offset and scalar scale factor must be passed at compile time using -DRESULT_OFFSET, -DREAL_MULTIPLIER
  *
  * @note In case the addition of int32 biases is required, -DADD_BIAS should be passed at compile time
+ * @note The output datatype should be passed at compile time using -DOUTPUT_DATA_TYPE
  * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
  *       These values can be used to implement "rectified linear unit" activation functions
  *
@@ -2388,19 +2391,20 @@ __kernel void gemmlowp_output_stage_quantize_down_float(TENSOR3D_DECLARATION(src
 #endif // defined(ADD_BIAS)
 
     // Convert to float
-    float16 input_values_f = convert_float4(input_values);
-    input_values_f         = round(input_values_f * (float)REAL_MULTIPLIER + (float)OUTPUT_OFFSET);
+    float4 input_values_f = convert_float4(input_values);
+    input_values_f        = round(input_values_f * (float)REAL_MULTIPLIER + (float)OUTPUT_OFFSET);
 
-    uchar4 res = convert_uchar4_sat(input_values_f);
+    VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4)
+    res = CONVERT_SAT(input_values_f, VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4));
 
 #if defined(MIN_BOUND)
-    res = max(res, (uchar4)MIN_BOUND);
+    res = max(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (uchar4)MAX_BOUND);
+    res = min(res, (VEC_DATA_TYPE(OUTPUT_DATA_TYPE, 4))MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, dst_addr);
+    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
 }
 #endif // defined(REAL_MULTIPLIER) && defined(OUTPUT_OFFSET)

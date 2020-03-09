@@ -556,6 +556,109 @@ protected:
     SimpleTensor<uint8_t> _reference{};
 };
 
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class GEMMLowpQuantizeDownInt32ScaleByFloatValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(DataType data_type, TensorShape shape, float result_real_multiplier, int32_t result_offset, int32_t min, int32_t max, bool add_bias)
+    {
+        _target    = compute_target(data_type, shape, result_real_multiplier, result_offset, min, max, add_bias);
+        _reference = compute_reference(shape, result_real_multiplier, result_offset, min, max, add_bias);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        // To avoid data all being clampped
+        std::uniform_int_distribution<> distribution(-500, 500);
+        library->fill(tensor, distribution, i);
+    }
+
+    TensorType compute_target(DataType data_type, const TensorShape &shape, float result_multiplier, int32_t result_offset, int32_t min, int32_t max, bool add_bias)
+    {
+        TensorShape shape_bias(shape[0]);
+
+        // Create tensors
+        TensorType a = create_tensor<TensorType>(shape, DataType::S32, 1);
+        TensorType b = create_tensor<TensorType>(shape_bias, DataType::S32, 1);
+        TensorType c = create_tensor<TensorType>(shape, data_type, 1);
+
+        // create output stage info
+        GEMMLowpOutputStageInfo info;
+        info.gemmlowp_max_bound       = max;
+        info.gemmlowp_min_bound       = min;
+        info.gemmlowp_real_multiplier = result_multiplier;
+        info.gemmlowp_offset          = result_offset;
+        info.type                     = GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT;
+        info.output_data_type         = data_type;
+
+        // Create and configure function
+        FunctionType output_stage;
+        output_stage.configure(&a, add_bias ? &b : nullptr, &c, info);
+
+        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        a.allocator()->allocate();
+        c.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensor
+        fill(AccessorType(a), 0);
+
+        if(add_bias)
+        {
+            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+            // Allocate bias tensor
+            b.allocator()->allocate();
+
+            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+            // Fill tensor
+            fill(AccessorType(b), 1);
+        }
+
+        // Compute GEMM function
+        output_stage.run();
+        return c;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &shape, float_t result_real_multiplier, int32_t result_offset, int32_t min, int32_t max, bool add_bias)
+    {
+        // Create reference
+        TensorShape shape_bias(shape[0]);
+
+        SimpleTensor<int32_t> a{ shape, DataType::S32, 1 };
+        SimpleTensor<int32_t> b{ shape_bias, DataType::S32, 1 };
+
+        // Fill reference
+        fill(a, 0);
+
+        const std::vector<float_t> result_float_multiplier_vec = { result_real_multiplier };
+
+        if(add_bias)
+        {
+            // Fill bias
+            fill(b, 1);
+
+            return reference::gemmlowp_quantize_down_scale_by_float<int32_t, T>(a, b, result_float_multiplier_vec, result_offset, min, max);
+        }
+        else
+        {
+            return reference::gemmlowp_quantize_down_scale_by_float<int32_t, T>(a, result_float_multiplier_vec, result_offset, min, max);
+        }
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
 template <typename TensorType, typename AccessorType, typename FunctionType>
 class GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture : public framework::Fixture
 {

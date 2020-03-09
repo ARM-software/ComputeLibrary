@@ -389,6 +389,46 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedP
 TEST_SUITE_END() // MultGreater1
 TEST_SUITE_END() // BoundedReLu
 TEST_SUITE_END() // QuantizeDownInt32ToInt16ScaleByFixedPoint
+
+TEST_SUITE(QuantizeDownInt32ScaleByFloat)
+
+TEST_SUITE(QASYMM8)
+using CLGEMMLowpQuantizeDownInt32ScaleByFloatFixture =
+    GEMMLowpQuantizeDownInt32ScaleByFloatValidationFixture<CLTensor, CLAccessor, CLGEMMLowpOutputStage, uint8_t>;
+
+FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMLowpQuantizeDownInt32ScaleByFloatFixture, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                       datasets::TinyShapes()),
+                                                               framework::dataset::make("result_real_multiplier", 0.33f)),
+                                                       framework::dataset::make("result_offset", 2, 3)),
+                                               framework::dataset::make("min", 0)),
+                                       framework::dataset::make("max", 255)),
+                               framework::dataset::make("addBias", { false, true })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+using CLGEMMLowpQuantizeDownInt32ScaleByFloatFixture_Signed =
+    GEMMLowpQuantizeDownInt32ScaleByFloatValidationFixture<CLTensor, CLAccessor, CLGEMMLowpOutputStage, int8_t>;
+FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMLowpQuantizeDownInt32ScaleByFloatFixture_Signed, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
+                                                                       datasets::TinyShapes()),
+                                                               framework::dataset::make("result_real_multiplier", 0.33f)),
+                                                       framework::dataset::make("result_offset", 2, 3)),
+                                               framework::dataset::make("min", -128)),
+                                       framework::dataset::make("max", 127)),
+                               framework::dataset::make("addBias", { false, true })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE_END() // QuantizeDownInt32ScaleByFloat
+
 TEST_SUITE_END() // OutputStage
 TEST_SUITE_END() // GEMMLowp
 TEST_SUITE_END() // CL
