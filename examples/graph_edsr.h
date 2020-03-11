@@ -725,14 +725,14 @@ public:
         _graph.add_connection(id_block_0_1_Conv2D_bias, 0, id_block_0_1_BiasAdd, 2);
 
         NodeID id_mul = _graph.add_node<EltwiseLayerNode>(
-                            EltwiseOperation::Mul, QuantizationInfo{ 0.0006341293919831514, 174 });
+                            descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0006341293919831514, 174 } });
         INode *node_mul = _graph.node(id_mul);
         node_mul->set_common_node_parameters(NodeParams{ "mul", target });
         _graph.add_connection(id_block_0_1_BiasAdd, 0, id_mul, 0);
         _graph.add_connection(id_mul_y, 0, id_mul, 1);
 
         NodeID id_add = _graph.add_node<EltwiseLayerNode>(
-                            EltwiseOperation::Add, QuantizationInfo{ 0.0031092411372810602, 95 });
+                            descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0031092411372810602, 95 } });
         INode *node_add = _graph.node(id_add);
         node_add->set_common_node_parameters(NodeParams{ "add", target });
         _graph.add_connection(id_pre_residual_BiasAdd, 0, id_add, 0);
@@ -756,14 +756,14 @@ public:
         _graph.add_connection(id_block_1_1_Conv2D_bias, 0, id_block_1_1_BiasAdd, 2);
 
         NodeID id_mul_1 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.0004965941770933568, 122 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0004965941770933568, 122 } });
         INode *node_mul_1 = _graph.node(id_mul_1);
         node_mul_1->set_common_node_parameters(NodeParams{ "mul_1", target });
         _graph.add_connection(id_block_1_1_BiasAdd, 0, id_mul_1, 0);
         _graph.add_connection(id_mul_1_y, 0, id_mul_1, 1);
 
         NodeID id_add_1 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.0030700892675668, 96 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0030700892675668, 96 } });
         INode *node_add_1 = _graph.node(id_add_1);
         node_add_1->set_common_node_parameters(NodeParams{ "add_1", target });
         _graph.add_connection(id_add, 0, id_add_1, 0);
@@ -787,14 +787,14 @@ public:
         _graph.add_connection(id_block_2_1_Conv2D_bias, 0, id_block_2_1_BiasAdd, 2);
 
         NodeID id_mul_2 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.0004133903712499887, 130 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0004133903712499887, 130 } });
         INode *node_mul_2 = _graph.node(id_mul_2);
         node_mul_2->set_common_node_parameters(NodeParams{ "mul_2", target });
         _graph.add_connection(id_block_2_1_BiasAdd, 0, id_mul_2, 0);
         _graph.add_connection(id_mul_2_y, 0, id_mul_2, 1);
 
         NodeID id_add_2 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.003026385325938463, 94 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.003026385325938463, 94 } });
         INode *node_add_2 = _graph.node(id_add_2);
         node_add_2->set_common_node_parameters(NodeParams{ "add_2", target });
         _graph.add_connection(id_add_1, 0, id_add_2, 0);
@@ -818,14 +818,14 @@ public:
         _graph.add_connection(id_block_3_1_Conv2D_bias, 0, id_block_3_1_BiasAdd, 2);
 
         NodeID id_mul_3 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.0003943995980080217, 141 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0003943995980080217, 141 } });
         INode *node_mul_3 = _graph.node(id_mul_3);
         node_mul_3->set_common_node_parameters(NodeParams{ "mul_3", target });
         _graph.add_connection(id_block_3_1_BiasAdd, 0, id_mul_3, 0);
         _graph.add_connection(id_mul_3_y, 0, id_mul_3, 1);
 
         NodeID id_add_3 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.003101327223703265, 98 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.003101327223703265, 98 } });
         INode *node_add_3 = _graph.node(id_add_3);
         node_add_3->set_common_node_parameters(NodeParams{ "add_3", target });
         _graph.add_connection(id_add_2, 0, id_add_3, 0);
@@ -849,14 +849,14 @@ public:
         _graph.add_connection(id_block_4_1_Conv2D_bias, 0, id_block_4_1_BiasAdd, 2);
 
         NodeID id_mul_4 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.00044342130422592163, 143 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.00044342130422592163, 143 } });
         INode *node_mul_4 = _graph.node(id_mul_4);
         node_mul_4->set_common_node_parameters(NodeParams{ "mul_4", target });
         _graph.add_connection(id_block_4_1_BiasAdd, 0, id_mul_4, 0);
         _graph.add_connection(id_mul_4_y, 0, id_mul_4, 1);
 
         NodeID id_add_4 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.003150839824229479, 98 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.003150839824229479, 98 } });
         INode *node_add_4 = _graph.node(id_add_4);
         node_add_4->set_common_node_parameters(NodeParams{ "add_4", target });
         _graph.add_connection(id_add_3, 0, id_add_4, 0);
@@ -880,14 +880,14 @@ public:
         _graph.add_connection(id_block_5_1_Conv2D_bias, 0, id_block_5_1_BiasAdd, 2);
 
         NodeID id_mul_5 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.0004023382789455354, 132 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0004023382789455354, 132 } });
         INode *node_mul_5 = _graph.node(id_mul_5);
         node_mul_5->set_common_node_parameters(NodeParams{ "mul_5", target });
         _graph.add_connection(id_block_5_1_BiasAdd, 0, id_mul_5, 0);
         _graph.add_connection(id_mul_5_y, 0, id_mul_5, 1);
 
         NodeID id_add_5 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.0030975888948887587, 94 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0030975888948887587, 94 } });
         INode *node_add_5 = _graph.node(id_add_5);
         node_add_5->set_common_node_parameters(NodeParams{ "add_5", target });
         _graph.add_connection(id_add_4, 0, id_add_5, 0);
@@ -911,14 +911,14 @@ public:
         _graph.add_connection(id_block_6_1_Conv2D_bias, 0, id_block_6_1_BiasAdd, 2);
 
         NodeID id_mul_6 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.00041950203012675047, 125 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.00041950203012675047, 125 } });
         INode *node_mul_6 = _graph.node(id_mul_6);
         node_mul_6->set_common_node_parameters(NodeParams{ "mul_6", target });
         _graph.add_connection(id_block_6_1_BiasAdd, 0, id_mul_6, 0);
         _graph.add_connection(id_mul_6_y, 0, id_mul_6, 1);
 
         NodeID id_add_6 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.003155382815748453, 92 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.003155382815748453, 92 } });
         INode *node_add_6 = _graph.node(id_add_6);
         node_add_6->set_common_node_parameters(NodeParams{ "add_6", target });
         _graph.add_connection(id_add_5, 0, id_add_6, 0);
@@ -942,14 +942,14 @@ public:
         _graph.add_connection(id_block_7_1_Conv2D_bias, 0, id_block_7_1_BiasAdd, 2);
 
         NodeID id_mul_7 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.00042401350219734013, 142 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.00042401350219734013, 142 } });
         INode *node_mul_7 = _graph.node(id_mul_7);
         node_mul_7->set_common_node_parameters(NodeParams{ "mul_7", target });
         _graph.add_connection(id_block_7_1_BiasAdd, 0, id_mul_7, 0);
         _graph.add_connection(id_mul_7_y, 0, id_mul_7, 1);
 
         NodeID id_add_7 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.0031760605052113533, 86 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0031760605052113533, 86 } });
         INode *node_add_7 = _graph.node(id_add_7);
         node_add_7->set_common_node_parameters(NodeParams{ "add_7", target });
         _graph.add_connection(id_add_6, 0, id_add_7, 0);
@@ -973,14 +973,14 @@ public:
         _graph.add_connection(id_block_8_1_Conv2D_bias, 0, id_block_8_1_BiasAdd, 2);
 
         NodeID id_mul_8 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.00042673019925132394, 123 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.00042673019925132394, 123 } });
         INode *node_mul_8 = _graph.node(id_mul_8);
         node_mul_8->set_common_node_parameters(NodeParams{ "mul_8", target });
         _graph.add_connection(id_block_8_1_BiasAdd, 0, id_mul_8, 0);
         _graph.add_connection(id_mul_8_y, 0, id_mul_8, 1);
 
         NodeID id_add_8 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.0032156009692698717, 86 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0032156009692698717, 86 } });
         INode *node_add_8 = _graph.node(id_add_8);
         node_add_8->set_common_node_parameters(NodeParams{ "add_8", target });
         _graph.add_connection(id_add_7, 0, id_add_8, 0);
@@ -1004,14 +1004,14 @@ public:
         _graph.add_connection(id_block_9_1_Conv2D_bias, 0, id_block_9_1_BiasAdd, 2);
 
         NodeID id_mul_9 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Mul, QuantizationInfo{ 0.0004448975087143481, 129 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0004448975087143481, 129 } });
         INode *node_mul_9 = _graph.node(id_mul_9);
         node_mul_9->set_common_node_parameters(NodeParams{ "mul_9", target });
         _graph.add_connection(id_block_9_1_BiasAdd, 0, id_mul_9, 0);
         _graph.add_connection(id_mul_9_y, 0, id_mul_9, 1);
 
         NodeID id_add_9 = _graph.add_node<EltwiseLayerNode>(
-                              EltwiseOperation::Add, QuantizationInfo{ 0.0032742770854383707, 80 });
+                              descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0032742770854383707, 80 } });
         INode *node_add_9 = _graph.node(id_add_9);
         node_add_9->set_common_node_parameters(NodeParams{ "add_9", target });
         _graph.add_connection(id_add_8, 0, id_add_9, 0);
@@ -1035,14 +1035,14 @@ public:
         _graph.add_connection(id_block_10_1_Conv2D_bias, 0, id_block_10_1_BiasAdd, 2);
 
         NodeID id_mul_10 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Mul, QuantizationInfo{ 0.00036083892337046564, 130 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.00036083892337046564, 130 } });
         INode *node_mul_10 = _graph.node(id_mul_10);
         node_mul_10->set_common_node_parameters(NodeParams{ "mul_10", target });
         _graph.add_connection(id_block_10_1_BiasAdd, 0, id_mul_10, 0);
         _graph.add_connection(id_mul_10_y, 0, id_mul_10, 1);
 
         NodeID id_add_10 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Add, QuantizationInfo{ 0.0031881770119071007, 81 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0031881770119071007, 81 } });
         INode *node_add_10 = _graph.node(id_add_10);
         node_add_10->set_common_node_parameters(NodeParams{ "add_10", target });
         _graph.add_connection(id_add_9, 0, id_add_10, 0);
@@ -1066,14 +1066,14 @@ public:
         _graph.add_connection(id_block_11_1_Conv2D_bias, 0, id_block_11_1_BiasAdd, 2);
 
         NodeID id_mul_11 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Mul, QuantizationInfo{ 0.0003968806122429669, 133 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0003968806122429669, 133 } });
         INode *node_mul_11 = _graph.node(id_mul_11);
         node_mul_11->set_common_node_parameters(NodeParams{ "mul_11", target });
         _graph.add_connection(id_block_11_1_BiasAdd, 0, id_mul_11, 0);
         _graph.add_connection(id_mul_11_y, 0, id_mul_11, 1);
 
         NodeID id_add_11 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Add, QuantizationInfo{ 0.0032707711216062307, 80 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0032707711216062307, 80 } });
         INode *node_add_11 = _graph.node(id_add_11);
         node_add_11->set_common_node_parameters(NodeParams{ "add_11", target });
         _graph.add_connection(id_add_10, 0, id_add_11, 0);
@@ -1097,14 +1097,14 @@ public:
         _graph.add_connection(id_block_12_1_Conv2D_bias, 0, id_block_12_1_BiasAdd, 2);
 
         NodeID id_mul_12 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Mul, QuantizationInfo{ 0.0004365936329122633, 110 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0004365936329122633, 110 } });
         INode *node_mul_12 = _graph.node(id_mul_12);
         node_mul_12->set_common_node_parameters(NodeParams{ "mul_12", target });
         _graph.add_connection(id_block_12_1_BiasAdd, 0, id_mul_12, 0);
         _graph.add_connection(id_mul_12_y, 0, id_mul_12, 1);
 
         NodeID id_add_12 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Add, QuantizationInfo{ 0.003275055903941393, 79 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.003275055903941393, 79 } });
         INode *node_add_12 = _graph.node(id_add_12);
         node_add_12->set_common_node_parameters(NodeParams{ "add_12", target });
         _graph.add_connection(id_add_11, 0, id_add_12, 0);
@@ -1128,14 +1128,14 @@ public:
         _graph.add_connection(id_block_13_1_Conv2D_bias, 0, id_block_13_1_BiasAdd, 2);
 
         NodeID id_mul_13 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Mul, QuantizationInfo{ 0.0004385628562886268, 139 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0004385628562886268, 139 } });
         INode *node_mul_13 = _graph.node(id_mul_13);
         node_mul_13->set_common_node_parameters(NodeParams{ "mul_13", target });
         _graph.add_connection(id_block_13_1_BiasAdd, 0, id_mul_13, 0);
         _graph.add_connection(id_mul_13_y, 0, id_mul_13, 1);
 
         NodeID id_add_13 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Add, QuantizationInfo{ 0.0033287261612713337, 78 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0033287261612713337, 78 } });
         INode *node_add_13 = _graph.node(id_add_13);
         node_add_13->set_common_node_parameters(NodeParams{ "add_13", target });
         _graph.add_connection(id_add_12, 0, id_add_13, 0);
@@ -1159,14 +1159,14 @@ public:
         _graph.add_connection(id_block_14_1_Conv2D_bias, 0, id_block_14_1_BiasAdd, 2);
 
         NodeID id_mul_14 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Mul, QuantizationInfo{ 0.00037829321809113026, 130 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.00037829321809113026, 130 } });
         INode *node_mul_14 = _graph.node(id_mul_14);
         node_mul_14->set_common_node_parameters(NodeParams{ "mul_14", target });
         _graph.add_connection(id_block_14_1_BiasAdd, 0, id_mul_14, 0);
         _graph.add_connection(id_mul_14_y, 0, id_mul_14, 1);
 
         NodeID id_add_14 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Add, QuantizationInfo{ 0.0033590947277843952, 77 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0033590947277843952, 77 } });
         INode *node_add_14 = _graph.node(id_add_14);
         node_add_14->set_common_node_parameters(NodeParams{ "add_14", target });
         _graph.add_connection(id_add_13, 0, id_add_14, 0);
@@ -1190,14 +1190,14 @@ public:
         _graph.add_connection(id_block_15_1_Conv2D_bias, 0, id_block_15_1_BiasAdd, 2);
 
         NodeID id_mul_15 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Mul, QuantizationInfo{ 0.0004008286341559142, 130 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Mul, QuantizationInfo{ 0.0004008286341559142, 130 } });
         INode *node_mul_15 = _graph.node(id_mul_15);
         node_mul_15->set_common_node_parameters(NodeParams{ "mul_15", target });
         _graph.add_connection(id_block_15_1_BiasAdd, 0, id_mul_15, 0);
         _graph.add_connection(id_mul_15_y, 0, id_mul_15, 1);
 
         NodeID id_add_15 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Add, QuantizationInfo{ 0.0035031239967793226, 78 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0035031239967793226, 78 } });
         INode *node_add_15 = _graph.node(id_add_15);
         node_add_15->set_common_node_parameters(NodeParams{ "add_15", target });
         _graph.add_connection(id_add_14, 0, id_add_15, 0);
@@ -1221,7 +1221,7 @@ public:
         _graph.add_connection(id_post_residual_Conv2D_bias, 0, id_post_residual_BiasAdd, 2);
 
         NodeID id_add_16 = _graph.add_node<EltwiseLayerNode>(
-                               EltwiseOperation::Add, QuantizationInfo{ 0.0065071373246610165, 89 });
+                               descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add, QuantizationInfo{ 0.0065071373246610165, 89 } });
         INode *node_add_16 = _graph.node(id_add_16);
         node_add_16->set_common_node_parameters(NodeParams{ "add_16", target });
         _graph.add_connection(id_post_residual_BiasAdd, 0, id_add_16, 0);

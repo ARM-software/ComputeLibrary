@@ -36,12 +36,9 @@ class EltwiseLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] op             Element-wise operation to perform
-     * @param[in] out_quant_info (Optional) Output quantization information
-     * @param[in] c_policy       (Optional) Convert policy used for the operation
-     * @param[in] r_policy       (Optional) Rounding policy used for the operation
+     * @param[in] descriptor Containing information for the node described in @ref descriptors::EltwiseLayerDescriptor
      */
-    EltwiseLayerNode(EltwiseOperation op, QuantizationInfo out_quant_info = QuantizationInfo(), ConvertPolicy c_policy = ConvertPolicy::SATURATE, RoundingPolicy r_policy = RoundingPolicy::TO_ZERO);
+    EltwiseLayerNode(const descriptors::EltwiseLayerDescriptor &descriptor);
     /** Eltwise operation accessor
      *
      * @return Eltwise operation that is to be performed by the node
@@ -67,10 +64,7 @@ public:
     void accept(INodeVisitor &v) override;
 
 private:
-    EltwiseOperation _op;
-    QuantizationInfo _out_quant_info;
-    ConvertPolicy    _convert_policy;
-    RoundingPolicy   _rounding_policy;
+    descriptors::EltwiseLayerDescriptor descriptor;
 };
 } // namespace graph
 } // namespace arm_compute

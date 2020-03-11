@@ -289,7 +289,7 @@ private:
         tanh_ss.forward_tail(tanh_nid);
 
         // Add (third split)
-        NodeID add_nid = graph.graph().add_node<EltwiseLayerNode>(EltwiseOperation::Add);
+        NodeID add_nid = graph.graph().add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add });
         graph.graph().add_connection(split_nid, 2, add_nid, 0);
         graph.graph().add_connection(add_y.tail_node(), 0, add_nid, 1);
         set_node_params(graph.graph(), add_nid, add_params);
