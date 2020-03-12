@@ -124,5 +124,27 @@ struct InstanceNormalizationLayerKernelInfo
     float epsilon;             /**< Lower bound value for the normalization. Defaults to 1e-12 */
     bool  use_mixed_precision; /**< Use mixed precision in case of FP16 execution. Defaults to true */
 };
+
+struct GEMMLowpReductionKernelInfo
+{
+    /** Default constructor */
+    GEMMLowpReductionKernelInfo() = default;
+    /** Constructor
+     *
+     * @param[in] k             Number of matrix columns/rows.
+     * @param[in] is_reshaped   True if the input tensor has been reshaped.
+     * @param[in] scalar        Scalar value to multiply each reduced column/row by.
+     * @param[in] mul_by_scalar True if each column/row reduction has to be multiplied by a scalar value.
+     */
+    GEMMLowpReductionKernelInfo(int32_t k, bool is_reshaped, int32_t scalar, bool mul_by_scalar)
+        : k(k), is_reshaped(is_reshaped), scalar(scalar), mul_by_scalar(mul_by_scalar)
+    {
+    }
+
+    int32_t k{ 0 };                 /**< Number of matrix columns/rows */
+    bool    is_reshaped{ false };   /**< True if the input tensor has been reshaped */
+    int32_t scalar{ 0 };            /**< Scalar value to multiply each reduced column/row by */
+    bool    mul_by_scalar{ false }; /**< True if each column/row reduction has to be multiplied by a scalar value */
+};
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */

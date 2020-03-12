@@ -66,9 +66,9 @@ public:
      * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                     Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                     Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED, FP32 if @p weights is BLOAT16
+     *                     Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED, FP32 if @p weights is BFLOAT16
      * @param[out] output  Destination tensor.
-     *                     Data types supported: Same as @p weights, FP32 if @p weights is BLOAT16
+     *                     Data types supported: Same as @p weights, FP32 if @p weights is BFLOAT16
      */
     void configure(const ITensor *weights, const ITensor *biases, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayerReshapeWeights
@@ -76,9 +76,9 @@ public:
      * @param[in] weights Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
      *                    Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in] biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                    Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED, FP32 if @p weights is BLOAT16
+     *                    Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED, FP32 if @p weights is BFLOAT16
      * @param[in] output  Destination tensor.
-     *                    Data types supported: Same as @p weights FP32 if @p weights is BLOAT16
+     *                    Data types supported: Same as @p weights FP32 if @p weights is BFLOAT16
      *
      * @return an error status
      */
@@ -140,7 +140,7 @@ private:
 /** Basic function to compute the convolution layer. This function calls the following NEON kernels/functions:
  *
  * -# @ref NEIm2ColKernel
- * -# @ref NEGEMM (if the data type is BLOAT16/FP16/FP32)
+ * -# @ref NEGEMM (if the data type is BFLOAT16/FP16/FP32)
  * -# @ref NEGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
