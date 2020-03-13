@@ -1245,13 +1245,14 @@ public:
         _graph.add_connection(id_pre_upscale_Conv2D_bias, 0, id_pre_upscale_BiasAdd, 2);
 
         NodeID id_upscale_net_FakeQuantWithMinMaxVars_1 = _graph.add_node<DeconvolutionLayerNode>(
-                                                              PadStrideInfo
+                                                              descriptors::DeconvolutionLayerDescriptor
         {
-            2, 2,
-            0, 0,
-            0, 0,
-            DimensionRoundingType::FLOOR },
-        QuantizationInfo{ 0.004990961868315935, 26 });
+            PadStrideInfo{
+                2, 2,
+                0, 0,
+                0, 0,
+                DimensionRoundingType::FLOOR },
+            QuantizationInfo{ 0.004990961868315935, 26 } });
         INode *node_upscale_net_FakeQuantWithMinMaxVars_1 = _graph.node(id_upscale_net_FakeQuantWithMinMaxVars_1);
         node_upscale_net_FakeQuantWithMinMaxVars_1->set_common_node_parameters(NodeParams{ "upscale_net_FakeQuantWithMinMaxVars_1", target });
         _graph.add_connection(id_pre_upscale_BiasAdd, 0, id_upscale_net_FakeQuantWithMinMaxVars_1, 0);

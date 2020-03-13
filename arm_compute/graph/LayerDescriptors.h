@@ -86,6 +86,22 @@ struct EltwiseLayerDescriptor
     RoundingPolicy   r_policy;       /**< Rounding policy */
 };
 
+/** Deconvolution layer descriptor */
+struct DeconvolutionLayerDescriptor
+{
+    /** Constructor
+     *
+     * @param[in] info           Dedonvolution layer attributes
+     * @param[in] out_quant_info (Optional) Output quantization infomation
+     */
+    DeconvolutionLayerDescriptor(PadStrideInfo info, QuantizationInfo out_quant_info = QuantizationInfo())
+        : info(info), out_quant_info(out_quant_info)
+    {
+    }
+
+    PadStrideInfo    info;           /**< Padding and stride information */
+    QuantizationInfo out_quant_info; /**< Output quantization information */
+};
 } // namespace descriptor
 } // namespace graph
 } // namespace arm_compute

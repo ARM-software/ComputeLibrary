@@ -32,8 +32,8 @@ namespace arm_compute
 {
 namespace graph
 {
-DeconvolutionLayerNode::DeconvolutionLayerNode(PadStrideInfo info, QuantizationInfo out_quant_info)
-    : _info(std::move(info)), _out_quant_info(std::move(out_quant_info))
+DeconvolutionLayerNode::DeconvolutionLayerNode(const descriptors::DeconvolutionLayerDescriptor &descriptor)
+    : descriptor(std::move(descriptor))
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -41,7 +41,7 @@ DeconvolutionLayerNode::DeconvolutionLayerNode(PadStrideInfo info, QuantizationI
 
 PadStrideInfo DeconvolutionLayerNode::deconvolution_info() const
 {
-    return _info;
+    return descriptor.info;
 }
 
 TensorDescriptor DeconvolutionLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
@@ -87,11 +87,11 @@ TensorDescriptor DeconvolutionLayerNode::configure_output(size_t idx) const
 
     ARM_COMPUTE_ERROR_ON(src == nullptr || weights == nullptr);
 
-    TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), _info);
+    TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), descriptor.info);
 
-    if(!_out_quant_info.empty())
+    if(!descriptor.out_quant_info.empty())
     {
-        output_info.set_quantization_info(_out_quant_info);
+        output_info.set_quantization_info(descriptor.out_quant_info);
     }
 
     return output_info;

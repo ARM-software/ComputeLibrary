@@ -306,7 +306,7 @@ NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdx
     }
 
     // Create convolution node and connect
-    NodeID deconv_nid = g.add_node<DeconvolutionLayerNode>(deconv_info);
+    NodeID deconv_nid = g.add_node<DeconvolutionLayerNode>(descriptors::DeconvolutionLayerDescriptor{ deconv_info });
     g.add_connection(input.node_id, input.index, deconv_nid, 0);
     g.add_connection(w_nid, 0, deconv_nid, 1);
     if(has_bias)
