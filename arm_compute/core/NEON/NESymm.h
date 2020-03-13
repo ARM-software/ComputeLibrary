@@ -239,7 +239,7 @@ inline qsymm16x8x2_t vquantize_qsymm16(const float32x4x4_t &qv, const UniformQua
  *
  * @return A neon vector holding the multiplied value
  */
-inline int32x4x2_t multiply_by_quantized_multipler_2row(int32x4x2_t input, int32_t qmul, int32_t shift)
+inline int32x4x2_t multiply_by_quantized_multiplier_2row(int32x4x2_t input, int32_t qmul, int32_t shift)
 {
     const auto left_shift  = shift > 0 ? shift : 0;
     const auto right_shift = shift > 0 ? 0 : -shift;

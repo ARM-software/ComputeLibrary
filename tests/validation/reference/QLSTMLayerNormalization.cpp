@@ -26,9 +26,8 @@
 #include "ArithmeticOperations.h"
 #include "MeanStdDevNormalizationLayer.h"
 #include "PixelWiseMultiplication.h"
+#include "arm_compute/core/utils/misc/Utility.h"
 #include "src/core/utils/quantization/AsymmHelpers.cpp"
-
-#include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {
@@ -38,53 +37,60 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<float> qlstm_layer_normalization_float_compute(SimpleTensor<float> src, SimpleTensor<float> weight, SimpleTensor<float> bias)
-{
-    SimpleTensor<float> output = mean_std_normalization_layer(src);
-    output                     = pixel_wise_multiplication<float, float, float>(output, weight, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO, DataType::F32);
-    return arithmetic_operation(ArithmeticOperation::ADD, output, bias, DataType::F32, ConvertPolicy::SATURATE);
-}
-
 SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src, const SimpleTensor<int16_t> &weight, const SimpleTensor<int32_t> &bias)
 {
     ARM_COMPUTE_ERROR_ON(src.shape().num_dimensions() > 2);
+    SimpleTensor<int16_t> output{ src.shape(), DataType::QSYMM16 };
 
-    SimpleTensor<float> converted_src{ src.shape(), DataType::F32 };
-    SimpleTensor<float> converted_weight{ weight.shape(), DataType::F32 };
-    SimpleTensor<float> converted_bias{ bias.shape(), DataType::F32 };
-
-    const auto iq_info = src.quantization_info().uniform();
+    const auto wq_info = weight.quantization_info().uniform();
     int        output_multiplier{};
     int        output_shift{};
-    quantization::calculate_quantized_multiplier(iq_info.scale, &output_multiplier, &output_shift);
+    const auto s = quantization::calculate_quantized_multiplier(wq_info.scale, &output_multiplier, &output_shift);
+    output_shift *= -1;
 
-    const float layer_norm_scale = output_multiplier * std::pow(2, static_cast<double>(output_shift - 31));
-    const float bias_scale       = std::pow(2., -10) * layer_norm_scale;
-
-    for(int i = 0; i < src.num_elements(); i++)
+    if(!bool(s))
     {
-        converted_src[i] = static_cast<float>(src[i]);
+        output_multiplier = 0;
+        output_shift      = 0;
     }
 
-    for(int i = 0; i < bias.num_elements(); i++)
+    const uint32_t num_batch = src.shape()[1];
+    const uint32_t num_input = src.shape()[0];
+
+    for(uint32_t batch_idx = 0; batch_idx < num_batch; ++batch_idx)
     {
-        converted_bias[i] = static_cast<float>(bias[i]) * bias_scale;
+        int64_t sum{};
+        int64_t sum_sq{};
+
+        for(uint32_t input_idx = 0; input_idx < num_input; ++input_idx)
+        {
+            const auto index = batch_idx * num_input + input_idx;
+            const auto val   = static_cast<int32_t>(src[index]);
+            sum += val;
+            sum_sq += val * val;
+        }
+
+        const auto temp     = static_cast<int64_t>(0x100000) / num_input;
+        const auto mean     = sum * 1024 / static_cast<int64_t>(num_input);
+        const auto variance = ((sum_sq * temp) - (mean * mean)) / 0x100000;
+
+        int32_t stddev_invsqrt_mul{};
+        int32_t stddev_invsqrt_shift{};
+        quantization::get_invsqrt_quantized_multiplier_exp(variance, -1, stddev_invsqrt_mul, stddev_invsqrt_shift);
+
+        for(uint32_t input_idx = 0; input_idx < num_input; ++input_idx)
+        {
+            const auto    index           = batch_idx * num_input + input_idx;
+            const auto    val             = static_cast<int32_t>(src[index]);
+            const auto    shifted         = (val << 10) - mean;
+            const auto    rescaled        = quantization::multiply_by_quantized_multiplier(shifted, stddev_invsqrt_mul, stddev_invsqrt_shift);
+            const int64_t weighted        = rescaled * weight[input_idx] + bias[input_idx];
+            const auto    reverse_shifted = static_cast<int32_t>((weighted + 512) >> 10);
+            auto          out_val         = quantization::multiply_by_quantized_multiplier(reverse_shifted, output_multiplier, output_shift + 12);
+            out_val                       = arm_compute::utility::clamp<decltype(out_val), int16_t>(out_val, std::numeric_limits<int16_t>::min());
+            output[index]                 = static_cast<int16_t>(out_val);
+        }
     }
-
-    for(int i = 0; i < weight.num_elements(); i++)
-    {
-        converted_weight[i] = weight[i] * layer_norm_scale;
-    }
-
-    SimpleTensor<float>   output_float = qlstm_layer_normalization_float_compute(converted_src, converted_weight, converted_bias);
-    SimpleTensor<int16_t> output{ output_float.shape(), DataType::QSYMM16 };
-
-    for(int i = 0; i < output.num_elements(); i++)
-    {
-        const auto output_val_s32 = static_cast<int32_t>(support::cpp11::round(output_float[i] * std::pow(2, 12)));
-        output[i]                 = utility::clamp<int32_t, int16_t>(output_val_s32, std::numeric_limits<int16_t>::min());
-    }
-
     return output;
 }
 } // namespace reference

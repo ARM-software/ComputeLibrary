@@ -202,9 +202,10 @@ int32_t saturating_rounding_doubling_highmul(int32_t a, int32_t b)
     bool    overflow = a == b && a == std::numeric_limits<int32_t>::min();
     int64_t a_64(a);
     int64_t b_64(b);
-    int64_t ab_64        = a_64 * b_64;
-    int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
-    int32_t ab_x2_high32 = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
+    int64_t ab_64               = a_64 * b_64;
+    bool    is_positive_or_zero = a == 0 || b == 0 || (std::signbit(a) == std::signbit(b));
+    int32_t nudge               = is_positive_or_zero ? (1 << 30) : (1 - (1 << 30));
+    int32_t ab_x2_high32        = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
     return overflow ? std::numeric_limits<int32_t>::max() : ab_x2_high32;
 }
 
@@ -215,7 +216,7 @@ inline int32_t rounding_divide_by_pow2(int32_t x, int exponent)
     return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
 }
 
-int32_t multiply_by_quantized_multipler(int32_t input, int32_t qmul, int32_t shift)
+int32_t multiply_by_quantized_multiplier(int32_t input, int32_t qmul, int32_t shift)
 {
     const auto left_shift  = shift > 0 ? shift : 0;
     const auto right_shift = shift > 0 ? 0 : -shift;
@@ -246,6 +247,81 @@ int32_t saturating_rounding_multiply_by_pow2(int32_t exponent, int32_t v)
         result                  = neg_mask ? min : result;
         return result;
     }
+}
+
+void get_invsqrt_quantized_multiplier_exp(int32_t input, int32_t reverse_shift, int32_t &output_inv_sqrt, int32_t &output_shift)
+{
+    ARM_COMPUTE_ERROR_ON(input < 0);
+
+    if(input <= 1)
+    {
+        // dealing the inputs (0 and 1) separately to avoid overflow
+        output_inv_sqrt = std::numeric_limits<std::int32_t>::max();
+        output_shift    = 0;
+        return;
+    }
+
+    // prepare input for fixed point operation and compute shift value
+    output_shift = 11;
+    while(input >= (1 << 29))
+    {
+        input /= 4;
+        ++output_shift;
+    }
+
+    const uint32_t max_left_shift_bits       = __builtin_clz(static_cast<uint32_t>(input)) - 1;
+    const uint32_t max_left_shift_bits_pairs = max_left_shift_bits / 2;
+    const uint32_t left_shift_bit_pairs      = max_left_shift_bits_pairs - 1;
+    output_shift -= left_shift_bit_pairs;
+    input <<= 2 * left_shift_bit_pairs;
+
+    // Calculation in fixed point domain with 3 integer bits.
+    using FixedPointRawType                    = int32_t;
+    constexpr uint32_t fixedpoint_position     = 3;
+    constexpr uint32_t fixedpoint_int_position = sizeof(FixedPointRawType) * 8 - 1 - fixedpoint_position;
+    using FixedPoint3                          = FixedPointRawType;
+    using FixedPoint0                          = FixedPointRawType;
+
+    // fixed point representation of input divided by 2 and 1.5 for Newton-Raphson iteration
+    const FixedPoint3 fixedpoint_input      = (input >> 1);
+    const FixedPoint3 fixedpoint_half_input = rounding_divide_by_pow2(fixedpoint_input, 1);
+    const FixedPoint3 fixedpoint_half_three = (0x1 << fixedpoint_int_position) + (0x1 << (fixedpoint_int_position - 1));
+
+    // initial guess (1) in fixed point representation
+    FixedPoint3 x = 0x1 << fixedpoint_int_position;
+
+    // multiplication of two fixed point numbers, defined for readability
+    auto fixed_point_mul = [](FixedPointRawType a, FixedPointRawType b) -> FixedPointRawType
+    {
+        return saturating_rounding_doubling_highmul(a, b);
+    };
+
+    // rescaling of fixed point to have dst_bit integer bits, defined for readability
+    auto fixed_point_rescale = [](FixedPointRawType a, uint32_t src_bit, uint32_t dst_bit) -> FixedPointRawType
+    {
+        const uint32_t exponent = src_bit - dst_bit;
+        return saturating_rounding_multiply_by_pow2(exponent, a);
+    };
+
+    // 5 iterations of Newton-Raphson method for inverse square root - 1.5 * x_n = input/2 * (x_n)^3
+    constexpr int32_t num_iteration = 5;
+    for(int32_t i = 0; i < num_iteration; ++i)
+    {
+        const auto x3 = fixed_point_rescale(fixed_point_mul(fixed_point_mul(x, x), x), 9, fixedpoint_position);
+        x             = fixed_point_rescale(fixed_point_mul(fixedpoint_half_three, x) - fixed_point_mul(fixedpoint_half_input, x3), 6, fixedpoint_position);
+    }
+
+    // fixed point representation of sqrt(1/2)
+    const FixedPoint0 fixedpoint_half_sqrt_2 = 1518500250;
+    x                                        = fixed_point_mul(fixedpoint_half_sqrt_2, x);
+    output_inv_sqrt                          = x;
+    if(output_shift < 0)
+    {
+        output_inv_sqrt <<= -output_shift;
+        output_shift = 0;
+    }
+    // convert right shift to left shift
+    output_shift *= reverse_shift;
 }
 } // quantization
 } // arm_compute

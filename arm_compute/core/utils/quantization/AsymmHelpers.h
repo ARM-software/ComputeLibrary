@@ -128,7 +128,7 @@ int32_t saturating_rounding_doubling_highmul(int32_t a, int32_t b);
  *
  * @return The multiplied value
  */
-int32_t multiply_by_quantized_multipler(int32_t input, int32_t qmul, int32_t shift);
+int32_t multiply_by_quantized_multiplier(int32_t input, int32_t qmul, int32_t shift);
 
 /** Compute the value multiplied the power-of-two
  *
@@ -137,7 +137,18 @@ int32_t multiply_by_quantized_multipler(int32_t input, int32_t qmul, int32_t shi
  *
  * @return The multiplied value
  */
-int32_t saturating_rounding_multiply_by_pow2(int exponent, int32_t v);
+int32_t saturating_rounding_multiply_by_pow2(int32_t exponent, int32_t v);
+
+/** Compute quantized multiplier and shift for the inverse square root of input.
+ *  Using 3-bit fixed point and 5 iteration of Newton-Raphson method.
+ *
+ * @param[in]  input           Input to use
+ * @param[in]  reverse_shift   -1 to reverse the shift direction
+ * @param[out] output_inv_sqrt Quantized multiplier for inverse square root
+ * @param[out] output_shift    Shift for inverse square root
+ *
+ */
+void get_invsqrt_quantized_multiplier_exp(int32_t input, int32_t reverse_shift, int32_t &output_inv_sqrt, int32_t &output_shift);
 
 } // namespace quantization
 } // namespace arm_compute

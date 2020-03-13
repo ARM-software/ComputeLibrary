@@ -322,6 +322,7 @@ cc_library_static {
         "src/core/NEON/kernels/NEPixelWiseMultiplicationKernel.cpp",
         "src/core/NEON/kernels/NEPoolingLayerKernel.cpp",
         "src/core/NEON/kernels/NEPriorBoxLayerKernel.cpp",
+        "src/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.cpp",
         "src/core/NEON/kernels/NEQuantizationLayerKernel.cpp",
         "src/core/NEON/kernels/NEROIAlignLayerKernel.cpp",
         "src/core/NEON/kernels/NEROIPoolingLayerKernel.cpp",

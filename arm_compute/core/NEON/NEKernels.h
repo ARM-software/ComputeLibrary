@@ -120,6 +120,7 @@
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPriorBoxLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEROIAlignLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
