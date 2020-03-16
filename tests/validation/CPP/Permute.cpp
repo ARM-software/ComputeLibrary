@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,7 @@ const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteVectors;
 TEST_SUITE(CPP)
 TEST_SUITE(Permute)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32 })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32, DataType::QASYMM8_SIGNED })),
                shape, data_type)
 {
     // Define permutation vector
@@ -132,6 +132,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint32_t>, framework::Dataset
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END()
+
+TEST_SUITE(QASYMM8_SINGED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::QASYMM8_SIGNED))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+TEST_SUITE_END() // QASYMM8_SINGED
 
 TEST_SUITE_END()
 TEST_SUITE_END()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,14 +56,14 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input  The input tensor to permute. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  The input tensor to permute. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32
      * @param[out] output The output tensor. Data types supported: Same as @p input
      * @param[in]  perm   Permutation vector
      */
     void configure(const ITensor *input, ITensor *output, const PermutationVector &perm);
     /** Static function to check if given info will lead to a valid configuration of @ref CPPPermuteKernel
      *
-     * @param[in] input  The input tensor to permute. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input  The input tensor to permute. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32
      * @param[in] output The output tensor. Data types supported: Same as @p input
      * @param[in] perm   Permutation vector
      *
