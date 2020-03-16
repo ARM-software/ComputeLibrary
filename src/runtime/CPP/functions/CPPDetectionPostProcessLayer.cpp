@@ -40,7 +40,7 @@ Status validate_arguments(const ITensorInfo *input_box_encoding, const ITensorIn
                           DetectionPostProcessLayerInfo info, const unsigned int kBatchSize, const unsigned int kNumCoordBox)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_box_encoding, input_class_score, input_anchors);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_box_encoding, 1, DataType::F32, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_box_encoding, 1, DataType::F32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_box_encoding, input_anchors);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_box_encoding->num_dimensions() > 3, "The location input tensor shape should be [4, N, kBatchSize].");
     if(input_box_encoding->num_dimensions() > 2)
@@ -90,6 +90,24 @@ Status validate_arguments(const ITensorInfo *input_box_encoding, const ITensorIn
     return Status{};
 }
 
+inline void DecodeBoxCorner(BBox &box_centersize, BBox &anchor, Iterator &decoded_it, DetectionPostProcessLayerInfo info)
+{
+    const float half_factor = 0.5f;
+
+    // BBox is equavalent to CenterSizeEncoding [y,x,h,w]
+    const float y_center = box_centersize[0] / info.scale_value_y() * anchor[2] + anchor[0];
+    const float x_center = box_centersize[1] / info.scale_value_x() * anchor[3] + anchor[1];
+    const float half_h   = half_factor * static_cast<float>(std::exp(box_centersize[2] / info.scale_value_h())) * anchor[2];
+    const float half_w   = half_factor * static_cast<float>(std::exp(box_centersize[3] / info.scale_value_w())) * anchor[3];
+
+    // Box Corner encoding boxes are saved as [xmin, ymin, xmax, ymax]
+    auto decoded_ptr   = reinterpret_cast<float *>(decoded_it.ptr());
+    *(decoded_ptr)     = x_center - half_w; // xmin
+    *(1 + decoded_ptr) = y_center - half_h; // ymin
+    *(2 + decoded_ptr) = x_center + half_w; // xmax
+    *(3 + decoded_ptr) = y_center + half_h; // ymax
+}
+
 /** Decode a bbox according to a anchors and scale info.
  *
  * @param[in]  input_box_encoding The input prior bounding boxes.
@@ -101,8 +119,8 @@ void DecodeCenterSizeBoxes(const ITensor *input_box_encoding, const ITensor *inp
 {
     const QuantizationInfo &qi_box     = input_box_encoding->info()->quantization_info();
     const QuantizationInfo &qi_anchors = input_anchors->info()->quantization_info();
-    BBox                    box_centersize;
-    BBox                    anchor;
+    BBox                    box_centersize{ {} };
+    BBox                    anchor{ {} };
 
     Window win;
     win.use_tensor_dimensions(input_box_encoding->info()->tensor_shape());
@@ -112,11 +130,9 @@ void DecodeCenterSizeBoxes(const ITensor *input_box_encoding, const ITensor *inp
     Iterator anchor_it(input_anchors, win);
     Iterator decoded_it(decoded_boxes, win);
 
-    const float half_factor = 0.5f;
-
-    execute_window_loop(win, [&](const Coordinates &)
+    if(input_box_encoding->info()->data_type() == DataType::QASYMM8)
     {
-        if(is_data_type_quantized(input_box_encoding->info()->data_type()))
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto box_ptr    = reinterpret_cast<const qasymm8_t *>(box_it.ptr());
             const auto anchor_ptr = reinterpret_cast<const qasymm8_t *>(anchor_it.ptr());
@@ -126,29 +142,38 @@ void DecodeCenterSizeBoxes(const ITensor *input_box_encoding, const ITensor *inp
             anchor = BBox({ dequantize_qasymm8(*anchor_ptr, qi_anchors), dequantize_qasymm8(*(anchor_ptr + 1), qi_anchors),
                             dequantize_qasymm8(*(2 + anchor_ptr), qi_anchors), dequantize_qasymm8(*(3 + anchor_ptr), qi_anchors)
                           });
-        }
-        else
+            DecodeBoxCorner(box_centersize, anchor, decoded_it, info);
+        },
+        box_it, anchor_it, decoded_it);
+    }
+    else if(input_box_encoding->info()->data_type() == DataType::QASYMM8_SIGNED)
+    {
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto box_ptr    = reinterpret_cast<const qasymm8_signed_t *>(box_it.ptr());
+            const auto anchor_ptr = reinterpret_cast<const qasymm8_signed_t *>(anchor_it.ptr());
+            box_centersize        = BBox({ dequantize_qasymm8_signed(*box_ptr, qi_box), dequantize_qasymm8_signed(*(box_ptr + 1), qi_box),
+                                           dequantize_qasymm8_signed(*(2 + box_ptr), qi_box), dequantize_qasymm8_signed(*(3 + box_ptr), qi_box)
+                                         });
+            anchor = BBox({ dequantize_qasymm8_signed(*anchor_ptr, qi_anchors), dequantize_qasymm8_signed(*(anchor_ptr + 1), qi_anchors),
+                            dequantize_qasymm8_signed(*(2 + anchor_ptr), qi_anchors), dequantize_qasymm8_signed(*(3 + anchor_ptr), qi_anchors)
+                          });
+            DecodeBoxCorner(box_centersize, anchor, decoded_it, info);
+        },
+        box_it, anchor_it, decoded_it);
+    }
+    else
+    {
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto box_ptr    = reinterpret_cast<const float *>(box_it.ptr());
             const auto anchor_ptr = reinterpret_cast<const float *>(anchor_it.ptr());
             box_centersize        = BBox({ *box_ptr, *(box_ptr + 1), *(2 + box_ptr), *(3 + box_ptr) });
             anchor                = BBox({ *anchor_ptr, *(anchor_ptr + 1), *(2 + anchor_ptr), *(3 + anchor_ptr) });
-        }
-
-        // BBox is equavalent to CenterSizeEncoding [y,x,h,w]
-        const float y_center = box_centersize[0] / info.scale_value_y() * anchor[2] + anchor[0];
-        const float x_center = box_centersize[1] / info.scale_value_x() * anchor[3] + anchor[1];
-        const float half_h   = half_factor * static_cast<float>(std::exp(box_centersize[2] / info.scale_value_h())) * anchor[2];
-        const float half_w   = half_factor * static_cast<float>(std::exp(box_centersize[3] / info.scale_value_w())) * anchor[3];
-
-        // Box Corner encoding boxes are saved as [xmin, ymin, xmax, ymax]
-        auto decoded_ptr   = reinterpret_cast<float *>(decoded_it.ptr());
-        *(decoded_ptr)     = x_center - half_w; // xmin
-        *(1 + decoded_ptr) = y_center - half_h; // ymin
-        *(2 + decoded_ptr) = x_center + half_w; // xmax
-        *(3 + decoded_ptr) = y_center + half_h; // ymax
-    },
-    box_it, anchor_it, decoded_it);
+            DecodeBoxCorner(box_centersize, anchor, decoded_it, info);
+        },
+        box_it, anchor_it, decoded_it);
+    }
 }
 
 void SaveOutputs(const Tensor *decoded_boxes, const std::vector<int> &result_idx_boxes_after_nms, const std::vector<float> &result_scores_after_nms, const std::vector<int> &result_classes_after_nms,
@@ -263,12 +288,26 @@ void CPPDetectionPostProcessLayer::run()
     // Decode scores if necessary
     if(_dequantize_scores)
     {
-        for(unsigned int idx_c = 0; idx_c < _num_classes_with_background; ++idx_c)
+        if(_input_box_encoding->info()->data_type() == DataType::QASYMM8)
         {
-            for(unsigned int idx_b = 0; idx_b < _num_boxes; ++idx_b)
+            for(unsigned int idx_c = 0; idx_c < _num_classes_with_background; ++idx_c)
             {
-                *(reinterpret_cast<float *>(_decoded_scores.ptr_to_element(Coordinates(idx_c, idx_b)))) =
-                    dequantize_qasymm8(*(reinterpret_cast<qasymm8_t *>(_input_scores->ptr_to_element(Coordinates(idx_c, idx_b)))), _input_scores->info()->quantization_info());
+                for(unsigned int idx_b = 0; idx_b < _num_boxes; ++idx_b)
+                {
+                    *(reinterpret_cast<float *>(_decoded_scores.ptr_to_element(Coordinates(idx_c, idx_b)))) =
+                        dequantize_qasymm8(*(reinterpret_cast<qasymm8_t *>(_input_scores->ptr_to_element(Coordinates(idx_c, idx_b)))), _input_scores->info()->quantization_info());
+                }
+            }
+        }
+        else if(_input_box_encoding->info()->data_type() == DataType::QASYMM8_SIGNED)
+        {
+            for(unsigned int idx_c = 0; idx_c < _num_classes_with_background; ++idx_c)
+            {
+                for(unsigned int idx_b = 0; idx_b < _num_boxes; ++idx_b)
+                {
+                    *(reinterpret_cast<float *>(_decoded_scores.ptr_to_element(Coordinates(idx_c, idx_b)))) =
+                        dequantize_qasymm8_signed(*(reinterpret_cast<qasymm8_signed_t *>(_input_scores->ptr_to_element(Coordinates(idx_c, idx_b)))), _input_scores->info()->quantization_info());
+                }
             }
         }
     }
