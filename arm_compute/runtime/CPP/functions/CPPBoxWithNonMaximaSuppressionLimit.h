@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,14 +47,14 @@ public:
     CPPBoxWithNonMaximaSuppressionLimit &operator=(const CPPBoxWithNonMaximaSuppressionLimit &) = delete;
     /** Configure the BoxWithNonMaximaSuppressionLimit CPP kernel
      *
-     * @param[in]  scores_in        The scores input tensor of size [count, num_classes]. Data types supported: QASYMM8/F16/F32
+     * @param[in]  scores_in        The scores input tensor of size [count, num_classes]. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in]  boxes_in         The boxes input tensor of size [count, num_classes * 4].
-     *                              Data types supported: QASYMM16 with 0.125 scale and 0 offset if @p scores_in is QASYMM8, otherwise same as @p scores_in
+     *                              Data types supported: QASYMM16 with 0.125 scale and 0 offset if @p scores_in is QASYMM8/QASYMM8_SIGNED, otherwise same as @p scores_in
      * @param[in]  batch_splits_in  The batch splits input tensor of size [batch_size]. Data types supported: Same as @p scores_in
      *                              @note Can be a nullptr. If not a nullptr, @p scores_in and @p boxes_in have items from multiple images.
      * @param[out] scores_out       The scores output tensor of size [N]. Data types supported: Same as @p scores_in
      * @param[out] boxes_out        The boxes output tensor of size [N, 4].
-     *                              Data types supported: QASYMM16 with 0.125 scale and 0 offset if @p scores_in is QASYMM8, otherwise same as @p scores_in
+     *                              Data types supported: QASYMM16 with 0.125 scale and 0 offset if @p scores_in is QASYMM8/QASYMM8_SIGNED, otherwise same as @p scores_in
      * @param[out] classes          The classes output tensor of size [N]. Data types supported: Same as @p scores_in
      * @param[out] batch_splits_out (Optional) The batch splits output tensor. Data types supported: Same as @p scores_in
      * @param[out] keeps            (Optional) The keeps output tensor of size [N]. Data types supported: Same as @p scores_in
@@ -65,14 +65,14 @@ public:
                    ITensor *batch_splits_out = nullptr, ITensor *keeps = nullptr, ITensor *keeps_size = nullptr, const BoxNMSLimitInfo info = BoxNMSLimitInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CPPDetectionOutputLayer
      *
-     * @param[in] scores_in        The scores input tensor of size [count, num_classes]. Data types supported: QASYMM8/F16/F32
+     * @param[in] scores_in        The scores input tensor of size [count, num_classes]. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
      * @param[in] boxes_in         The boxes input tensor of size [count, num_classes * 4].
-     *                             Data types supported: QASYMM16 with 0.125 scale and 0 offset if @p scores_in is QASYMM8, otherwise same as @p scores_in
+     *                             Data types supported: QASYMM16 with 0.125 scale and 0 offset if @p scores_in is QASYMM8/QASYMM8_SIGNED, otherwise same as @p scores_in
      * @param[in] batch_splits_in  The batch splits input tensor of size [batch_size]. Data types supported: Same as @p scores_in
      *                             @note Can be a nullptr. If not a nullptr, @p scores_in and @p boxes_in have items from multiple images.
      * @param[in] scores_out       The scores output tensor of size [N]. Data types supported: Same as @p scores_in
      * @param[in] boxes_out        The boxes output tensor of size [N, 4].
-     *                             Data types supported: QASYMM16 with 0.125 scale and 0 offset if @p scores_in is QASYMM8, otherwise same as @p scores_in
+     *                             Data types supported: QASYMM16 with 0.125 scale and 0 offset if @p scores_in is QASYMM8/QASYMM8_SIGNED, otherwise same as @p scores_in
      * @param[in] classes          The classes output tensor of size [N]. Data types supported: Same as @p scores_in
      * @param[in] batch_splits_out (Optional) The batch splits output tensor. Data types supported: Same as @p scores_in
      * @param[in] keeps            (Optional) The keeps output tensor of size [N]. Data types supported: Same as @p scores_in
