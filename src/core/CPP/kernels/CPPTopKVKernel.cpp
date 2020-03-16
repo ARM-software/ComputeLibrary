@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ inline bool greater_than(T a, T b)
 Status validate_arguments(const ITensorInfo *predictions, const ITensorInfo *targets, ITensorInfo *output, const unsigned int k)
 {
     ARM_COMPUTE_UNUSED(k);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(predictions, 1, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(predictions, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(targets, 1, DataType::U32);
 
     ARM_COMPUTE_RETURN_ERROR_ON(predictions->num_dimensions() > 2);
@@ -144,6 +144,9 @@ void CPPTopKVKernel::run(const Window &window, const ThreadInfo &info)
             break;
         case DataType::QASYMM8:
             run_topkv<uint8_t>();
+            break;
+        case DataType::QASYMM8_SIGNED:
+            run_topkv<int8_t>();
             break;
         default:
             ARM_COMPUTE_ERROR("Not supported");
