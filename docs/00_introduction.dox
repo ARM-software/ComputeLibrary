@@ -76,10 +76,10 @@ You should have the following file organisation:
 	│   ├── graph.h --> Includes all the Graph headers at once.
 	│   ├── core
 	│   │   ├── CL
-	│   │   │   ├── CLCoreRuntimeContext.h --> Manages all core OpenCL objects needed for kernel execution (cl_context, cl_kernel, cl_command_queue, etc).
 	│   │   │   ├── CLKernelLibrary.h --> Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
 	│   │   │   ├── CLKernels.h --> Includes all the OpenCL kernels at once
-	│   │   │   ├── CL specialisation of all the generic objects interfaces (ICLTensor, ICLArray, etc.)
+	│   │   │   ├── CL specialisation of all the generic interfaces (ICLTensor, ICLArray, etc.)
+	│   │   │   ├── gemm --> Folder containing all the configuration files for GEMM
 	│   │   │   ├── kernels --> Folder containing all the OpenCL kernels
 	│   │   │   │   └── CL*Kernel.h
 	│   │   │   └── OpenCL.h --> Wrapper to configure the Khronos OpenCL C++ header
@@ -88,10 +88,9 @@ You should have the following file organisation:
 	│   │   │   └── kernels --> Folder containing all the CPP kernels
 	│   │   │       └── CPP*Kernel.h
 	│   │   ├── GLES_COMPUTE
-	│   │   │   ├── GCCoreRuntimeContext.h --> Manages all core GLES objects needed for kernel execution.
 	│   │   │   ├── GCKernelLibrary.h --> Manages all the GLES kernels compilation and caching, provides accessors for the GLES Context.
 	│   │   │   ├── GCKernels.h --> Includes all the GLES kernels at once
-	│   │   │   ├── GLES specialisation of all the generic objects interfaces (IGCTensor etc.)
+	│   │   │   ├── GLES specialisation of all the generic interfaces (IGCTensor etc.)
 	│   │   │   ├── kernels --> Folder containing all the GLES kernels
 	│   │   │   │   └── GC*Kernel.h
 	│   │   │   └── OpenGLES.h --> Wrapper to configure the Khronos EGL and OpenGL ES C header
@@ -100,37 +99,31 @@ You should have the following file organisation:
 	│   │   │   │   ├── assembly --> headers for assembly optimised NEON kernels.
 	│   │   │   │   ├── convolution --> headers for convolution assembly optimised NEON kernels.
 	│   │   │   │   │   ├── common --> headers for code which is common to several convolution implementations.
-	│   │   │   │   │   ├── depthwise --> headers for Depthwise convolultion assembly implementation
+	│   │   │   │   │   ├── depthwise --> headers for Depthwise convolution assembly implementation
 	│   │   │   │   │   └── winograd --> headers for Winograd convolution assembly implementation
 	│   │   │   │   ├── detail --> Common code for several intrinsics implementations.
 	│   │   │   │   └── NE*Kernel.h
 	│   │   │   ├── wrapper --> NEON wrapper used to simplify code
-	│   │   │   │   ├── intrinsics --> NEON instrincs' wrappers
+	│   │   │   │   ├── intrinsics --> NEON intrinsics wrappers
 	│   │   │   │   ├── scalar --> Scalar operations
 	│   │   │   │   ├── traits.h --> Traits defined on NEON vectors
 	│   │   │   │   └── wrapper.h --> Includes all wrapper headers at once
 	│   │   │   └── NEKernels.h --> Includes all the NEON kernels at once
 	│   │   ├── All common basic types (Types.h, Window, Coordinates, Iterator, etc.)
-	│   │   ├── All generic objects interfaces (ITensor, IArray, etc.)
+	│   │   ├── All generic interfaces (ITensor, IArray, etc.)
 	│   │   └── Objects metadata classes (TensorInfo, MultiImageInfo)
 	│   ├── graph
-	│   │   ├── algorithms
-	│   │   │   └── Generic algorithms used by the graph backend (e.g Order of traversal)
+	│   │   ├── algorithms --> Generic algorithms used by the graph backend (e.g Order of traversal)
 	│   │   ├── backends --> The backend specific code
 	│   │   │   ├── CL --> OpenCL specific operations
 	│   │   │   ├── GLES  --> OpenGLES Compute Shaders specific operations
 	│   │   │   └── NEON --> NEON specific operations
-	│   │   ├── detail
-	│   │   │   └── Collection of internal utilities.
-	│   │   ├── frontend
-	│   │   │   └── Code related to the stream frontend interface.
-	│   │   ├── mutators
-	│   │   │   └── Used to modify / optimise the Graph intermediate representation(Operator fusion, in place operations, etc.)
-	│   │   ├── nodes
-	│   │   │   └── The various nodes supported by the graph API
-	│   │   ├── printers
-	│   │   │   └── Debug printers
-	│   │   └── Graph objects ( INode, ITensorAccessor, Graph, etc.)
+	│   │   ├── detail --> Collection of internal utilities.
+	│   │   ├── frontend --> Code related to the stream frontend interface.
+	│   │   ├── mutators --> Used to modify / optimise the Graph intermediate representation(Operator fusion, in place operations, etc.)
+	│   │   ├── nodes --> The various nodes supported by the graph API
+	│   │   ├── printers --> Debug printers
+	│   │   └── Graph objects interfaces (INode, ITensorAccessor, Graph, etc.)
 	│   └── runtime
 	│       ├── common
 	│       │   └── Common utility code used by all backends
@@ -169,6 +162,8 @@ You should have the following file organisation:
 	│   └── ...
 	├── documentation.xhtml --> documentation/index.xhtml
 	├── examples
+	│   ├── gemm_tuner
+	│   │   └── OpenCL GEMM tuner utility
 	│   ├── cl_*.cpp --> OpenCL examples
 	│   ├── gc_*.cpp --> GLES compute shaders examples
 	│   ├── graph_*.cpp --> Graph examples
@@ -246,7 +241,7 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
-v20.02 Public major release
+v20.05 Public major release
  - Various bug fixes.
  - Various optimisations.
  - Added Bfloat16 type support
@@ -1210,8 +1205,6 @@ or simply remove the build parameter as build=cross_compile is the default value
 
 	scons Werror=1 -j8 debug=0 neon=1 opencl=0 os=linux arch=armv7a
 
-@attention To cross compile with opencl=1 you need to make sure to have a version of libOpenCL matching your target architecture.
-
 @subsubsection S3_2_2_examples How to manually build the examples ?
 
 The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.
@@ -1248,8 +1241,6 @@ To cross compile a GLES example for Linux 64bit:
 
 To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the examples against arm_compute_graph.so too.
 
-@note The compute library must currently be built with both neon and opencl enabled - neon=1 and opencl=1
-
 i.e. to cross compile the "graph_lenet" example for Linux 32bit:
 
 	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
@@ -1281,7 +1272,6 @@ To compile natively (i.e directly on an ARM device) for GLES for Linux 32bit or 
 	g++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude/ -L. -larm_compute -larm_compute_core -std=c++11 -DARM_COMPUTE_GC -Iinclude/linux/ -o gc_absdiff
 
 To compile natively the examples with the Graph API, such as graph_lenet.cpp, you need to link the examples against arm_compute_graph.so too.
-@note The compute library must currently be built with both neon and opencl enabled - neon=1 and opencl=1
 
 i.e. to natively compile the "graph_lenet" example for Linux 32bit:
 
@@ -1382,7 +1372,6 @@ To cross compile a GLES example:
 	aarch64-linux-android-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_GC
 
 To cross compile the examples with the Graph API, such as graph_lenet.cpp, you need to link the library arm_compute_graph also.
-(notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)
 
 	#32 bit:
 	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
@@ -1473,51 +1462,9 @@ compiler is included in the Android standalone toolchain. After everything has
 been set up in the Cygwin terminal the general guide on building the library
 can be followed.
 
-@subsection S3_6_cl_stub_library The OpenCL stub library
+@subsection S3_6_cl_requirements OpenCL DDK Requirements
 
-In the opencl-1.2-stubs folder you will find the sources to build a stub OpenCL library which then can be used to link your application or arm_compute against.
-
-If you preferred you could retrieve the OpenCL library from your device and link against this one but often this library will have dependencies on a range of system libraries forcing you to link your application against those too even though it is not using them.
-
-@warning This OpenCL library provided is a stub and *not* a real implementation. You can use it to resolve OpenCL's symbols in arm_compute while building the example but you must make sure the real libOpenCL.so is in your PATH when running the example or it will not work.
-
-To cross-compile the stub OpenCL library simply run:
-
-	<target-prefix>-gcc -o libOpenCL.so -Iinclude opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
-
-For example:
-
-	#Linux 32bit
-	arm-linux-gnueabihf-gcc -o libOpenCL.so -Iinclude opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
-	#Linux 64bit
-	aarch64-linux-gnu-gcc -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/opencl_stubs.c -fPIC
-	#Android 32bit
-	arm-linux-androideabi-clang -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
-	#Android 64bit
-	aarch64-linux-android-clang -o libOpenCL.so -Iinclude -shared opencl-1.2-stubs/opencl_stubs.c -fPIC -shared
-
-@subsection S3_7_gles_stub_library The Linux OpenGLES and EGL stub libraries
-
-In the opengles-3.1-stubs folder you will find the sources to build stub EGL and OpenGLES libraries which then can be used to link your Linux application of arm_compute against.
-
-@note The stub libraries are only needed on Linux. For Android, the NDK toolchains already provide the meta-EGL and meta-GLES libraries.
-
-To cross-compile the stub OpenGLES and EGL libraries simply run:
-
-	<target-prefix>-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
-	<target-prefix>-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
-
-	#Linux 32bit
-	arm-linux-gnueabihf-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
-	arm-linux-gnueabihf-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
-
-	#Linux 64bit
-	aarch64-linux-gnu-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
-	aarch64-linux-gnu-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
-
-@subsection S3_8_cl_requirements OpenCL DDK Requirements
-
-@subsubsection S3_8_1_cl_hard_requirements Hard Requirements
+@subsubsection S3_6_1_cl_hard_requirements Hard Requirements
 
 Compute Library requires OpenCL 1.1 and above with support of non uniform workgroup sizes, which is officially supported in the Mali OpenCL DDK r8p0 and above as an extension (respective extension flag is \a -cl-arm-non-uniform-work-group-size).
 
@@ -1525,7 +1472,7 @@ Enabling 16-bit floating point calculations require \a cl_khr_fp16 extension to 
 
 Use of @ref CLMeanStdDev function requires 64-bit atomics support, thus \a cl_khr_int64_base_atomics should be supported in order to use.
 
-@subsubsection S3_8_2_cl_performance_requirements Performance improvements
+@subsubsection S3_6_2_cl_performance_requirements Performance improvements
 
 Integer dot product built-in function extensions (and therefore optimized kernels) are available with Mali OpenCL DDK r22p0 and above for the following GPUs : G71, G76. The relevant extensions are \a cl_arm_integer_dot_product_int8, \a cl_arm_integer_dot_product_accumulate_int8 and \a cl_arm_integer_dot_product_accumulate_int16.
 
@@ -1533,7 +1480,7 @@ OpenCL kernel level debugging can be simplified with the use of printf, this req
 
 SVM allocations are supported for all the underlying allocations in Compute Library. To enable this OpenCL 2.0 and above is a requirement.
 
-@subsection S3_9_cl_tuner OpenCL Tuner
+@subsection S3_7_cl_tuner OpenCL Tuner
 
 The OpenCL tuner, a.k.a. CLTuner, is a module of Arm Compute Library that can improve the performance of the OpenCL kernels tuning the Local-Workgroup-Size (LWS).
 The optimal LWS for each unique OpenCL kernel configuration is stored in a table. This table can be either imported or exported from/to a file.
@@ -1581,7 +1528,7 @@ CLTuner looks for the optimal LWS for each unique OpenCL kernel configuration. S
     gemm1.configure(&a1, &b1, nullptr, &c1, 1.0f, 0.0f);
 @endcode
 
-@subsubsection S3_9_1_cl_tuner_how_to How to use it
+@subsubsection S3_7_1_cl_tuner_how_to How to use it
 
 All the graph examples in the ACL's folder "examples" and the arm_compute_benchmark accept an argument to enable the OpenCL tuner and an argument to export/import the LWS values to/from a file
 
