@@ -45,9 +45,7 @@ public:
 
     GraphEdsrExample(const GraphEdsrExample &) = delete;
     GraphEdsrExample &operator=(const GraphEdsrExample &) = delete;
-    GraphEdsrExample(GraphEdsrExample &&)                 = default;
-    GraphEdsrExample &operator=(GraphEdsrExample &&) = default;
-    ~GraphEdsrExample() override                     = default;
+    ~GraphEdsrExample() override                          = default;
 
     bool do_setup(int argc, char **argv) override
     {
