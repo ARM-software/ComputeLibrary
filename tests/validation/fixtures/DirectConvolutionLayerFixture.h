@@ -105,8 +105,8 @@ protected:
             }
             case DataType::QASYMM8_SIGNED:
             {
-                std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-                std::uniform_int_distribution<int8_t> distribution(bounds.first, bounds.second);
+                // Use small input range to avoid all the test results being saturated at the end.
+                std::uniform_int_distribution<int8_t> distribution(-25, 25);
                 library->fill(tensor, distribution, i);
                 break;
             }
