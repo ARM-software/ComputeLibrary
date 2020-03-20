@@ -62,7 +62,8 @@ def filter_clang_tidy_lines( lines ):
                 ("Utils.h" in line and "no member named 'unmap' in 'arm_compute::Tensor'" in line) or
                 ("Utils.h" in line and "no member named 'map' in 'arm_compute::Tensor'" in line) or
                 ("CPUUtils.cpp" in line and "'asm/hwcap.h' file not found" in line) or
-                "3rdparty" in line):
+                "3rdparty" in line or
+                ("'arm_compute_version.embed' file not found" in line) ):
                 print_context=False
                 continue
 
