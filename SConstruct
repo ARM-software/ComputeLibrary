@@ -44,7 +44,7 @@ vars.AddVariables(
                   allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
+    EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "tizen", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
@@ -193,7 +193,7 @@ if 'v7a' in env['estate'] and env['estate'] == '64':
 prefix = ""
 if 'v7a' in env['arch']:
     env.Append(CXXFLAGS = ['-march=armv7-a', '-mthumb', '-mfpu=neon'])
-    if env['os'] == 'android':
+    if env['os'] == 'android' or env['os'] == 'tizen':
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
     else:
         env.Append(CXXFLAGS = ['-mfloat-abi=hard'])
@@ -227,6 +227,8 @@ if 'x86' not in env['arch']:
             prefix = "arm-eabi-"
         elif env['os'] == 'android':
             prefix = "arm-linux-androideabi-"
+        elif env['os'] == 'tizen':
+            prefix = "armv7l-tizen-linux-gnueabi-"
     elif env['estate'] == '64' and 'v8' in env['arch']:
         if env['os'] == 'linux':
             prefix = "aarch64-linux-gnu-"
@@ -234,6 +236,8 @@ if 'x86' not in env['arch']:
             prefix = "aarch64-elf-"
         elif env['os'] == 'android':
             prefix = "aarch64-linux-android-"
+        elif env['os'] == 'tizen':
+            prefix = "aarch64-tizen-linux-gnu-"
 
 if env['build'] == 'native':
     prefix = ""
