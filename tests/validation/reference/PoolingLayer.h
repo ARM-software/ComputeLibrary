@@ -36,9 +36,9 @@ namespace validation
 namespace reference
 {
 template <typename T, typename ACC_T = T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const PoolingLayerInfo &info);
+SimpleTensor<T> pooling_layer_internal(const SimpleTensor<T> &src, const PoolingLayerInfo &info, SimpleTensor<uint32_t> *indices);
 template <typename T>
-SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo);
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> *indices);
 } // namespace reference
 } // namespace validation
 } // namespace test

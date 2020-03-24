@@ -29,18 +29,18 @@
 
 #include "support/MemorySupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 GCPoolingLayer::GCPoolingLayer()
     : _kernel(nullptr), _border_handler(), _shift_handler()
 {
 }
 
-void GCPoolingLayer::configure(IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info)
+void GCPoolingLayer::configure(IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info, IGCTensor *indices)
 {
     // Configure pooling kernel
     auto k = arm_compute::support::cpp14::make_unique<GCPoolingLayerKernel>();
-    k->configure(input, output, pool_info);
+    k->configure(input, output, pool_info, indices);
     _kernel = std::move(k);
 
     // Configure border depending on operation required
@@ -50,9 +50,9 @@ void GCPoolingLayer::configure(IGCTensor *input, IGCTensor *output, const Poolin
     _shift_handler.configure(input);
 }
 
-Status GCPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status GCPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    return GCPoolingLayerKernel::validate(input, output, pool_info);
+    return GCPoolingLayerKernel::validate(input, output, pool_info, indices);
 }
 
 void GCPoolingLayer::run()
@@ -63,3 +63,4 @@ void GCPoolingLayer::run()
     GCScheduler::get().memory_barrier();
     GCScheduler::get().dispatch(*_kernel);
 }
+} // namespace arm_compute

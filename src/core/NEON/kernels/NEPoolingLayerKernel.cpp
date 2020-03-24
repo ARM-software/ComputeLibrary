@@ -123,7 +123,8 @@ inline void scale_vector_q16x8(bool exclude_padding, TVec &v, const Coordinates 
     v = wrapper::vsetlane(elems[7], v, 7);
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, unsigned int &pooled_w, unsigned int pooled_h)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info,
+                          unsigned int &pooled_w, unsigned int pooled_h, const ITensorInfo *indices, Size2D pool_size)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
@@ -134,6 +135,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    if(indices)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX, "Pooling indices only supported for MAX pooling method");
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_quantized(input->data_type()));
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_quantized(input->data_type()) && !pool_info.exclude_padding && (pool_info.pool_type == PoolingType::AVG) && pool_info.pad_stride_info.has_padding()
@@ -146,6 +152,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH)) != pooled_w)
                                     || (output->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT)) != pooled_h));
+
+        if(indices)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() == DataLayout::NHWC, "Pool indices only supported in NCHW");
+            ARM_COMPUTE_RETURN_ERROR_ON((indices->dimension(get_data_layout_dimension_index(indices->data_layout(), DataLayoutDimension::WIDTH)) != pooled_w)
+                                        || (indices->dimension(get_data_layout_dimension_index(indices->data_layout(), DataLayoutDimension::HEIGHT)) != pooled_h));
+        }
     }
 
     return Status{};
@@ -159,13 +173,18 @@ Status validate_arguments_pool_info(const unsigned int pool_size_x, const unsign
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info, unsigned int &num_elems_processed_per_iteration,
-                                                        BorderSize &border_size,
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, ITensorInfo *indices, const PoolingLayerInfo &pool_info,
+                                                        unsigned int &num_elems_processed_per_iteration,
+                                                        BorderSize   &border_size,
                                                         unsigned int pooled_w, unsigned int pooled_h, int pool_size_x, int pool_size_y)
 {
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_pool_shape(*input, pool_info)));
-
+    if(indices)
+    {
+        // Indices auto inizialitation if not yet initialized
+        auto_init_if_empty(*indices, (input->clone()->set_tensor_shape(compute_pool_shape(*input, pool_info))).set_data_type(DataType::U32) /* we store the offset to the element */);
+    }
     const auto          data_layout                  = pool_info.data_layout == DataLayout::UNKNOWN ? input->data_layout() : pool_info.data_layout;
     unsigned int        num_elems_read_per_iteration = 0;
     unsigned int        num_elems_horizontal_window  = 0;
@@ -286,25 +305,28 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     {
         // Number of iterations in X dimension
         const int num_iterations_x = (pooled_w + num_elems_processed_per_iteration - 1) / num_elems_processed_per_iteration;
-
         // Upper limit for the number of right/bottom border elements that are accessed
         const int upper_bound_w = ((num_iterations_x - 1) * num_elems_processed_per_iteration * pool_stride_x - pool_pad_left + num_elems_read_per_iteration) - input_width;
         const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_top + pool_size_y) - input_height;
-
-        border_size        = BorderSize(pool_pad_top, pool_pad_right, pool_pad_bottom, pool_pad_left);
-        border_size.right  = std::max(upper_bound_w, pool_pad_right);
-        border_size.bottom = std::max(upper_bound_h, pool_pad_bottom);
-
+        border_size             = BorderSize(pool_pad_top, pool_pad_right, pool_pad_bottom, pool_pad_left);
+        border_size.right       = std::max(upper_bound_w, pool_pad_right);
+        border_size.bottom      = std::max(upper_bound_h, pool_pad_bottom);
         TensorShape output_shape{ input->tensor_shape() };
         output_shape.set(0, pooled_w);
         output_shape.set(1, pooled_h);
         TensorInfo output_info(input->clone()->set_tensor_shape(output_shape));
-
         win = calculate_max_window(output_info, Steps(num_elems_processed_per_iteration));
-        AccessWindowStatic input_access(input, -pool_pad_left, -pool_pad_top, input_width + border_size.right, input_height + border_size.bottom);
-
+        AccessWindowStatic     input_access(input, -pool_pad_left, -pool_pad_top, input_width + border_size.right, input_height + border_size.bottom);
         AccessWindowHorizontal output_access(output, 0, num_elems_horizontal_window);
-        window_changed = update_window_and_padding(win, input_access, output_access);
+        if(indices)
+        {
+            AccessWindowHorizontal indices_access(indices, 0, num_elems_horizontal_window);
+            window_changed = update_window_and_padding(win, input_access, output_access, indices_access);
+        }
+        else
+        {
+            window_changed = update_window_and_padding(win, input_access, output_access);
+        }
         output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
     }
     else
@@ -313,12 +335,18 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         output_shape.set(1, pooled_w);
         output_shape.set(2, pooled_h);
         TensorInfo output_info(input->clone()->set_tensor_shape(output_shape));
-
         win = calculate_max_window(output_info, Steps(num_elems_processed_per_iteration));
         AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-
         AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = update_window_and_padding(win, input_access, output_access);
+        if(indices)
+        {
+            AccessWindowHorizontal indices_access(indices, 0, num_elems_processed_per_iteration);
+            window_changed = update_window_and_padding(win, input_access, output_access, indices_access);
+        }
+        else
+        {
+            window_changed = update_window_and_padding(win, input_access, output_access);
+        }
         output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
     }
 
@@ -438,7 +466,7 @@ inline int8x8_t vrequantize_pooling(int8x8_t &vec, const UniformQuantizationInfo
 } // namespace
 
 NEPoolingLayerKernel::NEPoolingLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _pool_info(), _data_layout(DataLayout::UNKNOWN), _num_elems_processed_per_iteration(0), _border_size(0), _is_square(false)
+    : _func(nullptr), _input(nullptr), _output(nullptr), _indices(nullptr), _pool_info(), _data_layout(DataLayout::UNKNOWN), _num_elems_processed_per_iteration(0), _border_size(0), _is_square(false)
 {
 }
 
@@ -447,10 +475,9 @@ BorderSize NEPoolingLayerKernel::border_size() const
     return _border_size;
 }
 
-void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
+void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info, ITensor *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
     const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info;
     const bool          is_global_pooling = pool_info.is_global_pooling;
     const int           pool_stride_x     = pad_stride_info.stride().first;
@@ -478,11 +505,12 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
                                                      pad_stride_info);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, pooled_w, pooled_h));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, pooled_w, pooled_h, (indices) ? indices->info() : nullptr, pool_size));
 
     // Set instance variables
     _input       = input;
     _output      = output;
+    _indices     = indices;
     _pool_info   = pool_info;
     _data_layout = input->info()->data_layout();
     _is_square   = (pool_size.x() == pool_size.y());
@@ -690,7 +718,8 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), pool_info, _num_elems_processed_per_iteration, _border_size, pooled_w, pooled_h, pool_size.x(), pool_size.y());
+    auto win_config = validate_and_configure_window(input->info(), output->info(), (indices) ? indices->info() : nullptr,
+                                                    pool_info, _num_elems_processed_per_iteration, _border_size, pooled_w, pooled_h, pool_size.x(), pool_size.y());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 }
@@ -1435,7 +1464,6 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
                     res              = std::max(res, data);
                 }
             }
-
 #if defined(__aarch64__)
             // Reduction operation available on 64 bit architectures only
             res = std::max(vmaxvq_f32(vres), res);
@@ -1459,66 +1487,117 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
     input, output);
 }
 
-void NEPoolingLayerKernel::pooling2_f32_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
+void NEPoolingLayerKernel::pooling2_f32_nchw_maxpool_indices(const Window &window_input, const Window &window)
 {
-    Iterator input(_input, window_input);
-    Iterator output(_output, window);
-
-    constexpr int pool_size       = 2;
-    const int     pool_pad_right  = _pool_info.pad_stride_info.pad_right();
-    const int     pool_pad_top    = _pool_info.pad_stride_info.pad_top();
-    const int     pool_pad_left   = _pool_info.pad_stride_info.pad_left();
-    const int     pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
-    int           pool_stride_x   = 0;
-    int           pool_stride_y   = 0;
+    Iterator  input(_input, window_input);
+    Iterator  output(_output, window);
+    Iterator  indices(_indices, window);
+    int       final_index   = 0;
+    const int pool_pad_top  = _pool_info.pad_stride_info.pad_top();
+    const int pool_pad_left = _pool_info.pad_stride_info.pad_left();
+    int       pool_stride_x = 0;
+    int       pool_stride_y = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
-
     const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
     const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    const Strides &input_strides = _input->info()->strides_in_bytes();
+    const auto     in_stridew    = input_strides[1];
+
+    execute_window_loop(window, [&](const Coordinates &)
     {
-        float32x2_t top_data    = vld1_f32(reinterpret_cast<const float *>(input_top_ptr + input.offset()));
-        float32x2_t bottom_data = vld1_f32(reinterpret_cast<const float *>(input_bottom_ptr + input.offset()));
-        float32x2_t res         = {};
-        float       final_res   = 0;
-
-        // Get power of 2 in case of l2 pooling
-        if(pooling_type == PoolingType::L2)
-        {
-            top_data    = vmul_f32(top_data, top_data);
-            bottom_data = vmul_f32(bottom_data, bottom_data);
-        }
-
-        if(pooling_type != PoolingType::MAX)
-        {
-            // Calculate scale
-            float             scale   = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-            const float32x2_t scale_v = vdup_n_f32(scale);
-
-            // Perform pooling
-            const float32x2_t sum_data = vadd_f32(top_data, bottom_data);
-            res                        = vmul_f32(vpadd_f32(sum_data, sum_data), scale_v);
-        }
-        else
-        {
-            const float32x2_t max_data = vmax_f32(top_data, bottom_data);
-            res                        = vpmax_f32(max_data, max_data);
-        }
-        final_res = vget_lane_f32(res, 0);
-
-        // Calculate square-root in case of l2 pooling
-        if(pooling_type == PoolingType::L2)
-        {
-            final_res = sqrt(final_res);
-        }
-
+        const auto        input_offset_top    = input_top_ptr + input.offset();
+        const auto        input_offset_bottom = input_bottom_ptr + input.offset();
+        const auto        in_top_ptr          = reinterpret_cast<const float *>(input_offset_top);
+        const auto        in_bottom_ptr       = reinterpret_cast<const float *>(input_offset_bottom);
+        float32x2_t       top_data            = vld1_f32(in_top_ptr);
+        float32x2_t       bottom_data         = vld1_f32(in_bottom_ptr);
+        float32x2_t       res                 = {};
+        float             final_res           = 0;
+        const float32x2_t max_data            = vmax_f32(top_data, bottom_data);
+        res                                   = vpmax_f32(max_data, max_data);
+        final_res                             = vget_lane_f32(res, 0);
         // Store result
         *(reinterpret_cast<float *>(output.ptr())) = final_res;
+        const uint32_t   offset_top                = (uint32_t)(input.offset() / sizeof(float));
+        const uint32_t   offset_bottom             = (uint32_t)offset_top + (in_stridew / sizeof(float));
+        const uint32x2_t voffset_top               = { offset_top, offset_top + 1u };
+        const uint32x2_t voffset_bottom            = { offset_bottom, offset_bottom + 1u };
+        const uint32x2_t tmp_indices               = vbsl_u32(vcgt_f32(top_data, bottom_data), voffset_top, voffset_bottom);
+        final_index                                = vget_lane_u32(vbsl_u32(vcgt_f32(max_data, vrev64_f32(max_data)), tmp_indices, vrev64_u32(tmp_indices)), 0);
+        *(reinterpret_cast<int *>(indices.ptr()))  = final_index;
     },
-    input, output);
+    input, output, indices);
+}
+
+void NEPoolingLayerKernel::pooling2_f32_nchw(const Window &window_input, const Window &window, PoolingType pooling_type,
+                                             bool exclude_padding)
+{
+    if(pooling_type == PoolingType::MAX && _indices)
+    {
+        pooling2_f32_nchw_maxpool_indices(window_input, window);
+    }
+    else
+    {
+        Iterator      input(_input, window_input);
+        Iterator      output(_output, window);
+        constexpr int pool_size       = 2;
+        const int     pool_pad_right  = _pool_info.pad_stride_info.pad_right();
+        const int     pool_pad_top    = _pool_info.pad_stride_info.pad_top();
+        const int     pool_pad_left   = _pool_info.pad_stride_info.pad_left();
+        const int     pool_pad_bottom = _pool_info.pad_stride_info.pad_bottom();
+        int           pool_stride_x   = 0;
+        int           pool_stride_y   = 0;
+        std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
+        const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+        const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
+
+        const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+        const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+
+        execute_window_loop(window, [&](const Coordinates & id)
+        {
+            const auto  in_top_ptr    = reinterpret_cast<const float *>(input_top_ptr + input.offset());
+            const auto  in_bottom_ptr = reinterpret_cast<const float *>(input_bottom_ptr + input.offset());
+            float32x2_t top_data      = vld1_f32(in_top_ptr);
+            float32x2_t bottom_data   = vld1_f32(in_bottom_ptr);
+            float32x2_t res           = {};
+            float       final_res     = 0;
+            // Get power of 2 in case of l2 pooling
+            if(pooling_type == PoolingType::L2)
+            {
+                top_data    = vmul_f32(top_data, top_data);
+                bottom_data = vmul_f32(bottom_data, bottom_data);
+            }
+
+            if(pooling_type != PoolingType::MAX)
+            {
+                // Calculate scale
+                float             scale   = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                const float32x2_t scale_v = vdup_n_f32(scale);
+
+                // Perform pooling
+                const float32x2_t sum_data = vadd_f32(top_data, bottom_data);
+                res                        = vmul_f32(vpadd_f32(sum_data, sum_data), scale_v);
+            }
+            else
+            {
+                const float32x2_t max_data = vmax_f32(top_data, bottom_data);
+                res                        = vpmax_f32(max_data, max_data);
+            }
+            final_res = vget_lane_f32(res, 0);
+
+            // Calculate square-root in case of l2 pooling
+            if(pooling_type == PoolingType::L2)
+            {
+                final_res = sqrt(final_res);
+            }
+
+            // Store result
+            *(reinterpret_cast<float *>(output.ptr())) = final_res;
+        },
+        input, output);
+    }
 }
 
 void NEPoolingLayerKernel::pooling3_f32_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
@@ -2001,7 +2080,7 @@ void NEPoolingLayerKernel::poolingMxN_q8_nhwc(const Window &window_input, const 
     input, output);
 }
 
-Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
 
@@ -2032,8 +2111,9 @@ Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInf
                                                      pool_size_y,
                                                      pool_info.pad_stride_info);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, pooled_w, pooled_h));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), pool_info, num_elems_processed_per_iteration, border_size, pooled_w, pooled_h,
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, pooled_w, pooled_h, indices, Size2D(pool_size_x, pool_size_y)));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(),
+                                                              (indices) ? indices->clone().get() : nullptr, pool_info, num_elems_processed_per_iteration, border_size, pooled_w, pooled_h,
                                                               pool_size_x, pool_size_y)
                                 .first);
 

@@ -30,14 +30,13 @@
 
 namespace arm_compute
 {
-void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info)
+void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
-
     // Configure pooling kernel
     auto k = arm_compute::support::cpp14::make_unique<CLPoolingLayerKernel>();
     k->set_target(CLScheduler::get().target());
-    k->configure(input, output, pool_info);
+    k->configure(input, output, pool_info, indices);
     _kernel = std::move(k);
 
     const DataType data_type = input->info()->data_type();
@@ -81,8 +80,8 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     CLScheduler::get().tune_kernel_static(*_kernel);
 }
 
-Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    return CLPoolingLayerKernel::validate(input, output, pool_info);
+    return CLPoolingLayerKernel::validate(input, output, pool_info, indices);
 }
 } // namespace arm_compute

@@ -55,9 +55,10 @@ void auto_init(const ITensorInfo *input, ITensorInfo *output, unsigned int poole
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(indices, "Indices not supported in GLES backend");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type == PoolingType::L2),
                                     "Unsupported combination of parameters!");
@@ -77,8 +78,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
-        unsigned int pooled_w        = 0;
-        unsigned int pooled_h        = 0;
+        unsigned int pooled_w = 0;
+        unsigned int pooled_h = 0;
         std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
                                                          input->dimension(1),
                                                          pool_size,
@@ -93,14 +94,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
 std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x         = 0;
-    int                 pool_pad_y         = 0;
-    int                 pool_stride_x      = 0;
-    int                 pool_stride_y      = 0;
-    unsigned int        pooled_w           = 0;
-    unsigned int        pooled_h           = 0;
-    int                 pool_size          = pool_info.pool_size.width;
-    const PadStrideInfo pad_stride_info    = pool_info.pad_stride_info;
+    int                 pool_pad_x      = 0;
+    int                 pool_pad_y      = 0;
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
+    unsigned int        pooled_w        = 0;
+    unsigned int        pooled_h        = 0;
+    int                 pool_size       = pool_info.pool_size.width;
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
@@ -215,7 +216,7 @@ std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITenso
 } // namespace
 
 GCPoolingLayerKernel::GCPoolingLayerKernel()
-    : _input(nullptr), _output(nullptr), _pool_info(), _border_size(0), _num_elems_processed_per_iteration(1)
+    : _input(nullptr), _output(nullptr), _indices(nullptr), _pool_info(), _border_size(0), _num_elems_processed_per_iteration(1)
 {
 }
 
@@ -224,18 +225,18 @@ BorderSize GCPoolingLayerKernel::border_size() const
     return _border_size;
 }
 
-void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info)
+void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info, IGCTensor *indices)
 {
-    int                 pool_pad_x         = 0;
-    int                 pool_pad_y         = 0;
-    int                 pool_stride_x      = 0;
-    int                 pool_stride_y      = 0;
-    unsigned int        pooled_w           = 0;
-    unsigned int        pooled_h           = 0;
-    const PoolingType   pool_type          = pool_info.pool_type;
-    int                 pool_size          = pool_info.pool_size.width;
-    const PadStrideInfo pad_stride_info    = pool_info.pad_stride_info;
-    const bool          exclude_padding    = pool_info.exclude_padding;
+    int                 pool_pad_x      = 0;
+    int                 pool_pad_y      = 0;
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
+    unsigned int        pooled_w        = 0;
+    unsigned int        pooled_h        = 0;
+    const PoolingType   pool_type       = pool_info.pool_type;
+    int                 pool_size       = pool_info.pool_size.width;
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info;
+    const bool          exclude_padding = pool_info.exclude_padding;
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
@@ -253,13 +254,13 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
 
     auto_init(input->info(), output->info(), pooled_w, pooled_h);
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr));
 
     // Set instance variables
     _input     = input;
     _output    = output;
     _pool_info = pool_info;
-
+    _indices   = indices;
     // Set build options
     std::set<std::string> build_opts;
     build_opts.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(1));
@@ -321,9 +322,9 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     _border_size                       = pooling_config.second;
 }
 
-Status GCPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status GCPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, indices));
     ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), pool_info)));
 
     return Status{};

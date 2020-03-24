@@ -33,7 +33,7 @@ NEPoolingLayer::NEPoolingLayer()
 {
 }
 
-void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
+void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info, ITensor *indices)
 {
     // Check if we have Global Pooling Layer
     _is_global_pooling_layer = (input->info()->dimension(0) == pool_info.pool_size.width) && (input->info()->dimension(1) == pool_info.pool_size.height);
@@ -42,7 +42,7 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
 
     // Configure pooling kernel
-    _pooling_layer_kernel.configure(input, output, pool_info);
+    _pooling_layer_kernel.configure(input, output, pool_info, indices);
 
     switch(_data_layout)
     {
@@ -65,9 +65,9 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
     }
 }
 
-Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status NEPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    return NEPoolingLayerKernel::validate(input, output, pool_info);
+    return NEPoolingLayerKernel::validate(input, output, pool_info, indices);
 }
 
 void NEPoolingLayer::run()

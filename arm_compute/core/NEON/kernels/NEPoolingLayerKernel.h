@@ -57,8 +57,9 @@ public:
      * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[out] indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(const ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info);
+    void configure(const ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info, ITensor *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref NEPoolingLayerKernel
      *
      * @note F16 are supported for pool sizes 2 and 3 only
@@ -66,10 +67,11 @@ public:
      * @param[in] input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[in] indices   (optional) The indices of the maximal values. Data type supported: U32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -84,6 +86,12 @@ private:
      * @param[in] exclude_padding Flag to specify exclusion of padding from the operation.
      */
     void pooling2_f32_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding = false);
+    /** Function to perform 2x2 pooling and compute the pooling indices. The indices can be used for max unpool.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    void pooling2_f32_nchw_maxpool_indices(const Window &window_input, const Window &window);
     /** Function to perform MxN pooling for 32-bit floating point values.
      *
      * @param[in] window_input    Input region on which to execute the kernel.
@@ -197,6 +205,7 @@ private:
     PoolingFunction  _func;
     const ITensor   *_input;
     ITensor         *_output;
+    ITensor         *_indices;
     PoolingLayerInfo _pool_info;
     DataLayout       _data_layout;
     unsigned int     _num_elems_processed_per_iteration;

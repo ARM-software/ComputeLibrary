@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,17 +51,19 @@ public:
      * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: F16/F32.
      * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[out]    indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info);
+    void configure(IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info, IGCTensor *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref GCPoolingLayer
      *
      * @param[in] input     Source tensor info. Data types supported: F16/F32.
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[in] indices   (optional) The indices of the maximal values. Data type supported: U32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
 
     void run() override final;
 
