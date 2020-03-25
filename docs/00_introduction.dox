@@ -253,8 +253,37 @@ v20.05 Public major release
      - @ref NEDepthConvertLayerKernel
      - @ref NEDepthConvertLayer
      - @ref NEGEMMConvolutionLayer
-     - @ref NEGEMMConvolutionLayer
      - @ref NEGEMMAssemblyDispatch
+ - Added new data type QASYMM8_SIGNED support for:
+     - @ref CLDirectConvolutionLayer
+     - @ref CLDeconvolutionLayer
+     - @ref CLDirectDeconvolutionLayer
+     - @ref CLGEMMDeconvolutionLayer
+     - @ref CLGEMMLowpMatrixMultiplyReshapedKernel
+     - @ref CLGEMMLowpQuantizeDownInt32ScaleKernel
+     - @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
+     - @ref CLReductionOperation
+     - @ref CLReduceMean
+     - @ref NEUpsampleLayer
+     - @ref NECast
+     - @ref NEReductionOperation
+     - @ref NEReduceMean
+     - @ref NEArgMinMaxLayer
+     - @ref NEDeconvolutionLayer
+     - @ref NEGEMMLowpQuantizeDownInt32ScaleKernel
+     - @ref CPPBoxWithNonMaximaSuppressionLimit
+     - @ref CPPDetectionPostProcessLayer
+     - @ref CPPPermuteKernel
+     - @ref CPPPermute
+     - @ref CPPTopKVKernel
+     - @ref CPPTopKV
+ - Deprecated OpenCL kernels / functions:
+     - CLGEMMLowpQuantizeDownInt32ToUint8Scale
+     - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
+ - Deprecated NEON kernels / functions:
+     - NEGEMMLowpQuantizeDownInt32ToUint8Scale
+ - Removed CPP kernels / functions:
+     - CPPFlipWeightsKernel
 
 v20.02.1 Maintenance release
  - Added Android-NN build script.
