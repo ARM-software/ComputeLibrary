@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,6 +99,46 @@ void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
                                               unsigned int       idx_ofms,
                                               int32_t           *output_multipliers_ptr,
                                               int32_t           *output_shifts_ptr);
+
+/** Round to the nearest division by a power-of-two using exponent, copied from NEMath
+ *
+ * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
+ *
+ * @param[in] x        Element to divide.
+ * @param[in] exponent Integer value used to round to nearest division by a power-of-two
+ *
+ * @return the nearest division by a power-of-two using exponent
+ */
+int32_t rounding_divide_by_pow2(int32_t x, int exponent);
+
+/** Compute multiplication of two integers
+ *
+ * @param[in] a One integer to multiply
+ * @param[in] b Another integer to multiply
+ *
+ * @return The multiplied value
+ */
+int32_t saturating_rounding_doubling_highmul(int32_t a, int32_t b);
+
+/** Compute the value multiplied by given quantized multiplier and shift
+ *
+ * @param[in] input Target value to multiply.
+ * @param[in] qmul  Quantized multipler
+ * @param[in] shift Left bit shift
+ *
+ * @return The multiplied value
+ */
+int32_t multiply_by_quantized_multipler(int32_t input, int32_t qmul, int32_t shift);
+
+/** Compute the value multiplied the power-of-two
+ *
+ * @param[in] exponent Exponent used to calculate power-of-two
+ * @param[in] v        Target value to multiply
+ *
+ * @return The multiplied value
+ */
+int32_t saturating_rounding_multiply_by_pow2(int exponent, int32_t v);
+
 } // namespace quantization
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_IO_FILE_HANDLER_H */

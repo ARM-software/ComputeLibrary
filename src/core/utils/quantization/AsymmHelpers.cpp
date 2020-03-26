@@ -196,5 +196,56 @@ void compute_quantized_multipliers_and_shifts(const ITensorInfo *input,
         output_shifts_ptr[i]      = output_shift;
     }
 }
+
+int32_t saturating_rounding_doubling_highmul(int32_t a, int32_t b)
+{
+    bool    overflow = a == b && a == std::numeric_limits<int32_t>::min();
+    int64_t a_64(a);
+    int64_t b_64(b);
+    int64_t ab_64        = a_64 * b_64;
+    int32_t nudge        = ab_64 >= 0 ? (1 << 30) : (1 - (1 << 30));
+    int32_t ab_x2_high32 = static_cast<int32_t>((ab_64 + nudge) / (1ll << 31));
+    return overflow ? std::numeric_limits<int32_t>::max() : ab_x2_high32;
+}
+
+inline int32_t rounding_divide_by_pow2(int32_t x, int exponent)
+{
+    const int32_t mask      = (1 << exponent) - 1;
+    const int32_t threshold = (mask >> 1) + (x < 0 ? 1 : 0);
+    return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
+}
+
+int32_t multiply_by_quantized_multipler(int32_t input, int32_t qmul, int32_t shift)
+{
+    const auto left_shift  = shift > 0 ? shift : 0;
+    const auto right_shift = shift > 0 ? 0 : -shift;
+    return rounding_divide_by_pow2(saturating_rounding_doubling_highmul(input * (1 << left_shift), qmul), right_shift);
+}
+
+int32_t saturating_rounding_multiply_by_pow2(int32_t exponent, int32_t v)
+{
+    if(exponent == 0)
+    {
+        return v;
+    }
+    else if(exponent < 0)
+    {
+        return rounding_divide_by_pow2(v, -exponent);
+    }
+    else
+    {
+        constexpr auto min   = std::numeric_limits<int32_t>::min();
+        constexpr auto max   = std::numeric_limits<int32_t>::max();
+        const auto     width = sizeof(int32_t) * 8;
+
+        const int32_t threshold = ((1 << (width - 1 - exponent)) - 1);
+        bool          pos_mask  = v > threshold;
+        bool          neg_mask  = v < -threshold;
+        int32_t       result    = v << exponent;
+        result                  = pos_mask ? max : result;
+        result                  = neg_mask ? min : result;
+        return result;
+    }
+}
 } // quantization
 } // arm_compute
