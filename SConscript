@@ -25,7 +25,10 @@ import re
 import subprocess
 
 VERSION = "v0.0-unreleased"
-SONAME_VERSION="1.0.0"
+LIBRARY_VERSION_MAJOR = 18
+LIBRARY_VERSION_MINOR =  1
+LIBRARY_VERSION_PATCH =  0
+SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
 
 Import('env')
 Import('vars')
@@ -159,6 +162,12 @@ if env['gles_compute'] and env['embed_kernels']:
 Default(generate_embed)
 if env["build"] == "embed_only":
     Return()
+
+# Append version defines for semantic versioning
+arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSION_MAJOR),
+                                     ('ARM_COMPUTE_VERSION_MINOR', LIBRARY_VERSION_MINOR),
+                                     ('ARM_COMPUTE_VERSION_PATCH', LIBRARY_VERSION_PATCH)])
+
 
 # Don't allow undefined references in the libraries:
 arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined'])
