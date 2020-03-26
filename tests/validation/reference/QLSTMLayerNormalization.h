@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LAYER_NORMALIZATION_LAYER_H
-#define ARM_COMPUTE_TEST_LAYER_NORMALIZATION_LAYER_H
+#ifndef ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_H
+#define ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -35,10 +35,10 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<int16_t> layer_normalization_layer(const SimpleTensor<int16_t> &src, const SimpleTensor<int16_t> &weight, const SimpleTensor<int16_t> &bias);
+SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src, const SimpleTensor<int16_t> &weight, const SimpleTensor<int32_t> &bias);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_LAYER_NORMALIZATION_LAYER_H */
+#endif /* ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_H */
