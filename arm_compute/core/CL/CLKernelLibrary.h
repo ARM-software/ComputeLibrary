@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CLKERNELLIBRARY_H
 #define ARM_COMPUTE_CLKERNELLIBRARY_H
 
+#include "arm_compute/core/CL/CLCompileContext.h"
 #include "arm_compute/core/CL/OpenCL.h"
 
 #include <map>
@@ -33,173 +34,18 @@
 
 namespace arm_compute
 {
-/** Build options */
-class CLBuildOptions final
-{
-    using StringSet = std::set<std::string>;
-
-public:
-    /** Default constructor. */
-    CLBuildOptions();
-    /** Adds option to the existing build option list
-     *
-     * @param[in] option Option to add
-     */
-    void add_option(std::string option);
-    /** Adds option if a given condition is true;
-     *
-     * @param[in] cond   Condition to check
-     * @param[in] option Option to add if condition is true
-     */
-    void add_option_if(bool cond, std::string option);
-    /** Adds first option if condition is true else the second one
-     *
-     * @param[in] cond         Condition to check
-     * @param[in] option_true  Option to add if condition is true
-     * @param[in] option_false Option to add if condition is false
-     */
-    void add_option_if_else(bool cond, std::string option_true, std::string option_false);
-    /** Appends given build options to the current's objects options.
-     *
-     * @param[in] options Build options to append
-     */
-    void add_options(const StringSet &options);
-    /** Appends given build options to the current's objects options if a given condition is true.
-     *
-     * @param[in] cond    Condition to check
-     * @param[in] options Option to add if condition is true
-     */
-    void add_options_if(bool cond, const StringSet &options);
-    /** Gets the current options list set
-     *
-     * @return Build options set
-     */
-    const StringSet &options() const;
-
-private:
-    StringSet _build_opts; /**< Build options set */
-};
-/** Program class */
-class Program final
-{
-public:
-    /** Default constructor. */
-    Program();
-    /** Construct program from source file.
-     *
-     * @param[in] context CL context used to create the program.
-     * @param[in] name    Program name.
-     * @param[in] source  Program source.
-     */
-    Program(cl::Context context, std::string name, std::string source);
-    /** Construct program from binary file.
-     *
-     * @param[in] context CL context used to create the program.
-     * @param[in] device  CL device for which the programs are created.
-     * @param[in] name    Program name.
-     * @param[in] binary  Program binary.
-     */
-    Program(cl::Context context, cl::Device device, std::string name, std::vector<unsigned char> binary);
-    /** Default Copy Constructor. */
-    Program(const Program &) = default;
-    /** Default Move Constructor. */
-    Program(Program &&) = default;
-    /** Default copy assignment operator */
-    Program &operator=(const Program &) = default;
-    /** Default move assignment operator */
-    Program &operator=(Program &&) = default;
-    /** Returns program name.
-     *
-     * @return Program's name.
-     */
-    std::string name() const
-    {
-        return _name;
-    }
-    /** User-defined conversion to the underlying CL program.
-     *
-     * @return The CL program object.
-     */
-    explicit operator cl::Program() const;
-    /** Build the given CL program.
-     *
-     * @param[in] program       The CL program to build.
-     * @param[in] build_options Options to build the CL program.
-     *
-     * @return True if the CL program builds successfully.
-     */
-    static bool build(const cl::Program &program, const std::string &build_options = "");
-    /** Build the underlying CL program.
-     *
-     * @param[in] build_options Options used to build the CL program.
-     *
-     * @return A reference to itself.
-     */
-    cl::Program build(const std::string &build_options = "") const;
-
-private:
-    cl::Context                _context;   /**< Underlying CL context. */
-    cl::Device                 _device;    /**< CL device for which the programs are created. */
-    bool                       _is_binary; /**< Create program from binary? */
-    std::string                _name;      /**< Program name. */
-    std::string                _source;    /**< Source code for the program. */
-    std::vector<unsigned char> _binary;    /**< Binary from which to create the program. */
-};
-
-/** Kernel class */
-class Kernel final
-{
-public:
-    /** Default Constructor. */
-    Kernel();
-    /** Default Copy Constructor. */
-    Kernel(const Kernel &) = default;
-    /** Default Move Constructor. */
-    Kernel(Kernel &&) = default;
-    /** Default copy assignment operator */
-    Kernel &operator=(const Kernel &) = default;
-    /** Default move assignment operator */
-    Kernel &operator=(Kernel &&) = default;
-    /** Constructor.
-     *
-     * @param[in] name    Kernel name.
-     * @param[in] program Built program.
-     */
-    Kernel(std::string name, const cl::Program &program);
-    /** Returns kernel name.
-     *
-     * @return Kernel's name.
-     */
-    std::string name() const
-    {
-        return _name;
-    }
-    /** Returns OpenCL kernel.
-     *
-     * @return OpenCL Kernel.
-     */
-    explicit operator cl::Kernel() const
-    {
-        return _kernel;
-    }
-
-private:
-    std::string _name;   /**< Kernel name */
-    cl::Kernel  _kernel; /**< OpenCL Kernel */
-};
-
 /** CLKernelLibrary class */
 class CLKernelLibrary final
 {
-    using StringSet = std::set<std::string>;
-
-public:
+private:
     /** Default Constructor. */
     CLKernelLibrary();
     /** Prevent instances of this class from being copied */
     CLKernelLibrary(const CLKernelLibrary &) = delete;
     /** Prevent instances of this class from being copied */
     const CLKernelLibrary &operator=(const CLKernelLibrary &) = delete;
+
+public:
     /** Access the KernelLibrary singleton.
      * This method has been deprecated and will be removed in the next release.
      * @return The KernelLibrary instance.
@@ -224,17 +70,9 @@ public:
      *
      * @param[in] program_name Program name.
      *
-     * @return Source of the selected program.
+     * @return A pair with the source (false) or the binary (true), of the selected program.
      */
-    std::string get_program_source(const std::string &program_name);
-    /** Sets the CL context used to create programs.
-     *
-     * @note Setting the context also resets the device to the
-     *       first one available in the new context.
-     *
-     * @param[in] context A CL context.
-     */
-    void set_context(cl::Context context);
+    std::pair<std::string, bool> get_program(const std::string &program_name) const;
 
     /** Accessor for the associated CL context.
      *
@@ -243,7 +81,7 @@ public:
     cl::Context &context();
 
     /** Gets the CL device for which the programs are created. */
-    cl::Device &get_device();
+    const cl::Device &get_device();
 
     /** Sets the CL device for which the programs are created.
      *
@@ -268,7 +106,7 @@ public:
      *
      * @return The created kernel.
      */
-    Kernel create_kernel(const std::string &kernel_name, const StringSet &build_options_set = {}) const;
+    Kernel create_kernel(const std::string &kernel_name, const std::set<std::string> &build_options_set = {}) const;
     /** Find the maximum number of local work items in a workgroup can be supported for the kernel.
      *
      */
@@ -304,28 +142,33 @@ public:
      */
     bool int64_base_atomics_supported() const;
 
-private:
-    /** Load program and its dependencies.
+    /** Returns the program name given a kernel name
      *
-     * @param[in] program_name Name of the program to load.
+     * @return Program name
      */
-    const Program &load_program(const std::string &program_name) const;
-    /** Concatenates contents of a set into a single string.
-     *
-     * @param[in] s Input set to concatenate.
-     *
-     * @return Concatenated string.
-     */
-    std::string stringify_set(const StringSet &s) const;
+    std::string get_program_name(const std::string &kernel_name) const;
 
-    cl::Context _context;                                                /**< Underlying CL context. */
-    cl::Device  _device;                                                 /**< Underlying CL device. */
-    std::string _kernel_path;                                            /**< Path to the kernels folder. */
-    mutable std::map<std::string, const Program>    _programs_map;       /**< Map with all already loaded program data. */
-    mutable std::map<std::string, cl::Program>      _built_programs_map; /**< Map with all already built program data. */
+    /** Sets the CL context used to create programs.
+     *
+     * @note Setting the context also resets the device to the
+     *       first one available in the new context.
+     *
+     * @param[in] context A CL context.
+     */
+    void set_context(cl::Context context);
+
+    /** Gets the compile context used
+     *
+     * @return The used compile context
+     */
+    CLCompileContext &get_compile_context();
+
+private:
+    CLCompileContext _compile_context;                                   /**< Compile Context. */
+    std::string      _kernel_path;                                       /**< Path to the kernels folder. */
     static const std::map<std::string, std::string> _kernel_program_map; /**< Map that associates kernel names with programs. */
     static const std::map<std::string, std::string> _program_source_map; /**< Contains sources for all programs.
-                                                                              Used for compile-time kernel inclusion. >*/
+                                                                            Used for compile-time kernel inclusion. >*/
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLKERNELLIBRARY_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,13 +39,13 @@ CLRuntimeContext::CLRuntimeContext()
     cl::CommandQueue queue = cl::CommandQueue(ctx, dev);
     _gpu_owned_scheduler->init(ctx, queue, dev, &_tuner);
     const std::string cl_kernels_folder("./cl_kernels");
-    _kernel_lib.init(cl_kernels_folder, ctx, dev);
-    _core_context = CLCoreRuntimeContext(&_kernel_lib, _gpu_owned_scheduler->context(), _gpu_owned_scheduler->queue());
+    CLKernelLibrary::get().init(cl_kernels_folder, ctx, dev);
+    _core_context = CLCoreRuntimeContext(&CLKernelLibrary::get(), _gpu_owned_scheduler->context(), _gpu_owned_scheduler->queue());
 }
 
 CLKernelLibrary &CLRuntimeContext::kernel_library()
 {
-    return _kernel_lib;
+    return CLKernelLibrary::get();
 }
 
 CLCoreRuntimeContext *CLRuntimeContext::core_runtime_context()

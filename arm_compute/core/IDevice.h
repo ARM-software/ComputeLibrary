@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/functions/CLFloor.h"
 
-#include "arm_compute/core/CL/kernels/CLFloorKernel.h"
-#include "support/MemorySupport.h"
+#ifndef ARM_COMPUTE_IDEVICE_H
+#define ARM_COMPUTE_IDEVICE_H
+
+#include <string>
 
 namespace arm_compute
 {
-void CLFloor::configure(const ICLTensor *input, ICLTensor *output)
+/** Device types */
+enum class DeviceType
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output);
-}
+    NEON,
+    CL,
+    GLES
+};
 
-void CLFloor::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+/** Interface for device object */
+class IDevice
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLFloorKernel>();
-    k->configure(compile_context, input, output);
-    _kernel = std::move(k);
-}
+public:
+    /** Virtual Destructor */
+    virtual ~IDevice() = default;
 
-Status CLFloor::validate(const ITensorInfo *input, const ITensorInfo *output)
-{
-    return CLFloorKernel::validate(input, output);
-}
+    /** Device type accessor */
+    virtual DeviceType type() const = 0;
+
+    /** Check if extensions on a device are supported
+     *
+     * @param[in] extension An extension to check if it's supported.
+     *
+     * @return True if the extension is supported else false
+     */
+    virtual bool supported(const std::string &extension) const = 0;
+};
 } // namespace arm_compute
+
+#endif /* ARM_COMPUTE_IDEVICE_H */

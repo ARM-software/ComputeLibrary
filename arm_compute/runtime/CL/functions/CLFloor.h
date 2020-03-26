@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,13 @@ public:
      * @param[out] output Destination tensor. Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Set the source, destination of the kernel
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data type supported: F16/F32.
+     * @param[out] output          Destination tensor. Same as @p input
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFloor
      *
      * @param[in] input  Source tensor info. Data type supported: F16/F32.

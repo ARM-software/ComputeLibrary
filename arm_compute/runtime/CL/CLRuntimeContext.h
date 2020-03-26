@@ -58,7 +58,6 @@ private:
     std::unique_ptr<CLScheduler> _gpu_owned_scheduler{ nullptr };
     CLScheduler                 *_gpu_scheduler{ nullptr };
     CLTuner                      _tuner{ false };
-    CLKernelLibrary              _kernel_lib{};
     CLSymbols                    _symbols{};
     CLCoreRuntimeContext         _core_context{};
 };

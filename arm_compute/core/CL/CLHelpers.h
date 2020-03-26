@@ -27,11 +27,13 @@
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
 
+#include <set>
 #include <string>
 
 namespace arm_compute
 {
 class CLCoreRuntimeContext;
+class CLCompileContext;
 class CLBuildOptions;
 
 enum class DataType;
@@ -195,6 +197,16 @@ bool preferred_dummy_work_items_support(const cl::Device &device);
  * @return An opencl kernel
  */
 cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts);
+
+/** Creates an opencl kernel using a compile context
+ *
+ * @param[in] ctx         A compile context to be used to create the opencl kernel.
+ * @param[in] kernel_name The kernel name.
+ * @param[in] build_opts  The build options to be used for the opencl kernel compilation.
+ *
+ * @return An opencl kernel
+ */
+cl::Kernel create_kernel(CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts);
 
 /** Creates a suitable LWS hint object for parallel implementations. Sets the number of WG based on the input size.
  *  If input width is smaller than 128 we can use fewer threads than 8.
