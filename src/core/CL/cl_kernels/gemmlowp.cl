@@ -2132,7 +2132,7 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, dst_addr);
+    vstore4(res, 0, (__global OUTPUT_DATA_TYPE *)dst_addr);
 }
 #endif // defined(RESULT_OFFSET) && defined(RESULT_MULT_INT) && defined(RESULT_SHIFT)
 
