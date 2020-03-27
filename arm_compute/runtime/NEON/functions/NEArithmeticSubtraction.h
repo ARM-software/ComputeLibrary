@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,10 +45,10 @@ class NEArithmeticSubtraction : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in]  input1 First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in]  input2 Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[out] output Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in]  policy Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is QASYMM8.
+     * @param[in]  input1 First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
+     * @param[in]  input2 Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
+     * @param[out] output Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
+     * @param[in]  policy Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticSubtraction
@@ -56,7 +56,7 @@ public:
      * @param[in] input1 First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
      * @param[in] input2 Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
      * @param[in] output Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
-     * @param[in] policy Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is QASYMM8
+     * @param[in] policy Policy to use to handle overflow. Convert policy cannot be WRAP if datatype is quantized.
      *
      * @return a status
      */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,10 +44,11 @@ namespace validation
 namespace
 {
 #ifdef __aarch64__
-constexpr AbsoluteTolerance<float> tolerance_qasymm8(0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-#else                                                    //__aarch64__
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(0);   /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#else                                                      //__aarch64__
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-#endif                                                   //__aarch64__
+#endif                                                     //__aarch64__
+constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 
 /** Input data sets **/
 const auto ArithmeticSubtractionQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8),
@@ -57,6 +58,10 @@ const auto ArithmeticSubtractionQASYMM8Dataset = combine(combine(framework::data
 const auto ArithmeticSubtractionQASYMM8SIGNEDDataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8_SIGNED),
                                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                                                                framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+
+const auto ArithmeticSubtractionQSYMM16Dataset = combine(combine(framework::dataset::make("DataType", DataType::QSYMM16),
+                                                                 framework::dataset::make("DataType", DataType::QSYMM16)),
+                                                         framework::dataset::make("DataType", DataType::QSYMM16));
 
 const auto ArithmeticSubtractionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8),
                                                             framework::dataset::make("DataType", DataType::U8)),
@@ -80,6 +85,9 @@ const auto ArithmeticSubtractionQuantizationInfoDataset = combine(combine(framew
 const auto ArithmeticSubtractionQuantizationInfoSignedDataset = combine(combine(framework::dataset::make("QuantizationInfoIn1", { QuantizationInfo(0.5f, 10) }),
                                                                                 framework::dataset::make("QuantizationInfoIn2", { QuantizationInfo(0.5f, 20) })),
                                                                         framework::dataset::make("QuantizationInfoOut", { QuantizationInfo(0.5f, 50) }));
+const auto ArithmeticSubtractionQuantizationInfoSymmetric = combine(combine(framework::dataset::make("QuantizationInfoIn1", { QuantizationInfo(0.3f, 0) }),
+                                                                            framework::dataset::make("QuantizationInfoIn2", { QuantizationInfo(0.7f, 0) })),
+                                                                    framework::dataset::make("QuantizationInfoOut", { QuantizationInfo(0.2f, 0) }));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -138,16 +146,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<uint8_t>, framew
 }
 TEST_SUITE_END() // U8
 
-using NEArithmeticSubtractionQuantFixture       = ArithmeticSubtractionQuantValidationFixture<Tensor, Accessor, NEArithmeticSubtraction>;
-using NEArithmeticSubtractionQuantSignedFixture = ArithmeticSubtractionQuantSignedValidationFixture<Tensor, Accessor, NEArithmeticSubtraction>;
+using NEArithmeticSubtractionQASYMM8Fixture       = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, uint8_t>;
+using NEArithmeticSubtractionQASYMM8SignedFixture = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, int8_t>;
+using NEArithmeticSubtractionQSYMM16Fixture       = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, int16_t>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQuantFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
-                                                                                                                     datasets::SmallShapes(),
-                                                                                                                     ArithmeticSubtractionQASYMM8Dataset),
-                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-                                                                                                                 ArithmeticSubtractionQuantizationInfoDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQASYMM8Fixture, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ArithmeticSubtractionQASYMM8Dataset),
+                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                                                                             ArithmeticSubtractionQuantizationInfoDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -155,16 +162,28 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQuantFixture, framework:
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQuantSignedFixture, framework::DatasetMode::ALL, combine(combine(combine(
-                                                                                                                     datasets::SmallShapes(),
-                                                                                                                     ArithmeticSubtractionQASYMM8SIGNEDDataset),
-                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-                                                                                                                 ArithmeticSubtractionQuantizationInfoSignedDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQASYMM8SignedFixture, framework::DatasetMode::ALL, combine(combine(combine(
+                                                                                                                       datasets::SmallShapes(),
+                                                                                                                       ArithmeticSubtractionQASYMM8SIGNEDDataset),
+                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                                                                                   ArithmeticSubtractionQuantizationInfoSignedDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE(QSYMM16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQSYMM16Fixture, framework::DatasetMode::ALL, combine(combine(combine(
+        datasets::SmallShapes(),
+        ArithmeticSubtractionQSYMM16Dataset),
+                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                                                                             ArithmeticSubtractionQuantizationInfoSymmetric))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE(S16)

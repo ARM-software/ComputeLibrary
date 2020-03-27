@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,27 +24,13 @@
 #include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
 
 #include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
+#include "arm_compute/core/NEON/NESymm.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
-#include <algorithm>
-#include <arm_neon.h>
-#include <cstdint>
-#include <map>
-#include <string>
-
-using namespace arm_compute;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 namespace
 {
 constexpr unsigned int num_elems_processed_per_iteration = 16;
@@ -145,6 +131,53 @@ void sub_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED(const ITensor *in
     input1, input2, output);
 }
 
+void sub_saturate_QSYMM16_QSYMM16_QSYMM16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
+    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
+    Iterator output(out, window);
+
+    const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
+
+    execute_window_loop(window, [&](const Coordinates &)
+    {
+        const int16x8x2_t in1_s16 =
+        {
+            {
+                vld1q_s16(reinterpret_cast<const qsymm16_t *>(input1.ptr())),
+                vld1q_s16(reinterpret_cast<const qsymm16_t *>(input1.ptr()) + 8),
+            }
+        };
+        const int16x8x2_t in2_s16 =
+        {
+            {
+                vld1q_s16(reinterpret_cast<const qsymm16_t *>(input2.ptr())),
+                vld1q_s16(reinterpret_cast<const qsymm16_t *>(input2.ptr()) + 8),
+            }
+        };
+        const float32x4x4_t ta1 = vdequantize(in1_s16, iq1_info);
+        const float32x4x4_t ta2 = vdequantize(in2_s16, iq2_info);
+
+        const float32x4x4_t ta3 =
+        {
+            {
+                vsubq_f32(ta1.val[0], ta2.val[0]),
+                vsubq_f32(ta1.val[1], ta2.val[1]),
+                vsubq_f32(ta1.val[2], ta2.val[2]),
+                vsubq_f32(ta1.val[3], ta2.val[3]),
+            }
+        };
+
+        const int16x8x2_t result = vquantize_qsymm16(ta3, oq_info);
+
+        vst1q_s16(reinterpret_cast<qsymm16_t *>(output.ptr()), result.val[0]);
+        vst1q_s16(reinterpret_cast<qsymm16_t *>(output.ptr()) + 8, result.val[1]);
+    },
+    input1, input2, output);
+}
+
 void sub_wrap_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
@@ -153,8 +186,20 @@ void sub_wrap_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, 
 
     execute_window_loop(window, [&](const Coordinates &)
     {
-        const int16x8x2_t ta1 = vld2q_s16(reinterpret_cast<const int16_t *>(input1.ptr()));
-        const int16x8x2_t ta2 = vld2q_s16(reinterpret_cast<const int16_t *>(input2.ptr()));
+        const int16x8x2_t ta1 =
+        {
+            {
+                vld1q_s16(reinterpret_cast<const int16_t *>(input1.ptr())),
+                vld1q_s16(reinterpret_cast<const int16_t *>(input1.ptr()) + 8),
+            }
+        };
+        const int16x8x2_t ta2 =
+        {
+            {
+                vld1q_s16(reinterpret_cast<const int16_t *>(input2.ptr())),
+                vld1q_s16(reinterpret_cast<const int16_t *>(input2.ptr()) + 8),
+            }
+        };
 
         const int16x8x2_t ta3 =
         {
@@ -164,7 +209,8 @@ void sub_wrap_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, 
             }
         };
 
-        vst2q_s16(reinterpret_cast<int16_t *>(output.ptr()), ta3);
+        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()), ta3.val[0]);
+        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()) + 8, ta3.val[1]);
     },
     input1, input2, output);
 }
@@ -177,8 +223,20 @@ void sub_saturate_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *o
 
     execute_window_loop(window, [&](const Coordinates &)
     {
-        const int16x8x2_t ta1 = vld2q_s16(reinterpret_cast<const int16_t *>(input1.ptr()));
-        const int16x8x2_t ta2 = vld2q_s16(reinterpret_cast<const int16_t *>(input2.ptr()));
+        const int16x8x2_t ta1 =
+        {
+            {
+                vld1q_s16(reinterpret_cast<const int16_t *>(input1.ptr())),
+                vld1q_s16(reinterpret_cast<const int16_t *>(input1.ptr()) + 8),
+            }
+        };
+        const int16x8x2_t ta2 =
+        {
+            {
+                vld1q_s16(reinterpret_cast<const int16_t *>(input2.ptr())),
+                vld1q_s16(reinterpret_cast<const int16_t *>(input2.ptr()) + 8),
+            }
+        };
 
         const int16x8x2_t ta3 =
         {
@@ -188,25 +246,11 @@ void sub_saturate_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *o
             }
         };
 
-        vst2q_s16(reinterpret_cast<int16_t *>(output.ptr()), ta3);
+        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()), ta3.val[0]);
+        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()) + 8, ta3.val[1]);
     },
     input1, input2, output);
 }
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-inline float16x8x2_t vsub2q_f16(const float16x8x2_t &a, const float16x8x2_t &b)
-{
-    const float16x8x2_t res =
-    {
-        {
-            vsubq_f16(a.val[0], b.val[0]),
-            vsubq_f16(a.val[1], b.val[1])
-        }
-    };
-
-    return res;
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 void sub_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
@@ -217,10 +261,30 @@ void sub_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const
 
     execute_window_loop(window, [&](const Coordinates &)
     {
-        const float16x8x2_t a = vld2q_f16(reinterpret_cast<const float16_t *>(input1.ptr()));
-        const float16x8x2_t b = vld2q_f16(reinterpret_cast<const float16_t *>(input2.ptr()));
+        const float16x8x2_t a =
+        {
+            {
+                vld1q_f16(reinterpret_cast<const float16_t *>(input1.ptr())),
+                vld1q_f16(reinterpret_cast<const float16_t *>(input1.ptr()) + 8),
+            }
+        };
+        const float16x8x2_t b =
+        {
+            {
+                vld1q_f16(reinterpret_cast<const float16_t *>(input2.ptr())),
+                vld1q_f16(reinterpret_cast<const float16_t *>(input2.ptr()) + 8),
+            }
+        };
+        const float16x8x2_t res =
+        {
+            {
+                vsubq_f16(a.val[0], b.val[0]),
+                vsubq_f16(a.val[1], b.val[1]),
+            }
+        };
 
-        vst2q_f16(reinterpret_cast<float16_t *>(output.ptr()), vsub2q_f16(a, b));
+        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), res.val[0]);
+        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + 8, res.val[1]);
     },
     input1, input2, output);
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -240,8 +304,24 @@ void sub_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const
 
     execute_window_loop(window, [&](const Coordinates &)
     {
-        const float32x4x4_t ta1 = vld4q_f32(reinterpret_cast<const float *>(input1.ptr()));
-        const float32x4x4_t ta2 = vld4q_f32(reinterpret_cast<const float *>(input2.ptr()));
+        const float32x4x4_t ta1 =
+        {
+            {
+                vld1q_f32(reinterpret_cast<const float *>(input1.ptr())),
+                vld1q_f32(reinterpret_cast<const float *>(input1.ptr()) + 4),
+                vld1q_f32(reinterpret_cast<const float *>(input1.ptr()) + 8),
+                vld1q_f32(reinterpret_cast<const float *>(input1.ptr()) + 12),
+            }
+        };
+        const float32x4x4_t ta2 =
+        {
+            {
+                vld1q_f32(reinterpret_cast<const float *>(input2.ptr())),
+                vld1q_f32(reinterpret_cast<const float *>(input2.ptr()) + 4),
+                vld1q_f32(reinterpret_cast<const float *>(input2.ptr()) + 8),
+                vld1q_f32(reinterpret_cast<const float *>(input2.ptr()) + 12),
+            }
+        };
 
         const float32x4x4_t ta3 =
         {
@@ -253,7 +333,10 @@ void sub_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const
             }
         };
 
-        vst4q_f32(reinterpret_cast<float *>(output.ptr()), ta3);
+        vst1q_f32(reinterpret_cast<float *>(output.ptr()), ta3.val[0]);
+        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4, ta3.val[1]);
+        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8, ta3.val[2]);
+        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, ta3.val[3]);
     },
     input1, input2, output);
 }
@@ -389,9 +472,9 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
 {
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM16, DataType::S16, DataType::F16, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
@@ -400,6 +483,7 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
         !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8)
         && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8)
         && !(input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED)
+        && !(input1.data_type() == DataType::QSYMM16 && input2.data_type() == DataType::QSYMM16)
         && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8)
         && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16)
         && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8)
@@ -410,7 +494,8 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
         input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED && policy == ConvertPolicy::WRAP
-        && input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && policy == ConvertPolicy::WRAP,
+        && input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && policy == ConvertPolicy::WRAP
+        && input1.data_type() == DataType::QSYMM16 && input2.data_type() == DataType::QSYMM16 && policy == ConvertPolicy::WRAP,
         "Convert policy cannot be WRAP if datatype is QASYMM8 or QASYMM8_SIGNED");
 
     // Validate in case of configured output
@@ -420,6 +505,7 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
             !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::U8)
             && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8)
             && !(input1.data_type() == DataType::QASYMM8_SIGNED && input2.data_type() == DataType::QASYMM8_SIGNED && output.data_type() == DataType::QASYMM8_SIGNED)
+            && !(input1.data_type() == DataType::QSYMM16 && input2.data_type() == DataType::QSYMM16 && output.data_type() == DataType::QSYMM16)
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
@@ -464,6 +550,10 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo &inpu
         {
             set_data_type_if_unknown(output, DataType::QASYMM8_SIGNED);
         }
+        else if(input1.data_type() == DataType::QSYMM16 || input2.data_type() == DataType::QSYMM16)
+        {
+            set_data_type_if_unknown(output, DataType::QSYMM16);
+        }
     }
 
     Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration));
@@ -507,6 +597,7 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
         { "sub_saturate_U8_U8_S16", &sub_saturate_U8_U8_S16 },
         { "sub_saturate_QASYMM8_QASYMM8_QASYMM8", &sub_saturate_QAYSMM8_QAYSMM8_QAYSMM8 },
         { "sub_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &sub_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED },
+        { "sub_saturate_QSYMM16_QSYMM16_QSYMM16", &sub_saturate_QSYMM16_QSYMM16_QSYMM16 },
         { "sub_wrap_U8_S16_S16", &sub_wrap_U8_S16_S16 },
         { "sub_wrap_S16_U8_S16", &sub_wrap_S16_U8_S16 },
         { "sub_saturate_U8_S16_S16", &sub_saturate_U8_S16_S16 },
@@ -565,3 +656,4 @@ BorderSize NEArithmeticSubtractionKernel::border_size() const
     const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
     return BorderSize{ 0, border, 0, 0 };
 }
+} // namespace arm_compute
