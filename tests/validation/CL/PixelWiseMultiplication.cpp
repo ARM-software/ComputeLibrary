@@ -127,14 +127,17 @@ using CLPixelWiseMultiplicationQuantizedFixture = PixelWiseMultiplicationValidat
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("Scale", { 1.f, 2.f })),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
-                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                       framework::dataset::make("OUtQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                               framework::dataset::make("DataTypeIn1", DataType::QASYMM8)),
+                                                                                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8)),
+                                                                               framework::dataset::make("DataTypeOut", DataType::QASYMM8)),
+                                                                       framework::dataset::make("Scale", { 1.f, 2.f })),
+                                                               framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
+                                               framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                               framework::dataset::make("OUtQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -142,14 +145,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<uint8
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                       framework::dataset::make("Scale", { 1.f, 2.f })),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
-                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                       framework::dataset::make("OUtQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                               framework::dataset::make("DataTypeIn1", DataType::QASYMM8_SIGNED)),
+                                                                                       framework::dataset::make("DataTypeIn2", DataType::QASYMM8_SIGNED)),
+                                                                               framework::dataset::make("DataTypeOut", DataType::QASYMM8_SIGNED)),
+                                                                       framework::dataset::make("Scale", { 1.f, 2.f })),
+                                                               framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
+                                               framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                               framework::dataset::make("OUtQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -157,26 +163,32 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<int8_
 TEST_SUITE_END() // QASYMM8_SIGNED
 
 TEST_SUITE(QSYMM16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                       framework::dataset::make("DataType", DataType::QSYMM16)),
-                       framework::dataset::make("Scale", { 1.f, 2.f })),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
-                       framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0) })),
-                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) })),
-                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                               framework::dataset::make("DataTypeIn1", DataType::QSYMM16)),
+                                                                                       framework::dataset::make("DataTypeIn2", DataType::QSYMM16)),
+                                                                               framework::dataset::make("DataTypeOut", DataType::QSYMM16)),
+                                                                       framework::dataset::make("Scale", { 1.f, 2.f })),
+                                                               framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
+                                               framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0) })),
+                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) })),
+                               framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qsymm16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPixelWiseMultiplicationQuantizedFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
-                       framework::dataset::make("DataType", DataType::QSYMM16)),
-                       framework::dataset::make("Scale", { 1.f, 2.f })),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
-                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
-                       framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0) })),
-                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) })),
-                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPixelWiseMultiplicationQuantizedFixture<int16_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                               framework::dataset::make("DataTypeIn1", DataType::QSYMM16)),
+                                                                                       framework::dataset::make("DataTypeIn2", DataType::QSYMM16)),
+                                                                               framework::dataset::make("DataTypeOut", DataType::QSYMM16)),
+                                                                       framework::dataset::make("Scale", { 1.f, 2.f })),
+                                                               framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
+                                               framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0) })),
+                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) })),
+                               framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qsymm16);

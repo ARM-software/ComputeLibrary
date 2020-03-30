@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,15 @@ public:
      *                                 This input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
      * @param[in, out] input2          An input tensor. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, QSYMM16 (only if @p input1 is QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
      *                                 This input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, QSYMM16 (only if both inputs are QSYMM16), F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
+     * @param[out]     output          Output tensor. Data types supported:
+     *                                 - U8, only if both inputs are U8.
+     *                                 - QASYMM8, only if both inputs are QASYMM8.
+     *                                 - QASYMM8_SIGNED, only if @p input1 is QASYMM8_SIGNED.
+     *                                 - S16.
+     *                                 - QSYMM16, only if both inputs are QSYMM16.
+     *                                 - S32, only if both inputs are QSYMM16.
+     *                                 - F16, only if @p input1 is F16.
+     *                                 - F32, only if both inputs are F32.
      * @param[in]      scale           Scale to apply after multiplication.
      *                                 Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]      overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8, QASYMM8_SIGNED or QSYMM16.
@@ -58,7 +66,15 @@ public:
      *
      * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
      * @param[in] input2          An input tensor info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, QSYMM16 (only if both inputs are QSYMM16), F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
-     * @param[in] output          Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), QASYMM8_SIGNED (only if @p input1 is QASYMM8_SIGNED), S16, QSYMM16 (only if both inputs are QSYMM16), F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
+     * @param[in] output          Output tensor info. Data types supported:
+     *                            - U8, only if both inputs are U8.
+     *                            - QASYMM8, only if both inputs are QASYMM8.
+     *                            - QASYMM8_SIGNED, only if @p input1 is QASYMM8_SIGNED.
+     *                            - S16.
+     *                            - QSYMM16, only if both inputs are QSYMM16.
+     *                            - S32, only if both inputs are QSYMM16.
+     *                            - F16, only if @p input1 is F16.
+     *                            - F32, only if both inputs are F32.
      * @param[in] scale           Scale to apply after multiplication.
      *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in] overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8, QASYMM8_SIGNED or QSYMM16.
