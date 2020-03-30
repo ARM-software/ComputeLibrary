@@ -53,7 +53,7 @@ using CLCol2Im = CLSynthetizeFunction<CLCol2ImKernel>;
  *     - Pass NHWC as output data layout
  *     - Pass an invalid output shape
  */
-TEST_CASE(Negative, framework::DatasetMode::PRECOMMIT)
+TEST_CASE(Negative, framework::DatasetMode::ALL)
 {
     // Unsupported data type
     {
@@ -101,7 +101,7 @@ using CLCol2ImFixture = Col2ImValidationFixture<CLTensor, CLAccessor, CLCol2Im, 
  */
 FIXTURE_DATA_TEST_CASE(FP32,
                        CLCol2ImFixture<float>,
-                       framework::DatasetMode::PRECOMMIT,
+                       framework::DatasetMode::ALL,
                        combine(combine(combine(combine(
                                                    framework::dataset::make("InputShape", { TensorShape(8U, 16U, 3U, 1U), TensorShape(17U, 16U, 3U, 1U), TensorShape(7U, 16U, 3U, 1U) }),
                                                    framework::dataset::make("ConvolvedWidth", 4)),
@@ -127,7 +127,7 @@ FIXTURE_DATA_TEST_CASE(FP32,
  */
 FIXTURE_DATA_TEST_CASE(F16,
                        CLCol2ImFixture<half>,
-                       framework::DatasetMode::PRECOMMIT,
+                       framework::DatasetMode::ALL,
                        combine(combine(combine(combine(
                                                    framework::dataset::make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
                                                    framework::dataset::make("ConvolvedWidth", 4)),
@@ -153,7 +153,7 @@ FIXTURE_DATA_TEST_CASE(F16,
  */
 FIXTURE_DATA_TEST_CASE(QASYMM8,
                        CLCol2ImFixture<uint8_t>,
-                       framework::DatasetMode::PRECOMMIT,
+                       framework::DatasetMode::ALL,
                        combine(combine(combine(combine(
                                                    framework::dataset::make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
                                                    framework::dataset::make("ConvolvedWidth", 4)),
