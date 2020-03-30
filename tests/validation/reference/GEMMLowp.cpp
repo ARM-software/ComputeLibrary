@@ -26,6 +26,8 @@
 #include "arm_compute/core/Types.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
+#include "support/ToolchainSupport.h"
+
 #include <limits>
 
 namespace arm_compute
@@ -152,7 +154,7 @@ void quantize_down_scale_by_float(const SimpleTensor<TIn> *in, const SimpleTenso
         const float_t multiplier = (is_per_channel) ? result_real_multiplier[i % cols_in] : result_real_multiplier[0];
 
         float_t result_f = static_cast<float_t>(result) * multiplier + static_cast<float_t>(result_offset);
-        result           = static_cast<TIn>(std::round(result_f));
+        result           = static_cast<TIn>(support::cpp11::round(result_f));
 
         // Bounded ReLu
         if(min != max)

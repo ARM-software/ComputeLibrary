@@ -418,6 +418,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     const bool append_bias  = false;
     const bool is_quantized = is_data_type_quantized_asymmetric(data_type);
+    const bool is_bf16      = data_type == DataType::BFLOAT16;
     bool       skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
 
     // Get convolved dimensions
@@ -462,6 +463,10 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         if(is_quantized)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+        }
+        else if(is_bf16)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::F32);
         }
         else
         {

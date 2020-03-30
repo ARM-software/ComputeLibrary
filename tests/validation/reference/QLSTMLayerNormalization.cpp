@@ -28,6 +28,8 @@
 #include "PixelWiseMultiplication.h"
 #include "src/core/utils/quantization/AsymmHelpers.cpp"
 
+#include "support/ToolchainSupport.h"
+
 namespace arm_compute
 {
 namespace test
@@ -79,7 +81,7 @@ SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src
 
     for(int i = 0; i < output.num_elements(); i++)
     {
-        const auto output_val_s32 = static_cast<int32_t>(std::round(output_float[i] * std::pow(2, 12)));
+        const auto output_val_s32 = static_cast<int32_t>(support::cpp11::round(output_float[i] * std::pow(2, 12)));
         output[i]                 = utility::clamp<int32_t, int16_t>(output_val_s32, std::numeric_limits<int16_t>::min());
     }
 
