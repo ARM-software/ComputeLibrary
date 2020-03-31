@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@ namespace arm_compute
 namespace test
 {
 extern std::unique_ptr<AssetsLibrary>     library;
+extern std::unique_ptr<AssetsLibrary>     fixed_library;
 extern std::unique_ptr<ParametersLibrary> parameters;
 } // namespace test
 } // namespace arm_compute

@@ -75,7 +75,11 @@ namespace arm_compute
 {
 namespace test
 {
-std::unique_ptr<AssetsLibrary>            library;
+std::unique_ptr<AssetsLibrary> library;
+
+static constexpr uint32_t      fixed_seed = 1;
+std::unique_ptr<AssetsLibrary> fixed_library;
+
 extern std::unique_ptr<ParametersLibrary> parameters;
 } // namespace test
 } // namespace arm_compute
@@ -308,7 +312,8 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        library = support::cpp14::make_unique<AssetsLibrary>(assets->value(), seed->value());
+        library       = support::cpp14::make_unique<AssetsLibrary>(assets->value(), seed->value());
+        fixed_library = support::cpp14::make_unique<AssetsLibrary>(assets->value(), fixed_seed);
 
         if(!parser.validate())
         {

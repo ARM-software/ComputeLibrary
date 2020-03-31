@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,8 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        library->fill_tensor_uniform(tensor, i);
+        // This kernel doesn't benefit from using random seed as it just copies values.
+        fixed_library->fill_tensor_uniform(tensor, i);
     }
 
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
