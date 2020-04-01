@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Rounding.h"
 #include "utils/misc/Utility.h"
+#include "arm_compute/core/Error.h"
 
 #include <cstddef>
 #include <type_traits>
