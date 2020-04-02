@@ -62,7 +62,7 @@ void range_function(ITensor *output, float start, float step, const Window &wind
         const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
         for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
-            for(unsigned int count = 0; count < window_step_x; ++count)
+            for(int count = 0; count < window_step_x; ++count)
             {
                 id_vec = wrapper::vsetlane(static_cast<T>(x + count), id_vec, count);
             }
