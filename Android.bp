@@ -530,6 +530,7 @@ cc_library_static {
         "src/runtime/CL/functions/CLPixelWiseMultiplication.cpp",
         "src/runtime/CL/functions/CLPoolingLayer.cpp",
         "src/runtime/CL/functions/CLPriorBoxLayer.cpp",
+        "src/runtime/CL/functions/CLQLSTMLayer.cpp",
         "src/runtime/CL/functions/CLQuantizationLayer.cpp",
         "src/runtime/CL/functions/CLRNNLayer.cpp",
         "src/runtime/CL/functions/CLROIAlignLayer.cpp",

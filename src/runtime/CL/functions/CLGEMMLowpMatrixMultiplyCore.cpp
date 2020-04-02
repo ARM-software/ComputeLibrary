@@ -303,11 +303,9 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
-    //DataType::QSYMM8_PER_CHANNEL supported only for weights
-    if(b->data_type() != DataType::QSYMM8_PER_CHANNEL)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
-    }
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(b, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
+    ARM_COMPUTE_RETURN_ERROR_ON(a->data_type() == DataType::QASYMM8 && b->data_type() == DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON(a->data_type() == DataType::QASYMM8_SIGNED && b->data_type() == DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
 

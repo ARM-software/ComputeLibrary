@@ -65,7 +65,7 @@ public:
      *  -# Quantize to uint8 if gemm_info.gemmlowp_output_stage != NONE
      *
      * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
-     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[in]  b         Second input tensor (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
      * @param[out] output    Output tensor. Data type supported: S32 or QASYMM8/QASYMM8_SIGNED if gemm_info.gemmlowp_output_stage != NONE
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
@@ -75,7 +75,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyCore
      *
      * @param[in] a         First input tensor info (Matrix A). Data type supported: QASYMM8.
-     * @param[in] b         Second input tensor info (Matrix B). Data type supported: same as @p a
+     * @param[in] b         Second input tensor info (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[in] c         Third input tensor info (Matrix C). It can be a nullptr. Data type supported: S32
      * @param[in] output    Output tensor info. Data type supported: S32 or QASYMM8/QASYMM8_SIGNED if gemm_info.gemmlowp_output_stage != NONE
      * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and

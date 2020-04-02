@@ -52,7 +52,7 @@ public:
     /** Initialise the kernel's input and output.
      *
      * @param[in]  input0             Input tensor containing the LHS matrix. Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[in]  input1             Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0
+     * @param[in]  input1             Input tensor containing the RHS reshaped matrix. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[out] output             Output tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/S32.
      * @param[in]  gemm_info          GEMM information used to retrieve the original dimensions of the input matrices, output stage information and RHS/LHS info.
      *                                Only the following values are supported for LHS info:
@@ -105,7 +105,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
      *
      * @param[in] input0             Input tensor info for the LHS matrix. Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[in] input1             Input tensor info for the RHS reshaped matrix. Data type supported: same as @p input0
+     * @param[in] input1             Input tensor info for the RHS reshaped matrix. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL
      * @param[in] output             Output tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/S32.
      * @param[in] gemm_info          GEMM information used to retrieve the original dimensions of the input matrices, output stage information and RHS/LHS info.
      *                               Only the following values are supported for LHS info:

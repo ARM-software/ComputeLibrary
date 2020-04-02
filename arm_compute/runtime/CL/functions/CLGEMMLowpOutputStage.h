@@ -322,6 +322,7 @@ public:
  * -# @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
  * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
  * -# @ref CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel
+ * -# @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
 */
 class CLGEMMLowpOutputStage : public ICLSimpleFunction
 {

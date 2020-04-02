@@ -149,6 +149,13 @@ void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *b
                     _kernel = std::move(k);
                     break;
                 }
+                case DataType::QSYMM16:
+                {
+                    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
+                    k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
+                    _kernel = std::move(k);
+                    break;
+                }
                 default:
                     ARM_COMPUTE_ERROR("Unsupported output data type.");
             }
@@ -188,6 +195,8 @@ Status CLGEMMLowpOutputStage::validate(const ITensorInfo *input, const ITensorIn
                     return CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(input, bias, output, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
                 case DataType::QASYMM8_SIGNED:
                     return CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel::validate(input, bias, output, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
+                case DataType::QSYMM16:
+                    return CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::validate(input, bias, output, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
                 default:
                     return ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported output data type.");
             }
