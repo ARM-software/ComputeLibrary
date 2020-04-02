@@ -63,6 +63,8 @@ public:
             return false;
         }
 
+        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_type != DataType::QASYMM8, "Only QASYMM8 is supported for this graph example");
+
         // Print parameter values
         std::cout << common_params << std::endl;
 
