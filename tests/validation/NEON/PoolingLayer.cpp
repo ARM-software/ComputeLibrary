@@ -35,7 +35,6 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/PoolingLayerFixture.h"
-
 namespace arm_compute
 {
 namespace test
@@ -129,7 +128,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunIndices, NEPoolingLayerIndicesFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), combine(PoolingLayerIndicesDatasetFPSmall,
                                                                                                                    framework::dataset::make("DataType",
                                                                                                                            DataType::F32))),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
 
                                                                                                                   ))
 {

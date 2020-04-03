@@ -92,6 +92,12 @@ private:
      * @param[in] window       Output region on which to execute the kernel.
      */
     void pooling2_f32_nchw_maxpool_indices(const Window &window_input, const Window &window);
+    /** Function to perform 2x2 pooling and compute the pooling indices. The indices can be used for max unpool.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    void pooling2_f32_nhwc_maxpool_indices(const Window &window_input, const Window &window);
     /** Function to perform MxN pooling for 32-bit floating point values.
      *
      * @param[in] window_input    Input region on which to execute the kernel.
