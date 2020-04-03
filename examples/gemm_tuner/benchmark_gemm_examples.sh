@@ -58,6 +58,9 @@ function help_gemm_shape_file() {
 Gemm shape file:
   Gemm shape file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
   around each field).
+
+  Note also comments and extraneous empty lines are not permitted.
+
   A gemm shape is a list of 4 positive integers <M, N, K, B> describing the shapes of the two matrices (LHS and RHS)
   with:
   M - Number of lhs matrix rows
@@ -87,7 +90,10 @@ function help_gemm_config_file_native() {
 Gemm config file (Strategy native):
   Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
   around each field).
-  A gemm config is a list of 4 positive integers <m0, n0, k0, h0> and 2 boolean values interleave_rhs and transpose_rhs, with:
+
+  Note also comments and extraneous empty lines are not permitted.
+
+  A gemm config is a list of 3 positive integers <m0, n0, k0>, with:
   m0 - Number of rows processed by the matrix multiplication
   n0 - Number of columns processed by the matrix multiplication
   k0 - Number of partial accumulations performed by the matrix multiplication
@@ -119,6 +125,9 @@ function help_gemm_config_file_reshaped_rhs_only() {
 Gemm config file (Strategy reshaped_rhs_only):
   Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
   around each field).
+
+  Note also comments and extraneous empty lines are not permitted.
+
   A gemm config is a list of 4 positive integers <m0, n0, k0, h0> and 2 boolean values interleave_rhs and transpose_rhs, with:
   m0 - Number of rows processed by the matrix multiplication
   n0 - Number of columns processed by the matrix multiplication
@@ -155,6 +164,9 @@ function help_gemm_config_file_reshaped() {
 Gemm config file (Strategy reshaped):
   Gemm config file is a headerless csv file with fields separated by commas and commas only (there cannot be whitespaces
   around each field).
+
+  Note also comments and extraneous empty lines are not permitted.
+
   A gemm config is a list of 5 positive integers <m0, n0, k0, v0, h0> and 3 boolean values interleave_lhs, interleave_rhs and transpose_rhs, with:
   m0 - Number of rows processed by the matrix multiplication
   n0 - Number of columns processed by the matrix multiplication
