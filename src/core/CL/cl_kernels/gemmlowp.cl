@@ -1287,6 +1287,7 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
 
 #if defined(COLS_A)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
+ * It is also possible to multiply each reduced row by a scalar value, if SCALAR is passed at compile time.
  *
  * @note This stage is needed to handle the offset of matrix product
  *       https://github.com/google/gemmlowp/blob/master/doc/low-precision.md
@@ -1294,8 +1295,9 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
  * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
  * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
+ * @note In case of scaling the scalar value must be passed at compile time using -DSCALAR (e.g. -DSCALAR=3)
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -1342,11 +1344,15 @@ __kernel void gemmlowp_matrix_a_reduction(TENSOR3D_DECLARATION(src),
 
     sum_row += sum_row_32.s0 + sum_row_32.s1 + sum_row_32.s2 + sum_row_32.s3;
 
+#if defined(SCALAR)
+    sum_row *= (int)SCALAR;
+#endif // defined(SCALAR)
     *((__global int *)dst.ptr) = (int)sum_row;
 }
 
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
-/** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A using the arm dot product instruction
+/** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A using the arm dot product instruction.
+ * It is also possible to multiply each reduced row by a scalar value, if SCALAR is passed at compile time.
  *
  * @note This stage is needed to handle the offset of matrix product
  *       https://github.com/google/gemmlowp/blob/master/doc/low-precision.md
@@ -1354,8 +1360,9 @@ __kernel void gemmlowp_matrix_a_reduction(TENSOR3D_DECLARATION(src),
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
  * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
  * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
+ * @note In case of scaling the scalar value must be passed at compile time using -DSCALAR (e.g. -DSCALAR=3)
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -1408,6 +1415,9 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
         sum_row += (ACC_DATA_TYPE)matrix_a[i];
     }
 
+#if defined(SCALAR)
+    sum_row *= (int)SCALAR;
+#endif // defined(SCALAR)
     *((__global int *)dst.ptr) = (int)sum_row;
 }
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
@@ -1415,6 +1425,7 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
 
 #if defined(COLS_B) && defined(ROWS_B)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each column of Matrix B.
+ * It is also possible to multiply each reduced column by a scalar value, if SCALAR is passed at compile time.
  *
  * @note This stage is needed to handle the offset of matrix product
  *       https://github.com/google/gemmlowp/blob/master/doc/low-precision.md
@@ -1422,8 +1433,9 @@ __kernel void gemmlowp_matrix_a_reduction_dot8(TENSOR3D_DECLARATION(src),
  * @attention The number of matrix B columns and rows needs to be passed at compile time using -DCOLS_B and -DROWS_B
  * @note The input data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=uchar)
  * @note The data type for the accumulation must be passed at compile time using -DACC_DATA_TYPE (i.e. -DACC_DATA_TYPE=uint)
+ * @note In case of scaling the scalar value must be passed at compile time using -DSCALAR (i.e. -DSCALAR=3)
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data type: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -1480,7 +1492,11 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
         matrix_b += src_stride_y;
     }
 
-    vstore16(convert_int16(sum_col_32), 0, (__global int *)dst.ptr);
+#if defined(SCALAR)
+    sum_col_32 *= (VEC_DATA_TYPE(ACC_DATA_TYPE, 16))SCALAR;
+#endif // defined(SCALAR)
+    VSTORE(16)
+    (sum_col_32, 0, (__global int *)dst.ptr);
 }
 #endif // defined(COLS_B) && defined(ROWS_B)
 
