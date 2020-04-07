@@ -145,9 +145,19 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
         b_64 = convert_long##size(b);                                                                        \
         VEC_DATA_TYPE(long, size)                                                                            \
         ab_64 = a_64 * b_64;                                                                                 \
-        /* COMPMID-907 */                                                                                    \
+        /* Revert COMPMID-907 */                                                                             \
+        VEC_DATA_TYPE(long, size)                                                                            \
+        mask1 = 1 << 30;                                                                                     \
+        VEC_DATA_TYPE(long, size)                                                                            \
+        mask2 = 1 - (1 << 30);                                                                               \
+        VEC_DATA_TYPE(long, size)                                                                            \
+        is_positive_or_zero = ab_64 >= 0;                                                                    \
+        VEC_DATA_TYPE(long, size)                                                                            \
+        nudge = select(mask2, mask1, is_positive_or_zero);                                                   \
+        VEC_DATA_TYPE(long, size)                                                                            \
+        mask = 1ll << 31;                                                                                    \
         VEC_DATA_TYPE(int, size)                                                                             \
-        ab_x2_high32 = convert_int##size(((ab_64 + (1 << 30)) >> 31));                                       \
+        ab_x2_high32 = convert_int##size((ab_64 + nudge) / mask);                                            \
         return select(ab_x2_high32, INT_MAX, overflow);                                                      \
     }
 
@@ -397,6 +407,15 @@ inline float dequantize_qasymm8_signed(char input, float offset, float scale)
 #define ASYMM_ROUNDING_HALF_SUM(a, b, size) asymm_rounding_half_sum##size(a, b)
 #define ASYMM_RESCALE(value, src_integer_bits, dst_integer_bits, size) asymm_rescale##size(value, src_integer_bits, dst_integer_bits)
 
+#define MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(size)                                                                             \
+    inline VEC_DATA_TYPE(int, size) multiply_by_quantized_multiplier##size(VEC_DATA_TYPE(int, size) input, int qmul, int shift) \
+    {                                                                                                                           \
+        const int left_shift  = shift > 0 ? shift : 0;                                                                          \
+        const int right_shift = shift > 0 ? 0 : -shift;                                                                         \
+        return ASYMM_ROUNDING_DIVIDE_BY_POW2(ASYMM_MULT(input * (1 << left_shift), qmul, size), right_shift, size);             \
+    }
+#define MULTIPLY_BY_QUANTIZED_MULTIPLIER(input, qmul, shift, size) multiply_by_quantized_multiplier##size(input, qmul, shift)
+
 QUANTIZE_IMPL(uchar, 1)
 QUANTIZE_IMPL(char, 1)
 QUANTIZE_IMPL(uint, 1)
@@ -442,16 +461,19 @@ ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(4)
 ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(8)
 ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL(16)
 
+ASYMM_SELECT_USING_MASK_IMPL(1)
 ASYMM_SELECT_USING_MASK_IMPL(2)
 ASYMM_SELECT_USING_MASK_IMPL(4)
 ASYMM_SELECT_USING_MASK_IMPL(8)
 ASYMM_SELECT_USING_MASK_IMPL(16)
 
+ASYMM_MASK_IF_ZERO_IMPL(1)
 ASYMM_MASK_IF_ZERO_IMPL(2)
 ASYMM_MASK_IF_ZERO_IMPL(4)
 ASYMM_MASK_IF_ZERO_IMPL(8)
 ASYMM_MASK_IF_ZERO_IMPL(16)
 
+ASYMM_MASK_IF_NON_ZERO_IMPL(1)
 ASYMM_MASK_IF_NON_ZERO_IMPL(2)
 ASYMM_MASK_IF_NON_ZERO_IMPL(4)
 ASYMM_MASK_IF_NON_ZERO_IMPL(8)
@@ -467,6 +489,7 @@ ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(4)
 ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(8)
 ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL(16)
 
+ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(1)
 ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(2)
 ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(4)
 ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL(8)
@@ -482,9 +505,16 @@ ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(4)
 ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(8)
 ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL(16)
 
+ASYMM_RESCALE_IMPL(1)
 ASYMM_RESCALE_IMPL(2)
 ASYMM_RESCALE_IMPL(4)
 ASYMM_RESCALE_IMPL(8)
 ASYMM_RESCALE_IMPL(16)
+
+MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(1)
+MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(2)
+MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(4)
+MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(8)
+MULTIPLY_BY_QUANTIZED_MULTIPLIER_IMPL(16)
 
 #endif // ARM_COMPUTE_HELPERS_ASYMM_H

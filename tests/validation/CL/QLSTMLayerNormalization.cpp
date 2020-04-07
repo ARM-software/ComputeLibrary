@@ -21,11 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+#include "arm_compute/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
+#include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
@@ -43,7 +40,8 @@ namespace validation
 {
 namespace
 {
-constexpr uint32_t vector_size_byte = 16;
+constexpr AbsoluteTolerance<int16_t> tolerance_s16(0); /**< Tolerance value for comparing reference's output against implementation's output for QSYMM16 data types */
+constexpr uint32_t                   vector_size_byte = 16;
 
 using test::datasets::ShapeDataset;
 template <uint32_t num_elements_per_iter, uint32_t num_batches, uint32_t num_iteration>
@@ -79,24 +77,22 @@ public:
     }
 };
 } // namespace
-TEST_SUITE(NEON)
+TEST_SUITE(CL)
 TEST_SUITE(QLSTMLayerNormalization)
 
 static const TensorShape correct_input_shape{ TensorShape(15U, 2U) };
 static const TensorShape correct_weight_shape{ TensorShape(15U) };
 static const TensorShape correct_bias_shape{ TensorShape(15U) };
-static const TensorShape correct_output_shape{ correct_input_shape };
 static const DataType    correct_input_dt{ DataType::QSYMM16 };
 static const DataType    correct_weight_dt{ DataType::QSYMM16 };
 static const DataType    correct_bias_dt{ DataType::S32 };
-static const DataType    correct_output_dt{ correct_input_dt };
 static const uint32_t    tensor_num_channel{ 1 };
 
 // *INDENT-OFF*
 // clang-format off
 
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
-    zip(zip(zip(
+    zip(zip(
         framework::dataset::make("InputInfo", {
             TensorInfo(correct_input_shape, tensor_num_channel, DataType::F16), // input supports only QSYMM16
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // weight supports only QSYMM16
@@ -106,8 +102,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // bias supports only up to 1D
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // input_shape[0] != weight_shape[0] should fail
             TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // weight_shape[0] != bias_shape[0] should fail
-            TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // output shape mismatches with input shape
-            TensorInfo(correct_input_shape, tensor_num_channel, correct_input_dt), // output data type mismatches with input data type
         }),
         framework::dataset::make("WeightInfo", {
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
@@ -117,8 +111,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(TensorShape(15U, 2U), tensor_num_channel, correct_weight_dt),
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
             TensorInfo(TensorShape(14U), tensor_num_channel, correct_weight_dt),
-            TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
-            TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
             TensorInfo(correct_weight_shape, tensor_num_channel, correct_weight_dt),
         })
     ),
@@ -131,26 +123,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
             TensorInfo(TensorShape(15U, 2U), tensor_num_channel, correct_bias_dt),
             TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
             TensorInfo(TensorShape(14U), tensor_num_channel, correct_bias_dt),
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
-            TensorInfo(correct_bias_shape, tensor_num_channel, correct_bias_dt),
         })
-    ),
-        framework::dataset::make("OutputInfo", {
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, correct_output_dt),
-            TensorInfo(TensorShape(15, 3), tensor_num_channel, correct_output_dt),
-            TensorInfo(correct_output_shape, tensor_num_channel, DataType::S32),
-        })
-    ),
-     input_info, weight_info, bias_info, output_info)
+    ), input_info, weight_info, bias_info)
 {
-    const Status s = NEQLSTMLayerNormalizationKernel::validate(&input_info, &output_info, &weight_info, &bias_info);
+    TensorInfo dummy_output{};
+    const Status s = CLQLSTMLayerNormalizationKernel::validate(&input_info, &dummy_output, &weight_info, &bias_info);
     ARM_COMPUTE_EXPECT(!bool(s), framework::LogLevel::ERRORS);
 }
 
@@ -158,13 +135,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL,
 // *INDENT-ON*
 
 template <typename T>
-using NEQLSTMLayerNormalizationFixture = NEQLSTMLayerNormalizationValidationFixture<Tensor, Accessor, NEQLSTMLayerNormalizationKernel, T>;
+using CLQLSTMLayerNormalizationFixture = CLQLSTMLayerNormalizationValidationFixture<CLTensor, CLAccessor, CLQLSTMLayerNormalizationKernel, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QSYMM16)
 
 /** Tests will be targetting
- * - Comparison between NEON kernel and the exact same but scalar version of reference kernel
+ * - Comparison between OpenCL kernel and the exact same but scalar version of reference kernel
  * - Input shapes of 1D and 2D with the first dimension covers boundary values of 128-bit vector size (0~3 iterations)
  * - Weight and bias 1D shape that have same size as that of input shapes
  * - Quantization scale is greater and smaller than one.
@@ -176,7 +153,7 @@ TEST_SUITE(QSYMM16)
  * - The algorithm has been sensitive to quantization scale but it is hard to fully test
  *   the sensitivity due to aforementioned reason.
  * - Again, it is hard to fully test corner values due to the exact same algorithm of the
- *   reference kernel and the NEON kernel.
+ *   reference kernel and the OpenCL kernel.
  */
 
 constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
@@ -186,7 +163,7 @@ constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
                             QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("WeightShape")),             \
                         QLSTMLayerNormShapeDataSet<qsymm16_per_vector, 1, num_iter>("BiasShape")),                   \
                     framework::dataset::make("DataType", DataType::QSYMM16)),                                        \
-            framework::dataset::make("WeightQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(8192) }))
+            framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1. / 8192), QuantizationInfo(8192) }))
 
 #define QSYMM16_DATASET_1D \
     concat(concat(QSYMM16_DATASET_ITER(1, 0), QSYMM16_DATASET_ITER(1, 1)), QSYMM16_DATASET_ITER(1, 2))
@@ -194,16 +171,16 @@ constexpr uint32_t qsymm16_per_vector = vector_size_byte / sizeof(int16_t);
 #define QSYMM16_DATASET_2D \
     concat(concat(QSYMM16_DATASET_ITER(3, 0), QSYMM16_DATASET_ITER(3, 1)), QSYMM16_DATASET_ITER(3, 2))
 
-FIXTURE_DATA_TEST_CASE(RandomValue1D, NEQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_1D)
+FIXTURE_DATA_TEST_CASE(RandomValue1D, CLQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_1D)
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_s16);
 }
 
-FIXTURE_DATA_TEST_CASE(RandomValue2D, NEQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_2D)
+FIXTURE_DATA_TEST_CASE(RandomValue2D, CLQLSTMLayerNormalizationFixture<int16_t>, framework::DatasetMode::ALL, QSYMM16_DATASET_2D)
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_s16);
 }
 
 #undef QSYMM16_DATASET_ITER
@@ -213,7 +190,7 @@ FIXTURE_DATA_TEST_CASE(RandomValue2D, NEQLSTMLayerNormalizationFixture<int16_t>,
 TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // QLSTMLayerNormalization
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // CL
 
 } // namespace validation
 } // namespace test

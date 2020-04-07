@@ -125,6 +125,7 @@
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/CL/kernels/CLPoolingLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLPriorBoxLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLQLSTMLayerNormalizationKernel.h"
 #include "arm_compute/core/CL/kernels/CLQuantizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLROIAlignLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLROIPoolingLayerKernel.h"

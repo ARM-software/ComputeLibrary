@@ -326,6 +326,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pooling_layer_MxN_quantized_nhwc", "pooling_layer_quantized.cl" },
     { "pooling_layer_MxN_quantized_nchw", "pooling_layer_quantized.cl" },
     { "prior_box_layer_nchw", "prior_box_layer.cl" },
+    { "qlstm_layer_normalization", "qlstm_layer_normalization.cl" },
     { "quantization_layer", "quantization_layer.cl" },
     { "range", "range.cl" },
     { "range_quantized", "range.cl" },
@@ -822,6 +823,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "prior_box_layer.cl",
 #include "./cl_kernels/prior_box_layer.clembed"
+    },
+    {
+        "qlstm_layer_normalization.cl",
+#include "./cl_kernels/qlstm_layer_normalization.clembed"
     },
     {
         "quantization_layer.cl",

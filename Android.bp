@@ -173,6 +173,7 @@ cc_library_static {
         "src/core/CL/kernels/CLPixelWiseMultiplicationKernel.cpp",
         "src/core/CL/kernels/CLPoolingLayerKernel.cpp",
         "src/core/CL/kernels/CLPriorBoxLayerKernel.cpp",
+        "src/core/CL/kernels/CLQLSTMLayerNormalizationKernel.cpp",
         "src/core/CL/kernels/CLQuantizationLayerKernel.cpp",
         "src/core/CL/kernels/CLROIAlignLayerKernel.cpp",
         "src/core/CL/kernels/CLROIPoolingLayerKernel.cpp",

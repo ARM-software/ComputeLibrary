@@ -2277,7 +2277,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
  * @param[in]  biases_stride_x                      (Optional) Stride of the biases tensor in X dimension (in bytes)
  * @param[in]  biases_step_x                        (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  biases_offset_first_element_in_bytes (Optional) The offset of the first element in the biases tensor
- * @param[out] dst_ptr                              Pointer to the destination tensor Supported data type: QASYMM8
+ * @param[out] dst_ptr                              Pointer to the destination tensor Supported data type: QSYMM16
  * @param[in]  dst_stride_x                         Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                           dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                         Stride of the destination tensor in Y dimension (in bytes)
