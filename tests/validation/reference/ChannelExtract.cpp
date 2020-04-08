@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,6 +51,9 @@ SimpleTensor<uint8_t> channel_extract(const TensorShape &shape, const std::vecto
     const int height = dst.shape().y();
 
     // Loop over each pixel and extract channel
+#if defined(_OPENMP)
+    #pragma omp parallel for collapse(2)
+#endif /* _OPENMP */
     for(int y = 0; y < height; ++y)
     {
         for(int x = 0; x < width; ++x)

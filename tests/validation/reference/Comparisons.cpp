@@ -80,13 +80,16 @@ struct BroadcastUnroll
         id_src1.set(dim - 1, 0);
         id_src2.set(dim - 1, 0);
         id_dst.set(dim - 1, 0);
-
-        for(size_t i = 0; i < dst.shape()[dim - 1]; ++i, ++id_dst[dim - 1])
+#if defined(_OPENMP)
+        #pragma omp parallel for
+#endif /* _OPENMP */
+        for(size_t i = 0; i < dst.shape()[dim - 1]; ++i)
         {
             BroadcastUnroll < dim - 1 >::unroll(op, src1, src2, dst, id_src1, id_src2, id_dst);
 
             id_src1[dim - 1] += !src1_is_broadcast;
             id_src2[dim - 1] += !src2_is_broadcast;
+            ++id_dst[dim - 1];
         }
     }
 };

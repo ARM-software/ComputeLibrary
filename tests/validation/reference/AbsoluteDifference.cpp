@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,9 @@ SimpleTensor<T> absolute_difference(const SimpleTensor<T> &src1, const SimpleTen
     SimpleTensor<T> result(src1.shape(), dst_data_type);
 
     using intermediate_type = typename common_promoted_signed_type<T>::intermediate_type;
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < src1.num_elements(); ++i)
     {
         intermediate_type val = std::abs(static_cast<intermediate_type>(src1[i]) - static_cast<intermediate_type>(src2[i]));

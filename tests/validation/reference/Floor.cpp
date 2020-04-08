@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,9 @@ SimpleTensor<T> floor_layer(const SimpleTensor<T> &src)
     SimpleTensor<T> dst{ src.shape(), src.data_type() };
 
     // Compute reference
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = std::floor(src[i]);

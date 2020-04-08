@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,9 @@ SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const Simpl
 
     const size_t box_fields   = 4;
     const size_t class_fields = 4;
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(size_t i = 0; i < num_boxes; ++i)
     {
         // Extract ROI information

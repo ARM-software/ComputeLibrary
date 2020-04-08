@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,12 +46,14 @@ SimpleTensor<T> instance_normalization(const SimpleTensor<T> &src, float gamma, 
     const size_t h_size = src.shape()[1];
     const size_t c_size = src.shape()[2];
     const size_t n_size = src.shape()[3];
-
+#if defined(_OPENMP)
+    #pragma omp parallel for collapse(2)
+#endif /* _OPENMP */
     for(size_t n_i = 0; n_i < n_size; ++n_i)
     {
         for(size_t c_i = 0; c_i < c_size; ++c_i)
         {
-            float sum_h_w = 0;
+            float sum_h_w    = 0;
             float sum_sq_h_w = 0;
 
             for(size_t h_i = 0; h_i < h_size; ++h_i)
@@ -60,13 +62,14 @@ SimpleTensor<T> instance_normalization(const SimpleTensor<T> &src, float gamma, 
                 {
                     float val = src[coord2index(src.shape(), Coordinates(w_i, h_i, c_i, n_i))];
                     sum_h_w += val;
-                    sum_sq_h_w += val*val;
+                    sum_sq_h_w += val * val;
                 }
             }
             //Compute mean
             const float mean_h_w = sum_h_w / (h_size * w_size);
             //Compute variance
-            const float var_h_w = sum_sq_h_w / (h_size * w_size) - mean_h_w * mean_h_w;;
+            const float var_h_w = sum_sq_h_w / (h_size * w_size) - mean_h_w * mean_h_w;
+            ;
 
             //Apply mean
             for(size_t h_i = 0; h_i < h_size; ++h_i)

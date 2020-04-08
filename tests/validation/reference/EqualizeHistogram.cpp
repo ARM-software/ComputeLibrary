@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,6 +75,9 @@ SimpleTensor<T> equalize_histogram(const SimpleTensor<T> &src)
     }
 
     // Fill output tensor with equalized values
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = lut[src[i]];

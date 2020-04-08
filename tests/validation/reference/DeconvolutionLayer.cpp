@@ -100,6 +100,9 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
 
     // Flip weights by 180 degrees
     SimpleTensor<T> weights_flipped{ weights.shape(), weights.data_type(), 1, weights.quantization_info() };
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int ud = 0; ud < weights_upper_dims; ++ud)
     {
         const int offset = ud * weights_width * weights_height;
@@ -111,7 +114,9 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
             }
         }
     }
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int slice = 0; slice < num_2d_slices; ++slice)
     {
         const int offset_slice_in  = slice * width_in * height_in;

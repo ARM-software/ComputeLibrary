@@ -46,6 +46,9 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     // Up-casting
     if(element_size_from_data_type(src.data_type()) < element_size_from_data_type(dt_out))
     {
+#if defined(_OPENMP)
+        #pragma omp parallel for
+#endif /* _OPENMP */
         for(int i = 0; i < src.num_elements(); ++i)
         {
             result[i] = src[i] << shift;
@@ -54,6 +57,9 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     // Down-casting
     else
     {
+#if defined(_OPENMP)
+        #pragma omp parallel for
+#endif /* _OPENMP */
         for(int i = 0; i < src.num_elements(); ++i)
         {
             T1 val    = src[i] >> shift;

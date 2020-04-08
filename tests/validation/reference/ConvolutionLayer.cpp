@@ -69,6 +69,9 @@ SimpleTensor<T> convolution_layer_nchw(const SimpleTensor<T> &src, const SimpleT
     const int end_xi      = output_wh.first * stride_xi;
     const int end_yi      = output_wh.second * stride_yi;
     const int num_batches = src.shape().total_size() / (width_in * height_in * depth_in);
+#if defined(_OPENMP)
+    #pragma omp parallel for collapse(5)
+#endif /* _OPENMP */
     for(int r = 0; r < num_batches; ++r)
     {
         for(int yi = start_yi; yi < start_yi + end_yi; yi += stride_yi)

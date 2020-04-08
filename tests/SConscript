@@ -30,6 +30,7 @@ Import('install_bin')
 variables = [
     BoolVariable("benchmark_examples", "Build benchmark examples programs", True),
     BoolVariable("validate_examples", "Build validate examples programs", True),
+    BoolVariable("reference_openmp", "Build reference validation with openmp", True),
     #FIXME Switch the following two options to False before releasing
     BoolVariable("validation_tests", "Build validation test programs", True),
     BoolVariable("benchmark_tests", "Build benchmark test programs", True),
@@ -170,8 +171,12 @@ bm_link_flags = ['-fstack-protector-strong']
 if test_env['linker_script']:
     bm_link_flags += ['-Wl,--build-id=none', '-T', env['linker_script']]
 
+if test_env['reference_openmp'] and env['os'] != 'bare_metal':
+   test_env['CXXFLAGS'].append('-fopenmp')
+   test_env['LINKFLAGS'].append('-fopenmp')
+
 if test_env['validation_tests']:
-    arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LIBS= [ arm_compute_test_framework, arm_compute_core_a])
+    arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LINKFLAGS=test_env['LINKFLAGS'], CXXFLAGS=test_env['CXXFLAGS'], LIBS= [ arm_compute_test_framework, arm_compute_core_a])
     Depends(arm_compute_validation_framework , arm_compute_test_framework)
     Depends(arm_compute_validation_framework , arm_compute_core_a)
 

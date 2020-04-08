@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,9 @@ SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, si
         upper_dims *= src.shape()[i];
     }
 
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int r = 0; r < upper_dims; ++r)
     {
         const T *src_row_ptr = src.data() + r * lower_dims;
@@ -107,7 +110,7 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axi
     return softmax_layer_generic<T>(src, beta, axis, false);
 }
 
-template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int>::type>
+template < typename T, typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int >::type >
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis)
 {
     const QuantizationInfo output_quantization_info = arm_compute::get_softmax_output_quantization_info(src.data_type(), false);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,7 +109,9 @@ void im2col_nhwc(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D 
 
     // Compute width and height of the convolved tensors
     std::pair<unsigned int, unsigned int> convolved_dims = scaled_dimensions(src_width, src_height, kernel_dims.width, kernel_dims.height, conv_info);
-
+#if defined(_OPENMP)
+    #pragma omp parallel for schedule(dynamic, 1) collapse(2)
+#endif /* _OPENMP */
     for(int b = 0; b < batches; ++b)
     {
         for(int yo = 0; yo < dst_height; ++yo)

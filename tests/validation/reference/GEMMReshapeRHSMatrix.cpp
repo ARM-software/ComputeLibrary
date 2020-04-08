@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,7 +70,9 @@ SimpleTensor<T> gemm_reshape_rhs_matrix(const SimpleTensor<T> &in, const TensorS
 
     const unsigned int offset_output_x = rhs_info.interleave ? tile_to_use->shape()[0] : tile_to_use->shape()[0] * tile_to_use->shape()[1];
     const unsigned int step_output_x   = rhs_info.interleave ? tile_to_use->shape()[0] * rhs_info.h0 : tile_to_use->shape()[0];
-
+#ifdef ARM_COMPUTE_OPENMP
+    #pragma omp parallel for schedule(dynamic, 1) collapse(3)
+#endif /* _OPENMP */
     for(unsigned int z = 0; z < B; ++z)
     {
         for(unsigned int y = 0; y < num_tiles_y; ++y)

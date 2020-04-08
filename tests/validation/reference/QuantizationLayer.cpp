@@ -50,12 +50,18 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
     switch(output_data_type)
     {
         case DataType::QASYMM8:
+#if defined(_OPENMP)
+            #pragma omp parallel for
+#endif /* _OPENMP */
             for(int i = 0; i < src.num_elements(); ++i)
             {
                 dst[i] = quantize_qasymm8((src[i]), qinfo, rounding_policy);
             }
             break;
         case DataType::QASYMM8_SIGNED:
+#if defined(_OPENMP)
+            #pragma omp parallel for
+#endif /* _OPENMP */
             for(int i = 0; i < src.num_elements(); ++i)
             {
 #ifdef __aarch64__
@@ -66,6 +72,9 @@ SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType out
             }
             break;
         case DataType::QASYMM16:
+#if defined(_OPENMP)
+            #pragma omp parallel for
+#endif /* _OPENMP */
             for(int i = 0; i < src.num_elements(); ++i)
             {
                 dst[i] = quantize_qasymm16((src[i]), qinfo, rounding_policy);

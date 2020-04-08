@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,9 @@ SimpleTensor<T2> accumulate(const SimpleTensor<T1> &src, DataType output_data_ty
     library->fill_tensor_uniform(dst, 1, static_cast<T2>(0), static_cast<T2>(std::numeric_limits<T1>::max()));
 
     using intermediate_type = typename common_promoted_signed_type<T1, T2>::intermediate_type;
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < src.num_elements(); ++i)
     {
         intermediate_type val = static_cast<intermediate_type>(src[i]) + static_cast<intermediate_type>(dst[i]);
@@ -62,7 +64,9 @@ SimpleTensor<T2> accumulate_weighted(const SimpleTensor<T1> &src, float alpha, D
     library->fill_tensor_uniform(dst, 1, static_cast<T2>(0), static_cast<T2>(std::numeric_limits<T1>::max()));
 
     using intermediate_type = typename common_promoted_signed_type<T1, T2>::intermediate_type;
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < src.num_elements(); ++i)
     {
         double val = (1. - static_cast<double>(alpha)) * static_cast<intermediate_type>(dst[i]) + static_cast<double>(alpha) * static_cast<intermediate_type>(src[i]);
@@ -83,7 +87,9 @@ SimpleTensor<T2> accumulate_squared(const SimpleTensor<T1> &src, uint32_t shift,
 
     using intermediate_type = typename common_promoted_signed_type<T1, T2>::intermediate_type;
     intermediate_type denom = 1 << shift;
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < src.num_elements(); ++i)
     {
         intermediate_type val = static_cast<intermediate_type>(dst[i]) + (static_cast<intermediate_type>(src[i]) * static_cast<intermediate_type>(src[i]) / denom);

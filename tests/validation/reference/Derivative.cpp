@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,9 @@ std::pair<SimpleTensor<T>, SimpleTensor<T>> derivative(const SimpleTensor<U> &sr
     ValidRegion valid_region = shape_to_valid_region(src.shape(), border_mode == BorderMode::UNDEFINED, BorderSize(filter_size / 2));
 
     const uint32_t num_elements = src.num_elements();
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(uint32_t i = 0; i < num_elements; ++i)
     {
         Coordinates coord = index2coord(src.shape(), i);

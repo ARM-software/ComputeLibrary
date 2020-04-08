@@ -69,6 +69,9 @@ void quantize_down_scale(const SimpleTensor<TIn> *in, const SimpleTensor<TIn> *b
     const int  cols_in        = in->shape().x();
     const bool is_per_channel = result_mult_int.size() > 1;
 
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < in->num_elements(); ++i)
     {
         int32_t result = ((*in)[i] + result_offset);
@@ -100,6 +103,9 @@ void quantize_down_scale_by_fixedpoint(const SimpleTensor<TIn> *in, const Simple
     const int  cols_in        = in->shape().x();
     const bool is_per_channel = result_fixedpoint_multiplier.size() > 1;
 
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < in->num_elements(); ++i)
     {
         TIn result = (*in)[i];
@@ -141,6 +147,9 @@ void quantize_down_scale_by_float(const SimpleTensor<TIn> *in, const SimpleTenso
     const int  cols_in        = in->shape().x();
     const bool is_per_channel = result_real_multiplier.size() > 1;
 
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < in->num_elements(); ++i)
     {
         TIn result = (*in)[i];

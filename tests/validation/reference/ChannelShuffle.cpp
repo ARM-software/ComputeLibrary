@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,9 @@ SimpleTensor<T> channel_shuffle(const SimpleTensor<T> &src, int num_groups)
 
     const T *src_ref = src.data();
     T       *dst_ref = dst.data();
-
+#if defined(_OPENMP)
+    #pragma omp parallel for collapse(2)
+#endif /* _OPENMP */
     for(int n = 0; n < batches; ++n)
     {
         for(int g = 0; g < num_groups; ++g)

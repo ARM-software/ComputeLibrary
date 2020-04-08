@@ -49,11 +49,12 @@ void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &w
     const T *weights_ptr = weights.data();
     const TB *bias_ptr    = bias.data();
     T        *dst_ptr     = dst.data() + offset_dst;
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int y = 0; y < rows_weights; ++y)
     {
-        dst_ptr[y] = std::inner_product(src_ptr, src_ptr + cols_weights, weights_ptr, static_cast<T>(0)) + bias_ptr[y];
-        weights_ptr += cols_weights;
+        dst_ptr[y] = std::inner_product(src_ptr, src_ptr + cols_weights, &weights_ptr[cols_weights * y], static_cast<T>(0)) + bias_ptr[y];
     }
 }
 
@@ -85,7 +86,9 @@ void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &w
 
     const int min = std::numeric_limits<T>::lowest();
     const int max = std::numeric_limits<T>::max();
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int y = 0; y < rows_weights; ++y)
     {
         // Reset accumulator
@@ -93,7 +96,7 @@ void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &w
 
         for(int x = 0; x < cols_weights; ++x)
         {
-            acc += (src_ptr[x] + input_offset) * (weights_ptr[x] + weights_offset);
+            acc += (src_ptr[x] + input_offset) * (weights_ptr[x + y * cols_weights] + weights_offset);
         }
 
         // Accumulate the bias
@@ -104,8 +107,6 @@ void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &w
 
         // Store the result
         dst_ptr[y] = static_cast<T>(acc);
-
-        weights_ptr += cols_weights;
     }
 }
 } // namespace

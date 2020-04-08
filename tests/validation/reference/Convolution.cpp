@@ -45,6 +45,9 @@ SimpleTensor<T> convolution(const SimpleTensor<uint8_t> &src, DataType output_da
     SimpleTensor<T>       dst(src.shape(), output_data_type);
     SimpleTensor<int32_t> sum(src.shape(), output_data_type);
     const uint32_t        num_elements = src.num_elements();
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(uint32_t element_idx = 0; element_idx < num_elements; ++element_idx)
     {
         const Coordinates id = index2coord(src.shape(), element_idx);
