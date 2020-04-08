@@ -31,8 +31,13 @@ namespace arm_compute
 {
 void CLMeanStdDevNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, float epsilon)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, epsilon);
+}
+
+void CLMeanStdDevNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float epsilon)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLMeanStdDevNormalizationKernel>();
-    k->configure(input, output, epsilon);
+    k->configure(compile_context, input, output, epsilon);
     _kernel = std::move(k);
 }
 

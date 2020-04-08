@@ -33,8 +33,14 @@ using namespace arm_compute;
 
 void CLWarpAffine::configure(ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, matrix, policy, border_mode, constant_border_value);
+}
+
+void CLWarpAffine::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
+                             uint8_t constant_border_value)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLWarpAffineKernel>();
-    k->configure(input, output, matrix, policy);
+    k->configure(compile_context, input, output, matrix, policy);
     _kernel = std::move(k);
-    _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode, PixelValue(constant_border_value));
 }

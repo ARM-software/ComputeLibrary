@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,13 @@ public:
      * @param[out] output Destination tensor, Data types supported: U32.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialise the function's source, destinations and border mode.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: U8.
+     * @param[out] output          Destination tensor, Data types supported: U32.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 
     // Inherited methods overridden:
     void run() override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,6 +48,20 @@ public:
      * @param[in]  upper       Upper threshold. Only used with RANGE thresholding
      */
     void configure(const ICLTensor *input, ICLTensor *output, uint8_t threshold,
+                   uint8_t false_value = 0, uint8_t true_value = 0,
+                   ThresholdType type = ThresholdType::BINARY, uint8_t upper = 0);
+    /** Initialise the function's source, destination, thresholds and threshold type
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           First tensor input. Data types supported: U8.
+     * @param[out] output          Output tensor. Data types supported: U8.
+     * @param[in]  threshold       Threshold. If upper threshold is specified, this will be used as the lower threshold.
+     * @param[in]  false_value     Value to assign when the condition is false.
+     * @param[in]  true_value      value to assign when the condition is true.
+     * @param[in]  type            Thresholding type. Can either be BINARY or RANGE.
+     * @param[in]  upper           Upper threshold. Only used with RANGE thresholding
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold,
                    uint8_t false_value = 0, uint8_t true_value = 0,
                    ThresholdType type = ThresholdType::BINARY, uint8_t upper = 0);
 };

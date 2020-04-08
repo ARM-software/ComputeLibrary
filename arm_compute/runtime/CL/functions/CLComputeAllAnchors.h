@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,15 @@ public:
      *
      */
     void configure(const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  anchors         Source tensor. Original set of anchors of size (4, A) where A is the number of anchors. Data types supported: F16/F32
+     * @param[out] all_anchors     Destination tensor. Destination anchors of size (4, H*W*A) where H and W are the height and width of the feature map and A is the number of anchors. Data types supported: Same as @p input
+     * @param[in]  info            Contains Compute Anchors operation information described in @ref ComputeAnchorsInfo
+     *
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLComputeAllAnchorsKernel
      *

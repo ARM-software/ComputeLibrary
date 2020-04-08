@@ -45,6 +45,18 @@ public:
      *
      */
     void configure(ICLTensor *input, ICLTensor *output, int32_t stride);
+    /** Initialise the function's source and destination.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: All.
+     * @param[out] output          Destination tensor with tensor shape:
+     *                             [width_input / stride, height_input / stride, channels_input * stride * stride, batch_size]. This means the output has
+     *                             the same number of input elements. Data types supported: same as @p input.
+     * @param[in]  stride          Stride value to use for reorganizing the values in the output tensor.
+     *                    It defines the spatial distance between 2 consecutive pixels in the x and y direction
+     *
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int32_t stride);
     /** Static function to check if given info will lead to a valid configuration of @ref CLReorgLayer
      *
      * @param[in] input  Source tensor. Data types supported: All.

@@ -32,8 +32,13 @@ using namespace arm_compute;
 
 void CLTranspose::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLTranspose::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLTransposeKernel>();
-    k->configure(input, output);
+    k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }
 

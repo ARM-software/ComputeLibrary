@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,13 @@ CLIntegralImage::CLIntegralImage()
 
 void CLIntegralImage::configure(const ICLTensor *input, ICLTensor *output)
 {
-    _integral_hor.configure(input, output);
-    _integral_vert.configure(output);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLIntegralImage::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
+    _integral_hor.configure(compile_context, input, output);
+    _integral_vert.configure(compile_context, output);
 }
 
 void CLIntegralImage::run()

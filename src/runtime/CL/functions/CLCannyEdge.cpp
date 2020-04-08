@@ -58,6 +58,13 @@ CLCannyEdge::CLCannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLI
 void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode,
                             uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, upper_thr, lower_thr, gradient_size, norm_type, border_mode, constant_border_value);
+}
+
+void CLCannyEdge::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type,
+                            BorderMode border_mode,
+                            uint8_t    constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
@@ -111,19 +118,19 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     if(gradient_size == 3)
     {
         auto k = arm_compute::support::cpp14::make_unique<CLSobel3x3>();
-        k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
+        k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 5)
     {
         auto k = arm_compute::support::cpp14::make_unique<CLSobel5x5>();
-        k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
+        k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else if(gradient_size == 7)
     {
         auto k = arm_compute::support::cpp14::make_unique<CLSobel7x7>();
-        k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
+        k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
         _sobel = std::move(k);
     }
     else
@@ -136,7 +143,7 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     _memory_group.manage(&_phase);
 
     // Configure gradient
-    _gradient.configure(&_gx, &_gy, &_mag, &_phase, norm_type);
+    _gradient.configure(compile_context, &_gx, &_gy, &_mag, &_phase, norm_type);
 
     // Allocate intermediate buffers
     _gx.allocator()->allocate();
@@ -146,14 +153,14 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     _memory_group.manage(&_nonmax);
 
     // Configure non-maxima suppression
-    _non_max_suppr.configure(&_mag, &_phase, &_nonmax, lower_thr, border_mode == BorderMode::UNDEFINED);
+    _non_max_suppr.configure(compile_context, &_mag, &_phase, &_nonmax, lower_thr, border_mode == BorderMode::UNDEFINED);
 
     // Allocate intermediate buffers
     _phase.allocator()->allocate();
 
     // Fill border around magnitude image as non-maxima suppression will access
     // it. If border mode is undefined filling the border is a nop.
-    _border_mag_gradient.configure(&_mag, _non_max_suppr.border_size(), border_mode, constant_border_value);
+    _border_mag_gradient.configure(compile_context, &_mag, _non_max_suppr.border_size(), border_mode, constant_border_value);
 
     // Allocate intermediate buffers
     _mag.allocator()->allocate();
@@ -165,7 +172,7 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     _memory_group.manage(&_l1_list_counter);
 
     // Configure edge tracing
-    _edge_trace.configure(&_nonmax, output, upper_thr, lower_thr, &_visited, &_recorded, &_l1_stack, &_l1_list_counter);
+    _edge_trace.configure(compile_context, &_nonmax, output, upper_thr, lower_thr, &_visited, &_recorded, &_l1_stack, &_l1_list_counter);
 
     // Allocate intermediate buffers
     _visited.allocator()->allocate();

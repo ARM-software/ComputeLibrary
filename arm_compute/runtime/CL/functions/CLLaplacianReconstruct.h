@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,22 @@ public:
      *
      */
     void configure(const CLPyramid *pyramid, ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value);
+    /** Initialise the function's source, destinations and border mode.
+     *
+     * The Output image must have the same size as the first level of the pyramid.
+     * The Input image must have the same size as the last level of the pyramid.
+     *
+     * The idea is to reconstuct the original hi-res image from a low-res representation of it and the laplacian pyramid.
+     *
+     * @param[in]  compile_context       The compile context to be used.
+     * @param[in]  pyramid               Laplacian pyramid tensors, Data types supported at each level: S16.
+     * @param[in]  input                 Source tensor. Data types supported: S16.
+     * @param[out] output                Output tensor. Data types supported: U8.
+     * @param[in]  border_mode           Border mode to use for the convolution.
+     * @param[in]  constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     *
+     */
+    void configure(const CLCompileContext &compile_context, const CLPyramid *pyramid, ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value);
 
     // Inherited methods overridden:
     void run() override;

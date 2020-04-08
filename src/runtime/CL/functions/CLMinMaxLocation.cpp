@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,13 @@ CLMinMaxLocation::CLMinMaxLocation()
 
 void CLMinMaxLocation::configure(const ICLImage *input, void *min, void *max, CLCoordinates2DArray *min_loc, CLCoordinates2DArray *max_loc, uint32_t *min_count, uint32_t *max_count)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, min, max, min_loc, max_loc, min_count, max_count);
+}
+
+void CLMinMaxLocation::configure(const CLCompileContext &compile_context, const ICLImage *input, void *min, void *max, CLCoordinates2DArray *min_loc, CLCoordinates2DArray *max_loc,
+                                 uint32_t *min_count,
+                                 uint32_t *max_count)
+{
     ARM_COMPUTE_ERROR_ON(nullptr == min);
     ARM_COMPUTE_ERROR_ON(nullptr == max);
 
@@ -55,8 +62,8 @@ void CLMinMaxLocation::configure(const ICLImage *input, void *min, void *max, CL
     _min_loc            = min_loc;
     _max_loc            = max_loc;
 
-    _min_max_kernel.configure(input, &_min_max_vals);
-    _min_max_loc_kernel.configure(input, &_min_max_vals, &_min_max_count_vals, _min_loc, _max_loc);
+    _min_max_kernel.configure(compile_context, input, &_min_max_vals);
+    _min_max_loc_kernel.configure(compile_context, input, &_min_max_vals, &_min_max_count_vals, _min_loc, _max_loc);
 }
 
 void CLMinMaxLocation::run()

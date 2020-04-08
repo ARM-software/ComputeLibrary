@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,20 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode,
+                   uint8_t constant_border_value = 0);
+    /** Initialise the function's source, destination, thresholds, gradient size, normalization type and border mode.
+     *
+     * @param[in]     compile_context       The compile context to be used.
+     * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for border_mode != UNDEFINED)
+     * @param[out]    output                Destination tensor. Data types supported: U8.
+     * @param[in]     upper_thr             Upper threshold used for the hysteresis.
+     * @param[in]     lower_thr             Lower threshold used for the hysteresis.
+     * @param[in]     gradient_size         Gradient size (3, 5 or 7).
+     * @param[in]     norm_type             Normalization type. if 1, L1-Norm otherwise L2-Norm.
+     * @param[in]     border_mode           Border mode to use for the convolution.
+     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode,
                    uint8_t constant_border_value = 0);
 
     // Inherited methods overridden:

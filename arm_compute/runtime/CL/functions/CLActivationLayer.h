@@ -62,6 +62,17 @@ public:
      * @param[in]      act_info Activation layer parameters.
      */
     void configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
+    /** Set the input and output tensor.
+     *
+     * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
+     *
+     * @param[in]      compile_context The compile context to be used.
+     * @param[in, out] input           Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
+     *                                 of the activation function. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
+     * @param[out]     output          Destination tensor. Data type supported: same as @p input
+     * @param[in]      act_info        Activation layer parameters.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLActivationLayer
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result

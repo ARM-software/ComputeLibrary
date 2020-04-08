@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,6 +98,12 @@ CLFFTConvolutionLayer::CLFFTConvolutionLayer(std::shared_ptr<IMemoryManager> mem
 void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
                                       const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info);
+}
+
+void CLFFTConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                                      const ActivationLayerInfo &act_info)
+{
     _original_weights = weights;
     _original_bias    = biases;
 
@@ -121,7 +127,7 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
     // Permute bias
     if(biases != nullptr)
     {
-        _permute_bias_func.configure(biases, &_permuted_bias, PermutationVector(1U, 2U, 0U));
+        _permute_bias_func.configure(compile_context, biases, &_permuted_bias, PermutationVector(1U, 2U, 0U));
         _permuted_bias.info()->set_data_layout(DataLayout::NCHW);
     }
 
@@ -131,11 +137,11 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
     {
         _memory_group.manage(&_permuted_input);
         // Configure the function to transform the input tensor from NHWC -> NCHW
-        _permute_input_func.configure(input, &_permuted_input, PermutationVector(1U, 2U, 0U));
+        _permute_input_func.configure(compile_context, input, &_permuted_input, PermutationVector(1U, 2U, 0U));
         _permuted_input.info()->set_data_layout(DataLayout::NCHW);
 
         // Configure the function to transform the weights tensor from HWI -> IHW
-        _permute_weights_func.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
+        _permute_weights_func.configure(compile_context, weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
         _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
 
         input_to_use   = &_permuted_input;
@@ -145,20 +151,20 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
     // Flip weights
     _flipped_weights.allocator()->init(weights_to_use->info()->clone()->set_is_resizable(true).reset_padding());
     _flip_axis.allocator()->init(TensorInfo(TensorShape(2U), 1, DataType::U32));
-    _flip_weights_func.configure(weights_to_use, &_flipped_weights, &_flip_axis);
+    _flip_weights_func.configure(compile_context, weights_to_use, &_flipped_weights, &_flip_axis);
 
     // Pad weights
     const PaddingList padding_w = { { 0, input_dims.x() + pad_valid.x() - 1 }, { 0, input_dims.y() + pad_valid.y() - 1 } };
-    _pad_weights_func.configure(&_flipped_weights, &_padded_weights, padding_w);
+    _pad_weights_func.configure(compile_context, &_flipped_weights, &_padded_weights, padding_w);
 
     // Transform weights
     _transform_weights_func = support::cpp14::make_unique<CLFFT2D>();
-    _transform_weights_func->configure(&_padded_weights, &_transformed_weights, FFT2DInfo());
+    _transform_weights_func->configure(compile_context, &_padded_weights, &_transformed_weights, FFT2DInfo());
 
     // Pad input
     const PaddingList padding_in = { { 0, kernel_size.x() + pad_valid.x() - 1 }, { 0, kernel_size.y() + pad_valid.y() - 1 } };
     _memory_group.manage(&_padded_input);
-    _pad_input_func.configure(input_to_use, &_padded_input, padding_in);
+    _pad_input_func.configure(compile_context, input_to_use, &_padded_input, padding_in);
     if(_needs_permute)
     {
         _permuted_input.allocator()->allocate();
@@ -166,17 +172,17 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
 
     // Transform input
     _memory_group.manage(&_transformed_input);
-    _transform_input_func.configure(&_padded_input, &_transformed_input, FFT2DInfo());
+    _transform_input_func.configure(compile_context, &_padded_input, &_transformed_input, FFT2DInfo());
     _padded_input.allocator()->allocate();
 
     // Perform product
     _memory_group.manage(&_output_product);
-    _prod_func.configure(&_transformed_input, &_transformed_weights, &_output_product);
+    _prod_func.configure(compile_context, &_transformed_input, &_transformed_weights, &_output_product);
     _transformed_input.allocator()->allocate();
 
     // Perform reduction
     _memory_group.manage(&_output_reduced);
-    _reduce_func.configure(&_output_product, &_output_reduced, 2, ReductionOperation::SUM);
+    _reduce_func.configure(compile_context, &_output_product, &_output_reduced, 2, ReductionOperation::SUM);
     _output_product.allocator()->allocate();
 
     // Transform output
@@ -184,7 +190,7 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
     FFT2DInfo itranform_info;
     itranform_info.direction = FFTDirection::Inverse;
     _itransformed_output.allocator()->init(_output_reduced.info()->clone()->set_is_resizable(true).set_num_channels(1).reset_padding());
-    _itransform_output_func.configure(&_output_reduced, &_itransformed_output, itranform_info);
+    _itransform_output_func.configure(compile_context, &_output_reduced, &_itransformed_output, itranform_info);
     _output_reduced.allocator()->allocate();
 
     // Reshape output
@@ -206,7 +212,7 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
         output_to_use = &_permuted_output;
         _memory_group.manage(&_permuted_output);
     }
-    _extract_output_func.configure(&_reshaped_output, output_to_use, Coordinates(start_left, start_top), Coordinates(end_right, end_botton));
+    _extract_output_func.configure(compile_context, &_reshaped_output, output_to_use, Coordinates(start_left, start_top), Coordinates(end_right, end_botton));
     _itransformed_output.allocator()->allocate();
 
     // Add bias
@@ -219,7 +225,7 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
             _memory_group.manage(&_permuted_output);
         }
         auto_init_if_empty(*output_to_use->info(), *_bias_output.info());
-        _bias_add_func.configure(&_bias_output, &_permuted_bias, output_to_use, ConvertPolicy::WRAP);
+        _bias_add_func.configure(compile_context, &_bias_output, &_permuted_bias, output_to_use, ConvertPolicy::WRAP);
         _bias_output.allocator()->allocate();
     }
 
@@ -228,7 +234,7 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
     {
         // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
         _permuted_output.info()->set_data_layout(DataLayout::NCHW);
-        _permute_output_func.configure(&_permuted_output, output, PermutationVector(2U, 0U, 1U));
+        _permute_output_func.configure(compile_context, &_permuted_output, output, PermutationVector(2U, 0U, 1U));
 
         // Allocate tensors
         _permuted_output.allocator()->allocate();
@@ -238,7 +244,7 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
     _is_activationlayer_enabled = act_info.enabled();
     if(_is_activationlayer_enabled)
     {
-        _activation_layer_func.configure(output, nullptr, act_info);
+        _activation_layer_func.configure(compile_context, output, nullptr, act_info);
     }
 
     // Setup flip axis data

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,13 @@ public:
      * @param[in]     constant_value Constant value to use to fill tensor.
      */
     void configure(ICLTensor *tensor, PixelValue constant_value);
+    /** Initialize the function
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] tensor          Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]     constant_value  Constant value to use to fill tensor.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *tensor, PixelValue constant_value);
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLFILL_H */

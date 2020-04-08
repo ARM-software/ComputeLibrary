@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,11 @@ CLGaussian5x5::CLGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager)
 
 void CLGaussian5x5::configure(ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_mode, constant_border_value);
+}
+
+void CLGaussian5x5::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
 
     _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, DataType::U16));
@@ -50,9 +55,9 @@ void CLGaussian5x5::configure(ICLTensor *input, ICLTensor *output, BorderMode bo
     _memory_group.manage(&_tmp);
 
     // Configure kernels
-    _kernel_hor.configure(input, &_tmp, border_mode == BorderMode::UNDEFINED);
-    _kernel_vert.configure(&_tmp, output, border_mode == BorderMode::UNDEFINED);
-    _border_handler.configure(input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
+    _kernel_hor.configure(compile_context, input, &_tmp, border_mode == BorderMode::UNDEFINED);
+    _kernel_vert.configure(compile_context, &_tmp, output, border_mode == BorderMode::UNDEFINED);
+    _border_handler.configure(compile_context, input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
 
     // Allocate intermediate buffers
     _tmp.allocator()->allocate();

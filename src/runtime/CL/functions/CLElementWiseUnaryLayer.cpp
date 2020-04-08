@@ -32,8 +32,13 @@ namespace arm_compute
 {
 void CLRsqrtLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLRsqrtLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(input, output, ElementWiseUnary::RSQRT);
+    k->configure(compile_context, input, output, ElementWiseUnary::RSQRT);
     _kernel = std::move(k);
 }
 Status CLRsqrtLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
@@ -43,8 +48,13 @@ Status CLRsqrtLayer::validate(const ITensorInfo *input, const ITensorInfo *outpu
 
 void CLExpLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLExpLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(input, output, ElementWiseUnary::EXP);
+    k->configure(compile_context, input, output, ElementWiseUnary::EXP);
     _kernel = std::move(k);
 }
 Status CLExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
@@ -54,8 +64,13 @@ Status CLExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLNegLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLNegLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(input, output, ElementWiseUnary::NEG);
+    k->configure(compile_context, input, output, ElementWiseUnary::NEG);
     _kernel = std::move(k);
 }
 Status CLNegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
@@ -65,8 +80,13 @@ Status CLNegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLSinLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLSinLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(input, output, ElementWiseUnary::SIN);
+    k->configure(compile_context, input, output, ElementWiseUnary::SIN);
     _kernel = std::move(k);
 }
 Status CLSinLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
@@ -76,8 +96,13 @@ Status CLSinLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLAbsLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLAbsLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(input, output, ElementWiseUnary::ABS);
+    k->configure(compile_context, input, output, ElementWiseUnary::ABS);
     _kernel = std::move(k);
 }
 Status CLAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
@@ -86,8 +111,13 @@ Status CLAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 }
 void CLLogLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLLogLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(input, output, ElementWiseUnary::LOG);
+    k->configure(compile_context, input, output, ElementWiseUnary::LOG);
     _kernel = std::move(k);
 }
 Status CLLogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
@@ -97,8 +127,13 @@ Status CLLogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 
 void CLRoundLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLRoundLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
-    k->configure(input, output, ElementWiseUnary::ROUND);
+    k->configure(compile_context, input, output, ElementWiseUnary::ROUND);
     _kernel = std::move(k);
 }
 Status CLRoundLayer::validate(const ITensorInfo *input, const ITensorInfo *output)

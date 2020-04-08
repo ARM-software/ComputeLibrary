@@ -72,6 +72,25 @@ public:
      *                       if the reshape of matrix B should be executed only for the first run
      */
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info = GEMMInfo());
+    /** Initialise the kernel's inputs, output
+     *
+     * @note GEMMLowp:  low precision GEMM kernel. [A * B + C]
+     *  This kernel performs the following computations:
+     *
+     *  -# Convert a values from QASYMM8 to int32 and add a_offset to each of them.
+     *  -# Convert b values from QASYMM8 to int32 and add b_offset to each of them.
+     *  -# Compute the matrix product of the resulting a * b in int32.
+     *  -# Quantize to uint8 if gemm_info.gemmlowp_output_stage != NONE
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  a               First input tensor  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
+     * @param[in]  b               Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[in]  c               Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
+     * @param[out] output          Output tensor. Data type supported: S32 or QASYMM8/QASYMM8_SIGNED if gemm_info.gemmlowp_output_stage != NONE
+     * @param[in]  gemm_info       (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                       if the reshape of matrix B should be executed only for the first run
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyCore
      *
      * @param[in] a         First input tensor info (Matrix A). Data type supported: QASYMM8.

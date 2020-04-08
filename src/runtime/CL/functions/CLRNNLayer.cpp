@@ -68,6 +68,13 @@ Status CLRNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights
 void CLRNNLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *recurrent_weights, const ICLTensor *bias, ICLTensor *hidden_state, ICLTensor *output,
                            ActivationLayerInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, recurrent_weights, bias, hidden_state, output, info);
+}
+
+void CLRNNLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *recurrent_weights, const ICLTensor *bias,
+                           ICLTensor *hidden_state,
+                           ICLTensor *output, ActivationLayerInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLRNNLayer::validate(input->info(), weights->info(), recurrent_weights->info(), bias->info(), hidden_state->info(), output->info(), info));
 
@@ -81,23 +88,23 @@ void CLRNNLayer::configure(const ICLTensor *input, const ICLTensor *weights, con
 
     // Manage intermediate buffers and configure
     _memory_group.manage(&_fully_connected_out);
-    _fully_connected_kernel.configure(input, weights, bias, &_fully_connected_out);
+    _fully_connected_kernel.configure(compile_context, input, weights, bias, &_fully_connected_out);
 
     _memory_group.manage(&_gemm_output);
-    _gemm_state_f.configure(hidden_state, recurrent_weights, nullptr, &_gemm_output, 1.f, 0.f);
+    _gemm_state_f.configure(compile_context, hidden_state, recurrent_weights, nullptr, &_gemm_output, 1.f, 0.f);
 
     _add_output.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
     _memory_group.manage(&_add_output);
 
-    _add_kernel.configure(ArithmeticOperation::ADD, &_fully_connected_out, &_gemm_output, &_add_output, ConvertPolicy::SATURATE);
+    _add_kernel.configure(compile_context, ArithmeticOperation::ADD, &_fully_connected_out, &_gemm_output, &_add_output, ConvertPolicy::SATURATE);
 
     _fully_connected_out.allocator()->allocate();
     _gemm_output.allocator()->allocate();
 
-    _activation_kernel.configure(&_add_output, hidden_state, info);
+    _activation_kernel.configure(compile_context, &_add_output, hidden_state, info);
     _add_output.allocator()->allocate();
 
-    _copy_kernel.configure(hidden_state, output);
+    _copy_kernel.configure(compile_context, hidden_state, output);
 }
 
 void CLRNNLayer::run()

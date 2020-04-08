@@ -43,7 +43,23 @@ void CLGEMMLowpQuantizeDownInt32ToUint8Scale::configure(const ICLTensor *input, 
     info.gemmlowp_max_bound      = max;
 
     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleKernel>();
-    k->configure(input, bias, output, &info);
+    k->configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, &info);
+    _kernel = std::move(k);
+}
+
+void CLGEMMLowpQuantizeDownInt32ToUint8Scale::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_offset,
+                                                        int result_mult_int,
+                                                        int result_shift, int min, int max)
+{
+    GEMMLowpOutputStageInfo info = GEMMLowpOutputStageInfo();
+    info.gemmlowp_offset         = result_offset;
+    info.gemmlowp_multiplier     = result_mult_int;
+    info.gemmlowp_shift          = result_shift;
+    info.gemmlowp_min_bound      = min;
+    info.gemmlowp_max_bound      = max;
+
+    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleKernel>();
+    k->configure(compile_context, input, bias, output, &info);
     _kernel = std::move(k);
 }
 
@@ -60,8 +76,15 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const ICLTen
                                                                     int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
                                                                     int min, int max)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
+}
+
+void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                                    int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
+                                                                    int min, int max)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
-    k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
+    k->configure(compile_context, input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
     _kernel = std::move(k);
 }
 
@@ -76,7 +99,16 @@ void CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::configure(const ICLTens
                                                                    int min, int max)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
-    k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
+    k->configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
+    _kernel = std::move(k);
+}
+
+void CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPoint::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                                   int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
+                                                                   int min, int max)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
+    k->configure(compile_context, input, bias, output, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max);
     _kernel = std::move(k);
 }
 
@@ -97,7 +129,22 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::configure(const ICLTensor *
     info.gemmlowp_max_bound       = max;
 
     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel>();
-    k->configure(input, bias, output, &info);
+    k->configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, &info);
+    _kernel = std::move(k);
+}
+
+void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                               float multiplier, int offset,
+                                                               int min, int max)
+{
+    GEMMLowpOutputStageInfo info  = GEMMLowpOutputStageInfo();
+    info.gemmlowp_offset          = offset;
+    info.gemmlowp_real_multiplier = multiplier;
+    info.gemmlowp_min_bound       = min;
+    info.gemmlowp_max_bound       = max;
+
+    auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel>();
+    k->configure(compile_context, input, bias, output, &info);
     _kernel = std::move(k);
 }
 
@@ -114,8 +161,15 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const ICLTen
                                                                     int result_fixedpoint_multiplier, int result_shift,
                                                                     int min, int max)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
+}
+
+void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                                    int result_fixedpoint_multiplier, int result_shift,
+                                                                    int min, int max)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel>();
-    k->configure(input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
+    k->configure(compile_context, input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
     _kernel = std::move(k);
 }
 
@@ -126,6 +180,11 @@ Status CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(const ITens
 }
 
 void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, info);
+}
+
+void CLGEMMLowpOutputStage::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -138,14 +197,14 @@ void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *b
                 case DataType::QASYMM8:
                 {
                     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel>();
-                    k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
+                    k->configure(compile_context, input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
                     _kernel = std::move(k);
                     break;
                 }
                 case DataType::QASYMM8_SIGNED:
                 {
                     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel>();
-                    k->configure(input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
+                    k->configure(compile_context, input, bias, output, info.gemmlowp_multiplier, info.gemmlowp_shift, info.gemmlowp_offset, info.gemmlowp_min_bound, info.gemmlowp_max_bound);
                     _kernel = std::move(k);
                     break;
                 }
@@ -164,14 +223,14 @@ void CLGEMMLowpOutputStage::configure(const ICLTensor *input, const ICLTensor *b
         case GEMMLowpOutputStageType::QUANTIZE_DOWN:
         {
             auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleKernel>();
-            k->configure(input, bias, output, &info);
+            k->configure(compile_context, input, bias, output, &info);
             _kernel = std::move(k);
             break;
         }
         case GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT:
         {
             auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel>();
-            k->configure(input, bias, output, &info);
+            k->configure(compile_context, input, bias, output, &info);
             _kernel = std::move(k);
             break;
         }

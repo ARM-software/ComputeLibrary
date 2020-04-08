@@ -30,9 +30,14 @@ namespace arm_compute
 {
 void CLBoundingBoxTransform::configure(const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), boxes, pred_boxes, deltas, info);
+}
+
+void CLBoundingBoxTransform::configure(const CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
+{
     // Configure Bounding Box kernel
     auto k = arm_compute::support::cpp14::make_unique<CLBoundingBoxTransformKernel>();
-    k->configure(boxes, pred_boxes, deltas, info);
+    k->configure(compile_context, boxes, pred_boxes, deltas, info);
     _kernel = std::move(k);
 }
 

@@ -32,14 +32,24 @@ using namespace arm_compute;
 
 void CLChannelCombine::configure(const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), plane0, plane1, plane2, plane3, output);
+}
+
+void CLChannelCombine::configure(const CLCompileContext &compile_context, const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLChannelCombineKernel>();
-    k->configure(plane0, plane1, plane2, plane3, output);
+    k->configure(compile_context, plane0, plane1, plane2, plane3, output);
     _kernel = std::move(k);
 }
 
 void CLChannelCombine::configure(const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), plane0, plane1, plane2, output);
+}
+
+void CLChannelCombine::configure(const CLCompileContext &compile_context, const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLChannelCombineKernel>();
-    k->configure(plane0, plane1, plane2, output);
+    k->configure(compile_context, plane0, plane1, plane2, output);
     _kernel = std::move(k);
 }

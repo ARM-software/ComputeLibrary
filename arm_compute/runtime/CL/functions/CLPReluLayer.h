@@ -47,6 +47,16 @@ public:
      * @param[out] output Destination tensor. Data type supported: same as @p input
      */
     void configure(ICLTensor *input, ICLTensor *alpha, ICLTensor *output);
+    /** Set the input and output tensor.
+     *
+     * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  alpha           PRelu layer parameters. Data types supported: same of @p input.
+     * @param[out] output          Destination tensor. Data type supported: same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *alpha, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPReluLayer
      *
      * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.

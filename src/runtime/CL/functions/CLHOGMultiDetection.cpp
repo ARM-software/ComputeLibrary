@@ -55,6 +55,14 @@ CLHOGMultiDetection::CLHOGMultiDetection(std::shared_ptr<IMemoryManager> memory_
 void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_hog, ICLDetectionWindowArray *detection_windows, ICLSize2DArray *detection_window_strides, BorderMode border_mode,
                                     uint8_t constant_border_value, float threshold, bool non_maxima_suppression, float min_distance)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, multi_hog, detection_windows, detection_window_strides, border_mode, constant_border_value, threshold, non_maxima_suppression,
+              min_distance);
+}
+
+void CLHOGMultiDetection::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLMultiHOG *multi_hog, ICLDetectionWindowArray *detection_windows,
+                                    ICLSize2DArray *detection_window_strides, BorderMode border_mode,
+                                    uint8_t constant_border_value, float threshold, bool non_maxima_suppression, float min_distance)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_INVALID_MULTI_HOG(multi_hog);
     ARM_COMPUTE_ERROR_ON(nullptr == detection_windows);
@@ -145,7 +153,7 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
     _memory_group.manage(&_phase);
 
     // Initialise gradient kernel
-    _gradient_kernel.configure(input, &_mag, &_phase, phase_type, border_mode, constant_border_value);
+    _gradient_kernel.configure(compile_context, input, &_mag, &_phase, phase_type, border_mode, constant_border_value);
 
     // Configure NETensor for the HOG space and orientation binning kernel
     for(size_t i = 0; i < _num_orient_bin_kernel; ++i)
@@ -173,7 +181,7 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
         _memory_group.manage(&_hog_space[i]);
 
         // Initialise orientation binning kernel
-        _orient_bin_kernel[i].configure(&_mag, &_phase, &_hog_space[i], multi_hog->model(idx_multi_hog)->info());
+        _orient_bin_kernel[i].configure(compile_context, &_mag, &_phase, &_hog_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
     // Allocate intermediate tensors
@@ -194,7 +202,7 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
         _memory_group.manage(&_hog_norm_space[i]);
 
         // Initialize block normalization kernel
-        _block_norm_kernel[i].configure(&_hog_space[idx_orient_bin], &_hog_norm_space[i], multi_hog->model(idx_multi_hog)->info());
+        _block_norm_kernel[i].configure(compile_context, &_hog_space[idx_orient_bin], &_hog_norm_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
     // Allocate intermediate tensors
@@ -210,7 +218,7 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
     {
         const size_t idx_block_norm = input_hog_detect[i];
 
-        _hog_detect_kernel[i].configure(&_hog_norm_space[idx_block_norm], multi_hog->cl_model(i), detection_windows, detection_window_strides->at(i), threshold, i);
+        _hog_detect_kernel[i].configure(compile_context, &_hog_norm_space[idx_block_norm], multi_hog->cl_model(i), detection_windows, detection_window_strides->at(i), threshold, i);
     }
 
     detection_window_strides->unmap(CLScheduler::get().queue());

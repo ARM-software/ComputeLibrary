@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,22 @@ public:
      * @param[out] max_count (Optional) Number of maximum value encounters.
      */
     void configure(const ICLImage *input, void *min, void *max,
+                   CLCoordinates2DArray *min_loc = nullptr, CLCoordinates2DArray *max_loc = nullptr,
+                   uint32_t *min_count = nullptr, uint32_t *max_count = nullptr);
+    /** Initialise the kernel's inputs and outputs.
+     *
+     * @note When locations of min and max occurrences are requested, the reported number of locations is limited to the given array size.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input image. Data types supported: U8/S16/F32.
+     * @param[out] min             Minimum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
+     * @param[out] max             Maximum value of image. Data types supported: S32 if input type is U8/S16, F32 if input type is F32.
+     * @param[out] min_loc         (Optional) Array of Coordinates2D used to store minimum value locations.
+     * @param[out] max_loc         (Optional) Array of Coordinates2D used to store maximum value locations.
+     * @param[out] min_count       (Optional) Number of minimum value encounters.
+     * @param[out] max_count       (Optional) Number of maximum value encounters.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, void *min, void *max,
                    CLCoordinates2DArray *min_loc = nullptr, CLCoordinates2DArray *max_loc = nullptr,
                    uint32_t *min_count = nullptr, uint32_t *max_count = nullptr);
 

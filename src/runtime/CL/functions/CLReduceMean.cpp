@@ -93,6 +93,11 @@ CLReduceMean::CLReduceMean(std::shared_ptr<IMemoryManager> memory_manager)
 }
 void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis, bool keep_dims, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, reduction_axis, keep_dims, output);
+}
+
+void CLReduceMean::configure(const CLCompileContext &compile_context, ICLTensor *input, const Coordinates &reduction_axis, bool keep_dims, ICLTensor *output)
+{
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(CLReduceMean::validate(input->info(), reduction_axis, keep_dims, output->info()));
     // Output auto inizialitation if not yet initialized
@@ -118,13 +123,13 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
 
         if(i == _reduction_ops - 1 && keep_dims)
         {
-            _reduction_kernels[i].configure(in, output, axis_local[i], ReductionOperation::MEAN_SUM);
+            _reduction_kernels[i].configure(compile_context, in, output, axis_local[i], ReductionOperation::MEAN_SUM);
         }
         else
         {
             _reduced_outs[i].allocator()->init(TensorInfo(out_shape, input->info()->num_channels(), input->info()->data_type(), input->info()->quantization_info()));
             _memory_group.manage(&_reduced_outs[i]);
-            _reduction_kernels[i].configure(in, &_reduced_outs[i], axis_local[i], ReductionOperation::MEAN_SUM);
+            _reduction_kernels[i].configure(compile_context, in, &_reduced_outs[i], axis_local[i], ReductionOperation::MEAN_SUM);
         }
     }
 
@@ -147,7 +152,7 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
             out_shape.remove_dimension(axis_local[i] - i);
         }
         auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(out_shape));
-        _reshape.configure(&_reduced_outs[_reduction_ops - 1], output);
+        _reshape.configure(compile_context, &_reduced_outs[_reduction_ops - 1], output);
     }
 }
 

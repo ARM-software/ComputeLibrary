@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,8 +82,29 @@ public:
      *
      */
     void configure(ICLTensor *input, const ICLMultiHOG *multi_hog, ICLDetectionWindowArray *detection_windows, ICLSize2DArray *detection_window_strides, BorderMode border_mode,
-                   uint8_t constant_border_value = 0,
-                   float threshold = 0.0f, bool non_maxima_suppression = false, float min_distance = 1.0f);
+                   uint8_t constant_border_value = 0, float threshold = 0.0f, bool non_maxima_suppression = false, float min_distance = 1.0f);
+    /** Initialise the function's source, destination, detection window strides, border mode, threshold and non-maxima suppression
+     *
+     * @param[in]      compile_context          The compile context to be used.
+     * @param[in, out] input                    Input tensor. Data type supported: U8
+     *                                          (Written to only for @p border_mode != UNDEFINED)
+     * @param[in]      multi_hog                Container of multiple HOG data object. Each HOG data object describes one HOG model to detect.
+     *                                          This container should store the HOG data-objects in descending or ascending cell_size width order.
+     *                                          This will help to understand if the HOG descriptor computation can be skipped for some HOG data-objects
+     * @param[out]     detection_windows        Array of @ref DetectionWindow used for locating the detected objects
+     * @param[in]      detection_window_strides Array of @ref Size2D used to specify the distance in pixels between 2 consecutive detection windows in x and y directions for each HOG data-object
+     *                                          The dimension of this array must be the same of multi_hog->num_models()
+     *                                          The i-th detection_window_stride of this array must be multiple of the block_stride stored in the i-th multi_hog array
+     * @param[in]      border_mode              Border mode to use.
+     * @param[in]      constant_border_value    (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     * @param[in]      threshold                (Optional) Threshold for the distance between features and SVM classifying plane
+     * @param[in]      non_maxima_suppression   (Optional) Flag to specify whether the non-maxima suppression is required or not.
+     *                                          True if the non-maxima suppression stage has to be computed
+     * @param[in]      min_distance             (Optional) Radial Euclidean distance to use for the non-maxima suppression stage
+     *
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLMultiHOG *multi_hog, ICLDetectionWindowArray *detection_windows, ICLSize2DArray *detection_window_strides,
+                   BorderMode border_mode, uint8_t constant_border_value = 0, float threshold = 0.0f, bool non_maxima_suppression = false, float min_distance = 1.0f);
 
     // Inherited method overridden:
     void run() override;

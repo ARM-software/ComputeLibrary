@@ -36,8 +36,13 @@ using namespace arm_compute;
 
 void CLReorgLayer::configure(ICLTensor *input, ICLTensor *output, int32_t stride)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, stride);
+}
+
+void CLReorgLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int32_t stride)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLReorgLayerKernel>();
-    k->configure(input, output, stride);
+    k->configure(compile_context, input, output, stride);
     _kernel = std::move(k);
 }
 

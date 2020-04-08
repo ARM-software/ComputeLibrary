@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,12 @@ CLDeconvolutionLayer::CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
 void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
                                      const WeightsInfo &weights_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, bias, output, deconv_info, weights_info);
+}
+
+void CLDeconvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
+                                     const WeightsInfo &weights_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     switch(CLDeconvolutionLayer::get_deconvolution_method(input->info(), weights->info(), nullptr, output->info(), deconv_info, weights_info))
@@ -51,14 +57,14 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const
         case DeconvolutionMethod::DIRECT:
         {
             auto f = arm_compute::support::cpp14::make_unique<CLDirectDeconvolutionLayer>();
-            f->configure(input, weights, bias, output, deconv_info, weights_info);
+            f->configure(compile_context, input, weights, bias, output, deconv_info, weights_info);
             _function = std::move(f);
             break;
         }
         case DeconvolutionMethod::GEMM:
         {
             auto f = arm_compute::support::cpp14::make_unique<CLGEMMDeconvolutionLayer>(_memory_manager);
-            f->configure(input, weights, bias, output, deconv_info);
+            f->configure(compile_context, input, weights, bias, output, deconv_info);
             _function = std::move(f);
             break;
         }

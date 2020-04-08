@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,26 +39,37 @@ CLSpaceToBatchLayer::CLSpaceToBatchLayer()
 
 void CLSpaceToBatchLayer::configure(const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape, paddings, output);
+}
+
+void CLSpaceToBatchLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, block_shape, paddings, output);
 
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
-        _memset_kernel.configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
+        _memset_kernel.configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
-    _space_to_batch_kernel.configure(input, block_shape, paddings, output);
+    _space_to_batch_kernel.configure(compile_context, input, block_shape, paddings, output);
 }
 
 void CLSpaceToBatchLayer::configure(const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ICLTensor *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape_x, block_shape_y, padding_left, padding_right, output);
+}
+
+void CLSpaceToBatchLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left,
+                                    const Size2D &padding_right, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     if(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size())
     {
         _has_padding = true;
-        _memset_kernel.configure(output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
+        _memset_kernel.configure(compile_context, output, PixelValue(0, input->info()->data_type(), input->info()->quantization_info()));
     }
-    _space_to_batch_kernel.configure(input, block_shape_x, block_shape_y, padding_left, padding_right, output);
+    _space_to_batch_kernel.configure(compile_context, input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 }
 
 Status CLSpaceToBatchLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *paddings, const ITensorInfo *output)

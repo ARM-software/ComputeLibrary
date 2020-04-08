@@ -50,6 +50,17 @@ public:
      *                    Data types supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, channels].
+     *                             Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[out] output          Destinationfeature tensor. Data type supported: same as @p input
+     * @param[in]  mean            Mean values tensor. 1 dimension with size equal to the number of input channels. Data types supported: Same as @p input
+     * @param[in]  std             Standard deviation values tensor. 1 dimension with size equal to the number of input channels.
+     *                    Data types supported: Same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizePlanarYUVLayer
      *
      * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, channels].

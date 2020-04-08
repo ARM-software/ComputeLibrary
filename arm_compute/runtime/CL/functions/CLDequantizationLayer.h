@@ -44,6 +44,14 @@ public:
      * @param[out] output Destination tensor with the same dimensions of input. Data type supported: F16/F32.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches.
+     *                             Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
+     * @param[out] output          Destination tensor with the same dimensions of input. Data type supported: F16/F32.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDequantizationLayer
      *
      * @param[in] input  Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.

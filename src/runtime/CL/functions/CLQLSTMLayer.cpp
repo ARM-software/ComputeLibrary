@@ -51,7 +51,7 @@ CLQLSTMLayer::CLQLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
     _memory_group = MemoryGroup(std::move(memory_manager));
 }
 
-void CLQLSTMLayer::configure_mm(CLGEMMLowpMatrixMultiplyCore &mm, CLGEMMLowpOutputStage &outstage, GEMMLowpOutputStageInfo &gemmlowp_info,
+void CLQLSTMLayer::configure_mm(const CLCompileContext &compile_context, CLGEMMLowpMatrixMultiplyCore &mm, CLGEMMLowpOutputStage &outstage, GEMMLowpOutputStageInfo &gemmlowp_info,
                                 const ICLTensor *mm_input, const ICLTensor *mm_weights, const ICLTensor *bias,
                                 CLTensor *mm_res, CLTensor *outstage_res, float gemmlowp_scale,
                                 const TensorInfo &mm_res_info, const TensorInfo &outstage_tensor_info)
@@ -63,15 +63,28 @@ void CLQLSTMLayer::configure_mm(CLGEMMLowpMatrixMultiplyCore &mm, CLGEMMLowpOutp
     outstage_res->allocator()->init(outstage_tensor_info);
 
     // Configure matrix-multiplication
-    mm.configure(mm_input, mm_weights, nullptr, mm_res);
+    mm.configure(compile_context, mm_input, mm_weights, nullptr, mm_res);
 
     // Configure output stage
     quantization::calculate_quantized_multiplier(gemmlowp_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift);
-    outstage.configure(mm_res, bias, outstage_res, gemmlowp_info);
+    outstage.configure(compile_context, mm_res, bias, outstage_res, gemmlowp_info);
     mm_res->allocator()->allocate();
 }
 
 void CLQLSTMLayer::configure(const ICLTensor *input,
+                             const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
+                             const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
+                             const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
+                             const ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                             ICLTensor *cell_state_out, ICLTensor *output_state_out,
+                             const LSTMParams<ICLTensor> &lstm_params)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
+              recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
+              cell_state_in, output_state_in, cell_state_out, output_state_out, lstm_params);
+}
+
+void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input,
                              const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                              const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                              const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
@@ -133,36 +146,36 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
         _input_to_input_weights     = lstm_params.input_to_input_weights();
         _recurrent_to_input_weights = lstm_params.recurrent_to_input_weights();
 
-        _input_to_input_reduction.configure(_input_to_input_weights, &_input_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-        _recurrent_to_input_reduction.configure(_recurrent_to_input_weights, &_recurrent_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+        _input_to_input_reduction.configure(compile_context, _input_to_input_weights, &_input_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+        _recurrent_to_input_reduction.configure(compile_context, _recurrent_to_input_weights, &_recurrent_to_input_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     }
-    _input_to_forget_reduction.configure(input_to_forget_weights, &_input_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_forget_reduction.configure(recurrent_to_forget_weights, &_recurrent_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
-    _input_to_cell_reduction.configure(input_to_cell_weights, &_input_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_cell_reduction.configure(recurrent_to_cell_weights, &_recurrent_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
-    _input_to_output_reduction.configure(input_to_output_weights, &_input_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
-    _recurrent_to_output_reduction.configure(recurrent_to_output_weights, &_recurrent_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_forget_reduction.configure(compile_context, input_to_forget_weights, &_input_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_forget_reduction.configure(compile_context, recurrent_to_forget_weights, &_recurrent_to_forget_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_cell_reduction.configure(compile_context, input_to_cell_weights, &_input_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_cell_reduction.configure(compile_context, recurrent_to_cell_weights, &_recurrent_to_cell_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
+    _input_to_output_reduction.configure(compile_context, input_to_output_weights, &_input_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qinput.offset, true));
+    _recurrent_to_output_reduction.configure(compile_context, recurrent_to_output_weights, &_recurrent_to_output_eff_bias, GEMMLowpReductionKernelInfo(num_units, false, -qoutput_state_in.offset, true));
     if(_projection_bias != nullptr)
     {
-        _projection_reduction.configure(_projection_weights, &_projection_reduction_res, GEMMLowpReductionKernelInfo(num_units, false, lstm_params.hidden_state_zero(), true));
-        _projection_bias_add.configure(ArithmeticOperation::ADD, _projection_bias, &_projection_reduction_res, &_projection_eff_bias, ConvertPolicy::SATURATE);
+        _projection_reduction.configure(compile_context, _projection_weights, &_projection_reduction_res, GEMMLowpReductionKernelInfo(num_units, false, lstm_params.hidden_state_zero(), true));
+        _projection_bias_add.configure(compile_context, ArithmeticOperation::ADD, _projection_bias, &_projection_reduction_res, &_projection_eff_bias, ConvertPolicy::SATURATE);
     }
 
     // Pre-transpose weights to be used in GEMM.
-    _transpose_input_to_forget_weights.configure(input_to_forget_weights, &_input_to_forget_weights_transposed);
-    _transpose_input_to_cell_weights.configure(input_to_cell_weights, &_input_to_cell_weights_transposed);
-    _transpose_input_to_output_weights.configure(input_to_output_weights, &_input_to_output_weights_transposed);
-    _transpose_recurrent_to_forget_weights.configure(recurrent_to_forget_weights, &_recurrent_to_forget_weights_transposed);
-    _transpose_recurrent_to_cell_weights.configure(recurrent_to_cell_weights, &_recurrent_to_cell_weights_transposed);
-    _transpose_recurrent_to_output_weights.configure(recurrent_to_output_weights, &_recurrent_to_output_weights_transposed);
+    _transpose_input_to_forget_weights.configure(compile_context, input_to_forget_weights, &_input_to_forget_weights_transposed);
+    _transpose_input_to_cell_weights.configure(compile_context, input_to_cell_weights, &_input_to_cell_weights_transposed);
+    _transpose_input_to_output_weights.configure(compile_context, input_to_output_weights, &_input_to_output_weights_transposed);
+    _transpose_recurrent_to_forget_weights.configure(compile_context, recurrent_to_forget_weights, &_recurrent_to_forget_weights_transposed);
+    _transpose_recurrent_to_cell_weights.configure(compile_context, recurrent_to_cell_weights, &_recurrent_to_cell_weights_transposed);
+    _transpose_recurrent_to_output_weights.configure(compile_context, recurrent_to_output_weights, &_recurrent_to_output_weights_transposed);
     if(!_has_cifg)
     {
-        _transpose_input_to_input_weights.configure(lstm_params.input_to_input_weights(), &_input_to_input_weights_transposed);
-        _transpose_recurrent_to_input_weights.configure(lstm_params.recurrent_to_input_weights(), &_recurrent_to_input_weights_transposed);
+        _transpose_input_to_input_weights.configure(compile_context, lstm_params.input_to_input_weights(), &_input_to_input_weights_transposed);
+        _transpose_recurrent_to_input_weights.configure(compile_context, lstm_params.recurrent_to_input_weights(), &_recurrent_to_input_weights_transposed);
     }
     if(_has_projection)
     {
-        _transpose_projection_weights.configure(_projection_weights, &_projection_weights_transposed);
+        _transpose_projection_weights.configure(compile_context, _projection_weights, &_projection_weights_transposed);
     }
 
     GEMMLowpOutputStageInfo gemmlowp_info;
@@ -175,31 +188,33 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
     // Forget gate.
     const TensorInfo forget_gate_outstage_info(mm_out_info.tensor_shape(), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.forget_intermediate_scale(), 0));
     const float      input_to_forget_scale = input_to_forget_weights->info()->quantization_info().uniform().scale * qinput.scale / lstm_params.forget_intermediate_scale();
-    configure_mm(_mm_input_to_forget, _input_to_forget_outstage, gemmlowp_info,
+    configure_mm(compile_context, _mm_input_to_forget, _input_to_forget_outstage, gemmlowp_info,
                  input, &_input_to_forget_weights_transposed, &_input_to_forget_eff_bias,
                  &_mm_input_to_forget_res, &_input_to_forget_outstage_res, input_to_forget_scale,
                  mm_out_info, forget_gate_outstage_info);
 
     const float recurrent_to_forget_scale = recurrent_to_forget_weights->info()->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.forget_intermediate_scale();
-    configure_mm(_mm_recurrent_to_forget, _recurrent_to_forget_outstage, gemmlowp_info,
+    configure_mm(compile_context, _mm_recurrent_to_forget, _recurrent_to_forget_outstage, gemmlowp_info,
                  output_state_in, &_recurrent_to_forget_weights_transposed, &_recurrent_to_forget_eff_bias,
                  &_mm_recurrent_to_forget_res, &_recurrent_to_forget_outstage_res, recurrent_to_forget_scale,
                  mm_out_info, forget_gate_outstage_info);
 
-    _accumulate_input_recurrent_forget.configure(ArithmeticOperation::ADD, &_input_to_forget_outstage_res, &_recurrent_to_forget_outstage_res, &_recurrent_to_forget_outstage_res, ConvertPolicy::SATURATE);
+    _accumulate_input_recurrent_forget.configure(compile_context, ArithmeticOperation::ADD, &_input_to_forget_outstage_res, &_recurrent_to_forget_outstage_res, &_recurrent_to_forget_outstage_res,
+                                                 ConvertPolicy::SATURATE);
     _input_to_forget_outstage_res.allocator()->allocate();
 
     if(_has_peephole)
     {
         _memory_group.manage(&_mul_cell_to_forget_res);
-        _pixelwise_mul_cell_to_forget.configure(cell_state_in, lstm_params.cell_to_forget_weights(), &_mul_cell_to_forget_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+        _pixelwise_mul_cell_to_forget.configure(compile_context, cell_state_in, lstm_params.cell_to_forget_weights(), &_mul_cell_to_forget_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
         _cell_to_forget_outstage_res.allocator()->init(TensorInfo(_mul_cell_to_forget_res.info()->tensor_shape(), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.forget_intermediate_scale(), 0)));
         _memory_group.manage(&_cell_to_forget_outstage_res);
         const float cell_to_forget_scale = std::pow(2, cell_shift) * lstm_params.cell_to_forget_weights()->info()->quantization_info().uniform().scale / lstm_params.forget_intermediate_scale();
         quantization::calculate_quantized_multiplier(cell_to_forget_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift);
-        _cell_to_forget_outstage.configure(&_mul_cell_to_forget_res, nullptr, &_cell_to_forget_outstage_res, gemmlowp_info);
+        _cell_to_forget_outstage.configure(compile_context, &_mul_cell_to_forget_res, nullptr, &_cell_to_forget_outstage_res, gemmlowp_info);
         _mul_cell_to_forget_res.allocator()->allocate();
-        _accumulate_cell_forget.configure(ArithmeticOperation::ADD, &_recurrent_to_forget_outstage_res, &_cell_to_forget_outstage_res, &_recurrent_to_forget_outstage_res, ConvertPolicy::SATURATE);
+        _accumulate_cell_forget.configure(compile_context, ArithmeticOperation::ADD, &_recurrent_to_forget_outstage_res, &_cell_to_forget_outstage_res, &_recurrent_to_forget_outstage_res,
+                                          ConvertPolicy::SATURATE);
         _cell_to_forget_outstage_res.allocator()->allocate();
     }
 
@@ -209,30 +224,31 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
     const TensorInfo forget_gate_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, sigmoid_tanh_outqinfo);
     _memory_group.manage(&_forget_gate);
     _forget_gate.allocator()->init(forget_gate_info);
-    _forget_gate_sigmoid.configure(&_recurrent_to_forget_outstage_res, &_forget_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
+    _forget_gate_sigmoid.configure(compile_context, &_recurrent_to_forget_outstage_res, &_forget_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
     _recurrent_to_forget_outstage_res.allocator()->allocate();
 
     // Modulation gate.
     const TensorInfo cell_outstage_info(mm_out_info.tensor_shape(), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.cell_intermediate_scale(), 0));
     const float      input_to_cell_scale = input_to_cell_weights->info()->quantization_info().uniform().scale * qinput.scale / lstm_params.cell_intermediate_scale();
-    configure_mm(_mm_input_to_cell, _input_to_cell_outstage, gemmlowp_info,
+    configure_mm(compile_context, _mm_input_to_cell, _input_to_cell_outstage, gemmlowp_info,
                  input, &_input_to_cell_weights_transposed, &_input_to_cell_eff_bias,
                  &_mm_input_to_cell_res, &_input_to_cell_outstage_res, input_to_cell_scale,
                  mm_out_info, cell_outstage_info);
 
     const float recurrent_to_cell_scale = recurrent_to_cell_weights->info()->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.cell_intermediate_scale();
-    configure_mm(_mm_recurrent_to_cell, _recurrent_to_cell_outstage, gemmlowp_info,
+    configure_mm(compile_context, _mm_recurrent_to_cell, _recurrent_to_cell_outstage, gemmlowp_info,
                  output_state_in, &_recurrent_to_cell_weights_transposed, &_recurrent_to_cell_eff_bias,
                  &_mm_recurrent_to_cell_res, &_recurrent_to_cell_outstage_res, recurrent_to_cell_scale,
                  mm_out_info, cell_outstage_info);
 
-    _accumulate_input_recurrent_modulation.configure(ArithmeticOperation::ADD, &_input_to_cell_outstage_res, &_recurrent_to_cell_outstage_res, &_recurrent_to_cell_outstage_res, ConvertPolicy::SATURATE);
+    _accumulate_input_recurrent_modulation.configure(compile_context, ArithmeticOperation::ADD, &_input_to_cell_outstage_res, &_recurrent_to_cell_outstage_res, &_recurrent_to_cell_outstage_res,
+                                                     ConvertPolicy::SATURATE);
     _input_to_cell_outstage_res.allocator()->allocate();
 
     const TensorInfo cell_gate_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, sigmoid_tanh_outqinfo);
     _memory_group.manage(&_cell_gate);
     _cell_gate.allocator()->init(cell_gate_info);
-    _cell_gate_tanh.configure(&_recurrent_to_cell_outstage_res, &_cell_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f));
+    _cell_gate_tanh.configure(compile_context, &_recurrent_to_cell_outstage_res, &_cell_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f));
     _recurrent_to_cell_outstage_res.allocator()->allocate();
 
     // Input gate.
@@ -242,75 +258,77 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
     if(_has_cifg)
     {
         _ones.allocator()->init(*_forget_gate.info());
-        _input_gate_sub.configure(ArithmeticOperation::SUB, &_ones, &_forget_gate, &_input_gate, ConvertPolicy::SATURATE);
+        _input_gate_sub.configure(compile_context, ArithmeticOperation::SUB, &_ones, &_forget_gate, &_input_gate, ConvertPolicy::SATURATE);
         _ones.allocator()->allocate();
     }
     else
     {
         const TensorInfo input_outstage_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.input_intermediate_scale(), 0));
         const float      input_to_input_scale = _input_to_input_weights->info()->quantization_info().uniform().scale * qinput.scale / lstm_params.input_intermediate_scale();
-        configure_mm(_mm_input_to_input, _input_to_input_outstage, gemmlowp_info,
+        configure_mm(compile_context, _mm_input_to_input, _input_to_input_outstage, gemmlowp_info,
                      input, &_input_to_input_weights_transposed, &_input_to_input_eff_bias,
                      &_mm_input_to_input_res, &_input_to_input_outstage_res, input_to_input_scale,
                      mm_out_info, input_outstage_info);
 
         const float recurrent_to_input_scale = _recurrent_to_input_weights->info()->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.input_intermediate_scale();
-        configure_mm(_mm_recurrent_to_input, _recurrent_to_input_outstage, gemmlowp_info,
+        configure_mm(compile_context, _mm_recurrent_to_input, _recurrent_to_input_outstage, gemmlowp_info,
                      input, &_recurrent_to_input_weights_transposed, &_recurrent_to_input_eff_bias,
                      &_mm_recurrent_to_input_res, &_recurrent_to_input_outstage_res, recurrent_to_input_scale,
                      mm_out_info, input_outstage_info);
-        _accumulate_input_recurrent_input.configure(ArithmeticOperation::ADD, &_input_to_input_outstage_res, &_recurrent_to_input_outstage_res, &_recurrent_to_input_outstage_res, ConvertPolicy::SATURATE);
+        _accumulate_input_recurrent_input.configure(compile_context, ArithmeticOperation::ADD, &_input_to_input_outstage_res, &_recurrent_to_input_outstage_res, &_recurrent_to_input_outstage_res,
+                                                    ConvertPolicy::SATURATE);
         _input_to_input_outstage_res.allocator()->allocate();
 
         if(_has_peephole)
         {
             _memory_group.manage(&_mul_cell_to_input_res);
-            _pixelwise_mul_cell_to_input.configure(cell_state_in, lstm_params.cell_to_input_weights(), &_mul_cell_to_input_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+            _pixelwise_mul_cell_to_input.configure(compile_context, cell_state_in, lstm_params.cell_to_input_weights(), &_mul_cell_to_input_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
             const float cell_to_input_scale = std::pow(2, cell_shift) * lstm_params.cell_to_input_weights()->info()->quantization_info().uniform().scale / lstm_params.input_intermediate_scale();
             quantization::calculate_quantized_multiplier(cell_to_input_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift);
             _cell_to_input_outstage_res.allocator()->init(TensorInfo(_mul_cell_to_input_res.info()->tensor_shape(), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.input_intermediate_scale(), 0)));
             _memory_group.manage(&_cell_to_input_outstage_res);
-            _cell_to_input_outstage.configure(&_mul_cell_to_input_res, nullptr, &_cell_to_input_outstage_res, gemmlowp_info);
+            _cell_to_input_outstage.configure(compile_context, &_mul_cell_to_input_res, nullptr, &_cell_to_input_outstage_res, gemmlowp_info);
             _mul_cell_to_input_res.allocator()->allocate();
             _accumulate_cell_input.configure(ArithmeticOperation::ADD, &_recurrent_to_input_outstage_res, &_cell_to_input_outstage_res, &_recurrent_to_input_outstage_res, ConvertPolicy::SATURATE);
             _cell_to_input_outstage_res.allocator()->allocate();
         }
 
-        _input_gate_tanh.configure(&_recurrent_to_input_outstage_res, &_input_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f));
+        _input_gate_tanh.configure(compile_context, &_recurrent_to_input_outstage_res, &_input_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f));
         _recurrent_to_input_outstage_res.allocator()->allocate();
     }
     // Cell.
     // TODO(COMPMID-3396): Perform multiplication in the quantized domain in CLPixelWiseMultiplicationKernel
-    _pixelwise_mul_forget_cell.configure(&_forget_gate, cell_state_in, &_forget_gate, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+    _pixelwise_mul_forget_cell.configure(compile_context, &_forget_gate, cell_state_in, &_forget_gate, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     const float      cell_gate_scale      = _cell_gate.info()->quantization_info().uniform().scale;
     const float      mul_input_cell_scale = cell_gate_scale * std::pow(2, 15 + cell_shift);
     const TensorInfo mul_input_cell_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, QuantizationInfo(mul_input_cell_scale, 0));
     _memory_group.manage(&_mul_input_cell_res);
     _mul_input_cell_res.allocator()->init(mul_input_cell_info);
-    _pixelwise_mul_input_cell.configure(&_input_gate, &_cell_gate, &_mul_input_cell_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+    _pixelwise_mul_input_cell.configure(compile_context, &_input_gate, &_cell_gate, &_mul_input_cell_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _cell_gate.allocator()->allocate();
-    _add_forget_cell.configure(ArithmeticOperation::ADD, &_forget_gate, &_mul_input_cell_res, cell_state_out, ConvertPolicy::SATURATE);
+    _add_forget_cell.configure(compile_context, ArithmeticOperation::ADD, &_forget_gate, &_mul_input_cell_res, cell_state_out, ConvertPolicy::SATURATE);
     _mul_input_cell_res.allocator()->allocate();
     _forget_gate.allocator()->allocate();
     if(_has_cell_clipping)
     {
-        _cell_clip.configure(cell_state_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -quantized_cell_clip, quantized_cell_clip));
+        _cell_clip.configure(compile_context, cell_state_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -quantized_cell_clip, quantized_cell_clip));
     }
     // Output gate.
     const TensorInfo output_outstage_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, QuantizationInfo(lstm_params.output_intermediate_scale(), 0));
     const float      input_to_output_scale = input_to_output_weights->info()->quantization_info().uniform().scale * qinput.scale / lstm_params.output_intermediate_scale();
-    configure_mm(_mm_input_to_output, _input_to_output_outstage, gemmlowp_info,
+    configure_mm(compile_context, _mm_input_to_output, _input_to_output_outstage, gemmlowp_info,
                  input, &_input_to_output_weights_transposed, &_input_to_output_eff_bias,
                  &_mm_input_to_output_res, &_input_to_output_outstage_res, input_to_output_scale,
                  mm_out_info, output_outstage_info);
 
     const float recurrent_to_output_scale = recurrent_to_output_weights->info()->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.output_intermediate_scale();
-    configure_mm(_mm_recurrent_to_output, _recurrent_to_output_outstage, gemmlowp_info,
+    configure_mm(compile_context, _mm_recurrent_to_output, _recurrent_to_output_outstage, gemmlowp_info,
                  output_state_in, &_recurrent_to_output_weights_transposed, &_recurrent_to_output_eff_bias,
                  &_mm_recurrent_to_output_res, &_recurrent_to_output_outstage_res, recurrent_to_output_scale,
                  mm_out_info, output_outstage_info);
 
-    _accumulate_input_recurrent_output.configure(ArithmeticOperation::ADD, &_recurrent_to_output_outstage_res, &_input_to_output_outstage_res, &_recurrent_to_output_outstage_res, ConvertPolicy::SATURATE);
+    _accumulate_input_recurrent_output.configure(compile_context, ArithmeticOperation::ADD, &_recurrent_to_output_outstage_res, &_input_to_output_outstage_res, &_recurrent_to_output_outstage_res,
+                                                 ConvertPolicy::SATURATE);
     _input_to_output_outstage_res.allocator()->allocate();
 
     if(_has_peephole)
@@ -320,31 +338,32 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
         // const float cell_to_output_scale = std::pow(2, cell_shift) * lstm_params.cell_to_output_weights()->info()->quantization_info().uniform().scale / lstm_params.output_intermediate_scale();
         // quantization::calculate_quantized_multiplier(cell_to_output_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift);
         _memory_group.manage(&_mul_cell_to_output_res);
-        _pixelwise_mul_cell_to_output.configure(cell_state_out, lstm_params.cell_to_output_weights(), &_mul_cell_to_output_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-        _accumulate_cell_to_output.configure(ArithmeticOperation::ADD, &_recurrent_to_output_outstage_res, &_mul_cell_to_output_res, &_recurrent_to_output_outstage_res, ConvertPolicy::SATURATE);
+        _pixelwise_mul_cell_to_output.configure(compile_context, cell_state_out, lstm_params.cell_to_output_weights(), &_mul_cell_to_output_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+        _accumulate_cell_to_output.configure(compile_context, ArithmeticOperation::ADD, &_recurrent_to_output_outstage_res, &_mul_cell_to_output_res, &_recurrent_to_output_outstage_res,
+                                             ConvertPolicy::SATURATE);
         _mul_cell_to_output_res.allocator()->allocate();
     }
 
     const TensorInfo output_gate_info(TensorShape(num_units, batch_size), 1, DataType::QSYMM16, sigmoid_tanh_outqinfo);
     _memory_group.manage(&_output_gate);
     _output_gate.allocator()->init(output_gate_info);
-    _output_gate_sigmoid.configure(&_recurrent_to_output_outstage_res, &_output_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
+    _output_gate_sigmoid.configure(compile_context, &_recurrent_to_output_outstage_res, &_output_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
     _recurrent_to_output_outstage_res.allocator()->allocate();
 
     // Hidden.
-    _hidden_tanh.configure(cell_state_out, &_input_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f));
+    _hidden_tanh.configure(compile_context, cell_state_out, &_input_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.f, 1.f));
     // TODO(COMPMID-3396): Perform multiplication in the quantized domain in CLPixelWiseMultiplicationKernel
     _memory_group.manage(&_hidden_mul_res);
     const TensorInfo hidden_mul_res(_input_gate.info()->tensor_shape(), 1, DataType::S32);
     _hidden_mul_res.allocator()->init(hidden_mul_res);
-    _pixelwise_mul_hidden.configure(&_output_gate, &_input_gate, &_hidden_mul_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+    _pixelwise_mul_hidden.configure(compile_context, &_output_gate, &_input_gate, &_hidden_mul_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _output_gate.allocator()->allocate();
     _input_gate.allocator()->allocate();
     const float hidden_state_scale = std::pow(2, -15) / lstm_params.hidden_state_scale() * std::pow(2, -15);
     quantization::calculate_quantized_multiplier(hidden_state_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift, /* ignore_epsilon */ true);
     gemmlowp_info.gemmlowp_offset  = lstm_params.hidden_state_zero();
     gemmlowp_info.output_data_type = output_state_in->info()->data_type();
-    _hidden_outstage.configure(&_hidden_mul_res, nullptr, output_state_out, gemmlowp_info);
+    _hidden_outstage.configure(compile_context, &_hidden_mul_res, nullptr, output_state_out, gemmlowp_info);
     _hidden_mul_res.allocator()->allocate();
 
     // Projection.
@@ -358,12 +377,12 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
         gemmlowp_info.gemmlowp_max_bound               = std::numeric_limits<int8_t>::max();
         gemmlowp_info.output_data_type                 = DataType::QASYMM8_SIGNED;
 
-        configure_mm(_mm_projection, _projection_outstage, gemmlowp_info,
+        configure_mm(compile_context, _mm_projection, _projection_outstage, gemmlowp_info,
                      output_state_out, &_projection_weights_transposed, &_projection_eff_bias,
                      &_mm_projection_res, &_projection_outstage_res, projection_scale,
                      mm_out_info, projection_outstage_info);
 
-        _accumulate_projection.configure(ArithmeticOperation::ADD, &_projection_outstage_res, output_state_out, output_state_out, ConvertPolicy::SATURATE);
+        _accumulate_projection.configure(compile_context, ArithmeticOperation::ADD, &_projection_outstage_res, output_state_out, output_state_out, ConvertPolicy::SATURATE);
         _projection_outstage_res.allocator()->allocate();
 
         int8_t quantized_projection_clip{ 0 };
@@ -374,7 +393,8 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
 
         if(quantized_projection_clip > 0)
         {
-            _projection_clip.configure(output_state_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -quantized_projection_clip, quantized_projection_clip));
+            _projection_clip.configure(compile_context, output_state_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -quantized_projection_clip,
+                                                                                                       quantized_projection_clip));
             _has_projection_clipping = true;
         }
     }

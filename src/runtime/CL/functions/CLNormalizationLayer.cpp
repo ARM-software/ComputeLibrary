@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,13 +39,18 @@ CLNormalizationLayer::CLNormalizationLayer()
 
 void CLNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, norm_info);
+}
+
+void CLNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info)
+{
     ARM_COMPUTE_ERROR_ON(input == nullptr);
 
     // Configure normalization kernel
-    _norm_kernel.configure(input, output, norm_info);
+    _norm_kernel.configure(compile_context, input, output, norm_info);
 
     // Fill the border by 3 elements since we need vload4 in the IN_MAP normalization kernel
-    _border_handler.configure(input, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue());
+    _border_handler.configure(compile_context, input, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue());
 }
 
 Status CLNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const NormalizationLayerInfo &norm_info)

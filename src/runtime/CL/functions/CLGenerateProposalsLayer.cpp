@@ -64,6 +64,13 @@ CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManage
 void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTensor *deltas, const ICLTensor *anchors, ICLTensor *proposals, ICLTensor *scores_out, ICLTensor *num_valid_proposals,
                                          const GenerateProposalsInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
+}
+
+void CLGenerateProposalsLayer::configure(const CLCompileContext &compile_context, const ICLTensor *scores, const ICLTensor *deltas, const ICLTensor *anchors, ICLTensor *proposals,
+                                         ICLTensor *scores_out,
+                                         ICLTensor *num_valid_proposals, const GenerateProposalsInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
     ARM_COMPUTE_ERROR_THROW_ON(CLGenerateProposalsLayer::validate(scores->info(), deltas->info(), anchors->info(), proposals->info(), scores_out->info(), num_valid_proposals->info(), info));
 
@@ -84,7 +91,7 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
 
     // Compute all the anchors
     _memory_group.manage(&_all_anchors);
-    _compute_anchors_kernel.configure(anchors, &_all_anchors, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale()));
+    _compute_anchors_kernel.configure(compile_context, anchors, &_all_anchors, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale()));
 
     const TensorShape flatten_shape_deltas(values_per_roi, total_num_anchors);
     _deltas_flattened.allocator()->init(TensorInfo(flatten_shape_deltas, 1, scores_data_type, deltas->info()->quantization_info()));
@@ -94,13 +101,13 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     if(!_is_nhwc)
     {
         _memory_group.manage(&_deltas_permuted);
-        _permute_deltas_kernel.configure(deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
-        _flatten_deltas_kernel.configure(&_deltas_permuted, &_deltas_flattened);
+        _permute_deltas_kernel.configure(compile_context, deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
+        _flatten_deltas_kernel.configure(compile_context, &_deltas_permuted, &_deltas_flattened);
         _deltas_permuted.allocator()->allocate();
     }
     else
     {
-        _flatten_deltas_kernel.configure(deltas, &_deltas_flattened);
+        _flatten_deltas_kernel.configure(compile_context, deltas, &_deltas_flattened);
     }
 
     const TensorShape flatten_shape_scores(1, total_num_anchors);
@@ -111,13 +118,13 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     if(!_is_nhwc)
     {
         _memory_group.manage(&_scores_permuted);
-        _permute_scores_kernel.configure(scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
-        _flatten_scores_kernel.configure(&_scores_permuted, &_scores_flattened);
+        _permute_scores_kernel.configure(compile_context, scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
+        _flatten_scores_kernel.configure(compile_context, &_scores_permuted, &_scores_flattened);
         _scores_permuted.allocator()->allocate();
     }
     else
     {
-        _flatten_scores_kernel.configure(scores, &_scores_flattened);
+        _flatten_scores_kernel.configure(compile_context, scores, &_scores_flattened);
     }
 
     CLTensor *anchors_to_use = &_all_anchors;
@@ -129,18 +136,18 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
         _memory_group.manage(&_all_anchors_f32);
         _memory_group.manage(&_deltas_flattened_f32);
         // Dequantize anchors to float
-        _dequantize_anchors.configure(&_all_anchors, &_all_anchors_f32);
+        _dequantize_anchors.configure(compile_context, &_all_anchors, &_all_anchors_f32);
         _all_anchors.allocator()->allocate();
         anchors_to_use = &_all_anchors_f32;
         // Dequantize deltas to float
-        _dequantize_deltas.configure(&_deltas_flattened, &_deltas_flattened_f32);
+        _dequantize_deltas.configure(compile_context, &_deltas_flattened, &_deltas_flattened_f32);
         _deltas_flattened.allocator()->allocate();
         deltas_to_use = &_deltas_flattened_f32;
     }
     // Bounding box transform
     _memory_group.manage(&_all_proposals);
     BoundingBoxTransformInfo bbox_info(info.im_width(), info.im_height(), 1.f);
-    _bounding_box_kernel.configure(anchors_to_use, &_all_proposals, deltas_to_use, bbox_info);
+    _bounding_box_kernel.configure(compile_context, anchors_to_use, &_all_proposals, deltas_to_use, bbox_info);
     deltas_to_use->allocator()->allocate();
     anchors_to_use->allocator()->allocate();
 
@@ -150,7 +157,7 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
         _memory_group.manage(&_all_proposals_quantized);
         // Requantize all_proposals to QASYMM16 with 0.125 scale and 0 offset
         _all_proposals_quantized.allocator()->init(TensorInfo(_all_proposals.info()->tensor_shape(), 1, DataType::QASYMM16, QuantizationInfo(0.125f, 0)));
-        _quantize_all_proposals.configure(&_all_proposals, &_all_proposals_quantized);
+        _quantize_all_proposals.configure(compile_context, &_all_proposals, &_all_proposals_quantized);
         _all_proposals.allocator()->allocate();
         _all_proposals_to_use = &_all_proposals_quantized;
     }
@@ -185,7 +192,7 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     _scores_flattened.allocator()->allocate();
 
     // Add the first column that represents the batch id. This will be all zeros, as we don't support multiple images
-    _pad_kernel.configure(&_proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } });
+    _pad_kernel.configure(compile_context, &_proposals_4_roi_values, proposals, PaddingList{ { 1, 0 } });
     _proposals_4_roi_values.allocator()->allocate();
 }
 

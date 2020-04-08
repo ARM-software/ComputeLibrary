@@ -37,8 +37,13 @@ CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
 
 void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
+}
+
+void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>();
-    k->configure(input, output, act_info);
+    k->configure(compile_context, input, output, act_info);
     _kernel = std::move(k);
 }
 

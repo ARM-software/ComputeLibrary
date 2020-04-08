@@ -38,9 +38,14 @@ Status CLROIAlignLayer::validate(const ITensorInfo *input, const ITensorInfo *ro
 
 void CLROIAlignLayer::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
+}
+
+void CLROIAlignLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+{
     // Configure ROI pooling kernel
     auto k = arm_compute::support::cpp14::make_unique<CLROIAlignLayerKernel>();
-    k->configure(input, rois, output, pool_info);
+    k->configure(compile_context, input, rois, output, pool_info);
     _kernel = std::move(k);
 }
 

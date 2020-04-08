@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,10 +44,16 @@ Status CLUpsampleLayer::validate(const ITensorInfo *input, const ITensorInfo *ou
 void CLUpsampleLayer::configure(ICLTensor *input, ICLTensor *output,
                                 const Size2D &info, const InterpolationPolicy upsampling_policy)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, info, upsampling_policy);
+}
+
+void CLUpsampleLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output,
+                                const Size2D &info, const InterpolationPolicy upsampling_policy)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _output = output;
-    _upsample.configure(input, _output, info, upsampling_policy);
+    _upsample.configure(compile_context, input, _output, info, upsampling_policy);
 }
 
 void CLUpsampleLayer::run()

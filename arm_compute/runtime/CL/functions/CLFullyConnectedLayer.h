@@ -52,6 +52,13 @@ public:
      * @param[out] output Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[out] output          Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayerReshapeWeights
      *
      * @param[in] input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -100,7 +107,16 @@ public:
      */
     void configure(const ICLTensor *input)
     {
-        _func.configure(input, &_output);
+        configure(CLKernelLibrary::get().get_compile_context(), input);
+    }
+    /** Configures the @ref CLFullyConnectedLayerReshapeWeights function
+     *
+     * @param[in] compile_context The compile context to be used.
+     * @param[in] input           Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input)
+    {
+        _func.configure(compile_context, input, &_output);
     }
 
 private:
@@ -147,6 +163,23 @@ public:
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  weights         Weights tensor. The weights must be 2 dimensional.
+     *                             If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
+     *                             If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
+     *                             Data type supported: Same as @p input.
+     * @param[in]  biases          Bias tensor. Can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output          Destination tensor. Its shape should be equal to the output of a matrix multiplication between:
+     *                             - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
+     *                             - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
+     *                             Data type supported: Same as @p input.
+     * @param[in]  fc_info         (Optional) Fully connected layer additional info
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
      *
      * @param[in]  input   Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -171,9 +204,9 @@ public:
     void prepare() override;
 
 private:
-    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
-    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
+    void configure_fc_fc(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
+    void configure_conv_fc(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
+    void configure_mm(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const FullyConnectedLayerInfo &fc_info);
 
     MemoryGroup                                                         _memory_group;
     IWeightsManager                                                    *_weights_manager;

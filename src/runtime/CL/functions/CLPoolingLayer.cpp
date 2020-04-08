@@ -32,11 +32,16 @@ namespace arm_compute
 {
 void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, pool_info, indices);
+}
+
+void CLPoolingLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     // Configure pooling kernel
     auto k = arm_compute::support::cpp14::make_unique<CLPoolingLayerKernel>();
     k->set_target(CLScheduler::get().target());
-    k->configure(input, output, pool_info, indices);
+    k->configure(compile_context, input, output, pool_info, indices);
     _kernel = std::move(k);
 
     const DataType data_type = input->info()->data_type();
@@ -74,7 +79,7 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
         default:
             ARM_COMPUTE_ERROR("Data layout not supported");
     }
-    _border_handler.configure(input, _kernel->border_size(), border_mode, pixel_value);
+    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode, pixel_value);
 
     // Tune kernels
     CLScheduler::get().tune_kernel_static(*_kernel);

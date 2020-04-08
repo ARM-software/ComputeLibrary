@@ -48,6 +48,20 @@ public:
      * @param[in]  ends   The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      */
     void configure(const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends);
+    /** Configure kernel
+     *
+     * @note Supported tensor rank: up to 4
+     * @note Start indices must be non-negative. 0 <= starts[i]
+     * @note End coordinates can be negative, which represents the number of elements before the end of that dimension.
+     * @note End indices are not inclusive unless negative.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data type supported: All.
+     * @param[out] output          Destination tensor. Data type supported: Same as @p input
+     * @param[in]  starts          The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in]  ends            The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLSlice
      *

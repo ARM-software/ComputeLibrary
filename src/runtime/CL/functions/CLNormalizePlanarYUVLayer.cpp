@@ -33,8 +33,13 @@ namespace arm_compute
 {
 void CLNormalizePlanarYUVLayer::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, std);
+}
+
+void CLNormalizePlanarYUVLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLNormalizePlanarYUVLayerKernel>();
-    k->configure(input, output, mean, std);
+    k->configure(compile_context, input, output, mean, std);
     _kernel = std::move(k);
 }
 

@@ -62,6 +62,15 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
                               Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, bool use_initial_estimate,
                               BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), old_pyramid, new_pyramid, old_points, new_points_estimates, new_points, termination, epsilon, num_iterations, window_dimension,
+              use_initial_estimate, border_mode, constant_border_value);
+}
+
+void CLOpticalFlow::configure(const CLCompileContext &compile_context, const CLPyramid *old_pyramid, const CLPyramid *new_pyramid,
+                              const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates, ICLKeyPointArray *new_points,
+                              Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, bool use_initial_estimate,
+                              BorderMode border_mode, uint8_t constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON(nullptr == old_pyramid);
     ARM_COMPUTE_ERROR_ON(nullptr == new_pyramid);
     ARM_COMPUTE_ERROR_ON(nullptr == old_points);
@@ -122,18 +131,18 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
         _memory_group.manage(&_scharr_gy[i]);
 
         // Init Scharr kernel
-        _func_scharr[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
+        _func_scharr[i].configure(compile_context, old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
 
         // Init Lucas-Kanade init kernel
-        _tracker_init_kernel[i].configure(old_points, new_points_estimates, _old_points_internal.get(), _new_points_internal.get(), use_initial_estimate, i, _num_levels, pyr_scale);
+        _tracker_init_kernel[i].configure(compile_context, old_points, new_points_estimates, _old_points_internal.get(), _new_points_internal.get(), use_initial_estimate, i, _num_levels, pyr_scale);
 
         // Init Lucas-Kanade stage0 kernel
-        _tracker_stage0_kernel[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i],
+        _tracker_stage0_kernel[i].configure(compile_context, old_ith_input, &_scharr_gx[i], &_scharr_gy[i],
                                             _old_points_internal.get(), _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
                                             window_dimension, i);
 
         // Init Lucas-Kanade stage1 kernel
-        _tracker_stage1_kernel[i].configure(new_ith_input, _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
+        _tracker_stage1_kernel[i].configure(compile_context, new_ith_input, _new_points_internal.get(), _coefficient_table.get(), _old_values.get(),
                                             termination, epsilon, num_iterations, window_dimension, i);
 
         // Allocate intermediate buffers
@@ -142,7 +151,7 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
     }
 
     // Finalize Lucas-Kanade
-    _tracker_finalize_kernel.configure(_new_points_internal.get(), new_points);
+    _tracker_finalize_kernel.configure(compile_context, _new_points_internal.get(), new_points);
 }
 
 void CLOpticalFlow::run()

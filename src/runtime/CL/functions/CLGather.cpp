@@ -31,8 +31,13 @@ namespace arm_compute
 {
 void CLGather::configure(const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, indices, output, axis);
+}
+
+void CLGather::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLGatherKernel>();
-    k->configure(input, indices, output, axis);
+    k->configure(compile_context, input, indices, output, axis);
     _kernel = std::move(k);
 }
 

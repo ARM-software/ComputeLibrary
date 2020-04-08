@@ -33,7 +33,7 @@ void CLFloor::configure(const ICLTensor *input, ICLTensor *output)
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLFloor::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLFloor::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLFloorKernel>();
     k->configure(compile_context, input, output);

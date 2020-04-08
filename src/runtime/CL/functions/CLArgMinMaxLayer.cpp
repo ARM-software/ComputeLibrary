@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,6 +106,11 @@ Status CLArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITen
 
 void CLArgMinMaxLayer::configure(const ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, axis, output, op);
+}
+
+void CLArgMinMaxLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, int axis, ICLTensor *output, const ReductionOperation &op)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     _num_of_stages  = calculate_number_of_stages_only_x_axis(input->info()->dimension(0), axis);
     _reduction_axis = axis;
@@ -121,7 +126,7 @@ void CLArgMinMaxLayer::configure(const ICLTensor *input, int axis, ICLTensor *ou
     // Create temporary tensors
     if(_num_of_stages == 1)
     {
-        _reduction_kernels_vector[0].configure(input, nullptr, &_not_reshaped_output, axis, op);
+        _reduction_kernels_vector[0].configure(compile_context, input, nullptr, &_not_reshaped_output, axis, op);
     }
     else
     {
@@ -135,22 +140,22 @@ void CLArgMinMaxLayer::configure(const ICLTensor *input, int axis, ICLTensor *ou
 
         // Apply ReductionOperation only on first kernel
         _memory_group.manage(&_results_vector[0]);
-        _reduction_kernels_vector[0].configure(input, nullptr, &_results_vector[0], axis, op);
+        _reduction_kernels_vector[0].configure(compile_context, input, nullptr, &_results_vector[0], axis, op);
 
         // Apply ReductionOperation on intermediate stages
         for(unsigned int i = 1; i < _num_of_stages - 1; ++i)
         {
             _memory_group.manage(&_results_vector[i]);
-            _reduction_kernels_vector[i].configure(input, &_results_vector[i - 1], &_results_vector[i], axis, op);
+            _reduction_kernels_vector[i].configure(compile_context, input, &_results_vector[i - 1], &_results_vector[i], axis, op);
             _results_vector[i - 1].allocator()->allocate();
         }
 
         // Apply ReductionOperation on the last stage
         const unsigned int last_stage = _num_of_stages - 1;
-        _reduction_kernels_vector[last_stage].configure(input, &_results_vector[last_stage - 1], &_not_reshaped_output, axis, op);
+        _reduction_kernels_vector[last_stage].configure(compile_context, input, &_results_vector[last_stage - 1], &_not_reshaped_output, axis, op);
         _results_vector[last_stage - 1].allocator()->allocate();
     }
-    _reshape_kernel.configure(&_not_reshaped_output, output);
+    _reshape_kernel.configure(compile_context, &_not_reshaped_output, output);
     _not_reshaped_output.allocator()->allocate();
 }
 

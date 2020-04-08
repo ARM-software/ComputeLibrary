@@ -64,6 +64,14 @@ public:
      * @param[in]      info   Contains padding and policies to be used in the deconvolution.
      */
     void configure(ICLTensor *input, ICLTensor *output, const PadStrideInfo &info);
+    /** Initialize the function's source, destination, interpolation type and border_mode.
+     *
+     * @param[in]      compile_context The compile context to be used.
+     * @param[in, out] input           Source tensor. Data type supported: All.
+     * @param[out]     output          Destination tensor. Data type supported: same as @p input.
+     * @param[in]      info            Contains padding and policies to be used in the deconvolution.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PadStrideInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayerUpsample
      *
      * @param[in] input  Source tensor info. Data type supported: All.

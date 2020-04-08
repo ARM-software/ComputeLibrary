@@ -33,7 +33,7 @@ namespace arm_compute
 {
 namespace
 {
-void configure_border_handler(CLFillBorderKernel &border_handler, BorderSize border_size, ICLTensor *input1, ICLTensor *input2, const ICLTensor *output)
+void configure_border_handler(const CLCompileContext &compile_context, CLFillBorderKernel &border_handler, BorderSize border_size, ICLTensor *input1, ICLTensor *input2, const ICLTensor *output)
 {
     if(output->info()->dimension(0) > 1)
     {
@@ -41,7 +41,7 @@ void configure_border_handler(CLFillBorderKernel &border_handler, BorderSize bor
 
         if(broadcasted_info->info()->dimension(0) == 1)
         {
-            border_handler.configure(broadcasted_info, border_size, BorderMode::REPLICATE);
+            border_handler.configure(compile_context, broadcasted_info, border_size, BorderMode::REPLICATE);
         }
     }
 }
@@ -49,10 +49,15 @@ void configure_border_handler(CLFillBorderKernel &border_handler, BorderSize bor
 
 void CLArithmeticAddition::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, policy, act_info);
+}
+
+void CLArithmeticAddition::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLSaturatedArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::ADD, input1, input2, output, policy, act_info);
+    k->configure(compile_context, ArithmeticOperation::ADD, input1, input2, output, policy, act_info);
     _kernel = std::move(k);
-    configure_border_handler(_border_handler, _kernel->border_size(), input1, input2, output);
+    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
@@ -62,10 +67,15 @@ Status CLArithmeticAddition::validate(const ITensorInfo *input1, const ITensorIn
 
 void CLArithmeticSubtraction::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, policy, act_info);
+}
+
+void CLArithmeticSubtraction::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLSaturatedArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::SUB, input1, input2, output, policy, act_info);
+    k->configure(compile_context, ArithmeticOperation::SUB, input1, input2, output, policy, act_info);
     _kernel = std::move(k);
-    configure_border_handler(_border_handler, _kernel->border_size(), input1, input2, output);
+    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
@@ -76,10 +86,15 @@ Status CLArithmeticSubtraction::validate(const ITensorInfo *input1, const ITenso
 
 void CLArithmeticDivision::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
+}
+
+void CLArithmeticDivision::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::DIV, input1, input2, output, act_info);
+    k->configure(compile_context, ArithmeticOperation::DIV, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(_border_handler, _kernel->border_size(), input1, input2, output);
+    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLArithmeticDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -89,10 +104,15 @@ Status CLArithmeticDivision::validate(const ITensorInfo *input1, const ITensorIn
 
 void CLElementwiseMax::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
+}
+
+void CLElementwiseMax::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::MAX, input1, input2, output, act_info);
+    k->configure(compile_context, ArithmeticOperation::MAX, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(_border_handler, _kernel->border_size(), input1, input2, output);
+    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -102,10 +122,15 @@ Status CLElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void CLElementwiseMin::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
+}
+
+void CLElementwiseMin::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::MIN, input1, input2, output, act_info);
+    k->configure(compile_context, ArithmeticOperation::MIN, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(_border_handler, _kernel->border_size(), input1, input2, output);
+    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -115,10 +140,15 @@ Status CLElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *
 
 void CLElementwiseSquaredDiff::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
+}
+
+void CLElementwiseSquaredDiff::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::SQUARED_DIFF, input1, input2, output, act_info);
+    k->configure(compile_context, ArithmeticOperation::SQUARED_DIFF, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(_border_handler, _kernel->border_size(), input1, input2, output);
+    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
@@ -128,10 +158,15 @@ Status CLElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITens
 
 void CLElementwisePower::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
+}
+
+void CLElementwisePower::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::POWER, input1, input2, output, act_info);
+    k->configure(compile_context, ArithmeticOperation::POWER, input1, input2, output, act_info);
     _kernel = std::move(k);
-    configure_border_handler(_border_handler, _kernel->border_size(), input1, input2, output);
+    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input1, input2, output);
 }
 
 Status CLElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)

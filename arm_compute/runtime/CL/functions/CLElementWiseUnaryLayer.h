@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,13 @@ public:
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialize the function
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: F16/F32.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLRsqrtLayer
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.
@@ -60,6 +67,13 @@ public:
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialize the function
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: F16/F32.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLExpLayer
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.
@@ -80,6 +94,13 @@ public:
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialize the function
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: F16/F32.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNegLayer
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.
@@ -100,6 +121,13 @@ public:
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialize the function
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: F16/F32.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSinLayer
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.
@@ -120,6 +148,13 @@ public:
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialize the function
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: F16/F32.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLogLayer
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.
@@ -140,6 +175,13 @@ public:
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialize the function
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: F16/F32.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLAbsLayer
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.
@@ -160,6 +202,13 @@ public:
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialize the function
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: F16/F32.
+     * @param[out] output          Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLRoundLayer
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.

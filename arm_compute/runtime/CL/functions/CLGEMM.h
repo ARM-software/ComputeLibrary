@@ -79,7 +79,18 @@ public:
      */
     void configure(const ICLTensor *input, GEMMRHSMatrixInfo info)
     {
-        _kernel.configure(input, &_output, info);
+        configure(CLKernelLibrary::get().get_compile_context(), input, info);
+    }
+
+    /** Configures the @ref CLGEMMReshapeRHSMatrixKernel kernel
+     *
+     * @param[in] compile_context The compile context to be used.
+     * @param[in] input           Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] info            RHS matrix information to be used for reshaping.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, GEMMRHSMatrixInfo info)
+    {
+        _kernel.configure(compile_context, input, &_output, info);
     }
 
 private:
@@ -134,6 +145,26 @@ public:
      *                       in case matrix A and matrix B have been already transformed.
      */
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    /** Initialise the kernel's inputs and output
+     *
+     * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
+     *
+     * @note All tensors must have the same data type.
+     *
+     * @note Whilst the first input tensor can be a vector, the second input tensor must be at least a matrix
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  a               First input tensor  (Matrix or Vector A). Data types supported: F16/F32
+     * @param[in]  b               Second input tensor (Matrix B). Data type supported: same as @p a.
+     * @param[in]  c               Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[out] output          Output tensor. Data type supported: same as @p a
+     * @param[in]  alpha           Weight of the matrix product
+     * @param[in]  beta            Weight of matrix C
+     * @param[in]  gemm_info       (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                       if the reshape of matrix B should happen only for the first run. GEMMInfo also contains information about the reshaping
+     *                       in case matrix A and matrix B have been already transformed.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMM.
      *
      * @param[in] a         First input tensor info  (Matrix or Vector A). Data types supported: F16/F32
@@ -156,10 +187,11 @@ public:
 private:
     static CLGEMMKernelType select_gemm_kernel(unsigned int m, unsigned int n, unsigned int k, DataType data_type, bool reshape_b_only_on_first_run);
 
-    void configure_native_v1(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info);
-    void configure_reshaped_v1(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info);
-    void configure_reshaped(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info);
-    void configure_reshaped_only_rhs(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info);
+    void configure_native_v1(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info);
+    void configure_reshaped_v1(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info);
+    void configure_reshaped_v2(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info);
+    void configure_reshaped_only_rhs(const CLCompileContext &compile_context, const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta,
+                                     const GEMMInfo &gemm_info);
 
     static Status validate_native_v1(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);
     static Status validate_reshaped_v1(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info);

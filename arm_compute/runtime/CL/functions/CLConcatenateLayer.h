@@ -62,6 +62,18 @@ public:
      */
     void configure(std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis);
     void configure(std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis);
+    /** Initialise the kernel's inputs vector and output.
+     *
+     * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
+     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayerKernel, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayerKernel.
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] inputs_vector   The vectors containing all the tensors to concatenate. Data types supported: All.
+     * @param[out]    output          Output tensor. Data types supported: Same as @p input.
+     * @param[in]     axis            Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
+     */
+    void configure(const CLCompileContext &compile_context, std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis);
+    void configure(const CLCompileContext &compile_context, std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
@@ -81,7 +93,7 @@ public:
 
 private:
     template <typename TensorType>
-    void configure_internal(std::vector<TensorType *> &&inputs_vector, ICLTensor *output, size_t axis);
+    void configure_internal(const CLCompileContext &compile_context, std::vector<TensorType *> &&inputs_vector, ICLTensor *output, size_t axis);
 
     template <typename TensorInfoType>
     static Status validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output, size_t axis);

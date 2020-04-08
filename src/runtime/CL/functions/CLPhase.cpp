@@ -32,7 +32,12 @@ using namespace arm_compute;
 
 void CLPhase::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, PhaseType phase_type)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, phase_type);
+}
+
+void CLPhase::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, PhaseType phase_type)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLMagnitudePhaseKernel>();
-    k->configure(input1, input2, nullptr, output, MagnitudeType::L1NORM, phase_type);
+    k->configure(compile_context, input1, input2, nullptr, output, MagnitudeType::L1NORM, phase_type);
     _kernel = std::move(k);
 }

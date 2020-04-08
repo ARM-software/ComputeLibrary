@@ -30,8 +30,13 @@ namespace arm_compute
 {
 void CLTile::configure(const ICLTensor *input, ICLTensor *output, const Multiples &multiples)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, multiples);
+}
+
+void CLTile::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Multiples &multiples)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLTileKernel>();
-    k->configure(input, output, multiples);
+    k->configure(compile_context, input, output, multiples);
     _kernel = std::move(k);
 }
 

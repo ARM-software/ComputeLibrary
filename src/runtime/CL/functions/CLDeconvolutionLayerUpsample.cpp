@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,11 +44,16 @@ Status CLDeconvolutionLayerUpsample::validate(const ITensorInfo *input, const IT
 
 void CLDeconvolutionLayerUpsample::configure(ICLTensor *input, ICLTensor *output, const PadStrideInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
+}
+
+void CLDeconvolutionLayerUpsample::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PadStrideInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _output = output;
-    _memset.configure(_output, PixelValue(0, _output->info()->data_type(), _output->info()->quantization_info()));
-    _upsample.configure(input, _output, info);
+    _memset.configure(compile_context, _output, PixelValue(0, _output->info()->data_type(), _output->info()->quantization_info()));
+    _upsample.configure(compile_context, input, _output, info);
 }
 
 void CLDeconvolutionLayerUpsample::run()

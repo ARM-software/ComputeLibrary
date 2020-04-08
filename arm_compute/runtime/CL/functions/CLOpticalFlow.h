@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,6 +88,27 @@ public:
      *
      */
     void configure(const CLPyramid *old_pyramid, const CLPyramid *new_pyramid,
+                   const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates, ICLKeyPointArray *new_points,
+                   Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, bool use_initial_estimate,
+                   BorderMode border_mode, uint8_t constant_border_value = 0);
+    /**  Initialise the function input and output
+     *
+     * @param[in]  compile_context       The compile context to be used.
+     * @param[in]  old_pyramid           Pointer to the pyramid for the old tensor. Data types supported U8
+     * @param[in]  new_pyramid           Pointer to the pyramid for the new tensor. Data types supported U8
+     * @param[in]  old_points            Pointer to the IKeyPointArray storing old key points
+     * @param[in]  new_points_estimates  Pointer to the IKeyPointArray storing new estimates key points
+     * @param[out] new_points            Pointer to the IKeyPointArray storing new key points
+     * @param[in]  termination           The criteria to terminate the search of each keypoint.
+     * @param[in]  epsilon               The error for terminating the algorithm
+     * @param[in]  num_iterations        The maximum number of iterations before terminate the alogrithm
+     * @param[in]  window_dimension      The size of the window on which to perform the algorithm
+     * @param[in]  use_initial_estimate  The flag to indicate whether the initial estimated position should be used
+     * @param[in]  border_mode           The border mode applied at scharr kernel stage
+     * @param[in]  constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT
+     *
+     */
+    void configure(const CLCompileContext &compile_context, const CLPyramid *old_pyramid, const CLPyramid *new_pyramid,
                    const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates, ICLKeyPointArray *new_points,
                    Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, bool use_initial_estimate,
                    BorderMode border_mode, uint8_t constant_border_value = 0);

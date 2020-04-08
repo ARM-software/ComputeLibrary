@@ -32,7 +32,13 @@ using namespace arm_compute;
 
 void CLThreshold::configure(const ICLTensor *input, ICLTensor *output, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, threshold, false_value, true_value, type, upper);
+}
+
+void CLThreshold::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type,
+                            uint8_t upper)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLThresholdKernel>();
-    k->configure(input, output, threshold, false_value, true_value, type, upper);
+    k->configure(compile_context, input, output, threshold, false_value, true_value, type, upper);
     _kernel = std::move(k);
 }

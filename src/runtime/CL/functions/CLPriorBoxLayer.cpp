@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,11 @@ CLPriorBoxLayer::CLPriorBoxLayer()
 
 void CLPriorBoxLayer::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, info);
+}
+
+void CLPriorBoxLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info)
+{
     _min           = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.min_sizes().size() * sizeof(float));
     _aspect_ratios = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.aspect_ratios().size() * sizeof(float));
     if(!info.max_sizes().empty())
@@ -48,7 +53,7 @@ void CLPriorBoxLayer::configure(const ICLTensor *input1, const ICLTensor *input2
     }
 
     auto k = arm_compute::support::cpp14::make_unique<CLPriorBoxLayerKernel>();
-    k->configure(input1, input2, output, info, &_min, &_max, &_aspect_ratios);
+    k->configure(compile_context, input1, input2, output, info, &_min, &_max, &_aspect_ratios);
     _kernel = std::move(k);
 }
 

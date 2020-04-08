@@ -59,6 +59,19 @@ void CLLSTMLayer::configure(const ICLTensor *input,
                             ICLTensor *scratch_buffer, ICLTensor *output_state_out, ICLTensor *cell_state_out, ICLTensor *output,
                             const LSTMParams<ICLTensor> &lstm_params, const ActivationLayerInfo &activation_info, float cell_threshold, float projection_threshold)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_forget_weights, recurrent_to_cell_weights,
+              recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias, output_state_in, cell_state_in, scratch_buffer, output_state_out, cell_state_out, output, lstm_params, activation_info,
+              cell_threshold, projection_threshold);
+}
+
+void CLLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input,
+                            const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
+                            const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
+                            const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
+                            const ICLTensor *output_state_in, const ICLTensor *cell_state_in,
+                            ICLTensor *scratch_buffer, ICLTensor *output_state_out, ICLTensor *cell_state_out, ICLTensor *output,
+                            const LSTMParams<ICLTensor> &lstm_params, const ActivationLayerInfo &activation_info, float cell_threshold, float projection_threshold)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input,
                                  input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
                                  recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
@@ -97,7 +110,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _forget_gate_out2.allocator()->init(TensorInfo(concat_shape, 1, input->info()->data_type()));
 
     _memory_group.manage(&_forget_gate_out2);
-    _concat_inputs_forget_gate.configure(input, output_state_in, &_forget_gate_out2);
+    _concat_inputs_forget_gate.configure(compile_context, input, output_state_in, &_forget_gate_out2);
 
     std::vector<const ICLTensor *> weights_vector;
 
@@ -106,10 +119,10 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     const TensorShape weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(weights_vector, 0);
     _forget_gate_out6.allocator()->init(TensorInfo(weights_concat_shape, 1, input->info()->data_type()));
 
-    _concat_weights_forget_gate.configure(input_to_forget_weights, recurrent_to_forget_weights, &_forget_gate_out6);
+    _concat_weights_forget_gate.configure(compile_context, input_to_forget_weights, recurrent_to_forget_weights, &_forget_gate_out6);
 
     _memory_group.manage(&_forget_gate_out5);
-    _fully_connected_forget_gate.configure(&_forget_gate_out2, &_forget_gate_out6, (_is_layer_norm_lstm) ? nullptr : forget_gate_bias, &_forget_gate_out5);
+    _fully_connected_forget_gate.configure(compile_context, &_forget_gate_out2, &_forget_gate_out6, (_is_layer_norm_lstm) ? nullptr : forget_gate_bias, &_forget_gate_out5);
     _memory_group.manage(&_forget_gate_out1);
     _memory_group.manage(&_forget_gate_out3);
     _forget_gate_out6.allocator()->allocate();
@@ -121,8 +134,8 @@ void CLLSTMLayer::configure(const ICLTensor *input,
 
         _run_peephole_opt = true;
         _memory_group.manage(&_forget_gate_out4);
-        _pixelwise_mul_forget_gate.configure(cell_state_in, lstm_params.cell_to_forget_weights(), &_forget_gate_out4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
-        _accum_forget_gate1.configure(&_forget_gate_out5, &_forget_gate_out4, &_forget_gate_out3, ConvertPolicy::SATURATE);
+        _pixelwise_mul_forget_gate.configure(compile_context, cell_state_in, lstm_params.cell_to_forget_weights(), &_forget_gate_out4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+        _accum_forget_gate1.configure(compile_context, &_forget_gate_out5, &_forget_gate_out4, &_forget_gate_out3, ConvertPolicy::SATURATE);
         _forget_gate_out4.allocator()->allocate();
         _forget_gate_out5.allocator()->allocate();
         forget_gate_out = &_forget_gate_out3;
@@ -137,15 +150,16 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         _forget_layer_norm_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
         _memory_group.manage(&_forget_layer_norm_out1);
         _memory_group.manage(&_forget_layer_norm_out2);
-        _mean_std_norm_forget_gate.configure(forget_gate_out);
-        _pixelwise_mul_forget_gate_coeff.configure(forget_gate_out, lstm_params.forget_layer_norm_weights(), &_forget_layer_norm_out1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+        _mean_std_norm_forget_gate.configure(compile_context, forget_gate_out);
+        _pixelwise_mul_forget_gate_coeff.configure(compile_context, forget_gate_out, lstm_params.forget_layer_norm_weights(), &_forget_layer_norm_out1, 1, ConvertPolicy::SATURATE,
+                                                   RoundingPolicy::TO_NEAREST_EVEN);
         // forget_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
         forget_gate_out->allocator()->allocate();
-        _accum_forget_gate_bias.configure(ArithmeticOperation::ADD, &_forget_layer_norm_out1, forget_gate_bias, &_forget_layer_norm_out2, ConvertPolicy::SATURATE);
+        _accum_forget_gate_bias.configure(compile_context, ArithmeticOperation::ADD, &_forget_layer_norm_out1, forget_gate_bias, &_forget_layer_norm_out2, ConvertPolicy::SATURATE);
         _forget_layer_norm_out1.allocator()->allocate();
         forget_gate_out = &_forget_layer_norm_out2;
     }
-    _activation_forget_gate.configure(forget_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
+    _activation_forget_gate.configure(compile_context, forget_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
 
     // Configure block that calculates the input gate
     // input_gate = Activation(input * input_to_input_weights + output_state * recurrent_to_input_weights + PixelWiseMul(cell_state, cell_to_input_weights) + input_gate_bias), without CIFG
@@ -158,8 +172,8 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     {
         _memory_group.manage(&_input_gate_out1);
         _ones.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-        _ones_memset_kernel.configure(&_ones, PixelValue(1, _ones.info()->data_type()));
-        _subtract_input_gate.configure(ArithmeticOperation::SUB, &_ones, forget_gate_out, &_input_gate_out1, ConvertPolicy::SATURATE);
+        _ones_memset_kernel.configure(compile_context, &_ones, PixelValue(1, _ones.info()->data_type()));
+        _subtract_input_gate.configure(compile_context, ArithmeticOperation::SUB, &_ones, forget_gate_out, &_input_gate_out1, ConvertPolicy::SATURATE);
         _ones.allocator()->allocate();
         _run_cifg_opt = true;
     }
@@ -174,20 +188,20 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(lstm_weights, 0);
         _input_gate_out2.allocator()->init(TensorInfo(lstm_weights_concat_shape, 1, input->info()->data_type()));
 
-        _concat_weights_input_gate.configure(lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), &_input_gate_out2);
+        _concat_weights_input_gate.configure(compile_context, lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), &_input_gate_out2);
 
         _memory_group.manage(&_input_gate_out1);
 
         _memory_group.manage(&_input_gate_out3);
-        _fully_connected_input_gate.configure(&_forget_gate_out2, &_input_gate_out2, (_is_layer_norm_lstm) ? nullptr : lstm_params.input_gate_bias(), &_input_gate_out3);
+        _fully_connected_input_gate.configure(compile_context, &_forget_gate_out2, &_input_gate_out2, (_is_layer_norm_lstm) ? nullptr : lstm_params.input_gate_bias(), &_input_gate_out3);
         _input_gate_out2.allocator()->allocate();
 
         input_gate_out = &_input_gate_out3;
         if(_run_peephole_opt)
         {
             _memory_group.manage(&_input_gate_out4);
-            _pixelwise_mul_input_gate.configure(cell_state_in, lstm_params.cell_to_input_weights(), &_input_gate_out4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
-            _accum_input_gate1.configure(&_input_gate_out3, &_input_gate_out4, &_input_gate_out1, ConvertPolicy::SATURATE);
+            _pixelwise_mul_input_gate.configure(compile_context, cell_state_in, lstm_params.cell_to_input_weights(), &_input_gate_out4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+            _accum_input_gate1.configure(compile_context, &_input_gate_out3, &_input_gate_out4, &_input_gate_out1, ConvertPolicy::SATURATE);
             _input_gate_out3.allocator()->allocate();
             _input_gate_out4.allocator()->allocate();
             input_gate_out = &_input_gate_out1;
@@ -203,15 +217,16 @@ void CLLSTMLayer::configure(const ICLTensor *input,
             _input_layer_norm_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
             _memory_group.manage(&_input_layer_norm_out1);
             _memory_group.manage(&_input_layer_norm_out2);
-            _mean_std_norm_input_gate.configure(input_gate_out);
-            _pixelwise_mul_input_gate_coeff.configure(input_gate_out, lstm_params.input_layer_norm_weights(), &_input_layer_norm_out1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+            _mean_std_norm_input_gate.configure(compile_context, input_gate_out);
+            _pixelwise_mul_input_gate_coeff.configure(compile_context, input_gate_out, lstm_params.input_layer_norm_weights(), &_input_layer_norm_out1, 1, ConvertPolicy::SATURATE,
+                                                      RoundingPolicy::TO_NEAREST_EVEN);
             // input_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
             input_gate_out->allocator()->allocate();
-            _accum_input_gate_bias.configure(ArithmeticOperation::ADD, &_input_layer_norm_out1, lstm_params.input_gate_bias(), &_input_layer_norm_out2, ConvertPolicy::SATURATE);
+            _accum_input_gate_bias.configure(compile_context, ArithmeticOperation::ADD, &_input_layer_norm_out1, lstm_params.input_gate_bias(), &_input_layer_norm_out2, ConvertPolicy::SATURATE);
             _input_layer_norm_out1.allocator()->allocate();
             input_gate_out = &_input_layer_norm_out2;
         }
-        _activation_input_gate.configure(input_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
+        _activation_input_gate.configure(compile_context, input_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
     }
 
     // Configure block that calculates the cell state
@@ -224,14 +239,14 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _cell_state_out5.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
     _memory_group.manage(&_cell_state_out1);
-    _fully_connected_cell_state.configure(input, input_to_cell_weights, (_is_layer_norm_lstm) ? nullptr : cell_bias, &_cell_state_out1);
+    _fully_connected_cell_state.configure(compile_context, input, input_to_cell_weights, (_is_layer_norm_lstm) ? nullptr : cell_bias, &_cell_state_out1);
     _memory_group.manage(&_cell_state_out2);
-    _transpose_cell_state.configure(recurrent_to_cell_weights, &_cell_state_out2);
+    _transpose_cell_state.configure(compile_context, recurrent_to_cell_weights, &_cell_state_out2);
     _memory_group.manage(&_cell_state_out3);
-    _gemm_cell_state1.configure(output_state_in, &_cell_state_out2, nullptr, &_cell_state_out3, 1.f, 0.f);
+    _gemm_cell_state1.configure(compile_context, output_state_in, &_cell_state_out2, nullptr, &_cell_state_out3, 1.f, 0.f);
     _cell_state_out2.allocator()->allocate();
     _memory_group.manage(&_cell_state_out4);
-    _accum_cell_state1.configure(ArithmeticOperation::ADD, &_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
+    _accum_cell_state1.configure(compile_context, ArithmeticOperation::ADD, &_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
     CLTensor *cell_state_out_ptr = &_cell_state_out4;
     if(_is_layer_norm_lstm)
     {
@@ -239,27 +254,28 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         _cell_layer_norm_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
         _memory_group.manage(&_cell_layer_norm_out1);
         _memory_group.manage(&_cell_layer_norm_out2);
-        _mean_std_norm_cell_gate.configure(cell_state_out_ptr);
-        _pixelwise_mul_cell_gate_coeff.configure(cell_state_out_ptr, lstm_params.cell_layer_norm_weights(), &_cell_layer_norm_out1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+        _mean_std_norm_cell_gate.configure(compile_context, cell_state_out_ptr);
+        _pixelwise_mul_cell_gate_coeff.configure(compile_context, cell_state_out_ptr, lstm_params.cell_layer_norm_weights(), &_cell_layer_norm_out1, 1, ConvertPolicy::SATURATE,
+                                                 RoundingPolicy::TO_NEAREST_EVEN);
         // cell_state_out_ptr is going to be reassigned, so allocate the tensor that it was assigned to before
         cell_state_out_ptr->allocator()->allocate();
-        _accum_cell_gate_bias.configure(ArithmeticOperation::ADD, &_cell_layer_norm_out1, cell_bias, &_cell_layer_norm_out2, ConvertPolicy::SATURATE);
+        _accum_cell_gate_bias.configure(compile_context, ArithmeticOperation::ADD, &_cell_layer_norm_out1, cell_bias, &_cell_layer_norm_out2, ConvertPolicy::SATURATE);
         _cell_layer_norm_out1.allocator()->allocate();
         cell_state_out_ptr = &_cell_layer_norm_out2;
     }
-    _activation_cell_state.configure(cell_state_out_ptr, nullptr, activation_info);
+    _activation_cell_state.configure(compile_context, cell_state_out_ptr, nullptr, activation_info);
     _memory_group.manage(&_cell_state_out5);
-    _pixelwise_mul_cell_state1.configure(cell_state_out_ptr, input_gate_out, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+    _pixelwise_mul_cell_state1.configure(compile_context, cell_state_out_ptr, input_gate_out, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     cell_state_out_ptr->allocator()->allocate();
-    _pixelwise_mul_cell_state2.configure(forget_gate_out, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
-    _accum_cell_state2.configure(ArithmeticOperation::ADD, &_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
+    _pixelwise_mul_cell_state2.configure(compile_context, forget_gate_out, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+    _accum_cell_state2.configure(compile_context, ArithmeticOperation::ADD, &_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
     _cell_state_out3.allocator()->allocate();
     _cell_state_out5.allocator()->allocate();
     // Perform clipping
     if(cell_threshold != 0.f)
     {
         _perform_cell_clipping = true;
-        _cell_clip.configure(&_cell_state_out1, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -cell_threshold, cell_threshold));
+        _cell_clip.configure(compile_context, &_cell_state_out1, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -cell_threshold, cell_threshold));
     }
 
     // Configure block that calculates the output
@@ -274,12 +290,12 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(in_out_weights, 0);
     _output2.allocator()->init(TensorInfo(in_out_weights_concat_shape, 1, input->info()->data_type()));
 
-    _concat_weights_output.configure(input_to_output_weights, recurrent_to_output_weights, &_output2);
+    _concat_weights_output.configure(compile_context, input_to_output_weights, recurrent_to_output_weights, &_output2);
 
     _memory_group.manage(&_output1);
     _memory_group.manage(&_output4);
 
-    _fully_connected_output.configure(&_forget_gate_out2, &_output2, (_is_layer_norm_lstm) ? nullptr : output_gate_bias, &_output4);
+    _fully_connected_output.configure(compile_context, &_forget_gate_out2, &_output2, (_is_layer_norm_lstm) ? nullptr : output_gate_bias, &_output4);
 
     _output2.allocator()->allocate();
     _forget_gate_out2.allocator()->allocate();
@@ -290,8 +306,8 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         _output3.allocator()->init(TensorInfo(_cell_state_out1.info()->tensor_shape(), 1, input->info()->data_type()));
 
         _memory_group.manage(&_output3);
-        _pixelwise_mul_output_state1.configure(&_cell_state_out1, lstm_params.cell_to_output_weights(), &_output3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
-        _accum_output1.configure(&_output4, &_output3, &_output1, ConvertPolicy::SATURATE);
+        _pixelwise_mul_output_state1.configure(compile_context, &_cell_state_out1, lstm_params.cell_to_output_weights(), &_output3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+        _accum_output1.configure(compile_context, &_output4, &_output3, &_output1, ConvertPolicy::SATURATE);
         _output4.allocator()->allocate();
         output_gate_out = &_output1;
 
@@ -308,15 +324,16 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         _output_layer_norm_out2.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
         _memory_group.manage(&_output_layer_norm_out1);
         _memory_group.manage(&_output_layer_norm_out2);
-        _mean_std_norm_output_gate.configure(output_gate_out);
-        _pixelwise_mul_output_gate_coeff.configure(output_gate_out, lstm_params.output_layer_norm_weights(), &_output_layer_norm_out1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+        _mean_std_norm_output_gate.configure(compile_context, output_gate_out);
+        _pixelwise_mul_output_gate_coeff.configure(compile_context, output_gate_out, lstm_params.output_layer_norm_weights(), &_output_layer_norm_out1, 1, ConvertPolicy::SATURATE,
+                                                   RoundingPolicy::TO_NEAREST_EVEN);
         // output_gate_out is going to be reassigned, so allocate the tensor that it was assigned to before
         output_gate_out->allocator()->allocate();
-        _accum_output_gate_bias.configure(ArithmeticOperation::ADD, &_output_layer_norm_out1, output_gate_bias, &_output_layer_norm_out2, ConvertPolicy::SATURATE);
+        _accum_output_gate_bias.configure(compile_context, ArithmeticOperation::ADD, &_output_layer_norm_out1, output_gate_bias, &_output_layer_norm_out2, ConvertPolicy::SATURATE);
         _output_layer_norm_out1.allocator()->allocate();
         output_gate_out = &_output_layer_norm_out2;
     }
-    _activation_output.configure(output_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
+    _activation_output.configure(compile_context, output_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
 
     // Configure block that calculates the output state
     /** lstm_res = PixelwiseMul(output, Activation(cell_state))
@@ -332,26 +349,26 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _output_state1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
     _memory_group.manage(&_cell_state_activation);
-    _activation_output_state.configure(&_cell_state_out1, &_cell_state_activation, activation_info);
-    _pixelwise_mul_output_state2.configure(&_cell_state_activation, output_gate_out, output_state_out_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+    _activation_output_state.configure(compile_context, &_cell_state_out1, &_cell_state_activation, activation_info);
+    _pixelwise_mul_output_state2.configure(compile_context, &_cell_state_activation, output_gate_out, output_state_out_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     _cell_state_activation.allocator()->allocate();
 
     if(lstm_params.has_projection())
     {
         _has_projection_weights = true;
-        _fully_connected_output_state.configure(output_state_out_tmp, lstm_params.projection_weights(), lstm_params.projection_bias(), output_state_out);
+        _fully_connected_output_state.configure(compile_context, output_state_out_tmp, lstm_params.projection_weights(), lstm_params.projection_bias(), output_state_out);
         _output_state1.allocator()->allocate();
         // Perform clipping
         if(projection_threshold != 0.f)
         {
             _perform_projection_clipping = true;
-            _projection_clip.configure(output_state_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -projection_threshold, projection_threshold));
+            _projection_clip.configure(compile_context, output_state_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -projection_threshold, projection_threshold));
         }
     }
 
     // Copy cell state and output
-    _copy_cell_state.configure(&_cell_state_out1, cell_state_out);
-    _copy_output.configure(output_state_out, output);
+    _copy_cell_state.configure(compile_context, &_cell_state_out1, cell_state_out);
+    _copy_output.configure(compile_context, output_state_out, output);
 
     // Vector for holding the tensors to store in scratch buffer
     std::vector<ICLTensor *> scratch_inputs;
@@ -362,7 +379,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     scratch_inputs.emplace_back(&_cell_state_out1);
     scratch_inputs.emplace_back(forget_gate_out);
     scratch_inputs.emplace_back(output_gate_out);
-    _concat_scratch_buffer.configure(scratch_inputs, scratch_buffer, Window::DimX);
+    _concat_scratch_buffer.configure(compile_context, scratch_inputs, scratch_buffer, Window::DimX);
     input_gate_out->allocator()->allocate();
     _cell_state_out1.allocator()->allocate();
     forget_gate_out->allocator()->allocate();

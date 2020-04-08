@@ -44,6 +44,11 @@ CLStackLayer::CLStackLayer() // NOLINT
 
 void CLStackLayer::configure(const std::vector<ICLTensor *> &input, int axis, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, axis, output);
+}
+
+void CLStackLayer::configure(const CLCompileContext &compile_context, const std::vector<ICLTensor *> &input, int axis, ICLTensor *output)
+{
     _num_inputs = input.size();
     _stack_kernels.resize(_num_inputs);
 
@@ -52,7 +57,7 @@ void CLStackLayer::configure(const std::vector<ICLTensor *> &input, int axis, IC
 
     for(unsigned int i = 0; i < _num_inputs; i++)
     {
-        _stack_kernels[i].configure(input[i], axis_u, i, _num_inputs, output);
+        _stack_kernels[i].configure(compile_context, input[i], axis_u, i, _num_inputs, output);
     }
 }
 

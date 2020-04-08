@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,6 +129,12 @@ Status CLLocallyConnectedLayer::validate(const ITensorInfo *input, const ITensor
 
 void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info);
+}
+
+void CLLocallyConnectedLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                        const PadStrideInfo &conv_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLLocallyConnectedLayer::validate(input->info(), weights->info(), biases == nullptr ? nullptr : biases->info(), output->info(), conv_info));
 
@@ -160,10 +166,10 @@ void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor 
     _memory_group.manage(&_gemm_output);
 
     // Configure kernels
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
-    _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
-    _mm_kernel.configure(&_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
-    _output_col2im_kernel.configure(&_gemm_output, output, Size2D(conv_w, conv_h));
+    _input_im2col_kernel.configure(compile_context, input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
+    _weights_reshape_kernel.configure(compile_context, weights, biases, &_weights_reshaped);
+    _mm_kernel.configure(compile_context, &_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
+    _output_col2im_kernel.configure(compile_context, &_gemm_output, output, Size2D(conv_w, conv_h));
 
     // Allocate intermediate tensors
     _input_im2col_reshaped.allocator()->allocate();

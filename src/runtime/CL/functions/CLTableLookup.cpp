@@ -32,7 +32,12 @@ using namespace arm_compute;
 
 void CLTableLookup::configure(const ICLTensor *input, const ICLLut *lut, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, lut, output);
+}
+
+void CLTableLookup::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLLut *lut, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLTableLookupKernel>();
-    k->configure(input, lut, output);
+    k->configure(compile_context, input, lut, output);
     _kernel = std::move(k);
 }

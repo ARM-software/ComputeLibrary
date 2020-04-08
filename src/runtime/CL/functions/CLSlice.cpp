@@ -33,13 +33,18 @@ namespace arm_compute
 {
 void CLSlice::configure(const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends);
+}
+
+void CLSlice::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Coordinates &starts, const Coordinates &ends)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     // Get absolute end coordinates
     const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);
 
     auto k = arm_compute::support::cpp14::make_unique<CLStridedSliceKernel>();
-    k->configure(input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
+    k->configure(compile_context, input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
     _kernel = std::move(k);
 }
 

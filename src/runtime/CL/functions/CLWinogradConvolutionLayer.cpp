@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,6 +98,13 @@ CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryMa
 void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info,
                                            bool enable_fast_math)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info, enable_fast_math);
+}
+
+void CLWinogradConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                           const PadStrideInfo &conv_info,
+                                           const ActivationLayerInfo &act_info, bool enable_fast_math)
+{
     // Get indices for the width and height
     const size_t idx_width  = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
@@ -129,17 +136,18 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
     // Do not manage _input1 as it contains the weights
 
     // Configure input transform
-    _input_transform.configure(input, &_input0, winograd_info);
+    _input_transform.configure(compile_context, input, &_input0, winograd_info);
 
     // Configure filter transform
-    _filter_transform.configure(weights, &_input1, winograd_info);
+    _filter_transform.configure(compile_context, weights, &_input1, winograd_info);
 
     // Configure batched matrix multiply
-    _batched_mm.configure(&_input0, &_input1, nullptr, &_batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/, 0, false, false, GEMMLowpOutputStageInfo(),
-                                                                                                 (input->info()->data_type() == DataType::F16)));
+    _batched_mm.configure(compile_context, &_input0, &_input1, nullptr, &_batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/, 0, false, false,
+                                                                                                                  GEMMLowpOutputStageInfo(),
+                                                                                                                  (input->info()->data_type() == DataType::F16)));
 
     // Configure output transform
-    _output_transform.configure(&_batched_mm_output, biases, output, winograd_info, act_info);
+    _output_transform.configure(compile_context, &_batched_mm_output, biases, output, winograd_info, act_info);
 
     // Allocate temporary tensors
     _input0.allocator()->allocate();

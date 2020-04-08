@@ -113,6 +113,55 @@ public:
                    ICLTensor *cell_state_out, ICLTensor *output_state_out,
                    const LSTMParams<ICLTensor> &lstm_params);
 
+    /** Initialize function's tensors.
+     *
+     * @param[in]  compile_context             The compile context to be used.
+     * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: QASYMM8_SIGNED.
+     * @param[in]  input_to_forget_weights     2D weights tensor with dimensions [input_size, num_units]. Data type supported: QSYMM8.
+     * @param[in]  input_to_cell_weights       2D weights tensor with dimensions [input_size, num_units]. Data type supported: QSYMM8.
+     * @param[in]  input_to_output_weights     2D weights tensor with dimensions [input_size, num_units]. Data type supported: QSYMM8.
+     * @param[in]  recurrent_to_forget_weights 2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     * @param[in]  recurrent_to_cell_weights   2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     * @param[in]  recurrent_to_output_weights 2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     * @param[in]  forget_gate_bias            1D weights tensor with dimensions [num_units]. Data type supported: S32.
+     * @param[in]  cell_bias                   1D weights tensor with dimensions [num_units]. Data type supported: S32.
+     * @param[in]  output_gate_bias            1D weights tensor with dimensions [num_units]. Data type supported: S32.
+     * @param[in]  cell_state_in               2D tensor with dimensions [output_size, batch_size]. Data type supported:  QSYMM16.
+     * @param[in]  output_state_in             2D tensor with dimensions [num_units, batch_size]. Data type supported: Same as @p input.
+     * @param[out] cell_state_out              Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size]. Data type supported:  QSYMM16.
+     * @param[out] output_state_out            Destination tensor. Output is a 2D tensor with dimensions [num_units, batch_size].Data types supported: Same as @p input.
+     * @param[in]  lstm_params                 Weights tensors used in peephole, CIFG and layer normalization optimizations:
+     *                                         input_intermediate_scale   Scale of the intermediate result of matmul, i.e. input to layer normalization, at input gate.
+     *                                         forget_intermediate_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at forget gate.
+     *                                         cell_intermediate_scale    Scale of the intermediate result of matmul, i.e. input to layer normalization, at cell gate.
+     *                                         output_intermediate_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at output gate.
+     *                                         hidden_state_zero          The zero point of the hidden state.
+     *                                         hidden_state_scale         The scale of the hidden state.
+     *                                         input_to_input_weights     (Optional) 2D weights tensor with dimensions [input_size, num_units]. Data type supported: QSYMM8.
+     *                                         recurrent_to_input_weights (Optional) 2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     *                                         cell_to_input_weights      (Optional) 1D weights tensor with dimensions [num_units]. Can be nullptr. Data type supported: QSYMM16.
+     *                                         cell_to_forget_weights     (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                         cell_to_output_weights     (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                         input_gate_bias            (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: S32.
+     *                                         projection_weights         (Optional) 2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     *                                         projection_bias            (Optional) 1D weights tensor with dimensions [output_size]. S32.
+     *                                         input_layer_norm_weights   (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                         forget_layer_norm_weights  (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                         cell_layer_norm_weights    (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                         output_layer_norm_weights  (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                         cell_threshold             (Optional) The clipping threshold for the cell state, such that values are bound within [-cell_clip, cell_clip].
+     *                                                                               If set to 0.0 then clipping is disabled.
+     *                                         projection_threshold       (Optional) The clipping threshold for the output from the projection layer, such that values are bound within
+     *                                                                               [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input,
+                   const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
+                   const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
+                   const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
+                   const ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                   ICLTensor *cell_state_out, ICLTensor *output_state_out,
+                   const LSTMParams<ICLTensor> &lstm_params);
+
     /** Static function to check if given info will lead to a valid configuration of @ref CLQLSTMLayer
      *
      * @param[in]  input                       Source tensor info. Input is a 2D tensor info with dimensions [input_size, batch_size]. Data types supported: QASYMM8_SIGNED.
@@ -169,19 +218,20 @@ public:
 private:
     /** Internal method to configure matrix multiplication plus output stage of each gate.
      *
-     * @param[in] mm             Matrix multiplication function to use.
-     * @param[in] outstage       Output stage function to use.
-     * @param[in] gemmlowp_info  GEMMLowp metadata to be used by the output stage.
-     * @param[in] mm_input       Input tensor to matrix multiplication function.
-     * @param[in] mm_weights     Weights tensor to matrix multiplication function.
-     * @param[in] bias           Bias tensor to matrix multiplication function.
-     * @param[in] outstage_res   Tensor to be used for storing the result of the output stage.
-     * @param[in] gemmlowp_scale Real multiplier to be used computing multiplier and shift for requantization.
-     * @param[in] mm_res_info    Tensor info to be used to initialize matrix multiplication result tensor.
-     * @param[in] mm_res_info    Tensor info to be used to initialize output stage result tensor.
+     * @param[in] compile_context The compile context to be used.
+     * @param[in] mm              Matrix multiplication function to use.
+     * @param[in] outstage        Output stage function to use.
+     * @param[in] gemmlowp_info   GEMMLowp metadata to be used by the output stage.
+     * @param[in] mm_input        Input tensor to matrix multiplication function.
+     * @param[in] mm_weights      Weights tensor to matrix multiplication function.
+     * @param[in] bias            Bias tensor to matrix multiplication function.
+     * @param[in] outstage_res    Tensor to be used for storing the result of the output stage.
+     * @param[in] gemmlowp_scale  Real multiplier to be used computing multiplier and shift for requantization.
+     * @param[in] mm_res_info     Tensor info to be used to initialize matrix multiplication result tensor.
+     * @param[in] mm_res_info     Tensor info to be used to initialize output stage result tensor.
      *
      */
-    void configure_mm(CLGEMMLowpMatrixMultiplyCore &mm, CLGEMMLowpOutputStage &outstage, GEMMLowpOutputStageInfo &gemmlowp_info,
+    void configure_mm(const CLCompileContext &compile_context, CLGEMMLowpMatrixMultiplyCore &mm, CLGEMMLowpOutputStage &outstage, GEMMLowpOutputStageInfo &gemmlowp_info,
                       const ICLTensor *mm_input, const ICLTensor *mm_weights, const ICLTensor *bias, CLTensor *mm_res,
                       CLTensor *outstage_res, float gemmlowp_scale,
                       const TensorInfo &mm_res_info, const TensorInfo &outstage_tensor_info);

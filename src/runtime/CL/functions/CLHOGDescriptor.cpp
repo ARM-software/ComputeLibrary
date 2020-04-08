@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,11 @@ CLHOGDescriptor::CLHOGDescriptor(std::shared_ptr<IMemoryManager> memory_manager)
 }
 
 void CLHOGDescriptor::configure(ICLTensor *input, ICLTensor *output, const IHOG *hog, BorderMode border_mode, uint8_t constant_border_value)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, hog, border_mode, constant_border_value);
+}
+
+void CLHOGDescriptor::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const IHOG *hog, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(nullptr == output);
@@ -76,16 +81,16 @@ void CLHOGDescriptor::configure(ICLTensor *input, ICLTensor *output, const IHOG 
     _memory_group.manage(&_phase);
 
     // Initialise gradient kernel
-    _gradient.configure(input, &_mag, &_phase, hog_info->phase_type(), border_mode, constant_border_value);
+    _gradient.configure(compile_context, input, &_mag, &_phase, hog_info->phase_type(), border_mode, constant_border_value);
 
     // Manage intermediate buffers
     _memory_group.manage(&_hog_space);
 
     // Initialise orientation binning kernel
-    _orient_bin.configure(&_mag, &_phase, &_hog_space, hog->info());
+    _orient_bin.configure(compile_context, &_mag, &_phase, &_hog_space, hog->info());
 
     // Initialize HOG norm kernel
-    _block_norm.configure(&_hog_space, output, hog->info());
+    _block_norm.configure(compile_context, &_hog_space, output, hog->info());
 
     // Allocate intermediate tensors
     _mag.allocator()->allocate();

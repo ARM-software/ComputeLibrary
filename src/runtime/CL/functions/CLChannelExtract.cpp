@@ -32,14 +32,24 @@ using namespace arm_compute;
 
 void CLChannelExtract::configure(const ICLTensor *input, Channel channel, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, channel, output);
+}
+
+void CLChannelExtract::configure(const CLCompileContext &compile_context, const ICLTensor *input, Channel channel, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLChannelExtractKernel>();
-    k->configure(input, channel, output);
+    k->configure(compile_context, input, channel, output);
     _kernel = std::move(k);
 }
 
 void CLChannelExtract::configure(const ICLMultiImage *input, Channel channel, ICLImage *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, channel, output);
+}
+
+void CLChannelExtract::configure(const CLCompileContext &compile_context, const ICLMultiImage *input, Channel channel, ICLImage *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLChannelExtractKernel>();
-    k->configure(input, channel, output);
+    k->configure(compile_context, input, channel, output);
     _kernel = std::move(k);
 }

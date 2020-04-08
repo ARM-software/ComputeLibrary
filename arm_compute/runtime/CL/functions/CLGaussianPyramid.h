@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,16 @@ public:
      *
      */
     virtual void configure(ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value = 0) = 0;
+    /** Initialise the function's source, destinations and border mode.
+     *
+     * @param[in]      compile_context       The compile context to be used.
+     * @param[in, out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]     pyramid               Destination pyramid tensors, Data types supported at each level: U8.
+     * @param[in]      border_mode           Border mode to use.
+     * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     *
+     */
+    virtual void configure(const CLCompileContext &compile_context, ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value = 0) = 0;
 
 protected:
     ICLTensor *_input;
@@ -86,6 +96,7 @@ public:
 
     // Inherited methods overridden:
     void configure(ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value) override;
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value) override;
     void run() override;
 
 private:
@@ -109,6 +120,7 @@ public:
 
     // Inherited methods overridden:
     void configure(ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value) override;
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value) override;
     void run() override;
 
 private:

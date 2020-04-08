@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,8 +33,13 @@ namespace arm_compute
 {
 void CLSelect::configure(const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), c, x, y, output);
+}
+
+void CLSelect::configure(const CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLSelectKernel>();
-    k->configure(c, x, y, output);
+    k->configure(compile_context, c, x, y, output);
     _kernel = std::move(k);
 }
 

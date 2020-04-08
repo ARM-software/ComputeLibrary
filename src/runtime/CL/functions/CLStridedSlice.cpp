@@ -33,8 +33,15 @@ void CLStridedSlice::configure(const ICLTensor *input, ICLTensor *output,
                                const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+}
+
+void CLStridedSlice::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+                               const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
+                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLStridedSliceKernel>();
-    k->configure(input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+    k->configure(compile_context, input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
     _kernel = std::move(k);
 }
 

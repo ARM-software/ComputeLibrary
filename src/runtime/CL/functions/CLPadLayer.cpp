@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,11 @@ CLPadLayer::CLPadLayer()
 
 void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, padding, constant_value, mode);
+}
+
+void CLPadLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
+{
     ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), padding, constant_value, mode));
 
     _perform_pad = std::any_of(padding.begin(), padding.end(), [](PaddingInfo info)
@@ -41,12 +46,12 @@ void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingLis
 
     if(_perform_pad)
     {
-        _pad_kernel.configure(input, output, padding, constant_value, mode);
+        _pad_kernel.configure(compile_context, input, output, padding, constant_value, mode);
     }
     else
     {
         // Copy the input to the whole output if no padding is applied
-        _copy_kernel.configure(input, output);
+        _copy_kernel.configure(compile_context, input, output);
     }
 }
 Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)

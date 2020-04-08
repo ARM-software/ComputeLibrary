@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,12 @@ CLFastCorners::CLFastCorners(std::shared_ptr<IMemoryManager> memory_manager)
 void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonmax_suppression, ICLKeyPointArray *corners,
                               unsigned int *num_corners, BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, threshold, nonmax_suppression, corners, num_corners, border_mode, constant_border_value);
+}
+
+void CLFastCorners::configure(const CLCompileContext &compile_context, const ICLImage *input, float threshold, bool nonmax_suppression, ICLKeyPointArray *corners,
+                              unsigned int *num_corners, BorderMode border_mode, uint8_t constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(BorderMode::UNDEFINED != border_mode);
     ARM_COMPUTE_ERROR_ON(nullptr == corners);
@@ -72,19 +78,19 @@ void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonma
     const bool update_number = (nullptr != _num_corners);
 
     _memory_group.manage(&_output);
-    _fast_corners_kernel.configure(input, &_output, threshold, nonmax_suppression, border_mode);
+    _fast_corners_kernel.configure(compile_context, input, &_output, threshold, nonmax_suppression, border_mode);
 
     if(!_non_max)
     {
-        _copy_array_kernel.configure(&_output, update_number, _corners, &_num_buffer);
+        _copy_array_kernel.configure(compile_context, &_output, update_number, _corners, &_num_buffer);
     }
     else
     {
         _suppr.allocator()->init(tensor_info);
         _memory_group.manage(&_suppr);
 
-        _suppr_func.configure(&_output, &_suppr, border_mode);
-        _copy_array_kernel.configure(&_suppr, update_number, _corners, &_num_buffer);
+        _suppr_func.configure(compile_context, &_output, &_suppr, border_mode);
+        _copy_array_kernel.configure(compile_context, &_suppr, update_number, _corners, &_num_buffer);
 
         _suppr.allocator()->allocate();
     }

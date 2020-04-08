@@ -32,10 +32,15 @@ using namespace arm_compute;
 
 void CLWinogradInputTransform::configure(ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, winograd_info);
+}
+
+void CLWinogradInputTransform::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLWinogradInputTransformKernel>();
-    k->configure(input, output, winograd_info);
+    k->configure(compile_context, input, output, winograd_info);
     _kernel = std::move(k);
-    _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue());
+    _border_handler.configure(compile_context, input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue());
 }
 
 Status CLWinogradInputTransform::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)

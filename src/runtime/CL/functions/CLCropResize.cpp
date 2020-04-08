@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/runtime/CL/functions/CLCropResize.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
-
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/functions/CLCropResize.h"
 
 #include <cstddef>
 
@@ -51,120 +50,10 @@ inline void configure_crop(const ICLTensor *input, ICLTensor *crop_boxes, ICLTen
     const TensorShape out_shape(input->info()->tensor_shape()[0], static_cast<uint32_t>(abs(end[0] - start[0])) + 1, static_cast<uint32_t>(abs(end[1] - start[1])) + 1);
     output->info()->set_tensor_shape(out_shape);
 }
-
-inline void run_crop(const ICLTensor *input, ICLTensor *output, uint32_t batch_index, Coordinates start, Coordinates end, float extrapolation_value)
-{
-    bool is_width_flipped  = end[0] < start[0];
-    bool is_height_flipped = end[1] < start[1];
-    /** The number of rows out of bounds at the start and end of output. */
-    std::array<int32_t, 2> rows_out_of_bounds{ 0 };
-    /** The number of columns out of bounds at the start and end of output. */
-    std::array<int32_t, 2> cols_out_of_bounds{ 0 };
-    if(is_height_flipped)
-    {
-        rows_out_of_bounds[0] = start[1] >= static_cast<int32_t>(input->info()->dimension(2)) ? std::min(start[1] - input->info()->dimension(2) + 1, output->info()->dimension(2)) : 0;
-        rows_out_of_bounds[1] = end[1] < 0 ? std::min(-end[1], static_cast<int32_t>(output->info()->dimension(2))) : 0;
-    }
-    else
-    {
-        rows_out_of_bounds[0] = start[1] < 0 ? std::min(-start[1], static_cast<int32_t>(output->info()->dimension(2))) : 0;
-        rows_out_of_bounds[1] = end[1] >= static_cast<int32_t>(input->info()->dimension(2)) ? std::min(end[1] - input->info()->dimension(2) + 1, output->info()->dimension(2)) : 0;
-    }
-    if(is_width_flipped)
-    {
-        cols_out_of_bounds[0] = start[0] >= static_cast<int32_t>(input->info()->dimension(1)) ? std::min(start[0] - input->info()->dimension(1) + 1, output->info()->dimension(1)) : 0;
-        cols_out_of_bounds[1] = end[0] < 0 ? std::min(-end[0], static_cast<int32_t>(output->info()->dimension(1))) : 0;
-    }
-    else
-    {
-        cols_out_of_bounds[0] = start[0] < 0 ? std::min(-start[0], static_cast<int32_t>(output->info()->dimension(1))) : 0;
-        cols_out_of_bounds[1] = end[0] >= static_cast<int32_t>(input->info()->dimension(1)) ? std::min(end[0] - input->info()->dimension(1) + 1, output->info()->dimension(1)) : 0;
-    }
-
-    Window full_window = calculate_max_window(*output->info());
-
-    //  Full output window:
-    //  --------------------------------
-    //  |          Out of bounds       |
-    //  |          rows before         |
-    //  |------------------------------|
-    //  | Out of | In         | Out of |
-    //  | bounds | bounds     | bounds |
-    //  | cols   | elements   | cols   |
-    //  | before | copied     | after  |
-    //  |        | from input |        |
-    //  |------------------------------|
-    //  |        Out of bounds         |
-    //  |        rows after            |
-    //  |------------------------------|
-    // Use a separate output window for each section of the full output window.
-    // Fill all output rows that have no elements that are within the input bounds
-    // with the extrapolation value using memset.
-    // First for the rows before the in bounds rows.
-    if(rows_out_of_bounds[0] > 0)
-    {
-        Window slice_fill_rows_before(full_window);
-        slice_fill_rows_before.set(2, Window::Dimension(0, rows_out_of_bounds[0], 1));
-        auto kernel = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
-        kernel->configure(output, extrapolation_value, &slice_fill_rows_before);
-        CLScheduler::get().enqueue(*kernel);
-    }
-
-    Window slice_in(full_window);
-    slice_in.set(2, Window::Dimension(rows_out_of_bounds[0], output->info()->dimension(2) - rows_out_of_bounds[1], 1));
-    slice_in.set(1, Window::Dimension(cols_out_of_bounds[0], output->info()->dimension(1) - cols_out_of_bounds[1], 1));
-
-    int rows_in_bounds = static_cast<int32_t>(output->info()->dimension(2)) - rows_out_of_bounds[0] - rows_out_of_bounds[1];
-    if(rows_in_bounds > 0)
-    {
-        // Fill all elements that share a row with an in bounds element with the extrapolation value.
-        if(cols_out_of_bounds[0] > 0)
-        {
-            Window slice_fill_cols_before(slice_in);
-            slice_fill_cols_before.set(1, Window::Dimension(0, cols_out_of_bounds[0], 1));
-            auto kernel = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
-            kernel->configure(output, extrapolation_value, &slice_fill_cols_before);
-            CLScheduler::get().enqueue(*kernel);
-        }
-
-        if(cols_out_of_bounds[1] > 0)
-        {
-            Window slice_fill_cols_after(slice_in);
-            slice_fill_cols_after.set(1, Window::Dimension(output->info()->dimension(1) - cols_out_of_bounds[1], output->info()->dimension(1), 1));
-            auto kernel = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
-            kernel->configure(output, extrapolation_value, &slice_fill_cols_after);
-            CLScheduler::get().enqueue(*kernel);
-        }
-
-        // Copy all elements within the input bounds from the input tensor.
-        int cols_in_bounds = static_cast<int32_t>(output->info()->dimension(1)) - cols_out_of_bounds[0] - cols_out_of_bounds[1];
-        if(cols_in_bounds > 0)
-        {
-            Coordinates2D start_in{ is_width_flipped ? start[0] - cols_out_of_bounds[0] : start[0] + cols_out_of_bounds[0],
-                                    is_height_flipped ? start[1] - rows_out_of_bounds[0] : start[1] + rows_out_of_bounds[0] };
-            Coordinates2D end_in{ is_width_flipped ? start_in.x - cols_in_bounds + 1 : start_in.x + cols_in_bounds - 1,
-                                  is_height_flipped ? start_in.y - rows_in_bounds + 1 : start_in.y + rows_in_bounds - 1 };
-            auto kernel = arm_compute::support::cpp14::make_unique<CLCropKernel>();
-
-            kernel->configure(input, output, start_in, end_in, batch_index, extrapolation_value, &slice_in);
-            CLScheduler::get().enqueue(*kernel);
-        }
-    }
-
-    // Fill all rows after the in bounds elements with the extrapolation value.
-    if(rows_out_of_bounds[1] > 0)
-    {
-        Window slice_fill_rows_after(full_window);
-        slice_fill_rows_after.set(2, Window::Dimension(output->info()->dimension(2) - rows_out_of_bounds[1], output->info()->dimension(2), 1));
-        auto kernel = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
-        kernel->configure(output, extrapolation_value, &slice_fill_rows_after);
-        CLScheduler::get().enqueue(*kernel);
-    }
-}
 } // namespace
 
 CLCropResize::CLCropResize()
-    : _input(nullptr), _boxes(nullptr), _box_ind(nullptr), _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _scale(), _copy(), _crop_results(), _scaled_results()
+    : _input(nullptr), _boxes(nullptr), _box_ind(nullptr), _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _scale(), _copy(), _crop_results(), _scaled_results(), _internal_kernels()
 {
 }
 
@@ -190,8 +79,17 @@ Status CLCropResize::validate(const ITensorInfo *input, ITensorInfo *boxes, ITen
 void CLCropResize::configure(const ICLTensor *input, ICLTensor *boxes, ICLTensor *box_ind, ICLTensor *output, Coordinates2D crop_size,
                              InterpolationPolicy method, float extrapolation_value)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    configure(CLKernelLibrary::get().get_compile_context(), input, boxes, box_ind, output, crop_size, method, extrapolation_value);
+}
+
+void CLCropResize::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *boxes, ICLTensor *box_ind, ICLTensor *output, Coordinates2D crop_size,
+                             InterpolationPolicy method, float extrapolation_value)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, boxes, box_ind);
     ARM_COMPUTE_ERROR_THROW_ON(CLCropResize::validate(input->info(), boxes->info(), box_ind->info(), output->info(), crop_size, method, extrapolation_value));
+
+    TensorShape output_shape = TensorShape(input->info()->tensor_shape()[0], crop_size.x, crop_size.y, boxes->info()->tensor_shape()[1]);
+    auto_init_if_empty(*output->info(), output_shape, 1, DataType::F32);
 
     _num_boxes = boxes->info()->tensor_shape()[1];
     TensorShape out_shape(input->info()->tensor_shape()[0], crop_size.x, crop_size.y);
@@ -210,7 +108,13 @@ void CLCropResize::configure(const ICLTensor *input, ICLTensor *boxes, ICLTensor
     // - A scale function is used to resize the cropped image to the size specified by crop_size.
     // - A tensor is required to hold the final scaled image before it is copied into the 4D output
     //   that will hold all final cropped and scaled 3D images using CLCopyKernel.
-    for(unsigned int i = 0; i < _num_boxes; ++i)
+
+    // The contents of _boxes and _box_ind are required to calculate the shape
+    // of the initial cropped image and thus are required to configure the
+    // kernels used for cropping and scaling.
+    _boxes->map(CLScheduler::get().queue());
+    _box_ind->map(CLScheduler::get().queue());
+    for(unsigned int num_box = 0; num_box < _num_boxes; ++num_box)
     {
         auto       crop_tensor = support::cpp14::make_unique<CLTensor>();
         TensorInfo crop_result_info(1, DataType::F32);
@@ -223,44 +127,148 @@ void CLCropResize::configure(const ICLTensor *input, ICLTensor *boxes, ICLTensor
         scaled_result_info.set_data_layout(DataLayout::NHWC);
         scale_tensor->allocator()->init(scaled_result_info);
         _scaled_results.emplace_back(std::move(scale_tensor));
+
+        // Size of the crop box in _boxes has to be given before the configure
+        uint32_t    batch_index;
+        Coordinates start{};
+        Coordinates end{};
+        configure_crop(_input, _boxes, _box_ind, _crop_results[num_box].get(), num_box, start, end, batch_index);
+
+        auto scale_kernel = support::cpp14::make_unique<CLScale>();
+        scale_kernel->configure(compile_context, _crop_results[num_box].get(), _scaled_results[num_box].get(), _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT);
+        _scale.emplace_back(std::move(scale_kernel));
+
+        Window win = calculate_max_window(*_output->info());
+        win.set(3, Window::Dimension(num_box, num_box + 1, 1));
+
+        auto copy_kernel = support::cpp14::make_unique<CLCopyKernel>();
+        copy_kernel->configure(compile_context, _scaled_results[num_box].get(), _output, PaddingList(), &win);
+        _copy.emplace_back(std::move(copy_kernel));
+
+        _crop_results[num_box]->allocator()->allocate();
+        _scaled_results[num_box]->allocator()->allocate();
+
+        bool is_width_flipped  = end[0] < start[0];
+        bool is_height_flipped = end[1] < start[1];
+        /** The number of rows out of bounds at the start and end of _crop_results[num_box].get(). */
+        std::array<int32_t, 2> rows_out_of_bounds{ 0 };
+        /** The number of columns out of bounds at the start and end of _crop_results[num_box].get(). */
+        std::array<int32_t, 2> cols_out_of_bounds{ 0 };
+        if(is_height_flipped)
+        {
+            rows_out_of_bounds[0] = start[1] >= static_cast<int32_t>(_input->info()->dimension(2)) ? std::min(start[1] - _input->info()->dimension(2) + 1, _crop_results[num_box].get()->info()->dimension(2)) : 0;
+            rows_out_of_bounds[1] = end[1] < 0 ? std::min(-end[1], static_cast<int32_t>(_crop_results[num_box].get()->info()->dimension(2))) : 0;
+        }
+        else
+        {
+            rows_out_of_bounds[0] = start[1] < 0 ? std::min(-start[1], static_cast<int32_t>(_crop_results[num_box].get()->info()->dimension(2))) : 0;
+            rows_out_of_bounds[1] = end[1] >= static_cast<int32_t>(_input->info()->dimension(2)) ? std::min(end[1] - _input->info()->dimension(2) + 1, _crop_results[num_box].get()->info()->dimension(2)) : 0;
+        }
+        if(is_width_flipped)
+        {
+            cols_out_of_bounds[0] = start[0] >= static_cast<int32_t>(_input->info()->dimension(1)) ? std::min(start[0] - _input->info()->dimension(1) + 1, _crop_results[num_box].get()->info()->dimension(1)) : 0;
+            cols_out_of_bounds[1] = end[0] < 0 ? std::min(-end[0], static_cast<int32_t>(_crop_results[num_box].get()->info()->dimension(1))) : 0;
+        }
+        else
+        {
+            cols_out_of_bounds[0] = start[0] < 0 ? std::min(-start[0], static_cast<int32_t>(_crop_results[num_box].get()->info()->dimension(1))) : 0;
+            cols_out_of_bounds[1] = end[0] >= static_cast<int32_t>(_input->info()->dimension(1)) ? std::min(end[0] - _input->info()->dimension(1) + 1, _crop_results[num_box].get()->info()->dimension(1)) : 0;
+        }
+
+        Window full_window = calculate_max_window(*_crop_results[num_box].get()->info());
+
+        //  Full _crop_results[num_box].get() window:
+        //  --------------------------------
+        //  |          Out of bounds       |
+        //  |          rows before         |
+        //  |------------------------------|
+        //  | Out of | In         | Out of |
+        //  | bounds | bounds     | bounds |
+        //  | cols   | elements   | cols   |
+        //  | before | copied     | after  |
+        //  |        | from input |        |
+        //  |------------------------------|
+        //  |        Out of bounds         |
+        //  |        rows after            |
+        //  |------------------------------|
+        // Use a separate _crop_results[num_box].get() window for each section of the full _crop_results[num_box].get() window.
+        // Fill all _crop_results[num_box].get() rows that have no elements that are within the input bounds
+        // with the extrapolation value using memset.
+        // First for the rows before the in bounds rows.
+        if(rows_out_of_bounds[0] > 0)
+        {
+            Window slice_fill_rows_before(full_window);
+            slice_fill_rows_before.set(2, Window::Dimension(0, rows_out_of_bounds[0], 1));
+            auto kernel = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
+            kernel->configure(compile_context, _crop_results[num_box].get(), extrapolation_value, &slice_fill_rows_before);
+            _internal_kernels.push_back(std::move(kernel));
+        }
+
+        Window slice_in(full_window);
+        slice_in.set(2, Window::Dimension(rows_out_of_bounds[0], _crop_results[num_box].get()->info()->dimension(2) - rows_out_of_bounds[1], 1));
+        slice_in.set(1, Window::Dimension(cols_out_of_bounds[0], _crop_results[num_box].get()->info()->dimension(1) - cols_out_of_bounds[1], 1));
+
+        int rows_in_bounds = static_cast<int32_t>(_crop_results[num_box].get()->info()->dimension(2)) - rows_out_of_bounds[0] - rows_out_of_bounds[1];
+        if(rows_in_bounds > 0)
+        {
+            // Fill all elements that share a row with an in bounds element with the extrapolation value.
+            if(cols_out_of_bounds[0] > 0)
+            {
+                Window slice_fill_cols_before(slice_in);
+                slice_fill_cols_before.set(1, Window::Dimension(0, cols_out_of_bounds[0], 1));
+                auto kernel = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
+                kernel->configure(compile_context, _crop_results[num_box].get(), extrapolation_value, &slice_fill_cols_before);
+                _internal_kernels.push_back(std::move(kernel));
+            }
+
+            if(cols_out_of_bounds[1] > 0)
+            {
+                Window slice_fill_cols_after(slice_in);
+                slice_fill_cols_after.set(1, Window::Dimension(_crop_results[num_box].get()->info()->dimension(1) - cols_out_of_bounds[1], _crop_results[num_box].get()->info()->dimension(1), 1));
+                auto kernel = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
+                kernel->configure(compile_context, _crop_results[num_box].get(), extrapolation_value, &slice_fill_cols_after);
+                _internal_kernels.push_back(std::move(kernel));
+            }
+
+            // Copy all elements within the input bounds from the input tensor.
+            int cols_in_bounds = static_cast<int32_t>(_crop_results[num_box].get()->info()->dimension(1)) - cols_out_of_bounds[0] - cols_out_of_bounds[1];
+            if(cols_in_bounds > 0)
+            {
+                Coordinates2D start_in{ is_width_flipped ? start[0] - cols_out_of_bounds[0] : start[0] + cols_out_of_bounds[0],
+                                        is_height_flipped ? start[1] - rows_out_of_bounds[0] : start[1] + rows_out_of_bounds[0] };
+                Coordinates2D end_in{ is_width_flipped ? start_in.x - cols_in_bounds + 1 : start_in.x + cols_in_bounds - 1,
+                                      is_height_flipped ? start_in.y - rows_in_bounds + 1 : start_in.y + rows_in_bounds - 1 };
+                auto kernel = arm_compute::support::cpp14::make_unique<CLCropKernel>();
+
+                kernel->configure(compile_context, _input, _crop_results[num_box].get(), start_in, end_in, batch_index, extrapolation_value, &slice_in);
+                _internal_kernels.push_back(std::move(kernel));
+            }
+        }
+
+        // Fill all rows after the in bounds elements with the extrapolation value.
+        if(rows_out_of_bounds[1] > 0)
+        {
+            Window slice_fill_rows_after(full_window);
+            slice_fill_rows_after.set(2, Window::Dimension(_crop_results[num_box].get()->info()->dimension(2) - rows_out_of_bounds[1], _crop_results[num_box].get()->info()->dimension(2), 1));
+            auto kernel = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
+            kernel->configure(compile_context, _crop_results[num_box].get(), extrapolation_value, &slice_fill_rows_after);
+            _internal_kernels.push_back(std::move(kernel));
+        }
     }
+    _boxes->unmap(CLScheduler::get().queue());
+    _box_ind->unmap(CLScheduler::get().queue());
+    CLScheduler::get().sync();
 }
 
 void CLCropResize::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_output == nullptr, "Unconfigured function");
-    // The contents of _boxes and _box_ind are required to calculate the shape
-    // of the initial cropped image and thus are required to configure the
-    // kernels used for cropping and scaling.
-    _boxes->map(CLScheduler::get().queue());
-    _box_ind->map(CLScheduler::get().queue());
-    for(unsigned int i = 0; i < _num_boxes; ++i)
+
+    for(unsigned int i = 0; i < _internal_kernels.size(); ++i)
     {
-        // Size of the crop box in _boxes and thus the shape of _crop_results[i]
-        // may not be known until run-time and so the kernels cannot be configured until then.
-        uint32_t    batch_index;
-        Coordinates start{};
-        Coordinates end{};
-        configure_crop(_input, _boxes, _box_ind, _crop_results[i].get(), i, start, end, batch_index);
-
-        auto scale_kernel = support::cpp14::make_unique<CLScale>();
-        scale_kernel->configure(_crop_results[i].get(), _scaled_results[i].get(), _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT);
-        _scale.emplace_back(std::move(scale_kernel));
-
-        Window win = calculate_max_window(*_output->info());
-        win.set(3, Window::Dimension(i, i + 1, 1));
-
-        auto copy_kernel = support::cpp14::make_unique<CLCopyKernel>();
-        copy_kernel->configure(_scaled_results[i].get(), _output, PaddingList(), &win);
-        _copy.emplace_back(std::move(copy_kernel));
-
-        _crop_results[i]->allocator()->allocate();
-        _scaled_results[i]->allocator()->allocate();
-
-        run_crop(_input, _crop_results[i].get(), batch_index, start, end, _extrapolation_value);
+        CLScheduler::get().enqueue(*(_internal_kernels[i]));
     }
-    _boxes->unmap(CLScheduler::get().queue());
-    _box_ind->unmap(CLScheduler::get().queue());
+
     CLScheduler::get().sync();
     for(auto &kernel : _scale)
     {

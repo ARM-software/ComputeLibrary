@@ -32,16 +32,21 @@ using namespace arm_compute;
 
 void CLNonMaximaSuppression3x3::configure(ICLTensor *input, ICLTensor *output, BorderMode border_mode)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_mode);
+}
+
+void CLNonMaximaSuppression3x3::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, BorderMode border_mode)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLNonMaximaSuppression3x3Kernel>();
-    k->configure(input, output, border_mode == BorderMode::UNDEFINED);
+    k->configure(compile_context, input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
 
     if(border_mode != BorderMode::UNDEFINED)
     {
-        _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT);
+        _border_handler.configure(compile_context, input, _kernel->border_size(), BorderMode::CONSTANT);
     }
     else
     {
-        _border_handler.configure(input, _kernel->border_size(), BorderMode::UNDEFINED);
+        _border_handler.configure(compile_context, input, _kernel->border_size(), BorderMode::UNDEFINED);
     }
 }

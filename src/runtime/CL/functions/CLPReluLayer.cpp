@@ -31,7 +31,7 @@ namespace arm_compute
 {
 namespace
 {
-void configure_border_handler(CLFillBorderKernel &border_handler, BorderSize border_size, ICLTensor *input1, ICLTensor *input2, const ICLTensor *output)
+void configure_border_handler(const CLCompileContext &compile_context, CLFillBorderKernel &border_handler, BorderSize border_size, ICLTensor *input1, ICLTensor *input2, const ICLTensor *output)
 {
     if(output->info()->dimension(0) > 1)
     {
@@ -39,7 +39,7 @@ void configure_border_handler(CLFillBorderKernel &border_handler, BorderSize bor
 
         if(broadcasted_info->info()->dimension(0) == 1)
         {
-            border_handler.configure(broadcasted_info, border_size, BorderMode::REPLICATE);
+            border_handler.configure(compile_context, broadcasted_info, border_size, BorderMode::REPLICATE);
         }
     }
 }
@@ -47,10 +47,15 @@ void configure_border_handler(CLFillBorderKernel &border_handler, BorderSize bor
 
 void CLPReluLayer::configure(ICLTensor *input, ICLTensor *alpha, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, alpha, output);
+}
+
+void CLPReluLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *alpha, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLArithmeticOperationKernel>();
-    k->configure(ArithmeticOperation::PRELU, input, alpha, output);
+    k->configure(compile_context, ArithmeticOperation::PRELU, input, alpha, output);
     _kernel = std::move(k);
-    configure_border_handler(_border_handler, _kernel->border_size(), input, alpha, output);
+    configure_border_handler(compile_context, _border_handler, _kernel->border_size(), input, alpha, output);
 }
 
 Status CLPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)

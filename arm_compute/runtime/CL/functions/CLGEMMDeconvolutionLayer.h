@@ -99,6 +99,17 @@ public:
      * @param[in]     deconv_info Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo. This function supports only stride_x = weights.width && stride_y = weights.height. Moreover, padding is not supported.
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info);
+    /** Set the input, weights, biases and output tensors.
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] input           Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.
+     *                                Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. Data layout supported: NHWC
+     * @param[in]     weights         The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input. Data layout supported: same as @p input.
+     * @param[in]     bias            (Optional) The biases have one dimension. Data type supported: Same as @p input. Data layout supported: same as @p input.
+     * @param[out]    output          Output tensor. The output has the same number of dimensions as the @p input. Data layout supported: same as @p input.
+     * @param[in]     deconv_info     Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo. This function supports only stride_x = weights.width && stride_y = weights.height. Moreover, padding is not supported.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayer
      *
      * @param[in] input       Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs.

@@ -31,8 +31,13 @@ namespace arm_compute
 {
 void CLReverse::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis);
+}
+
+void CLReverse::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLReverseKernel>();
-    k->configure(input, output, axis);
+    k->configure(compile_context, input, output, axis);
     _kernel = std::move(k);
 }
 

@@ -125,7 +125,14 @@ CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3(std::shared_ptr<I
 void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                                                ActivationLayerInfo act_info, const Size2D &dilation)
 {
-    _func.configure(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
+    _func.configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
+}
+
+void CLDepthwiseConvolutionLayer3x3::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                               const PadStrideInfo &conv_info, unsigned int depth_multiplier,
+                                               ActivationLayerInfo act_info, const Size2D &dilation)
+{
+    _func.configure(compile_context, input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
 }
 
 Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
@@ -167,6 +174,13 @@ CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::CLDepthwiseConv
 void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
                                                                                 unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
+}
+
+void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases,
+                                                                                ICLTensor *output, const PadStrideInfo &conv_info,
+                                                                                unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLDepthwiseConvolutionLayer::validate(input->info(),
                                                                      weights->info(),
@@ -193,11 +207,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(
         _memory_group.manage(&_permuted_output);
 
         // Configure the function to transform the input tensor from NCHW -> NHWC
-        _permute_input_to_nhwc.configure(input, &_permuted_input, PermutationVector(2U, 0U, 1U));
+        _permute_input_to_nhwc.configure(compile_context, input, &_permuted_input, PermutationVector(2U, 0U, 1U));
         _permuted_input.info()->set_data_layout(DataLayout::NHWC);
 
         // Configure the function to transform the weights tensor from IHW -> HWI
-        _permute_weights_to_nhwc.configure(weights, &_permuted_weights, PermutationVector(2U, 0U, 1U));
+        _permute_weights_to_nhwc.configure(compile_context, weights, &_permuted_weights, PermutationVector(2U, 0U, 1U));
         _permuted_weights.info()->set_data_layout(DataLayout::NHWC);
 
         // Set output quantization info before dwc kernel configure
@@ -226,7 +240,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(
     dwc_weights_info.n0 = (depth_multiplier == 1) ? 8 : 1;
     DWCKernelInfo dwc_info;
     dwc_info.activation_info = act_info;
-    _dwc_native_kernel.configure(input_to_use, weights_to_use, biases, output_to_use,
+    _dwc_native_kernel.configure(compile_context, input_to_use, weights_to_use, biases, output_to_use,
                                  dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation,
                                  output_multipliers_to_use, output_shifts_to_use);
 
@@ -236,7 +250,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::configure(
 
         // Configure the function to transform the convoluted output to NCHW format
         _permuted_output.info()->set_data_layout(DataLayout::NCHW);
-        _permute_output_to_nchw.configure(&_permuted_output, output, PermutationVector(1U, 2U, 0U));
+        _permute_output_to_nchw.configure(compile_context, &_permuted_output, output, PermutationVector(1U, 2U, 0U));
         _permuted_output.allocator()->allocate();
     }
 
@@ -386,6 +400,13 @@ CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::CLDepthwise
 void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                                                                     const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
+}
+
+void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases,
+                                                                                    ICLTensor           *output,
+                                                                                    const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
+{
     const GPUTarget gpu_target = CLScheduler::get().target();
 
     // Perform validation step
@@ -429,11 +450,11 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
         _memory_group.manage(&_permuted_output);
 
         // Configure the function to transform the input tensor from NHWC -> NCHW
-        _permute_input_to_nchw.configure(input, &_permuted_input, PermutationVector(1U, 2U, 0U));
+        _permute_input_to_nchw.configure(compile_context, input, &_permuted_input, PermutationVector(1U, 2U, 0U));
         _permuted_input.info()->set_data_layout(DataLayout::NCHW);
 
         // Configure the function to transform the weights tensor from HWI -> IHW
-        _permute_weights_to_nchw.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
+        _permute_weights_to_nchw.configure(compile_context, weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
         _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
         _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
 
@@ -447,7 +468,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
     {
         if(_needs_weights_reshape)
         {
-            _reshape_weights.configure(weights, &_permuted_weights, info);
+            _reshape_weights.configure(compile_context, weights, &_permuted_weights, info);
             weights_to_use = &_permuted_weights;
         }
         _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NHWCKernel>();
@@ -473,7 +494,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
 
     // Configure kernel
     _kernel->set_target(gpu_target);
-    _kernel->configure(input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier,
+    _kernel->configure(compile_context, input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier,
                        act_info, dilation, output_multipliers_to_use, output_shifts_to_use);
 
     if(_is_quantized)
@@ -487,7 +508,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
     {
         // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
         _permuted_output.info()->set_data_layout(DataLayout::NCHW);
-        _permute_output_to_nhwc.configure(&_permuted_output, output, PermutationVector(2U, 0U, 1U));
+        _permute_output_to_nhwc.configure(compile_context, &_permuted_output, output, PermutationVector(2U, 0U, 1U));
 
         // Allocate tensors
         _permuted_input.allocator()->allocate();
@@ -499,7 +520,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
     {
         zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().uniform().offset));
     }
-    _border_handler.configure(input_to_use, _kernel->border_size(), BorderMode::CONSTANT, zero_value);
+    _border_handler.configure(compile_context, input_to_use, _kernel->border_size(), BorderMode::CONSTANT, zero_value);
 }
 
 Status CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
@@ -575,6 +596,14 @@ CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayer(std::shared_ptr<IMemory
 void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                                             ActivationLayerInfo act_info, const Size2D &dilation)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
+}
+
+void CLDepthwiseConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                            const PadStrideInfo &conv_info,
+                                            unsigned int        depth_multiplier,
+                                            ActivationLayerInfo act_info, const Size2D &dilation)
+{
     const GPUTarget gpu_target = CLScheduler::get().target();
     _depth_conv_func           = get_depthwiseconvolution_function(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info,
                                                                    dilation, gpu_target);
@@ -582,12 +611,12 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     {
         case DepthwiseConvolutionFunction::OPTIMIZED:
             _func_3x3.set_memory_group(_memory_manager);
-            _func_3x3.configure(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
+            _func_3x3.configure(compile_context, input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
             break;
         case DepthwiseConvolutionFunction::GENERIC:
         {
             _func_generic.set_memory_group(_memory_manager);
-            _func_generic.configure(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
+            _func_generic.configure(compile_context, input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
         }
         break;
         default:

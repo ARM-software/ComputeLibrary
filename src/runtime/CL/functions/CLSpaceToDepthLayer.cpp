@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,12 @@ CLSpaceToDepthLayer::CLSpaceToDepthLayer()
 
 void CLSpaceToDepthLayer::configure(const ICLTensor *input, ICLTensor *output, int32_t block_shape)
 {
-    _space_to_depth_kernel.configure(input, output, block_shape);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, block_shape);
+}
+
+void CLSpaceToDepthLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
+{
+    _space_to_depth_kernel.configure(compile_context, input, output, block_shape);
 }
 
 Status CLSpaceToDepthLayer::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)

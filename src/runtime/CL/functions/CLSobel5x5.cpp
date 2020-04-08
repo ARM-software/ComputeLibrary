@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,11 @@ CLSobel5x5::CLSobel5x5(std::shared_ptr<IMemoryManager> memory_manager)
 
 void CLSobel5x5::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output_x, output_y, border_mode, constant_border_value);
+}
+
+void CLSobel5x5::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, BorderMode border_mode, uint8_t constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
 
     const bool run_sobel_x = output_x != nullptr;
@@ -53,8 +58,8 @@ void CLSobel5x5::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *out
         _tmp_y.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_x);
         _memory_group.manage(&_tmp_y);
-        _sobel_hor.configure(input, &_tmp_x, &_tmp_y, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(&_tmp_x, &_tmp_y, output_x, output_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor.configure(compile_context, input, &_tmp_x, &_tmp_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert.configure(compile_context, &_tmp_x, &_tmp_y, output_x, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
         _tmp_y.allocator()->allocate();
     }
@@ -62,19 +67,19 @@ void CLSobel5x5::configure(ICLTensor *input, ICLTensor *output_x, ICLTensor *out
     {
         _tmp_x.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_x);
-        _sobel_hor.configure(input, &_tmp_x, nullptr, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(&_tmp_x, nullptr, output_x, nullptr, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor.configure(compile_context, input, &_tmp_x, nullptr, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert.configure(compile_context, &_tmp_x, nullptr, output_x, nullptr, border_mode == BorderMode::UNDEFINED);
         _tmp_x.allocator()->allocate();
     }
     else if(run_sobel_y)
     {
         _tmp_y.allocator()->init(tensor_info);
         _memory_group.manage(&_tmp_y);
-        _sobel_hor.configure(input, nullptr, &_tmp_y, border_mode == BorderMode::UNDEFINED);
-        _sobel_vert.configure(nullptr, &_tmp_y, nullptr, output_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_hor.configure(compile_context, input, nullptr, &_tmp_y, border_mode == BorderMode::UNDEFINED);
+        _sobel_vert.configure(compile_context, nullptr, &_tmp_y, nullptr, output_y, border_mode == BorderMode::UNDEFINED);
         _tmp_y.allocator()->allocate();
     }
-    _border_handler.configure(input, _sobel_hor.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(compile_context, input, _sobel_hor.border_size(), border_mode, PixelValue(constant_border_value));
 }
 
 void CLSobel5x5::run()

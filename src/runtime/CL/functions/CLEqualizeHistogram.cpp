@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,9 +89,14 @@ CLEqualizeHistogram::CLEqualizeHistogram()
 
 void CLEqualizeHistogram::configure(const ICLImage *input, ICLImage *output)
 {
-    _histogram_kernel.configure(input, &_hist);
-    _border_histogram_kernel.configure(input, &_hist);
-    _map_histogram_kernel.configure(input, &_cd_lut, output);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLEqualizeHistogram::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLImage *output)
+{
+    _histogram_kernel.configure(compile_context, input, &_hist);
+    _border_histogram_kernel.configure(compile_context, input, &_hist);
+    _map_histogram_kernel.configure(compile_context, input, &_cd_lut, output);
 }
 
 void CLEqualizeHistogram::run()

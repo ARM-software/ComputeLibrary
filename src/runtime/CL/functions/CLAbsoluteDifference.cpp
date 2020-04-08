@@ -32,7 +32,12 @@ using namespace arm_compute;
 
 void CLAbsoluteDifference::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
+}
+
+void CLAbsoluteDifference::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLAbsoluteDifferenceKernel>();
-    k->configure(input1, input2, output);
+    k->configure(compile_context, input1, input2, output);
     _kernel = std::move(k);
 }

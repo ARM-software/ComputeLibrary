@@ -45,6 +45,11 @@ CLL2NormalizeLayer::CLL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_ma
 
 void CLL2NormalizeLayer::configure(ICLTensor *input, ICLTensor *output, int axis, float epsilon)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, epsilon);
+}
+
+void CLL2NormalizeLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, int axis, float epsilon)
+{
     // Reset auxiliary tensor
     _sumsq.allocator()->init(TensorInfo());
 
@@ -53,8 +58,8 @@ void CLL2NormalizeLayer::configure(ICLTensor *input, ICLTensor *output, int axis
 
     // Configure kernels
     const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
-    _reduce_func.configure(input, &_sumsq, actual_axis, ReductionOperation::SUM_SQUARE);
-    _normalize_kernel.configure(input, &_sumsq, output, axis, epsilon);
+    _reduce_func.configure(compile_context, input, &_sumsq, actual_axis, ReductionOperation::SUM_SQUARE);
+    _normalize_kernel.configure(compile_context, input, &_sumsq, output, axis, epsilon);
 
     // Allocate intermediate tensor
     _sumsq.allocator()->allocate();
