@@ -307,6 +307,12 @@ CLGEMMMatrixMultiplyKernel::CLGEMMMatrixMultiplyKernel()
 void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
                                            bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, bool fp_mixed_precision, const ActivationLayerInfo &activation_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, input2, output, alpha, beta, is_interleaved_transposed, reshape_info, fp_mixed_precision, activation_info);
+}
+
+void CLGEMMMatrixMultiplyKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
+                                           bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, bool fp_mixed_precision, const ActivationLayerInfo &activation_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
     // Perform validate step
@@ -430,7 +436,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = "gemm_";

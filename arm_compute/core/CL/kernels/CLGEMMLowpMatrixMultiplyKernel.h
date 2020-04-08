@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,17 @@ public:
      * @param[in]  gemm_info (Optional) GEMM information used to retrieve the original dimensions of the input matrices
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMReshapeInfo &gemm_info = GEMMReshapeInfo());
+    /** Initialise the kernel's input and output.
+     *
+     * @note This kernel should be used ONLY for Midgard architectures
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input0          Input tensor containing the LHS matrix. Data type supported: QASYMM8
+     * @param[in]  input1          Input tensor containing the RHS matrix. Data type supported: same as @p input0
+     * @param[out] output          Output tensor to store the result of matrix multiplication. Data type supported: S32
+     * @param[in]  gemm_info       (Optional) GEMM information used to retrieve the original dimensions of the input matrices
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMReshapeInfo &gemm_info = GEMMReshapeInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyKernel
      *
      * @param[in] input0    Input tensor containing the LHS matrix. Data type supported: QASYMM8

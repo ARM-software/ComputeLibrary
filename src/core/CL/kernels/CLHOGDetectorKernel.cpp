@@ -45,6 +45,13 @@ CLHOGDetectorKernel::CLHOGDetectorKernel()
 void CLHOGDetectorKernel::configure(const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, cl::Buffer *num_detection_windows, const Size2D &detection_window_stride,
                                     float threshold, uint16_t idx_class)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, hog, detection_windows, num_detection_windows, detection_window_stride, threshold, idx_class);
+}
+
+void CLHOGDetectorKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, cl::Buffer *num_detection_windows,
+                                    const Size2D &detection_window_stride,
+                                    float threshold, uint16_t idx_class)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F32);
     ARM_COMPUTE_ERROR_ON(hog == nullptr);
     ARM_COMPUTE_ERROR_ON(detection_windows == nullptr);
@@ -82,7 +89,7 @@ void CLHOGDetectorKernel::configure(const ICLTensor *input, const ICLHOG *hog, I
 
     // Create kernel
     const std::string kernel_name = std::string("hog_detector");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); // Skip the input parameters

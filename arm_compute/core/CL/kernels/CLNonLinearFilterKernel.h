@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,20 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function,
+                   unsigned int mask_size, MatrixPattern pattern, const uint8_t *mask,
+                   bool border_undefined);
+    /** Set the source, destination and border mode of the kernel
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data types supported: U8
+     * @param[out] output           Destination tensor. Data types supported: U8
+     * @param[in]  function         Non linear function to perform
+     * @param[in]  mask_size        Mask size. Supported sizes: 3, 5
+     * @param[in]  pattern          Mask pattern
+     * @param[in]  mask             The given mask. Will be used only if pattern is specified to PATTERN_OTHER
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function,
                    unsigned int mask_size, MatrixPattern pattern, const uint8_t *mask,
                    bool border_undefined);
 

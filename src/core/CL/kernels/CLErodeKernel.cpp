@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,11 +38,16 @@ BorderSize CLErodeKernel::border_size() const
 
 void CLErodeKernel::configure(const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
+}
+
+void CLErodeKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("erode"));
+    _kernel = create_kernel(compile_context, "erode");
 
     _input  = input;
     _output = output;

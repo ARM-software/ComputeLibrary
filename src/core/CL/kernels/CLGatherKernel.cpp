@@ -89,6 +89,11 @@ CLGatherKernel::CLGatherKernel()
 
 void CLGatherKernel::configure(const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, indices, output, axis);
+}
+
+void CLGatherKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, indices);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), indices->info(), output->info(), axis));
 
@@ -109,7 +114,7 @@ void CLGatherKernel::configure(const ICLTensor *input, const ICLTensor *indices,
     build_opts.add_option("-DAXIS=" + support::cpp11::to_string(_axis));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gather", build_opts.options()));
+    _kernel = create_kernel(compile_context, "gather", build_opts.options());
     ICLKernel::configure_internal(win_config.second);
 }
 

@@ -57,6 +57,18 @@ public:
      *                    - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
     virtual void configure(const ICLTensor *input, ICLTensor *output, const GEMMLowpReductionKernelInfo &info) = 0;
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data type supported: S8
+     * @param[out] output          Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
+     * @param[in]  info            Kernel metadata:
+     *                             - k            Number of matrix columns/rows depending on the type of reduction.
+     *                             - is_reshaped  True if the matrix has been reshaped.
+     *                             - scalar       Scalar value to multiply each reduced column/row by.
+     *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
+     */
+    virtual void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLowpReductionKernelInfo &info) = 0;
 
 protected:
     const ICLTensor *_input;
@@ -82,6 +94,18 @@ public:
      *                            - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
     void configure(const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info) override;
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  mtx_a           Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[out] vector_sum_row  Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
+     * @param[in]  info            Kernel metadata:
+     *                             - k            Number of matrix columns/rows depending on the type of reduction.
+     *                             - is_reshaped  True if the matrix has been reshaped.
+     *                             - scalar       Scalar value to multiply each reduced column/row by.
+     *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixAReductionKernel
      *
      * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
@@ -119,6 +143,18 @@ public:
      *                            - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
     void configure(const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info) override;
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  mtx_b           Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[out] vector_sum_col  Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
+     * @param[in]  info            Kernel metadata:
+     *                             - k            Number of matrix columns/rows depending on the type of reduction.
+     *                             - is_reshaped  True if the matrix has been reshaped.
+     *                             - scalar       Scalar value to multiply each reduced column/row by.
+     *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixBReductionKernel
      *
      * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED

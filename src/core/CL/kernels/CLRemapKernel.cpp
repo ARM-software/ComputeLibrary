@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,12 @@ BorderSize CLRemapKernel::border_size() const
 
 void CLRemapKernel::configure(const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, map_x, map_y, output, policy, border_undefined);
+}
+
+void CLRemapKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy,
+                              bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(map_x, 1, DataType::F32);
@@ -66,7 +72,7 @@ void CLRemapKernel::configure(const ICLTensor *input, const ICLTensor *map_x, co
     std::string           interpolation_name = string_from_interpolation_policy(policy);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
     std::string kernel_name = "remap_" + interpolation_name;
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts);
 
     // Configure window
     constexpr unsigned int num_elems_processed_per_iteration = 4;

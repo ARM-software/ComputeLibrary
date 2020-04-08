@@ -178,6 +178,11 @@ BorderSize CLPoolingLayerKernel::border_size() const
 
 void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, pool_info, indices);
+}
+
+void CLPoolingLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Set instance variables
@@ -275,12 +280,12 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
 
                 std::string kernel_name = ((is_pool3x3_stride_le3) ? "pooling_layer_optimized_" : "pooling_layer_")
                                           + support::cpp11::to_string(pool_size_x);
-                _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+                _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
             }
             else // Run general case
             {
                 std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "pooling_layer_MxN_quantized_nchw" : "pooling_layer_MxN_nchw";
-                _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+                _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
             }
             break;
         }
@@ -292,7 +297,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
             build_opts.add_option_if(output->info()->tensor_shape().total_size_upper(3) > 1,
                                      "-DDST_DEPTH=" + support::cpp11::to_string(output->info()->dimension(idx_height)));
             std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "pooling_layer_MxN_quantized_nhwc" : "pooling_layer_MxN_nhwc";
-            _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+            _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
             break;
         }
         default:

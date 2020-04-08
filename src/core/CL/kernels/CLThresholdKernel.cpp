@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,12 @@ using namespace arm_compute;
 void CLThresholdKernel::configure(const ICLTensor *input, ICLTensor *output, uint8_t threshold,
                                   uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, threshold, false_value, true_value, type, upper);
+}
+
+void CLThresholdKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold,
+                                  uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
@@ -57,7 +63,7 @@ void CLThresholdKernel::configure(const ICLTensor *input, ICLTensor *output, uin
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel = create_kernel(compile_context, kernel_name);
 
     // Set arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters

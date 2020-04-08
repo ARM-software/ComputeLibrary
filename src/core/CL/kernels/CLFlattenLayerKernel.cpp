@@ -82,6 +82,11 @@ CLFlattenLayerKernel::CLFlattenLayerKernel()
 
 void CLFlattenLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLFlattenLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
@@ -101,7 +106,7 @@ void CLFlattenLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
     build_opts.add_option_if(output->info()->num_dimensions() > 2, "-DDST_DIM1=" + support::cpp11::to_string(output->info()->dimension(1)));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("flatten", build_opts.options()));
+    _kernel = create_kernel(compile_context, "flatten", build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = "flatten";

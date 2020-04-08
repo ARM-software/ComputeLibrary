@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,11 @@ BorderSize CLGaussian3x3Kernel::border_size() const
 
 void CLGaussian3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
+}
+
+void CLGaussian3x3Kernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
@@ -55,7 +60,7 @@ void CLGaussian3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, b
                                        };
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution3x3_static", build_opts));
+    _kernel = create_kernel(compile_context, "convolution3x3_static", build_opts);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;

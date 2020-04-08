@@ -115,12 +115,17 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-CLActivationLayerKernel::CLActivationLayerKernel(CLCoreRuntimeContext *ctx)
-    : _input(nullptr), _output(nullptr), _run_in_place(false), _ctx(ctx)
+CLActivationLayerKernel::CLActivationLayerKernel()
+    : _input(nullptr), _output(nullptr), _run_in_place(false)
 {
 }
 
 void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
+}
+
+void CLActivationLayerKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
@@ -226,7 +231,8 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     // Create kernel
-    _kernel = create_opencl_kernel(_ctx, kernel_name, build_opts);
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
+
     // Make sure _kernel is initialized before calling the parent's configure
     _input  = input;
     _output = output;

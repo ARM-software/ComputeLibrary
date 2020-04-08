@@ -172,6 +172,11 @@ CLGEMMLowpMatrixMultiplyKernel::CLGEMMLowpMatrixMultiplyKernel()
 
 void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMReshapeInfo &gemm_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output, gemm_info);
+}
+
+void CLGEMMLowpMatrixMultiplyKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMReshapeInfo &gemm_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), gemm_info));
@@ -218,7 +223,7 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
     kernel_name = "gemmlowp_mm_midgard";
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;

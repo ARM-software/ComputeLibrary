@@ -52,6 +52,14 @@ public:
      * @param[in]  info   Depthwise convolution information to reshape the input tensor.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const DepthwiseConvolutionReshapeInfo &info);
+    /** Initialize the function's source and destination.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           The input tensor of dimension [IFM, W, H]. Data types supported: All. Data layouts supported: NHWC
+     * @param[out] output          The output tensor of dimension [W*H*C0, ceil(IFM/C0)]. C0 is the number of channels read by each thread. Data types supported: same as @p weights.
+     * @param[in]  info            Depthwise convolution information to reshape the input tensor.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const DepthwiseConvolutionReshapeInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
      *

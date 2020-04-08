@@ -56,6 +56,14 @@ public:
      * @param[in]     window         Window to be used in case setting only part of a tensor. Default is nullptr.
      */
     void configure(ICLTensor *tensor, const PixelValue &constant_value, Window *window = nullptr);
+    /** Initialise the kernel's tensor and filling value
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] tensor          Input tensor to fill. Supported data types: All.
+     * @param[in]     constant_value  The value used to fill the planes of the tensor
+     * @param[in]     window          Window to be used in case setting only part of a tensor. Default is nullptr.
+     */
+    void configure(CLCompileContext &compile_context, ICLTensor *tensor, const PixelValue &constant_value, Window *window = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLMemsetKernel
      *
      * @param[in] tensor         Source tensor info. Data types supported: All.

@@ -123,6 +123,13 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(const 
                                                                           int result_fixedpoint_multiplier, int result_shift,
                                                                           int min, int max)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
+}
+
+void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                                          int result_fixedpoint_multiplier, int result_shift,
+                                                                          int min, int max)
+{
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(),
@@ -141,7 +148,7 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(const 
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16", build_opts.options()));
+    _kernel = create_kernel(compile_context, "gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());

@@ -72,6 +72,11 @@ CLReorgLayerKernel::CLReorgLayerKernel()
 
 void CLReorgLayerKernel::configure(const ICLTensor *input, ICLTensor *output, int32_t stride)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, stride);
+}
+
+void CLReorgLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t stride)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), stride));
 
@@ -86,7 +91,7 @@ void CLReorgLayerKernel::configure(const ICLTensor *input, ICLTensor *output, in
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(input->info()->dimension(idx_channel)));
     build_opts.add_option("-DSTRIDE=" + support::cpp11::to_string(stride));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure window
     // auto inizialize the output tensor if not yet initialized

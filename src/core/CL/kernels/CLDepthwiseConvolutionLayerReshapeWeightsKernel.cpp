@@ -88,6 +88,11 @@ CLDepthwiseConvolutionLayerReshapeWeightsKernel::CLDepthwiseConvolutionLayerResh
 
 void CLDepthwiseConvolutionLayerReshapeWeightsKernel::configure(const ICLTensor *input, ICLTensor *output, const DepthwiseConvolutionReshapeInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
+}
+
+void CLDepthwiseConvolutionLayerReshapeWeightsKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const DepthwiseConvolutionReshapeInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), info));
     auto win_config = validate_and_configure_window(input->info(), output->info(), info);
@@ -105,7 +110,7 @@ void CLDepthwiseConvolutionLayerReshapeWeightsKernel::configure(const ICLTensor 
     build_opts.add_option_if(info.transpose, "-DTRANSPOSE");
     build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_convolution_reshape_weights", build_opts.options()));
+    _kernel = create_kernel(compile_context, "depthwise_convolution_reshape_weights", build_opts.options());
 }
 
 Status CLDepthwiseConvolutionLayerReshapeWeightsKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const DepthwiseConvolutionReshapeInfo &info)

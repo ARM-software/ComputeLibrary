@@ -81,6 +81,11 @@ CLQuantizationLayerKernel::CLQuantizationLayerKernel()
 
 void CLQuantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLQuantizationLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
@@ -154,7 +159,7 @@ void CLQuantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     build_opts.add_option("-DMIN_QUANT_VAL=" + support::cpp11::to_string(min_max_quant_values.first));
     build_opts.add_option("-DMAX_QUANT_VAL=" + support::cpp11::to_string(min_max_quant_values.second));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("quantization_layer", build_opts.options()));
+    _kernel = create_kernel(compile_context, "quantization_layer", build_opts.options());
 }
 
 Status CLQuantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)

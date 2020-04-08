@@ -97,6 +97,11 @@ CLNormalizePlanarYUVLayerKernel::CLNormalizePlanarYUVLayerKernel()
 
 void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, std);
+}
+
+void CLNormalizePlanarYUVLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
+{
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, mean, std);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), mean->info(), std->info()));
@@ -127,7 +132,7 @@ void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTenso
 
     // Create kernel
     kernel_name += lower_string(string_from_data_layout(input->info()->data_layout()));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), mean->info(), std->info());

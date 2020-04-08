@@ -102,6 +102,13 @@ void CLStridedSliceKernel::configure(const ICLTensor *input, ICLTensor *output,
                                      const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                                      int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+}
+
+void CLStridedSliceKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+                                     const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
+                                     int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), starts, ends, strides, begin_mask, end_mask, shrink_axis_mask));
 
@@ -157,7 +164,7 @@ void CLStridedSliceKernel::configure(const ICLTensor *input, ICLTensor *output,
                                   "-DDST_DEPTH=1");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("strided_slice", build_opts.options()));
+    _kernel = create_kernel(compile_context, "strided_slice", build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = "strided_slice";

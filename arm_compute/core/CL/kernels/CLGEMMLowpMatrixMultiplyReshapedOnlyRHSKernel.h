@@ -75,6 +75,33 @@ public:
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMKernelInfo &gemm_info, const ICLTensor *vector_sum_col = nullptr,
                    const ICLTensor *vector_sum_row = nullptr, const ICLTensor *bias = nullptr, const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context    The compile context to be used.
+     * @param[in]  input0             Input tensor containing the LHS matrix. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  input1             Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0
+     * @param[out] output             Output tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/S32.
+     * @param[in]  gemm_info          GEMM information used to retrieve the original dimensions of the input matrices, output stage information and RHS/LHS info.
+     *                                Only the following values are supported for LHS info:
+     *                                lhs_info.m0: 2,3,4,5,6,7,8
+     *                                lhs_info.k0: 2,3,4,8,16
+     *                                Only the following values are supported for RHS info:
+     *                                rhs_info.n0: 2,3,4,8,16
+     *                                rhs_info.k0: same as lhs_info.k0
+     *                                rhs_info.transpose: true
+     * @param[in]  vector_sum_col     (Optional) Input row-vector of sums of all the entries in each column of matrix B.
+     *                                Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: S32
+     * @param[in]  vector_sum_row     (Optional) Input row-vector of sums of all the entries in each row of matrix A.
+     *                                Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: S32
+     * @param[in]  bias               (Optional) Biases tensor. Only shared biases supported and it can be a nullptr if the addition of biases is not required.
+     *                                Biases are 1D tensor with dimensions [OFM]. Data type supported: S32.
+     * @param[in]  output_multipliers (Optional) Output multipliers tensor. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
+     *                                Supported data types: S32.
+     * @param[in]  output_shifts      (Optional) Output shifts tensor. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
+     *                                Supported data types: S32.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMKernelInfo &gemm_info, const ICLTensor *vector_sum_col = nullptr,
+                   const ICLTensor *vector_sum_row = nullptr, const ICLTensor *bias = nullptr, const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
      *
      * @param[in] input0             Input tensor info for the LHS matrix. Data type supported: QASYMM8/QASYMM8_SIGNED

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,13 @@ public:
      * @param[out] output Destination tensor, Data types supported: U32.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           An input tensor. Data types supported: U8
+     * @param[out] output          Destination tensor, Data types supported: U32.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 };
 
 /** Interface to run the vertical pass of the integral image kernel. */
@@ -62,6 +69,12 @@ public:
      * @param[in,out] in_out The input/output tensor. Data types supported: U32
      */
     void configure(ICLTensor *in_out);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] in_out          The input/output tensor. Data types supported: U32
+     */
+    void configure(CLCompileContext &compile_context, ICLTensor *in_out);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

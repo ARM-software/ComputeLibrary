@@ -54,6 +54,14 @@ public:
      * @param[in]  block_shape Block shape value.
      */
     void configure(const ICLTensor *input, ICLTensor *output, int32_t block_shape);
+    /** Initialise the kernel's inputs and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Tensor input. Supported tensor rank: 4. Data types supported: All.
+     * @param[out] output          Tensor output. Data types supported: same as @p input
+     * @param[in]  block_shape     Block shape value.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthToSpaceLayerKernel.
      *
      * @param[in] input       Tensor input info. Supported tensor rank: 4. Data types supported: All.

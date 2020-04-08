@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,13 @@ public:
      * @param[out] output Destination tensor. Data types supported: U8.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Set the inputs and output images.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: U8.
+     * @param[out] output          Destination tensor. Data types supported: U8.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLBITWISENOTKERNEL_H */

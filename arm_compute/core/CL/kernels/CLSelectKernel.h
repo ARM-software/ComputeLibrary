@@ -60,6 +60,15 @@ public:
      * @param[in]  output Output tensor. Data types supported: Same as @p x.
      */
     void configure(const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output);
+    /** Initialise the kernel's inputs and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  c               Condition input tensor. Data types supported: U8.
+     * @param[in]  x               First input tensor. Data types supported: All.
+     * @param[out] y               Second input tensor. Data types supported: Same as @p x
+     * @param[in]  output          Output tensor. Data types supported: Same as @p x.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSelectKernel
      *
      * @param[in] c      Condition input tensor. Data types supported: U8.

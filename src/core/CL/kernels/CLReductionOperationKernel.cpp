@@ -129,6 +129,11 @@ BorderSize CLReductionOperationKernel::border_size() const
 
 void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, op, width);
+}
+
+void CLReductionOperationKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis, op, width));
@@ -227,7 +232,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
         default:
             ARM_COMPUTE_ERROR("Not supported");
     }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reduction_operation_" + kernel_axis_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, "reduction_operation_" + kernel_axis_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(_input->info(), _output->info(), axis, op);

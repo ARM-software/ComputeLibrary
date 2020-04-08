@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,6 +83,11 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input0, IT
 
 void CLLocallyConnectedMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output);
+}
+
+void CLLocallyConnectedMatrixMultiplyKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
 
@@ -108,7 +113,7 @@ void CLLocallyConnectedMatrixMultiplyKernel::configure(const ICLTensor *input0, 
 
     // Create kernel
     std::string data_type_name = lower_string(string_from_data_type(input0->info()->data_type()));
-    _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(("gemm_lc_vm_" + data_type_name), build_opts));
+    _kernel                    = create_kernel(compile_context, ("gemm_lc_vm_" + data_type_name), build_opts);
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());

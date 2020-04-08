@@ -61,6 +61,11 @@ BorderSize CLWarpAffineKernel::border_size() const
 
 void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, matrix, policy);
+}
+
+void CLWarpAffineKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(InterpolationPolicy::AREA == policy);
@@ -77,7 +82,7 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
     std::string interpolation_name = string_from_interpolation_policy(policy);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
     const std::string kernel_name = "warp_affine_" + interpolation_name;
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, options));
+    _kernel                       = create_kernel(compile_context, kernel_name, options);
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters

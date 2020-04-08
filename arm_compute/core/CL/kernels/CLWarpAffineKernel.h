@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,16 @@ public:
      * @param[in]  policy The interpolation type.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy);
+    /** Initialize the function's source, destination, interpolation policy and border_mode.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: U8.
+     * @param[out] output          Destination tensor, Data types supported: U8.
+     * @param[in]  matrix          The perspective matrix. Must be 2x3 of type float
+     *                             The matrix argument requires 9 values, the last 3 values are ignored.
+     * @param[in]  policy          The interpolation type.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;

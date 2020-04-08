@@ -37,9 +37,7 @@ CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
 
 void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
-    auto core_ctx = _ctx ? _ctx->core_runtime_context() : /* Legacy */ nullptr;
-
-    auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>(core_ctx);
+    auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>();
     k->configure(input, output, act_info);
     _kernel = std::move(k);
 }

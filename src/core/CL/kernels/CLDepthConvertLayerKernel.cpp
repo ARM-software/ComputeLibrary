@@ -74,6 +74,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
 
 void CLDepthConvertLayerKernel::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, policy, shift);
+}
+
+void CLDepthConvertLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Auto initialize output shape if not initialized (We can only auto-configure the shape, datatype must be given)
@@ -100,14 +105,14 @@ void CLDepthConvertLayerKernel::configure(const ICLTensor *input, ICLTensor *out
 
     // Create kernel
     const std::string kernel_name = (input_size >= output_size) ? "convert_depth_down" : "convert_depth_up";
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set shift arg
     unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
     _kernel.setArg(idx++, shift);
 
     // Configure kernel
-    ICLSimple3DKernel::configure(input, output, num_elems_processed_per_iteration);
+    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
 
     // Collapse window
     const Window &full_window      = window();

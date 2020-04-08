@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,13 @@ public:
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/F16/F32
+     * @param[out] output          Destination tensor. Data types supported: same as @p input
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLogits1DMaxKernel
      *
      * @param[in] input  Source tensor. Data types supported: QASYMM8/F16/F32
@@ -76,6 +83,16 @@ public:
      * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.0
      */
     void configure(const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum, float beta = 1.0f);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/F16/F32
+     * @param[in]  max             Max values tensor. Data types supported: same as @p input
+     * @param[out] output          Destination tensor. Data types supported: S32 for QASYMM8 @p input, or same as @p input
+     * @param[out] sum             Sum of 1D logits tensor. Data types supported: S32 for QASYMM8 @p input, or same as @p input
+     * @param[in]  beta            (Optional) A scaling factor for the exponent. Defaults to 1.0
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *max, ICLTensor *output, ICLTensor *sum, float beta = 1.0f);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLogits1DShiftExpSumKernel
      *
      * @param[in] input  Source tensor. Data types supported: QASYMM8/F16/F32
@@ -124,6 +141,16 @@ public:
      * @param[in]     info   Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      */
     void configure(const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info);
+    /** Set the input and output tensors.
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in]     input           Source tensor. Data types supported: F16/F32
+     * @param[in,out] max             Max values tensor. Data types supported: same as @p input
+     * @param[out]    output          Destination tensor. Data types supported: same as @p input
+     * @param[out]    sum             Sum of 1D logits tensor. Data types supported: same as @p input
+     * @param[in]     info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLogits1DMaxShiftExpSumKernel
      *
      * @param[in] input  Source tensor. Data types supported: F16/F32
@@ -182,6 +209,15 @@ public:
      * @param[in]  info   Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
      */
     void configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: S32/F16/F32
+     * @param[in]  sum             Sum tensor. Dimensions should be dim(input)-1. Data types supported: same as @p input
+     * @param[out] output          Destination tensor. Data types supported: QASYMM8 for S32 @p input, or same as @p input
+     * @param[in]  info            Contains information consumed by kernels for softmax described in @ref SoftmaxKernelInfo.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLogits1DNormKernel
      *
      * @param[in] input  Source tensor. Data types supported: S32/F16/F32

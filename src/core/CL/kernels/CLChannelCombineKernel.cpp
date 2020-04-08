@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,11 @@ CLChannelCombineKernel::CLChannelCombineKernel()
 }
 
 void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), plane0, plane1, plane2, plane3, output);
+}
+
+void CLChannelCombineKernel::configure(CLCompileContext &compile_context, const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(plane0, plane1, plane2, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane0);
@@ -109,7 +114,7 @@ void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor 
 
     // Create kernel
     std::string kernel_name = "channel_combine_" + string_from_format(output_format);
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel                 = create_kernel(compile_context, kernel_name);
 
     // Configure window
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
@@ -135,6 +140,11 @@ void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor 
 }
 
 void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), plane0, plane1, plane2, output);
+}
+
+void CLChannelCombineKernel::configure(CLCompileContext &compile_context, const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(plane0, plane1, plane2, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane0);
@@ -211,7 +221,7 @@ void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *p
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts);
 
     // Configure window
     Window win = calculate_max_window(*plane0->info(), Steps(num_elems_processed_per_iteration));

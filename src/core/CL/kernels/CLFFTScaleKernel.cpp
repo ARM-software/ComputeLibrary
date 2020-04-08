@@ -78,6 +78,11 @@ CLFFTScaleKernel::CLFFTScaleKernel()
 
 void CLFFTScaleKernel::configure(ICLTensor *input, ICLTensor *output, const FFTScaleKernelInfo &config)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, config);
+}
+
+void CLFFTScaleKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTScaleKernelInfo &config)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr));
 
@@ -91,7 +96,7 @@ void CLFFTScaleKernel::configure(ICLTensor *input, ICLTensor *output, const FFTS
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(output != nullptr ? output->info()->num_channels() : input->info()->num_channels()));
     build_opts.add_option_if(config.conjugate, "-DCONJ");
     std::string kernel_name = "fft_scale_conj";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set static arguments
     unsigned int idx = (1 + (_run_in_place ? 0 : 1)) * num_arguments_per_3D_tensor(); // Skip the input and output parameters

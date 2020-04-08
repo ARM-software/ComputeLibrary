@@ -53,6 +53,13 @@ public:
      * @param[out] output Destination tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Set the input and output of the kernel
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data type supported: All.
+     * @param[out] output          Destination tensor. Data type supported: Same as @p input
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayerKernel
      *

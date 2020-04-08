@@ -44,6 +44,13 @@ void CLMemsetKernel::configure(ICLTensor        *tensor,
                                const PixelValue &constant_value,
                                Window           *window)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), tensor, constant_value, window);
+}
+
+void CLMemsetKernel::configure(CLCompileContext &compile_context, ICLTensor *tensor,
+                               const PixelValue &constant_value,
+                               Window           *window)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
     ARM_COMPUTE_ERROR_THROW_ON(validate(tensor->info(), constant_value, window));
 
@@ -77,7 +84,7 @@ void CLMemsetKernel::configure(ICLTensor        *tensor,
     build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(constant_value, data_type));
     build_opts.add_option_if(multi_access_x, "-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
     build_opts.add_option_if(multi_access_x && remainder_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(output_width_x - vec_size_x, 0)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("memset", build_opts.options()));
+    _kernel = create_kernel(compile_context, "memset", build_opts.options());
 }
 
 Status CLMemsetKernel::validate(const ITensorInfo *tensor, const PixelValue &constant_value, Window *window)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,13 @@ using namespace arm_compute;
 void CLLKTrackerInitKernel::configure(const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates,
                                       ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                                       bool use_initial_estimate, size_t level, size_t num_levels, float pyramid_scale)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), old_points, new_points_estimates, old_points_internal, new_points_internal, use_initial_estimate, level, num_levels, pyramid_scale);
+}
+
+void CLLKTrackerInitKernel::configure(CLCompileContext &compile_context, const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates,
+                                      ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
+                                      bool use_initial_estimate, size_t level, size_t num_levels, float pyramid_scale)
 
 {
     ARM_COMPUTE_ERROR_ON(old_points == nullptr);
@@ -55,7 +62,7 @@ void CLLKTrackerInitKernel::configure(const ICLKeyPointArray *old_points, const 
     {
         kernel_name += (use_initial_estimate) ? std::string("_max_initial_estimate") : std::string("_max");
     }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel = create_kernel(compile_context, kernel_name);
 
     // Set static kernel arguments
     unsigned int idx = 0;
@@ -87,13 +94,18 @@ void CLLKTrackerInitKernel::run(const Window &window, cl::CommandQueue &queue)
 }
 
 void CLLKTrackerFinalizeKernel::configure(ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), new_points_internal, new_points);
+}
+
+void CLLKTrackerFinalizeKernel::configure(CLCompileContext &compile_context, ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points)
 
 {
     ARM_COMPUTE_ERROR_ON(new_points_internal == nullptr);
     ARM_COMPUTE_ERROR_ON(new_points == nullptr);
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("finalize"));
+    _kernel = create_kernel(compile_context, "finalize");
 
     // Set static kernel arguments
     unsigned int idx = 0;
@@ -121,6 +133,14 @@ CLLKTrackerStage0Kernel::CLLKTrackerStage0Kernel()
 }
 
 void CLLKTrackerStage0Kernel::configure(const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
+                                        ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
+                                        ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
+                                        size_t window_dimension, size_t level)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), old_input, old_scharr_gx, old_scharr_gy, old_points_internal, new_points_internal, coeff_table, old_ival, window_dimension, level);
+}
+
+void CLLKTrackerStage0Kernel::configure(CLCompileContext &compile_context, const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
                                         ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                                         ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
                                         size_t window_dimension, size_t level)
@@ -175,7 +195,7 @@ void CLLKTrackerStage0Kernel::configure(const ICLTensor *old_input, const ICLTen
     };
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("lktracker_stage0"));
+    _kernel = create_kernel(compile_context, "lktracker_stage0");
 
     // Set arguments
     unsigned int idx = 3 * num_arguments_per_2D_tensor();
@@ -211,6 +231,13 @@ CLLKTrackerStage1Kernel::CLLKTrackerStage1Kernel()
 }
 
 void CLLKTrackerStage1Kernel::configure(const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
+                                        Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, size_t level)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), new_input, new_points_internal, coeff_table, old_ival, termination, epsilon, num_iterations, window_dimension, level);
+}
+
+void CLLKTrackerStage1Kernel::configure(CLCompileContext &compile_context, const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table,
+                                        ICLOldValArray *old_ival,
                                         Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, size_t level)
 
 {
@@ -257,7 +284,7 @@ void CLLKTrackerStage1Kernel::configure(const ICLTensor *new_input, ICLLKInterna
     const int term_epsilon = (termination == Termination::TERM_CRITERIA_EPSILON || termination == Termination::TERM_CRITERIA_BOTH) ? 1 : 0;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("lktracker_stage1"));
+    _kernel = create_kernel(compile_context, "lktracker_stage1");
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor();

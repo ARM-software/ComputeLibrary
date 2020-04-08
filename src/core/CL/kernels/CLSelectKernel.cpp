@@ -104,6 +104,11 @@ CLSelectKernel::CLSelectKernel()
 }
 void CLSelectKernel::configure(const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), c, x, y, output);
+}
+
+void CLSelectKernel::configure(CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(c, x, y, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(c->info(), x->info(), y->info(), output->info()));
 
@@ -141,7 +146,7 @@ void CLSelectKernel::configure(const ICLTensor *c, const ICLTensor *x, const ICL
         kernel_name += "_different_rank";
         kernel_name += is_input_rank_greater_than_two ? "_n" : "_2";
     }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(c->info(), x->info(), y->info(), output->info());

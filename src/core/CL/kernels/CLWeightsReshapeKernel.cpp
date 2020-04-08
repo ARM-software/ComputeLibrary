@@ -79,6 +79,11 @@ CLWeightsReshapeKernel::CLWeightsReshapeKernel()
 
 void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, biases, output, num_groups);
+}
+
+void CLWeightsReshapeKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
@@ -102,7 +107,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     build_opts.add_option_if(biases != nullptr, "-DHAS_BIAS");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_to_columns", build_opts.options()));
+    _kernel = create_kernel(compile_context, "reshape_to_columns", build_opts.options());
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());

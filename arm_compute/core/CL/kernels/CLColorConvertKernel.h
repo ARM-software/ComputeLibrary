@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,10 +61,26 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Set the input and output of the kernel
      *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Formats supported: RGBA8888/UYVY422/YUYV422/RGB888
+     * @param[out] output          Destination tensor. Formats supported: RGB888 (if the formats of @p input are RGBA8888/UYVY422/YUYV422),
+     *                                                          RGBA8888 (if the formats of @p input are UYVY422/YUYV422/RGB888/),
+     *                                                          U8 (if the formats of @p input is RGB888)
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    /** Set the input and output of the kernel
+     *
      * @param[in]  input  Multi-planar source image. Formats supported: NV12/NV21/IYUV
      * @param[out] output Single-planar destination image. Formats supported: RGB888/RGBA8888
      */
     void configure(const ICLMultiImage *input, ICLImage *output);
+    /** Set the input and output of the kernel
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Multi-planar source image. Formats supported: NV12/NV21/IYUV
+     * @param[out] output          Single-planar destination image. Formats supported: RGB888/RGBA8888
+     */
+    void configure(CLCompileContext &compile_context, const ICLMultiImage *input, ICLImage *output);
     /** Set the input and output of the kernel
      *
      * @param[in]  input  Single-planar source image. Formats supported: RGB888/RGBA8888/UYVY422/YUYV422
@@ -73,10 +89,24 @@ public:
     void configure(const ICLImage *input, ICLMultiImage *output);
     /** Set the input and output of the kernel
      *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Single-planar source image. Formats supported: RGB888/RGBA8888/UYVY422/YUYV422
+     * @param[out] output          Multi-planar destination image. Formats supported: NV12/IYUV/YUV444 (if the formats of @p input are RGB888/RGB8888)
+     */
+    void configure(CLCompileContext &compile_context, const ICLImage *input, ICLMultiImage *output);
+    /** Set the input and output of the kernel
+     *
      * @param[in]  input  Multi-planar source image. Formats supported: NV12/NV21/IYUV
      * @param[out] output Multi-planar destination image. Formats supported: YUV444/IYUV (if the formats of @p input are NV12/NV21)/NV12 (if the format of  @p input is IYUV)
      */
     void configure(const ICLMultiImage *input, ICLMultiImage *output);
+    /** Set the input and output of the kernel
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Multi-planar source image. Formats supported: NV12/NV21/IYUV
+     * @param[out] output          Multi-planar destination image. Formats supported: YUV444/IYUV (if the formats of @p input are NV12/NV21)/NV12 (if the format of  @p input is IYUV)
+     */
+    void configure(CLCompileContext &compile_context, const ICLMultiImage *input, ICLMultiImage *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

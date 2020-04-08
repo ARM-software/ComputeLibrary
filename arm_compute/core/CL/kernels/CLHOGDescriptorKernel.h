@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,15 @@ public:
      * @param[in]  hog_info        HOG's metadata
      */
     void configure(const ICLTensor *input_magnitude, const ICLTensor *input_phase, ICLTensor *output, const HOGInfo *hog_info);
+    /**  Initialise the kernel's inputs, output and HOG's metadata
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input_magnitude Input tensor which stores the magnitude of the gradient for each pixel. Data type supported: S16.
+     * @param[in]  input_phase     Input tensor which stores the phase of the gradient for each pixel. Data type supported: U8
+     * @param[out] output          Output tensor which stores the local HOG for each cell. DataType supported: F32. Number of channels supported: equal to the number of histogram bins per cell
+     * @param[in]  hog_info        HOG's metadata
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input_magnitude, const ICLTensor *input_phase, ICLTensor *output, const HOGInfo *hog_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -92,6 +101,14 @@ public:
      * @param[in]  hog_info HOG's metadata
      */
     void configure(const ICLTensor *input, ICLTensor *output, const HOGInfo *hog_info);
+    /** Initialise the kernel's input, output and HOG's metadata
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor which stores the local HOG for each cell. Data type supported: F32. Number of channels supported: equal to the number of histogram bins per cell
+     * @param[out] output          Output tensor which stores the normalised blocks. Data type supported: F32. Number of channels supported: equal to the number of histogram bins per block
+     * @param[in]  hog_info        HOG's metadata
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const HOGInfo *hog_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

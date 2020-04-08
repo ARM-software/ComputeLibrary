@@ -52,6 +52,13 @@ public:
      * @param[out] output Destination tensor. Data types supported: F16/F32.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Set the input, output, min and max.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.
+     * @param[out] output          Destination tensor. Data types supported: F16/F32.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDequantizationLayerKernel
      *
      * @param[in] input  Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/QSYMM8/QSYMM16.

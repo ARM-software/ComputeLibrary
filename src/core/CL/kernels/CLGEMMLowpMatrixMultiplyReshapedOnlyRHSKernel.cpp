@@ -310,6 +310,13 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *i
                                                               const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias,
                                                               const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output, gemm_info, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts);
+}
+
+void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMKernelInfo &gemm_info,
+                                                              const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias,
+                                                              const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(),
                                                   input1->info(),
@@ -420,7 +427,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *i
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;

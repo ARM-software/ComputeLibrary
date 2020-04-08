@@ -77,6 +77,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
 void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, perm);
+}
+
+void CLPermuteKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), perm));
 
@@ -98,7 +103,7 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
     build_opts.add_option("-DP3=" + support::cpp11::to_string((_perm.num_dimensions() >= 3) ? perm[2] : 2));
     build_opts.add_option("-DP4=" + support::cpp11::to_string((_perm.num_dimensions() >= 4) ? perm[3] : 3));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute", build_opts.options()));
+    _kernel = create_kernel(compile_context, "permute", build_opts.options());
 
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());

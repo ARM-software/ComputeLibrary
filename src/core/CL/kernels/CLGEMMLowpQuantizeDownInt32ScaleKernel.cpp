@@ -107,6 +107,11 @@ Status CLGEMMLowpQuantizeDownInt32ScaleKernel::validate(const ITensorInfo *input
 
 void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *output_stage)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, output_stage);
+}
+
+void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *output_stage)
+{
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -135,7 +140,7 @@ void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(const ICLTensor *input, c
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down", build_opts.options()));
+    _kernel = create_kernel(compile_context, "gemmlowp_output_stage_quantize_down", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), output_stage->output_data_type);

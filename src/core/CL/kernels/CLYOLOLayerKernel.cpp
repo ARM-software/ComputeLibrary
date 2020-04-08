@@ -102,6 +102,11 @@ CLYOLOLayerKernel::CLYOLOLayerKernel()
 
 void CLYOLOLayerKernel::configure(ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info, num_classes);
+}
+
+void CLYOLOLayerKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     _run_in_place = (output == nullptr) || (output == input);
@@ -127,7 +132,7 @@ void CLYOLOLayerKernel::configure(ICLTensor *input, ICLTensor *output, const Act
 
     // Create kernel
     std::string kernel_name = std::string("yolo_layer_") + lower_string(string_from_data_layout(input->info()->data_layout()));
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Make sure _kernel is initialized before calling the parent's configure
     _input  = input;

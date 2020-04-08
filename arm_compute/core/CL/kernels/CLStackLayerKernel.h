@@ -61,6 +61,20 @@ public:
      *
      */
     void configure(const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output);
+    /** Initialise the kernel's inputs and output
+     *
+     * @note Supported input tensor rank: up to 4
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: All.
+     * @param[in]  axis            The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
+     * @param[in]  idx_input       Index of the input tensor in the list of tensors to stack.
+     *                             All tensors in the list must have the same shape
+     * @param[in]  num_tensors     Number of tensors to stack
+     * @param[out] output          Output tensor. Data types supported: Same as @p input.
+     *
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4

@@ -48,6 +48,11 @@ CLHOGOrientationBinningKernel::CLHOGOrientationBinningKernel()
 
 void CLHOGOrientationBinningKernel::configure(const ICLTensor *input_magnitude, const ICLTensor *input_phase, ICLTensor *output, const HOGInfo *hog_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input_magnitude, input_phase, output, hog_info);
+}
+
+void CLHOGOrientationBinningKernel::configure(CLCompileContext &compile_context, const ICLTensor *input_magnitude, const ICLTensor *input_phase, ICLTensor *output, const HOGInfo *hog_info)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_magnitude, 1, DataType::S16);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_phase, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(hog_info == nullptr);
@@ -75,7 +80,7 @@ void CLHOGOrientationBinningKernel::configure(const ICLTensor *input_magnitude, 
 
     // Create kernel
     const std::string kernel_name = std::string("hog_orientation_binning");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
     constexpr unsigned int num_elems_read_per_iteration      = 1;
@@ -139,6 +144,11 @@ CLHOGBlockNormalizationKernel::CLHOGBlockNormalizationKernel()
 
 void CLHOGBlockNormalizationKernel::configure(const ICLTensor *input, ICLTensor *output, const HOGInfo *hog_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, hog_info);
+}
+
+void CLHOGBlockNormalizationKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const HOGInfo *hog_info)
+{
     ARM_COMPUTE_ERROR_ON(hog_info == nullptr);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, hog_info->num_bins(), DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(output, DataType::F32);
@@ -172,7 +182,7 @@ void CLHOGBlockNormalizationKernel::configure(const ICLTensor *input, ICLTensor 
     build_opts.insert(args_str.str());
 
     const std::string kernel_name = std::string("hog_block_normalization");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
     constexpr unsigned int num_elems_read_per_iteration      = 1;

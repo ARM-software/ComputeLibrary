@@ -91,6 +91,11 @@ Status CLHeightConcatenateLayerKernel::validate(const ITensorInfo *input, unsign
 
 void CLHeightConcatenateLayerKernel::configure(const ICLTensor *input, unsigned int height_offset, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, height_offset, output);
+}
+
+void CLHeightConcatenateLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int height_offset, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), height_offset, output->info()));
 
@@ -119,7 +124,7 @@ void CLHeightConcatenateLayerKernel::configure(const ICLTensor *input, unsigned 
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate_height", build_opts.options()));
+    _kernel = create_kernel(compile_context, "concatenate_height", build_opts.options());
     // Configure kernel window
 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));

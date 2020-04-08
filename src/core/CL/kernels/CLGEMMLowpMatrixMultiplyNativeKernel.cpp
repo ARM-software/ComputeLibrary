@@ -173,6 +173,13 @@ CLGEMMLowpMatrixMultiplyNativeKernel::CLGEMMLowpMatrixMultiplyNativeKernel()
 void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
                                                      const GEMMReshapeInfo &gemm_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output, lhs_info, rhs_info, gemm_info);
+}
+
+void CLGEMMLowpMatrixMultiplyNativeKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info,
+                                                     const GEMMRHSMatrixInfo &rhs_info,
+                                                     const GEMMReshapeInfo   &gemm_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), lhs_info, rhs_info, gemm_info));
@@ -223,7 +230,7 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const ICLTensor *input0, co
     std::string kernel_name("gemmlowp_mm_native");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;

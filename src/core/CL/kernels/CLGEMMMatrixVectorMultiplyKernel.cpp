@@ -83,6 +83,11 @@ BorderSize CLGEMMMatrixVectorMultiplyKernel::border_size() const
 
 void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output);
+}
+
+void CLGEMMMatrixVectorMultiplyKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
 
@@ -100,7 +105,7 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
     build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input0->info()->dimension(1)));
 
     std::string kernel_name = is_quantized ? std::string("gemm_mv_quantized") : std::string("gemm_mv");
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Add static arguments
     if(is_quantized)

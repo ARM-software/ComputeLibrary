@@ -66,6 +66,11 @@ Status CLUpsampleLayerKernel::validate(const ITensorInfo *input, const ITensorIn
 
 void CLUpsampleLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &info, const InterpolationPolicy upsampling_policy)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, info, upsampling_policy);
+}
+
+void CLUpsampleLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &info, const InterpolationPolicy upsampling_policy)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_UNUSED(upsampling_policy);
 
@@ -126,7 +131,7 @@ void CLUpsampleLayerKernel::configure(const ICLTensor *input, ICLTensor *output,
     build_opts.add_option_if(multi_access_x, "-DVEC_SIZE_OUT=" + support::cpp11::to_string(num_elems_processed_per_iteration_x));
     build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X_IN=" + support::cpp11::to_string(std::max<int>(_input->info()->dimension(0) - _num_elems_processed_per_iteration_input_x, 0)));
     build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X_OUT=" + support::cpp11::to_string(std::max<int>(output_width_x - num_elems_processed_per_iteration_x, 0)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("upsample_layer_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
+    _kernel = create_kernel(compile_context, "upsample_layer_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options());
 
     ICLKernel::configure_internal(win);
 }

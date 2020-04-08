@@ -58,6 +58,15 @@ public:
      *
      */
     void configure(const ICLTensor *input, unsigned int width_offset, ICLTensor *output);
+    /** Initialise the kernel's inputs and output
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in]     input           Input tensor. Data types supported: All.
+     * @param[in]     width_offset    The offset on the X axis.
+     * @param[in,out] output          Output tensor. Data types supported: Same as @p input.
+     *
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int width_offset, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLWidthConcatenateLayerKernel
      *
      * @param[in] input        Input tensor info. Data types supported: All.

@@ -92,6 +92,11 @@ CLChannelShuffleLayerKernel::CLChannelShuffleLayerKernel()
 
 void CLChannelShuffleLayerKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, num_groups);
+}
+
+void CLChannelShuffleLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _input  = input;
@@ -116,7 +121,7 @@ void CLChannelShuffleLayerKernel::configure(const ICLTensor *input, ICLTensor *o
     // Create kernel
     std::string kernel_name = "channel_shuffle_" + lower_string(string_from_data_layout(data_layout));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());

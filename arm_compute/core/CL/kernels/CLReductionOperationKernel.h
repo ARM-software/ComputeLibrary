@@ -59,6 +59,17 @@ public:
      * @param[in]  width  (Optional)  In case of x-axis we also need to provide the width of the input image.
      */
     void configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width = 0);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
+     * @param[out] output          Destination tensor. Data types and data layouts supported: Same as @p input.
+     *                             Output will have the same number of dimensions as input.
+     * @param[in]  axis            Axis along which to reduce. Supported reduction axis : 0,1,2,3
+     * @param[in]  op              Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
+     * @param[in]  width           (Optional)  In case of x-axis we also need to provide the width of the input image.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
      *

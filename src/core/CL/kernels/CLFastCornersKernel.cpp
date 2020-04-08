@@ -50,6 +50,11 @@ BorderSize CLFastCornersKernel::border_size() const
 
 void CLFastCornersKernel::configure(const ICLImage *input, ICLImage *output, float threshold, bool non_max_suppression, BorderMode border_mode)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, threshold, non_max_suppression, border_mode);
+}
+
+void CLFastCornersKernel::configure(CLCompileContext &compile_context, const ICLImage *input, ICLImage *output, float threshold, bool non_max_suppression, BorderMode border_mode)
+{
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
@@ -69,7 +74,7 @@ void CLFastCornersKernel::configure(const ICLImage *input, ICLImage *output, flo
 
     // Create kernel
     const std::string kernel_name = std::string("fast_corners");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); // Skip the input and output parameters
@@ -133,6 +138,11 @@ CLCopyToArrayKernel::CLCopyToArrayKernel()
 
 void CLCopyToArrayKernel::configure(const ICLImage *input, bool update_number, ICLKeyPointArray *corners, cl::Buffer *num_buffers)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, update_number, corners, num_buffers);
+}
+
+void CLCopyToArrayKernel::configure(CLCompileContext &compile_context, const ICLImage *input, bool update_number, ICLKeyPointArray *corners, cl::Buffer *num_buffers)
+{
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(corners == nullptr);
@@ -151,7 +161,7 @@ void CLCopyToArrayKernel::configure(const ICLImage *input, bool update_number, I
 
     // Create kernel
     const std::string kernel_name = std::string("copy_to_keypoint");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     //Get how many pixels skipped in the x dimension in the previous stages
     unsigned int offset = _input->info()->valid_region().anchor.x();

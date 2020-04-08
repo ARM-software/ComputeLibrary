@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,13 @@ public:
      * @param[out] output Destination distribution.
      */
     void configure(const ICLImage *input, ICLDistribution1D *output);
+    /** Initialise the kernel's input, output and border mode.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source image. Data types supported: U8.
+     * @param[out] output          Destination distribution.
+     */
+    void configure(CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -85,6 +92,13 @@ public:
      * @param[out] output Destination distribution.
      */
     void configure(const ICLImage *input, ICLDistribution1D *output);
+    /** Initialise the kernel's input, output and border mode.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source image. Data types supported: U8.
+     * @param[out] output          Destination distribution.
+     */
+    void configure(CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

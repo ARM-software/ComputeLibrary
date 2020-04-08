@@ -50,6 +50,11 @@ BorderSize CLSobel7x7HorKernel::border_size() const
 
 void CLSobel7x7HorKernel::configure(const ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output_x, output_y, border_undefined);
+}
+
+void CLSobel7x7HorKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON((output_x == nullptr) && (output_y == nullptr));
 
@@ -88,7 +93,7 @@ void CLSobel7x7HorKernel::configure(const ICLTensor *input, ICLTensor *output_x,
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -150,6 +155,11 @@ BorderSize CLSobel7x7VertKernel::border_size() const
 
 void CLSobel7x7VertKernel::configure(const ICLTensor *input_x, const ICLTensor *input_y, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input_x, input_y, output_x, output_y, border_undefined);
+}
+
+void CLSobel7x7VertKernel::configure(CLCompileContext &compile_context, const ICLTensor *input_x, const ICLTensor *input_y, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON((output_x == nullptr) && (output_y == nullptr));
 
     _run_sobel_x = output_x != nullptr;
@@ -187,7 +197,7 @@ void CLSobel7x7VertKernel::configure(const ICLTensor *input_x, const ICLTensor *
 
     // Create kernel
     const std::string kernel_name = std::string("sobel_separable7x1");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     const ICLTensor *input = _run_sobel_x ? _input_x : _input_y;
 

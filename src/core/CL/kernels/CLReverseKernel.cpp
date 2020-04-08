@@ -65,6 +65,11 @@ CLReverseKernel::CLReverseKernel()
 
 void CLReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis);
+}
+
+void CLReverseKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, axis);
 
     _input  = input;
@@ -82,7 +87,7 @@ void CLReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const
     build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reverse", build_opts.options()));
+    _kernel = create_kernel(compile_context, "reverse", build_opts.options());
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_4D_tensor() + num_arguments_per_1D_tensor();

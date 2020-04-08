@@ -145,6 +145,12 @@ CLPixelWiseMultiplicationKernel::CLPixelWiseMultiplicationKernel()
 void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
+}
+
+void CLPixelWiseMultiplicationKernel::configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
+                                                ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info(),
                                                   scale, overflow_policy, rounding_policy, act_info));
@@ -233,7 +239,7 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set scale argument
     unsigned int idx = 3 * num_arguments_per_3D_tensor(); // Skip the inputs and output parameters
@@ -370,6 +376,11 @@ CLComplexPixelWiseMultiplicationKernel::CLComplexPixelWiseMultiplicationKernel()
 
 void CLComplexPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
+}
+
+void CLComplexPixelWiseMultiplicationKernel::configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1->info(), input2->info(), output->info(), act_info));
 
@@ -390,7 +401,7 @@ void CLComplexPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, 
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("pixelwise_mul_complex", build_opts.options()));
+    _kernel = create_kernel(compile_context, "pixelwise_mul_complex", build_opts.options());
 
     ICLKernel::configure_internal(win_config.second);
 }

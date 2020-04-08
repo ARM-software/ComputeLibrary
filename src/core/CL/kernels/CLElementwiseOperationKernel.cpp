@@ -237,6 +237,11 @@ CLElementwiseOperationKernel::CLElementwiseOperationKernel()
 
 void CLElementwiseOperationKernel::configure_common(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
+    configure_common(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
+}
+
+void CLElementwiseOperationKernel::configure_common(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
 
@@ -264,7 +269,7 @@ void CLElementwiseOperationKernel::configure_common(const ICLTensor *input1, con
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     ICLKernel::configure_internal(win_config.second);
 
@@ -329,10 +334,17 @@ BorderSize CLElementwiseOperationKernel::border_size() const
 void CLSaturatedArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy,
                                                      const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), op, input1, input2, output, policy, act_info);
+}
+
+void CLSaturatedArithmeticOperationKernel::configure(CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+                                                     const ConvertPolicy       &policy,
+                                                     const ActivationLayerInfo &act_info)
+{
     _policy   = policy;
     _op       = op;
     _act_info = act_info;
-    configure_common(input1, input2, output);
+    configure_common(compile_context, input1, input2, output);
 }
 
 Status CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy,
@@ -381,9 +393,15 @@ std::string CLSaturatedArithmeticOperationKernel::name()
 
 void CLArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), op, input1, input2, output, act_info);
+}
+
+void CLArithmeticOperationKernel::configure(CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+                                            const ActivationLayerInfo &act_info)
+{
     _op       = op;
     _act_info = act_info;
-    configure_common(input1, input2, output);
+    configure_common(compile_context, input1, input2, output);
 }
 
 Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)

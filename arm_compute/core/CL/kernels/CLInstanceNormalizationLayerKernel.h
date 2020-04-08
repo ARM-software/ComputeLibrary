@@ -58,6 +58,15 @@ public:
      * @param[in]      info   Kernel meta-data descriptor
      */
     void configure(ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info);
+    /** Set the input and output tensors.
+     *
+     * @param[in]      compile_context The compile context to be used.
+     * @param[in, out] input           Source tensor. Data types supported: F16/F32. Data layout supported: NCHW, NHWC
+     *                                 In case of @p output tensor = nullptr this tensor will store the result of the normalization.
+     * @param[out]     output          Destination tensor. Data types and data layouts supported: same as @p input.
+     * @param[in]      info            Kernel meta-data descriptor
+     */
+    void configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLInstanceNormalizationLayer.
      *

@@ -85,6 +85,11 @@ CLMeanStdDevNormalizationKernel::CLMeanStdDevNormalizationKernel()
 
 void CLMeanStdDevNormalizationKernel::configure(ICLTensor *input, ICLTensor *output, float epsilon)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, epsilon);
+}
+
+void CLMeanStdDevNormalizationKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float epsilon)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     _run_in_place = (output == nullptr) || (output == input);
@@ -105,7 +110,7 @@ void CLMeanStdDevNormalizationKernel::configure(ICLTensor *input, ICLTensor *out
     build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("mean_stddev_normalization", build_opts.options()));
+    _kernel = create_kernel(compile_context, "mean_stddev_normalization", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (_run_in_place) ? nullptr : output->info());

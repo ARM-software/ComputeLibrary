@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,6 +66,27 @@ public:
      * @param[in]  gemm_info GEMM information used to retrieve the original dimensions of the input matrices
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
+                   const GEMMRHSMatrixInfo &rhs_info,
+                   const GEMMKernelInfo    &gemm_info);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input0          Input tensor containing the LHS matrix. Data type supported: F16/F32. The number of dimensions for the LHS matrix must be less or equal than 4.
+     * @param[in]  input1          Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3.
+     * @param[in]  input2          Input tensor containing the bias matrix. Data type supported: same as @p input0.
+     * @param[out] output          Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
+     * @param[in]  alpha           Weight of the matrix product
+     * @param[in]  beta            Weight of the matrix bias
+     * @param[in]  lhs_info        LHS matrix information used to retrieve the number of rows to be processed by each thread. Only the following values are supported:
+     *                             lhs_info.m0: 1,2,3,4,5,6,7,8
+     * @param[in]  rhs_info        RHS matrix information used for reshaping the input1 tensor.  Only the following values are supported:
+     *                             rhs_info.k0: 2,3,4,8,16
+     *                             rhs_info.n0: 2,3,4,8,16
+     *                             rhs_info.transpose: true,false
+     * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
+                   const GEMMLHSMatrixInfo &lhs_info,
                    const GEMMRHSMatrixInfo &rhs_info,
                    const GEMMKernelInfo    &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel

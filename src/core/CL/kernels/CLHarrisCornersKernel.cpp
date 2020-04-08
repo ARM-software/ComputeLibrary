@@ -56,6 +56,13 @@ void CLHarrisScoreKernel::configure(const ICLImage *input1, const ICLImage *inpu
                                     int32_t block_size, float norm_factor, float strength_thresh, float sensitivity,
                                     bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, block_size, norm_factor, strength_thresh, sensitivity, border_undefined);
+}
+
+void CLHarrisScoreKernel::configure(CLCompileContext &compile_context, const ICLImage *input1, const ICLImage *input2, ICLImage *output,
+                                    int32_t block_size, float norm_factor, float strength_thresh, float sensitivity,
+                                    bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input1);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input2);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
@@ -82,7 +89,7 @@ void CLHarrisScoreKernel::configure(const ICLImage *input1, const ICLImage *inpu
     std::set<std::string> build_opts = { ("-DDATA_TYPE=" + get_cl_type_from_data_type(input1->info()->data_type())) };
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(harris_score_kernel_name.str(), build_opts));
+    _kernel = create_kernel(compile_context, harris_score_kernel_name.str(), build_opts);
 
     // Set static kernel arguments
     unsigned int idx = 3 * num_arguments_per_2D_tensor(); //Skip the input and output parameters

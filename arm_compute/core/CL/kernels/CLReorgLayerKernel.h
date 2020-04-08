@@ -55,6 +55,17 @@ public:
      *                    It defines the spatial distance between 2 consecutive pixels in the x and y direction
      */
     void configure(const ICLTensor *input, ICLTensor *output, int32_t stride);
+    /** Initialize the kernel's input, output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32.
+     * @param[out] output          Destination tensor with tensor shape:
+     *                             [width_input / stride, height_input / stride, channels_input * stride * stride, batch_size]. This means the output has
+     *                             the same number of input elements. Data types supported: same as @p input.
+     * @param[in]  stride          Stride value to use for reorganizing the values in the output tensor.
+     *                             It defines the spatial distance between 2 consecutive pixels in the x and y direction
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t stride);
     /** Static function to check if given info will lead to a valid configuration of @ref CLReorgLayerKernel
      *
      * @param[in] input  Source tensor. Data types supported: All.

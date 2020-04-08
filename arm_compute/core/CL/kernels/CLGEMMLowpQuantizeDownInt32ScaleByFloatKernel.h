@@ -67,6 +67,16 @@ public:
      * @param[in]  info   Output stage info. Used to pass the quantized output data type
      */
     void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *info);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data type supported: S32
+     * @param[in]  bias            Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
+     *                             Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[out] output          Output tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  info            Output stage info. Used to pass the quantized output data type
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
      *
      * @param[in] input  Input tensor. Data type supported: S32

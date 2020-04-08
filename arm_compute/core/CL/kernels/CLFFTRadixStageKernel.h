@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,6 +60,16 @@ public:
      * @param[in]     config FFT descriptor metadata.
      */
     void configure(ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config);
+    /** Set the input and output tensors.
+     *
+     * @note If the output tensor is nullptr, the FFT will be performed in-place
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] input           Source tensor. Data types supported: F32.
+     * @param[out]    output          Destination tensor. Can be nullptr. Data type supported: same as @p input
+     * @param[in]     config          FFT descriptor metadata.
+     */
+    void configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTRadixStageKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F32.

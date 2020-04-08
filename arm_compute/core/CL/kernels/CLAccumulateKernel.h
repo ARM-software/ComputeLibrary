@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,13 @@ public:
      * @param[out] accum Destination tensor. Data types supported: S16.
      */
     void configure(const ICLTensor *input, ICLTensor *accum);
+    /** Set the input and accumulation tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: U8.
+     * @param[out] accum           Destination tensor. Data types supported: S16.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum);
 };
 
 /** Interface for the accumulate weighted kernel.
@@ -67,6 +74,14 @@ public:
      * @param[in,out] accum Accumulated tensor. Data types supported: U8.
      */
     void configure(const ICLTensor *input, float alpha, ICLTensor *accum);
+    /** Set the input and accumulation images, and the scale value.
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in]     input           Source tensor. Data types supported: U8.
+     * @param[in]     alpha           Scalar value in the range [0, 1.0]. Data types supported: F32.
+     * @param[in,out] accum           Accumulated tensor. Data types supported: U8.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum);
 };
 
 /** Interface for the accumulate squared kernel.
@@ -86,6 +101,14 @@ public:
      * @param[in,out] accum Accumulated tensor. Data types supported: S16.
      */
     void configure(const ICLTensor *input, uint32_t shift, ICLTensor *accum);
+    /** Set the input and accumulation tensors and the shift value.
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in]     input           Source tensor. Data types supported: U8.
+     * @param[in]     shift           Shift value in the range of [0, 15]. Data types supported: U32.
+     * @param[in,out] accum           Accumulated tensor. Data types supported: S16.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, uint32_t shift, ICLTensor *accum);
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLACCUMULATEKERNEL_H */

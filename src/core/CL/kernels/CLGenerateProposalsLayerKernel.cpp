@@ -73,6 +73,11 @@ CLComputeAllAnchorsKernel::CLComputeAllAnchorsKernel()
 
 void CLComputeAllAnchorsKernel::configure(const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), anchors, all_anchors, info);
+}
+
+void CLComputeAllAnchorsKernel::configure(CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(anchors, all_anchors);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(anchors->info(), all_anchors->info(), info));
 
@@ -110,7 +115,7 @@ void CLComputeAllAnchorsKernel::configure(const ICLTensor *anchors, ICLTensor *a
 
     // Create kernel
     const std::string kernel_name = (is_quantized) ? "generate_proposals_compute_all_anchors_quantized" : "generate_proposals_compute_all_anchors";
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // The tensor all_anchors can be interpreted as an array of structs (each structs has values_per_roi fields).
     // This means we don't need to pad on the X dimension, as we know in advance how many fields

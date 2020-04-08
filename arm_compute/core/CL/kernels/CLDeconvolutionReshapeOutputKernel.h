@@ -68,6 +68,19 @@ public:
      * @param[in]  deconv_info  Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo. This kernel supports only stride_x = weights.width && stride_y = weights.height. Moreover, padding is not supported.
      */
     void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info, const ITensorInfo *weights_info, const PadStrideInfo &deconv_info);
+    /** Initialise the kernel's source and destination.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/S32/F16/F32.
+     * @param[in]  bias            Bias tensor to be added directly during the reshape operation. Supported data types: same as @p input.  Supported data layouts: same as @p input.
+     * @param[out] output          Output tensor with the following shape: [stride_x * (input_width - 1) + filter_width - 2 * padx, stride_y * (input_height - 1) + filter_height - 2 * pady, ofms, batch_size]
+     *                             Supported data types: same as @p input.  Supported data layouts: same as @p input.
+     * @param[in]  input_info      Deconvolution input tensor info. Supported data types: same as @p input.  Supported data layouts: same as @p input.
+     * @param[in]  weights_info    Deconvolution weights tensor info. Supported data types: same as @p input.  Supported data layouts: same as @p input.
+     * @param[in]  deconv_info     Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo. This kernel supports only stride_x = weights.width && stride_y = weights.height. Moreover, padding is not supported.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info, const ITensorInfo *weights_info,
+                   const PadStrideInfo &deconv_info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref  CLDeconvolutionReshapeOutputKernel.
      *

@@ -72,6 +72,16 @@ public:
      * @param[in]  num_groups     (Optional) Number of groups when performing a grouped convolution
      */
     void configure(const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups = 1);
+    /** Set the input and output of the kernel.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           The input tensor to convert. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
+     * @param[out] output          The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
+     *                             while the rest represent batch of outputs. Data types supported: Same as @p input. Data layout: NCHW
+     * @param[in]  convolved_dims  Output convolved dimensions.
+     * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCol2ImKernel
      *
      * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32

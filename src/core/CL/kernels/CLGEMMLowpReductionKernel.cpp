@@ -85,6 +85,11 @@ ICLGEMMLowpReductionKernel::ICLGEMMLowpReductionKernel()
 
 void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), mtx_a, vector_sum_row, info);
+}
+
+void CLGEMMLowpMatrixAReductionKernel::configure(CLCompileContext &compile_context, const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
+{
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_a, vector_sum_row);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_a_reduction(mtx_a->info(), vector_sum_row->info()));
@@ -104,7 +109,7 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTens
     std::string kernel_name = "gemmlowp_matrix_a_reduction" + std::string(is_dot8_supported ? "_dot8" : "");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     // This kernel does not need padding
@@ -154,6 +159,11 @@ void CLGEMMLowpMatrixAReductionKernel::run(const Window &window, cl::CommandQueu
 
 void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), mtx_b, vector_sum_col, info);
+}
+
+void CLGEMMLowpMatrixBReductionKernel::configure(CLCompileContext &compile_context, const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_b, vector_sum_col);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(mtx_b->info(), vector_sum_col->info()));
 
@@ -169,7 +179,7 @@ void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTens
     build_opts.add_option_if(info.mul_by_scalar, "-DSCALAR=" + support::cpp11::to_string(info.scalar));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_matrix_b_reduction", build_opts.options()));
+    _kernel = create_kernel(compile_context, "gemmlowp_matrix_b_reduction", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window_matrix_b_reduction(_input->info(), _output->info());

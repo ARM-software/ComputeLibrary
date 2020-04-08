@@ -48,6 +48,11 @@ CLColorConvertKernel::CLColorConvertKernel()
 
 void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLColorConvertKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
@@ -114,7 +119,7 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
     _output = output;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str()));
+    _kernel = create_kernel(compile_context, kernel_name.str());
 
     // Configure kernel window
     Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
@@ -138,6 +143,11 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
 }
 
 void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLColorConvertKernel::configure(CLCompileContext &compile_context, const ICLMultiImage *input, ICLImage *output)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -180,7 +190,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *outpu
     _output      = output;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str()));
+    _kernel = create_kernel(compile_context, kernel_name.str());
 
     // Configure kernel window
     const bool  has_two_planes = (input->info()->format() == Format::NV12) || (input->info()->format() == Format::NV21);
@@ -223,6 +233,11 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *outpu
 }
 
 void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLColorConvertKernel::configure(CLCompileContext &compile_context, const ICLImage *input, ICLMultiImage *output)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -289,7 +304,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
     _multi_output = output;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str()));
+    _kernel = create_kernel(compile_context, kernel_name.str());
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
@@ -330,6 +345,11 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
 }
 
 void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLColorConvertKernel::configure(CLCompileContext &compile_context, const ICLMultiImage *input, ICLMultiImage *output)
 {
     unsigned int num_elems_processed_per_iteration = 0;
     switch(input->info()->format())
@@ -387,7 +407,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *
     float sub_sampling_input  = (has_two_input_planars || (input->info()->format() == Format::IYUV)) ? 0.5f : 1;
     float sub_sampling_output = (has_two_output_planars || (output->info()->format() == Format::IYUV)) ? 0.5f : 1;
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str()));
+    _kernel = create_kernel(compile_context, kernel_name.str());
 
     Window win = calculate_max_window(*input->cl_plane(0)->info(), Steps(num_elems_processed_per_iteration));
     win.set_dimension_step(Window::DimY, 2);

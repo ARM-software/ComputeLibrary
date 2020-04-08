@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,11 @@ Status CLMeanStdDevKernel::validate(const ITensorInfo *input, float *mean, cl::B
 
 void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev, cl::Buffer *global_sum_squared)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, mean, global_sum, stddev, global_sum_squared);
+}
+
+void CLMeanStdDevKernel::configure(CLCompileContext &compile_context, const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev, cl::Buffer *global_sum_squared)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, mean, global_sum);
     ARM_COMPUTE_ERROR_ON(stddev && nullptr == global_sum_squared);
     ARM_COMPUTE_ERROR_THROW_ON(CLMeanStdDevKernel::validate(input->info(), mean, global_sum, stddev, global_sum_squared));
@@ -83,7 +88,7 @@ void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffe
         build_opts.insert("-DSTDDEV");
     }
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("mean_stddev_accumulate", build_opts));
+    _kernel = create_kernel(compile_context, "mean_stddev_accumulate", build_opts);
 
     // Set fixed arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input parameters

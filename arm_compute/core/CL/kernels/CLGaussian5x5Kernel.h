@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,14 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *input, ICLTensor *output, bool border_undefined);
+    /** Initialise the kernel's source, destination and border.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data types supported: U8.
+     * @param[out] output           Destination tensor. Data types supported: S16.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
 
 private:
     //Make the configure method of the parent class private
@@ -58,6 +66,14 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *input, ICLTensor *output, bool border_undefined);
+    /** Initialise the kernel's source, destination and border.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Input tensor(output of horizontal pass). Data types supported: S16.
+     * @param[out] output           Destination tensor. Data types supported: U8.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
 
 private:
     //Make the configure method of the parent class private

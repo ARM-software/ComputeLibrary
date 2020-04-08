@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,6 +87,21 @@ public:
     void configure(const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates,
                    ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                    bool use_initial_estimate, size_t level, size_t num_levels, float pyramid_scale);
+    /** Initialise the kernel input and output
+     *
+     * @param[in]  compile_context      The compile context to be used.
+     * @param[in]  old_points           Pointer to the @ref ICLKeyPointArray storing old key points
+     * @param[in]  new_points_estimates Pointer to the @ref ICLKeyPointArray storing new estimates key points
+     * @param[out] old_points_internal  Pointer to the array of internal @ref CLLKInternalKeypoint old points
+     * @param[out] new_points_internal  Pointer to the array of internal @ref CLLKInternalKeypoint new points
+     * @param[in]  use_initial_estimate The flag to indicate whether the initial estimated position should be used
+     * @param[in]  level                The pyramid level
+     * @param[in]  num_levels           The number of pyramid levels
+     * @param[in]  pyramid_scale        Scale factor used for generating the pyramid
+     */
+    void configure(CLCompileContext &compile_context, const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates,
+                   ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
+                   bool use_initial_estimate, size_t level, size_t num_levels, float pyramid_scale);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -102,6 +117,13 @@ public:
      * @param[out] new_points          Pointer to the @ref ICLKeyPointArray storing new key points
      */
     void configure(ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points);
+    /** Initialise the kernel input and output
+     *
+     * @param[in]  compile_context     The compile context to be used.
+     * @param[in]  new_points_internal Pointer to the array of internal @ref CLLKInternalKeypoint new points
+     * @param[out] new_points          Pointer to the @ref ICLKeyPointArray storing new key points
+     */
+    void configure(CLCompileContext &compile_context, ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -134,6 +156,23 @@ public:
      * @param[in]      level               The pyramid level
      */
     void configure(const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
+                   ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
+                   ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
+                   size_t window_dimension, size_t level);
+    /** Initialise the kernel input and output
+     *
+     * @param[in]      compile_context     The compile context to be used.
+     * @param[in]      old_input           Pointer to the input old tensor. Data types supported: U8
+     * @param[in]      old_scharr_gx       Pointer to the input scharr X tensor. Data types supported: S16
+     * @param[in]      old_scharr_gy       Pointer to the input scharr Y tensor. Data types supported: S16
+     * @param[in]      old_points_internal Pointer to the array of CLLKInternalKeypoint old points
+     * @param[in, out] new_points_internal Pointer to the array of CLLKInternalKeypoint new points
+     * @param[out]     coeff_table         Pointer to the array holding the Spatial Gradient coefficients
+     * @param[out]     old_ival            Pointer to the array holding internal values
+     * @param[in]      window_dimension    The size of the window on which to perform the algorithm
+     * @param[in]      level               The pyramid level
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
                    ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                    ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
                    size_t window_dimension, size_t level);
@@ -174,6 +213,21 @@ public:
      * @param[in]      level               The pyramid level
      */
     void configure(const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
+                   Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, size_t level);
+    /** Initialise the kernel input and output
+     *
+     * @param[in]      compile_context     The compile context to be used.
+     * @param[in]      new_input           Pointer to the input new tensor. Data types supported: U8
+     * @param[in, out] new_points_internal Pointer to the array of CLLKInternalKeypoint for new points
+     * @param[in]      coeff_table         Pointer to the array holding the Spatial Gradient coefficients
+     * @param[in]      old_ival            Pointer to the array holding internal values
+     * @param[in]      termination         The criteria to terminate the search of each keypoint.
+     * @param[in]      epsilon             The error for terminating the algorithm
+     * @param[in]      num_iterations      The maximum number of iterations before terminating the algorithm
+     * @param[in]      window_dimension    The size of the window on which to perform the algorithm
+     * @param[in]      level               The pyramid level
+     */
+    void configure(CLCompileContext &compile_context, const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
                    Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, size_t level);
 
     // Inherited methods overridden:
