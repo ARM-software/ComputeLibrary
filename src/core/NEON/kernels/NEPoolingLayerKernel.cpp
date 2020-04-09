@@ -36,7 +36,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-
 #include "support/ToolchainSupport.h"
 
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
@@ -137,6 +136,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     if(indices)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX, "Pooling indices only supported for MAX pooling method");
     }
@@ -156,7 +156,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
         if(indices)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
-
             ARM_COMPUTE_RETURN_ERROR_ON((indices->dimension(get_data_layout_dimension_index(indices->data_layout(), DataLayoutDimension::WIDTH)) != pooled_w)
                                         || (indices->dimension(get_data_layout_dimension_index(indices->data_layout(), DataLayoutDimension::HEIGHT)) != pooled_h));
         }
@@ -1489,6 +1488,39 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
     input, output);
 }
 
+inline uint32_t offset_no_padding(uint32_t padded_offset, const Coordinates &id, const ITensorInfo &info, int pool_stride_x, int pool_stride_y)
+{
+    const int pad_left    = info.padding().left;
+    const int pad_right   = info.padding().right;
+    const int pad_top     = info.padding().top;
+    const int pad_bottom  = info.padding().bottom;
+    const int in_stride_y = static_cast<int>(info.strides_in_bytes().y());
+    const int in_stride_w = static_cast<int>(info.strides_in_bytes()[3]);
+    const int pad_horiz   = pad_left + pad_right;
+    const int pad_vert    = pad_top + pad_bottom;
+
+    if(info.data_layout() == DataLayout::NCHW)
+    {
+        const uint32_t offset_base = padded_offset
+                                     - sizeof(float) * pad_horiz * id.y() * pool_stride_y                                            /* subtract padding elems per row */
+                                     - pad_top * sizeof(float)                                                                       /* top padding */
+                                     - sizeof(float) * pad_horiz * info.tensor_shape()[1] * id.z() - pad_vert * in_stride_y * id.z() /* for each Z plane there are height*pad_right padding elems */
+                                     - in_stride_w * id[3];
+
+        return offset_base;
+    }
+    else
+    {
+        const uint32_t offset_base = padded_offset
+                                     - sizeof(float) * pad_horiz * id.y() * pool_stride_x                          // subtract padding elems per row
+                                     - pad_top * sizeof(float)                                                     // top padding
+                                     - sizeof(float) * pad_horiz * info.tensor_shape()[1] * id.z() * pool_stride_y // for each Z plane there are width*pad_right padding elems
+                                     - in_stride_w * id[3];
+
+        return offset_base;
+    }
+}
+
 void NEPoolingLayerKernel::pooling2_f32_nchw_maxpool_indices(const Window &window_input, const Window &window)
 {
     Iterator  input(_input, window_input);
@@ -1502,11 +1534,10 @@ void NEPoolingLayerKernel::pooling2_f32_nchw_maxpool_indices(const Window &windo
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info.stride();
     const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
     const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
-
-    const Strides &input_strides = _input->info()->strides_in_bytes();
-    const auto     in_stridew    = input_strides[1];
-
-    execute_window_loop(window, [&](const Coordinates &)
+    const int            pad_left         = _input->info()->padding().left;
+    const int            pad_right        = _input->info()->padding().right;
+    const int            in_stride_y      = static_cast<int>(_input->info()->strides_in_bytes().y());
+    execute_window_loop(window, [&](const Coordinates & id)
     {
         const auto        input_offset_top    = input_top_ptr + input.offset();
         const auto        input_offset_bottom = input_bottom_ptr + input.offset();
@@ -1521,8 +1552,9 @@ void NEPoolingLayerKernel::pooling2_f32_nchw_maxpool_indices(const Window &windo
         final_res                             = vget_lane_f32(res, 0);
         // Store result
         *(reinterpret_cast<float *>(output.ptr())) = final_res;
-        const uint32_t   offset_top                = (uint32_t)(input.offset() / sizeof(float));
-        const uint32_t   offset_bottom             = (uint32_t)offset_top + (in_stridew / sizeof(float));
+        const uint32_t   offset_base               = offset_no_padding(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
+        const uint32_t   offset_top                = (uint32_t)(offset_base / sizeof(float));
+        const uint32_t   offset_bottom             = offset_top + in_stride_y / sizeof(float) - pad_right - pad_left;
         const uint32x2_t voffset_top               = { offset_top, offset_top + 1u };
         const uint32x2_t voffset_bottom            = { offset_bottom, offset_bottom + 1u };
         const uint32x2_t tmp_indices               = vbsl_u32(vcgt_f32(top_data, bottom_data), voffset_top, voffset_bottom);
@@ -1867,10 +1899,8 @@ void NEPoolingLayerKernel::pooling2_f32_nhwc_maxpool_indices(const Window &windo
     float32x4_t vres;
 
     const int pad_right   = _input->info()->padding().right;
-    const int pad_top     = _input->info()->padding().top;
     const int in_stride_y = static_cast<int>(_input->info()->strides_in_bytes().y());
     const int in_stride_z = static_cast<int>(_input->info()->strides_in_bytes().z());
-    const int in_stride_w = static_cast<int>(_input->info()->strides_in_bytes()[3]);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -1904,17 +1934,11 @@ void NEPoolingLayerKernel::pooling2_f32_nhwc_maxpool_indices(const Window &windo
         // Store result
         vst1q_f32(reinterpret_cast<float *>(output.ptr()), vres);
 
-        const uint32_t offset_base = input.offset()
-                                     - sizeof(float) * pad_right * id.y() * pool_stride_x                                     /* subtract padding elems per row */
-                                     - pad_top * sizeof(float)                                                                /* top padding */
-                                     - sizeof(float) * pad_right * _input->info()->tensor_shape()[1] * id.z() * pool_stride_y /* for each Z plane there are width*pad_right padding elems */
-                                     - in_stride_w * id[3] + _input->info()->tensor_shape()[0] * sizeof(float) * id[3];
-
-        const uint32_t offset_x0 = (uint32_t)offset_base / sizeof(float);
-        const uint32_t offset_x1 = (uint32_t)offset_x0 + in_stride_y / sizeof(float) - pad_right;
-        const uint32_t offset_x2 = (uint32_t)offset_x0 + in_stride_z / sizeof(float) - pad_right * _input->info()->tensor_shape()[1];
-        const uint32_t offset_x3 = (uint32_t)offset_x2 + in_stride_y / sizeof(float) - pad_right;
-
+        const uint32_t   offset_base  = offset_no_padding(input.offset(), id, *_input->info(), pool_stride_x, pool_stride_y);
+        const uint32_t   offset_x0    = (uint32_t)offset_base / sizeof(float);
+        const uint32_t   offset_x1    = (uint32_t)offset_x0 + in_stride_y / sizeof(float) - pad_right;
+        const uint32_t   offset_x2    = (uint32_t)offset_x0 + in_stride_z / sizeof(float) - pad_right * _input->info()->tensor_shape()[1];
+        const uint32_t   offset_x3    = (uint32_t)offset_x2 + in_stride_y / sizeof(float) - pad_right;
         const uint32x4_t voffset_x0   = { offset_x0, offset_x0 + 1, offset_x0 + 2, offset_x0 + 3 };
         const uint32x4_t voffset_x1   = { offset_x1, offset_x1 + 1, offset_x1 + 2, offset_x1 + 3 };
         const uint32x4_t voffset_x2   = { offset_x2, offset_x2 + 1, offset_x2 + 2, offset_x2 + 3 };

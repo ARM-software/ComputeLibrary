@@ -49,8 +49,8 @@ void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLay
         case DataLayout::NCHW:
         {
             // Configure border depending on operation required (quantize border in case of asymmetric data_type)
-            BorderMode border_mode = (pool_info.pool_type == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
-            PixelValue zero_value(0.f);
+            BorderMode border_mode = (!indices && pool_info.pool_type == PoolingType::MAX) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
+            PixelValue zero_value((indices) ? std::numeric_limits<int>::min() : 0.f);
             if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding)
             {
                 zero_value = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());

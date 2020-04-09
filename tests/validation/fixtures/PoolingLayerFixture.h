@@ -86,7 +86,6 @@ protected:
         {
             permute(shape, PermutationVector(2U, 0U, 1U));
         }
-
         // Create tensors
         TensorType        src       = create_tensor<TensorType>(shape, data_type, 1, input_qinfo, data_layout);
         const TensorShape dst_shape = misc::shape_calculator::compute_pool_shape(*(src.info()), info);

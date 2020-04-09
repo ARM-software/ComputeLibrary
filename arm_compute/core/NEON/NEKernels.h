@@ -106,6 +106,7 @@
 #include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"
 #include "arm_compute/core/NEON/kernels/NELocallyConnectedMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEMagnitudePhaseKernel.h"
+#include "arm_compute/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEMeanStdDevKernel.h"
 #include "arm_compute/core/NEON/kernels/NEMeanStdDevNormalizationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEMedian3x3Kernel.h"
