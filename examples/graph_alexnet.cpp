@@ -22,11 +22,15 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph.h"
+#ifdef ARM_COMPUTE_CL
+#include "arm_compute/runtime/CL/Utils.h"
+#endif /* ARM_COMPUTE_CL */
 #include "support/ToolchainSupport.h"
 #include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
 
+using namespace arm_compute;
 using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
@@ -160,7 +164,9 @@ public:
         // compilation won't be required.
         if(common_params.enable_cl_cache)
         {
+#ifdef ARM_COMPUTE_CL
             restore_program_cache_from_file();
+#endif /* ARM_COMPUTE_CL */
         }
 
         graph.finalize(common_params.target, config);
@@ -168,7 +174,9 @@ public:
         // Save the opencl kernels to a file
         if(common_opts.enable_cl_cache)
         {
+#ifdef ARM_COMPUTE_CL
             save_program_cache_to_file();
+#endif /* ARM_COMPUTE_CL */
         }
 
         return true;

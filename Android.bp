@@ -443,6 +443,7 @@ cc_library_static {
         "src/runtime/CL/CLTensorAllocator.cpp",
         "src/runtime/CL/CLTuner.cpp",
         "src/runtime/CL/ICLSimpleFunction.cpp",
+        "src/runtime/CL/Utils.cpp",
         "src/runtime/CL/functions/CLAbsoluteDifference.cpp",
         "src/runtime/CL/functions/CLAccumulate.cpp",
         "src/runtime/CL/functions/CLActivationLayer.cpp",

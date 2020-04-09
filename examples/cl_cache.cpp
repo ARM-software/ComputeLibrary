@@ -26,6 +26,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/Utils.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute;
