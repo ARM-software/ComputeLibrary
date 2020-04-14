@@ -30,7 +30,7 @@
 #endif /* SATURATE */
 #define CONVERT_OP_FLOAT(x, type, round) CONVERT_OP_FLOAT_STR(x, type, round)
 
-#if defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_RES) && defined(DATA_TYPE_OUT)
+#if defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(ACC_DATA_TYPE) && defined(DATA_TYPE_OUT)
 
 #if defined(ACTIVATION_TYPE)
 #include "activation_float_helpers.h"
@@ -40,8 +40,8 @@
  *
  * @attention The inputs and output data types need to be passed at compile time using -DDATA_TYPE_IN1, -DDATA_TYPE_IN2 and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN1=uchar -DDATA_TYPE_IN2=ushort -DDATA_TYPE_OUT=short
- * @attention The data type of the intermediate result of the multiplication should passed as well using -DDATA_TYPE_RES.
- * e.g. If one of inputs is S16 -DDATA_TYPE_RES=int should be passed else -DDATA_TYPE_RES=short.
+ * @attention The data type of the intermediate result of the multiplication should passed as well using -DACC_DATA_TYPE.
+ * e.g. If one of inputs is S16 -DACC_DATA_TYPE=int should be passed else -DACC_DATA_TYPE=short.
  * @attention -DDATA_TYPE_FLOAT must be passed if floating point inputs are provided.
  *
  * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: U8, S16, F16, F32
@@ -82,18 +82,18 @@ __kernel void pixelwise_mul_float(
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load data
-    VEC_DATA_TYPE(DATA_TYPE_RES, 16)
-    in1_data = CONVERT(vload16(0, (__global DATA_TYPE_IN1 *)in1.ptr), VEC_DATA_TYPE(DATA_TYPE_RES, 16));
-    VEC_DATA_TYPE(DATA_TYPE_RES, 16)
-    in2_data = CONVERT(vload16(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(DATA_TYPE_RES, 16));
+    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
+    in1_data = CONVERT(vload16(0, (__global DATA_TYPE_IN1 *)in1.ptr), VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
+    VEC_DATA_TYPE(ACC_DATA_TYPE, 16)
+    in2_data = CONVERT(vload16(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(ACC_DATA_TYPE, 16));
 
     // Perform multiplication
 #ifdef DATA_TYPE_FLOAT
     VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
-    res = CONVERT(in1_data * in2_data * (DATA_TYPE_RES)scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
+    res = CONVERT(in1_data * in2_data * (ACC_DATA_TYPE)scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
 #else  /* DATA_TYPE_FLOAT */
     VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
-    res = CONVERT_OP_FLOAT(CONVERT_OP_FLOAT((convert_float16(in1_data * in2_data) * scale), VEC_DATA_TYPE(DATA_TYPE_RES, 16), ROUND), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), ROUND);
+    res = CONVERT_OP_FLOAT(CONVERT_OP_FLOAT((convert_float16(in1_data * in2_data) * scale), VEC_DATA_TYPE(ACC_DATA_TYPE, 16), ROUND), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), ROUND);
 #endif /* DATA_TYPE_FLOAT */
 
 #if defined(ACTIVATION_TYPE)
@@ -103,7 +103,7 @@ __kernel void pixelwise_mul_float(
     vstore16(res, 0, (__global DATA_TYPE_OUT *)out.ptr);
 #endif // defined(ACTIVATION_TYPE)
 }
-#endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_RES) && defined(DATA_TYPE_OUT) */
+#endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(ACC_DATA_TYPE) && defined(DATA_TYPE_OUT) */
 
 /** Performs a pixelwise multiplication of complex float values
  *

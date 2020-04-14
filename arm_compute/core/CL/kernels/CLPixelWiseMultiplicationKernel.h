@@ -50,7 +50,15 @@ public:
      *
      * @param[in]  input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in]  input2          An input tensor. Data types supported: same as @p input1.
-     * @param[out] output          The output tensor, Data types supported: same as @p input1. Note: U8 requires both inputs to be U8.
+     * @param[out] output          The output tensor, Data types supported:
+     *                             - U8, only if both input are U8
+     *                             - QASYMM8, only if both inputs are QASYMM8
+     *                             - QASYMM8_SIGNED, only if both inputs are QASYMM8_SIGNED
+     *                             - S16
+     *                             - QSYMM16, only if both inputs are QSYMM16
+     *                             - S32, only if both inputs are QSYMM16
+     *                             - F16
+     *                             - F32
      * @param[in]  scale           Scale to apply after multiplication.
      *                             Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]  overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate
@@ -63,7 +71,15 @@ public:
      *
      * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in] input2          An input tensor info. Data types supported: same as @p input1.
-     * @param[in] output          The output tensor info, Data types supported: same as @p input1. Note: U8 requires both inputs to be U8.
+     * @param[in] output          The output tensor info, Data types supported:
+     *                            - U8, only if both input are U8
+     *                            - QASYMM8, only if both inputs are QASYMM8
+     *                            - QASYMM8_SIGNED, only if both inputs are QASYMM8_SIGNED
+     *                            - S16
+     *                            - QSYMM16, only if both inputs are QSYMM16
+     *                            - S32, only if both inputs are QSYMM16
+     *                            - F16
+     *                            - F32
      * @param[in] scale           Scale to apply after multiplication.
      *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in] overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate

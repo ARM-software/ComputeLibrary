@@ -137,7 +137,8 @@ PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunWithActivationSmallBroadcast
                                                  VALIDATE(float, 1.f))
 
 template <typename T>
-using CLPixelWiseMultiplicationQuantizedFixture = PixelWiseMultiplicationValidationQuantizedFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, T>;
+using CLPixelWiseMultiplicationQuantizedFixture   = PixelWiseMultiplicationValidationQuantizedFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, T>;
+using CLPixelWiseMultiplicationQSYMM16ToS32Fxture = PixelWiseMultiplicationValidationQuantizedFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, int16_t, int16_t, int32_t>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -208,6 +209,23 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPixelWiseMultiplicationQuantizedFixture<int16
     validate(CLAccessor(_target), _reference, tolerance_qsymm16);
 }
 TEST_SUITE_END() // QSYMM16
+TEST_SUITE(QSYMM16ToS32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQSYMM16ToS32Fxture, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                               framework::dataset::make("DataTypeIn1", DataType::QSYMM16)),
+                                                                                       framework::dataset::make("DataTypeIn2", DataType::QSYMM16)),
+                                                                               framework::dataset::make("DataTypeOut", DataType::S32)),
+                                                                       framework::dataset::make("Scale", { 1.f })),
+                                                               framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
+                                               framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0) })),
+                                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0) })),
+                               framework::dataset::make("OutQInfo", { QuantizationInfo(1.f, 0) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END() // QSYMM16ToS32
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // PixelWiseMultiplication
