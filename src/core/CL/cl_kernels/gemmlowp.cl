@@ -1496,7 +1496,7 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
     sum_col_32 *= (VEC_DATA_TYPE(ACC_DATA_TYPE, 16))SCALAR;
 #endif // defined(SCALAR)
     VSTORE(16)
-    (sum_col_32, 0, (__global int *)dst.ptr);
+    (convert_int16(sum_col_32), 0, (__global int *)dst.ptr);
 }
 #endif // defined(COLS_B) && defined(ROWS_B)
 
