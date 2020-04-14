@@ -169,7 +169,7 @@ Kernel CLCompileContext::create_kernel(const std::string &kernel_name, const std
         cl_program = program.build(build_options);
 
         // Add built program to internal map
-        _built_programs_map.emplace(program_name, cl_program);
+        _built_programs_map.emplace(built_program_name, cl_program);
     }
 
     // Create and return kernel
