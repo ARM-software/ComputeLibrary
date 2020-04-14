@@ -66,6 +66,15 @@ public:
         k->configure(std::forward<Args>(args)...);
         _kernel = std::move(k);
     }
+    /** Validate input arguments
+     *
+     * @param[in] args Configuration arguments.
+     */
+    template <typename... Args>
+    static Status validate(Args &&... args)
+    {
+        return K::validate(std::forward<Args>(args)...);
+    }
 };
 
 /** As above but this also setups a Zero border on the input tensor of the specified bordersize */

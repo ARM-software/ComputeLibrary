@@ -26,10 +26,6 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#ifdef ARM_COMPUTE_CL
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#endif /* ARM_COMPUTE_CL */
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/IAccessor.h"
@@ -101,8 +97,6 @@ protected:
         }
     }
 
-    virtual void run_target(FunctionType &fn) = 0;
-
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &weight_shape, const TensorShape &bias_shape)
     {
         TensorType input  = create_tensor<TensorType>(input_shape, _data_type, 1);
@@ -114,8 +108,7 @@ protected:
         fn.configure(&input, &output, &weight, &bias);
         allocate_tensors({ &input, &weight, &bias, &output });
         fill(AccessorType(input), AccessorType(weight), AccessorType(bias));
-
-        run_target(fn);
+        fn.run();
 
         return output;
     }
@@ -138,32 +131,6 @@ protected:
     DataType         _data_type{};
     QuantizationInfo _qinfo{};
 };
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class NEQLSTMLayerNormalizationValidationFixture : public QLSTMLayerNormalizationValidationFixture<TensorType, AccessorType, FunctionType, T>
-{
-protected:
-    void run_target(FunctionType &fn) override
-    {
-        ThreadInfo tinfo;
-        tinfo.cpu_info = &NEScheduler::get().cpu_info();
-        fn.run(fn.window(), tinfo);
-    }
-};
-
-#ifdef ARM_COMPUTE_CL
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class CLQLSTMLayerNormalizationValidationFixture : public QLSTMLayerNormalizationValidationFixture<TensorType, AccessorType, FunctionType, T>
-{
-protected:
-    void run_target(FunctionType &fn) override
-    {
-        CLScheduler::get().default_init();
-        fn.run(fn.window(), CLScheduler::get().queue());
-    }
-};
-#endif /* ARM_COMPUTE_CL */
-
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
