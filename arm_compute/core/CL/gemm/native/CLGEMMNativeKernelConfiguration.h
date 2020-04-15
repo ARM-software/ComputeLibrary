@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/CL/ICLGEMMKernelConfiguration.h"
 #include "arm_compute/core/CL/gemm/native/CLGEMMNativeKernelConfigurationBifrost.h"
+#include "arm_compute/core/CL/gemm/native/CLGEMMNativeKernelConfigurationMidgard.h"
 #include "arm_compute/core/CL/gemm/native/CLGEMMNativeKernelConfigurationValhall.h"
 
 #include <memory>
@@ -49,12 +50,11 @@ public:
         switch(get_arch_from_target(gpu))
         {
             case GPUTarget::MIDGARD:
+                return support::cpp14::make_unique<CLGEMMNativeKernelConfigurationMidgard>(gpu);
             case GPUTarget::BIFROST:
                 return support::cpp14::make_unique<CLGEMMNativeKernelConfigurationBifrost>(gpu);
-                break;
             case GPUTarget::VALHALL:
                 return support::cpp14::make_unique<CLGEMMNativeKernelConfigurationValhall>(gpu);
-                break;
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
         }

@@ -45,12 +45,15 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMNativeKernelConfigurationV
     using ConfigurationFunctionExecutorPtr = std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> (CLGEMMNativeKernelConfigurationValhall::*)(unsigned int m, unsigned int n, unsigned int k,
                                              unsigned int b);
 
-    // Configurations for Mali-G71
+    // Configurations for Mali-G77
     static std::map<DataType, ConfigurationFunctionExecutorPtr> gemm_configs_G77 =
     {
         { DataType::F32, &CLGEMMNativeKernelConfigurationValhall::configure_G77_f32 },
         { DataType::F16, &CLGEMMNativeKernelConfigurationValhall::configure_G77_f16 },
-        { DataType::QASYMM8, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 }
+        { DataType::QASYMM8, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QSYMM8, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMNativeKernelConfigurationValhall::configure_G77_u8 }
     };
 
     switch(_target)

@@ -32,7 +32,7 @@ class ICLTensor;
 
 /** OpenCL kernel used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8/QASYMM8_SIGNED
  *
- * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QASYMM8/QASYMM8_SIGNED value.
+ * This kernel takes a final int32 accumulator value (the output of the matrix multiplication), and processes it to obtain the final QASYMM8/QASYMM8_SIGNED value.
  * The following computations will be performed by the kernel:
  *
  *  -# Add offset terms to final result

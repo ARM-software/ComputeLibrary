@@ -50,7 +50,10 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     {
         { DataType::F32, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_f32 },
         { DataType::F16, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_f16 },
-        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 }
+        { DataType::QASYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QSYMM8, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedOnlyRHSKernelConfigurationValhall::configure_G77_u8 }
     };
 
     switch(_target)
@@ -135,7 +138,15 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     }
     else
     {
-        return configure_lhs_rhs_info(m, n, 4, 4, 16, 1, 4, false, true, false, true);
+        const int h0 = std::max(std::min(static_cast<int>(n / 4), static_cast<int>(256)), static_cast<int>(1));
+        if(m >= 28)
+        {
+            return configure_lhs_rhs_info(m, n, 4, 4, 16, 1, h0, false, true, false, true);
+        }
+        else
+        {
+            return configure_lhs_rhs_info(m, n, 2, 4, 16, 1, h0, false, true, false, true);
+        }
     }
 }
 } // namespace cl_gemm

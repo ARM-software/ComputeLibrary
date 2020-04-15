@@ -165,27 +165,15 @@ CLGEMMKernelType CLGEMMKernelSelectionBifrost::default_f16(unsigned int m, unsig
 
 CLGEMMKernelType CLGEMMKernelSelectionBifrost::default_q8(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant)
 {
+    ARM_COMPUTE_UNUSED(m, n, k);
+
     if(is_rhs_constant)
     {
-        if(m == 1)
-        {
-            if((n > k) && gpu_target_is_in(_target, GPUTarget::G71))
-            {
-                return CLGEMMKernelType::NATIVE_V1;
-            }
-            else
-            {
-                return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-            }
-        }
-        else
-        {
-            return CLGEMMKernelType::RESHAPED;
-        }
+        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
     else
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 }
 

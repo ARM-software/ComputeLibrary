@@ -231,7 +231,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
     { "gemmlowp_matrix_a_reduction_dot8", "gemmlowp.cl" },
     { "gemmlowp_matrix_b_reduction", "gemmlowp.cl" },
-    { "gemmlowp_mm_midgard", "gemmlowp.cl" },
     { "gemmlowp_mm_native", "gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_only_rhs_t", "gemmlowp.cl" },

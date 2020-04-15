@@ -25,7 +25,6 @@
 #define ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H
 
 #include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
@@ -41,18 +40,7 @@ namespace arm_compute
 class IMemoryManager;
 class ICLTensor;
 
-/** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. This function calls the following OpenCL kernels:
- *
- *  -# @ref CLGEMMReshapeRHSMatrixKernel  (if the output tensor is a matrix)
- *  -# @ref CLGEMMLowpMatrixMultiplyKernel (if the parameter "reshape_b_only_on_first_run" of GEMMInfo is FALSE)
- *  -# @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel (if the parameter "reshape_b_only_on_first_run" of GEMMInfo is TRUE)
- *  -# @ref CLGEMMLowpMatrixAReductionKernel (if the offset of matrix B is not 0)
- *  -# @ref CLGEMMLowpMatrixBReductionKernel (if the offset of matrix A is not 0)
- *  -# @ref CLGEMMLowpOffsetContributionKernel (if gemm_info.gemmlowp_output_stage == NONE)
- *  -# @ref CLGEMMLowpOffsetContributionOutputStageKernel (if gemm_info.gemmlowp_output_stage != NONE)
- *  -# @ref CLDepthConvertLayerKernel
- *
-*/
+/** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. */
 class CLGEMMLowpMatrixMultiplyCore : public IFunction
 {
 public:
@@ -106,7 +94,6 @@ private:
 
     // Kernels used
     CLDepthConvertLayerKernel                     _weights_to_qasymm8;
-    CLGEMMLowpMatrixMultiplyKernel                _mm_midgard_kernel;
     CLGEMMLowpMatrixMultiplyNativeKernel          _mm_native_kernel;
     CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel _mm_reshaped_only_rhs_kernel;
     CLGEMMReshapeRHSMatrixKernel                  _mtx_b_reshape_kernel;
@@ -132,7 +119,6 @@ private:
     int32_t _a_offset;
     int32_t _b_offset;
     bool    _is_gemm_reshaped;
-    bool    _is_midgard;
     bool    _reshape_b_only_on_first_run;
     bool    _is_prepared;
     bool    _run_output_stage;

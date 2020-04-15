@@ -39,14 +39,6 @@ public:
      * @param[in] gpu GPU target
      */
     CLGEMMNativeKernelConfigurationBifrost(GPUTarget gpu);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMNativeKernelConfigurationBifrost(const CLGEMMNativeKernelConfigurationBifrost &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMNativeKernelConfigurationBifrost &operator=(const CLGEMMNativeKernelConfigurationBifrost &) = delete;
-    /** Default Move Constructor. */
-    CLGEMMNativeKernelConfigurationBifrost(CLGEMMNativeKernelConfigurationBifrost &&) = default;
-    /** Default move assignment operator */
-    CLGEMMNativeKernelConfigurationBifrost &operator=(CLGEMMNativeKernelConfigurationBifrost &&) = default;
 
     // Inherited overridden method
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;

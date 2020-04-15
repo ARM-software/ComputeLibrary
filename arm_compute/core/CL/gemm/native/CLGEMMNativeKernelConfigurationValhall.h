@@ -39,14 +39,6 @@ public:
      * @param[in] gpu GPU target
      */
     CLGEMMNativeKernelConfigurationValhall(GPUTarget gpu);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMNativeKernelConfigurationValhall(const CLGEMMNativeKernelConfigurationValhall &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMNativeKernelConfigurationValhall &operator=(const CLGEMMNativeKernelConfigurationValhall &) = delete;
-    /** Default Move Constructor. */
-    CLGEMMNativeKernelConfigurationValhall(CLGEMMNativeKernelConfigurationValhall &&) = default;
-    /** Default move assignment operator */
-    CLGEMMNativeKernelConfigurationValhall &operator=(CLGEMMNativeKernelConfigurationValhall &&) = default;
 
     // Inherited overridden method
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;

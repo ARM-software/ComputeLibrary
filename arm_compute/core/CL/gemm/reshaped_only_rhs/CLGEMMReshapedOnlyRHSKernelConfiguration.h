@@ -51,10 +51,8 @@ public:
             case GPUTarget::MIDGARD:
             case GPUTarget::BIFROST:
                 return support::cpp14::make_unique<CLGEMMReshapedOnlyRHSKernelConfigurationBifrost>(gpu);
-                break;
             case GPUTarget::VALHALL:
                 return support::cpp14::make_unique<CLGEMMReshapedOnlyRHSKernelConfigurationValhall>(gpu);
-                break;
             default:
                 ARM_COMPUTE_ERROR("Not supported GPU target");
         }

@@ -34,6 +34,8 @@ enum class CLGEMMKernelType
      * @note This variant will be deprecated in favor of a new and configurable NATIVE variant
      */
     NATIVE_V1,
+    /** Native GEMM kernel with configurable block size.*/
+    NATIVE,
     /** Reshaped GEMM kernel where both lhs and rhs matrices are reshaped. Fixed block size fixed.
      * @note Temporary variant to keep compatibility with the old implementation.
      * @note This variant will be deprecated in favor of RESHAPED
@@ -48,11 +50,11 @@ enum class CLGEMMKernelType
 /** OpenCL GEMM kernel selection parameters. These information are retrieved to select the GEMM kernel on OpenCL */
 struct CLGEMMKernelSelectionParams
 {
-    unsigned int m{ 0 };                        /**< Number of rows for the lhs matrix. Lhs matrix NOT transposed */
-    unsigned int n{ 0 };                        /**< Number of columns for the rhs matrix. Rhs matrix NOT transposed */
-    unsigned int k{ 0 };                        /**< Number of rows for the rhs matrix. Rhs matrix NOT transposed */
-    bool         is_rhs_constant{ false };      /**< True if the content of the rhs matrix is constant */
-    DataType     data_type{DataType::UNKNOWN};  /**< Data type */
+    unsigned int m{ 0 };                         /**< Number of rows for the lhs matrix. Lhs matrix NOT transposed */
+    unsigned int n{ 0 };                         /**< Number of columns for the rhs matrix. Rhs matrix NOT transposed */
+    unsigned int k{ 0 };                         /**< Number of rows for the rhs matrix. Rhs matrix NOT transposed */
+    bool         is_rhs_constant{ false };       /**< True if the content of the rhs matrix is constant */
+    DataType     data_type{ DataType::UNKNOWN }; /**< Data type */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_RUNTIME_CLTYPES_H */

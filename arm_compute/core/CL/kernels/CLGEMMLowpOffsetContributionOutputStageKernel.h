@@ -30,9 +30,9 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** OpenCL kernel used to add the offset contribution after @ref CLGEMMLowpMatrixMultiplyKernel and perform the output stage.
+/** OpenCL kernel used to add the offset contribution after the matrix multiplication and perform the output stage.
  *
- * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), adds to it the offset contribution
+ * This kernel takes a final int32 accumulator value (the output of the matrix multiplication), adds to it the offset contribution
  * of matrix A and matrix B and performs the output stage defined by the output_stage argument
  *
  * @note For quantized computations the output data type for auto-initialization must be passed as part of the @ref GEMMLowpOutputStageInfo.
@@ -52,7 +52,7 @@ public:
     CLGEMMLowpOffsetContributionOutputStageKernel &operator=(CLGEMMLowpOffsetContributionOutputStageKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mm_result          Input tensor containing the result of @ref CLGEMMLowpMatrixMultiplyKernel. Data type supported: S32
+     * @param[in]  mm_result          Input tensor containing the result of the matrix multiplication. Data type supported: S32
      * @param[in]  vector_sum_col     Input row-vector of sums of all the entries in each column of matrix B.
      *                                Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
      * @param[in]  vector_sum_row     Input row-vector of sums of all the entries in each row of matrix A.
@@ -74,7 +74,7 @@ public:
     /** Initialise the kernel's input and output.
      *
      * @param[in]  compile_context    The compile context to be used.
-     * @param[in]  mm_result          Input tensor containing the result of @ref CLGEMMLowpMatrixMultiplyKernel. Data type supported: S32
+     * @param[in]  mm_result          Input tensor containing the result of the matrix multiplication. Data type supported: S32
      * @param[in]  vector_sum_col     Input row-vector of sums of all the entries in each column of matrix B.
      *                                Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
      * @param[in]  vector_sum_row     Input row-vector of sums of all the entries in each row of matrix A.

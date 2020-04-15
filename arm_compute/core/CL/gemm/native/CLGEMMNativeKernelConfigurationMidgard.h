@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,43 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATION_H
-#define ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATION_H
+#ifndef ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONMIDGARD_H
+#define ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONMIDGARD_H
 
 #include "arm_compute/core/CL/ICLGEMMKernelConfiguration.h"
-#include "arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
-#include "arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationValhall.h"
-
-#include <memory>
 
 namespace arm_compute
 {
 namespace cl_gemm
 {
-/** CLGEMMReshaped factory class */
-class CLGEMMReshapedKernelConfigurationFactory final
+/** Midgard based OpenCL GEMMNative configuration */
+class CLGEMMNativeKernelConfigurationMidgard final : public ICLGEMMKernelConfiguration
 {
 public:
-    /** Static method to call the CLGEMMReshaped kernel configuration class accordingly with the GPU target
+    /** Constructor
      *
      * @param[in] gpu GPU target
-     *
-     * @return CLGEMMReshaped kernel configuration class
      */
-    static std::unique_ptr<ICLGEMMKernelConfiguration> create(GPUTarget gpu)
-    {
-        switch(get_arch_from_target(gpu))
-        {
-            case GPUTarget::MIDGARD:
-            case GPUTarget::BIFROST:
-                return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(gpu);
-            case GPUTarget::VALHALL:
-                return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationValhall>(gpu);
-            default:
-                ARM_COMPUTE_ERROR("Not supported GPU target");
-        }
-    }
+    CLGEMMNativeKernelConfigurationMidgard(GPUTarget gpu);
+
+    // Inherited overridden method
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
+
+private:
+    std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> default_q8(unsigned int m, unsigned int n, unsigned int k, unsigned int b);
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATION_H */
+#endif /*ARM_COMPUTE_CLGEMMNATIVEKERNELCONFIGURATIONMIDGARD_H */

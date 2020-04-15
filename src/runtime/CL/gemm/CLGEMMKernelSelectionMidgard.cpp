@@ -86,10 +86,9 @@ CLGEMMKernelType CLGEMMKernelSelectionMidgard::default_f16(unsigned int m, unsig
 
 CLGEMMKernelType CLGEMMKernelSelectionMidgard::default_q8(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant)
 {
-    ARM_COMPUTE_UNUSED(n, k);
+    ARM_COMPUTE_UNUSED(m, n, k, is_rhs_constant);
 
-    // We reshape the matrices only if we do not have the vector-by-matrix case and we reshape the matrix B only once
-    return ((m != 1) && is_rhs_constant) ? CLGEMMKernelType::RESHAPED_V1 : CLGEMMKernelType::NATIVE_V1;
+    return CLGEMMKernelType::NATIVE;
 }
 } // namespace cl_gemm
 } // namespace arm_compute

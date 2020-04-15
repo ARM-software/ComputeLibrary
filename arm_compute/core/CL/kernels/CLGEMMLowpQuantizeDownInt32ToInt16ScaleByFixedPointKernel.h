@@ -32,7 +32,7 @@ class ICLTensor;
 
 /** CL kernel used to quantize down the int32 accumulator values of GEMMLowp to QSYMM16
  *
- * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QSYMM16 value.
+ * This kernel takes a final int32 accumulator value (the output of the matrix multiplication), and processes it to obtain the final QSYMM16 value.
  * The following computations will be performed by the kernel:
  *
  *  -# Compute fixed point multiplication between each entry of input by result_fixedpoint_multiplier

@@ -83,22 +83,15 @@ CLGEMMKernelType CLGEMMKernelSelectionValhall::default_f16(unsigned int m, unsig
 
 CLGEMMKernelType CLGEMMKernelSelectionValhall::default_q8(unsigned int m, unsigned int n, unsigned int k, bool is_rhs_constant)
 {
-    ARM_COMPUTE_UNUSED(n, k);
+    ARM_COMPUTE_UNUSED(m, n, k);
 
     if(is_rhs_constant)
     {
-        if(m == 1)
-        {
-            return CLGEMMKernelType::RESHAPED_ONLY_RHS;
-        }
-        else
-        {
-            return CLGEMMKernelType::RESHAPED;
-        }
+        return CLGEMMKernelType::RESHAPED_ONLY_RHS;
     }
     else
     {
-        return CLGEMMKernelType::NATIVE_V1;
+        return CLGEMMKernelType::NATIVE;
     }
 }
 } // namespace cl_gemm

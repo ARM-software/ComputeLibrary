@@ -49,7 +49,10 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedKernelConfiguratio
     {
         { DataType::F32, &CLGEMMReshapedKernelConfigurationValhall::configure_G77_f32 },
         { DataType::F16, &CLGEMMReshapedKernelConfigurationValhall::configure_G77_f16 },
-        { DataType::QASYMM8, &CLGEMMReshapedKernelConfigurationValhall::configure_G77_u8 }
+        { DataType::QASYMM8, &CLGEMMReshapedKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QSYMM8, &CLGEMMReshapedKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QASYMM8_SIGNED, &CLGEMMReshapedKernelConfigurationValhall::configure_G77_u8 },
+        { DataType::QSYMM8_PER_CHANNEL, &CLGEMMReshapedKernelConfigurationValhall::configure_G77_u8 }
     };
 
     switch(_target)
