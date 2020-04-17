@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
- * deal in the Software withoutput restriction, including withoutput limitation the
+ * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
@@ -13,12 +13,12 @@
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KOUTD, EXPRESS OR
- * IMPLIED, OUTCLUDOUTG BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONOUTFROUTGEMENT. OUT NO EVENT SHALL THE
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER OUT AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISOUTG FROM,
- * OUT OF OR OUT CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALOUTGS OUT THE
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "helpers.h"
@@ -29,7 +29,7 @@
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note The block shape tensor rank must be passed at compile time using -DBLOCK_SHAPE_DIM. e.g. -DBLOCK_SHAPE_DIM=2
  *
- * @param[in]  input_ptr                                 Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                                 Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                            Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                              input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                            Stride of the source image in Y dimension (in bytes)
@@ -100,7 +100,7 @@ __kernel void space_to_batch_nchw(
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note The block shape tensor rank must be passed at compile time using -DBLOCK_SHAPE_DIM. e.g. -DBLOCK_SHAPE_DIM=2
  *
- * @param[in]  input_ptr                                 Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                                 Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                            Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                              input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                            Stride of the source image in Y dimension (in bytes)
@@ -180,7 +180,7 @@ __kernel void space_to_batch_nhwc(
  * @note The starting pad value of y must be passed at compile time using -DPAD_LEFT_Y. e.g. -DPAD_LEFT_Y=2
  * @note The ending pad value of  y must be passed at compile time using -DPAD_RIGHT_Y. e.g. -DPAD_RIGHT_X=2
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -236,7 +236,7 @@ __kernel void space_to_batch_static_nchw(
  * @note The starting pad value of y must be passed at compile time using -DPAD_LEFT_Y. e.g. -DPAD_LEFT_Y=2
  * @note The ending pad value of  y must be passed at compile time using -DPAD_RIGHT_Y. e.g. -DPAD_RIGHT_X=2
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)

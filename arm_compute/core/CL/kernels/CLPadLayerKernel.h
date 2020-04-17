@@ -49,7 +49,7 @@ public:
     ~CLPadLayerKernel() = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input          Source tensor. Data types supported: All.
+     * @param[in]  input          Source tensor. Data types supported: U8, S8, QASYMM8, QASYMM8_SIGNED, U16, S16, U32, S32, F16, F32.
      * @param[out] output         Output tensor. Data type supported: same as @p input
      * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                            specifies the front and the end padding in the i-th dimension.
@@ -73,7 +73,7 @@ public:
                    PaddingMode mode = PaddingMode::CONSTANT);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPadLayerKernel
      *
-     * @param[in] input          Source tensor info. Data types supported: All.
+     * @param[in] input          Source tensor info. Data types supported: U8, S8, QASYMM8, QASYMM8_SIGNED, U16, S16, U32, S32, F16, F32.
      * @param[in] output         Output tensor info. Data type supported: same as @p input
      * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                           specifies the front and the end padding in the i-th dimension.

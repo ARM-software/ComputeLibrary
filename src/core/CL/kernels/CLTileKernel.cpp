@@ -22,17 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/kernels/CLTileKernel.h"
-
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/StringSupport.h"
 
@@ -94,7 +85,7 @@ void CLTileKernel::configure(const CLCompileContext &compile_context, const ICLT
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(data_type)));
     build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input_width_x));
     build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
     build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));

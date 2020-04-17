@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -152,7 +152,7 @@ __kernel void im2col1x1_stridex1_nchw(
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -252,7 +252,7 @@ __kernel void im2col_generic_nchw(
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -358,7 +358,7 @@ __kernel void im2col3x3_nchw(
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -550,7 +550,7 @@ __kernel void im2col5x5_nchw(
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -770,7 +770,7 @@ __kernel void im2col11x11_padx0_pady0_nchw(
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -875,7 +875,7 @@ __kernel void im2col_generic_padx0_pady0_nchw(
  * @note The stride along the Y direction must be passed at compile time using -DSTRIDE_Y: e.g. -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -1127,7 +1127,7 @@ __kernel void im2col3x3_nhwc(
  * @note The stride along the Y direction must be passed at compile time using -DSTRIDE_Y: e.g. -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -1212,7 +1212,7 @@ __kernel void im2col9x9_nhwc(
  * @note The dilation_x and dilation_y must be passed at compile time using -DDILATION_X and -DDILATION_Y: e.g. -DDILATION_X=1, -DDILATION_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8_SIGNED/QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

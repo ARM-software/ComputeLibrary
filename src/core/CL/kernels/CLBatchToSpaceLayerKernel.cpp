@@ -132,7 +132,7 @@ void CLBatchToSpaceLayerKernel::configure(const CLCompileContext &compile_contex
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
     build_opts.add_option("-DBATCH_SIZE=" + support::cpp11::to_string(input->info()->dimension(3)));
     build_opts.add_option("-DBLOCK_SHAPE_X=" + support::cpp11::to_string(block_shape_x));
     build_opts.add_option("-DBLOCK_SHAPE_Y=" + support::cpp11::to_string(block_shape_y));

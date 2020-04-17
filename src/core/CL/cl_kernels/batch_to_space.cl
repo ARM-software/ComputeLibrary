@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
- * deal in the Software withoutput restriction, including withoutput limitation the
+ * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
@@ -30,7 +30,7 @@
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note The input tensor batch size must be passed at compile time using -DBATCH_SIZE. e.g. -DBATCH_SIZE=2
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -84,7 +84,7 @@ __kernel void batch_to_space_nchw(
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note The input tensor batch size must be passed at compile time using -DBATCH_SIZE. e.g. -DBATCH_SIZE=2
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -142,7 +142,7 @@ __kernel void batch_to_space_nhwc(
  * @note The block shape x must be passed at compile time using -DBLOCK_SHAPE_X. e.g. -DBLOCK_SHAPE_X=2
  * @note The block shape y must be passed at compile time using -DBLOCK_SHAPE_Y. e.g. -DBLOCK_SHAPE_Y=2
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -189,7 +189,7 @@ __kernel void batch_to_space_static_nchw(
  * @note The block shape x must be passed at compile time using -DBLOCK_SHAPE_X. e.g. -DBLOCK_SHAPE_X=2
  * @note The block shape y must be passed at compile time using -DBLOCK_SHAPE_Y. e.g. -DBLOCK_SHAPE_Y=2
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)

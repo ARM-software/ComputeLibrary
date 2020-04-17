@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
  * @attention Input tensor depth should be given as a preprocessor argument using -DINPUT_DIM_Z=size. e.g. -DINPUT_DIM_Z=16
  *
  *
- * @param[in]  input_ptr                             Pointer to the source tensor. Supported data types: U8/S8/U16/S16/U32/S32/F16/F32
+ * @param[in]  input_ptr                             Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                        Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                          input_stride_x * number of elements along X processed per work item (in bytes)
  * @param[in]  input_stride_y                        Stride of the source tensor in Y dimension (in bytes)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@
  * @note The element size must be passed at compile time using -DELEMENT_SIZE: e.g. -DELEMENT_SIZE=4
  * @note The number of groups must be passed at compile time using  -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/QASYMM8_SIGNED/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
