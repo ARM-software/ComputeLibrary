@@ -28,6 +28,7 @@
 #include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
+#include "arm_compute/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
@@ -169,6 +170,16 @@ public:
     void prepare() override;
 
 private:
+    enum class LayerNormGate : uint8_t
+    {
+        Forget,
+        Cell,
+        Input,
+        Output,
+        Count
+    };
+    static constexpr uint8_t _layer_norm_count = static_cast<uint8_t>(LayerNormGate::Count);
+
     /** Internal method to configure matrix multiplication plus output stage of each gate.
      *
      * @param[in] mm             Matrix multiplication function to use.
@@ -254,12 +265,10 @@ private:
     NEGEMMLowpOutputStage            _projection_outstage{};
     NEArithmeticAdditionKernel       _accumulate_projection{};
     NEActivationLayer                _projection_clip{};
+    std::array<NEQLSTMLayerNormalizationKernel, _layer_norm_count> _layer_norms{};
 
     // Tensor pointers
-    const ITensor *_input_to_input_weights
-    {
-        nullptr
-    };
+    const ITensor *_input_to_input_weights{ nullptr };
     const ITensor *_recurrent_to_input_weights{ nullptr };
     const ITensor *_projection_bias{ nullptr };
     const ITensor *_input_to_forget_weights{ nullptr };
@@ -269,6 +278,58 @@ private:
     const ITensor *_recurrent_to_cell_weights{ nullptr };
     const ITensor *_recurrent_to_output_weights{ nullptr };
     const ITensor *_projection_weights{ nullptr };
+    std::array<const ITensor *, _layer_norm_count> _layer_norm_weights{};
+    std::array<const ITensor *, _layer_norm_count> _layer_norm_bias{};
+
+    using LayerNormIndexType = typename std::underlying_type<LayerNormGate>::type;
+    inline LayerNormIndexType getGateIndex(LayerNormGate g)
+    {
+        return static_cast<LayerNormIndexType>(g);
+    }
+
+    inline void set_layer_norm_weight(const ITensor *t, LayerNormGate g)
+    {
+        _layer_norm_weights[getGateIndex(g)] = t;
+    }
+
+    inline void set_layer_norm_bias(const ITensor *t, LayerNormGate g)
+    {
+        _layer_norm_bias[getGateIndex(g)] = t;
+    }
+
+    inline const ITensor *get_layer_norm_weight(LayerNormGate g)
+    {
+        return _layer_norm_weights[getGateIndex(g)];
+    }
+
+    inline const ITensor *get_layer_norm_bias(LayerNormGate g)
+    {
+        return _layer_norm_bias[getGateIndex(g)];
+    }
+
+    inline NEQLSTMLayerNormalizationKernel &get_layer_norm(LayerNormGate g)
+    {
+        return _layer_norms[getGateIndex(g)];
+    }
+
+    inline void configure_layer_norm(LayerNormGate g, const ITensor *in)
+    {
+        ARM_COMPUTE_ERROR_ON(!_has_layer_norm);
+
+        Tensor &out = get_layer_norm_output(g);
+        _memory_group.manage(&out);
+        out.allocator()->init(*(in->info()));
+
+        get_layer_norm(g).configure(in, &out, get_layer_norm_weight(g), get_layer_norm_bias(g));
+    }
+
+    inline static Status validate_layer_norm(const ITensorInfo &in, const ITensorInfo &weight, const ITensorInfo &bias)
+    {
+        // Output quantization scale will be different, but ignored here
+        // since it will be configured at configure() stage.
+        const TensorInfo out{ in };
+        return NEQLSTMLayerNormalizationKernel::validate(&in, &out, &weight, &bias);
+    }
 
     // Temporary tensors
     Tensor _input_to_forget_weights_transposed{ nullptr };
@@ -320,6 +381,12 @@ private:
     Tensor _mm_projection_res{ nullptr };
     Tensor _projection_outstage_res{ nullptr };
     Tensor _ones{ nullptr };
+    std::array<Tensor, _layer_norm_count> _layer_norm_output{};
+
+    inline Tensor &get_layer_norm_output(LayerNormGate g)
+    {
+        return _layer_norm_output[getGateIndex(g)];
+    }
 
     bool _is_prepared{ false };
     bool _has_cifg{ false };
@@ -327,6 +394,7 @@ private:
     bool _has_projection{ false };
     bool _has_projection_clipping{ false };
     bool _has_peephole{ false };
+    bool _has_layer_norm{ false };
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEQLSTMLAYER_H */

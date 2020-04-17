@@ -130,6 +130,8 @@ private:
                             const int16_t *weight_ptr,
                             const int32_t *bias_ptr,
                             int32_t mean, int32_t inv_std_mul, int32_t inv_std_shift);
+    /** Function to compute output quantization information */
+    QuantizationInfo compute_output_qinfo();
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEQLSTMLAYERNORMALIZATIONKERNEL_H */
