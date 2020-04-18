@@ -58,8 +58,8 @@ public:
           _forget_intermediate_scale(0.0f),
           _cell_intermediate_scale(0.0f),
           _output_intermediate_scale(0.0f),
-          _hidden_state_zero(0.0f),
-          _hidden_state_scale(0),
+          _hidden_state_zero(0),
+          _hidden_state_scale(0.0f),
           _has_peephole_opt(false),
           _has_projection(false),
           _has_cifg_opt(true),
@@ -333,8 +333,8 @@ private:
     float    _forget_intermediate_scale;
     float    _cell_intermediate_scale;
     float    _output_intermediate_scale;
-    float    _hidden_state_zero;
-    int32_t  _hidden_state_scale;
+    int32_t  _hidden_state_zero;
+    float    _hidden_state_scale;
     bool     _has_peephole_opt;
     bool     _has_projection;
     bool     _has_cifg_opt;

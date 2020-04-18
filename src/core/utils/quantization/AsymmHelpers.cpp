@@ -36,7 +36,7 @@ namespace quantization
 constexpr int64_t fixed_point_one_Q0 = (1LL << 31);
 constexpr float   epsilon            = 0.00001f;
 
-Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplier, int32_t *shift)
+Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplier, int32_t *shift, bool ignore_epsilon)
 {
     if(multiplier >= 1.f)
     {
@@ -46,19 +46,22 @@ Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplie
     }
     else
     {
-        return calculate_quantized_multiplier_less_than_one(multiplier, quant_multiplier, shift);
+        return calculate_quantized_multiplier_less_than_one(multiplier, quant_multiplier, shift, ignore_epsilon);
     }
 }
 
 Status calculate_quantized_multiplier_less_than_one(float    multiplier,
                                                     int32_t *quant_multiplier,
-                                                    int32_t *right_shift)
+                                                    int32_t *right_shift,
+                                                    bool     ignore_epsilon)
 {
+    const float internal_epsilon = ignore_epsilon ? 0.0f : epsilon;
+
     ARM_COMPUTE_RETURN_ERROR_ON(quant_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(right_shift == nullptr);
-    ARM_COMPUTE_RETURN_ERROR_ON(multiplier < -epsilon);
-    ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f + epsilon);
-    if(std::fabs(0.0f - multiplier) < epsilon)
+    ARM_COMPUTE_RETURN_ERROR_ON(multiplier < -internal_epsilon);
+    ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f + internal_epsilon);
+    if(std::fabs(0.0f - multiplier) < internal_epsilon)
     {
         *quant_multiplier = 0;
         *right_shift      = 0;
@@ -75,6 +78,13 @@ Status calculate_quantized_multiplier_less_than_one(float    multiplier,
         q_fixed /= 2;
         --*right_shift;
     }
+
+    if(ignore_epsilon && *right_shift > 31)
+    {
+        *right_shift = 0;
+        q_fixed      = 0;
+    }
+
     ARM_COMPUTE_RETURN_ERROR_ON(*right_shift < 0);
     ARM_COMPUTE_RETURN_ERROR_ON(q_fixed > std::numeric_limits<int32_t>::max());
     *quant_multiplier = static_cast<int32_t>(q_fixed);

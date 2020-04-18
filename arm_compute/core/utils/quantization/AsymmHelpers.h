@@ -37,19 +37,21 @@ namespace quantization
  * @param[in]  multiplier       Real multiplier.
  * @param[out] quant_multiplier Integer multiplier.
  * @param[out] shift            bit shift. A negative value indicates a left shift, while a positive value indicates a right shift
+ * @param[in]  ignore_epsilon   When true, ignore pre-defined epsilon value. Defaults to false
  *
  * @return a status
  */
-Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplier, int32_t *shift);
+Status calculate_quantized_multiplier(float multiplier, int32_t *quant_multiplier, int32_t *shift, bool ignore_epsilon = false);
 /** Calculate quantized representation of multiplier with value less than one.
  *
  * @param[in]  multiplier       Real multiplier.
  * @param[out] quant_multiplier Integer multiplier.
  * @param[out] right_shift      Right bit shift.
+ * @param[in]  ignore_epsilon   When true, ignore pre-defined epsilon value. Defaults to false
  *
  * @return a status
  */
-Status calculate_quantized_multiplier_less_than_one(float multiplier, int32_t *quant_multiplier, int32_t *right_shift);
+Status calculate_quantized_multiplier_less_than_one(float multiplier, int32_t *quant_multiplier, int32_t *right_shift, bool ignore_epsilon = false);
 /** Calculate quantized representation of multiplier having value greater than one.
  *
  * @param[in]  multiplier           Real multiplier.

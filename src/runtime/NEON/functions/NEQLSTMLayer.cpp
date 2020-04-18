@@ -341,7 +341,7 @@ void NEQLSTMLayer::configure(const ITensor *input,
     _output_gate.allocator()->allocate();
     _input_gate.allocator()->allocate();
     const float hidden_state_scale = std::pow(2, -15) / lstm_params.hidden_state_scale() * std::pow(2, -15);
-    quantization::calculate_quantized_multiplier(hidden_state_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift);
+    quantization::calculate_quantized_multiplier(hidden_state_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift, /* ignore_epsilon */ true);
     gemmlowp_info.gemmlowp_offset  = lstm_params.hidden_state_zero();
     gemmlowp_info.output_data_type = output_state_in->info()->data_type();
     _hidden_outstage.configure(&_hidden_mul_res, nullptr, output_state_out, gemmlowp_info);
@@ -622,7 +622,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const TensorInfo hidden_mul_res(TensorShape(num_units, batch_size), 1, DataType::S32);
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&output_gate_info, &input_gate_info, &hidden_mul_res, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     const float hidden_state_scale = std::pow(2, -15) / lstm_params.hidden_state_scale() * std::pow(2, -15);
-    ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(hidden_state_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
+    ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(hidden_state_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift, /* ignore_epsilon */ true));
     gemmlowp_info.gemmlowp_offset = lstm_params.hidden_state_zero();
     ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOutputStage::validate(&hidden_mul_res, nullptr, output_state_out, gemmlowp_info));
 
