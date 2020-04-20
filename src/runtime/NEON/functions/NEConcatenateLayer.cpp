@@ -178,7 +178,7 @@ void NEConcatenateLayer::run()
 {
     for(auto &kernel : _concat_kernels)
     {
-        NEScheduler::get().schedule(kernel.get(), _axis);
+        NEScheduler::get().schedule(kernel.get(), Window::DimY);
     }
 }
 } // namespace arm_compute
