@@ -140,7 +140,7 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, winograd_info, act_info);
 }
 
-void CLWinogradOutputTransformKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info,
+void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info,
                                                 const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);

@@ -82,7 +82,7 @@ public:
      * @param[in]  shrink_axis_mask If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
                    const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                    int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
 

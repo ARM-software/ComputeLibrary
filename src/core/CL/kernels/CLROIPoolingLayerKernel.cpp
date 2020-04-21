@@ -76,7 +76,7 @@ void CLROIPoolingLayerKernel::configure(const ICLTensor *input, const ICLTensor 
     configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
 }
 
-void CLROIPoolingLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIPoolingLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, rois, output);
 

@@ -185,7 +185,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     configure(CLKernelLibrary::get().get_compile_context(), input, output, policy, border_mode, sampling_policy, align_corners);
 }
 
-void CLScaleKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
+void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
                               bool align_corners)
 {
     _align_corners = policy == InterpolationPolicy::BILINEAR

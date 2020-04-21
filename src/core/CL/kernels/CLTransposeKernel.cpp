@@ -111,7 +111,7 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLTransposeKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLTransposeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

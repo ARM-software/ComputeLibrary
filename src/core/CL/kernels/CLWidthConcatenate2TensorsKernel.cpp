@@ -99,7 +99,7 @@ void CLWidthConcatenate2TensorsKernel::configure(const ICLTensor *input1, const 
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
 }
 
-void CLWidthConcatenate2TensorsKernel::configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLWidthConcatenate2TensorsKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info()));

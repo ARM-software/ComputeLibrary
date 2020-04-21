@@ -40,7 +40,7 @@ void CLThresholdKernel::configure(const ICLTensor *input, ICLTensor *output, uin
     configure(CLKernelLibrary::get().get_compile_context(), input, output, threshold, false_value, true_value, type, upper);
 }
 
-void CLThresholdKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold,
+void CLThresholdKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold,
                                   uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);

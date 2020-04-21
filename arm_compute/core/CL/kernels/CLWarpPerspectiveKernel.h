@@ -50,7 +50,7 @@ public:
      * @param[in]  matrix          The perspective matrix. Must be 3x3 of type float.
      * @param[in]  policy          The interpolation type.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;

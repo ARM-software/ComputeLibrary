@@ -68,7 +68,7 @@ void CLReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const
     configure(CLKernelLibrary::get().get_compile_context(), input, output, axis);
 }
 
-void CLReverseKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
+void CLReverseKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *axis)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, axis);
 

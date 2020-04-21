@@ -71,7 +71,7 @@ void CLSpaceToDepthLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     configure(CLKernelLibrary::get().get_compile_context(), input, output, block_shape);
 }
 
-void CLSpaceToDepthLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
+void CLSpaceToDepthLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

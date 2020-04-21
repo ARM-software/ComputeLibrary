@@ -49,7 +49,7 @@ public:
      * @param[in]  lut             The input LUT. Data types supported: U8, S16.
      * @param[out] output          The output tensor. Data types supported: U8, S16.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLLut *lut, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLLut *lut, ICLTensor *output);
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLTABLELOOKUPKERNEL_H */

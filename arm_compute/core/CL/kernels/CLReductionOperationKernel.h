@@ -69,7 +69,7 @@ public:
      * @param[in]  op              Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
      * @param[in]  width           (Optional)  In case of x-axis we also need to provide the width of the input image.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width = 0);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
      *

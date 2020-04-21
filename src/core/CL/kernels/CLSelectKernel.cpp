@@ -107,7 +107,7 @@ void CLSelectKernel::configure(const ICLTensor *c, const ICLTensor *x, const ICL
     configure(CLKernelLibrary::get().get_compile_context(), c, x, y, output);
 }
 
-void CLSelectKernel::configure(CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
+void CLSelectKernel::configure(const CLCompileContext &compile_context, const ICLTensor *c, const ICLTensor *x, const ICLTensor *y, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(c, x, y, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(c->info(), x->info(), y->info(), output->info()));

@@ -82,7 +82,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     configure(CLKernelLibrary::get().get_compile_context(), input, biases, output, num_groups);
 }
 
-void CLWeightsReshapeKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
+void CLWeightsReshapeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

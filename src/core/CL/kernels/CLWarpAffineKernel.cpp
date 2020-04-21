@@ -64,7 +64,7 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
     configure(CLKernelLibrary::get().get_compile_context(), input, output, matrix, policy);
 }
 
-void CLWarpAffineKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy)
+void CLWarpAffineKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);

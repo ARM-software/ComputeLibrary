@@ -92,7 +92,7 @@ public:
      * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      *                             Number of groups greater than one are only supported for NCHW data layout, and the number of weights must be a multiple of it.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups = 1);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWeightsReshapeKernel
      *
      * @param[in] input      The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,

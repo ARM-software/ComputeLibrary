@@ -95,7 +95,7 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     configure(CLKernelLibrary::get().get_compile_context(), input, width_offset, output);
 }
 
-void CLWidthConcatenateLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int width_offset, ICLTensor *output)
+void CLWidthConcatenateLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int width_offset, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), width_offset, output->info()));

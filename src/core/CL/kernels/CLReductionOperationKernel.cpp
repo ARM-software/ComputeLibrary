@@ -132,7 +132,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, op, width);
 }
 
-void CLReductionOperationKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width)
+void CLReductionOperationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

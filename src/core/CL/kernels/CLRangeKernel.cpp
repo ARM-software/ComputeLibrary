@@ -96,7 +96,7 @@ void CLRangeKernel::configure(ICLTensor *output, const float start, const float 
     configure(CLKernelLibrary::get().get_compile_context(), output, start, end, step);
 }
 
-void CLRangeKernel::configure(CLCompileContext &compile_context, ICLTensor *output, const float start, const float end, const float step)
+void CLRangeKernel::configure(const CLCompileContext &compile_context, ICLTensor *output, const float start, const float end, const float step)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 

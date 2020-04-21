@@ -82,7 +82,7 @@ public:
      * @param[out] output          The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_filter_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info   Contains Winograd's information described in @ref WinogradInfo
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradFilterTransformKernel
      *
      * @note Winograd filter transform supports the following configurations for NCWH data layout

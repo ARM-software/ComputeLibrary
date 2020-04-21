@@ -94,7 +94,7 @@ void CLSpaceToBatchLayerKernel::configure(const ICLTensor *input, const ICLTenso
     configure(CLKernelLibrary::get().get_compile_context(), input, block_shape, paddings, output);
 }
 
-void CLSpaceToBatchLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output)
+void CLSpaceToBatchLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), block_shape->info(), paddings->info(), output->info()));
@@ -131,7 +131,7 @@ void CLSpaceToBatchLayerKernel::configure(const ICLTensor *input, const int bloc
     configure(CLKernelLibrary::get().get_compile_context(), input, block_shape_x, block_shape_y, padding_left, padding_right, output);
 }
 
-void CLSpaceToBatchLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left,
+void CLSpaceToBatchLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left,
                                           const Size2D &padding_right,
                                           ICLTensor    *output)
 {

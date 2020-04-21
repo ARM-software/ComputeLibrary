@@ -62,7 +62,7 @@ public:
      * @param[in]  type            Thresholding type. Either RANGE or BINARY.
      * @param[in]  upper           Upper threshold. Only used when the thresholding type is RANGE.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold,
                    uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper);
 };
 } // namespace arm_compute

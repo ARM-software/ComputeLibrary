@@ -223,7 +223,7 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     configure(CLKernelLibrary::get().get_compile_context(), input, max, output, sum, info);
 }
 
-void CLLogits1DMaxShiftExpSumKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info)
+void CLLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
 
@@ -351,7 +351,7 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     configure(CLKernelLibrary::get().get_compile_context(), input, sum, output, info);
 }
 
-void CLLogits1DNormKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info)
+void CLLogits1DNormKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
 

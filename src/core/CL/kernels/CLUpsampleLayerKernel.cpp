@@ -69,7 +69,7 @@ void CLUpsampleLayerKernel::configure(const ICLTensor *input, ICLTensor *output,
     configure(CLKernelLibrary::get().get_compile_context(), input, output, info, upsampling_policy);
 }
 
-void CLUpsampleLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &info, const InterpolationPolicy upsampling_policy)
+void CLUpsampleLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &info, const InterpolationPolicy upsampling_policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_UNUSED(upsampling_policy);

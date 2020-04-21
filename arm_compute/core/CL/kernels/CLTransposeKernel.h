@@ -50,7 +50,7 @@ public:
      * @param[in]  input           Input tensor. Data types supported: All.
      * @param[out] output          Output tensor. Data type supported: Same as @p input
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLTransposeKernel
      *
      * @param[in] input  Input tensor. Data types supported: All.

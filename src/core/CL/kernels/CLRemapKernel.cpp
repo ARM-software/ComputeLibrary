@@ -52,7 +52,7 @@ void CLRemapKernel::configure(const ICLTensor *input, const ICLTensor *map_x, co
     configure(CLKernelLibrary::get().get_compile_context(), input, map_x, map_y, output, policy, border_undefined);
 }
 
-void CLRemapKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy,
+void CLRemapKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy,
                               bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);

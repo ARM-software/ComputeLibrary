@@ -59,7 +59,7 @@ public:
      * @param[in]  input           Source tensor. Data type supported: All.
      * @param[out] output          Destination tensor. Data type supported: Same as @p input
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayerKernel
      *

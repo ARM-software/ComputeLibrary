@@ -74,7 +74,7 @@ public:
      * @param[out] output          Output tensor. Data types supported: Same as @p input.
      *
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4

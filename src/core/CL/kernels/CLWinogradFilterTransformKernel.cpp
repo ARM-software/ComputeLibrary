@@ -104,7 +104,7 @@ void CLWinogradFilterTransformKernel::configure(const ICLTensor *input, ICLTenso
     configure(CLKernelLibrary::get().get_compile_context(), input, output, winograd_info);
 }
 
-void CLWinogradFilterTransformKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
+void CLWinogradFilterTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

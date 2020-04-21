@@ -105,7 +105,7 @@ void CLStridedSliceKernel::configure(const ICLTensor *input, ICLTensor *output,
     configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 }
 
-void CLStridedSliceKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+void CLStridedSliceKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
                                      const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                                      int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {

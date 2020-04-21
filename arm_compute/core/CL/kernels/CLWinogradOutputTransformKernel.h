@@ -86,7 +86,7 @@ public:
      * @param[in]  winograd_info   Contains Winograd's information described in @ref WinogradInfo
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradOutputTransformKernel

@@ -65,7 +65,7 @@ public:
      * @param[in]  policy           The interpolation type.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy, bool border_undefined);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

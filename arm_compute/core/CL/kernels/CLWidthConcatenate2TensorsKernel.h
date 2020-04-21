@@ -64,7 +64,7 @@ public:
      * @param[in]  input2          Second input tensor. Data types supported: same as @p input1
      * @param[out] output          Output tensor. Data types supported: Same as @p input1.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLWidthConcatenate2TensorsKernel
      *
      * @param[in] input1 First tensor info. Data types supported: All.

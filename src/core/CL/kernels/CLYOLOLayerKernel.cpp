@@ -105,7 +105,7 @@ void CLYOLOLayerKernel::configure(ICLTensor *input, ICLTensor *output, const Act
     configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info, num_classes);
 }
 
-void CLYOLOLayerKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
+void CLYOLOLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 

@@ -41,7 +41,7 @@ void CLTableLookupKernel::configure(const ICLTensor *input, const ICLLut *lut, I
     configure(CLKernelLibrary::get().get_compile_context(), input, lut, output);
 }
 
-void CLTableLookupKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLLut *lut, ICLTensor *output)
+void CLTableLookupKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLLut *lut, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);

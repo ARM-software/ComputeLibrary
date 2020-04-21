@@ -85,7 +85,7 @@ void CLStackLayerKernel::configure(const ICLTensor *input, unsigned int axis, un
     configure(CLKernelLibrary::get().get_compile_context(), input, axis, idx_input, num_tensors, output);
 }
 
-void CLStackLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output)
+void CLStackLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), axis, idx_input, num_tensors, output->info()));

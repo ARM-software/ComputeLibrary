@@ -80,7 +80,7 @@ public:
      * @param[out] output_y         (Optional) Destination tensor for the Y gradient, Data types supported: S16.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

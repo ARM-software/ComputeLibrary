@@ -73,7 +73,7 @@ public:
      * @param[in]      act_info        Activation layer information.
      * @param[in]      num_classes     Number of classes to activate (must be submultiple of @p input channels)
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes);
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes);
     /** Static function to check if given info will lead to a valid configuration of @ref CLYOLOLayerKernel
      *
      * @param[in] input       Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result

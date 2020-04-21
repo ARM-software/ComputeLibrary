@@ -72,7 +72,7 @@ void CLTileKernel::configure(const ICLTensor *input, ICLTensor *output, const Mu
     configure(CLKernelLibrary::get().get_compile_context(), input, output, multiples);
 }
 
-void CLTileKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Multiples &multiples)
+void CLTileKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Multiples &multiples)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
