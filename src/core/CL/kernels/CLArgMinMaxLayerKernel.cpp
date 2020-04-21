@@ -119,7 +119,7 @@ void CLArgMinMaxLayerKernel::configure(const ICLTensor *input, const ICLTensor *
     configure(CLKernelLibrary::get().get_compile_context(), input, prev_output, output, axis, op);
 }
 
-void CLArgMinMaxLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op)
+void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (prev_output != nullptr) ? prev_output->info() : nullptr, output->info(), axis, op));

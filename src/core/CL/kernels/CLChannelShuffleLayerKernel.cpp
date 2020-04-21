@@ -95,7 +95,7 @@ void CLChannelShuffleLayerKernel::configure(const ICLTensor *input, ICLTensor *o
     configure(CLKernelLibrary::get().get_compile_context(), input, output, num_groups);
 }
 
-void CLChannelShuffleLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
+void CLChannelShuffleLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

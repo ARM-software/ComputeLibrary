@@ -87,7 +87,7 @@ void CLDepthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     configure(CLKernelLibrary::get().get_compile_context(), input, depth_offset, output);
 }
 
-void CLDepthConcatenateLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int depth_offset, ICLTensor *output)
+void CLDepthConcatenateLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int depth_offset, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), depth_offset, output->info()));

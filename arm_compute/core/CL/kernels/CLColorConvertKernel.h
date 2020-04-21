@@ -67,7 +67,7 @@ public:
      *                                                          RGBA8888 (if the formats of @p input are UYVY422/YUYV422/RGB888/),
      *                                                          U8 (if the formats of @p input is RGB888)
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Set the input and output of the kernel
      *
      * @param[in]  input  Multi-planar source image. Formats supported: NV12/NV21/IYUV
@@ -80,7 +80,7 @@ public:
      * @param[in]  input           Multi-planar source image. Formats supported: NV12/NV21/IYUV
      * @param[out] output          Single-planar destination image. Formats supported: RGB888/RGBA8888
      */
-    void configure(CLCompileContext &compile_context, const ICLMultiImage *input, ICLImage *output);
+    void configure(const CLCompileContext &compile_context, const ICLMultiImage *input, ICLImage *output);
     /** Set the input and output of the kernel
      *
      * @param[in]  input  Single-planar source image. Formats supported: RGB888/RGBA8888/UYVY422/YUYV422
@@ -93,7 +93,7 @@ public:
      * @param[in]  input           Single-planar source image. Formats supported: RGB888/RGBA8888/UYVY422/YUYV422
      * @param[out] output          Multi-planar destination image. Formats supported: NV12/IYUV/YUV444 (if the formats of @p input are RGB888/RGB8888)
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input, ICLMultiImage *output);
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, ICLMultiImage *output);
     /** Set the input and output of the kernel
      *
      * @param[in]  input  Multi-planar source image. Formats supported: NV12/NV21/IYUV
@@ -106,7 +106,7 @@ public:
      * @param[in]  input           Multi-planar source image. Formats supported: NV12/NV21/IYUV
      * @param[out] output          Multi-planar destination image. Formats supported: YUV444/IYUV (if the formats of @p input are NV12/NV21)/NV12 (if the format of  @p input is IYUV)
      */
-    void configure(CLCompileContext &compile_context, const ICLMultiImage *input, ICLMultiImage *output);
+    void configure(const CLCompileContext &compile_context, const ICLMultiImage *input, ICLMultiImage *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

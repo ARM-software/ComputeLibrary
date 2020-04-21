@@ -61,7 +61,7 @@ public:
      * @param[in]  block_shape     1-D tensor with shape [M]. Data types supported: S32
      * @param[out] output          Tensor output. Data types supported: same as @p input
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output);
     /** Initialise the kernel's inputs and output (Static block shape).
      *
      * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -78,7 +78,7 @@ public:
      * @param[in]  block_shape_y   Block shape y value.
      * @param[out] output          Tensor output. Data types supported: same as @p input
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchToSpaceLayerKernel
      *
      * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: All.

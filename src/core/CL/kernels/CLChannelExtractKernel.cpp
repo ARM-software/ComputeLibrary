@@ -52,7 +52,7 @@ void CLChannelExtractKernel::configure(const ICLTensor *input, Channel channel, 
     configure(CLKernelLibrary::get().get_compile_context(), input, channel, output);
 }
 
-void CLChannelExtractKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, Channel channel, ICLTensor *output)
+void CLChannelExtractKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, Channel channel, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON(input == output);
@@ -114,7 +114,7 @@ void CLChannelExtractKernel::configure(const ICLMultiImage *input, Channel chann
     configure(CLKernelLibrary::get().get_compile_context(), input, channel, output);
 }
 
-void CLChannelExtractKernel::configure(CLCompileContext &compile_context, const ICLMultiImage *input, Channel channel, ICLImage *output)
+void CLChannelExtractKernel::configure(const CLCompileContext &compile_context, const ICLMultiImage *input, Channel channel, ICLImage *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);

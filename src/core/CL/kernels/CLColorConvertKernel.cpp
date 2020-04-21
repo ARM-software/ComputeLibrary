@@ -51,7 +51,7 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLColorConvertKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLColorConvertKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -147,7 +147,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *outpu
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLColorConvertKernel::configure(CLCompileContext &compile_context, const ICLMultiImage *input, ICLImage *output)
+void CLColorConvertKernel::configure(const CLCompileContext &compile_context, const ICLMultiImage *input, ICLImage *output)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -237,7 +237,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLColorConvertKernel::configure(CLCompileContext &compile_context, const ICLImage *input, ICLMultiImage *output)
+void CLColorConvertKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLMultiImage *output)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -349,7 +349,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLColorConvertKernel::configure(CLCompileContext &compile_context, const ICLMultiImage *input, ICLMultiImage *output)
+void CLColorConvertKernel::configure(const CLCompileContext &compile_context, const ICLMultiImage *input, ICLMultiImage *output)
 {
     unsigned int num_elems_processed_per_iteration = 0;
     switch(input->info()->format())

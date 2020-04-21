@@ -61,7 +61,7 @@ public:
      * @param[in]  padding         (Optional) Padding to be applied to the input tensor
      * @param[in]  output_window   (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCopyKernel
      *
      * @param[in] input         Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.

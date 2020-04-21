@@ -75,7 +75,7 @@ public:
      * @param[in]  output_shifts      (Optional) Output shifts tensor for quantized computations. In case of per-channel quantization,
      *                                the number of multipliers must be equal to the number of filters (IFM). Supported data types: S32
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
                    unsigned int depth_multiplier = 1, ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U),
                    const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NCHWKernel

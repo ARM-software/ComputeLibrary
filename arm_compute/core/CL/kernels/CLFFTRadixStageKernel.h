@@ -69,7 +69,7 @@ public:
      * @param[out]    output          Destination tensor. Can be nullptr. Data type supported: same as @p input
      * @param[in]     config          FFT descriptor metadata.
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config);
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTRadixStageKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F32.

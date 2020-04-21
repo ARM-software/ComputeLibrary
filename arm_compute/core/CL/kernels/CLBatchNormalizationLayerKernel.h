@@ -81,9 +81,8 @@ public:
      * @param[in]      epsilon         (Optional) Small value to avoid division with zero. Default value is 0.001f.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta = nullptr, const ICLTensor *gamma = nullptr,
-                   float               epsilon  = 0.001f,
-                   ActivationLayerInfo act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta = nullptr,
+                   const ICLTensor *gamma = nullptr, float epsilon = 0.001f, ActivationLayerInfo act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchNormalizationLayerKernel
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result.

@@ -53,7 +53,7 @@ void CLFastCornersKernel::configure(const ICLImage *input, ICLImage *output, flo
     configure(CLKernelLibrary::get().get_compile_context(), input, output, threshold, non_max_suppression, border_mode);
 }
 
-void CLFastCornersKernel::configure(CLCompileContext &compile_context, const ICLImage *input, ICLImage *output, float threshold, bool non_max_suppression, BorderMode border_mode)
+void CLFastCornersKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLImage *output, float threshold, bool non_max_suppression, BorderMode border_mode)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
@@ -141,7 +141,7 @@ void CLCopyToArrayKernel::configure(const ICLImage *input, bool update_number, I
     configure(CLKernelLibrary::get().get_compile_context(), input, update_number, corners, num_buffers);
 }
 
-void CLCopyToArrayKernel::configure(CLCompileContext &compile_context, const ICLImage *input, bool update_number, ICLKeyPointArray *corners, cl::Buffer *num_buffers)
+void CLCopyToArrayKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, bool update_number, ICLKeyPointArray *corners, cl::Buffer *num_buffers)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);

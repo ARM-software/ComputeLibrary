@@ -91,7 +91,7 @@ void CLDepthwiseConvolutionLayerReshapeWeightsKernel::configure(const ICLTensor 
     configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
 }
 
-void CLDepthwiseConvolutionLayerReshapeWeightsKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const DepthwiseConvolutionReshapeInfo &info)
+void CLDepthwiseConvolutionLayerReshapeWeightsKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const DepthwiseConvolutionReshapeInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), info));

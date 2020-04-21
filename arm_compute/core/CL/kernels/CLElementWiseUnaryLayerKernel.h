@@ -50,7 +50,7 @@ public:
      * @param[out] output          Output tensor. Data types supported: Same as @p input.
      * @param[in]  op              Element wise unary operation to perform.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ElementWiseUnary &op);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ElementWiseUnary &op);
     /** Static function to check if given info will lead to a valid configuration of @ref CLElementWiseUnaryLayerKernel
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.

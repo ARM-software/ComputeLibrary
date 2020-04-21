@@ -112,7 +112,7 @@ void CLFuseBatchNormalizationKernel::configure(const ICLTensor *input_weights, c
     configure(CLKernelLibrary::get().get_compile_context(), input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma, epsilon, fbn_type);
 }
 
-void CLFuseBatchNormalizationKernel::configure(CLCompileContext &compile_context, const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var,
+void CLFuseBatchNormalizationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var,
                                                ICLTensor *fused_weights, ICLTensor *fused_bias,
                                                const ICLTensor *input_bias, const ICLTensor *bn_beta, const ICLTensor *bn_gamma,
                                                float epsilon, FuseBatchNormalizationType fbn_type)

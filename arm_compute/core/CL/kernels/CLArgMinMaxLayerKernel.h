@@ -76,7 +76,7 @@ public:
      * @param[in]  axis            Axis along which to reduce. Supported reduction axis : 0,1,2,3
      * @param[in]  op              Reduction operation to perform. Only ArgMin and ArgMax are supported.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLArgMinMaxLayerKernel.
      *

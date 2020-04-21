@@ -65,7 +65,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     configure(CLKernelLibrary::get().get_compile_context(), tensor, border_size, border_mode, constant_border_value);
 }
 
-void CLFillBorderKernel::configure(CLCompileContext &compile_context, ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
+void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
     ARM_COMPUTE_ERROR_ON(tensor->info()->num_channels() != 1);

@@ -53,7 +53,7 @@ void CLDerivativeKernel::configure(const ICLTensor *input, ICLTensor *output_x, 
     configure(CLKernelLibrary::get().get_compile_context(), input, output_x, output_y, border_undefined);
 }
 
-void CLDerivativeKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)
+void CLDerivativeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON((output_x == nullptr) && (output_y == nullptr));

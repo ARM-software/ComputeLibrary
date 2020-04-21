@@ -99,7 +99,7 @@ protected:
     /** Commmon configure function for element-wise operators with no additional options (e.g., Div, Min, Max, SquaredDiff)
      *
      */
-    void configure_common(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    void configure_common(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
 
     ActivationLayerInfo _act_info;
 
@@ -138,7 +138,7 @@ public:
      * @param[in] policy          Policy to use to handle overflow.
      * @param[in] act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy,
+    void configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
@@ -194,7 +194,7 @@ public:
      * @param[in] output          Output tensor. Data types supported: Same as @p input1.
      * @param[in] act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+    void configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel

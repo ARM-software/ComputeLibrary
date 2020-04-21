@@ -71,7 +71,7 @@ public:
      * @param[in]  extrapolation_value Value to be used for values outside of the image. Default is 0.
      * @param[in]  output_window       Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0,
                    Window *output_window = nullptr);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSliceKernel

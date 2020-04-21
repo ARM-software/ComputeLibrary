@@ -65,7 +65,7 @@ public:
      * @param[out]     output          Destination tensor. Data type supported: same as @p input
      * @param[in]      act_info        Activation layer information.
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLActivationLayerKernel
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result
@@ -81,9 +81,9 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    ICLTensor            *_input;
-    ICLTensor            *_output;
-    bool                  _run_in_place;
+    ICLTensor *_input;
+    ICLTensor *_output;
+    bool       _run_in_place;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H */

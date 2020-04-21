@@ -88,7 +88,7 @@ void CLFFTRadixStageKernel::configure(ICLTensor *input, ICLTensor *output, const
     configure(CLKernelLibrary::get().get_compile_context(), input, output, config);
 }
 
-void CLFFTRadixStageKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config)
+void CLFFTRadixStageKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, config));

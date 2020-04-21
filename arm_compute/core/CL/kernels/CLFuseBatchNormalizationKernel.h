@@ -81,7 +81,7 @@ public:
      * @param[in]  epsilon         (Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f.
      * @param[in]  fbn_type        (Optional) Fused batch normalization type. Defaults to CONVOLUTION.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var, ICLTensor *fused_weights, ICLTensor *fused_bias,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var, ICLTensor *fused_weights, ICLTensor *fused_bias,
                    const ICLTensor *input_bias = nullptr, const ICLTensor *bn_beta = nullptr, const ICLTensor *bn_gamma = nullptr,
                    float epsilon = 0.001f, FuseBatchNormalizationType fbn_type = FuseBatchNormalizationType::CONVOLUTION);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFuseBatchNormalizationKernel

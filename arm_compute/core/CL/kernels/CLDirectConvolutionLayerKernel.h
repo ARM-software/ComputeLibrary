@@ -88,7 +88,7 @@ public:
      *                             The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDirectConvolutionLayerKernel
      *
      * @param[in] input     The input tensor to convolve. 3 lower dimensions represent a single input [width, height, IFM],

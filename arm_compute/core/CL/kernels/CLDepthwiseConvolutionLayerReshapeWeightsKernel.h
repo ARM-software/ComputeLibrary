@@ -59,7 +59,7 @@ public:
      * @param[out] output          The output tensor of dimension [W*H*C0, ceil(IFM/C0)]. C0 is the number of channels read by each thread. Data types supported: same as @p weights.
      * @param[in]  info            Depthwise convolution information to reshape the input tensor.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const DepthwiseConvolutionReshapeInfo &info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const DepthwiseConvolutionReshapeInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
      *

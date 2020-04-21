@@ -77,7 +77,7 @@ CLFloorKernel::CLFloorKernel()
 {
 }
 
-void CLFloorKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLFloorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

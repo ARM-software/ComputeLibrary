@@ -65,7 +65,7 @@ public:
      * @param[in]  idx             Digit reverse index tensor. Data type supported: U32
      * @param[in]  config          Kernel configuration.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTDigitReverseKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F32.

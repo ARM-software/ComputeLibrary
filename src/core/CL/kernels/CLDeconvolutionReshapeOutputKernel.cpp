@@ -119,7 +119,7 @@ void CLDeconvolutionReshapeOutputKernel::configure(const ICLTensor *input, const
     configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, input_info, weights_info, deconv_info);
 }
 
-void CLDeconvolutionReshapeOutputKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info,
+void CLDeconvolutionReshapeOutputKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info,
                                                    const ITensorInfo   *weights_info,
                                                    const PadStrideInfo &deconv_info)
 {

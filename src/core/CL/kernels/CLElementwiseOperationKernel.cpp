@@ -240,7 +240,7 @@ void CLElementwiseOperationKernel::configure_common(const ICLTensor *input1, con
     configure_common(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
 }
 
-void CLElementwiseOperationKernel::configure_common(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLElementwiseOperationKernel::configure_common(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
@@ -337,7 +337,7 @@ void CLSaturatedArithmeticOperationKernel::configure(ArithmeticOperation op, con
     configure(CLKernelLibrary::get().get_compile_context(), op, input1, input2, output, policy, act_info);
 }
 
-void CLSaturatedArithmeticOperationKernel::configure(CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+void CLSaturatedArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
                                                      const ConvertPolicy       &policy,
                                                      const ActivationLayerInfo &act_info)
 {
@@ -396,7 +396,7 @@ void CLArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTen
     configure(CLKernelLibrary::get().get_compile_context(), op, input1, input2, output, act_info);
 }
 
-void CLArithmeticOperationKernel::configure(CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+void CLArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
                                             const ActivationLayerInfo &act_info)
 {
     _op       = op;

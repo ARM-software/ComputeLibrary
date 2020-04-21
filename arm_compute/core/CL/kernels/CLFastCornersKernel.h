@@ -75,7 +75,7 @@ public:
      * @param[in]  non_max_suppression True if non-maxima suppresion is applied, false otherwise.
      * @param[in]  border_mode         Strategy to use for borders.
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input, ICLImage *output, float threshold, bool non_max_suppression, BorderMode border_mode);
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, ICLImage *output, float threshold, bool non_max_suppression, BorderMode border_mode);
 
     // Inherited methods overridden
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -119,7 +119,7 @@ public:
      * @param[out] corners         Array of keypoints to store the results.
      * @param[out] num_buffers     Number of keypoints to store the results.
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input, bool update_number, ICLKeyPointArray *corners, cl::Buffer *num_buffers);
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, bool update_number, ICLKeyPointArray *corners, cl::Buffer *num_buffers);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

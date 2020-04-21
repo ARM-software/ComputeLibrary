@@ -93,7 +93,7 @@ void CLBoundingBoxTransformKernel::configure(const ICLTensor *boxes, ICLTensor *
     configure(CLKernelLibrary::get().get_compile_context(), boxes, pred_boxes, deltas, info);
 }
 
-void CLBoundingBoxTransformKernel::configure(CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
+void CLBoundingBoxTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
     auto_init_if_empty(*pred_boxes->info(), deltas->info()->clone()->set_data_type(boxes->info()->data_type()).set_quantization_info(boxes->info()->quantization_info()));

@@ -206,7 +206,7 @@ cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &ke
  *
  * @return An opencl kernel
  */
-cl::Kernel create_kernel(CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts = std::set<std::string>());
+cl::Kernel create_kernel(const CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts = std::set<std::string>());
 
 /** Creates a suitable LWS hint object for parallel implementations. Sets the number of WG based on the input size.
  *  If input width is smaller than 128 we can use fewer threads than 8.

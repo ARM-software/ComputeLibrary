@@ -125,7 +125,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
 }
 
-void CLActivationLayerKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+void CLActivationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 

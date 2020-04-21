@@ -62,7 +62,7 @@ public:
      * @param[in]  input2          Source tensor. Data types supported: U8.
      * @param[out] output          Destination tensor. Data types supported: U8.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

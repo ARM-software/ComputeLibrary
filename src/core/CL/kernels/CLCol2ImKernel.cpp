@@ -94,7 +94,7 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     configure(CLKernelLibrary::get().get_compile_context(), input, output, convolved_dims, num_groups);
 }
 
-void CLCol2ImKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups)
+void CLCol2ImKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

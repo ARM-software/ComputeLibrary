@@ -71,7 +71,7 @@ public:
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the BoundingBoxTransformInfo struct.
      *
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLBoundingBoxTransform
      *

@@ -75,7 +75,7 @@ public:
      * @param[in]  policy          Conversion policy
      * @param[in]  shift           Value for down/up conversions. Must be 0 <= shift < 8.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConvertLayerKernel
      *
      * @param[in] input  Source tensor info. Data types supported: U8/S8/QSYMM8_PER_CHANNEL/U16/S16/U32/S32/F16/F32.

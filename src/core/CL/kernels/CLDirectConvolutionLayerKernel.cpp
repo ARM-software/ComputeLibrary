@@ -426,7 +426,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info);
 }
 
-void CLDirectConvolutionLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                                const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);

@@ -77,7 +77,7 @@ void CLDepthConvertLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     configure(CLKernelLibrary::get().get_compile_context(), input, output, policy, shift);
 }
 
-void CLDepthConvertLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
+void CLDepthConvertLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

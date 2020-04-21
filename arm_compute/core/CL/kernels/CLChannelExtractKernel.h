@@ -65,7 +65,7 @@ public:
      * @param[in]  channel         Channel to extract.
      * @param[out] output          Destination tensor. Must be of U8 format.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, Channel channel, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, Channel channel, ICLTensor *output);
     /** Set the input and output of the kernel
      *
      * @param[in]  input   Multi-planar source image. Formats supported: NV12/NV21/IYUV/YUV444
@@ -80,7 +80,7 @@ public:
      * @param[in]  channel         Channel to extract.
      * @param[out] output          Single-planar 2D destination image. Must be of U8 format.
      */
-    void configure(CLCompileContext &compile_context, const ICLMultiImage *input, Channel channel, ICLImage *output);
+    void configure(const CLCompileContext &compile_context, const ICLMultiImage *input, Channel channel, ICLImage *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

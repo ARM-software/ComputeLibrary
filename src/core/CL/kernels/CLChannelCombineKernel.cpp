@@ -56,7 +56,7 @@ void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor 
     configure(CLKernelLibrary::get().get_compile_context(), plane0, plane1, plane2, plane3, output);
 }
 
-void CLChannelCombineKernel::configure(CLCompileContext &compile_context, const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output)
+void CLChannelCombineKernel::configure(const CLCompileContext &compile_context, const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(plane0, plane1, plane2, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane0);
@@ -144,7 +144,7 @@ void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *p
     configure(CLKernelLibrary::get().get_compile_context(), plane0, plane1, plane2, output);
 }
 
-void CLChannelCombineKernel::configure(CLCompileContext &compile_context, const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
+void CLChannelCombineKernel::configure(const CLCompileContext &compile_context, const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(plane0, plane1, plane2, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane0);

@@ -52,8 +52,8 @@ void CLCropKernel::configure(const ICLTensor *input, ICLTensor *output, Coordina
     configure(CLKernelLibrary::get().get_compile_context(), input, output, start, end, batch_index, extrapolation_value, output_window);
 }
 
-void CLCropKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value,
-                             Window *output_window)
+void CLCropKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index,
+                             float extrapolation_value, Window *output_window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), start, end, batch_index, extrapolation_value, output_window));

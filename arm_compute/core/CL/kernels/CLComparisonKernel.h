@@ -64,7 +64,7 @@ public:
      * @param[out] output          Destination tensor. Data types supported: U8.
      * @param[in]  operation       Comparison operation to use.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation);
     /** Static function to check if given info will lead to a valid configuration of @ref CLComparisonKernel
      *
      * @param[in] input1    Source tensor. Data types supported: All.

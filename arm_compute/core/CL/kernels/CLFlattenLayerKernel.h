@@ -60,7 +60,7 @@ public:
      * @param[out] output          Output tensor with shape [w*h*d, input_batches] where:
      *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFlattenLayerKernel
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.

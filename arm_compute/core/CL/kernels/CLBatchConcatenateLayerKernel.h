@@ -72,7 +72,7 @@ public:
      * @note: The gaps between the two lowest dimensions of input and output need to be divisible by 2.
      *
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int batch_offset, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int batch_offset, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLBatchConcatenateLayerKernel
      *
      * @param[in] input        Input tensor info. Data types supported: All.

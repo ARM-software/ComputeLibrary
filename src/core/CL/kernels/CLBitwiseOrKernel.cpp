@@ -43,7 +43,7 @@ void CLBitwiseOrKernel::configure(const ICLTensor *input1, const ICLTensor *inpu
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
 }
 
-void CLBitwiseOrKernel::configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLBitwiseOrKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8);

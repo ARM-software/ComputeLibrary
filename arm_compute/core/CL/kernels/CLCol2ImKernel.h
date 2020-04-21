@@ -81,7 +81,7 @@ public:
      * @param[in]  convolved_dims  Output convolved dimensions.
      * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups = 1);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCol2ImKernel
      *
      * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32

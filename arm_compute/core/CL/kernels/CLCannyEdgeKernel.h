@@ -65,7 +65,7 @@ public:
      * @param[out] phase           Destination tensor - Quantized phase. Data types supported: U8.
      * @param[in]  norm_type       Normalization type. if 1, L1-Norm otherwise L2-Norm.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase, int32_t norm_type);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase, int32_t norm_type);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -111,7 +111,7 @@ public:
      * @param[in]  lower_thr        Lower threshold.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *magnitude, const ICLTensor *phase, ICLTensor *output, int32_t lower_thr, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *magnitude, const ICLTensor *phase, ICLTensor *output, int32_t lower_thr, bool border_undefined);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -167,7 +167,7 @@ public:
      * @param[in,out] l1_stack_counter Tensor for counting the elements in the L1 stack of each pixel. Data types supported: U8.
      *                                              Expected to be initialized to 0 before each run.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr,
                    ICLTensor *visited, ICLTensor *recorded, ICLTensor *l1_stack, ICLTensor *l1_stack_counter);
 
     // Inherited methods overridden:

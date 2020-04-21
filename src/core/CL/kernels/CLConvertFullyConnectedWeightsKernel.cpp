@@ -44,7 +44,7 @@ void CLConvertFullyConnectedWeightsKernel::configure(const ICLTensor *input, ICL
     configure(CLKernelLibrary::get().get_compile_context(), input, output, original_input_shape, data_layout);
 }
 
-void CLConvertFullyConnectedWeightsKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
+void CLConvertFullyConnectedWeightsKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
                                                      DataLayout data_layout)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);

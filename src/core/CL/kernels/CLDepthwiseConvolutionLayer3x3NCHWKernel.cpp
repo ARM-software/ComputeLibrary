@@ -249,7 +249,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation, output_multipliers, output_shifts);
 }
 
-void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                                                          const PadStrideInfo &conv_info, unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation,
                                                          const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
 {

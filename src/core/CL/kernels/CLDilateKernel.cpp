@@ -41,7 +41,7 @@ void CLDilateKernel::configure(const ICLTensor *input, ICLTensor *output, bool b
     configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
 }
 
-void CLDilateKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+void CLDilateKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);

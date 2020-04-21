@@ -43,7 +43,7 @@ void CLGradientKernel::configure(const ICLTensor *gx, const ICLTensor *gy, ICLTe
     configure(CLKernelLibrary::get().get_compile_context(), gx, gy, magnitude, phase, norm_type);
 }
 
-void CLGradientKernel::configure(CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase, int32_t norm_type)
+void CLGradientKernel::configure(const CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase, int32_t norm_type)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gx, 1, DataType::S16, DataType::S32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gy, 1, DataType::S16, DataType::S32);
@@ -128,7 +128,7 @@ void CLEdgeNonMaxSuppressionKernel::configure(const ICLTensor *magnitude, const 
     configure(CLKernelLibrary::get().get_compile_context(), magnitude, phase, output, lower_thr, border_undefined);
 }
 
-void CLEdgeNonMaxSuppressionKernel::configure(CLCompileContext &compile_context, const ICLTensor *magnitude, const ICLTensor *phase, ICLTensor *output, int32_t lower_thr, bool border_undefined)
+void CLEdgeNonMaxSuppressionKernel::configure(const CLCompileContext &compile_context, const ICLTensor *magnitude, const ICLTensor *phase, ICLTensor *output, int32_t lower_thr, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(magnitude, 1, DataType::U16, DataType::U32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(phase, 1, DataType::U8);
@@ -208,7 +208,7 @@ void CLEdgeTraceKernel::configure(const ICLTensor *input, ICLTensor *output, int
     configure(CLKernelLibrary::get().get_compile_context(), input, output, upper_thr, lower_thr, visited, recorded, l1_stack, l1_stack_counter);
 }
 
-void CLEdgeTraceKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr,
+void CLEdgeTraceKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr,
                                   ICLTensor *visited, ICLTensor *recorded, ICLTensor *l1_stack, ICLTensor *l1_stack_counter)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U16, DataType::U32);

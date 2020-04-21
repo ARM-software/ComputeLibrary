@@ -70,7 +70,7 @@ public:
      * @param[in]  scale            Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
@@ -112,7 +112,7 @@ public:
      * @param[in]  conv             Convolution matrix to apply to the input tensor.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, bool border_undefined);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
@@ -153,7 +153,7 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      * @param[in]  data_type        Data type to use for intermeidate result. @sa data_type_for_convolution
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined, DataType data_type = DataType::S32);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined, DataType data_type = DataType::S32);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
@@ -209,7 +209,7 @@ public:
      * @param[in]  scale            Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale, bool border_undefined);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

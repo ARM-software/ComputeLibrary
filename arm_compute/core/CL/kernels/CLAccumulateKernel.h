@@ -52,7 +52,7 @@ public:
      * @param[in]  input           Source tensor. Data types supported: U8.
      * @param[out] accum           Destination tensor. Data types supported: S16.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum);
 };
 
 /** Interface for the accumulate weighted kernel.
@@ -81,7 +81,7 @@ public:
      * @param[in]     alpha           Scalar value in the range [0, 1.0]. Data types supported: F32.
      * @param[in,out] accum           Accumulated tensor. Data types supported: U8.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum);
 };
 
 /** Interface for the accumulate squared kernel.
@@ -108,7 +108,7 @@ public:
      * @param[in]     shift           Shift value in the range of [0, 15]. Data types supported: U32.
      * @param[in,out] accum           Accumulated tensor. Data types supported: S16.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, uint32_t shift, ICLTensor *accum);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, uint32_t shift, ICLTensor *accum);
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLACCUMULATEKERNEL_H */

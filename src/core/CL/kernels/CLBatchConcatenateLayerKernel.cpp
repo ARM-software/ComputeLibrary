@@ -89,7 +89,7 @@ void CLBatchConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     configure(CLKernelLibrary::get().get_compile_context(), input, batch_offset, output);
 }
 
-void CLBatchConcatenateLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int batch_offset, ICLTensor *output)
+void CLBatchConcatenateLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int batch_offset, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), batch_offset, output->info()));

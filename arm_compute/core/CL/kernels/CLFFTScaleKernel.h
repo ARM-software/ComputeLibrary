@@ -63,7 +63,7 @@ public:
      * @param[out]    output          Destination tensor. Data type supported: same as @p input
      * @param[in]     config          Kernel configuration
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTScaleKernelInfo &config);
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTScaleKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTScaleKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F32.

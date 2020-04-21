@@ -64,7 +64,7 @@ void CLConvolutionKernel<matrix_size>::configure(const ICLTensor *input, ICLTens
 }
 
 template <unsigned int matrix_size>
-void CLConvolutionKernel<matrix_size>::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined)
+void CLConvolutionKernel<matrix_size>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
@@ -140,7 +140,7 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
 }
 
 template <unsigned int matrix_size>
-void CLSeparableConvolutionHorKernel<matrix_size>::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, bool border_undefined)
+void CLSeparableConvolutionHorKernel<matrix_size>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U16, DataType::S16, DataType::S32);
@@ -216,7 +216,7 @@ void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *i
 }
 
 template <unsigned int matrix_size>
-void CLSeparableConvolutionVertKernel<matrix_size>::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+void CLSeparableConvolutionVertKernel<matrix_size>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
                                                               const int16_t *conv, uint32_t scale, bool border_undefined, DataType data_type)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U16, DataType::S16, DataType::S32);
@@ -303,7 +303,7 @@ void CLConvolutionRectangleKernel::configure(const ICLTensor *input, ICLTensor *
     configure(CLKernelLibrary::get().get_compile_context(), input, output, conv, width, height, scale, border_undefined);
 }
 
-void CLConvolutionRectangleKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale,
+void CLConvolutionRectangleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale,
                                              bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);

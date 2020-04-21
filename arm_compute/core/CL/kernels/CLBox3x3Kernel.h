@@ -50,7 +50,7 @@ public:
      * @param[out] output           The output tensor. Data types supported: U8.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
 
     //Inherited methods overriden:
     BorderSize border_size() const override;

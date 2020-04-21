@@ -142,7 +142,7 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
-void CLBatchNormalizationLayerKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta,
+void CLBatchNormalizationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta,
                                                 const ICLTensor *gamma,
                                                 float epsilon, ActivationLayerInfo act_info)
 {

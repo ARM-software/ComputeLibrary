@@ -111,7 +111,7 @@ void CLComparisonKernel::configure(const ICLTensor *input1, const ICLTensor *inp
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, operation);
 }
 
-void CLComparisonKernel::configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
+void CLComparisonKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info(), operation));

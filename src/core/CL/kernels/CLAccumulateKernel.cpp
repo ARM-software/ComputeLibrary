@@ -43,7 +43,7 @@ void CLAccumulateKernel::configure(const ICLTensor *input, ICLTensor *accum)
     configure(CLKernelLibrary::get().get_compile_context(), input, accum);
 }
 
-void CLAccumulateKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum)
+void CLAccumulateKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::S16);
@@ -60,7 +60,7 @@ void CLAccumulateWeightedKernel::configure(const ICLTensor *input, float alpha, 
     configure(CLKernelLibrary::get().get_compile_context(), input, alpha, accum);
 }
 
-void CLAccumulateWeightedKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum)
+void CLAccumulateWeightedKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::U8);
@@ -82,7 +82,7 @@ void CLAccumulateSquaredKernel::configure(const ICLTensor *input, uint32_t shift
     configure(CLKernelLibrary::get().get_compile_context(), input, shift, accum);
 }
 
-void CLAccumulateSquaredKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, uint32_t shift, ICLTensor *accum)
+void CLAccumulateSquaredKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, uint32_t shift, ICLTensor *accum)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::S16);

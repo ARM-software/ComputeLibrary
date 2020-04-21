@@ -69,7 +69,7 @@ public:
      * @param[in]  plane3          The 2D plane that forms channel 3. Must be of U8 format.
      * @param[out] output          The single planar output tensor.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output);
     /** Configure function's inputs and outputs.
      *
      * @param[in]  plane0 The 2D plane that forms channel 0. Must be of U8 format.
@@ -86,7 +86,7 @@ public:
      * @param[in]  plane2          The 2D plane that forms channel 2. Must be of U8 format.
      * @param[out] output          The multi planar output tensor.
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output);
+    void configure(const CLCompileContext &compile_context, const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

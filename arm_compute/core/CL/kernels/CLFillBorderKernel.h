@@ -65,7 +65,7 @@ public:
      * @param[in]     border_mode           Border mode to use for the convolution.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    void configure(const CLCompileContext &compile_context, ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
 
     /** Function to set the constant value on fill border kernel depending on type.
      *

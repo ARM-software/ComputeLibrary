@@ -79,7 +79,7 @@ public:
      * @param[in]  weights_info    Deconvolution weights tensor info. Supported data types: same as @p input.  Supported data layouts: same as @p input.
      * @param[in]  deconv_info     Contains padding and policies to be used in the deconvolution, this is described in @ref PadStrideInfo. This kernel supports only stride_x = weights.width && stride_y = weights.height. Moreover, padding is not supported.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info, const ITensorInfo *weights_info,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info, const ITensorInfo *weights_info,
                    const PadStrideInfo &deconv_info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref  CLDeconvolutionReshapeOutputKernel.
