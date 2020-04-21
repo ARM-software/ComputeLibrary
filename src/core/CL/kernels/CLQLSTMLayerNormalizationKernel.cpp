@@ -31,11 +31,17 @@ namespace arm_compute
 {
 namespace
 {
+QuantizationInfo compute_output_qinfo()
+{
+    return QuantizationInfo(1.f / 4096);
+}
+
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, *input);
+    output->set_quantization_info(compute_output_qinfo());
 
     const uint32_t temp_num_elems_processed_per_iteration = max_cl_vector_width / input->element_size();
     /* If width is less then step, then make step same as width to avoid global size being step instead of actual width. */
@@ -48,7 +54,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     return std::make_pair(Status{}, win);
 }
-Status validate_arguments(const ITensorInfo *input, ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weight, bias, output);
 
@@ -129,7 +135,7 @@ void CLQLSTMLayerNormalizationKernel::configure(const ICLTensor *input, ICLTenso
     configure(CLKernelLibrary::get().get_compile_context(), input, output, weight, bias);
 }
 
-Status CLQLSTMLayerNormalizationKernel::validate(const ITensorInfo *input, ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias)
+Status CLQLSTMLayerNormalizationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, weight, bias));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);

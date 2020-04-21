@@ -73,7 +73,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *weight, const ITensorInfo *bias);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

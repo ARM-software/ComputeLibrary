@@ -172,10 +172,7 @@ void NEQLSTMLayerNormalizationKernel::run(const Window &window, const ThreadInfo
 
 inline QuantizationInfo NEQLSTMLayerNormalizationKernel::compute_output_qinfo()
 {
-    const UniformQuantizationInfo iq_info      = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo wq_info      = _weight->info()->quantization_info().uniform();
-    const float                   output_scale = (wq_info.scale * iq_info.scale) * 1024;
-    return QuantizationInfo(output_scale);
+    return QuantizationInfo(1.f / 4096);
 }
 
 inline std::pair<int64_t, int64_t> NEQLSTMLayerNormalizationKernel::sum_qsymm16(const int16_t *input_ptr)
