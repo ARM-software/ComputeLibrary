@@ -120,7 +120,7 @@ void CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::configure(const ICLTensor *i
     configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, info);
 }
 
-void CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+void CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
                                                               const GEMMLowpOutputStageInfo *info)
 {
     // Perform validate step

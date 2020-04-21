@@ -66,7 +66,7 @@ public:
      * @param[out] output          Output tensor. Data types supported: Same as @p input.
      *
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int height_offset, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int height_offset, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLHeightConcatenateLayerKernel
      *
      * @param[in] input         Input tensor info. Data types supported: All.

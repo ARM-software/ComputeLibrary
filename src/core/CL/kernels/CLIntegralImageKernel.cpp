@@ -42,7 +42,7 @@ void CLIntegralImageHorKernel::configure(const ICLTensor *input, ICLTensor *outp
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLIntegralImageHorKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLIntegralImageHorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
@@ -93,7 +93,7 @@ void CLIntegralImageVertKernel::configure(ICLTensor *in_out)
     configure(CLKernelLibrary::get().get_compile_context(), in_out);
 }
 
-void CLIntegralImageVertKernel::configure(CLCompileContext &compile_context, ICLTensor *in_out)
+void CLIntegralImageVertKernel::configure(const CLCompileContext &compile_context, ICLTensor *in_out)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(in_out, 1, DataType::U32);
 

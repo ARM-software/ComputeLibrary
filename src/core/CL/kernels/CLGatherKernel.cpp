@@ -92,7 +92,7 @@ void CLGatherKernel::configure(const ICLTensor *input, const ICLTensor *indices,
     configure(CLKernelLibrary::get().get_compile_context(), input, indices, output, axis);
 }
 
-void CLGatherKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
+void CLGatherKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, indices);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), indices->info(), output->info(), axis));

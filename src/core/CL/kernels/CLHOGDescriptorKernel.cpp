@@ -51,7 +51,7 @@ void CLHOGOrientationBinningKernel::configure(const ICLTensor *input_magnitude, 
     configure(CLKernelLibrary::get().get_compile_context(), input_magnitude, input_phase, output, hog_info);
 }
 
-void CLHOGOrientationBinningKernel::configure(CLCompileContext &compile_context, const ICLTensor *input_magnitude, const ICLTensor *input_phase, ICLTensor *output, const HOGInfo *hog_info)
+void CLHOGOrientationBinningKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input_magnitude, const ICLTensor *input_phase, ICLTensor *output, const HOGInfo *hog_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_magnitude, 1, DataType::S16);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_phase, 1, DataType::U8);
@@ -147,7 +147,7 @@ void CLHOGBlockNormalizationKernel::configure(const ICLTensor *input, ICLTensor 
     configure(CLKernelLibrary::get().get_compile_context(), input, output, hog_info);
 }
 
-void CLHOGBlockNormalizationKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const HOGInfo *hog_info)
+void CLHOGBlockNormalizationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const HOGInfo *hog_info)
 {
     ARM_COMPUTE_ERROR_ON(hog_info == nullptr);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, hog_info->num_bins(), DataType::F32);

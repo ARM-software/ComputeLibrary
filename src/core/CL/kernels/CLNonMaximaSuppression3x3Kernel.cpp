@@ -46,7 +46,7 @@ void CLNonMaximaSuppression3x3Kernel::configure(const ICLTensor *input, ICLTenso
     configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
 }
 
-void CLNonMaximaSuppression3x3Kernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+void CLNonMaximaSuppression3x3Kernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::F32);

@@ -80,7 +80,7 @@ public:
      * @param[in]  threshold               (Optional) Threshold for the distance between features and SVM classifying plane
      * @param[in]  idx_class               (Optional) Index of the class used for evaluating which class the detection window belongs to
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, cl::Buffer *num_detection_windows,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, cl::Buffer *num_detection_windows,
                    const Size2D &detection_window_stride, float threshold = 0.0f,
                    uint16_t idx_class = 0);
 

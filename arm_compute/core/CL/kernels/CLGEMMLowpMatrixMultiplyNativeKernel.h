@@ -72,7 +72,7 @@ public:
      *                             rhs_info.k0: same as lhs_info.k0
      * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
                    const GEMMReshapeInfo &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyNativeKernel
      *

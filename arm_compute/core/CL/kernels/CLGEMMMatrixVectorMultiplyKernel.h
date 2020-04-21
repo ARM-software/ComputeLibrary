@@ -58,7 +58,7 @@ public:
      * @param[in]  input1          The 2D reshaped weights tensor. Data type supported: Same as @p input.
      * @param[out] output          The output 2D tensor. Data types supported: Same as @p input, S32 for QASYMM8/QASYMM8_SIGNED.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixVectorMultiplyKernel
      *
      * @param[in] input0 The reshaped input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32

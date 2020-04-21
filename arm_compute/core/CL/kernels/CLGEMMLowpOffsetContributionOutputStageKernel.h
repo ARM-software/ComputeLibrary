@@ -91,7 +91,7 @@ public:
      * @param[in]  output_shifts      Output shifts tensor. In case of per-channel quantization, the number of multipliers must be equal to the number of filters (OFM).
      *                                Supported data types: S32
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, ICLTensor *output, int32_t k,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, ICLTensor *output, int32_t k,
                    int32_t a_offset, int32_t b_offset,
                    const GEMMLowpOutputStageInfo &output_stage, const ICLTensor *output_multipliers, const ICLTensor *output_shifts);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpOffsetContributionKernel

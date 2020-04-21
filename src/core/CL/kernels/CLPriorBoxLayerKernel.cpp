@@ -105,7 +105,7 @@ void CLPriorBoxLayerKernel::configure(const ICLTensor *input1, const ICLTensor *
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, info, min, max, aspect_ratios);
 }
 
-void CLPriorBoxLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min,
+void CLPriorBoxLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min,
                                       cl::Buffer *max, cl::Buffer *aspect_ratios)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);

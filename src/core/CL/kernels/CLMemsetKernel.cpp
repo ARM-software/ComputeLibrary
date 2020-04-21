@@ -47,7 +47,7 @@ void CLMemsetKernel::configure(ICLTensor        *tensor,
     configure(CLKernelLibrary::get().get_compile_context(), tensor, constant_value, window);
 }
 
-void CLMemsetKernel::configure(CLCompileContext &compile_context, ICLTensor *tensor,
+void CLMemsetKernel::configure(const CLCompileContext &compile_context, ICLTensor *tensor,
                                const PixelValue &constant_value,
                                Window           *window)
 {

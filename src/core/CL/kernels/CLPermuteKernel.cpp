@@ -80,7 +80,7 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
     configure(CLKernelLibrary::get().get_compile_context(), input, output, perm);
 }
 
-void CLPermuteKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+void CLPermuteKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), perm));

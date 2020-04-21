@@ -32,7 +32,7 @@ void CLGaussian5x5HorKernel::configure(const ICLTensor *input, ICLTensor *output
     configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
 }
 
-void CLGaussian5x5HorKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+void CLGaussian5x5HorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
     const std::array<int16_t, 5> matrix = { 1, 4, 6, 4, 1 };
 
@@ -45,7 +45,7 @@ void CLGaussian5x5VertKernel::configure(const ICLTensor *input, ICLTensor *outpu
     configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
 }
 
-void CLGaussian5x5VertKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+void CLGaussian5x5VertKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
     const uint32_t scale = 256;
     const std::array<int16_t, 5> matrix = { 1, 4, 6, 4, 1 };

@@ -100,7 +100,7 @@ void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTenso
     configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, std);
 }
 
-void CLNormalizePlanarYUVLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
+void CLNormalizePlanarYUVLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, mean, std);

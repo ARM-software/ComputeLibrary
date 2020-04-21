@@ -84,7 +84,7 @@ public:
      * @param[in]      a_offset        Offset to be added to each element of the matrix A.
      * @param[in]      b_offset        Offset to be added to each element of the matrix B.
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, int32_t k, int32_t a_offset,
+    void configure(const CLCompileContext &compile_context, ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, int32_t k, int32_t a_offset,
                    int32_t b_offset);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpOffsetContributionKernel
      *

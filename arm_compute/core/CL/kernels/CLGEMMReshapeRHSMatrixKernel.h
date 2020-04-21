@@ -72,7 +72,7 @@ public:
      *                             rhs_info.transpose: true, false
      *                             rhs_info.interleave: true, false
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMReshapeRHSMatrixKernel
      *
      * @param[in] input    Input tensor info. Data types supported: All

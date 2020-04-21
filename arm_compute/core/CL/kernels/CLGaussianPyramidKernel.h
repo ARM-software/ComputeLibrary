@@ -59,7 +59,7 @@ public:
      * @param[in]  input           Source tensor. Data types supported: U8.
      * @param[out] output          Destination tensor. Output should have half the input width. Data types supported: U16.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -98,7 +98,7 @@ public:
      * @param[in]  input           Source tensor. Data types supported: U16.
      * @param[out] output          Destination tensor. Output should have half the input height. Data types supported: U8.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

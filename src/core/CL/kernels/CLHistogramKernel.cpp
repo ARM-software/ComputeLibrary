@@ -56,7 +56,7 @@ void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *outp
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLHistogramKernel::configure(CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output)
+void CLHistogramKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(nullptr == output);
@@ -166,7 +166,7 @@ void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLHistogramBorderKernel::configure(CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output)
+void CLHistogramBorderKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(nullptr == output);

@@ -63,7 +63,7 @@ public:
      *                             Data layouts supported: same as @p input.
      * @param[in]  norm_info       Normalization layer information like the normalization type, normalization size and other parameters.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizationLayerKernel
      *
      * @param[in] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],

@@ -68,7 +68,7 @@ public:
      *                             - scalar       Scalar value to multiply each reduced column/row by.
      *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
-    virtual void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLowpReductionKernelInfo &info) = 0;
+    virtual void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLowpReductionKernelInfo &info) = 0;
 
 protected:
     const ICLTensor *_input;
@@ -105,7 +105,7 @@ public:
      *                             - scalar       Scalar value to multiply each reduced column/row by.
      *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info) override;
+    void configure(const CLCompileContext &compile_context, const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixAReductionKernel
      *
      * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
@@ -154,7 +154,7 @@ public:
      *                             - scalar       Scalar value to multiply each reduced column/row by.
      *                             - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info) override;
+    void configure(const CLCompileContext &compile_context, const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixBReductionKernel
      *
      * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED

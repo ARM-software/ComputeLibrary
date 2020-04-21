@@ -62,7 +62,7 @@ public:
      * @param[in]  info            Contains Compute Anchors operation information described in @ref ComputeAnchorsInfo
      *
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLComputeAllAnchorsKernel
      *

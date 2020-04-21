@@ -81,7 +81,7 @@ public:
      * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QSYMM16.
      *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions. Defaults to 0.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift, int min = 0, int max = 0);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift, int min = 0, int max = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
      *
      * @param[in] input  Input tensor info. Data type supported: S32

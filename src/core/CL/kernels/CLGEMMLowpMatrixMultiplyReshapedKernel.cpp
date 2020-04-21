@@ -171,7 +171,7 @@ void CLGEMMLowpMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, 
     configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output, lhs_info, rhs_info, gemm_info);
 }
 
-void CLGEMMLowpMatrixMultiplyReshapedKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info,
+void CLGEMMLowpMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info,
                                                        const GEMMRHSMatrixInfo &rhs_info,
                                                        const GEMMReshapeInfo   &gemm_info)
 {

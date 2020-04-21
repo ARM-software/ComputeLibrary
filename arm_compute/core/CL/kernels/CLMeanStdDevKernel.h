@@ -68,7 +68,7 @@ public:
      * @param[out] stddev             (Optional) Output standard deviation of pixel values.
      * @param[out] global_sum_squared (Optional if stddev is not set, required if stddev is set) Keeps global sum of squared pixel values (Buffer size: 1 cl_ulong).
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev = nullptr, cl::Buffer *global_sum_squared = nullptr);
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev = nullptr, cl::Buffer *global_sum_squared = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLMeanStdDevKernel.
      *
      * @param[in] input              Input image info. Data types supported: U8.

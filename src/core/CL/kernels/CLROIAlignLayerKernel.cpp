@@ -108,7 +108,7 @@ void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *r
     configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
 }
 
-void CLROIAlignLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIAlignLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, rois);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->info(), output->info(), pool_info));

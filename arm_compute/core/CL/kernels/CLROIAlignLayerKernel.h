@@ -79,7 +79,7 @@ public:
      * @note The z dimensions of @p output tensor and @p input tensor must be the same.
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLROIAlignLayerKernel
      *
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.

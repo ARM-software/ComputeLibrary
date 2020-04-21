@@ -50,7 +50,7 @@ void CLMagnitudePhaseKernel::configure(const ICLTensor *gx, const ICLTensor *gy,
     configure(CLKernelLibrary::get().get_compile_context(), gx, gy, magnitude, phase, mag_type, phase_type);
 }
 
-void CLMagnitudePhaseKernel::configure(CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase,
+void CLMagnitudePhaseKernel::configure(const CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase,
                                        MagnitudeType mag_type, PhaseType phase_type)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gx, 1, DataType::S16, DataType::S32);

@@ -220,7 +220,7 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
     configure(CLKernelLibrary::get().get_compile_context(), input0, input1, input2, output, alpha, beta, lhs_info, rhs_info, gemm_info);
 }
 
-void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha,
+void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha,
                                                           float                    beta,
                                                           const GEMMLHSMatrixInfo &lhs_info,
                                                           const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)

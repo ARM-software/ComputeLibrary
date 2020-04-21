@@ -121,7 +121,7 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(const 
     configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
 }
 
-void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
                                                                           int result_fixedpoint_multiplier, int result_shift,
                                                                           int min, int max)
 {

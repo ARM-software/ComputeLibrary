@@ -79,7 +79,7 @@ public:
      * @param[in]  rounding_policy Rounding policy. Supported rounding modes: to zero, to nearest even.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
                    ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLPixelWiseMultiplicationKernel
      *
@@ -145,7 +145,7 @@ public:
      * @param[out] output          The output tensor, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[in]  act_info        (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLComplexPixelWiseMultiplicationKernel
      *
      * @param[in] input1   An input tensor info. Data types supported: F32. Number of channels supported: 2.

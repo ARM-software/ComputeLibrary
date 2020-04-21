@@ -68,7 +68,7 @@ void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffe
     configure(CLKernelLibrary::get().get_compile_context(), input, mean, global_sum, stddev, global_sum_squared);
 }
 
-void CLMeanStdDevKernel::configure(CLCompileContext &compile_context, const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev, cl::Buffer *global_sum_squared)
+void CLMeanStdDevKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev, cl::Buffer *global_sum_squared)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, mean, global_sum);
     ARM_COMPUTE_ERROR_ON(stddev && nullptr == global_sum_squared);

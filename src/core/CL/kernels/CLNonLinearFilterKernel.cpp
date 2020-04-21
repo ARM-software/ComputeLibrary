@@ -60,7 +60,7 @@ void CLNonLinearFilterKernel::configure(const ICLTensor *input, ICLTensor *outpu
     configure(CLKernelLibrary::get().get_compile_context(), input, output, function, mask_size, pattern, mask, border_undefined);
 }
 
-void CLNonLinearFilterKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function,
+void CLNonLinearFilterKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function,
                                         unsigned int mask_size, MatrixPattern pattern, const uint8_t *mask,
                                         bool border_undefined)
 {

@@ -47,7 +47,7 @@ public:
      * @param[in]  input           An input tensor. Data types supported: U8
      * @param[out] output          Destination tensor, Data types supported: U32.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 };
 
 /** Interface to run the vertical pass of the integral image kernel. */
@@ -74,7 +74,7 @@ public:
      * @param[in]     compile_context The compile context to be used.
      * @param[in,out] in_out          The input/output tensor. Data types supported: U32
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *in_out);
+    void configure(const CLCompileContext &compile_context, ICLTensor *in_out);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -70,7 +70,7 @@ public:
      * @param[in]  axis            Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in]  epsilon         Lower bound value for the normalization.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayerKernel.
      *

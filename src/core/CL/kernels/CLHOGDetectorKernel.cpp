@@ -48,7 +48,7 @@ void CLHOGDetectorKernel::configure(const ICLTensor *input, const ICLHOG *hog, I
     configure(CLKernelLibrary::get().get_compile_context(), input, hog, detection_windows, num_detection_windows, detection_window_stride, threshold, idx_class);
 }
 
-void CLHOGDetectorKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, cl::Buffer *num_detection_windows,
+void CLHOGDetectorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, cl::Buffer *num_detection_windows,
                                     const Size2D &detection_window_stride,
                                     float threshold, uint16_t idx_class)
 {

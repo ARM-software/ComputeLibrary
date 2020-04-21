@@ -62,7 +62,7 @@ public:
      * @param[in]  input1          Second input tensor. Data type supported: same as @p input0
      * @param[out] output          Output tensor to store the result. Data type supported: same as @p input0
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLLocallyConnectedMatrixMultiplyKernel
      *
      * @param[in] input0 First input tensor info. Data types supported: F32

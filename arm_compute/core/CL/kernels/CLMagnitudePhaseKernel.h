@@ -72,7 +72,7 @@ public:
      * @param[in]  mag_type        (Optional) Magnitude calculation type. Default: L2NORM.
      * @param[in]  phase_type      (Optional) Phase calculation type. Default: SIGNED.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase,
                    MagnitudeType mag_type = MagnitudeType::L2NORM, PhaseType phase_type = PhaseType::SIGNED);
 
     // Inherited methods overridden:

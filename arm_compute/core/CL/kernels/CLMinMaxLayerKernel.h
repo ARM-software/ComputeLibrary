@@ -59,7 +59,7 @@ public:
      * @param[out] output          Output tensor with shape [2, batches, ...] which stores the minimum and maximum values for each 3D input tensor.
      *                    The dimensions over the second must match the batched dimensions of the input tensor. Data types supported: F32.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLMinMaxLayerKernel
      *
      * @param[in] input  Input tensor info.  Data types supported: F32.

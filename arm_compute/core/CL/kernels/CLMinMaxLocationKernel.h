@@ -61,7 +61,7 @@ public:
      * @param[in]  input           Input Image. Data types supported: U8/S16/F32.
      * @param[out] min_max         Buffer of 2 elements to store the min value at position 0 and the max value at position 1. Data type supported: S32 if input type is U8/S16, F32 if input type is F32.
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max);
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -110,7 +110,7 @@ public:
      * @param[out] min_loc         (Optional) Array of Coordinates2D used to store minimum value locations.
      * @param[out] max_loc         (Optional) Array of Coordinates2D used to store maximum value locations.
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max, cl::Buffer *min_max_count,
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max, cl::Buffer *min_max_count,
                    ICLCoordinates2DArray *min_loc = nullptr, ICLCoordinates2DArray *max_loc = nullptr);
 
     // Inherited methods overridden:

@@ -110,7 +110,7 @@ void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(const ICLTensor *input, c
     configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, output_stage);
 }
 
-void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *output_stage)
+void CLGEMMLowpQuantizeDownInt32ScaleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *output_stage)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);

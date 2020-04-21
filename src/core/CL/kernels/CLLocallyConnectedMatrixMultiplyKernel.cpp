@@ -86,7 +86,7 @@ void CLLocallyConnectedMatrixMultiplyKernel::configure(const ICLTensor *input0, 
     configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output);
 }
 
-void CLLocallyConnectedMatrixMultiplyKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
+void CLLocallyConnectedMatrixMultiplyKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));

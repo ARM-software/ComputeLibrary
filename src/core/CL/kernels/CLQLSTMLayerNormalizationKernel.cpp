@@ -78,7 +78,7 @@ CLQLSTMLayerNormalizationKernel::CLQLSTMLayerNormalizationKernel()
 {
 }
 
-void CLQLSTMLayerNormalizationKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *weight, const ICLTensor *bias)
+void CLQLSTMLayerNormalizationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *weight, const ICLTensor *bias)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weight, bias, output);
 

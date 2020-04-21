@@ -101,7 +101,7 @@ void CLPadLayerKernel::configure(const ICLTensor *input, ICLTensor *output, cons
     configure(CLKernelLibrary::get().get_compile_context(), input, output, padding, constant_value, mode);
 }
 
-void CLPadLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
+void CLPadLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);

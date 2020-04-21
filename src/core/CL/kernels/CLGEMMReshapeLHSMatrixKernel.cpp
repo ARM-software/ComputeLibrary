@@ -124,7 +124,7 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *
     configure(CLKernelLibrary::get().get_compile_context(), input, output, lhs_info, reinterpret_input_as_3d);
 }
 
-void CLGEMMReshapeLHSMatrixKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d)
+void CLGEMMReshapeLHSMatrixKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

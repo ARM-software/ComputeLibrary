@@ -82,7 +82,7 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
     configure(CLKernelLibrary::get().get_compile_context(), accum, biases);
 }
 
-void CLGEMMMatrixAccumulateBiasesKernel::configure(CLCompileContext &compile_context, ICLTensor *accum, const ICLTensor *biases)
+void CLGEMMMatrixAccumulateBiasesKernel::configure(const CLCompileContext &compile_context, ICLTensor *accum, const ICLTensor *biases)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(accum, biases);

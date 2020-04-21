@@ -99,7 +99,7 @@ public:
      * @param[in]  num_levels           The number of pyramid levels
      * @param[in]  pyramid_scale        Scale factor used for generating the pyramid
      */
-    void configure(CLCompileContext &compile_context, const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates,
+    void configure(const CLCompileContext &compile_context, const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates,
                    ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                    bool use_initial_estimate, size_t level, size_t num_levels, float pyramid_scale);
 
@@ -123,7 +123,7 @@ public:
      * @param[in]  new_points_internal Pointer to the array of internal @ref CLLKInternalKeypoint new points
      * @param[out] new_points          Pointer to the @ref ICLKeyPointArray storing new key points
      */
-    void configure(CLCompileContext &compile_context, ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points);
+    void configure(const CLCompileContext &compile_context, ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -172,7 +172,7 @@ public:
      * @param[in]      window_dimension    The size of the window on which to perform the algorithm
      * @param[in]      level               The pyramid level
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
                    ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                    ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
                    size_t window_dimension, size_t level);
@@ -227,7 +227,7 @@ public:
      * @param[in]      window_dimension    The size of the window on which to perform the algorithm
      * @param[in]      level               The pyramid level
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
                    Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, size_t level);
 
     // Inherited methods overridden:

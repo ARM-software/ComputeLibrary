@@ -56,7 +56,7 @@ public:
      * @param[in, out] accum           The accumulate tensor to convert. Data types supported: F16/F32
      * @param[in]      biases          The shared biases tensor to append. It must be 1D tensor. Data types supported: Same as @p input
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *accum, const ICLTensor *biases);
+    void configure(const CLCompileContext &compile_context, ICLTensor *accum, const ICLTensor *biases);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixAccumulateBiasesKernel
      *
      * @param[in] accum      The accumulate tensor to convert. Data types supported: F16/F32

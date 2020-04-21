@@ -298,7 +298,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     configure(CLKernelLibrary::get().get_compile_context(), input, output, kernel_dims, conv_info, has_bias, dilation, num_groups);
 }
 
-void CLIm2ColKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias,
+void CLIm2ColKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias,
                                const Size2D &dilation,
                                unsigned int  num_groups)
 {

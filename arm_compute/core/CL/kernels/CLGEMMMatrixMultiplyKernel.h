@@ -83,7 +83,7 @@ public:
      * @param[in]  activation_info           (Optional) Activation to apply after the matrix multiplication
      *
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta = 0.f,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta = 0.f,
                    bool is_interleaved_transposed = true, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo(), bool fp_mixed_precision = false, const ActivationLayerInfo &activation_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyKernel
      *

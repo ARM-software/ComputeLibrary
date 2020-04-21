@@ -110,7 +110,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     configure(CLKernelLibrary::get().get_compile_context(), input, output, norm_info);
 }
 
-void CLNormalizationLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
+void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

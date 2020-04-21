@@ -59,7 +59,7 @@ void CLHarrisScoreKernel::configure(const ICLImage *input1, const ICLImage *inpu
     configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, block_size, norm_factor, strength_thresh, sensitivity, border_undefined);
 }
 
-void CLHarrisScoreKernel::configure(CLCompileContext &compile_context, const ICLImage *input1, const ICLImage *input2, ICLImage *output,
+void CLHarrisScoreKernel::configure(const CLCompileContext &compile_context, const ICLImage *input1, const ICLImage *input2, ICLImage *output,
                                     int32_t block_size, float norm_factor, float strength_thresh, float sensitivity,
                                     bool border_undefined)
 {

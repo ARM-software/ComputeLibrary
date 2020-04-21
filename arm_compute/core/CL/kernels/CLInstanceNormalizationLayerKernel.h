@@ -66,7 +66,7 @@ public:
      * @param[out]     output          Destination tensor. Data types and data layouts supported: same as @p input.
      * @param[in]      info            Kernel meta-data descriptor
      */
-    void configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info);
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLInstanceNormalizationLayer.
      *

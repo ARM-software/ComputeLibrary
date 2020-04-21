@@ -320,7 +320,7 @@ void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *i
     configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output, gemm_info, vector_sum_col, vector_sum_row, bias, output_multipliers, output_shifts);
 }
 
-void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMKernelInfo &gemm_info,
+void CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMKernelInfo &gemm_info,
                                                               const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias,
                                                               const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
 {

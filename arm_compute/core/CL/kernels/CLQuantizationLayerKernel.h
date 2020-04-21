@@ -65,7 +65,7 @@ public:
      *
      * @note Output auto initialization is not supported by this kernel
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLQuantizationLayerKernel
      *
      * @param[in] input  Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.

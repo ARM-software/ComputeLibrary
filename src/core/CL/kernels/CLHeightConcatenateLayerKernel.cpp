@@ -94,7 +94,7 @@ void CLHeightConcatenateLayerKernel::configure(const ICLTensor *input, unsigned 
     configure(CLKernelLibrary::get().get_compile_context(), input, height_offset, output);
 }
 
-void CLHeightConcatenateLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, unsigned int height_offset, ICLTensor *output)
+void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int height_offset, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), height_offset, output->info()));

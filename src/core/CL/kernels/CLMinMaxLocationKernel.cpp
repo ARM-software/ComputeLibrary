@@ -65,7 +65,7 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     configure(CLKernelLibrary::get().get_compile_context(), input, min_max);
 }
 
-void CLMinMaxKernel::configure(CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max)
+void CLMinMaxKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
@@ -177,7 +177,7 @@ void CLMinMaxLocationKernel::configure(const ICLImage *input, cl::Buffer *min_ma
     configure(CLKernelLibrary::get().get_compile_context(), input, min_max, min_max_count, min_loc, max_loc);
 }
 
-void CLMinMaxLocationKernel::configure(CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max, cl::Buffer *min_max_count, ICLCoordinates2DArray *min_loc,
+void CLMinMaxLocationKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max, cl::Buffer *min_max_count, ICLCoordinates2DArray *min_loc,
                                        ICLCoordinates2DArray *max_loc)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);

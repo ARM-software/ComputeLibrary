@@ -45,7 +45,7 @@ void CLLKTrackerInitKernel::configure(const ICLKeyPointArray *old_points, const 
     configure(CLKernelLibrary::get().get_compile_context(), old_points, new_points_estimates, old_points_internal, new_points_internal, use_initial_estimate, level, num_levels, pyramid_scale);
 }
 
-void CLLKTrackerInitKernel::configure(CLCompileContext &compile_context, const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates,
+void CLLKTrackerInitKernel::configure(const CLCompileContext &compile_context, const ICLKeyPointArray *old_points, const ICLKeyPointArray *new_points_estimates,
                                       ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                                       bool use_initial_estimate, size_t level, size_t num_levels, float pyramid_scale)
 
@@ -98,7 +98,7 @@ void CLLKTrackerFinalizeKernel::configure(ICLLKInternalKeypointArray *new_points
     configure(CLKernelLibrary::get().get_compile_context(), new_points_internal, new_points);
 }
 
-void CLLKTrackerFinalizeKernel::configure(CLCompileContext &compile_context, ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points)
+void CLLKTrackerFinalizeKernel::configure(const CLCompileContext &compile_context, ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points)
 
 {
     ARM_COMPUTE_ERROR_ON(new_points_internal == nullptr);
@@ -140,7 +140,7 @@ void CLLKTrackerStage0Kernel::configure(const ICLTensor *old_input, const ICLTen
     configure(CLKernelLibrary::get().get_compile_context(), old_input, old_scharr_gx, old_scharr_gy, old_points_internal, new_points_internal, coeff_table, old_ival, window_dimension, level);
 }
 
-void CLLKTrackerStage0Kernel::configure(CLCompileContext &compile_context, const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
+void CLLKTrackerStage0Kernel::configure(const CLCompileContext &compile_context, const ICLTensor *old_input, const ICLTensor *old_scharr_gx, const ICLTensor *old_scharr_gy,
                                         ICLLKInternalKeypointArray *old_points_internal, ICLLKInternalKeypointArray *new_points_internal,
                                         ICLCoefficientTableArray *coeff_table, ICLOldValArray *old_ival,
                                         size_t window_dimension, size_t level)
@@ -236,7 +236,7 @@ void CLLKTrackerStage1Kernel::configure(const ICLTensor *new_input, ICLLKInterna
     configure(CLKernelLibrary::get().get_compile_context(), new_input, new_points_internal, coeff_table, old_ival, termination, epsilon, num_iterations, window_dimension, level);
 }
 
-void CLLKTrackerStage1Kernel::configure(CLCompileContext &compile_context, const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table,
+void CLLKTrackerStage1Kernel::configure(const CLCompileContext &compile_context, const ICLTensor *new_input, ICLLKInternalKeypointArray *new_points_internal, ICLCoefficientTableArray *coeff_table,
                                         ICLOldValArray *old_ival,
                                         Termination termination, float epsilon, size_t num_iterations, size_t window_dimension, size_t level)
 

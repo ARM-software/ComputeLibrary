@@ -105,7 +105,7 @@ void CLGEMMReshapeRHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *
     configure(CLKernelLibrary::get().get_compile_context(), input, output, rhs_info);
 }
 
-void CLGEMMReshapeRHSMatrixKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info)
+void CLGEMMReshapeRHSMatrixKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

@@ -76,7 +76,7 @@ void CLComputeAllAnchorsKernel::configure(const ICLTensor *anchors, ICLTensor *a
     configure(CLKernelLibrary::get().get_compile_context(), anchors, all_anchors, info);
 }
 
-void CLComputeAllAnchorsKernel::configure(CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)
+void CLComputeAllAnchorsKernel::configure(const CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(anchors, all_anchors);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(anchors->info(), all_anchors->info(), info));

@@ -48,7 +48,7 @@ public:
      * @param[out] output           Destination tensor. Data types supported: S16.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
 
 private:
     //Make the configure method of the parent class private
@@ -73,7 +73,7 @@ public:
      * @param[out] output           Destination tensor. Data types supported: U8.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
 
 private:
     //Make the configure method of the parent class private

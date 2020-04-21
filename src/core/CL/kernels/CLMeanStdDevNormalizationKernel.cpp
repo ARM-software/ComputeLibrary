@@ -88,7 +88,7 @@ void CLMeanStdDevNormalizationKernel::configure(ICLTensor *input, ICLTensor *out
     configure(CLKernelLibrary::get().get_compile_context(), input, output, epsilon);
 }
 
-void CLMeanStdDevNormalizationKernel::configure(CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float epsilon)
+void CLMeanStdDevNormalizationKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 

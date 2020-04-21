@@ -76,7 +76,7 @@ public:
      * @param[out] output          Output tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
      * @param[in]  info            Output stage info. Used to pass the quantized output data type
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const GEMMLowpOutputStageInfo *info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
      *
      * @param[in] input  Input tensor. Data type supported: S32

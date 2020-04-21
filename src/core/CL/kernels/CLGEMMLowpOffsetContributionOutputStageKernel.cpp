@@ -187,7 +187,7 @@ void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const ICLTensor *m
     configure(CLKernelLibrary::get().get_compile_context(), mm_result, vector_sum_col, vector_sum_row, bias, output, k, a_offset, b_offset, output_stage, output_multipliers, output_shifts);
 }
 
-void CLGEMMLowpOffsetContributionOutputStageKernel::configure(CLCompileContext &compile_context, const ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row,
+void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const CLCompileContext &compile_context, const ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row,
                                                               const ICLTensor *bias, ICLTensor *output,
                                                               int32_t k, int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage,
                                                               const ICLTensor *output_multipliers, const ICLTensor *output_shifts)

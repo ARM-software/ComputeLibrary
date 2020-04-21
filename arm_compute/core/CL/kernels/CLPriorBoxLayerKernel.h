@@ -69,7 +69,7 @@ public:
      * @param[in]  max             Maximum prior box values
      * @param[in]  aspect_ratios   Aspect ratio values
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min, cl::Buffer *max,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min, cl::Buffer *max,
                    cl::Buffer *aspect_ratios);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPriorBoxLayerKernel
      *

@@ -181,7 +181,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     configure(CLKernelLibrary::get().get_compile_context(), input, output, pool_info, indices);
 }
 
-void CLPoolingLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
+void CLPoolingLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 

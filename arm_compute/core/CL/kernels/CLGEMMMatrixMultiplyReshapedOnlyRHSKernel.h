@@ -85,7 +85,7 @@ public:
      *                             rhs_info.transpose: true,false
      * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
                    const GEMMLHSMatrixInfo &lhs_info,
                    const GEMMRHSMatrixInfo &rhs_info,
                    const GEMMKernelInfo    &gemm_info);

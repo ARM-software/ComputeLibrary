@@ -91,7 +91,7 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTens
     configure(CLKernelLibrary::get().get_compile_context(), mtx_a, vector_sum_row, info);
 }
 
-void CLGEMMLowpMatrixAReductionKernel::configure(CLCompileContext &compile_context, const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
+void CLGEMMLowpMatrixAReductionKernel::configure(const CLCompileContext &compile_context, const ICLTensor *mtx_a, ICLTensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_a, vector_sum_row);
@@ -168,7 +168,7 @@ void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTens
     configure(CLKernelLibrary::get().get_compile_context(), mtx_b, vector_sum_col, info);
 }
 
-void CLGEMMLowpMatrixBReductionKernel::configure(CLCompileContext &compile_context, const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
+void CLGEMMLowpMatrixBReductionKernel::configure(const CLCompileContext &compile_context, const ICLTensor *mtx_b, ICLTensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_b, vector_sum_col);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(mtx_b->info(), vector_sum_col->info()));

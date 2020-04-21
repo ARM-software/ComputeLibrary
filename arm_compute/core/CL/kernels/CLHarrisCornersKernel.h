@@ -79,7 +79,7 @@ public:
      * @param[in]  sensitivity      Sensitivity threshold k from the Harris-Stephens equation.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input1, const ICLImage *input2, ICLImage *output,
+    void configure(const CLCompileContext &compile_context, const ICLImage *input1, const ICLImage *input2, ICLImage *output,
                    int32_t block_size, float norm_factor, float strength_thresh, float sensitivity,
                    bool border_undefined);
 

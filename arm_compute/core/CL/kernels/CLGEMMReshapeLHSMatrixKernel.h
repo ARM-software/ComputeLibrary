@@ -75,7 +75,7 @@ public:
      *                                     lhs_info.interleave: true, false
      * @param[in]  reinterpret_input_as_3d (Optional) True if the input has to be reinterpreted as 3D tensor
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d = false);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMReshapeLHSMatrixKernel
      *
      * @param[in] input                   Input tensor info. Data types supported: All

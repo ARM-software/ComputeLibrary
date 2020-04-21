@@ -63,7 +63,7 @@ public:
      * @param[in]  mask             The given mask. Will be used only if pattern is specified to PATTERN_OTHER
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function,
                    unsigned int mask_size, MatrixPattern pattern, const uint8_t *mask,
                    bool border_undefined);
 

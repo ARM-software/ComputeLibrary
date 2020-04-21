@@ -65,7 +65,7 @@ public:
      * @param[out] output          Output tensor which stores the local HOG for each cell. DataType supported: F32. Number of channels supported: equal to the number of histogram bins per cell
      * @param[in]  hog_info        HOG's metadata
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input_magnitude, const ICLTensor *input_phase, ICLTensor *output, const HOGInfo *hog_info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input_magnitude, const ICLTensor *input_phase, ICLTensor *output, const HOGInfo *hog_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -108,7 +108,7 @@ public:
      * @param[out] output          Output tensor which stores the normalised blocks. Data type supported: F32. Number of channels supported: equal to the number of histogram bins per block
      * @param[in]  hog_info        HOG's metadata
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const HOGInfo *hog_info);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const HOGInfo *hog_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

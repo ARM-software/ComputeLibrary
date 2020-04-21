@@ -84,7 +84,7 @@ void CLQuantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLQuantizationLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLQuantizationLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));

@@ -100,7 +100,7 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     configure(CLKernelLibrary::get().get_compile_context(), input, sum, output, axis, epsilon);
 }
 
-void CLL2NormalizeLayerKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon)
+void CLL2NormalizeLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), sum->info(), output->info(), axis, epsilon));

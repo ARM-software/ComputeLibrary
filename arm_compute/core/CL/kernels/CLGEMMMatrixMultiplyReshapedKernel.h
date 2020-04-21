@@ -101,7 +101,7 @@ public:
      *
      * @note lhs_info.k0 must be equal to rhs_info.k0
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
                    const GEMMLHSMatrixInfo &lhs_info,
                    const GEMMRHSMatrixInfo &rhs_info,
                    const GEMMKernelInfo    &gemm_info);

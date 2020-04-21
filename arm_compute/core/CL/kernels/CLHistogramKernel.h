@@ -60,7 +60,7 @@ public:
      * @param[in]  input           Source image. Data types supported: U8.
      * @param[out] output          Destination distribution.
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output);
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -98,7 +98,7 @@ public:
      * @param[in]  input           Source image. Data types supported: U8.
      * @param[out] output          Destination distribution.
      */
-    void configure(CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output);
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

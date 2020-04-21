@@ -69,7 +69,7 @@ public:
      * @param[in]  mode            (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
      *                             or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
      */
-    void configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(),
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(),
                    PaddingMode mode = PaddingMode::CONSTANT);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPadLayerKernel
      *

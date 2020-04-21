@@ -47,7 +47,7 @@ void CLGaussianPyramidHorKernel::configure(const ICLTensor *input, ICLTensor *ou
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLGaussianPyramidHorKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLGaussianPyramidHorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U16);
@@ -158,7 +158,7 @@ void CLGaussianPyramidVertKernel::configure(const ICLTensor *input, ICLTensor *o
     configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
-void CLGaussianPyramidVertKernel::configure(CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLGaussianPyramidVertKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U16);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
