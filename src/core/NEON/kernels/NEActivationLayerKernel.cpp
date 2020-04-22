@@ -533,17 +533,17 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
             if(act == ActivationFunction::RELU)
             {
                 tmp = std::max(const_0, in);
-                tmp = utility::clamp<qasymm8_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(const_0, in));
-                tmp = utility::clamp<qasymm8_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::LU_BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(b, in));
-                tmp = utility::clamp<qasymm8_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::LOGISTIC)
             {
@@ -710,17 +710,17 @@ typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NE
             if(act == ActivationFunction::RELU)
             {
                 tmp = std::max(const_0, in);
-                tmp = utility::clamp<qasymm8_signed_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(const_0, in));
-                tmp = utility::clamp<qasymm8_signed_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::LU_BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(b, in));
-                tmp = utility::clamp<qasymm8_signed_t>(tmp * s + o);
+                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::LOGISTIC)
             {
