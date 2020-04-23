@@ -100,6 +100,10 @@
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 /** Specialized macros to perform a broadcast dot product operation between one vector "a" and N0 vectors "b" of size K0 [1,16] */
+#define ARM_DOT_K0X1(k0, a, b, c)         \
+    ({                                    \
+        ARM_DOT_K0(k0, (a), (b##0), (c)); \
+    })
 #define ARM_DOT_K0X2(k0, a, b, c)            \
     ({                                       \
         ARM_DOT_K0(k0, (a), (b##0), (c.s0)); \
