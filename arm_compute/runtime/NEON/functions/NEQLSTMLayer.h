@@ -265,7 +265,7 @@ private:
     NEGEMMLowpOutputStage            _projection_outstage{};
     NEArithmeticAdditionKernel       _accumulate_projection{};
     NEActivationLayer                _projection_clip{};
-    std::array<NEQLSTMLayerNormalizationKernel, _layer_norm_count> _layer_norms{};
+    std::array<NEQLSTMLayerNormalizationKernel, _layer_norm_count> _layer_norms{ {} };
 
     // Tensor pointers
     const ITensor *_input_to_input_weights{ nullptr };
@@ -278,8 +278,8 @@ private:
     const ITensor *_recurrent_to_cell_weights{ nullptr };
     const ITensor *_recurrent_to_output_weights{ nullptr };
     const ITensor *_projection_weights{ nullptr };
-    std::array<const ITensor *, _layer_norm_count> _layer_norm_weights{};
-    std::array<const ITensor *, _layer_norm_count> _layer_norm_bias{};
+    std::array<const ITensor *, _layer_norm_count> _layer_norm_weights{ {} };
+    std::array<const ITensor *, _layer_norm_count> _layer_norm_bias{ {} };
 
     using LayerNormIndexType = typename std::underlying_type<LayerNormGate>::type;
     inline LayerNormIndexType getGateIndex(LayerNormGate g)
@@ -381,7 +381,7 @@ private:
     Tensor _mm_projection_res{ nullptr };
     Tensor _projection_outstage_res{ nullptr };
     Tensor _ones{ nullptr };
-    std::array<Tensor, _layer_norm_count> _layer_norm_output{};
+    std::array<Tensor, _layer_norm_count> _layer_norm_output{ {} };
 
     inline Tensor &get_layer_norm_output(LayerNormGate g)
     {
