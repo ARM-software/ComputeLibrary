@@ -49,10 +49,10 @@ In order to facilitate the work of the support team please provide the build inf
 For each release we provide some pre-built binaries of the library [here](https://github.com/ARM-software/ComputeLibrary/releases)
 
 These binaries have been built using the following toolchains:
-            - Linux armv7a: gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf
-            - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
-            - Android armv7a: clang++ / libc++ NDK r17c
-            - Android am64-v8a: clang++ / libc++ NDK r17c
+            - Linux armv7a: gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf
+            - Linux arm64-v8a: gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu
+            - Android armv7a: clang++ / libc++ NDK r18b
+            - Android am64-v8a: clang++ / libc++ NDK r18b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
@@ -244,6 +244,8 @@ If there is more than one release in a month then an extra sequential number is 
 v20.05 Public major release
  - Various bug fixes.
  - Various optimisations.
+ - Updated recommended NDK version to r18b.
+ - Updated recommended gcc version to Linaro 6.3.1.
  - Added Bfloat16 type support
  - Added Bfloat16 support in:
      - @ref NEWeightsReshapeKernel
@@ -1211,8 +1213,8 @@ Example:
 
 For Linux, the library was successfully built and tested using the following Linaro GCC toolchain:
 
- - gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf
- - gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
+ - gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf
+ - gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu
 
 To cross-compile the library in debug mode, with NEON only support, for Linux 32bit:
 
@@ -1348,25 +1350,25 @@ Below is a list of the common parameters among the graph examples :
 @subsection S3_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
- - clang++ from NDK r17c for armv7a
- - clang++ from NDK r17c for arm64-v8a
- - clang++ from NDK r18-beta1 for arm64-v8.2-a with FP16 support
+ - clang++ from NDK r18b for armv7a
+ - clang++ from NDK r18b for arm64-v8a
+ - clang++ from NDK r18b for arm64-v8.2-a with FP16 support
 
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
-- Download the NDK r17c from here: https://developer.android.com/ndk/downloads/index.html
+- Download the NDK r18b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2.7 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
 
 
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r17c --stl libc++ --api 21
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r17c --stl libc++ --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r18b --stl libc++ --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r18b --stl libc++ --api 21
 
 @attention We used to use gnustl but as of NDK r17 it is deprecated so we switched to libc++
 
 @note Make sure to add the toolchains to your PATH:
 
-	export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r17c/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r17c/bin
+	export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r18b/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r18b/bin
 
 @subsubsection S3_3_1_library How to build the library ?
 
