@@ -269,9 +269,7 @@ SimpleTensor<T> complex_mul_and_reduce(const SimpleTensor<T> &input, const Simpl
 
     // MemSet dst memory to zero
     std::memset(dst.data(), 0, dst.size());
-#if defined(_OPENMP)
-    #pragma omp parallel for collapse(5)
-#endif /* _OPENMP */
+
     for(uint32_t b = 0; b < N; ++b)
     {
         for(uint32_t co = 0; co < Co; ++co)
