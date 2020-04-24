@@ -277,6 +277,15 @@ v20.05 Public major release
      - @ref CPPPermute
      - @ref CPPTopKVKernel
      - @ref CPPTopKV
+ - New OpenCL kernels / functions:
+     - @ref CLQLSTMLayer
+     - @ref CLQLSTMLayerNormalizationKernel
+ - New NEON kernels / functions:
+     - @ref NEQLSTMLayer
+     - @ref NEQLSTMLayerNormalizationKernel
+ - Added HARD_SWISH support in:
+     - @ref CLActivationLayerKernel
+     - @ref NEActivationLayerKernel
  - Deprecated OpenCL kernels / functions:
      - CLGEMMLowpQuantizeDownInt32ToUint8Scale
      - CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
