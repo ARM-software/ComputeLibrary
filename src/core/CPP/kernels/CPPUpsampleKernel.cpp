@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,10 +82,24 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     const int    end_y         = height_scaled - _info.pad_bottom();
     const size_t element_size  = _input->info()->element_size();
 
-    //The fill value is normally 0, but for QASYMM8 the '0' corresponds to the offset
-    const uint8_t fill_value = _output->info()->data_type() == DataType::QASYMM8 ? utility::clamp<uint8_t>(_output->info()->quantization_info().uniform().offset) : 0;
-    //Filling a value different than 0 works only for QASYMM8 datatype since we are filling 1byte values in a buffer of uint8_ts
-    std::fill_n(_output->buffer(), _output->info()->total_size(), fill_value);
+    // The fill value is normally 0, but for quantized types '0' corresponds to the offset
+    switch(_output->info()->data_type())
+    {
+        case DataType::QASYMM8:
+        {
+            const uint8_t fill_value = _output->info()->quantization_info().uniform().offset;
+            std::fill_n(_output->buffer(), _output->info()->total_size(), fill_value);
+        }
+        break;
+        case DataType::QASYMM8_SIGNED:
+        {
+            const int8_t fill_value = _output->info()->quantization_info().uniform().offset;
+            std::fill_n(_output->buffer(), _output->info()->total_size(), fill_value);
+        }
+        break;
+        default:
+            std::fill_n(_output->buffer(), _output->info()->total_size(), 0);
+    }
 
     // Create window
     Window window_out(window);
