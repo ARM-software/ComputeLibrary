@@ -85,6 +85,15 @@ template void copy_and_pad_tile(
   unsigned int, unsigned int, unsigned int, unsigned int, float
 );
 
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template void copy_and_pad_tile(
+    unsigned int, unsigned int, unsigned int,
+    const __fp16 *, unsigned int, unsigned int,
+    __fp16 *, unsigned int, unsigned int,
+    unsigned int, unsigned int, unsigned int, unsigned int, __fp16
+);
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 template <unsigned int TileRows, unsigned int TileCols>
 void CopyCropped<TileRows, TileCols>::execute(
   const size_t size,
@@ -163,4 +172,21 @@ template void crop_and_copy_tile(
   unsigned int crop_right
 );
 
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template void crop_and_copy_tile(
+    unsigned int tile_rows,
+    unsigned int tile_cols,
+    unsigned int n_channels,
+    const __fp16 *inptr,
+    unsigned int in_row_stride,
+    unsigned int in_col_stride,
+    __fp16 *outptr,
+    unsigned int out_row_stride,
+    unsigned int out_col_stride,
+    unsigned int crop_top,
+    unsigned int crop_left,
+    unsigned int crop_bottom,
+    unsigned int crop_right
+);
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 }  // namespace padding

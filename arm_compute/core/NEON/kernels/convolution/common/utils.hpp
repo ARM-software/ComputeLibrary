@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <limits>
+
 void PrintMatrix(const float *const m, const int M, const int N, const int row_stride);
 
 constexpr inline int iceildiv(const int a, const int b)
@@ -36,3 +38,23 @@ inline T roundup(const T a, const T b)
 {
     return b * iceildiv(a, b);
 }
+
+template<typename T>
+struct TypeBounds
+{
+    static constexpr T lower() noexcept { return std::numeric_limits<T>::has_infinity
+                                                 ? -std::numeric_limits<T>::infinity()
+                                                 : std::numeric_limits<T>::lowest(); };
+    static constexpr T upper() noexcept { return std::numeric_limits<T>::has_infinity
+                                                 ? std::numeric_limits<T>::infinity()
+                                                 : std::numeric_limits<T>::max(); };
+};
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template<>
+struct TypeBounds<__fp16>
+{
+    static constexpr __fp16 lower() noexcept { return -std::numeric_limits<float>::infinity(); };
+    static constexpr __fp16 upper() noexcept { return std::numeric_limits<float>::infinity(); }
+};
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */

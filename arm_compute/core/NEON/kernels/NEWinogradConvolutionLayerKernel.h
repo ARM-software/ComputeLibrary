@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,10 +31,10 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Interface for the NEON kernel to perform Winograd input transform. */
-template <typename T>
 class INEWinogradLayerTransformInputKernel : public INEKernel
 {
 public:
@@ -97,7 +97,7 @@ public:
 
 /** NEON kernel to perform Winograd input transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-class NEWinogradLayerTransformInputKernel : public INEWinogradLayerTransformInputKernel<T>
+class NEWinogradLayerTransformInputKernel : public INEWinogradLayerTransformInputKernel
 {
 public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -168,7 +168,7 @@ public:
 
     /** Configure the output transform kernel.
      *
-     * @param[in]  input_nhwc    Input tensor.  Data types supported: F32. Layout supported NHWC.
+     * @param[in]  input_nhwc    Input tensor.  Data types supported: F16/F32. Layout supported NHWC.
      * @param[in]  num_batches   Number of batches in input tensor.
      * @param[in]  num_rows      Number of rows in input tensor.
      * @param[in]  num_cols      Number of columns in input tensor.
@@ -199,7 +199,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformInputKernel
      *
-     * @param[in] input         First tensor input info. Data types supported: F32.
+     * @param[in] input         First tensor input info. Data types supported: F16/F32.
      * @param[in] output        Output tensor info. Data types supported: same as @p input.
      * @param[in] winograd_info Contains Winograd's information described in @ref WinogradInfo
      *
@@ -227,7 +227,6 @@ private:
 };
 
 /** Interface for the NEON kernel to perform Winograd output transform. */
-template <typename T>
 class INEWinogradLayerTransformOutputKernel : public INEKernel
 {
 public:
@@ -312,7 +311,7 @@ public:
 
 /** NEON kernel to perform Winograd output transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-class NEWinogradLayerTransformOutputKernel : public INEWinogradLayerTransformOutputKernel<T>
+class NEWinogradLayerTransformOutputKernel : public INEWinogradLayerTransformOutputKernel
 {
 public:
     const char *name() const override
@@ -410,7 +409,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformOutputKernel
      *
-     * @param[in] input         Source tensor info with shape [C, N, 16, batches] or [C, N, 36, batches]. Data types supported: F32.
+     * @param[in] input         Source tensor info with shape [C, N, 16, batches] or [C, N, 36, batches]. Data types supported: F16/F32.
      * @param[in] bias          Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
      * @param[in] output        Destination tensor info with shape [output_convolved_dims.width, output_convolved_dims.height, C, batches]. Data type supported: same as @p input
      * @param[in] winograd_info Contains Winograd's information described in @ref WinogradInfo
@@ -438,7 +437,6 @@ private:
 };
 
 /** Interface for the NEON kernel to perform Winograd weights transform. */
-template <typename T>
 class INEWinogradLayerTransformWeightsKernel : public INEKernel
 {
 public:
@@ -488,7 +486,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformWeightsKernel
      *
-     * @param[in] input   First tensor input info. Data types supported: F32.
+     * @param[in] input   First tensor input info. Data types supported: F16/F32.
      * @param[in] weights Weights tensor info. Data types supported: same as @p input.
      *
      * @return a status
@@ -498,7 +496,7 @@ public:
 
 /** NEON kernel to perform Winograd weights transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-class NEWinogradLayerTransformWeightsKernel final : public INEWinogradLayerTransformWeightsKernel<T>
+class NEWinogradLayerTransformWeightsKernel final : public INEWinogradLayerTransformWeightsKernel
 {
 public:
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -522,7 +520,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformWeightsKernel
      *
      * @param[in] input         Source tensor info. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
-     *                          kernel_x must be 3 and equal to kernel_y. Data types supported: F32.
+     *                          kernel_x must be 3 and equal to kernel_y. Data types supported: F16/F32.
      * @param[in] output        Destination tensor info. The output is a 3D tensor with dimensions [OFM, IFM, 16] or [OFM, IFM, 36]. Data type supported: same as @p input
      * @param[in] winograd_info Contains Winograd's information described in @ref WinogradInfo
      *

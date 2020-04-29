@@ -48,15 +48,9 @@ MEMBERFN()
       _n_channels(n_channels),
       _output_min((activation.type == arm_gemm::Activation::Type::ReLU ||
                    activation.type == arm_gemm::Activation::Type::BoundedReLU)
-                      ? static_cast<TOut>(0.0f)
-                      : (std::numeric_limits<TOut>::has_infinity)
-                            ? -std::numeric_limits<TOut>::infinity()
-                            : std::numeric_limits<TOut>::lowest()),
+                      ? static_cast<TOut>(0.0f) : TypeBounds<TOut>::lower()),
       _output_max((activation.type == arm_gemm::Activation::Type::BoundedReLU)
-                      ? static_cast<TOut>(activation.param1)
-                      : (std::numeric_limits<TOut>::has_infinity)
-                            ? std::numeric_limits<TOut>::infinity()
-                            : std::numeric_limits<TOut>::max()),
+                      ? static_cast<TOut>(activation.param1) : TypeBounds<TOut>::upper()),
       _matrix_base(nullptr), _biases(nullptr), _matrix_stride(0),
       _matrix_row_stride(0), _matrix_batch_stride(0), _outptr(nullptr),
       _tiles_M(iceildiv(n_rows, output_tile_rows)),

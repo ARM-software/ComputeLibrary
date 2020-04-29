@@ -53,6 +53,11 @@ const AbsoluteTolerance<float> abs_tolerance_f32(0.002f);             /**< Absol
 const AbsoluteTolerance<float> abs_tolerance_1xN_f32(0.0041f);        /**< Absolute tolerance for FP32 types */
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+const AbsoluteTolerance<half> tolerance_convolution_layer_f16(half(0.4f));
+constexpr float               tolerance_num_f16 = 0.15f;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
 constexpr float                           tolerance_num = 0.07f;                     /**< Tolerance number for the FP16 implementation */
@@ -329,6 +334,36 @@ FIXTURE_DATA_TEST_CASE(RunSmallNoBias, NEWinogradConvolutionLayerNoBiasFixture<f
 }
 
 TEST_SUITE_END() // FP32
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+TEST_SUITE(FP16)
+using CLWinogradConvolutionLayerFastMathFixture16 = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, half, float>;
+
+TEST_SUITE(Conv3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F16 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F16 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_convolution_layer_f16, tolerance_num_f16);
+}
+TEST_SUITE_END() // Conv3x3
+TEST_SUITE_END() // FP16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END() // WinogradLayer
 
 TEST_SUITE(GEMMConvolutionLayer)
