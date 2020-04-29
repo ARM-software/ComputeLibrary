@@ -43,11 +43,6 @@ void NEElementwiseMax::configure(ITensor *input1, ITensor *input2, ITensor *outp
 Status NEElementwiseMax::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    if(input1->data_type() == DataType::QASYMM8_SIGNED)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input1, input2, output);
-    }
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::MAX, input1, input2, output);
 }
 
@@ -62,11 +57,6 @@ void NEElementwiseMin::configure(ITensor *input1, ITensor *input2, ITensor *outp
 Status NEElementwiseMin::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    if(input1->data_type() == DataType::QASYMM8_SIGNED)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input1, input2, output);
-    }
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::MIN, input1, input2, output);
 }
 

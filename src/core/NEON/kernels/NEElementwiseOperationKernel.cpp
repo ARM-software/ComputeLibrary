@@ -24,26 +24,17 @@
 #include "arm_compute/core/NEON/kernels/NEElementwiseOperationKernel.h"
 
 #include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
-#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Validate.h"
 
-#include <algorithm>
 #include <arm_neon.h>
-#include <cstdint>
 #include <map>
-#include <string>
 
 namespace arm_compute
 {
-class Coordinates;
-
 namespace
 {
 float32x4x4_t load_quantized(const uint8_t *input1_ptr, const int32x4_t &offset, const float32x4_t &scale)
