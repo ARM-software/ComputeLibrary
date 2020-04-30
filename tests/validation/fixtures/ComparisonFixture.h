@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -144,6 +144,17 @@ public:
 
     {
         ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape, shape, data_type, qinfo0, qinfo1);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ComparisonQuantizedBroadcastValidationFixture : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(ComparisonOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, QuantizationInfo qinfo0, QuantizationInfo qinfo1)
+    {
+        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape0, shape1, data_type, qinfo0, qinfo1);
     }
 };
 } // namespace validation
