@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,8 @@ Status NEDirectConvolutionLayer::validate(const ITensorInfo *input, const ITenso
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
 
-    DataType   data_type = output->data_type();
+    // output might not be initialized since it can be an intermediate tensor of another layer
+    DataType   data_type = input->data_type();
     TensorInfo accumulator(output->clone()->set_is_resizable(true).reset_padding().set_data_type(data_type));
 
     // Validate Convolution kernel

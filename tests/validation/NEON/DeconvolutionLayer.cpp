@@ -59,6 +59,16 @@ const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::
 const auto data3x3_asymm = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadLeft", 0, 1)
                            * framework::dataset::make("PadRight", 0, 1) * framework::dataset::make("PadTop", 0, 1) * framework::dataset::make("PadBottom", 0, 1) * framework::dataset::make("NumKernels", { 3 });
 
+const auto data9x9_small_asymm = framework::dataset::make("InputShape", TensorShape{ 10U, 10U, 1U, 1U }) *framework::dataset::make("StrideX", 2) *framework::dataset::make("StrideY",
+                                 2)
+                                 *framework::dataset::make("PadLeft", 3)
+                                 *framework::dataset::make("PadRight", 4) *framework::dataset::make("PadTop", 3) *framework::dataset::make("PadBottom", 4) *framework::dataset::make("NumKernels", { 1 });
+
+const auto data9x9_large_asymm = framework::dataset::make("InputShape", TensorShape{ 640U, 360U, 56U, 1U }) *framework::dataset::make("StrideX", 2) *framework::dataset::make("StrideY",
+                                 2)
+                                 *framework::dataset::make("PadLeft", 3)
+                                 *framework::dataset::make("PadRight", 4) *framework::dataset::make("PadTop", 3) *framework::dataset::make("PadBottom", 4) *framework::dataset::make("NumKernels", { 1 });
+
 const auto data3x3_precommit = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadX", 0, 2)
                                * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
 
@@ -142,6 +152,9 @@ template <typename T>
 using NEDeconvolutionLayerAsymmFixture3x3 = DeconvolutionValidationAsymmFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3>;
 
 template <typename T>
+using NEDeconvolutionLayerAsymmFixture9x9 = DeconvolutionValidationAsymmFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 9, 9>;
+
+template <typename T>
 using NEDeconvolutionLayerFixture1x1 = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 1, 1>;
 
 TEST_SUITE(Float)
@@ -189,6 +202,24 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture1x1<float>, framework::Da
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
 TEST_SUITE_END() // W1x1
+TEST_SUITE(W9x9)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerAsymmFixture9x9<float>, framework::DatasetMode::ALL, combine(combine(combine(data9x9_small_asymm, framework::dataset::make("DataType",
+                                                                                                                  DataType::F32)),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                  framework::dataset::make("AddBias", { false })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerAsymmFixture9x9<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data9x9_large_asymm, framework::dataset::make("DataType",
+                                                                                                                      DataType::F32)),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                      framework::dataset::make("AddBias", { false })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END() // W9x9
 TEST_SUITE_END() // FP32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

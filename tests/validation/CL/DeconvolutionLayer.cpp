@@ -49,6 +49,16 @@ RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< T
 constexpr AbsoluteTolerance<float>  tolerance_qasymm8(1.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
+const auto data9x9_small_asymm = framework::dataset::make("InputShape", TensorShape{ 10U, 10U, 1U, 1U }) *framework::dataset::make("StrideX", 2) *framework::dataset::make("StrideY",
+                                 2)
+                                 *framework::dataset::make("PadLeft", 3)
+                                 *framework::dataset::make("PadRight", 4) *framework::dataset::make("PadTop", 3) *framework::dataset::make("PadBottom", 4) *framework::dataset::make("NumKernels", { 1 });
+
+const auto data9x9_large_asymm = framework::dataset::make("InputShape", TensorShape{ 640U, 360U, 56U, 1U }) *framework::dataset::make("StrideX", 2) *framework::dataset::make("StrideY",
+                                 2)
+                                 *framework::dataset::make("PadLeft", 3)
+                                 *framework::dataset::make("PadRight", 4) *framework::dataset::make("PadTop", 3) *framework::dataset::make("PadBottom", 4) *framework::dataset::make("NumKernels", { 1 });
+
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
                      * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("NumKernels", { 3 });
 
@@ -137,6 +147,9 @@ using CLDeconvolutionLayerFixture2x2 = DeconvolutionValidationFixture<CLTensor, 
 template <typename T>
 using CLDeconvolutionLayerFixture1x1 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 1, 1>;
 
+template <typename T>
+using CLDeconvolutionLayerAsymmFixture9x9 = DeconvolutionValidationAsymmFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 9, 9>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
@@ -196,7 +209,16 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<float>, framework::Da
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 TEST_SUITE_END() // W1x1
-
+TEST_SUITE(W9x9)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerAsymmFixture9x9<float>, framework::DatasetMode::ALL, combine(combine(combine(data9x9_small_asymm, framework::dataset::make("DataType",
+                                                                                                                  DataType::F32)),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                  framework::dataset::make("AddBias", { false })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END() // W9x9
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)

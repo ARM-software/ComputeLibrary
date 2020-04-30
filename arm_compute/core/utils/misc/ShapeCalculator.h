@@ -485,7 +485,7 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
  * @return the calculated shape
  */
 inline TensorShape compute_deconvolution_upsampled_shape(const ITensorInfo &input, const ITensorInfo &weights, unsigned int sx, unsigned int sy,
-                                                         std::pair<unsigned int, unsigned int> &out_dims, unsigned int &padx, unsigned int &pady)
+                                                         std::pair<unsigned int, unsigned int> &out_dims, uint32_t &padx, uint32_t &pady)
 {
     const DataLayout data_layout = input.data_layout();
     const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);

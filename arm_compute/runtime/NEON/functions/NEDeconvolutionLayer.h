@@ -120,16 +120,9 @@ private:
     NEConvolutionLayer _conv_f;
     CPPUpsample        _upsample_f;
     NEReverse          _flip_weights;
-    NEPermute          _permute_input;
-    NEPermute          _permute_weights;
-    NEPermute          _permute_output;
     Tensor             _scaled_output;
     Tensor             _weights_flipped;
-    Tensor             _permuted_input;
-    Tensor             _permuted_weights;
-    Tensor             _permuted_output;
     Tensor             _flip_axis;
-    bool               _is_nchw;
     const ITensor     *_original_weights;
     ITensor           *_input;
     PadStrideInfo      _info;
