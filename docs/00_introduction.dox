@@ -264,6 +264,8 @@ v20.05 Public major release
      - @ref CLGEMMLowpQuantizeDownInt32ScaleByFloatKernel
      - @ref CLReductionOperation
      - @ref CLReduceMean
+     - @ref NEScale
+     - @ref NEScaleKernel
      - @ref NEUpsampleLayer
      - @ref NECast
      - @ref NEReductionOperation
@@ -277,6 +279,8 @@ v20.05 Public major release
      - @ref CPPPermute
      - @ref CPPTopKVKernel
      - @ref CPPTopKV
+     - @ref CPPUpsample
+     - @ref CPPUpsampleKernel
  - New OpenCL kernels / functions:
      - @ref CLQLSTMLayer
      - @ref CLQLSTMLayerNormalizationKernel
