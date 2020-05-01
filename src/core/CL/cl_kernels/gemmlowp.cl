@@ -140,7 +140,7 @@
         ARM_DOT_K0(k0, (a), (b##F), (c.sF)); \
     })
 
-/** Specialized macros to perform a a partial matrix multiplication with dimensions M0,N0,K0 */
+/** Specialized macros to perform a partial matrix multiplication with dimensions M0,N0,K0 */
 #define ARM_MM_K0XN0X1(n0, k0, a, b, c)           \
     ({                                            \
         ARM_DOT_K0XN0(n0, k0, (a##0), b, (c##0)); \
@@ -197,6 +197,97 @@
     ({                                       \
         CONCAT(ARM_MM_K0XN0X, m0)            \
         (n0, k0, a, b, c);                   \
+    })
+
+/** Specialized macros to perform a broadcast dot product operation between one vector "a" and N0 vectors "b" of size K0 [1,16] */
+#define ARM_MUL_N0X1(VECTOR_ACC_TYPE, a, b, c)   \
+    ({                                           \
+        c += CONVERT(b##0, VECTOR_ACC_TYPE) * a; \
+    })
+#define ARM_MUL_N0X2(VECTOR_ACC_TYPE, a, b, c)        \
+    ({                                                \
+        c += CONVERT(b##0, VECTOR_ACC_TYPE) * a.s##0; \
+        c += CONVERT(b##1, VECTOR_ACC_TYPE) * a.s##1; \
+    })
+#define ARM_MUL_N0X3(VECTOR_ACC_TYPE, a, b, c)        \
+    ({                                                \
+        ARM_MUL_N0X2(VECTOR_ACC_TYPE, a, b, c);       \
+        c += CONVERT(b##2, VECTOR_ACC_TYPE) * a.s##2; \
+    })
+#define ARM_MUL_N0X4(VECTOR_ACC_TYPE, a, b, c)        \
+    ({                                                \
+        ARM_MUL_N0X3(VECTOR_ACC_TYPE, a, b, c);       \
+        c += CONVERT(b##3, VECTOR_ACC_TYPE) * a.s##3; \
+    })
+#define ARM_MUL_N0X8(VECTOR_ACC_TYPE, a, b, c)        \
+    ({                                                \
+        ARM_MUL_N0X4(VECTOR_ACC_TYPE, a, b, c);       \
+        c += CONVERT(b##4, VECTOR_ACC_TYPE) * a.s##4; \
+        c += CONVERT(b##5, VECTOR_ACC_TYPE) * a.s##5; \
+        c += CONVERT(b##6, VECTOR_ACC_TYPE) * a.s##6; \
+        c += CONVERT(b##7, VECTOR_ACC_TYPE) * a.s##7; \
+    })
+#define ARM_MUL_N0X16(VECTOR_ACC_TYPE, a, b, c)       \
+    ({                                                \
+        ARM_MUL_N0X8(VECTOR_ACC_TYPE, a, b, c);       \
+        c += CONVERT(b##8, VECTOR_ACC_TYPE) * a.s##8; \
+        c += CONVERT(b##9, VECTOR_ACC_TYPE) * a.s##9; \
+        c += CONVERT(b##A, VECTOR_ACC_TYPE) * a.s##A; \
+        c += CONVERT(b##B, VECTOR_ACC_TYPE) * a.s##B; \
+        c += CONVERT(b##C, VECTOR_ACC_TYPE) * a.s##C; \
+        c += CONVERT(b##D, VECTOR_ACC_TYPE) * a.s##D; \
+        c += CONVERT(b##E, VECTOR_ACC_TYPE) * a.s##E; \
+        c += CONVERT(b##F, VECTOR_ACC_TYPE) * a.s##F; \
+    })
+/** Specialized macros to perform a a partial matrix multiplication with dimensions M0,N0,K0 */
+#define ARM_MM_NATIVE_N0XK0X1(VECTOR_ACC_TYPE, k0, a, b, c)    \
+    ({                                                         \
+        ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, (a##0), b, (c##0)); \
+    })
+#define ARM_MM_NATIVE_N0XK0X2(VECTOR_ACC_TYPE, k0, a, b, c)    \
+    ({                                                         \
+        ARM_MM_NATIVE_N0XK0X1(VECTOR_ACC_TYPE, k0, a, b, c);   \
+        ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, (a##1), b, (c##1)); \
+    })
+#define ARM_MM_NATIVE_N0XK0X3(VECTOR_ACC_TYPE, k0, a, b, c)    \
+    ({                                                         \
+        ARM_MM_NATIVE_N0XK0X2(VECTOR_ACC_TYPE, k0, a, b, c);   \
+        ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, (a##2), b, (c##2)); \
+    })
+#define ARM_MM_NATIVE_N0XK0X4(VECTOR_ACC_TYPE, k0, a, b, c)    \
+    ({                                                         \
+        ARM_MM_NATIVE_N0XK0X3(VECTOR_ACC_TYPE, k0, a, b, c);   \
+        ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, (a##3), b, (c##3)); \
+    })
+#define ARM_MM_NATIVE_N0XK0X5(VECTOR_ACC_TYPE, k0, a, b, c)    \
+    ({                                                         \
+        ARM_MM_NATIVE_N0XK0X4(VECTOR_ACC_TYPE, k0, a, b, c);   \
+        ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, (a##4), b, (c##4)); \
+    })
+#define ARM_MM_NATIVE_N0XK0X6(VECTOR_ACC_TYPE, k0, a, b, c)    \
+    ({                                                         \
+        ARM_MM_NATIVE_N0XK0X5(VECTOR_ACC_TYPE, k0, a, b, c);   \
+        ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, (a##5), b, (c##5)); \
+    })
+#define ARM_MM_NATIVE_N0XK0X7(VECTOR_ACC_TYPE, k0, a, b, c)    \
+    ({                                                         \
+        ARM_MM_NATIVE_N0XK0X6(VECTOR_ACC_TYPE, k0, a, b, c);   \
+        ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, (a##6), b, (c##6)); \
+    })
+#define ARM_MM_NATIVE_N0XK0X8(VECTOR_ACC_TYPE, k0, a, b, c)    \
+    ({                                                         \
+        ARM_MM_NATIVE_N0XK0X7(VECTOR_ACC_TYPE, k0, a, b, c);   \
+        ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, (a##7), b, (c##7)); \
+    })
+#define ARM_MUL_N0XK0(VECTOR_ACC_TYPE, k0, a, b, c) \
+    ({                                              \
+        CONCAT(ARM_MUL_N0X, k0)                     \
+        (VECTOR_ACC_TYPE, (a), b, (c));             \
+    })
+#define ARM_MM_NATIVE_N0XK0XM0(VECTOR_ACC_TYPE, m0, k0, a, b, c) \
+    ({                                                           \
+        CONCAT(ARM_MM_NATIVE_N0XK0X, m0)                         \
+        (VECTOR_ACC_TYPE, k0, a, b, c);                          \
     })
 
 #if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N)
@@ -949,11 +1040,15 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
         // Load values from RHS matrix
         LOAD_BLOCK(K0, N0, DATA_TYPE, b, rhs_ptr, rhs_offset, rhs_stride_y, zrhs);
 
+        // Partial matrix multiplication M0,N0,K0
+#if(GPU_ARCH == GPU_ARCH_MIDGARD)
+        ARM_MM_NATIVE_N0XK0XM0(VEC_DATA_TYPE(ACC_DATA_TYPE, N0), M0, K0, a, b, c);
+#else  // GPU_ARCH == GPU_ARCH_MIDGARD
         // Transpose the values from RHS matrix
         TRANSPOSE_K0XN0(K0, N0, b_t, b, DATA_TYPE);
 
-        // Partial matrix multiplication M0,N0,K0
         ARM_MM_K0XN0XM0(M0, N0, K0, a, b_t, c);
+#endif // GPU_ARCH == GPU_ARCH_MIDGARD
 
         // Update the offset
         lhs_offset += K0;
@@ -969,11 +1064,15 @@ __kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
         // Load values from RHS matrix
         LOAD_BLOCK(1, N0, DATA_TYPE, b, rhs_ptr, rhs_offset, rhs_stride_y, zrhs);
 
+        // Partial matrix multiplication M0,N0,1
+#if(GPU_ARCH == GPU_ARCH_MIDGARD)
+        ARM_MM_NATIVE_N0XK0XM0(VEC_DATA_TYPE(ACC_DATA_TYPE, N0), M0, 1, a, b, c);
+#else  // GPU_ARCH == GPU_ARCH_MIDGARD
         // Transpose the values from RHS matrix
         TRANSPOSE_K0XN0(1, N0, b_t, b, DATA_TYPE);
 
-        // Partial matrix multiplication M0,N0,1
         ARM_MM_K0XN0XM0(M0, N0, 1, a, b_t, c);
+#endif // GPU_ARCH == GPU_ARCH_MIDGARD
 
         // Update the offset
         lhs_offset += 1;
