@@ -146,7 +146,7 @@ inline T delta_bilinear_c1(const T *pixel_ptr, size_t stride, float dx, float dy
 }
 
 /** Computes bilinear interpolation for quantized input and output, using the pointer to the top-left pixel and the pixel's distance between
- * the real coordinates and the smallest following integer coordinates. Input must be quantized and in single channel format.
+ * the real coordinates and the smallest following integer coordinates. Input must be QASYMM8 and in single channel format.
  *
  * @param[in] pixel_ptr Pointer to the top-left pixel value of a single channel input.
  * @param[in] stride    Stride to access the bottom-left and bottom-right pixel values
@@ -177,6 +177,40 @@ inline uint8_t delta_bilinear_c1_quantized(const uint8_t *pixel_ptr, size_t stri
     const float w4  = dx * dy;
     float       res = a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4;
     return static_cast<uint8_t>(quantize_qasymm8(res, oq_info));
+}
+
+/** Computes bilinear interpolation for quantized input and output, using the pointer to the top-left pixel and the pixel's distance between
+ * the real coordinates and the smallest following integer coordinates. Input must be QASYMM8_SIGNED and in single channel format.
+ *
+ * @param[in] pixel_ptr Pointer to the top-left pixel value of a single channel input.
+ * @param[in] stride    Stride to access the bottom-left and bottom-right pixel values
+ * @param[in] dx        Pixel's distance between the X real coordinate and the smallest X following integer
+ * @param[in] dy        Pixel's distance between the Y real coordinate and the smallest Y following integer
+ * @param[in] iq_info   Input QuantizationInfo
+ * @param[in] oq_info   Output QuantizationInfo
+ *
+ * @note dx and dy must be in the range [0, 1.0]
+ *
+ * @return The bilinear interpolated pixel value
+ */
+inline int8_t delta_bilinear_c1_quantized(const int8_t *pixel_ptr, size_t stride, float dx, float dy, UniformQuantizationInfo iq_info, UniformQuantizationInfo oq_info)
+{
+    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
+
+    const float dx1 = 1.0f - dx;
+    const float dy1 = 1.0f - dy;
+
+    const float a00 = dequantize_qasymm8_signed(*pixel_ptr, iq_info);
+    const float a01 = dequantize_qasymm8_signed(*(pixel_ptr + 1), iq_info);
+    const float a10 = dequantize_qasymm8_signed(*(pixel_ptr + stride), iq_info);
+    const float a11 = dequantize_qasymm8_signed(*(pixel_ptr + stride + 1), iq_info);
+
+    const float w1  = dx1 * dy1;
+    const float w2  = dx * dy1;
+    const float w3  = dx1 * dy;
+    const float w4  = dx * dy;
+    float       res = a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4;
+    return static_cast<int8_t>(quantize_qasymm8_signed(res, oq_info));
 }
 
 /** Computes linear interpolation using the pointer to the top pixel and the pixel's distance between

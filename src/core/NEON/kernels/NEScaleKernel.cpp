@@ -25,20 +25,12 @@
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 
 #include <arm_neon.h>
-#include <cstddef>
-#include <cstdint>
 
 namespace arm_compute
 {
@@ -724,7 +716,7 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
                 const auto dx_ptr      = reinterpret_cast<const float *>(dx.ptr());
                 const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
-                const auto in_ptr      = reinterpret_cast<const uint8_t *>(in.ptr());
+                const auto in_ptr      = reinterpret_cast<const int8_t *>(in.ptr());
 
                 const int in_yi      = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
                 const int offset_row = in_yi * in_stide_in_bytes;
