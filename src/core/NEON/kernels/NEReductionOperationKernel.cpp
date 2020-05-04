@@ -724,14 +724,13 @@ struct RedOpX_quantized
 
                 if(op == ReductionOperation::MEAN_SUM)
                 {
-                    res /= in_info.dimension(0);
+                    res /= static_cast<int32_t>(in_info.dimension(0));
                 }
                 else
                 {
                     // Subtract accumulated offsets
                     res -= (in_info.dimension(0) - 1) * iq_info.offset;
                 }
-
                 *reinterpret_cast<T *>(output.ptr()) = utils::cast::saturate_cast<T>(res);
             }
         }
