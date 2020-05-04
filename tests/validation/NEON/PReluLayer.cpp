@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,9 +132,9 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPReluLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                     PReluLayerQASYMM8SignedDataset),
-                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 20) })),
-                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
-                                                                                                            framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 5) }))
+                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.2f, 127) })),
+                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 64) })),
+                                                                                                            framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -128) }))
 
                       )
 {

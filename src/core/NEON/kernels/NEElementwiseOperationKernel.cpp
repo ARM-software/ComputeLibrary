@@ -941,7 +941,7 @@ void elementwise_op_quantized_signed(const ITensor *in1, const ITensor *in2, ITe
             const auto output_ptr              = reinterpret_cast<int8_t *>(output.ptr());
 
             const int8_t        broadcast_value  = *reinterpret_cast<const int8_t *>(broadcast_input.ptr());
-            const float32x4x4_t broadcast_vector = vdequantize(vdupq_n_u8(broadcast_value), broadcast_qinfo);
+            const float32x4x4_t broadcast_vector = vdequantize(vdupq_n_s8(broadcast_value), broadcast_qinfo);
 
             int x = (*broadcast_func)(window_start_x, window_end_x, window_step_x, non_broadcast_input_ptr, broadcast_vector, output_ptr,
                                       voffset_non_broadcast, vscale_non_broadcast, voffseto, invvscaleo, !is_broadcast_input_2);
