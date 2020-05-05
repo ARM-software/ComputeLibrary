@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ NESoftmaxLayerGeneric<IS_LOG>::NESoftmaxLayerGeneric(std::shared_ptr<IMemoryMana
 }
 
 template <bool IS_LOG>
-void NESoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ITensor *input, const ITensor *output, size_t axis)
+void NESoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ITensor *input, const ITensor *output, int32_t axis)
 {
     // Flatten the input
     const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input->info(), axis);
@@ -71,11 +71,14 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ITensor
 }
 
 template <bool IS_LOG>
-void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, float beta, size_t axis)
+void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, float beta, int32_t axis)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NESoftmaxLayerGeneric::validate(input->info(), output->info(), beta, axis));
+
+    // Handle negative axis, negative index is used to specify axis from the end (e.g. -1 for the last axis).
+    axis = wrap_around(axis, static_cast<int32_t>(input->info()->num_dimensions()));
 
     // We don't need flattening only in the case the input is 2D and axis is 1
     _needs_flattening = axis != 1;
@@ -142,13 +145,16 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
 }
 
 template <bool IS_LOG>
-Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, size_t axis)
+Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
 {
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Only up to 4 dimensions are supported");
     ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_RETURN_ERROR_ON(axis < 1 || input->num_dimensions() < axis);
+    ARM_COMPUTE_RETURN_ERROR_ON(axis < static_cast<int32_t>(-input->num_dimensions()) || static_cast<int32_t>(input->num_dimensions()) <= axis);
+
+    // Handle negative axis, negative index is used to specify axis from the end (e.g. -1 for the last axis).
+    axis = wrap_around(axis, static_cast<int32_t>(input->num_dimensions()));
 
     // Create intermediate tensor info
     DataType         tmp_data_type = input->data_type();

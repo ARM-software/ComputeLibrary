@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,13 +43,13 @@ public:
     NELogits1DMaxKernel();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NELogits1DMaxKernel
      *
-     * @param[in] input  Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output Destination tensor. Data types supported: same as @p input
      *
      * @return a status
@@ -98,7 +98,7 @@ public:
     ~NELogits1DSoftmaxKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in]  max    Max values tensor. Same shape as input with dimension 0 set to 1.
      *                    Data types supported: same as @p input.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
@@ -109,7 +109,7 @@ public:
     void configure(const ITensor *input, const ITensor *max, ITensor *output, const float beta, ITensor *tmp);
     /** Static function to check if given info will lead to a valid configuration of @ref NELogits1DSoftmaxKernel
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] max    Max values tensor info. Same shape as input with dimension 0 set to 1.
      *                   Data types supported: same as @p input.
      * @param[in] output Destination tensor info. Data types supported: same as @p input.
