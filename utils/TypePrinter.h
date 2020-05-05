@@ -29,6 +29,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/HOGInfo.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -232,6 +233,95 @@ inline std::string to_string(const ROIPoolingLayerInfo &pool_info)
 {
     std::stringstream str;
     str << pool_info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMKernelInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  gemm_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMKernelInfo &gemm_info)
+{
+    os << "( m= " << gemm_info.m;
+    os << " n= " << gemm_info.n;
+    os << " k= " << gemm_info.k;
+    os << " depth_output_gemm3d= " << gemm_info.depth_output_gemm3d;
+    os << " reinterpret_input_as_3d= " << gemm_info.reinterpret_input_as_3d;
+    os << " broadcast_bias= " << gemm_info.broadcast_bias;
+    os << " fp_mixed_precision= " << gemm_info.fp_mixed_precision;
+    os << " mult_transpose1xW_width= " << gemm_info.mult_transpose1xW_width;
+    os << " mult_interleave4x4_height= " << gemm_info.mult_interleave4x4_height;
+    os << " a_offset = " << gemm_info.a_offset;
+    os << " b_offset = " << gemm_info.b_offset;
+    os << ")";
+    return os;
+}
+
+/** Formatted output of the GEMMLHSMatrixInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  gemm_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &gemm_info)
+{
+    os << "( m0= " << (unsigned int)gemm_info.m0 << " k0= " << gemm_info.k0 << "  v0= " << gemm_info.v0 << "  trans= " << gemm_info.transpose << "  inter= " << gemm_info.interleave << "})";
+    return os;
+}
+
+/** Formatted output of the GEMMRHSMatrixInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  gemm_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMRHSMatrixInfo &gemm_info)
+{
+    os << "( n0= " << (unsigned int)gemm_info.n0 << " k0= " << gemm_info.k0 << "  h0= " << gemm_info.h0 << "  trans= " << gemm_info.transpose << "  inter= " << gemm_info.interleave << "})";
+    return os;
+}
+
+/** Formatted output of the GEMMRHSMatrixInfo type.
+ *
+ * @param[in] gemm_info GEMMRHSMatrixInfo to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMRHSMatrixInfo &gemm_info)
+{
+    std::stringstream str;
+    str << gemm_info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMLHSMatrixInfo type.
+ *
+ * @param[in] gemm_info GEMMLHSMatrixInfo to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMLHSMatrixInfo &gemm_info)
+{
+    std::stringstream str;
+    str << gemm_info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMKernelInfo type.
+ *
+ * @param[in] gemm_info GEMMKernelInfo Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMKernelInfo &gemm_info)
+{
+    std::stringstream str;
+    str << gemm_info;
     return str.str();
 }
 

@@ -1964,6 +1964,11 @@ struct GEMMLowpOutputStageInfo
 /** GEMM LHS (Left Hand Side) matrix information */
 struct GEMMLHSMatrixInfo
 {
+    GEMMLHSMatrixInfo() = default;
+    GEMMLHSMatrixInfo(unsigned int m, unsigned int k, unsigned int v, bool trans, bool inter)
+        : m0(m), k0(k), v0(v), transpose(trans), interleave(inter)
+    {
+    }
     unsigned int m0{ 1 };            /**< Number of rows processed by the matrix multiplication */
     unsigned int k0{ 1 };            /**< Number of partial accumulations performed by the matrix multiplication */
     unsigned int v0{ 1 };            /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
@@ -1974,6 +1979,11 @@ struct GEMMLHSMatrixInfo
 /** GEMM RHS (Right Hand Side) matrix information */
 struct GEMMRHSMatrixInfo
 {
+    GEMMRHSMatrixInfo() = default;
+    GEMMRHSMatrixInfo(unsigned int n, unsigned int k, unsigned int h, bool trans, bool inter)
+        : n0(n), k0(k), h0(h), transpose(trans), interleave(inter)
+    {
+    }
     unsigned int n0{ 1 };            /**< Number of columns processed by the matrix multiplication */
     unsigned int k0{ 1 };            /**< Number of partial accumulations performed by the matrix multiplication */
     unsigned int h0{ 1 };            /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */

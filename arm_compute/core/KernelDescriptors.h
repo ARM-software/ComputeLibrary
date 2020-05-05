@@ -54,6 +54,28 @@ struct FFTRadixStageKernelInfo
 /** Descriptor used by the GEMM kernels */
 struct GEMMKernelInfo
 {
+    GEMMKernelInfo() = default;
+    GEMMKernelInfo(
+        unsigned int        im,
+        unsigned int        in,
+        unsigned int        ik,
+        unsigned int        idepth_output_gemm3d,
+        bool                ireinterpret_input_as_3d,
+        bool                ibroadcast_bias,
+        bool                ifp_mixed_precision,
+        ActivationLayerInfo iactivation_info,
+        int                 inmult_transpose1xW_width,
+        int                 imult_interleave4x4_height,
+        GEMMLHSMatrixInfo   ilhs_info,
+        GEMMRHSMatrixInfo   irhs_info,
+        int32_t             ina_offset,
+        int32_t             inb_offset)
+        : m(im), n(in), k(ik), depth_output_gemm3d(idepth_output_gemm3d), reinterpret_input_as_3d(ireinterpret_input_as_3d), broadcast_bias(ibroadcast_bias), fp_mixed_precision(ifp_mixed_precision),
+          activation_info(iactivation_info), mult_transpose1xW_width(inmult_transpose1xW_width), mult_interleave4x4_height(imult_interleave4x4_height), lhs_info(ilhs_info), rhs_info(irhs_info),
+          a_offset(ina_offset), b_offset(inb_offset)
+    {
+    }
+
     unsigned int            m{ 0 };                           /**< Number of LHS rows*/
     unsigned int            n{ 0 };                           /**< Number of RHS columns*/
     unsigned int            k{ 0 };                           /**< Number of LHS columns or RHS rows */
