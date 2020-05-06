@@ -178,7 +178,8 @@ private:
         Output,
         Count
     };
-    static constexpr uint8_t _layer_norm_count = static_cast<uint8_t>(LayerNormGate::Count);
+    static constexpr uint8_t  _layer_norm_count                    = static_cast<uint8_t>(LayerNormGate::Count);
+    static constexpr uint32_t _out_state_output_size_dimension_idx = 0;
 
     /** Internal method to configure matrix multiplication plus output stage of each gate.
      *
@@ -200,6 +201,35 @@ private:
                       const TensorInfo &mm_res_info, const TensorInfo &outstage_tensor_info);
 
     MemoryGroup _memory_group{};
+
+    /** A small internel kernel do the copy between two tensors */
+    class TensorCopyKernel
+    {
+        static constexpr uint32_t max_dimension_supported = 2;
+
+        ITensor *_src{ nullptr };
+        ITensor *_dst{ nullptr };
+        size_t   _row_size{};
+        Window   _window{};
+
+    public:
+        /** Static function to check if given info will lead to a valid configuration of @ref NEQLSTMLayer::TensorCopyKernel
+         *
+         * @param[in] src Source tensor info.
+         * @param[in] dst Destination tensor info
+         *
+         * @return a status
+         */
+        static Status validate(const ITensorInfo &src, const ITensorInfo &dst);
+        /** Set the input and output tensors.
+         *
+         * @param[in]  src Source tensor
+         * @param[out] dst Destination tensor
+         */
+        void configure(ITensor &src, ITensor &dst);
+        /** run the kernel */
+        void run();
+    };
 
     // Functions used
     NETranspose                      _transpose_input_to_forget_weights{};
@@ -245,7 +275,7 @@ private:
     NEPixelWiseMultiplicationKernel  _pixelwise_mul_cell_to_input{};
     NEGEMMLowpOutputStage            _cell_to_input_outstage{};
     NEArithmeticAdditionKernel       _accumulate_cell_input{};
-    NEActivationLayer                _input_gate_tanh{};
+    NEActivationLayer                _input_gate_sigmoid{};
     NEPixelWiseMultiplicationKernel  _pixelwise_mul_forget_cell{};
     NEPixelWiseMultiplicationKernel  _pixelwise_mul_input_cell{};
     NEArithmeticAdditionKernel       _add_forget_cell{};
@@ -256,6 +286,7 @@ private:
     NEGEMMLowpOutputStage            _recurrent_to_output_outstage{};
     NEArithmeticAdditionKernel       _accumulate_input_recurrent_output{};
     NEPixelWiseMultiplicationKernel  _pixelwise_mul_cell_to_output{};
+    NEGEMMLowpOutputStage            _cell_to_output_outstage{};
     NEArithmeticAdditionKernel       _accumulate_cell_to_output{};
     NEActivationLayer                _output_gate_sigmoid{};
     NEActivationLayer                _hidden_tanh{};
@@ -265,6 +296,12 @@ private:
     NEGEMMLowpOutputStage            _projection_outstage{};
     NEArithmeticAdditionKernel       _accumulate_projection{};
     NEActivationLayer                _projection_clip{};
+
+    TensorCopyKernel _projection_bias_copy{};
+    TensorCopyKernel _projection_output_to_accumulate_copy{};
+    TensorCopyKernel _projection_accumulate_to_output_copy{};
+    TensorCopyKernel _hidden_to_output_copy{};
+
     std::array<NEQLSTMLayerNormalizationKernel, _layer_norm_count> _layer_norms{ {} };
 
     // Tensor pointers
@@ -375,11 +412,16 @@ private:
     Tensor _input_to_output_outstage_res{ nullptr };
     Tensor _mm_recurrent_to_output_res{ nullptr };
     Tensor _mul_cell_to_output_res{ nullptr };
+    Tensor _cell_to_output_outstage_res{ nullptr };
     Tensor _recurrent_to_output_outstage_res{ nullptr };
     Tensor _output_gate{ nullptr };
     Tensor _hidden_mul_res{ nullptr };
+    Tensor _hidden_gate{ nullptr };
     Tensor _mm_projection_res{ nullptr };
     Tensor _projection_outstage_res{ nullptr };
+    Tensor _projection_out_res{ nullptr };
+    Tensor _projection_eff_bias_adjusted{ nullptr };
+    Tensor _projection_accumulate_res{ nullptr };
     Tensor _ones{ nullptr };
     std::array<Tensor, _layer_norm_count> _layer_norm_output{ {} };
 
@@ -395,6 +437,7 @@ private:
     bool _has_projection_clipping{ false };
     bool _has_peephole{ false };
     bool _has_layer_norm{ false };
+    bool _projection_tensor_copy_required{ false };
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEQLSTMLAYER_H */
