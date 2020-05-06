@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,23 +78,26 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
+private:
     /** Common signature for all the specialised arithmetic functions
      *
-     * @param[in]  input  An input tensor. Data types supported: F16/F32.
-     * @param[out] output The output tensor. Data types supported: F16/F32.
-     * @param[in]  window Region on which to execute the kernel.
+     * @param[in] window Region on which to execute the kernel.
      */
-    using ElementwiseUnaryFunction = void(const ITensor *input, ITensor *output, const Window &window);
+    using ElementwiseUnaryPtr = void (NEElementwiseUnaryKernel::*)(const Window &window);
 
-protected:
-    // Inherited methods overridden:
-    static Status validate_arguments(ElementWiseUnary op, const ITensorInfo &input, const ITensorInfo &output);
+    /** Template function to run elementwise unary operation
+     *
+     * @tparam ScalarType Scalar datatype
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <typename ScalarType>
+    void elementwise_op(const Window &window);
 
-    /** Function to use for the particular tensor types passed to configure() */
-    std::function<void(const ITensor *input, ITensor *output, const Window &window)> _function;
-
-    const ITensor *_input;
-    ITensor       *_output;
+    ElementwiseUnaryPtr _func;
+    const ITensor      *_input;
+    ITensor            *_output;
+    ElementWiseUnary    _op;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEELEMENTWISEUNARYKERNEL_H */
