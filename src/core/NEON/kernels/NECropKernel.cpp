@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,6 @@
 #include "arm_compute/core/utils/helpers/bit_ops.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-
-#include <map>
 
 namespace arm_compute
 {
@@ -86,9 +84,9 @@ inline float32x4_t load_as_f32(float16_t *ptr)
 }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
-template <typename T, bool input_has_single_channel, bool is_width_flipped>
+template <typename T>
 inline void in_bounds_crop_window(const ITensor *input, const ITensor *output, float *output_ptr, Coordinates input_offset,
-                                  int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit)
+                                  int32_t window_step_x, int32_t output_width_start, int32_t output_width_limit, bool input_has_single_channel, bool is_width_flipped)
 {
     // Reverse elements if width flipped.
     if(is_width_flipped)
@@ -176,9 +174,9 @@ inline void out_of_bounds_crop_window(const ITensor *output, float *output_ptr, 
     }
 }
 
-template <bool is_height_flipped, bool has_cols_in_bounds, bool has_cols_out_of_bounds_before, bool has_cols_out_of_bounds_after>
 inline void execute_window(const ITensor *input, const ITensor *output, Coordinates input_offset, float extrapolation_value,
-                           const std::array<uint32_t, 2> &rows_out_of_bounds, const std::array<uint32_t, 2> &cols_out_of_bounds, NECropKernel::InBoundsCropFunction *in_bounds_crop_function)
+                           const std::array<uint32_t, 2> &rows_out_of_bounds, const std::array<uint32_t, 2> &cols_out_of_bounds, NECropKernel::InBoundsCropFunction *in_bounds_crop_function,
+                           bool is_height_flipped, bool has_cols_in_bounds, bool has_cols_out_of_bounds_before, bool has_cols_out_of_bounds_after, bool input_has_single_channel, bool is_width_flipped)
 {
     // Output is always float.
     const int window_step_x = 16 / sizeof(float);
@@ -214,7 +212,8 @@ inline void execute_window(const ITensor *input, const ITensor *output, Coordina
         // Copy all elements within the input bounds from the input tensor.
         if(has_cols_in_bounds)
         {
-            (*in_bounds_crop_function)(input, output, output_ptr, input_offset, window_step_x, cols_out_of_bounds[0], output->info()->dimension(1) - cols_out_of_bounds[1]);
+            (*in_bounds_crop_function)(input, output, output_ptr, input_offset, window_step_x, cols_out_of_bounds[0],
+                                       output->info()->dimension(1) - cols_out_of_bounds[1], input_has_single_channel, is_width_flipped);
         }
         // Fill all elements after the in bounds elements with the extrapolation value.
         if(has_cols_out_of_bounds_after)
@@ -230,7 +229,7 @@ inline void execute_window(const ITensor *input, const ITensor *output, Coordina
 
 NECropKernel::NECropKernel()
     : _input(nullptr), _crop_boxes(nullptr), _box_ind(nullptr), _output(nullptr), _start(), _end(), _crop_box_ind(0), _extrapolation_value(0), _rows_out_of_bounds(), _cols_out_of_bounds(),
-      _in_bounds_crop_functions(), _in_bounds_crop_function(nullptr), _crop_function(nullptr)
+      _in_bounds_crop_function(nullptr)
 {
 }
 
@@ -246,29 +245,30 @@ void NECropKernel::configure(const ITensor *input, const ITensor *crop_boxes, co
     _crop_box_ind        = crop_box_ind;
     _extrapolation_value = extrapolation_value;
 
-    const static std::map<std::pair<DataType, bool>, std::pair<NECropKernel::InBoundsCropFunction *, NECropKernel::InBoundsCropFunction *>> in_map_function =
+    switch(input->info()->data_type())
     {
-        { { DataType::F32, false }, { &in_bounds_crop_window<float, false, false>, &in_bounds_crop_window<float, false, true> } },
-        { { DataType::F32, true }, { &in_bounds_crop_window<float, true, false>, &in_bounds_crop_window<float, true, true> } },
-        { { DataType::U16, false }, { &in_bounds_crop_window<uint16_t, false, false>, &in_bounds_crop_window<uint16_t, false, true> } },
-        { { DataType::U16, true }, { &in_bounds_crop_window<uint16_t, true, false>, &in_bounds_crop_window<uint16_t, true, true> } },
-        { { DataType::S16, false }, { &in_bounds_crop_window<int16_t, false, false>, &in_bounds_crop_window<int16_t, false, true> } },
-        { { DataType::S16, true }, { &in_bounds_crop_window<int16_t, true, false>, &in_bounds_crop_window<int16_t, true, true> } },
-        { { DataType::U32, false }, { &in_bounds_crop_window<uint32_t, false, false>, &in_bounds_crop_window<uint32_t, false, true> } },
-        { { DataType::U32, true }, { &in_bounds_crop_window<uint32_t, true, false>, &in_bounds_crop_window<uint32_t, true, true> } },
-        { { DataType::S32, false }, { &in_bounds_crop_window<int32_t, false, false>, &in_bounds_crop_window<int32_t, false, true> } },
-        { { DataType::S32, true }, { &in_bounds_crop_window<int32_t, true, false>, &in_bounds_crop_window<int32_t, true, true> } },
+        case DataType::F32:
+            _in_bounds_crop_function = &in_bounds_crop_window<float>;
+            break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        { { DataType::F16, false }, { &in_bounds_crop_window<float16_t, false, false>, &in_bounds_crop_window<float16_t, false, true> } },
-        { { DataType::F16, false }, { &in_bounds_crop_window<float16_t, true, false>, &in_bounds_crop_window<float16_t, true, true> } }
+        case DataType::F16:
+            _in_bounds_crop_function = &in_bounds_crop_window<float16_t>;
+            break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    };
-
-    auto in_it = in_map_function.find({ input->info()->data_type(), input->info()->dimension(0) == 1 });
-
-    if(in_it != in_map_function.end())
-    {
-        _in_bounds_crop_functions = in_it->second;
+        case DataType::U32:
+            _in_bounds_crop_function = &in_bounds_crop_window<uint32_t>;
+            break;
+        case DataType::S32:
+            _in_bounds_crop_function = &in_bounds_crop_window<int32_t>;
+            break;
+        case DataType::U16:
+            _in_bounds_crop_function = &in_bounds_crop_window<uint16_t>;
+            break;
+        case DataType::S16:
+            _in_bounds_crop_function = &in_bounds_crop_window<int16_t>;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Datatype not supported");
     }
 }
 
@@ -309,8 +309,6 @@ void NECropKernel::configure_output_shape()
     const TensorShape out_shape(_input->info()->tensor_shape()[0], abs(_end[0] - _start[0]) + 1, abs(_end[1] - _start[1]) + 1);
     _output->info()->set_tensor_shape(out_shape);
 
-    _in_bounds_crop_function = _start[0] <= _end[0] ? _in_bounds_crop_functions.first : _in_bounds_crop_functions.second;
-
     bool is_width_flipped  = _end[0] < _start[0];
     bool is_height_flipped = _end[1] < _start[1];
     if(is_height_flipped)
@@ -350,36 +348,6 @@ void NECropKernel::configure_output_shape()
                                  0;
     }
 
-    const static std::map<std::tuple<bool, bool, bool, bool>, NECropKernel::CropFunction *> map_function =
-    {
-        { std::make_tuple(false, false, false, false), &execute_window<false, false, false, false> },
-        { std::make_tuple(false, false, false, true), &execute_window<false, false, false, true> },
-        { std::make_tuple(false, false, true, false), &execute_window<false, false, true, false> },
-        { std::make_tuple(false, false, true, true), &execute_window<false, false, true, true> },
-        { std::make_tuple(false, true, false, false), &execute_window<false, true, false, false> },
-        { std::make_tuple(false, true, false, true), &execute_window<false, true, false, true> },
-        { std::make_tuple(false, true, true, false), &execute_window<false, true, true, false> },
-        { std::make_tuple(false, true, true, true), &execute_window<false, true, true, true> },
-        { std::make_tuple(true, false, false, false), &execute_window<true, false, false, false> },
-        { std::make_tuple(true, false, false, true), &execute_window<true, false, false, true> },
-        { std::make_tuple(true, false, true, false), &execute_window<true, false, true, false> },
-        { std::make_tuple(true, false, true, true), &execute_window<true, false, true, true> },
-        { std::make_tuple(true, true, false, false), &execute_window<true, true, false, false> },
-        { std::make_tuple(true, true, false, true), &execute_window<true, true, false, true> },
-        { std::make_tuple(true, true, true, false), &execute_window<true, true, true, false> },
-        { std::make_tuple(true, true, true, true), &execute_window<true, true, true, true> },
-    };
-
-    auto it = map_function.find(std::make_tuple(is_height_flipped,
-                                                _cols_out_of_bounds[0] + _cols_out_of_bounds[1] < _output->info()->dimension(1),
-                                                _cols_out_of_bounds[0] > 0,
-                                                _cols_out_of_bounds[1] > 0));
-
-    if(it != map_function.end())
-    {
-        _crop_function = it->second;
-    }
-
     INEKernel::configure(calculate_max_window(*_output->info()));
 }
 
@@ -395,6 +363,8 @@ void NECropKernel::run(const Window &window, const ThreadInfo &info)
     uint32_t    batch_index = *(reinterpret_cast<int32_t *>(_box_ind->ptr_to_element(Coordinates(_crop_box_ind))));
     Coordinates input_offset(0, _end[0] < _start[0] ? _start[0] - _cols_out_of_bounds[0] : _start[0] + _cols_out_of_bounds[0],
                              _end[1] < _start[1] ? _start[1] - _rows_out_of_bounds[0] : _start[1] + _rows_out_of_bounds[0], batch_index);
-    (*_crop_function)(_input, _output, input_offset, _extrapolation_value, _rows_out_of_bounds, _cols_out_of_bounds, _in_bounds_crop_function);
+    execute_window(_input, _output, input_offset, _extrapolation_value, _rows_out_of_bounds, _cols_out_of_bounds, _in_bounds_crop_function, _end[1] < _start[1],
+                   _cols_out_of_bounds[0] + _cols_out_of_bounds[1] < _output->info()->dimension(1), _cols_out_of_bounds[0] > 0, _cols_out_of_bounds[1] > 0,
+                   _start[0] <= _end[0], _end[0] < _start[0]);
 }
 } // namespace arm_compute

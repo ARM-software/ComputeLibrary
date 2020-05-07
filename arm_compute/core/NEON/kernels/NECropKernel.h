@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,9 +27,6 @@
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Types.h"
-
-#include <cstdint>
-#include <map>
 
 namespace arm_compute
 {
@@ -94,7 +91,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
     /** Function to use for in bounds crop for the particular tensor types passed to configure() */
-    using InBoundsCropFunction = void(const ITensor *, const ITensor *, float *, Coordinates, int32_t, int32_t, int32_t);
+    using InBoundsCropFunction = void(const ITensor *, const ITensor *, float *, Coordinates, int32_t, int32_t, int32_t, bool, bool);
 
 private:
     const ITensor *_input;
@@ -111,13 +108,7 @@ private:
     /** The number of columns out of bounds at the start and end of output. */
     std::array<uint32_t, 2> _cols_out_of_bounds;
 
-    std::pair<NECropKernel::InBoundsCropFunction *, NECropKernel::InBoundsCropFunction *> _in_bounds_crop_functions;
     NECropKernel::InBoundsCropFunction *_in_bounds_crop_function;
-
-    using CropFunction = void(const ITensor *, const ITensor *, Coordinates, float, const std::array<uint32_t, 2> &, const std::array<uint32_t, 2> &,
-                              NECropKernel::InBoundsCropFunction *);
-
-    NECropKernel::CropFunction *_crop_function;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEON_CROP_KERNEL_H */
