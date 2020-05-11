@@ -101,7 +101,7 @@ public:
     }
 
     NDRange(const std::array<unsigned int, D>& n)
-    : m_sizes{n}
+    : m_sizes(n)
     {
         unsigned int t=1;
 
@@ -139,7 +139,7 @@ public:
     NDCoordinate(const NDCoordinate& rhs)           =default;
     NDCoordinate(const std::initializer_list<std::pair<int_t, int_t>>& list)
     {
-        std::array<int_t, N> sizes;
+        std::array<int_t, N> sizes{};
 
         std::size_t i = 0;
         for(auto& p : list) {
