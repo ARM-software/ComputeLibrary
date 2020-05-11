@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include <cmath>
+#include <limits>
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
@@ -147,6 +148,8 @@ inline float32x4_t vexpq_f32(float32x4_t x)
 {
     static const float32x4_t CONST_LN2          = vdupq_n_f32(0.6931471805f); // ln(2)
     static const float32x4_t CONST_INV_LN2      = vdupq_n_f32(1.4426950408f); // 1/ln(2)
+    static const float32x4_t CONST_INF          = vdupq_n_f32(std::numeric_limits<float>::infinity());
+    static const float32x4_t CONST_MAX_INPUT    = vdupq_n_f32(88.7f);
     static const float32x4_t CONST_0            = vdupq_n_f32(0.f);
     static const int32x4_t   CONST_NEGATIVE_126 = vdupq_n_s32(-126);
 
@@ -159,7 +162,8 @@ inline float32x4_t vexpq_f32(float32x4_t x)
 
     // Reconstruct
     poly = vreinterpretq_f32_s32(vqaddq_s32(vreinterpretq_s32_f32(poly), vqshlq_n_s32(m, 23)));
-    poly = vbslq_f32(vcltq_s32(m, CONST_NEGATIVE_126), CONST_0, poly);
+    poly = vbslq_f32(vcltq_s32(m, CONST_NEGATIVE_126), CONST_0, poly); // Handle underflow
+    poly = vbslq_f32(vcgtq_f32(x, CONST_MAX_INPUT), CONST_INF, poly);  // Handle overflow
 
     return poly;
 }

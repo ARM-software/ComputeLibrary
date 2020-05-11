@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NEMATH_H
 
 #include <arm_neon.h>
+#include <array>
 
 namespace arm_compute
 {
