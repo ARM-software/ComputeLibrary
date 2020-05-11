@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
+#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEQLSTMLayerNormalizationKernel.h"
@@ -49,6 +50,7 @@ class ITensor;
  * -# @ref NEActivationLayer                                     Activation functions (tanh and logistic)
  * -# @ref NEArithmeticAdditionKernel                            Elementwise addition
  * -# @ref NEArithmeticSubtractionKernel                         Elementwise subtraction
+ * -# @ref NECopyKernel                                          Copy kernel for copying output_state_out to output
  * -# @ref NEGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
  * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16
  * -# @ref NEGEMMLowpMatrixAReductionKernel                      For precomputing effective biases to use
@@ -80,10 +82,11 @@ public:
      * @param[in]  forget_gate_bias            1D weights tensor with dimensions [num_units]. Data type supported: S32.
      * @param[in]  cell_bias                   1D weights tensor with dimensions [num_units]. Data type supported: S32.
      * @param[in]  output_gate_bias            1D weights tensor with dimensions [num_units]. Data type supported: S32.
-     * @param[in]  cell_state_in               2D tensor with dimensions [output_size, batch_size]. Data type supported:  QSYMM16.
-     * @param[in]  output_state_in             2D tensor with dimensions [num_units, batch_size]. Data type supported: Same as @p input.
-     * @param[out] cell_state_out              Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size]. Data type supported:  QSYMM16.
-     * @param[out] output_state_out            Destination tensor. Output is a 2D tensor with dimensions [num_units, batch_size].Data types supported: Same as @p input.
+     * @param[in]  cell_state_in               2D tensor with dimensions [num_units, batch_size]. Data type supported:  QSYMM16.
+     * @param[in]  output_state_in             2D tensor with dimensions [output_size, batch_size]. Data type supported: Same as @p input.
+     * @param[out] cell_state_out              Destination tensor. Output is a 2D tensor with dimensions [num_units, batch_size]. Data type supported:  QSYMM16.
+     * @param[out] output_state_out            Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size].Data types supported: Same as @p input.
+     * @param[out] output                      Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size].Data types supported: Same as @p input.
      * @param[in]  lstm_params                 Weights tensors used in peephole, CIFG and layer normalization optimizations:
      *                                         input_intermediate_scale   Scale of the intermediate result of matmul, i.e. input to layer normalization, at input gate.
      *                                         forget_intermediate_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at forget gate.
@@ -113,48 +116,49 @@ public:
                    const ITensor *recurrent_to_forget_weights, const ITensor *recurrent_to_cell_weights, const ITensor *recurrent_to_output_weights,
                    const ITensor *forget_gate_bias, const ITensor *cell_bias, const ITensor *output_gate_bias,
                    const ITensor *cell_state_in, const ITensor *output_state_in,
-                   ITensor *cell_state_out, ITensor *output_state_out,
+                   ITensor *cell_state_out, ITensor *output_state_out, ITensor *output,
                    const LSTMParams<ITensor> &lstm_params);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEQLSTMLayer
      *
-     * @param[in]  input                       Source tensor info. Input is a 2D tensor info with dimensions [input_size, batch_size]. Data types supported: QASYMM8_SIGNED.
-     * @param[in]  input_to_forget_weights     2D weights tensor info with dimensions [input_size, num_units]. Data type supported: QSYMM8.
-     * @param[in]  input_to_cell_weights       2D weights tensor info with dimensions [input_size, num_units]. Data type supported: QSYMM8.
-     * @param[in]  input_to_output_weights     2D weights tensor info with dimensions [input_size, num_units]. Data type supported: QSYMM8.
-     * @param[in]  recurrent_to_forget_weights 2D weights tensor info with dimensions [output_size, num_units]. Data type supported: QSYMM8.
-     * @param[in]  recurrent_to_cell_weights   2D weights tensor info with dimensions [output_size, num_units]. Data type supported: QSYMM8.
-     * @param[in]  recurrent_to_output_weights 2D weights tensor info with dimensions [output_size, num_units]. Data type supported: QSYMM8.
-     * @param[in]  forget_gate_bias            1D weights tensor info with dimensions [num_units]. Data type supported: S32.
-     * @param[in]  cell_bias                   1D weights tensor info with dimensions [num_units]. Data type supported: S32.
-     * @param[in]  output_gate_bias            1D weights tensor info with dimensions [num_units]. Data type supported: S32.
-     * @param[in]  cell_state_in               2D tensor info with dimensions [num_units, batch_size]. Data type supported:  QSYMM16.
-     * @param[in]  output_state_in             2D tensor info with dimensions [output_size, batch_size]. Data type supported: Same as @p input.
-     * @param[out] cell_state_out              Destination tensor info. Output is a 2D tensor info with dimensions [num_units, batch_size]. Data type supported:  QSYMM16.
-     * @param[out] output_state_out            Destination tensor info. Output is a 2D tensor info with dimensions [output_size, batch_size].Data types supported: Same as @p input.
-     * @param[in]  lstm_params                 Weights tensors info used in peephole, CIFG and layer normalization optimizations:
-     *                                         input_intermediate_scale   Scale of the intermediate result of matmul, i.e. input to layer normalization, at input gate.
-     *                                         forget_intermediate_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at forget gate.
-     *                                         cell_intermediate_scale    Scale of the intermediate result of matmul, i.e. input to layer normalization, at cell gate.
-     *                                         output_intermediate_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at output gate.
-     *                                         hidden_state_zero          The zero point of the hidden state.
-     *                                         hidden_state_scale         The scale of the hidden state.
-     *                                         input_to_input_weights     (Optional) 2D weights tensor with dimensions [input_size, num_units]. Data type supported: QSYMM8.
-     *                                         recurrent_to_input_weights (Optional) 2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
-     *                                         cell_to_input_weights      (Optional) 1D weights tensor with dimensions [num_units]. Can be nullptr. Data type supported: QSYMM16.
-     *                                         cell_to_forget_weights     (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
-     *                                         cell_to_output_weights     (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
-     *                                         input_gate_bias            (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: S32.
-     *                                         projection_weights         (Optional) 2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
-     *                                         projection_bias            (Optional) 1D weights tensor with dimensions [output_size]. S32.
-     *                                         input_layer_norm_weights   (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
-     *                                         forget_layer_norm_weights  (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
-     *                                         cell_layer_norm_weights    (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
-     *                                         output_layer_norm_weights  (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
-     *                                         cell_threshold             (Optional) The clipping threshold for the cell state, such that values are bound within [-cell_clip, cell_clip].
-     *                                                                               If set to 0.0 then clipping is disabled.
-     *                                         projection_threshold       (Optional) The clipping threshold for the output from the projection layer, such that values are bound within
-     *                                                                               [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
+     * @param[in] input                       Source tensor info. Input is a 2D tensor info with dimensions [input_size, batch_size]. Data types supported: QASYMM8_SIGNED.
+     * @param[in] input_to_forget_weights     2D weights tensor info with dimensions [input_size, num_units]. Data type supported: QSYMM8.
+     * @param[in] input_to_cell_weights       2D weights tensor info with dimensions [input_size, num_units]. Data type supported: QSYMM8.
+     * @param[in] input_to_output_weights     2D weights tensor info with dimensions [input_size, num_units]. Data type supported: QSYMM8.
+     * @param[in] recurrent_to_forget_weights 2D weights tensor info with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     * @param[in] recurrent_to_cell_weights   2D weights tensor info with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     * @param[in] recurrent_to_output_weights 2D weights tensor info with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     * @param[in] forget_gate_bias            1D weights tensor info with dimensions [num_units]. Data type supported: S32.
+     * @param[in] cell_bias                   1D weights tensor info with dimensions [num_units]. Data type supported: S32.
+     * @param[in] output_gate_bias            1D weights tensor info with dimensions [num_units]. Data type supported: S32.
+     * @param[in] cell_state_in               2D tensor info with dimensions [num_units, batch_size]. Data type supported:  QSYMM16.
+     * @param[in] output_state_in             2D tensor info with dimensions [output_size, batch_size]. Data type supported: Same as @p input.
+     * @param[in] cell_state_out              Destination tensor info. Output is a 2D tensor info with dimensions [num_units, batch_size]. Data type supported:  QSYMM16.
+     * @param[in] output_state_out            Destination tensor info. Output is a 2D tensor info with dimensions [output_size, batch_size].Data types supported: Same as @p input.
+     * @param[in] output                      Destination tensor info. Output is a 2D tensor info with dimensions [output_size, batch_size].Data types supported: Same as @p input.
+     * @param[in] lstm_params                 Weights tensors info used in peephole, CIFG and layer normalization optimizations:
+     *                                        input_intermediate_scale   Scale of the intermediate result of matmul, i.e. input to layer normalization, at input gate.
+     *                                        forget_intermediate_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at forget gate.
+     *                                        cell_intermediate_scale    Scale of the intermediate result of matmul, i.e. input to layer normalization, at cell gate.
+     *                                        output_intermediate_scale  Scale of the intermediate result of matmul, i.e. input to layer normalization, at output gate.
+     *                                        hidden_state_zero          The zero point of the hidden state.
+     *                                        hidden_state_scale         The scale of the hidden state.
+     *                                        input_to_input_weights     (Optional) 2D weights tensor with dimensions [input_size, num_units]. Data type supported: QSYMM8.
+     *                                        recurrent_to_input_weights (Optional) 2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     *                                        cell_to_input_weights      (Optional) 1D weights tensor with dimensions [num_units]. Can be nullptr. Data type supported: QSYMM16.
+     *                                        cell_to_forget_weights     (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                        cell_to_output_weights     (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                        input_gate_bias            (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: S32.
+     *                                        projection_weights         (Optional) 2D weights tensor with dimensions [output_size, num_units]. Data type supported: QSYMM8.
+     *                                        projection_bias            (Optional) 1D weights tensor with dimensions [output_size]. S32.
+     *                                        input_layer_norm_weights   (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                        forget_layer_norm_weights  (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                        cell_layer_norm_weights    (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                        output_layer_norm_weights  (Optional) 1D weights tensor with dimensions [num_units]. Data type supported: QSYMM16.
+     *                                        cell_threshold             (Optional) The clipping threshold for the cell state, such that values are bound within [-cell_clip, cell_clip].
+     *                                                                              If set to 0.0 then clipping is disabled.
+     *                                        projection_threshold       (Optional) The clipping threshold for the output from the projection layer, such that values are bound within
+     *                                                                              [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
      * @return a status
      */
     static Status validate(const ITensorInfo *input,
@@ -162,7 +166,7 @@ public:
                            const ITensorInfo *recurrent_to_forget_weights, const ITensorInfo *recurrent_to_cell_weights, const ITensorInfo *recurrent_to_output_weights,
                            const ITensorInfo *forget_gate_bias, const ITensorInfo *cell_bias, const ITensorInfo *output_gate_bias,
                            const ITensorInfo *cell_state_in, const ITensorInfo *output_state_in,
-                           const ITensorInfo *cell_state_out, const ITensorInfo *output_state_out,
+                           const ITensorInfo *cell_state_out, const ITensorInfo *output_state_out, const ITensorInfo *output,
                            const LSTMParams<ITensorInfo> &lstm_params);
 
     // Inherited methods overridden:
@@ -303,6 +307,8 @@ private:
     TensorCopyKernel _hidden_to_output_copy{};
 
     std::array<NEQLSTMLayerNormalizationKernel, _layer_norm_count> _layer_norms{ {} };
+
+    NECopyKernel _copy_output{};
 
     // Tensor pointers
     const ITensor *_input_to_input_weights{ nullptr };
