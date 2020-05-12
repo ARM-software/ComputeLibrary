@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,37 @@ public:
     }
 
 protected:
+    std::vector<T> get_boundary_values(T min, T max)
+    {
+        // This function will return a vector filled with the following values that can
+        // represent two partitions derived from equivalent partitioning.
+        // * Lower parition: min, min + delta, lower quarter (nominal), center - delta
+        // * Upper partition: center, center + delta, upper quarter (nominal), max - delta, max
+        const auto delta         = is_data_type_float(_data_type) ? T(0.1f) : T(1);
+        const auto center_value  = (min + max) / 2;
+        const auto lower_quarter = (min + center_value) / 2;
+        const auto upper_quarter = (center_value + max) / 2;
+
+        std::vector<T> boundary_values{};
+
+        // To ensure all the inserted values are within the given range after subtracing/adding delta
+        auto insert_values = [&boundary_values, &min, &max](const std::initializer_list<T> &new_values)
+        {
+            for(auto &v : new_values)
+            {
+                if(v >= min && v <= max)
+                {
+                    boundary_values.emplace_back(v);
+                }
+            }
+        };
+
+        insert_values({ min, static_cast<T>(min + delta), static_cast<T>(lower_quarter), static_cast<T>(center_value - delta) });                               // lower partition
+        insert_values({ static_cast<T>(center_value), static_cast<T>(center_value + delta), static_cast<T>(upper_quarter), static_cast<T>(max - delta), max }); // upper partition
+
+        return boundary_values;
+    }
+
     template <typename U>
     void fill(U &&tensor)
     {
@@ -76,20 +107,14 @@ protected:
             float min_bound = 0;
             float max_bound = 0;
             std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(_function, _data_type);
-            std::uniform_real_distribution<> distribution(min_bound, max_bound);
-            library->fill(tensor, distribution, 0);
-        }
-        else if(is_data_type_quantized(tensor.data_type()))
-        {
-            library->fill_tensor_uniform(tensor, 0);
+            library->fill_static_values(tensor, get_boundary_values(static_cast<T>(min_bound), static_cast<T>(max_bound)));
         }
         else
         {
-            int min_bound = 0;
-            int max_bound = 0;
-            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(_function, _data_type);
-            std::uniform_int_distribution<> distribution(min_bound, max_bound);
-            library->fill(tensor, distribution, 0);
+            PixelValue min{};
+            PixelValue max{};
+            std::tie(min, max) = get_min_max(tensor.data_type());
+            library->fill_static_values(tensor, get_boundary_values(min.get<T>(), max.get<T>()));
         }
     }
 
