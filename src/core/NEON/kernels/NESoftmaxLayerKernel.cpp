@@ -311,7 +311,7 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
             for(; x <= (input_width - vec_size); x += vec_size)
             {
                 auto vec_elements     = wrapper::vloadq(in_ptr + x);
-                vec_elements          = wrapper::vsub(vec_max, vec_elements);
+                vec_elements          = wrapper::vqsub(vec_max, vec_elements);
                 auto vec_elements_flt = convert_int_to_float<float32x4x4_t>(vec_elements);
 
                 if(is_log)
