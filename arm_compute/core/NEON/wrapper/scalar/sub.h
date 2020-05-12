@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
+#ifndef ARM_COMPUTE_WRAPPER_SCALAR_SUB_H
+#define ARM_COMPUTE_WRAPPER_SCALAR_SUB_H
 
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
-#include "support/MemorySupport.h"
-
-#include <utility>
+#include <arm_neon.h>
 
 namespace arm_compute
 {
-void NEArithmeticSubtraction::configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+namespace wrapper
 {
-    ARM_COMPUTE_UNUSED(act_info);
-    auto k = arm_compute::support::cpp14::make_unique<NEArithmeticSubtractionKernel>();
-    k->configure(input1, input2, output, policy);
-    _kernel = std::move(k);
+inline uint8_t sub_sat(const uint8_t &a, const uint8_t &b)
+{
+    const uint8x8_t va = { a, 0, 0, 0, 0, 0, 0, 0 };
+    const uint8x8_t vb = { b, 0, 0, 0, 0, 0, 0, 0 };
+    return vget_lane_u8(vqsub_u8(va, vb), 0);
 }
 
-Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+inline int16_t sub_sat(const int16_t &a, const int16_t &b)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return NEArithmeticSubtractionKernel::validate(input1, input2, output, policy);
+    const int16x4_t va = { a, 0, 0, 0 };
+    const int16x4_t vb = { b, 0, 0, 0 };
+    return vget_lane_s16(vqsub_s16(va, vb), 0);
 }
+
+inline float sub_sat(const float &a, const float &b)
+{
+    // No notion of saturation exists in floating point
+    return a - b;
+}
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+inline float16_t sub_sat(const float16_t &a, const float16_t &b)
+{
+    // No notion of saturation exists in floating point
+    return a - b;
+}
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+} // namespace wrapper
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_WRAPPER_SCALAR_SUB_H */

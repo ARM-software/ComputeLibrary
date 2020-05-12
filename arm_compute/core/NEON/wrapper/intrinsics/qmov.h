@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
+#ifndef ARM_COMPUTE_WRAPPER_QMOV_H
+#define ARM_COMPUTE_WRAPPER_QMOV_H
 
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
-#include "support/MemorySupport.h"
-
-#include <utility>
+#include <arm_neon.h>
 
 namespace arm_compute
 {
-void NEArithmeticSubtraction::configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+namespace wrapper
 {
-    ARM_COMPUTE_UNUSED(act_info);
-    auto k = arm_compute::support::cpp14::make_unique<NEArithmeticSubtractionKernel>();
-    k->configure(input1, input2, output, policy);
-    _kernel = std::move(k);
+template <typename T>
+inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8x8_t>::type
+vqmov(const int16x8_t &a)
+{
+    return vqmovun_s16(a);
 }
 
-Status NEArithmeticSubtraction::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
+template <typename T>
+inline typename std::enable_if<std::is_same<T, int8_t>::value, int8x8_t>::type
+vqmov(const int16x8_t &a)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
-    return NEArithmeticSubtractionKernel::validate(input1, input2, output, policy);
+    return vqmovn_s16(a);
 }
+
+} // namespace wrapper
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_WRAPPER_QMOV_H */

@@ -52,7 +52,7 @@ public:
     /** Default destructor */
     ~NEArithmeticSubtractionKernel() = default;
 
-    /** Initialise the kernel's input, output and border mode.
+    /** Initialise the kernel's input and output.
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
@@ -87,7 +87,6 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
     /** Common signature for all the specialised sub functions
@@ -96,13 +95,15 @@ private:
      * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
      * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32.
      * @param[in]  window Region on which to execute the kernel.
+     * @param[in]  is_sat Flag to indicate if the policy is SATURATE.
      */
-    using SubFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
+    using SubFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window, bool is_sat);
     /** Sub function to use for the particular tensor types passed to configure() */
     SubFunction   *_func;
     const ITensor *_input1;
     const ITensor *_input2;
     ITensor       *_output;
+    ConvertPolicy  _policy;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H */

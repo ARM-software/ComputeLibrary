@@ -37,7 +37,6 @@ class ITensor;
  * @note The function performs an arithmetic subtraction between two tensors.
  *
  *  This function calls the following kernels:
- * -# @ref NEFillBorderKernel (In case of broadcasting, in the input being broadcasted)
  * -# @ref NEArithmeticSubtractionKernel
  */
 class NEArithmeticSubtraction : public INESimpleFunction

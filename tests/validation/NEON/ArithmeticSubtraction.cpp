@@ -101,7 +101,6 @@ using NEArithmeticSubtractionFixture = ArithmeticSubtractionValidationFixture<Te
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
                                                  TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::QASYMM8), // Mismatching types
@@ -109,7 +108,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         }),
         framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
@@ -117,19 +115,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         })),
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
         })),
         framework::dataset::make("ConvertPolicy",{ ConvertPolicy::WRAP,
                                                 ConvertPolicy::SATURATE,
-                                                ConvertPolicy::WRAP,
                                                 ConvertPolicy::SATURATE,
                                                 ConvertPolicy::WRAP,
                                                 ConvertPolicy::WRAP,
         })),
-        framework::dataset::make("Expected", { true, true, false, false, false, false, false})),
+        framework::dataset::make("Expected", { true, true, false, false, false, false})),
         input1_info, input2_info, output_info, policy, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEArithmeticSubtraction::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), policy)) == expected, framework::LogLevel::ERRORS);
