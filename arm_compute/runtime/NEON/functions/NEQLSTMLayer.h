@@ -426,7 +426,6 @@ private:
     Tensor _mm_projection_res{ nullptr };
     Tensor _projection_outstage_res{ nullptr };
     Tensor _projection_out_res{ nullptr };
-    Tensor _projection_eff_bias_adjusted{ nullptr };
     Tensor _projection_accumulate_res{ nullptr };
     Tensor _ones{ nullptr };
     std::array<Tensor, _layer_norm_count> _layer_norm_output{ {} };
