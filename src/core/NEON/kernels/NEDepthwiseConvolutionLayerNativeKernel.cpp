@@ -46,9 +46,9 @@ void pad_vectors(std::vector<int> &mult, std::vector<int> &shift, int vec_size)
     }
 }
 
-template <typename T, int S, bool has_biases>
+template <typename T, int S>
 void depthwise_loop_multiplier1_fp(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                   const Size2D &dilation, const Window &window)
+                                   const Size2D &dilation, const Window &window, bool has_biases)
 {
     using VectorType = typename wrapper::traits::neon_vector<T, S>::type;
     using TagType    = typename wrapper::traits::neon_vector<T, S>::tag_type;
@@ -119,9 +119,9 @@ void depthwise_loop_multiplier1_fp(const ITensor *input, const ITensor *weights,
     input_it, weights_it, biases_it, output_it);
 }
 
-template <typename T, bool has_biases>
+template <typename T>
 void depthwise_loop_generic_fp(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                               const Size2D &dilation, unsigned int depth_multiplier, const Window &window)
+                               const Size2D &dilation, unsigned int depth_multiplier, const Window &window, bool has_biases)
 {
     const size_t input_stride_y   = input->info()->strides_in_bytes().y();
     const size_t input_stride_z   = input->info()->strides_in_bytes().z();
@@ -203,9 +203,9 @@ void depthwise_loop_generic_fp(const ITensor *input, const ITensor *weights, con
     input_it, weights_it, biases_it, output_it);
 }
 
-template <typename T, typename TW, int S, bool has_biases, bool is_per_channel>
+template <typename T, typename TW, int S>
 void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                          const Size2D &dilation, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window)
+                                          const Size2D &dilation, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window, bool has_biases)
 {
     using VectorType = typename wrapper::traits::neon_vector<T, S>::type;
     using TagType    = typename wrapper::traits::neon_vector<T, S>::tag_type;
@@ -308,9 +308,9 @@ void depthwise_loop_multiplier1_quantized(const ITensor *input, const ITensor *w
     input_it, weights_it, biases_it, output_it);
 }
 
-template <typename T, typename TW, bool has_biases, bool is_per_channel>
+template <typename T, typename TW>
 void depthwise_loop_generic_quantized(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                      const Size2D &dilation, unsigned int depth_multiplier, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window)
+                                      const Size2D &dilation, unsigned int depth_multiplier, std::vector<int> output_multiplier, std::vector<int> output_shift, const Window &window, bool has_biases)
 {
     const size_t input_stride_y   = input->info()->strides_in_bytes().y();
     const size_t input_stride_z   = input->info()->strides_in_bytes().z();
@@ -497,7 +497,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 NEDepthwiseConvolutionLayerNativeKernel::NEDepthwiseConvolutionLayerNativeKernel()
-    : _func(), _border_size(0), _input(), _weights(), _biases(), _output(), _conv_info(), _depth_multiplier(1), _dilation(), _output_multiplier(), _output_shift()
+    : _func(), _border_size(0), _input(), _weights(), _biases(), _output(), _conv_info(), _depth_multiplier(1), _dilation(), _output_multiplier(), _output_shift(), _has_biases()
 {
 }
 
@@ -520,6 +520,7 @@ void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, co
     _depth_multiplier = depth_multiplier;
     _border_size      = BorderSize(_conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
     _dilation         = dilation;
+    _has_biases       = (biases != nullptr);
 
     if(is_data_type_quantized(_input->info()->data_type()))
     {
@@ -550,38 +551,32 @@ void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, co
     switch(_weights->info()->data_type())
     {
         case DataType::QASYMM8:
-            _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, uint8_t, 8, true, false> :
-                    &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, uint8_t, 8, false, false>;
+            _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, uint8_t, 8>;
             pad_vectors(_output_multiplier, _output_shift, 8);
             break;
         case DataType::QASYMM8_SIGNED:
-            _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8, true, false> :
-                    &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8, false, false>;
+            _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8>;
             pad_vectors(_output_multiplier, _output_shift, 8);
             break;
         case DataType::QSYMM8_PER_CHANNEL:
             if(_input->info()->data_type() == DataType::QASYMM8)
             {
-                _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, int8_t, 8, true, true> :
-                        &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, int8_t, 8, false, true>;
+                _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<uint8_t, int8_t, 8>;
             }
             else
             {
-                _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8, true, true> :
-                        &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8, false, true>;
+                _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<int8_t, int8_t, 8>;
             }
             pad_vectors(_output_multiplier, _output_shift, 8);
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float16_t, float16_t, 4, true, false> :
-                    &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float16_t, float16_t, 4, false, false>;
+            _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float16_t, float16_t, 4>;
             pad_vectors(_output_multiplier, _output_shift, 4);
             break;
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F32:
-            _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float, float, 2, true, false> :
-                    &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float, float, 2, false, false>;
+            _func = &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float, float, 2>;
             pad_vectors(_output_multiplier, _output_shift, 2);
             break;
         default:
@@ -611,43 +606,43 @@ void NEDepthwiseConvolutionLayerNativeKernel::run(const Window &window, const Th
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    (this->*_func)(window);
+    (this->*_func)(window, _has_biases);
 }
 
-template < typename T, typename TW, int S, bool has_biases, bool is_per_channel, typename std::enable_if < std::is_same<T, float>::value
+template < typename T, typename TW, int S, typename std::enable_if < std::is_same<T, float>::value
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                                                                           || std::is_same<T, float16_t>::value
+                                                                     || std::is_same<T, float16_t>::value
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                                                                           ,
-                                                                                                           int >::type >
-void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window)
+                                                                     ,
+                                                                     int >::type >
+void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window, bool has_biases)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
     if(_depth_multiplier == 1)
     {
-        depthwise_loop_multiplier1_fp<T, S, has_biases>(_input, _weights, _biases, _output, _conv_info, _dilation, window);
+        depthwise_loop_multiplier1_fp<T, S>(_input, _weights, _biases, _output, _conv_info, _dilation, window, has_biases);
     }
     else
     {
-        depthwise_loop_generic_fp<T, has_biases>(_input, _weights, _biases, _output, _conv_info, _dilation, _depth_multiplier, window);
+        depthwise_loop_generic_fp<T>(_input, _weights, _biases, _output, _conv_info, _dilation, _depth_multiplier, window, has_biases);
     }
 }
 
-template <typename T, typename TW, int S, bool has_biases, bool is_per_channel, typename>
-void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window)
+template <typename T, typename TW, int S, typename>
+void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window, bool has_biases)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
     if(_depth_multiplier == 1)
     {
-        depthwise_loop_multiplier1_quantized<T, TW, S, has_biases, is_per_channel>(_input, _weights, _biases, _output, _conv_info, _dilation, _output_multiplier, _output_shift, window);
+        depthwise_loop_multiplier1_quantized<T, TW, S>(_input, _weights, _biases, _output, _conv_info, _dilation, _output_multiplier, _output_shift, window, has_biases);
     }
     else
     {
-        depthwise_loop_generic_quantized<T, TW, has_biases, is_per_channel>(_input, _weights, _biases, _output, _conv_info, _dilation, _depth_multiplier, _output_multiplier, _output_shift, window);
+        depthwise_loop_generic_quantized<T, TW>(_input, _weights, _biases, _output, _conv_info, _dilation, _depth_multiplier, _output_multiplier, _output_shift, window, has_biases);
     }
 }
 } // namespace arm_compute
