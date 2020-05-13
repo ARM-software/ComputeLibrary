@@ -45,7 +45,6 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float>  absolute_tolerance_float(0.0001f);    /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<float>            tolerance_f32(0.1f);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr AbsoluteTolerance<float>  tolerance_qasymm8(1);                 /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
