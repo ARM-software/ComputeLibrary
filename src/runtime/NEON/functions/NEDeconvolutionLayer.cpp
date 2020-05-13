@@ -161,7 +161,6 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
     _flip_axis.allocator()->init(TensorInfo(TensorShape(2U), 1, DataType::U32));
     _memory_group.manage(&_scaled_output);
-    _memory_group.manage(&_flip_axis);
 
     _weights_flipped.allocator()->init(weights->info()->clone()->set_data_layout(data_layout));
     _flip_weights.configure(weights, &_weights_flipped, &_flip_axis);
