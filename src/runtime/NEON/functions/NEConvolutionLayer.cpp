@@ -50,7 +50,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
     ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
                                                             enable_fast_math));
 
-    switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info))
+    switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
         {
@@ -91,7 +91,7 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1), "Grouping (num_groups != 1) is not supported on NEON");
 
-    switch(NEConvolutionLayer::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info))
+    switch(NEConvolutionLayer::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info, enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
             //Validate Winograd
