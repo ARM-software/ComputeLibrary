@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,33 +26,20 @@
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
-#include <algorithm>
-#include <arm_neon.h>
-#include <cstdint>
 #include <map>
 #include <string>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 namespace
 {
-template <typename T, bool is_sat>
-void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolicy policy, const Window &window)
+template <typename T>
+void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, const ConvertPolicy policy, const Window &window)
 {
-    ARM_COMPUTE_UNUSED(policy);
-
     /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
@@ -97,7 +84,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
-                const auto res             = is_sat ? wrapper::vqadd(broadcast_value_vec, non_broadcast_v) : wrapper::vadd(broadcast_value_vec, non_broadcast_v);
+                const auto res             = (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(broadcast_value_vec, non_broadcast_v) : wrapper::vadd(broadcast_value_vec, non_broadcast_v);
                 wrapper::vstore(output_ptr + x, res);
             }
 
@@ -105,7 +92,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
             for(; x < window_end_x; ++x)
             {
                 const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
-                *(output_ptr + x)          = is_sat ? wrapper::add_sat(broadcast_value, non_broadcast_v) : broadcast_value + non_broadcast_v;
+                *(output_ptr + x)          = (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(broadcast_value, non_broadcast_v) : broadcast_value + non_broadcast_v;
             }
         },
         broadcast_input, non_broadcast_input, output);
@@ -132,7 +119,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
             {
                 const auto val1 = wrapper::vloadq(input1_ptr + x);
                 const auto val2 = wrapper::vloadq(input2_ptr + x);
-                const auto res  = is_sat ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
+                const auto res  = (policy == ConvertPolicy::SATURATE) ? wrapper::vqadd(val1, val2) : wrapper::vadd(val1, val2);
                 wrapper::vstore(output_ptr + x, res);
             }
 
@@ -141,7 +128,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
             {
                 const auto val1   = *(input1_ptr + x);
                 const auto val2   = *(input2_ptr + x);
-                *(output_ptr + x) = is_sat ? wrapper::add_sat(val1, val2) : val1 + val2;
+                *(output_ptr + x) = (policy == ConvertPolicy::SATURATE) ? wrapper::add_sat(val1, val2) : val1 + val2;
             }
         },
         input1, input2, output);
@@ -929,21 +916,21 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
         { "add_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED", &add_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED },
         { "add_wrap_QSYMM16_QSYMM16_QSYMM16", &add_QSYMM16_QSYMM16_QSYMM16 },
         { "add_saturate_QSYMM16_QSYMM16_QSYMM16", &add_QSYMM16_QSYMM16_QSYMM16 },
-        { "add_wrap_U8_U8_U8", &add_same<uint8_t, false> },
-        { "add_saturate_U8_U8_U8", &add_same<uint8_t, true> },
+        { "add_wrap_U8_U8_U8", &add_same<uint8_t> },
+        { "add_saturate_U8_U8_U8", &add_same<uint8_t> },
         { "add_wrap_S16_U8_S16", &add_S16_U8_S16 },
         { "add_saturate_S16_U8_S16", &add_S16_U8_S16 },
         { "add_wrap_U8_S16_S16", &add_U8_S16_S16 },
         { "add_saturate_U8_S16_S16", &add_U8_S16_S16 },
         { "add_wrap_U8_U8_S16", &add_U8_U8_S16 },
         { "add_saturate_U8_U8_S16", &add_U8_U8_S16 },
-        { "add_wrap_S16_S16_S16", &add_same<int16_t, false> },
-        { "add_saturate_S16_S16_S16", &add_same<int16_t, true> },
-        { "add_wrap_F32_F32_F32", &add_same<float, false> },
-        { "add_saturate_F32_F32_F32", &add_same<float, false> },
+        { "add_wrap_S16_S16_S16", &add_same<int16_t> },
+        { "add_saturate_S16_S16_S16", &add_same<int16_t> },
+        { "add_wrap_F32_F32_F32", &add_same<float> },
+        { "add_saturate_F32_F32_F32", &add_same<float> },
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        { "add_wrap_F16_F16_F16", &add_same<float16_t, false> },
-        { "add_saturate_F16_F16_F16", &add_same<float16_t, false> },
+        { "add_wrap_F16_F16_F16", &add_same<float16_t> },
+        { "add_saturate_F16_F16_F16", &add_same<float16_t> },
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     };
 
@@ -987,3 +974,4 @@ void NEArithmeticAdditionKernel::run(const Window &window, const ThreadInfo &inf
 
     (*_func)(_input1, _input2, _output, _policy, window);
 }
+} // namespace arm_compute
