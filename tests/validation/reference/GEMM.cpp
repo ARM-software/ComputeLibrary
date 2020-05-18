@@ -56,7 +56,7 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
     const int c_stride_z = N * M;
     const int c_stride_w = N * M * D;
 
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !( defined(__arm__) && defined(__ANDROID__))
     #pragma omp parallel for collapse(2)
 #endif /* _OPENMP */
     for(int w = 0; w < W; ++w)
