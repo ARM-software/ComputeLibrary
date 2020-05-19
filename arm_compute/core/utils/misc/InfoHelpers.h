@@ -107,6 +107,13 @@ inline void build_lstm_params_tensor_info(const LSTMParams<T>     &lstm_params,
 
         lstm_params_info->set_layer_normalization_params(input_info, forget_info, cell_info, output_info);
     }
+
+    lstm_params_info->set_matmul_scale_params(lstm_params.input_intermediate_scale(),
+                                              lstm_params.forget_intermediate_scale(),
+                                              lstm_params.cell_intermediate_scale(),
+                                              lstm_params.output_intermediate_scale());
+
+    lstm_params_info->set_hidden_state_params(lstm_params.hidden_state_zero(), lstm_params.hidden_state_scale());
 }
 } // namespace info_helpers
 } // namespace utils
