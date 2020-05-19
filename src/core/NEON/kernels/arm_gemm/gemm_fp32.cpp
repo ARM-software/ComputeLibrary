@@ -149,25 +149,25 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 //Pretranpose, 2D split
 {
     GemmMethod::GEMM_INTERLEAVED_2D,
-    "sgemm_12x8",
+    "sgemm_12x8_pretranspose_2d",
     [](const GemmArgs &args) { return args._pretransposed_hint; },
-    [](const GemmArgs &args) { return args._pretransposed_hint; },
+    [](const GemmArgs &args) { return args._maxthreads >= 8; },
     [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<sgemm_12x8, float, float>(args); }
 },
 //Tranpose, 2D split, no blockmanager
 {
     GemmMethod::GEMM_INTERLEAVED_2D,
-    "sgemm_12x8",
-    [](const GemmArgs &args) { return (!args._pretransposed_hint) && args._maxthreads >= 8; },
-    [](const GemmArgs &args) { return (!args._pretransposed_hint) && args._maxthreads >= 8; },
+    "sgemm_12x8_2d",
+    nullptr,
+    [](const GemmArgs &args) { return (!args._pretransposed_hint) && (args._maxthreads >= 8); },
     [](const GemmArgs &args) { return new GemmInterleaved2d<sgemm_12x8, float, float>(args); }
 },
 //Tranpose, 1D split, with blockmanager
 {
     GemmMethod::GEMM_INTERLEAVED,
-    "sgemm_12x8",
-    [](const GemmArgs &args) { return (!args._pretransposed_hint); },
-    [](const GemmArgs &args) { return (!args._pretransposed_hint); },
+    "sgemm_12x8_1d",
+    nullptr,
+    nullptr,
     [](const GemmArgs &args) { return new GemmInterleaved<sgemm_12x8, float, float>(args); }
 },
 
