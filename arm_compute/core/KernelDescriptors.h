@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H
 #define ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H
 
+#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -167,6 +168,40 @@ struct GEMMLowpReductionKernelInfo
     bool    is_reshaped{ false };   /**< True if the input tensor has been reshaped */
     int32_t scalar{ 0 };            /**< Scalar value to multiply each reduced column/row by */
     bool    mul_by_scalar{ false }; /**< True if each column/row reduction has to be multiplied by a scalar value */
+};
+
+struct ScaleKernelInfo
+{
+    /** Constructor
+     *
+     * @param[in] interpolation_policy  Interpolation type to use
+     * @param[in] border_mode           Border mode policy
+     * @param[in] constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT and use_padding is set to false. Defaults to default @ref PixelValue
+     * @param[in] sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     * @param[in] use_padding           (Optional) Is padding in use or not. Defaults to true.
+     * @param[in] align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
+     */
+    ScaleKernelInfo(InterpolationPolicy interpolation_policy,
+                    BorderMode          border_mode,
+                    PixelValue          constant_border_value = PixelValue(),
+                    SamplingPolicy      sampling_policy       = SamplingPolicy::CENTER,
+                    bool                use_padding           = true,
+                    bool                align_corners         = false)
+        : interpolation_policy{ interpolation_policy },
+          border_mode{ border_mode },
+          constant_border_value{ constant_border_value },
+          sampling_policy{ sampling_policy },
+          use_padding{ use_padding },
+          align_corners{ align_corners }
+    {
+    }
+
+    InterpolationPolicy interpolation_policy;  /**< Interpolation type to use */
+    BorderMode          border_mode;           /**< Border mode policy */
+    PixelValue          constant_border_value; /**< Constant value to use for constant border mode policy */
+    SamplingPolicy      sampling_policy;       /**< Sampling policy used by the interpolation. */
+    bool                use_padding;           /**< Indication of using padding */
+    bool                align_corners;         /**< Align corners of input and output */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */

@@ -230,6 +230,15 @@ TEST_SUITE(Validate)
  * the kernel are not currently tested.
  * - The same input and output
  * - Data type of offset, dx and dy
+ * This suite also tests two different validate() APIs - one is
+ * using @ref ScaleKernelInfo and the other one is more verbose
+ * one calls the other one - in the same test case. Even though
+ * there are possibility that it makes debugging for regression
+ * harder, belows are reasons of this test case implementation.
+ * - The more verbose one is just a wrapper function calls
+ *   the other one without any additional logic. So we are
+ *   safe to merge two tests into one.
+ * - A large amount of code duplication is test suite can be prevented.
  */
 
 const auto input_shape  = TensorShape{ 2, 3, 3, 2 };
@@ -252,8 +261,14 @@ TEST_CASE(NullPtr, framework::DatasetMode::ALL)
     result = NEScale::validate(nullptr, &output, default_interpolation_policy, default_border_mode);
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 
+    result = NEScale::validate(nullptr, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+
     // nullptr is given as output
     result = NEScale::validate(&input, nullptr, default_interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+
+    result = NEScale::validate(&input, nullptr, ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
@@ -290,7 +305,11 @@ TEST_CASE(SupportDataType, framework::DatasetMode::ALL)
     {
         const auto input  = TensorInfo{ input_shape, 1, kv.first, default_data_layout };
         const auto output = TensorInfo{ output_shape, 1, kv.first, default_data_layout };
-        result            = NEScale::validate(&input, &output, default_interpolation_policy, default_border_mode);
+
+        result = NEScale::validate(&input, &output, default_interpolation_policy, default_border_mode);
+        ARM_COMPUTE_EXPECT(bool(result) == kv.second, framework::LogLevel::ERRORS);
+
+        result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
         ARM_COMPUTE_EXPECT(bool(result) == kv.second, framework::LogLevel::ERRORS);
     }
 }
@@ -302,7 +321,11 @@ TEST_CASE(MissmatchingDataType, framework::DatasetMode::ALL)
     const auto input  = TensorInfo{ input_shape, 1, default_data_type, default_data_layout };
     const auto output = TensorInfo{ output_shape, 1, non_default_data_type, default_data_layout };
     Status     result{};
+
     result = NEScale::validate(&input, &output, default_interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, default_border_mode });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
@@ -318,6 +341,9 @@ TEST_CASE(UsePadding, framework::DatasetMode::ALL)
 
     result = NEScale::validate(&input, &output, default_interpolation_policy, border_mode, PixelValue(), default_sampling_policy, use_padding);
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ default_interpolation_policy, border_mode, PixelValue(), default_sampling_policy, use_padding });
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
 TEST_CASE(AreaWithNHWC, framework::DatasetMode::ALL)
@@ -329,7 +355,11 @@ TEST_CASE(AreaWithNHWC, framework::DatasetMode::ALL)
     const auto input  = TensorInfo{ input_shape, 1, default_data_type, data_layout };
     const auto output = TensorInfo{ output_shape, 1, default_data_type, data_layout };
     Status     result{};
+
     result = NEScale::validate(&input, &output, interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
@@ -343,7 +373,11 @@ TEST_CASE(AreaWithNonU8, framework::DatasetMode::ALL)
     const auto input  = TensorInfo{ input_shape, 1, data_type, data_layout };
     const auto output = TensorInfo{ output_shape, 1, data_type, data_layout };
     Status     result{};
+
     result = NEScale::validate(&input, &output, interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
@@ -359,10 +393,13 @@ TEST_CASE(InvalidAlignedCornerOutput, framework::DatasetMode::ALL)
     const auto input  = TensorInfo{ input_shape, 1, default_data_type, default_data_layout };
     const auto output = TensorInfo{ invalid_output_shape, 1, default_data_type, default_data_layout };
     Status     result{};
+
     result = NEScale::validate(&input, &output, interpolation_policy, default_border_mode, PixelValue(), sampling_policy, default_use_padding, align_corners);
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
-}
 
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), sampling_policy, default_use_padding, align_corners });
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
 TEST_SUITE_END() // Validate
 
 template <typename T>

@@ -102,16 +102,15 @@ NEScale::NEScale() // NOLINT
 {
 }
 
-void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
-                        bool align_corners)
+void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), policy, border_mode, constant_border_value, sampling_policy, use_padding));
+    ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), info));
 
-    _use_padding   = use_padding;
-    _align_corners = policy == InterpolationPolicy::BILINEAR
-                     && sampling_policy == SamplingPolicy::TOP_LEFT
-                     && align_corners;
+    _use_padding   = info.use_padding;
+    _align_corners = info.interpolation_policy == InterpolationPolicy::BILINEAR
+                     && info.sampling_policy == SamplingPolicy::TOP_LEFT
+                     && info.align_corners;
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();
@@ -129,25 +128,22 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
     const size_t input_element_size = input->info()->element_size();
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
-    if(policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
-    {
-        policy = InterpolationPolicy::NEAREST_NEIGHBOR;
-    }
+    const auto policy_to_use = (info.interpolation_policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f) ? InterpolationPolicy::NEAREST_NEIGHBOR : info.interpolation_policy;
 
-    switch(policy)
+    switch(policy_to_use)
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
         {
             TensorInfo tensor_info_offsets(shape, Format::S32);
             _offsets.allocator()->init(tensor_info_offsets);
 
-            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding);
+            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, info);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
 
             // Pre-compute offsets for nearest interpolation
-            precompute_dx_dy_offsets(nullptr, nullptr, &_offsets, wr, hr, input_element_size, sampling_policy);
+            precompute_dx_dy_offsets(nullptr, nullptr, &_offsets, wr, hr, input_element_size, info.sampling_policy);
             break;
         }
         case InterpolationPolicy::BILINEAR:
@@ -159,7 +155,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dx.allocator()->init(tensor_info_dxdy);
             _dy.allocator()->init(tensor_info_dxdy);
 
-            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners);
+            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, info);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -167,29 +163,33 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dy.allocator()->allocate();
 
             // Pre-compute dx, dy and offsets for bilinear interpolation
-            precompute_dx_dy_offsets(&_dx, &_dy, &_offsets, wr, hr, input_element_size, sampling_policy);
+            precompute_dx_dy_offsets(&_dx, &_dy, &_offsets, wr, hr, input_element_size, info.sampling_policy);
             break;
         }
         case InterpolationPolicy::AREA:
         {
-            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, policy, border_mode, constant_border_value);
+            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, info);
             break;
         }
         default:
             ARM_COMPUTE_ERROR("Unsupported interpolation mode");
     }
-    if(use_padding)
+    if(info.use_padding)
     {
-        _border_handler.configure(input, _scale_kernel.border_size(), border_mode, constant_border_value);
+        _border_handler.configure(input, _scale_kernel.border_size(), info.border_mode, info.constant_border_value);
     }
 }
 
-Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
-                         BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding, bool align_corners)
+void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
+                        bool align_corners)
+{
+    configure(input, output, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners });
+}
+
+Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER && sampling_policy != SamplingPolicy::TOP_LEFT);
-    ARM_COMPUTE_UNUSED(border_mode, constant_border_value);
+    ARM_COMPUTE_RETURN_ERROR_ON(info.sampling_policy != SamplingPolicy::CENTER && info.sampling_policy != SamplingPolicy::TOP_LEFT);
 
     ITensorInfo *offsets = nullptr;
     ITensorInfo *dx      = nullptr;
@@ -207,7 +207,7 @@ Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, In
     TensorInfo tensor_info_dx(shape, Format::F32);
     TensorInfo tensor_info_dy(shape, Format::F32);
 
-    switch(policy)
+    switch(info.interpolation_policy)
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
             offsets = &tensor_info_offsets;
@@ -221,8 +221,14 @@ Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, In
             break;
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEScaleKernel::validate(input->clone().get(), dx, dy, offsets, output->clone().get(),
-                                                        policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEScaleKernel::validate(input->clone().get(), dx, dy, offsets, output->clone().get(), info));
+    return Status{};
+}
+
+Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
+                         BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding, bool align_corners)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(NEScale::validate(input, output, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners }));
     return Status{};
 }
 
