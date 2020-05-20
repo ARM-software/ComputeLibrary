@@ -89,6 +89,7 @@ Status validate_config(const ITensorInfo *input, const Coordinates &reduction_ax
         }
         const TensorInfo out_info = input->clone()->set_tensor_shape(out_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &out_info);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
     return Status{};
 }
