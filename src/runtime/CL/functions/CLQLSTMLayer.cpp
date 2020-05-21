@@ -119,7 +119,7 @@ void CLQLSTMLayer::configure(const ICLTensor *input,
 {
     configure(CLKernelLibrary::get().get_compile_context(), input, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
               recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights, forget_gate_bias, cell_bias, output_gate_bias,
-              cell_state_in, output_state_in, cell_state_out, output, output_state_out, lstm_params);
+              cell_state_in, output_state_in, cell_state_out, output_state_out, output, lstm_params);
 }
 
 void CLQLSTMLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input,
