@@ -28,8 +28,8 @@
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEReductionOperationKernel.h"
-#include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -76,7 +76,7 @@ private:
     MemoryGroup                _memory_group;
     NEReductionOperationKernel _reduction_kernel;
     NEFillBorderKernel         _fill_border_kernel;
-    NEReshapeLayerKernel       _reshape_kernel;
+    NEReshapeLayer             _reshape;
     Tensor                     _output_internal;
     size_t                     _window_split;
     int                        _reduction_axis;

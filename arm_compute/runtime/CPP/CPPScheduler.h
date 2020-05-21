@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CPPSCHEDULER_H
 #define ARM_COMPUTE_CPPSCHEDULER_H
 
+#include "arm_compute/core/experimental/Types.h"
 #include "arm_compute/runtime/IScheduler.h"
 
 #include <memory>
@@ -65,6 +66,18 @@ public:
      * @param[in] hints  Hints for the scheduler.
      */
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
+    /** Multithread the execution of the passed kernel if possible.
+     *
+     * The kernel will run on a single thread if any of these conditions is true:
+     * - ICPPKernel::is_parallelisable() returns false
+     * - The scheduler has been initialized with only one thread.
+     *
+     * @param[in] kernel  Kernel to execute.
+     * @param[in] hints   Hints for the scheduler.
+     * @param[in] inputs  Vector that contains the input tensors.
+     * @param[in] outputs Vector that contains the output tensors.
+     */
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs) override;
 
 protected:
     /** Will run the workloads in parallel using num_threads
@@ -74,6 +87,7 @@ protected:
     void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
+    void schedule_common(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs);
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

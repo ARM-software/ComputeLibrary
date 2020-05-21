@@ -26,10 +26,13 @@
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/IKernel.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/Types.h"
 
 namespace arm_compute
 {
 class Window;
+class ITensor;
 
 /** Common interface for all kernels implemented in C++ */
 class ICPPKernel : public IKernel
@@ -51,8 +54,7 @@ public:
      */
     virtual void run(const Window &window, const ThreadInfo &info)
     {
-        ARM_COMPUTE_UNUSED(window);
-        ARM_COMPUTE_UNUSED(info);
+        ARM_COMPUTE_UNUSED(window, info);
         ARM_COMPUTE_ERROR("default implementation of legacy run() virtual member function invoked");
     }
 
@@ -67,6 +69,24 @@ public:
     {
         ARM_COMPUTE_UNUSED(thread_locator);
         run(window, info);
+    }
+
+    /** Execute the kernel on the passed window
+     *
+     * @warning If is_parallelisable() returns false then the passed window must be equal to window()
+     *
+     * @note The window has to be a region within the window returned by the window() method
+     *
+     * @note The width of the window has to be a multiple of num_elems_processed_per_iteration().
+     *
+     * @param[in] inputs  A vector containing the input tensors.
+     * @param[in] outputs A vector containing the output tensors.
+     * @param[in] window  Region on which to execute the kernel. (Must be a region of the window returned by window())
+     * @param[in] info    Info about executing thread and CPU.
+     */
+    virtual void run_op(const std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs, const Window &window, const ThreadInfo &info)
+    {
+        ARM_COMPUTE_UNUSED(inputs, outputs, window, info);
     }
 
     /** Name of the kernel

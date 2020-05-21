@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,19 @@ public:
     {
         _timer.start();
         _real_scheduler.schedule(kernel, hints);
+        _timer.stop();
+
+        typename SchedulerClock<output_timestamps>::kernel_info info;
+        info.name         = kernel->name();
+        info.prefix       = _prefix;
+        info.measurements = _timer.measurements();
+        _kernels.push_back(std::move(info));
+    }
+
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs) override
+    {
+        _timer.start();
+        _real_scheduler.schedule_op(kernel, hints, inputs, outputs);
         _timer.stop();
 
         typename SchedulerClock<output_timestamps>::kernel_info info;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,13 +31,14 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 
 #include <cstdint>
 
 /** [NEReshapeLayerKernel Kernel] **/
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
@@ -71,21 +72,47 @@ inline void reshape_tensor(const Window &window, const ITensor *input, ITensor *
 }
 } // namespace
 
-void NEReshapeLayerKernel::configure(const ITensor *input, ITensor *output)
+void NEReshapeLayerKernel::configure(const ITensorInfo *input, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
-
-    _input  = input;
-    _output = output;
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output));
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info());
+    Window win = calculate_max_window(*input);
 
     // Set the output valid region
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     INEKernel::configure(win);
+}
+
+void NEReshapeLayerKernel::run_op(const std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs, const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+
+    switch(inputs[0]->second->info()->data_type())
+    {
+        case DataType::U8:
+        case DataType::S8:
+        case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
+            reshape_tensor<uint8_t>(window, inputs[0]->second, outputs[0]->second);
+            break;
+        case DataType::U16:
+        case DataType::S16:
+        case DataType::F16:
+            reshape_tensor<uint16_t>(window, inputs[0]->second, outputs[0]->second);
+            break;
+        case DataType::U32:
+        case DataType::S32:
+        case DataType::F32:
+            reshape_tensor<uint32_t>(window, inputs[0]->second, outputs[0]->second);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type!");
+    }
 }
 
 Status NEReshapeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
@@ -94,33 +121,5 @@ Status NEReshapeLayerKernel::validate(const ITensorInfo *input, const ITensorInf
 
     return Status{};
 }
-
-void NEReshapeLayerKernel::run(const Window &window, const ThreadInfo &info)
-{
-    ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INESimpleKernel::window(), window);
-
-    switch(_input->info()->data_type())
-    {
-        case DataType::U8:
-        case DataType::S8:
-        case DataType::QASYMM8:
-        case DataType::QASYMM8_SIGNED:
-            reshape_tensor<uint8_t>(window, _input, _output);
-            break;
-        case DataType::U16:
-        case DataType::S16:
-        case DataType::F16:
-            reshape_tensor<uint16_t>(window, _input, _output);
-            break;
-        case DataType::U32:
-        case DataType::S32:
-        case DataType::F32:
-            reshape_tensor<uint32_t>(window, _input, _output);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Unsupported data type!");
-    }
-}
+} // namespace arm_compute
 /** [NEReshapeLayerKernel Kernel] **/

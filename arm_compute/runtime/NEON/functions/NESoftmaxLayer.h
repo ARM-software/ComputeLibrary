@@ -25,11 +25,11 @@
 #define ARM_COMPUTE_NESOFTMAXLAYER_H
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -119,9 +119,9 @@ private:
     MemoryGroup                     _memory_group;
     NELogits1DMaxKernel             _max_kernel;
     NELogits1DSoftmaxKernel<IS_LOG> _softmax_kernel;
-    std::unique_ptr<INEKernel>      _flat_or_reshape_kernel_ptr;
+    std::unique_ptr<IFunction>      _flat_or_reshape_ptr;
     NEFillBorderKernel              _fill_border_kernel;
-    NEReshapeLayerKernel            _reshape_kernel;
+    NEReshapeLayer                  _reshape;
     Tensor                          _max;
     Tensor                          _tmp;
     Tensor                          _input_flattened;

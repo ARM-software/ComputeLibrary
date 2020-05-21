@@ -25,16 +25,41 @@
 
 #include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/Types.h"
 #include "support/MemorySupport.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
+namespace experimental
+{
+void NEReshapeLayer::configure(const ITensorInfo *input, ITensorInfo *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();
     k->configure(input, output);
+    _kernel = std::move(k);
+}
+
+Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return arm_compute::NEReshapeLayer::validate(input, output);
+}
+
+MemoryRequirements NEReshapeLayer::workspace() const
+{
+    return MemoryRequirements{};
+}
+} // namespace experimental
+
+void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
+{
+    _input  = input;
+    _output = output;
+
+    auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();
+    k->configure(input->info(), output->info());
     _kernel = std::move(k);
 }
 
@@ -44,5 +69,16 @@ Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *out
     ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(input, output));
 
     return Status{};
+}
+
+void NEReshapeLayer::run()
+{
+    InputOperatorTensors  src_0 = std::make_pair(TensorType::ACL_SRC, _input);
+    OutputOperatorTensors dst_0 = std::make_pair(TensorType::ACL_DST, _output);
+
+    std::vector<InputOperatorTensors *>  inputs  = { &src_0 };
+    std::vector<OutputOperatorTensors *> outputs = { &dst_0 };
+
+    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, inputs, outputs);
 }
 } // namespace arm_compute

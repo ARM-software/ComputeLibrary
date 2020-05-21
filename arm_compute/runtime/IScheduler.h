@@ -25,6 +25,8 @@
 #define ARM_COMPUTE_ISCHEDULER_H
 
 #include "arm_compute/core/CPP/CPPTypes.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/experimental/Types.h"
 
 #include <functional>
 #include <limits>
@@ -32,6 +34,7 @@
 namespace arm_compute
 {
 class ICPPKernel;
+class ITensor;
 
 /** Scheduler interface to run kernels */
 class IScheduler
@@ -146,6 +149,15 @@ public:
      * @param[in] hints  Hints for the scheduler.
      */
     virtual void schedule(ICPPKernel *kernel, const Hints &hints) = 0;
+
+    /** Runs the kernel in the same thread as the caller synchronously.
+     *
+     * @param[in] kernel  Kernel to execute.
+     * @param[in] hints   Hints for the scheduler.
+     * @param[in] inputs  Vector containing the input tensors.
+     * @param[in] outputs Vector containing the output tensors.
+     */
+    virtual void schedule_op(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs) = 0;
 
     /** Execute all the passed workloads
      *

@@ -54,7 +54,7 @@ size_t reduction_window_split_dimension(unsigned int axis)
 } // namespace
 
 NEReductionOperation::NEReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _reduction_kernel(), _fill_border_kernel(), _reshape_kernel(), _output_internal(), _window_split(0), _reduction_axis(), _is_reshape_required(false)
+    : _memory_group(memory_manager), _reduction_kernel(), _fill_border_kernel(), _reshape(), _output_internal(), _window_split(0), _reduction_axis(), _is_reshape_required(false)
 {
 }
 
@@ -91,7 +91,7 @@ Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInf
 
     if(is_reshape_required)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(output_internal, output));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayer::validate(output_internal, output));
     }
 
     return Status{};
@@ -171,7 +171,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
 
     if(_is_reshape_required)
     {
-        _reshape_kernel.configure(output_internal, output);
+        _reshape.configure(output_internal, output);
         _output_internal.allocator()->allocate();
     }
 }
@@ -185,7 +185,7 @@ void NEReductionOperation::run()
     NEScheduler::get().schedule(&_reduction_kernel, _window_split);
     if(_is_reshape_required)
     {
-        NEScheduler::get().schedule(&_reshape_kernel, Window::DimY);
+        _reshape.run();
     }
 }
 } // namespace arm_compute

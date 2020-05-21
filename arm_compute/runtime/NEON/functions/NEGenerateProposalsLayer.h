@@ -23,18 +23,19 @@
  */
 #ifndef ARM_COMPUTE_NEGENERATEPROPOSALSLAYER_H
 #define ARM_COMPUTE_NEGENERATEPROPOSALSLAYER_H
+
 #include "arm_compute/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDequantizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGenerateProposalsLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPadLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
 #include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -112,9 +113,9 @@ private:
 
     // Neon kernels
     NEPermuteKernel              _permute_deltas_kernel;
-    NEReshapeLayerKernel         _flatten_deltas_kernel;
+    NEReshapeLayer               _flatten_deltas;
     NEPermuteKernel              _permute_scores_kernel;
-    NEReshapeLayerKernel         _flatten_scores_kernel;
+    NEReshapeLayer               _flatten_scores;
     NEComputeAllAnchorsKernel    _compute_anchors_kernel;
     NEBoundingBoxTransformKernel _bounding_box_kernel;
     NEPadLayerKernel             _pad_kernel;

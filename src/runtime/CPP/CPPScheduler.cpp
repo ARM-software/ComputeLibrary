@@ -95,10 +95,10 @@ std::pair<unsigned, unsigned> split_2d(unsigned max_threads, std::size_t m, std:
 
     // nt = sqrt(max_threads * (m / n) )
     const unsigned adjusted = std::round(
-                    std::sqrt(max_threads * ratio));
+                                  std::sqrt(max_threads * ratio));
 
     //find the nearest factor of max_threads
-    for(unsigned i = 0; i!= adjusted; ++i)
+    for(unsigned i = 0; i != adjusted; ++i)
     {
         //try down
         const unsigned adj_down = adjusted - i;
@@ -118,11 +118,11 @@ std::pair<unsigned, unsigned> split_2d(unsigned max_threads, std::size_t m, std:
     //we didn't find anything so lets bail out with maxes biased to the largest dimension
     if(m > n)
     {
-         return{ std::min<unsigned>(m, max_threads), 1 };
+        return { std::min<unsigned>(m, max_threads), 1 };
     }
     else
     {
-        return{ 1, std::min<unsigned>(n, max_threads) };
+        return { 1, std::min<unsigned>(n, max_threads) };
     }
 }
 
@@ -144,7 +144,6 @@ void process_workloads(std::vector<IScheduler::Workload> &workloads, ThreadFeede
     }
     while(feeder.get_next(workload_index));
 }
-
 } //namespace
 
 struct CPPScheduler::Impl final
@@ -364,11 +363,11 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 }
 #endif /* DOXYGEN_SKIP_THIS */
 
-void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
+void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
-    const Window      &max_window     = kernel->window();
+    const Window &max_window = kernel->window();
 
     if(hints.split_dimension() == IScheduler::split_dimensions_all)
     {
@@ -379,34 +378,32 @@ void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
         const std::size_t m = max_window.num_iterations(Window::DimX);
         const std::size_t n = max_window.num_iterations(Window::DimY);
 
-       //in c++17 this can be swapped for   auto [ m_threads, n_threads ] = split_2d(...
+        //in c++17 this can be swapped for   auto [ m_threads, n_threads ] = split_2d(...
         unsigned m_threads, n_threads;
         std::tie(m_threads, n_threads) = split_2d(_impl->_num_threads, m, n);
 
         std::vector<IScheduler::Workload> workloads;
-        for(unsigned int ni  = 0; ni != n_threads; ++ni)
+        for(unsigned int ni = 0; ni != n_threads; ++ni)
         {
-            for(unsigned int mi  = 0; mi != m_threads; ++mi)
+            for(unsigned int mi = 0; mi != m_threads; ++mi)
             {
                 workloads.push_back(
-                    [ ni, mi, m_threads, n_threads, &max_window, &kernel ]
-                    (const ThreadInfo & info)
-                    {
-                        //narrow the window to our mi-ni workload
-                        Window win = max_window.split_window(Window::DimX, mi, m_threads)
-                                               .split_window(Window::DimY, ni, n_threads);
+                    [ni, mi, m_threads, n_threads, &max_window, &kernel](const ThreadInfo & info)
+                {
+                    //narrow the window to our mi-ni workload
+                    Window win = max_window.split_window(Window::DimX, mi, m_threads)
+                                 .split_window(Window::DimY, ni, n_threads);
 
-                        win.validate();
+                    win.validate();
 
-                        Window thread_locator;
-                        thread_locator.set(Window::DimX, Window::Dimension(mi, m_threads));
-                        thread_locator.set(Window::DimY, Window::Dimension(ni, n_threads));
+                    Window thread_locator;
+                    thread_locator.set(Window::DimX, Window::Dimension(mi, m_threads));
+                    thread_locator.set(Window::DimY, Window::Dimension(ni, n_threads));
 
-                        thread_locator.validate();
+                    thread_locator.validate();
 
-                        kernel->run_nd(win, info, thread_locator);
-                    }
-                );
+                    kernel->run_nd(win, info, thread_locator);
+                });
             }
         }
         run_workloads(workloads);
@@ -425,7 +422,14 @@ void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
         {
             ThreadInfo info;
             info.cpu_info = &_cpu_info;
-            kernel->run(max_window, info);
+            if(inputs.empty())
+            {
+                kernel->run(max_window, info);
+            }
+            else
+            {
+                kernel->run_op(inputs, outputs, max_window, info);
+            }
         }
         else
         {
@@ -449,15 +453,35 @@ void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
             for(unsigned int t = 0; t < num_windows; t++)
             {
                 //Capture 't' by copy, all the other variables by reference:
-                workloads[t] = [t, &hints, &max_window, &num_windows, &kernel](const ThreadInfo & info)
+                workloads[t] = [t, &hints, &max_window, &num_windows, &kernel, &inputs, &outputs](const ThreadInfo & info)
                 {
                     Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
                     win.validate();
-                    kernel->run(win, info);
+
+                    if(inputs.empty())
+                    {
+                        kernel->run(win, info);
+                    }
+                    else
+                    {
+                        kernel->run_op(inputs, outputs, win, info);
+                    }
                 };
             }
             run_workloads(workloads);
         }
     }
+}
+
+void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs)
+{
+    schedule_common(kernel, hints, inputs, outputs);
+}
+
+void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
+{
+    std::vector<InputOperatorTensors *>  inputs;
+    std::vector<OutputOperatorTensors *> outputs;
+    schedule_common(kernel, hints, inputs, outputs);
 }
 } // namespace arm_compute

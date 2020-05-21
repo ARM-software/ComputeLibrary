@@ -31,9 +31,9 @@ namespace arm_compute
 NEGenerateProposalsLayer::NEGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager),
       _permute_deltas_kernel(),
-      _flatten_deltas_kernel(),
+      _flatten_deltas(),
       _permute_scores_kernel(),
-      _flatten_scores_kernel(),
+      _flatten_scores(),
       _compute_anchors_kernel(),
       _bounding_box_kernel(),
       _pad_kernel(),
@@ -95,12 +95,12 @@ void NEGenerateProposalsLayer::configure(const ITensor *scores, const ITensor *d
     {
         _memory_group.manage(&_deltas_permuted);
         _permute_deltas_kernel.configure(deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
-        _flatten_deltas_kernel.configure(&_deltas_permuted, &_deltas_flattened);
+        _flatten_deltas.configure(&_deltas_permuted, &_deltas_flattened);
         _deltas_permuted.allocator()->allocate();
     }
     else
     {
-        _flatten_deltas_kernel.configure(deltas, &_deltas_flattened);
+        _flatten_deltas.configure(deltas, &_deltas_flattened);
     }
 
     const TensorShape flatten_shape_scores(1, total_num_anchors);
@@ -112,12 +112,12 @@ void NEGenerateProposalsLayer::configure(const ITensor *scores, const ITensor *d
     {
         _memory_group.manage(&_scores_permuted);
         _permute_scores_kernel.configure(scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
-        _flatten_scores_kernel.configure(&_scores_permuted, &_scores_flattened);
+        _flatten_scores.configure(&_scores_permuted, &_scores_flattened);
         _scores_permuted.allocator()->allocate();
     }
     else
     {
-        _flatten_scores_kernel.configure(scores, &_scores_flattened);
+        _flatten_scores.configure(scores, &_scores_flattened);
     }
 
     Tensor *anchors_to_use = &_all_anchors;
@@ -244,12 +244,12 @@ Status NEGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     }
 
     TensorInfo deltas_flattened_info(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(&deltas_permuted_info, &deltas_flattened_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayer::validate(&deltas_permuted_info, &deltas_flattened_info));
 
     TensorInfo scores_flattened_info(scores->clone()->set_tensor_shape(TensorShape(1, total_num_anchors)).set_is_resizable(true));
     TensorInfo proposals_4_roi_values(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(&scores_permuted_info, &scores_flattened_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayer::validate(&scores_permuted_info, &scores_flattened_info));
 
     TensorInfo *proposals_4_roi_values_to_use = &proposals_4_roi_values;
     TensorInfo  proposals_4_roi_values_quantized(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
@@ -327,8 +327,8 @@ void NEGenerateProposalsLayer::run()
         NEScheduler::get().schedule(&_permute_scores_kernel, Window::DimY);
     }
 
-    NEScheduler::get().schedule(&_flatten_deltas_kernel, Window::DimY);
-    NEScheduler::get().schedule(&_flatten_scores_kernel, Window::DimY);
+    _flatten_deltas.run();
+    _flatten_scores.run();
 
     if(_is_qasymm8)
     {
