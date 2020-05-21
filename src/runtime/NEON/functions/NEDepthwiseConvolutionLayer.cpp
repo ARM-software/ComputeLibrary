@@ -86,38 +86,6 @@ Status validate_arguments_optimized(const ITensorInfo *input, const ITensorInfo 
 }
 } // namespace
 
-NEDepthwiseConvolutionLayerOptimized::NEDepthwiseConvolutionLayerOptimized(std::shared_ptr<IMemoryManager> memory_manager)
-    : _func(std::move(memory_manager))
-{
-}
-
-void NEDepthwiseConvolutionLayerOptimized::configure(ITensor       *input,
-                                                     const ITensor *weights,
-                                                     const ITensor *biases,
-                                                     ITensor *output, const PadStrideInfo &conv_info,
-                                                     unsigned int               depth_multiplier,
-                                                     const ActivationLayerInfo &act_info,
-                                                     const Size2D              &dilation)
-{
-    _func.configure(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
-}
-
-Status NEDepthwiseConvolutionLayerOptimized::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                      unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
-{
-    return validate_arguments_optimized(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
-}
-
-void NEDepthwiseConvolutionLayerOptimized::run()
-{
-    _func.run();
-}
-
-void NEDepthwiseConvolutionLayerOptimized::prepare()
-{
-    _func.prepare();
-}
-
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayerOptimizedInternal::NEDepthwiseConvolutionLayerOptimizedInternal(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _dwc_kernel(), _dwc_optimized_func(memory_manager), _output_stage_kernel(), _border_handler(), _permute_input(), _permute_weights(), _permute_output(),
       _activationlayer_function(), _accumulator(), _permuted_input(), _permuted_weights(), _permuted_output(), _original_weights(nullptr), _has_bias(false), _is_quantized(false), _is_optimized(false),
@@ -563,7 +531,7 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     switch(depth_conv_func)
     {
         case DepthwiseConvolutionFunction::OPTIMIZED:
-            return NEDepthwiseConvolutionLayerOptimized::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
+            return NEDepthwiseConvolutionLayerOptimizedInternal::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
             break;
         case DepthwiseConvolutionFunction::GENERIC:
             return NEDepthwiseConvolutionLayerGeneric::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
@@ -577,7 +545,7 @@ DepthwiseConvolutionFunction NEDepthwiseConvolutionLayer::get_depthwiseconvoluti
                                                                                             const PadStrideInfo &conv_info,
                                                                                             unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
-    if(bool(NEDepthwiseConvolutionLayerOptimized::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation)))
+    if(bool(NEDepthwiseConvolutionLayerOptimizedInternal::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation)))
     {
         return DepthwiseConvolutionFunction::OPTIMIZED;
     }

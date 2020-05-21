@@ -117,40 +117,6 @@ Status validate_arguments_3x3(const ITensorInfo *input, const ITensorInfo *weigh
 }
 } // namespace
 
-CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3(std::shared_ptr<IMemoryManager> memory_manager)
-    : _func(std::move(memory_manager))
-{
-}
-
-void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
-                                               ActivationLayerInfo act_info, const Size2D &dilation)
-{
-    _func.configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
-}
-
-void CLDepthwiseConvolutionLayer3x3::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
-                                               const PadStrideInfo &conv_info, unsigned int depth_multiplier,
-                                               ActivationLayerInfo act_info, const Size2D &dilation)
-{
-    _func.configure(compile_context, input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
-}
-
-Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                unsigned int depth_multiplier, ActivationLayerInfo act_info, GPUTarget gpu_target, const Size2D &dilation)
-{
-    return validate_arguments_3x3(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target, dilation);
-}
-
-void CLDepthwiseConvolutionLayer3x3::run()
-{
-    _func.run();
-}
-
-void CLDepthwiseConvolutionLayer3x3::prepare()
-{
-    _func.prepare();
-}
-
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerGeneric::CLDepthwiseConvolutionLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
       _dwc_native_kernel(),
@@ -411,7 +377,7 @@ void CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayerInternal3x3::config
 
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CLDepthwiseConvolutionLayer3x3::validate(input->info(),
+    ARM_COMPUTE_ERROR_THROW_ON(CLDepthwiseConvolutionLayerInternal3x3::validate(input->info(),
                                                                         weights->info(),
                                                                         biases != nullptr ? biases->info() : nullptr,
                                                                         output->info(),
