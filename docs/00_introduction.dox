@@ -302,6 +302,13 @@ v20.05 Public major release
  - Removed PoolingLayerInfo constructors without Data Layout.
  - Removed CLDepthwiseConvolutionLayer3x3
  - Removed NEDepthwiseConvolutionLayerOptimized
+ - Added support for Winograd 3x3,4x4 on NEON FP16:
+     - @ref NEWinogradConvolutionLayer
+     - @ref NEWinogradLayerTransformInputKernel
+     - @ref NEWinogradLayerTransformOutputKernel
+     - @ref NEWinogradLayerTransformWeightsKernel
+ - Added CLCompileContext
+ - Added NEON GEMM kernel with 2D window support
 
 v20.02.1 Maintenance release
  - Added Android-NN build script.
