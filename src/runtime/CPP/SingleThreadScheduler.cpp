@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,13 @@ void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
 
 void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
-    ARM_COMPUTE_UNUSED(hints);
+    const Window      &max_window     = kernel->window();
+    const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
+    if(num_iterations < 1)
+    {
+        return;
+    }
+
     ThreadInfo info;
     info.cpu_info = &_cpu_info;
     kernel->run(kernel->window(), info);
