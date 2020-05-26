@@ -97,8 +97,7 @@ NEScale::NEScale() // NOLINT
       _dy(),
       _scale_kernel(),
       _border_handler(),
-      _use_padding(true),
-      _align_corners(false)
+      _use_padding(true)
 {
 }
 
@@ -107,10 +106,8 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), info));
 
-    _use_padding   = info.use_padding;
-    _align_corners = info.interpolation_policy == InterpolationPolicy::BILINEAR
-                     && info.sampling_policy == SamplingPolicy::TOP_LEFT
-                     && info.align_corners;
+    _use_padding                     = info.use_padding;
+    const bool is_align_corners_used = info.align_corners && is_align_corners_allowed(info.sampling_policy);
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();
@@ -121,8 +118,8 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     const TensorShape shape(output->info()->dimension(idx_width), output->info()->dimension(idx_height));
 
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_width), output->info()->dimension(idx_width), _align_corners);
-    const auto hr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), _align_corners);
+    const auto wr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_width), output->info()->dimension(idx_width), is_align_corners_used);
+    const auto hr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), is_align_corners_used);
 
     // Get the element size of the input image
     const size_t input_element_size = input->info()->element_size();

@@ -54,7 +54,7 @@ public:
         _sampling_policy   = sampling_policy;
         _data_type         = data_type;
         _quantization_info = quantization_info;
-        _align_corners     = align_corners && _policy == InterpolationPolicy::BILINEAR && _sampling_policy == SamplingPolicy::TOP_LEFT;
+        _align_corners     = align_corners;
 
         generate_scale(shape);
 
@@ -75,8 +75,10 @@ protected:
         constexpr float max_width{ 8192.0f };
         constexpr float max_height{ 6384.0f };
 
-        const float min_width  = _align_corners ? 2.f : 1.f;
-        const float min_height = _align_corners ? 2.f : 1.f;
+        const bool is_align_corners_used = _align_corners && arm_compute::is_align_corners_allowed(_sampling_policy);
+
+        const float min_width  = is_align_corners_used ? 2.f : 1.f;
+        const float min_height = is_align_corners_used ? 2.f : 1.f;
 
         std::mt19937                          generator(library->seed());
         std::uniform_real_distribution<float> distribution_float(_min_scale, _max_scale);

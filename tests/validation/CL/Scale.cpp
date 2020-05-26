@@ -55,12 +55,16 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
     DataType::F32,
 });
 
-/** Align corners, this functionality is supported only by NEON */
-const auto AlignCorners = framework::dataset::make("AlignCorners",
+/** Sampling policy data set */
+const auto SamplingPolicySet = combine(datasets::SamplingPolicies(),
+                                       framework::dataset::make("AlignCorners", { false }));
+
+/** Sampling policy data set for Aligned Corners which only allows TOP_LEFT poicy.*/
+const auto AlignCornersSamplingPolicySet = combine(framework::dataset::make("SamplingPolicy",
 {
-    false,
-    true,
-});
+    SamplingPolicy::TOP_LEFT,
+}),
+framework::dataset::make("AlignCorners", { true }));
 
 /** Tolerance */
 constexpr AbsoluteTolerance<uint8_t> tolerance_q8(1);
@@ -173,13 +177,12 @@ using CLScaleFixture = ScaleValidationFixture<CLTensor, CLAccessor, CLScale, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
                                                                                                                      DataType::F32)),
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                     framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                             datasets::BorderModes()),
-                                                                                                     datasets::SamplingPolicies()),
-                                                                                             AlignCorners))
+                                                                                                             framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                     datasets::BorderModes()),
+                                                                                             SamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -188,13 +191,41 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<float>, framework::DatasetMode::
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32, tolerance_f32_absolute);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, CLScaleFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)),
                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                  framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                                  datasets::BorderModes()),
-                                                                                                         datasets::SamplingPolicies()),
-                                                                                                 AlignCorners))
+                                                                                                         AlignCornersSamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32, tolerance_f32_absolute);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::F32)),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                 framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                         datasets::BorderModes()),
+                                                                                                 SamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32, tolerance_f32_absolute);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeAlignCorners, CLScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::F32)),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                     framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                     datasets::BorderModes()),
+                                                                                                             AlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -205,13 +236,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<float>, framework::DatasetMode::
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
                                                                                                                     DataType::F16)),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                            datasets::BorderModes()),
-                                                                                                    datasets::SamplingPolicies()),
-                                                                                            AlignCorners))
+                                                                                                            framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                    datasets::BorderModes()),
+                                                                                            SamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -220,13 +250,41 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<half>, framework::DatasetMode::A
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, CLScaleFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
                                                                                                                         DataType::F16)),
                                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                         framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                                 datasets::BorderModes()),
-                                                                                                        datasets::SamplingPolicies()),
-                                                                                                AlignCorners))
+                                                                                                        AlignCornersSamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                        DataType::F16)),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                        datasets::BorderModes()),
+                                                                                                SamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeAlignCorners, CLScaleFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::F16)),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                    datasets::BorderModes()),
+                                                                                                            AlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -240,13 +298,12 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
                                                                                                                        DataType::U8)),
                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                               datasets::BorderModes()),
-                                                                                                       datasets::SamplingPolicies()),
-                                                                                               AlignCorners))
+                                                                                                               framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                       datasets::BorderModes()),
+                                                                                               SamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -255,13 +312,42 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<uint8_t>, framework::DatasetMode
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, CLScaleFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::U8)),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                                    datasets::BorderModes()),
-                                                                                                           datasets::SamplingPolicies()),
-                                                                                                   AlignCorners))
+                                                                                                           AlignCornersSamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::U8)),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                           datasets::BorderModes()),
+                                                                                                   SamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeAlignCorners, CLScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::U8)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                       datasets::BorderModes()),
+                                                                                                               AlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -272,13 +358,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<uint8_t>, framework::DatasetMode
 }
 TEST_SUITE_END() // U8
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::Tiny4DShapes(), framework::dataset::make("DataType",
                                                                                                                        DataType::S16)),
                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                               datasets::BorderModes()),
-                                                                                                       datasets::SamplingPolicies()),
-                                                                                               AlignCorners))
+                                                                                                               framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                       datasets::BorderModes()),
+                                                                                               SamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -287,13 +372,42 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<int16_t>, framework::DatasetMode
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, CLScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::S16)),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                                    datasets::BorderModes()),
-                                                                                                           datasets::SamplingPolicies()),
-                                                                                                   AlignCorners))
+                                                                                                           AlignCornersSamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                           datasets::BorderModes()),
+                                                                                                   SamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeAlignCorners, CLScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::S16)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                       datasets::BorderModes()),
+                                                                                                               AlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -309,15 +423,14 @@ template <typename T>
 using CLScaleQuantizedFixture = ScaleValidationQuantizedFixture<CLTensor, CLAccessor, CLScale, T>;
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
                                                                                                                         framework::dataset::make("DataType",
                                                                                                                                 DataType::QASYMM8)),
                                                                                                                         framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
                                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                         framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                                        datasets::BorderModes()),
-                                                                                                                datasets::SamplingPolicies()),
-                                                                                                        AlignCorners))
+                                                                                                                datasets::BorderModes()),
+                                                                                                        SamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -326,15 +439,46 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<uint8_t>, framework::Da
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
                                                                                                                     framework::dataset::make("DataType",
                                                                                                                             DataType::QASYMM8)),
                                                                                                                     framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                     framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                                     datasets::BorderModes()),
-                                                                                                                    datasets::SamplingPolicies()),
-                                                                                                            AlignCorners))
+                                                                                                                    AlignCornersSamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QASYMM8)),
+                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                    datasets::BorderModes()),
+                                                                                                            SamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_q8);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeAlignCorners, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QASYMM8)),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                        datasets::BorderModes()),
+                                                                                                                        AlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -345,14 +489,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<uint8_t>, framework::Da
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                                       datasets::BorderModes()),
-                                                                                                               datasets::SamplingPolicies()),
-                                                                                                       AlignCorners))
+                                                                                                               datasets::BorderModes()),
+                                                                                                       SamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -361,14 +504,43 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<int8_t>, framework::Dat
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::Tiny4DShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                                    datasets::BorderModes()),
-                                                                                                                   datasets::SamplingPolicies()),
-                                                                                                           AlignCorners))
+                                                                                                                   AlignCornersSamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                   framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           SamplingPolicySet))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_qs8);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeAlignCorners, CLScaleQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                       datasets::BorderModes()),
+                                                                                                                       AlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);

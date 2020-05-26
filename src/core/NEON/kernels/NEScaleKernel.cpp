@@ -66,18 +66,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dx, 1, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dy, 1, DataType::F32);
+    }
 
-        if(info.align_corners)
-        {
-            // For bilinear method with aligned corners, the resize ratio will
-            // be calculated by (input_size - 1)/(output_size - 1). Belows are
-            // checking possible overflows.
-            const auto input_width  = input->dimension(width_index);
-            const auto input_height = input->dimension(height_index);
+    ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !is_align_corners_allowed(info.sampling_policy));
 
-            ARM_COMPUTE_RETURN_ERROR_ON(input_width == 0 || input_height == 0);
-            ARM_COMPUTE_RETURN_ERROR_ON((output_width - 1 == 0) || (output_height - 1 == 0));
-        }
+    if(info.align_corners && is_align_corners_allowed(info.sampling_policy))
+    {
+        // For bilinear method with aligned corners, the resize ratio will
+        // be calculated by (input_size - 1)/(output_size - 1). Belows are
+        // checking possible overflows.
+        const auto input_width  = input->dimension(width_index);
+        const auto input_height = input->dimension(height_index);
+
+        ARM_COMPUTE_RETURN_ERROR_ON(input_width == 0 || input_height == 0);
+        ARM_COMPUTE_RETURN_ERROR_ON((output_width - 1 == 0) || (output_height - 1 == 0));
     }
 
     if(info.interpolation_policy == InterpolationPolicy::AREA)
@@ -376,9 +378,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     _border_mode           = info.border_mode;
     _constant_border_value = info.constant_border_value;
     _use_padding           = info.use_padding;
-    _align_corners         = info.interpolation_policy == InterpolationPolicy::BILINEAR
-                             && info.sampling_policy == SamplingPolicy::TOP_LEFT
-                             && info.align_corners;
+    _align_corners         = info.align_corners;
 
     if(info.sampling_policy == SamplingPolicy::CENTER)
     {

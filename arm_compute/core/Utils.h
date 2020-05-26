@@ -991,6 +991,17 @@ QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool 
  */
 float calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners = false);
 
+/** Returns if aligned corners are allowed for the given sampling policy
+ *
+ * @param[in] sampling_policy The sampling policy to consider
+ *
+ * @return True if aligned corners are allowed
+ */
+inline bool is_align_corners_allowed(SamplingPolicy sampling_policy)
+{
+    return sampling_policy != SamplingPolicy::CENTER;
+}
+
 /** Returns a pair of minimum and maximum values for a quantized activation
  *
  * @param[in] act_info  The information for activation

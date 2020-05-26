@@ -100,7 +100,6 @@ private:
     NEScaleKernel      _scale_kernel;   /**< Kernel to perform the scaling */
     NEFillBorderKernel _border_handler; /**< kernel to handle tensor borders */
     bool               _use_padding;    /**< Is padding used on the tensors */
-    bool               _align_corners;  /**< Align corners of input and output */
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NESCALEIMAGE_H */

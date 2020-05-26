@@ -60,7 +60,7 @@ inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input,
     return std::make_pair(wr, hr);
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, bool align_corners)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, SamplingPolicy sampling_policy, bool align_corners)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
@@ -68,6 +68,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, I
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
+    ARM_COMPUTE_RETURN_ERROR_ON(align_corners && !is_align_corners_allowed(sampling_policy));
 
     if(align_corners)
     {
@@ -160,11 +161,9 @@ BorderSize CLScaleKernel::border_size() const
 Status CLScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
                                BorderMode border_mode, SamplingPolicy sampling_policy, bool align_corners)
 {
-    BorderSize border           = BorderSize(1);
-    const bool is_align_corners = policy == InterpolationPolicy::BILINEAR
-                                  && sampling_policy == SamplingPolicy::TOP_LEFT
-                                  && align_corners;
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, policy, is_align_corners));
+    BorderSize border = BorderSize(1);
+
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, policy, sampling_policy, align_corners));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), policy, border_mode, sampling_policy, border).first);
 
     return Status{};
@@ -188,16 +187,13 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
                               bool align_corners)
 {
-    _align_corners = policy == InterpolationPolicy::BILINEAR
-                     && sampling_policy == SamplingPolicy::TOP_LEFT
-                     && align_corners;
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy, _align_corners));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy, sampling_policy, align_corners));
 
     _input               = input;
     _output              = output;
     _interpolationPolicy = policy;
     _data_layout         = input->info()->data_layout();
+    _align_corners       = align_corners;
 
     float wr = 0.f;
     float hr = 0.f;
