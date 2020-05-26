@@ -574,7 +574,7 @@ void NEGEMMLowpMatrixMultiplyCore::prepare()
         }
 
         // Run matrix B reduction kernel only if _a_offset is not equal to 0
-        if(_a_offset != 0 && _reshape_b_only_on_first_run)
+        if(!_fused_assembly_path && _a_offset != 0 && _reshape_b_only_on_first_run)
         {
             _vector_sum_col.allocator()->allocate();
             NEScheduler::get().schedule(&_mtx_b_reduction_kernel, Window::DimX);
