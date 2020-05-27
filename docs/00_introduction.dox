@@ -156,11 +156,7 @@ You should have the following file organisation:
 	│       ├── Memory & weights manager files (LifetimeManager, PoolManager, etc.)
 	│       └── Basic implementations of the generic object interfaces (Array, Tensor, etc.)
 	├── data --> Contains test images and reference data dumps used by validation tests
-	├── docs --> Contains Doxyfile and Doxygen sources used to generate the HTML pages in the documentation folder.
-	├── documentation
-	│   ├── index.xhtml
-	│   └── ...
-	├── documentation.xhtml --> documentation/index.xhtml
+	├── docs --> Contains Doxyfile and Doxygen sources used to generate the HTML pages.
 	├── examples
 	│   ├── gemm_tuner
 	│   │   └── OpenCL GEMM tuner utility
