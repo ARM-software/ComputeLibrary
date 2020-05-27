@@ -25,7 +25,7 @@
 
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/Dimensions.h"
-#include "src/core/NEON/kernels/arm_gemm/ndrange.hpp"
+#include "arm_compute/core/NEON/kernels/arm_gemm/ndrange.hpp"
 
 #include <cassert>
 

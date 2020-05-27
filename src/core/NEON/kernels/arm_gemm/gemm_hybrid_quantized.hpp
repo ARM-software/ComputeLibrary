@@ -28,8 +28,9 @@
 #include <algorithm>
 
 #include "arm_gemm.hpp"
-#include "ndrange.hpp"
 #include "utils.hpp"
+
+#include "arm_compute/core/NEON/kernels/arm_gemm/ndrange.hpp"
 
 #include "mergeresults.hpp"
 #include "transform.hpp"

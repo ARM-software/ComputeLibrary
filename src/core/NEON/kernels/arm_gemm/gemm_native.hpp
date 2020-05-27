@@ -27,7 +27,7 @@
 
 #include "arm_gemm.hpp"
 
-#include "ndrange.hpp"
+#include "arm_compute/core/NEON/kernels/arm_gemm/ndrange.hpp"
 
 #ifdef CYCLE_PROFILING
 #include "profiler.hpp"
