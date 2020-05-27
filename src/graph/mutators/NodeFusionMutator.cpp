@@ -226,6 +226,12 @@ void fuse_node_with_activation(Graph &g, const Edge *output_edge, const std::set
         return;
     }
 
+    // EltwiseLayerNode can only be fused when dataype is float
+    if(n_node->type() == NodeType::EltwiseLayer && !is_data_type_float(n_node->output(0)->desc().data_type))
+    {
+        return;
+    }
+
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Fusing node with ID : " << output_edge->producer_id()
                                   << " with Activation Layer node with ID : " << output_edge->consumer_id() << std::endl);
 

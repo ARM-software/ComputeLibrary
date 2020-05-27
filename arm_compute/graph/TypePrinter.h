@@ -98,6 +98,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::EltwiseLayer:
             os << "EltwiseLayer";
             break;
+        case NodeType::UnaryEltwiseLayer:
+            os << "UnaryEltwiseLayer";
+            break;
         case NodeType::FlattenLayer:
             os << "FlattenLayer";
             break;

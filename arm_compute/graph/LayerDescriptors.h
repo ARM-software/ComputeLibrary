@@ -89,6 +89,31 @@ struct EltwiseLayerDescriptor
     ActivationLayerInfo fused_activation; /**< Fused activation info */
 };
 
+/** Unary Elementwise layer descriptor */
+struct UnaryEltwiseLayerDescriptor
+{
+    /** Constructor
+     *
+     * @param[in] op               Unary element-wise operation to perform
+     * @param[in] out_quant_info   (Optional) Output quantization information. Defaults to empty @ref QuantizationInfo
+     * @param[in] c_policy         (Optional) Convert policy used for the operation. Defaults to @ref ConvertPolicy::SATURATE
+     * @param[in] r_policy         (Optional) Rounding policy used for the operation. Defaults to @ref RoundingPolicy::TO_ZERO
+     * @param[in] fused_activation (Optional) Fused activation information. Defaults to empty (identity) @ref ActivationLayerInfo
+     */
+    UnaryEltwiseLayerDescriptor(UnaryEltwiseOperation op, QuantizationInfo out_quant_info = QuantizationInfo(), ConvertPolicy c_policy = ConvertPolicy::SATURATE,
+                                RoundingPolicy      r_policy         = RoundingPolicy::TO_ZERO,
+                                ActivationLayerInfo fused_activation = ActivationLayerInfo())
+        : op(op), out_quant_info(out_quant_info), c_policy(c_policy), r_policy(r_policy), fused_activation(fused_activation)
+    {
+    }
+
+    UnaryEltwiseOperation op;               /**< Unary element-wise operation to perform */
+    QuantizationInfo      out_quant_info;   /**< Output quantization information */
+    ConvertPolicy         c_policy;         /**< Convert policy */
+    RoundingPolicy        r_policy;         /**< Rounding policy */
+    ActivationLayerInfo   fused_activation; /**< Fused activation info */
+};
+
 /** Deconvolution layer descriptor */
 struct DeconvolutionLayerDescriptor
 {

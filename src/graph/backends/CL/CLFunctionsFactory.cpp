@@ -65,6 +65,12 @@ struct CLEltwiseFunctions
     using Multiplication = CLPixelWiseMultiplication;
 };
 
+/** Collection of CL unary element-wise functions */
+struct CLUnaryEltwiseFunctions
+{
+    using Exp = CLExpLayer;
+};
+
 /** Function and tensor types to be used inside a CL fused convolution/batch normalization layer */
 struct CLFusedLayerTypes
 {
@@ -252,6 +258,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_detection_post_process_layer<CPPDetectionPostProcessLayer, CLTargetInfo>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::EltwiseLayer:
             return detail::create_eltwise_layer<CLEltwiseFunctions, CLTargetInfo>(*polymorphic_downcast<EltwiseLayerNode *>(node));
+        case NodeType::UnaryEltwiseLayer:
+            return detail::create_unary_eltwise_layer<CLUnaryEltwiseFunctions, CLTargetInfo>(*polymorphic_downcast<UnaryEltwiseLayerNode *>(node));
         case NodeType::FlattenLayer:
             return detail::create_flatten_layer<CLFlattenLayer, CLTargetInfo>(*polymorphic_downcast<FlattenLayerNode *>(node));
         case NodeType::FullyConnectedLayer:

@@ -103,7 +103,13 @@ enum class EltwiseOperation
 {
     Add, /**< Arithmetic addition */
     Sub, /**< Arithmetic subtraction */
-    Mul  /**< Arithmetic multiplication */
+    Mul, /**< Arithmetic multiplication */
+};
+
+/** Supported Unary Element-wise operations */
+enum class UnaryEltwiseOperation
+{
+    Exp /**< Exp */
 };
 
 /** Supported Convolution layer methods */
@@ -168,6 +174,7 @@ enum class NodeType
     SplitLayer,
     StackLayer,
     UpsampleLayer,
+    UnaryEltwiseLayer,
     YOLOLayer,
 
     Input,

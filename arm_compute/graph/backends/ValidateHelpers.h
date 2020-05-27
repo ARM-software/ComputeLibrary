@@ -579,6 +579,79 @@ Status validate_yolo_layer(YOLOLayerNode &node)
     // Validate function
     return YOLOLayer::validate(input, output, node.activation_info(), node.num_classes());
 }
+/** Validates a element-wise layer node
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename EltwiseLayerFunctions>
+Status validate_eltwise_Layer(EltwiseLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating EltwiseLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    const arm_compute::ITensorInfo *input1         = detail::get_backing_tensor_info(node.input(0));
+    const arm_compute::ITensorInfo *input2         = detail::get_backing_tensor_info(node.input(1));
+    const arm_compute::ITensorInfo *output         = get_backing_tensor_info(node.output(0));
+    const EltwiseOperation          eltwise_op     = node.eltwise_operation();
+    const ConvertPolicy             convert_policy = node.convert_policy();
+    const RoundingPolicy            round_policy   = node.rounding_policy();
+    const ActivationLayerInfo       act_info       = node.fused_activation();
+    const QuantizationInfo          quant_info     = node.output_quant_info();
+    const float                     scale          = (quant_info.scale().empty()) ? 1.0f : quant_info.scale()[0];
+
+    // Validate function
+    if(eltwise_op == EltwiseOperation::Add)
+    {
+        return EltwiseLayerFunctions::ArithmeticAddition::validate(input1, input2, output, convert_policy, act_info);
+    }
+    else if(eltwise_op == EltwiseOperation::Sub)
+    {
+        return EltwiseLayerFunctions::ArithmeticSubtraction::validate(input1, input2, output, convert_policy, act_info);
+    }
+    else if(eltwise_op == EltwiseOperation::Mul)
+    {
+        return EltwiseLayerFunctions::PixelWiseMultiplication::validate(input1, input2, output, scale, convert_policy, round_policy, act_info);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Unsupported element-wise operation!");
+    }
+    return Status{};
+}
+/** Validates a unary element-wise layer node
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename UnaryEltwiseLayerFunctions>
+Status validate_unary_eltwise_layer(UnaryEltwiseLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating EltwiseLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo   *input      = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo   *output     = get_backing_tensor_info(node.output(0));
+    const UnaryEltwiseOperation eltwise_op = node.eltwise_descriptor().op;
+
+    // Validate function
+    if(eltwise_op == UnaryEltwiseOperation::Exp)
+    {
+        return UnaryEltwiseLayerFunctions::ExpLayer::validate(input, output);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Unsupported unary element-wise operation!");
+    }
+
+    return Status{};
+}
 } // namespace detail
 } // namespace backends
 } // namespace graph

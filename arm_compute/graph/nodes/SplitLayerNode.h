@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,10 +38,13 @@ class SplitLayerNode final : public INode
 public:
     /** Default Constructor
      *
-     * @param[in] num_splits Number of splits
-     * @param[in] axis       (Optional) Axis to split on. Supported axis >= 2. Defaults to 0
+     * @param[in] num_splits  Number of splits
+     * @param[in] axis        (Optional) Axis to split on. Defaults to 0
+     * @param[in] size_splits (Optional) The sizes of each output tensor along the split dimension.
+     *                        Must sum to the dimension of value along split_dim.
+     *                        Can contain one -1 indicating that dimension is to be inferred.
      */
-    SplitLayerNode(unsigned int num_splits, unsigned int axis = 0);
+    SplitLayerNode(unsigned int num_splits, int axis = 0, std::vector<int> size_splits = std::vector<int>());
     /** Computes split layer output descriptor
      *
      * @param[in] input_descriptor Descriptor of the input tensor
@@ -51,8 +54,8 @@ public:
      *
      * @return  A pair with the descriptor of the split and the starting coordinates
      */
-    static std::pair<TensorDescriptor, Coordinates> compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                                              unsigned int num_splits, unsigned int axis, unsigned int idx);
+    std::pair<TensorDescriptor, Coordinates> compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                                       unsigned int num_splits, int axis, unsigned int idx);
     /** Number of splits accessor
      *
      * @return Number of splits
@@ -72,8 +75,9 @@ public:
     void accept(INodeVisitor &v) override;
 
 private:
-    unsigned int _num_splits;
-    unsigned int _axis;
+    unsigned int     _num_splits;
+    int              _axis;
+    std::vector<int> _size_splits;
 };
 } // namespace graph
 } // namespace arm_compute

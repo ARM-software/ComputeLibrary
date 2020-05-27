@@ -63,6 +63,12 @@ public:
      */
     ActivationLayerInfo fused_activation() const;
 
+    /** Returns output quantization info
+     *
+     * @return Output quantization info
+     */
+    QuantizationInfo output_quant_info() const;
+
     /** Sets fused activation
      *
      * @param[in] fused_activation Fused activation to set
@@ -80,6 +86,40 @@ public:
 private:
     descriptors::EltwiseLayerDescriptor descriptor;
 };
+
+/** Unary Eltwise Layer node */
+class UnaryEltwiseLayerNode final : public INode
+{
+public:
+    /** Constructor
+     *
+     * @param[in] descriptor Containing information for the node described in @ref descriptors::EltwiseLayerDescriptor
+     */
+    UnaryEltwiseLayerNode(const descriptors::UnaryEltwiseLayerDescriptor &descriptor);
+    /** Unary eltwise layer descriptor
+     *
+     * @return Unary eltwise layer descriptor which containing information
+     */
+    descriptors::UnaryEltwiseLayerDescriptor eltwise_descriptor() const;
+
+    /** Sets fused activation
+     *
+     * @param[in] fused_activation Fused activation to set
+     */
+    void set_fused_activation(ActivationLayerInfo fused_activation);
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+
+    static constexpr NodeType node_type = NodeType::UnaryEltwiseLayer;
+
+private:
+    descriptors::UnaryEltwiseLayerDescriptor descriptor;
+};
+
 } // namespace graph
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_GRAPH_ELTWISE_LAYER_NODE_H */
