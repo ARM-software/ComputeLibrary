@@ -48,52 +48,54 @@ public:
     void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
                bool align_corners)
     {
-        constexpr float max_width  = 8192.0f;
-        constexpr float max_height = 6384.0f;
-
         _shape             = shape;
         _policy            = policy;
         _border_mode       = border_mode;
         _sampling_policy   = sampling_policy;
         _data_type         = data_type;
         _quantization_info = quantization_info;
-        _align_corners     = align_corners;
+        _align_corners     = align_corners && _policy == InterpolationPolicy::BILINEAR && _sampling_policy == SamplingPolicy::TOP_LEFT;
 
-        std::mt19937                          generator(library->seed());
-        std::uniform_real_distribution<float> distribution_float(0.25, 3);
-        float                                 scale_x = distribution_float(generator);
-        float                                 scale_y = distribution_float(generator);
+        generate_scale(shape);
 
-        const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-        const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-
-        scale_x = ((shape[idx_width] * scale_x) > max_width) ? (max_width / shape[idx_width]) : scale_x;
-        scale_y = ((shape[idx_height] * scale_y) > max_height) ? (max_height / shape[idx_height]) : scale_y;
-
-        const bool align_corners_a = policy == InterpolationPolicy::BILINEAR
-                                     && sampling_policy == SamplingPolicy::TOP_LEFT
-                                     && align_corners;
-
-        if(align_corners_a)
-        {
-            /* When align_corners = true is used for bilinear, both width and height
-             * of output should be > 1 to avoid overflow during computation otherwise
-             * it fails while checking argument values.
-             */
-            constexpr float min_width  = 2.f;
-            constexpr float min_height = 2.f;
-            scale_x                    = ((shape[idx_width] * scale_x) < min_width) ? (min_width / shape[idx_width]) : scale_x;
-            scale_y                    = ((shape[idx_height] * scale_y) < min_height) ? (min_height / shape[idx_height]) : scale_y;
-        }
-
+        std::mt19937                           generator(library->seed());
         std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
-        T                                      constant_border_value = static_cast<T>(distribution_u8(generator));
+        _constant_border_value = static_cast<T>(distribution_u8(generator));
 
-        _target    = compute_target(shape, data_layout, scale_x, scale_y, policy, border_mode, constant_border_value, sampling_policy, quantization_info);
-        _reference = compute_reference(shape, scale_x, scale_y, policy, border_mode, constant_border_value, sampling_policy, quantization_info);
+        _target    = compute_target(shape, data_layout);
+        _reference = compute_reference(shape);
     }
 
 protected:
+    void generate_scale(const TensorShape &shape)
+    {
+        static constexpr float _min_scale{ 0.25f };
+        static constexpr float _max_scale{ 3.f };
+
+        constexpr float max_width{ 8192.0f };
+        constexpr float max_height{ 6384.0f };
+
+        const float min_width  = _align_corners ? 2.f : 1.f;
+        const float min_height = _align_corners ? 2.f : 1.f;
+
+        std::mt19937                          generator(library->seed());
+        std::uniform_real_distribution<float> distribution_float(_min_scale, _max_scale);
+
+        auto generate = [&](size_t input_size, float min_output, float max_output) -> float
+        {
+            const float generated_scale = distribution_float(generator);
+            const float output_size     = utility::clamp(static_cast<float>(input_size) * generated_scale, min_output, max_output);
+            return output_size / input_size;
+        };
+
+        // Input shape is always given in NCHW layout. NHWC is dealt by permute in compute_target()
+        const int idx_width  = get_data_layout_dimension_index(DataLayout::NCHW, DataLayoutDimension::WIDTH);
+        const int idx_height = get_data_layout_dimension_index(DataLayout::NCHW, DataLayoutDimension::HEIGHT);
+
+        _scale_x = generate(shape[idx_width], min_width, max_width);
+        _scale_y = generate(shape[idx_height], min_height, max_height);
+    }
+
     template <typename U>
     void fill(U &&tensor)
     {
@@ -114,9 +116,7 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape shape, DataLayout data_layout, const float scale_x, const float scale_y,
-                              InterpolationPolicy policy, BorderMode border_mode, T constant_border_value, SamplingPolicy sampling_policy,
-                              QuantizationInfo quantization_info)
+    TensorType compute_target(TensorShape shape, DataLayout data_layout)
     {
         // Change shape in case of NHWC.
         if(data_layout == DataLayout::NHWC)
@@ -125,20 +125,20 @@ protected:
         }
 
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, quantization_info, data_layout);
+        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, _quantization_info, data_layout);
 
         const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
         const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
         TensorShape shape_scaled(shape);
-        shape_scaled.set(idx_width, shape[idx_width] * scale_x);
-        shape_scaled.set(idx_height, shape[idx_height] * scale_y);
-        TensorType dst = create_tensor<TensorType>(shape_scaled, _data_type, 1, quantization_info, data_layout);
+        shape_scaled.set(idx_width, shape[idx_width] * _scale_x);
+        shape_scaled.set(idx_height, shape[idx_height] * _scale_y);
+        TensorType dst = create_tensor<TensorType>(shape_scaled, _data_type, 1, _quantization_info, data_layout);
 
         // Create and configure function
         FunctionType scale;
 
-        scale.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy, /* use_padding */ true, _align_corners);
+        scale.configure(&src, &dst, _policy, _border_mode, _constant_border_value, _sampling_policy, /* use_padding */ true, _align_corners);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -158,17 +158,15 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, const float scale_x, const float scale_y,
-                                      InterpolationPolicy policy, BorderMode border_mode, T constant_border_value, SamplingPolicy sampling_policy,
-                                      QuantizationInfo quantization_info)
+    SimpleTensor<T> compute_reference(const TensorShape &shape)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, _data_type, 1, quantization_info };
+        SimpleTensor<T> src{ shape, _data_type, 1, _quantization_info };
 
         // Fill reference
         fill(src);
 
-        return reference::scale<T>(src, scale_x, scale_y, policy, border_mode, constant_border_value, sampling_policy, /* ceil_policy_scale */ false, _align_corners);
+        return reference::scale<T>(src, _scale_x, _scale_y, _policy, _border_mode, _constant_border_value, _sampling_policy, /* ceil_policy_scale */ false, _align_corners);
     }
 
     TensorType          _target{};
@@ -176,10 +174,13 @@ protected:
     TensorShape         _shape{};
     InterpolationPolicy _policy{};
     BorderMode          _border_mode{};
+    T                   _constant_border_value{};
     SamplingPolicy      _sampling_policy{};
     DataType            _data_type{};
     QuantizationInfo    _quantization_info{};
     bool                _align_corners{ false };
+    float               _scale_x{ 1.f };
+    float               _scale_y{ 1.f };
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>

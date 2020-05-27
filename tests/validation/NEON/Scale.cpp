@@ -47,12 +47,118 @@ namespace validation
 {
 namespace
 {
+using test::datasets::ShapeDataset;
+
+/** Class to generate boundary values for the given template parameters
+ * including shapes with large differences between width and height
+ */
+template <uint32_t channel, uint32_t batch, uint32_t element_per_vector, uint32_t vector_size>
+class ScaleShapesBaseDataSet : public ShapeDataset
+{
+    static constexpr auto boundary_minus_one = element_per_vector * vector_size - 1;
+    static constexpr auto boundary_plus_one  = element_per_vector * vector_size + 1;
+    static constexpr auto small_size         = 3;
+
+public:
+    // These tensor shapes are NCHW layout, fixture will convert to NHWC.
+    ScaleShapesBaseDataSet()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ small_size, boundary_minus_one, channel, batch },
+                     TensorShape{ small_size, boundary_plus_one, channel, batch },
+                     TensorShape{ boundary_minus_one, small_size, channel, batch },
+                     TensorShape{ boundary_plus_one, small_size, channel, batch },
+                     TensorShape{ boundary_minus_one, boundary_plus_one, channel, batch },
+                     TensorShape{ boundary_plus_one, boundary_minus_one, channel, batch },
+    })
+    {
+    }
+};
+
+/** For the single vector, only larger value (+1) than boundary
+ * since smaller value (-1) could cause some invalid shapes like
+ * - invalid zero size
+ * - size 1 which isn't compatible with scale with aligned corners.
+ */
+template <uint32_t channel, uint32_t batch, uint32_t element_per_vector>
+class ScaleShapesBaseDataSet<channel, batch, element_per_vector, 1> : public ShapeDataset
+{
+    static constexpr auto small_size        = 3;
+    static constexpr auto boundary_plus_one = element_per_vector + 1;
+
+public:
+    // These tensor shapes are NCHW layout, fixture will convert to NHWC.
+    ScaleShapesBaseDataSet()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ small_size, boundary_plus_one, channel, batch },
+                     TensorShape{ boundary_plus_one, small_size, channel, batch },
+    })
+    {
+    }
+};
+
+/** For the shapes smaller than one vector, only pre-defined tiny shapes
+ * are tested (3x2, 2x3) as smaller shapes are more likely to cause
+ * issues and easier to debug.
+ */
+template <uint32_t channel, uint32_t batch, uint32_t element_per_vector>
+class ScaleShapesBaseDataSet<channel, batch, element_per_vector, 0> : public ShapeDataset
+{
+    static constexpr auto small_size                 = 3;
+    static constexpr auto zero_vector_boundary_value = 2;
+
+public:
+    // These tensor shapes are NCHW layout, fixture will convert to NHWC.
+    ScaleShapesBaseDataSet()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ small_size, zero_vector_boundary_value, channel, batch },
+                     TensorShape{ zero_vector_boundary_value, small_size, channel, batch },
+    })
+    {
+    }
+};
+
+/** Generated shaeps
+ * - 2D shapes with 0, 1, 2 vector iterations
+ * - 3D shapes with 0, 1 vector iterations
+ * - 4D shapes with 0 vector iterations
+ */
+#define SCALE_SHAPE_DATASET(element_per_vector)                                                  \
+    concat(concat(concat(concat(concat(ScaleShapesBaseDataSet<1, 1, (element_per_vector), 0>(),  \
+                                       ScaleShapesBaseDataSet<1, 1, (element_per_vector), 1>()), \
+                                ScaleShapesBaseDataSet<1, 1, (element_per_vector), 2>()),        \
+                         ScaleShapesBaseDataSet<3, 3, (element_per_vector), 0>()),               \
+                  ScaleShapesBaseDataSet<3, 3, (element_per_vector), 1>()),                      \
+           ScaleShapesBaseDataSet<3, 7, (element_per_vector), 0>())
+
+/** We consider vector size in byte 64 since the maximum size of
+ * a vector used by @ref ScaleKernelInfo is currently 64-byte (float32x4x4).
+ * There are possibility to reduce test time further by using
+ * smaller vector sizes for different data types where applicable.
+ */
+constexpr uint32_t vector_byte = 64;
+
+template <typename T>
+constexpr uint32_t num_elements_per_vector()
+{
+    return vector_byte / sizeof(T);
+}
+
 /** Scale data types */
 const auto ScaleDataTypes = framework::dataset::make("DataType",
 {
     DataType::U8,
     DataType::S16,
     DataType::F32,
+});
+
+/** Interpolation policy test set */
+const auto InterpolationPolicySet = framework::dataset::make("InterpolationPolicy",
+{
+    InterpolationPolicy::NEAREST_NEIGHBOR,
+    InterpolationPolicy::BILINEAR,
 });
 
 /** Scale data types */
@@ -62,12 +168,43 @@ const auto ScaleDataLayouts = framework::dataset::make("DataLayout",
     DataLayout::NHWC,
 });
 
+/** Sampling policy data set */
+const auto SamplingPolicySet = framework::dataset::make("SamplingPolicy",
+{
+    SamplingPolicy::TOP_LEFT,
+    SamplingPolicy::CENTER,
+});
+
 /** Align corners */
 const auto AlignCorners = framework::dataset::make("AlignCorners",
 {
     false,
     true,
 });
+
+/** Generating dataset for non-quantized data tyeps with the given shapes */
+#define ASSEMBLE_DATASET(shape)                                         \
+    combine(combine(combine(combine(combine((shape), ScaleDataLayouts), \
+                                    InterpolationPolicySet),            \
+                            datasets::BorderModes()),                   \
+                    SamplingPolicySet),                                 \
+            AlignCorners)
+
+/** Quantization information data set */
+const auto QuantizationInfoSet = framework::dataset::make("QuantizationInfo",
+{
+    QuantizationInfo(0.5f, -10),
+});
+
+/** Generating dataset for quantized data tyeps with the given shapes */
+#define ASSEMBLE_QUANTIZED_DATASET(shape)                                 \
+    combine(combine(combine(combine(combine(combine(shape,                \
+                                                    QuantizationInfoSet), \
+                                            ScaleDataLayouts),            \
+                                    InterpolationPolicySet),              \
+                            datasets::BorderModes()),                     \
+                    SamplingPolicySet),                                   \
+            AlignCorners)
 
 /** Tolerance */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
@@ -83,122 +220,150 @@ constexpr float tolerance_num_f32 = 0.01f;
 
 TEST_SUITE(NEON)
 TEST_SUITE(Scale)
+TEST_SUITE(Validate)
 
-// *INDENT-OFF*
-// clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),  // Mismatching data type
-                                                TensorInfo(TensorShape(4U, 27U, 13U), 1, DataType::F32), // Invalid policy
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Insufficient padding
-                                                TensorInfo(TensorShape(4U, 27U, 13U), 1, DataType::F32),
-                                              }),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(4U, 132U, 25U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(4U, 132U, 25U), 1, DataType::F32),
-                                              })),
-        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR,
-                                                          InterpolationPolicy::AREA,
-                                                          InterpolationPolicy::AREA,
-                                                          InterpolationPolicy::NEAREST_NEIGHBOR,
-                                                        })),
-        framework::dataset::make("BorderMode",  { BorderMode::UNDEFINED,
-                                                  BorderMode::UNDEFINED,
-                                                  BorderMode::UNDEFINED,
-                                                  BorderMode::REPLICATE,
-                                                })),
-        framework::dataset::make("SamplingPolicy",  { SamplingPolicy::CENTER,
-                                                      SamplingPolicy::CENTER,
-                                                      SamplingPolicy::CENTER,
-                                                      SamplingPolicy::CENTER,
-                                                    })),
-        framework::dataset::make("DataLayout",  { DataLayout::NCHW,
-                                                  DataLayout::NHWC,
-                                                  DataLayout::NCHW,
-                                                  DataLayout::NHWC,
-                                                })),
-        framework::dataset::make("Expected", { false, false, false ,true })),
-        input_info, output_info, policy,border_mode, sampling_policy, data_layout, expected)
+/** Validate test suite is to test ARM_COMPUTE_RETURN_ON_* macros
+ * we use to check the validity of given arguments in @ref NEScale
+ * and subsequent call to @ref NEScaleKernel.
+ * Since this is using validate() of @ref NEScale, which pre-adjust
+ * arguments for @ref NEScaleKernel, the following conditions in
+ * the kernel are not currently tested.
+ * - The same input and output
+ * - Data type of offset, dx and dy
+ */
+
+const auto input_shape  = TensorShape{ 2, 3, 3, 2 };
+const auto output_shape = TensorShape{ 4, 6, 3, 2 };
+
+constexpr auto default_data_type            = DataType::U8;
+constexpr auto default_data_layout          = DataLayout::NHWC;
+constexpr auto default_interpolation_policy = InterpolationPolicy::NEAREST_NEIGHBOR;
+constexpr auto default_border_mode          = BorderMode::UNDEFINED;
+constexpr auto default_sampling_policy      = SamplingPolicy::CENTER;
+constexpr bool default_use_padding          = false;
+
+TEST_CASE(NullPtr, framework::DatasetMode::ALL)
 {
-    const PixelValue constant_border(5);
-    Status status = NEScale::validate(&input_info.clone()->set_is_resizable(false).set_data_layout(data_layout),
-                                           &output_info.clone()->set_is_resizable(false).set_data_layout(data_layout),
-                                           policy, border_mode, constant_border, sampling_policy);
-    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
-}
-// clang-format on
-// *INDENT-ON*
+    const auto input  = TensorInfo{ input_shape, 1, default_data_type, default_data_layout };
+    const auto output = TensorInfo{ output_shape, 1, default_data_type, default_data_layout };
+    Status     result{};
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallShapes(), ScaleDataTypes), ScaleDataLayouts),
-                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                           datasets::BorderModes()),
-                                                                   framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })),
-               shape, data_type, data_layout, policy, border_mode, sampling_policy)
+    // nullptr is given as input
+    result = NEScale::validate(nullptr, &output, default_interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+
+    // nullptr is given as output
+    result = NEScale::validate(&input, nullptr, default_interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(SupportDataType, framework::DatasetMode::ALL)
 {
-    std::mt19937                          generator(library->seed());
-    std::uniform_real_distribution<float> distribution_float(0.25, 2);
-    const float                           scale_x               = distribution_float(generator);
-    const float                           scale_y               = distribution_float(generator);
-    uint8_t                               constant_border_value = 0;
-    TensorShape                           src_shape             = shape;
-    if(border_mode == BorderMode::CONSTANT)
+    const std::map<DataType, bool> supported_data_types =
     {
-        std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
-        constant_border_value = distribution_u8(generator);
-    }
-
-    // Get width/height indices depending on layout
-    const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-
-    // Change shape in case of NHWC.
-    if(data_layout == DataLayout::NHWC)
+        { DataType::U8, true },
+        { DataType::S8, false },
+        { DataType::QSYMM8, false },
+        { DataType::QASYMM8, true },
+        { DataType::QASYMM8_SIGNED, true },
+        { DataType::QSYMM8_PER_CHANNEL, false },
+        { DataType::U16, false },
+        { DataType::S16, true },
+        { DataType::QSYMM16, false },
+        { DataType::QASYMM16, false },
+        { DataType::U32, false },
+        { DataType::S32, false },
+        { DataType::U64, false },
+        { DataType::S64, false },
+        { DataType::BFLOAT16, false },
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        { DataType::F16, true },
+#else  // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        { DataType::F16, false },
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        { DataType::F32, true },
+        { DataType::F64, false },
+        { DataType::SIZET, false },
+    };
+    Status result{};
+    for(auto &kv : supported_data_types)
     {
-        permute(src_shape, PermutationVector(2U, 0U, 1U));
+        const auto input  = TensorInfo{ input_shape, 1, kv.first, default_data_layout };
+        const auto output = TensorInfo{ output_shape, 1, kv.first, default_data_layout };
+        result            = NEScale::validate(&input, &output, default_interpolation_policy, default_border_mode);
+        ARM_COMPUTE_EXPECT(bool(result) == kv.second, framework::LogLevel::ERRORS);
     }
-
-    // Calculate scaled shape
-    TensorShape shape_scaled(src_shape);
-    shape_scaled.set(idx_width, src_shape[idx_width] * scale_x);
-    shape_scaled.set(idx_height, src_shape[idx_height] * scale_y);
-
-    // Create tensors
-    Tensor src = create_tensor<Tensor>(src_shape, data_type, 1, QuantizationInfo(), data_layout);
-    Tensor dst = create_tensor<Tensor>(shape_scaled, data_type, 1, QuantizationInfo(), data_layout);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEScale nescale;
-    nescale.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy);
-
-    // Validate valid region
-    const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, sampling_policy, (border_mode == BorderMode::UNDEFINED));
-    validate(dst.info()->valid_region(), dst_valid_region);
-
-    // Validate padding
-    int num_elements_processed_x = 16;
-    if(data_layout == DataLayout::NHWC)
-    {
-        num_elements_processed_x = (policy == InterpolationPolicy::BILINEAR) ? 1 : 16 / src.info()->element_size();
-    }
-    PaddingCalculator calculator(shape_scaled.x(), num_elements_processed_x);
-    calculator.set_border_mode(border_mode);
-
-    PaddingSize read_padding(1);
-    if(data_layout == DataLayout::NHWC)
-    {
-        read_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
-        if(border_mode != BorderMode::REPLICATE && policy == InterpolationPolicy::BILINEAR)
-        {
-            read_padding.top = 1;
-        }
-    }
-    const PaddingSize write_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
-    validate(src.info()->padding(), read_padding);
-    validate(dst.info()->padding(), write_padding);
 }
+
+TEST_CASE(MissmatchingDataType, framework::DatasetMode::ALL)
+{
+    constexpr auto non_default_data_type = DataType::F32;
+
+    const auto input  = TensorInfo{ input_shape, 1, default_data_type, default_data_layout };
+    const auto output = TensorInfo{ output_shape, 1, non_default_data_type, default_data_layout };
+    Status     result{};
+    result = NEScale::validate(&input, &output, default_interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(UsePadding, framework::DatasetMode::ALL)
+{
+    const auto input  = TensorInfo{ input_shape, 1, default_data_type, default_data_layout };
+    const auto output = TensorInfo{ output_shape, 1, default_data_type, default_data_layout };
+    Status     result{};
+
+    // When use padding is false, border mode should be constant
+    constexpr auto border_mode = BorderMode::UNDEFINED;
+    constexpr bool use_padding = false;
+
+    result = NEScale::validate(&input, &output, default_interpolation_policy, border_mode, PixelValue(), default_sampling_policy, use_padding);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(AreaWithNHWC, framework::DatasetMode::ALL)
+{
+    // InterpolationPolicy::AREA is not supported for NHWC
+    constexpr auto interpolation_policy = InterpolationPolicy::AREA;
+    constexpr auto data_layout          = DataLayout::NHWC;
+
+    const auto input  = TensorInfo{ input_shape, 1, default_data_type, data_layout };
+    const auto output = TensorInfo{ output_shape, 1, default_data_type, data_layout };
+    Status     result{};
+    result = NEScale::validate(&input, &output, interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(AreaWithNonU8, framework::DatasetMode::ALL)
+{
+    // InterpolationPolicy::AREA only supports U8
+    constexpr auto interpolation_policy = InterpolationPolicy::AREA;
+    constexpr auto data_type            = DataType::F32;
+    constexpr auto data_layout          = DataLayout::NCHW;
+
+    const auto input  = TensorInfo{ input_shape, 1, data_type, data_layout };
+    const auto output = TensorInfo{ output_shape, 1, data_type, data_layout };
+    Status     result{};
+    result = NEScale::validate(&input, &output, interpolation_policy, default_border_mode);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(InvalidAlignedCornerOutput, framework::DatasetMode::ALL)
+{
+    // Bilinear with aligned corners require at least 2x2 output to prevent overflow.
+    // Also, aligned corners require sampling policy to be TOP_LEFT.
+    constexpr auto interpolation_policy = InterpolationPolicy::BILINEAR;
+    constexpr bool align_corners        = true;
+    constexpr auto sampling_policy      = SamplingPolicy::TOP_LEFT;
+    const auto     invalid_output_shape = TensorShape{ 1, 1, 3, 2 };
+
+    const auto input  = TensorInfo{ input_shape, 1, default_data_type, default_data_layout };
+    const auto output = TensorInfo{ invalid_output_shape, 1, default_data_type, default_data_layout };
+    Status     result{};
+    result = NEScale::validate(&input, &output, interpolation_policy, default_border_mode, PixelValue(), sampling_policy, default_use_padding, align_corners);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
+TEST_SUITE_END() // Validate
 
 template <typename T>
 using NEScaleFixture = ScaleValidationFixture<Tensor, Accessor, NEScale, T>;
@@ -207,28 +372,8 @@ using NEScaleQuantizedFixture = ScaleValidationQuantizedFixture<Tensor, Accessor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                     DataType::F32)),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                     framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                             datasets::BorderModes()),
-                                                                                                     framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                             AlignCorners))
-{
-    //Create valid region
-    TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
-
-    // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::F32)),
-                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                 framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                                 datasets::BorderModes()),
-                                                                                                         framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                                 AlignCorners))
+const auto f32_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<float>())), framework::dataset::make("DataType", DataType::F32));
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -240,28 +385,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::
 TEST_SUITE_END() // FP32
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                    DataType::F16)),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                            datasets::BorderModes()),
-                                                                                                    framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                            AlignCorners))
-{
-    //Create valid region
-    TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
-
-    // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_f16);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                        DataType::F16)),
-                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                                datasets::BorderModes()),
-                                                                                                        framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                                AlignCorners))
+const auto f16_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<half>())), framework::dataset::make("DataType", DataType::F16));
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<half>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f16_shape))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -276,28 +401,8 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                       DataType::U8)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                               datasets::BorderModes()),
-                                                                                                       framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                               AlignCorners))
-{
-    //Create valid region
-    TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
-
-    // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_u8);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                                   AlignCorners))
+const auto u8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::U8));
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(u8_shape))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -308,28 +413,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode
 }
 TEST_SUITE_END() // U8
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                       DataType::S16)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                               datasets::BorderModes()),
-                                                                                                       framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                               AlignCorners))
-{
-    //Create valid region
-    TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
-
-    // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_s16, tolerance_num_s16);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                   framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                                   AlignCorners))
+const auto s16_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int16_t>())), framework::dataset::make("DataType", DataType::S16));
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(s16_shape))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -343,14 +428,8 @@ TEST_SUITE_END() // Integer
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) })),
-                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                                        datasets::BorderModes()),
-                                                                                                                framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                                        AlignCorners))
+const auto qasymm8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::QASYMM8));
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -360,16 +439,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<uint8_t>, framework::Da
     validate(Accessor(_target), _reference, valid_region, tolerance_u8);
 }
 TEST_SUITE_END() // QASYMM8
-
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) })),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
-                                                                                                                       datasets::BorderModes()),
-                                                                                                               framework::dataset::make("SamplingPolicy", { SamplingPolicy::TOP_LEFT, SamplingPolicy::CENTER })),
-                                                                                                       AlignCorners))
+const auto qasymm8_signed_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int8_t>())), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_signed_shape))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
