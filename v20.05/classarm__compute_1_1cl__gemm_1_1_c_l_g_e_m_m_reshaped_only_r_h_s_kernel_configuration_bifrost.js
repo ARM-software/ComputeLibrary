@@ -1,0 +1,5 @@
+var classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_bifrost =
+[
+    [ "CLGEMMReshapedOnlyRHSKernelConfigurationBifrost", "classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_bifrost.xhtml#a89f57eac5abf1f3d9a49603961007dff", null ],
+    [ "configure", "classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_bifrost.xhtml#ab6d0980d5c4bff1c0e3284b895c36248", null ]
+];

@@ -1,0 +1,5 @@
+<map id="NESynthetizeFunctionWithZeroConstantKernelBorder&lt; K &gt;" name="NESynthetizeFunctionWithZeroConstantKernelBorder&lt; K &gt;">
+<area shape="rect" id="node1" title="As above but this also setups a Zero border on the input tensor of the kernel&#39;s bordersize." alt="" coords="5,155,236,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_n_e_simple_function.xhtml" title="Basic interface for functions which have a single NEON kernel." alt="" coords="51,80,191,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="81,5,160,32"/>
+</map>

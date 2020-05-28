@@ -1,0 +1,4 @@
+<map id="CLConvertFullyConnectedWeightsManaged" name="CLConvertFullyConnectedWeightsManaged">
+<area shape="rect" id="node1" title="Basic function to run CLConvertFullyConnectedWeightsKernel." alt="" coords="5,80,239,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_transform_weights.xhtml" title="Weights tensor transform interface In order to identify the different reshape functions,..." alt="" coords="53,5,191,32"/>
+</map>

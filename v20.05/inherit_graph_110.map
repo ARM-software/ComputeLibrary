@@ -1,0 +1,13 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,307,131,334"/>
+<area shape="rect" id="node2" href="$classarm__gemm_1_1_gemm_hybrid.xhtml" title=" " alt="" coords="213,5,391,47"/>
+<area shape="rect" id="node3" href="$classarm__gemm_1_1_gemm_hybrid_quantized.xhtml" title=" " alt="" coords="216,71,388,112"/>
+<area shape="rect" id="node4" href="$classarm__gemm_1_1_gemm_interleaved.xhtml" title=" " alt="" coords="197,136,407,177"/>
+<area shape="rect" id="node5" href="$classarm__gemm_1_1_gemm_interleaved2d.xhtml" title=" " alt="" coords="220,201,384,243"/>
+<area shape="rect" id="node6" href="$classarm__gemm_1_1_gemm_interleaved_pretransposed2d.xhtml" title=" " alt="" coords="179,267,425,308"/>
+<area shape="rect" id="node7" href="$classarm__gemm_1_1_gemm_native.xhtml" title=" " alt="" coords="213,332,391,373"/>
+<area shape="rect" id="node8" href="$classarm__gemm_1_1_gemv_batched.xhtml" title=" " alt="" coords="215,398,389,425"/>
+<area shape="rect" id="node9" href="$classarm__gemm_1_1_gemv_native_transposed.xhtml" title=" " alt="" coords="215,449,389,491"/>
+<area shape="rect" id="node10" href="$classarm__gemm_1_1_gemv_pretransposed.xhtml" title=" " alt="" coords="220,515,384,556"/>
+<area shape="rect" id="node11" href="$classarm__gemm_1_1_quantize_wrapper.xhtml" title=" " alt="" coords="221,580,383,621"/>
+</map>

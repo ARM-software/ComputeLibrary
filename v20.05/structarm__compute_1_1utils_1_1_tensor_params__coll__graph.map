@@ -1,0 +1,4 @@
+<map id="TensorParams" name="TensorParams">
+<area shape="rect" id="node1" title="Structure holding all the input tensor graph parameters." alt="" coords="13,95,124,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_quantization_info.xhtml" title="Quantization information." alt="" coords="5,5,132,32"/>
+</map>

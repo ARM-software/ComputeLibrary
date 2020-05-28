@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['b',['B',['../structgemm__tuner_1_1_common_gemm_example_params.xhtml#ae7162d16c9c9f8505490c7ecc55b4d62',1,'gemm_tuner::CommonGemmExampleParams::B()'],['../classgemm__tuner_1_1_common_gemm_example_options.xhtml#ab113d1d1a86a1c6aecf503a1c9474e82',1,'gemm_tuner::CommonGemmExampleOptions::B()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#aa76b4a6e74940dabc5b7fc6b2dab3545',1,'arm_compute::test::validation::b()']]],
+  ['b_5foffset',['b_offset',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#a126a5e90d1af15ccd17a6efe3a47f54b',1,'arm_compute::GEMMKernelInfo']]],
+  ['backward',['backward',['../namespacearm__compute_1_1test_1_1validation.xhtml#a7c5b54128c108267837e7e999259e0e9',1,'arm_compute::test::validation']]],
+  ['batch',['batch',['../structarm__compute_1_1utils_1_1_tensor_params.xhtml#ad1793c1a8dd3db1a8c4e2d76eadf0036',1,'arm_compute::utils::TensorParams']]],
+  ['batch_5fnorm_5fepsilon',['batch_norm_epsilon',['../graph__inception__resnet__v1_8cpp.xhtml#ae89536b490f3ad0e9070bd2dd0a6df5d',1,'graph_inception_resnet_v1.cpp']]],
+  ['benchmark_5fresult_5fjson_5fextension',['BENCHMARK_RESULT_JSON_EXTENSION',['../namespace_gemm_tuner.xhtml#a2f8b815490a02d3feccad7c5472ba4e2',1,'GemmTuner']]],
+  ['benchmarkresultcsvrow',['BenchmarkResultCSVRow',['../namespace_gemm_tuner.xhtml#a547e317a8765ca62ed005b0bf03fec15',1,'GemmTuner']]],
+  ['beta',['beta',['../structarm__compute_1_1_softmax_kernel_info.xhtml#aa773d9a6c0ccefaa0fc9ab66fec68ec1',1,'arm_compute::SoftmaxKernelInfo::beta()'],['../structarm__compute_1_1_instance_normalization_layer_kernel_info.xhtml#aa773d9a6c0ccefaa0fc9ab66fec68ec1',1,'arm_compute::InstanceNormalizationLayerKernelInfo::beta()']]],
+  ['beta_5finfo',['beta_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a4117a6db63ae46d644756cbfff7fe74b',1,'arm_compute::test::validation']]],
+  ['bf16',['bf16',['../classarm__compute_1_1_pixel_value.xhtml#a1f7f3c4437c80758d7528690ee4a8e6c',1,'arm_compute::PixelValue']]],
+  ['bias',['bias',['../structarm__compute_1_1utils_1_1_common_params.xhtml#a2cf08508c0b5892468831a326739d95b',1,'arm_compute::utils::CommonParams::bias()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#a3a77be8aebd8e00522b32061d46ccdbd',1,'arm_compute::test::validation::bias()']]],
+  ['bias_5finfo',['bias_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a43c38c81ff3058e36ceb9904a944d1ea',1,'arm_compute::test::validation']]],
+  ['bias_5fshape',['bias_shape',['../namespacearm__compute_1_1test_1_1validation.xhtml#a79820c7442073b8eb22fb3eaef6fd6ba',1,'arm_compute::test::validation']]],
+  ['bias_5fvalid_5fregion',['bias_valid_region',['../namespacearm__compute_1_1test_1_1validation.xhtml#af42ac4b2bf87fe75b10d2b29371da967',1,'arm_compute::test::validation']]],
+  ['blue_5fcoef_5fbt709',['blue_coef_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#ab7d52900468f442e85c01d73722d181c',1,'arm_compute::test::colorconvert_helper::detail']]],
+  ['border_5fmode',['border_mode',['../namespacearm__compute_1_1test_1_1validation.xhtml#a5471e46933e7a9c4709972d91fc4ea65',1,'arm_compute::test::validation']]],
+  ['bordersizesdataset',['BorderSizesDataset',['../namespacearm__compute_1_1test_1_1validation.xhtml#a3a0ac966aec5b787bd5b1a5218b97401',1,'arm_compute::test::validation']]],
+  ['bottom',['bottom',['../structarm__compute_1_1_border_size.xhtml#a802ffcf1b49237efe5be8a314d3f3869',1,'arm_compute::BorderSize']]],
+  ['broadcast_5fbias',['broadcast_bias',['../structarm__compute_1_1_g_e_m_m_kernel_info.xhtml#aab96468aedb59e7a2a19c6eea2f4b055',1,'arm_compute::GEMMKernelInfo']]],
+  ['build_5foptions',['build_options',['../_c_l_im2_col_kernel_8cpp.xhtml#a3e76c95cfc49454dbfff42e02d25ccb8',1,'CLIm2ColKernel.cpp']]]
+];

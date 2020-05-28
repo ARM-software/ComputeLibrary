@@ -1,0 +1,6 @@
+<map id="CLSaturatedArithmeticOperationKernel" name="CLSaturatedArithmeticOperationKernel">
+<area shape="rect" id="node1" title="Addition operation." alt="" coords="5,229,236,271"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_elementwise_operation_kernel.xhtml" title="Interface for an element&#45;wise operation kernel." alt="" coords="11,155,231,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="81,80,161,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="89,5,153,32"/>
+</map>

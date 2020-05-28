@@ -1,0 +1,5 @@
+<map id="NECropResize" name="NECropResize">
+<area shape="rect" id="node1" title="Function to perform cropping and resizing." alt="" coords="37,95,148,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="5,5,84,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor." alt="" coords="109,5,175,32"/>
+</map>

@@ -1,0 +1,5 @@
+var classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_valhall =
+[
+    [ "CLGEMMReshapedOnlyRHSKernelConfigurationValhall", "classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_valhall.xhtml#a625bcad1f5e14e827d1021f8e9146a72", null ],
+    [ "configure", "classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_valhall.xhtml#ab6d0980d5c4bff1c0e3284b895c36248", null ]
+];
