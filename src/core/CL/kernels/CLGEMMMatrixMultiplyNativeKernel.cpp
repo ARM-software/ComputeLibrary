@@ -69,6 +69,7 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
                                     && (!gemm_info.broadcast_bias),
                                     "Bias addition only supported with broadcast mode in case the input or output has to be reinterpreted as 3D");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.fp_mixed_precision, "Mixed precision not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image, "Export to CLImage not supported for GEMM native");
 
     const unsigned int m = gemm_info.m;
     const unsigned int n = gemm_info.n;

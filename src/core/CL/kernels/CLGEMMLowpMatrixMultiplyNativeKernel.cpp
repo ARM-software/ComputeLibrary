@@ -70,6 +70,7 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.m0 < 1 || lhs_info.m0 > 8);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.n0 & (rhs_info.n0 - 1)) && rhs_info.n0 != 3), "Only 2,3,4,8,16 are supported for n0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image, "Export to CLImage not supported for quantized GEMM");
 
     const int m = gemm_info.m();
     const int n = gemm_info.n();
