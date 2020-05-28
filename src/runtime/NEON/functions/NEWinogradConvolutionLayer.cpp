@@ -62,7 +62,7 @@ inline Status validate_kernel_3x3(const Size2D input_dims, const ITensorInfo *in
         }
     }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    else if(input->data_type() == DataType::F32)
+    else if(input->data_type() == DataType::F16)
     {
         ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<__fp16, 4, 4, 3, 3>::validate(input, input0, winograd_info)));
         ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<__fp16, 4, 4, 3, 3>::validate(weights, input1, winograd_info)));
