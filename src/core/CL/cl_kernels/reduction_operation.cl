@@ -196,7 +196,7 @@ __kernel void reduction_operation_non_parallel_x(
 #if defined(MIN)
         res = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
 #elif defined(MAX)
-        res                             = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
+        res = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
 #elif defined(PROD)
 #if defined(OFFSET) && defined(SCALE)
         res_f *= DEQUANTIZE(in, OFFSET, SCALE, DATA_TYPE_PROMOTED, 1);
@@ -223,11 +223,7 @@ __kernel void reduction_operation_non_parallel_x(
     res = QUANTIZE(res_f, OFFSET, SCALE, DATA_TYPE_PROMOTED, 1);
 #endif // defined(PROD) && defined(OFFSET) && defined(SCALE)
 
-#if defined(MIN) || defined(MAX)
-    *((__global DATA_TYPE_PROMOTED *)output.ptr) = res;
-#else  // !(defined(MIN) || defined(MAX))
     *((__global DATA_TYPE *)output.ptr) = CONVERT_SAT(res, DATA_TYPE);
-#endif // defined(MIN) || defined(MAX)
 }
 #endif // defined(WIDTH)
 
@@ -276,7 +272,7 @@ __kernel void reduction_operation_y(
 #if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res                             = select(res, in, ISGREATER(in, res));
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;
@@ -373,7 +369,7 @@ __kernel void reduction_operation_z(
 #if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res                             = select(res, in, ISGREATER(in, res));
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;
@@ -472,7 +468,7 @@ __kernel void reduction_operation_w(
 #if defined(MIN)
         res = select(res, in, ISLESS(in, res));
 #elif defined(MAX)
-        res                             = select(res, in, ISGREATER(in, res));
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(MAX) || defined(MIN))
 #if defined(SUM_SQUARE)
         in *= in;

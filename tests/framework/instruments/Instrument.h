@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #ifndef ARM_COMPUTE_TEST_INSTRUMENT
 #define ARM_COMPUTE_TEST_INSTRUMENT
+
+#include "support/MemorySupport.h"
 
 #include "../Utils.h"
 #include "Measurement.h"

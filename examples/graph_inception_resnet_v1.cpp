@@ -49,9 +49,7 @@ public:
     }
     InceptionResNetV1Example(const InceptionResNetV1Example &) = delete;
     InceptionResNetV1Example &operator=(const InceptionResNetV1Example &) = delete;
-    InceptionResNetV1Example(InceptionResNetV1Example &&)                 = default; // NOLINT
-    InceptionResNetV1Example &operator=(InceptionResNetV1Example &&) = default;      // NOLINT
-    ~InceptionResNetV1Example() override                             = default;
+    ~InceptionResNetV1Example() override                                  = default;
     bool do_setup(int argc, char **argv) override
     {
         // Parse arguments

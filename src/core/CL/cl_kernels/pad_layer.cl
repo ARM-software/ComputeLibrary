@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@
  *       -# -DPAD_W_BEFORE: Pad to add before the first batch of the input tensor (e.g. -DPAD_W_BEFORE=3)
  *       -# -DSRC_BATCH: Input tensor's batch size (e.g. -DSRC_BATCH=4)
  *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: U8, S8, QASYMM8, U16, S16, U32, S32, F16, F32
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: U8, S8, QASYMM8, QASYMM8_SIGNED, U16, S16, U32, S32, F16, F32
  * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -165,7 +165,7 @@ __kernel void pad_layer_constant(TENSOR3D_DECLARATION(src),
  * @note If the starting point to read backward from is less than the output's last element accessed in the X, the following compile flags must be passed at compile time to avoid negative offsets:
  *       -# -DAFTER_PAD_REM: Defines how much to rotate the vector if the backward calculation attempted to read from a negative offset (e.g. -DAFTER_PAD_REM=3)
  *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: U8, S8, QASYMM8, U16, S16, U32, S32, F16, F32
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: U8, S8, QASYMM8, QASYMM8_SIGNED, U16, S16, U32, S32, F16, F32
  * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)

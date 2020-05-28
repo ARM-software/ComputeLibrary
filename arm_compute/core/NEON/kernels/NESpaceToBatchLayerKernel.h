@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,6 +101,7 @@ private:
     const ITensor *_block_shape; /**< Block shape tensor */
     const ITensor *_paddings;    /**< Paddings tensor */
     ITensor       *_output;      /**< Destination tensor */
+    DataLayout     _data_layout; /**< Data layout to be used at run-time */
 
     Size2D _padding_left;
     int    _block_shape_x;

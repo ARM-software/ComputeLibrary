@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@
  * @note The input tensor batch size must be passed at compile time using -DCHANNEL_SIZE. e.g. -DCHANNEL_SIZE=2
  * @note The block shape must be passed at compile time using -DBLOCK_SHAPE. e.g. -DBLOCK_SHAPE=2
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -72,7 +72,7 @@ __kernel void space_to_depth_nchw(
  * @note The input tensor batch size must be passed at compile time using -DCHANNEL_SIZE. e.g. -DCHANNEL_SIZE=2
  * @note The block shape must be passed at compile time using -DBLOCK_SHAPE. e.g. -DBLOCK_SHAPE=2
  *
- * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)

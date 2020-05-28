@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -185,6 +185,20 @@ VGETLANE_IMPL_4(float16_t, float16x4_t, f16)
         }                                                              \
     }
 
+#define VGETQLANE_IMPL_2(stype, vtype, postfix)                        \
+    inline stype vgetlane(const vtype vector, const unsigned int lane) \
+    {                                                                  \
+        switch(lane)                                                   \
+        {                                                              \
+            case 0:                                                    \
+                return vgetq_lane_##postfix(vector, 0);                \
+            case 1:                                                    \
+                return vgetq_lane_##postfix(vector, 1);                \
+            default:                                                   \
+                ARM_COMPUTE_ERROR("Invalid lane");                     \
+        }                                                              \
+    }
+
 VGETQLANE_IMPL_16(uint8_t, uint8x16_t, u8)
 VGETQLANE_IMPL_16(int8_t, int8x16_t, s8)
 VGETQLANE_IMPL_8(uint16_t, uint16x8_t, u16)
@@ -192,6 +206,7 @@ VGETQLANE_IMPL_8(int16_t, int16x8_t, s16)
 VGETQLANE_IMPL_4(uint32_t, uint32x4_t, u32)
 VGETQLANE_IMPL_4(int32_t, int32x4_t, s32)
 VGETQLANE_IMPL_4(float, float32x4_t, f32)
+VGETQLANE_IMPL_2(int64_t, int64x2_t, s64)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 VGETQLANE_IMPL_8(float16_t, float16x8_t, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

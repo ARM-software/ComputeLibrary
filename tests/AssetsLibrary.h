@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,10 +32,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Random.h"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include "libnpy/npy.hpp"
-#pragma GCC diagnostic pop
 #include "tests/RawTensor.h"
 #include "tests/TensorCache.h"
 #include "tests/Utils.h"
@@ -396,6 +392,19 @@ public:
     template <typename T, typename D>
     void fill_tensor_value(T &&tensor, D value) const;
 
+    /** Fill a tensor with a given vector with static values.
+     *
+     * @param[in, out] tensor To be filled tensor.
+     * @param[in]      values A vector containing values
+     *
+     * To cope with various size tensors, the vector size doens't have to be
+     * the same as tensor's size. If the size of the tensor is larger than the vector,
+     * the iterator the vector will keep iterating and wrap around. If the vector is
+     * larger, values located after the required size won't be used.
+     */
+    template <typename T, typename DataType>
+    void fill_static_values(T &&tensor, const std::vector<DataType> &values) const;
+
 private:
     // Function prototype to convert between image formats.
     using Converter = void (*)(const RawTensor &src, RawTensor &dst);
@@ -403,6 +412,9 @@ private:
     using Extractor = void (*)(const RawTensor &src, RawTensor &dst);
     // Function prototype to load an image file.
     using Loader = RawTensor (*)(const std::string &path);
+    // Function type to generate a number to fill tensors.
+    template <typename ResultType>
+    using GeneratorFunctionType = std::function<ResultType(void)>;
 
     const Converter &get_converter(Format src, Format dst) const;
     const Converter &get_converter(DataType src, Format dst) const;
@@ -447,6 +459,14 @@ private:
      */
     const RawTensor &find_or_create_raw_tensor(const std::string &name, Format format, Channel channel) const;
 
+    /** Fill a tensor with a value generator function.
+     *
+     * @param[in, out] tensor         To be filled tensor.
+     * @param[in]      generate_value A function that generates values.
+     */
+    template <typename T, typename ResultType>
+    void fill_with_generator(T &&tensor, const GeneratorFunctionType<ResultType> &generate_value) const;
+
     mutable TensorCache             _cache{};
     mutable arm_compute::Mutex      _format_lock{};
     mutable arm_compute::Mutex      _channel_lock{};
@@ -469,6 +489,16 @@ inline std::vector<std::pair<T, T>> convert_range_pair(const std::vector<AssetsL
     });
     return converted;
 }
+
+/* Read npy header and check the payload is suitable for the specified type and shape
+ *
+ * @param[in] stream         ifstream of the npy file
+ * @param[in] expect_typestr Expected typestr
+ * @param[in] expect_shape   Shape of tensor expected to receive the data
+ *
+ * @note Advances stream to the beginning of the data payload
+ */
+void validate_npy_header(std::ifstream &stream, const std::string &expect_typestr, const TensorShape &expect_shape);
 } // namespace detail
 
 template <typename T, typename D>
@@ -550,13 +580,9 @@ void AssetsLibrary::fill(std::vector<T> &vec, D &&distribution, std::random_devi
     }
 }
 
-template <typename T, typename D>
-void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
+template <typename T, typename ResultType>
+void AssetsLibrary::fill_with_generator(T &&tensor, const GeneratorFunctionType<ResultType> &generate_value) const
 {
-    using ResultType = typename std::remove_reference<D>::type::result_type;
-
-    std::mt19937 gen(_seed + seed_offset);
-
     const bool  is_nhwc = tensor.data_layout() == DataLayout::NHWC;
     TensorShape shape(tensor.shape());
 
@@ -581,14 +607,48 @@ void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::resul
         // Iterate over all channels
         for(int channel = 0; channel < tensor.num_channels(); ++channel)
         {
-            const ResultType value        = distribution(gen);
+            const ResultType value        = generate_value();
             ResultType      &target_value = reinterpret_cast<ResultType *>(tensor(id))[channel];
 
             store_value_with_data_type(&target_value, value, tensor.data_type());
         }
     }
+}
 
+template <typename T, typename D>
+void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
+{
+    using ResultType = typename std::remove_reference<D>::type::result_type;
+    std::mt19937 gen(_seed + seed_offset);
+
+    GeneratorFunctionType<ResultType> number_generator = [&]()
+    {
+        const ResultType value = distribution(gen);
+        return value;
+    };
+
+    fill_with_generator(tensor, number_generator);
     fill_borders_with_garbage(tensor, distribution, seed_offset);
+}
+
+template <typename T, typename DataType>
+void AssetsLibrary::fill_static_values(T &&tensor, const std::vector<DataType> &values) const
+{
+    auto                            it             = values.begin();
+    GeneratorFunctionType<DataType> get_next_value = [&]()
+    {
+        const DataType value = *it;
+        ++it;
+
+        if(it == values.end())
+        {
+            it = values.begin();
+        }
+
+        return value;
+    };
+
+    fill_with_generator(tensor, get_next_value);
 }
 
 template <typename D>
@@ -712,6 +772,13 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_s64, seed_offset);
             break;
         }
+        case DataType::BFLOAT16:
+        {
+            // It doesn't make sense to check [-inf, inf], so hard code it to a big number
+            std::uniform_real_distribution<float> distribution_bf16(-1000.f, 1000.f);
+            fill(tensor, distribution_bf16, seed_offset);
+            break;
+        }
         case DataType::F16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
@@ -810,6 +877,14 @@ void AssetsLibrary::fill_tensor_uniform_ranged(T                                
             fill(tensor, distribution_s32, seed_offset);
             break;
         }
+        case DataType::BFLOAT16:
+        {
+            // It doesn't make sense to check [-inf, inf], so hard code it to a big number
+            const auto                       converted_pairs = detail::convert_range_pair<float>(excluded_range_pairs);
+            RangedUniformDistribution<float> distribution_bf16(-1000.f, 1000.f, converted_pairs);
+            fill(tensor, distribution_bf16, seed_offset);
+            break;
+        }
         case DataType::F16:
         {
             // It doesn't make sense to check [-inf, inf], so hard code it to a big number
@@ -896,6 +971,12 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             fill(tensor, distribution_s64, seed_offset);
             break;
         }
+        case DataType::BFLOAT16:
+        {
+            std::uniform_real_distribution<float> distribution_bf16(low, high);
+            fill(tensor, distribution_bf16, seed_offset);
+            break;
+        }
         case DataType::F16:
         {
             std::uniform_real_distribution<float> distribution_f16(low, high);
@@ -938,41 +1019,14 @@ void AssetsLibrary::fill_layer_data(T &&tensor, std::string name) const
 #endif /* _WIN32 */
     const std::string path = _library_path + path_separator + name;
 
-    std::vector<unsigned long> shape;
-
     // Open file
     std::ifstream stream(path, std::ios::in | std::ios::binary);
     if(!stream.good())
     {
         throw framework::FileNotFound("Could not load npy file: " + path);
     }
-    std::string header = npy::read_header(stream);
 
-    // Parse header
-    bool        fortran_order = false;
-    std::string typestr;
-    npy::parse_header(header, typestr, fortran_order, shape);
-
-    // Check if the typestring matches the given one
-    std::string expect_typestr = get_typestring(tensor.data_type());
-    ARM_COMPUTE_ERROR_ON_MSG(typestr != expect_typestr, "Typestrings mismatch");
-
-    // Validate tensor shape
-    ARM_COMPUTE_ERROR_ON_MSG(shape.size() != tensor.shape().num_dimensions(), "Tensor ranks mismatch");
-    if(fortran_order)
-    {
-        for(size_t i = 0; i < shape.size(); ++i)
-        {
-            ARM_COMPUTE_ERROR_ON_MSG(tensor.shape()[i] != shape[i], "Tensor dimensions mismatch");
-        }
-    }
-    else
-    {
-        for(size_t i = 0; i < shape.size(); ++i)
-        {
-            ARM_COMPUTE_ERROR_ON_MSG(tensor.shape()[i] != shape[shape.size() - i - 1], "Tensor dimensions mismatch");
-        }
-    }
+    validate_npy_header(stream, tensor.data_type(), tensor.shape());
 
     // Read data
     if(tensor.padding().empty())

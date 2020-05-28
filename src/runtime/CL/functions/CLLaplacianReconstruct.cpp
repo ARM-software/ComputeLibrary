@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
-#include "support/ToolchainSupport.h"
 
 #include <cstddef>
 
@@ -43,6 +42,11 @@ CLLaplacianReconstruct::CLLaplacianReconstruct() // NOLINT
 }
 
 void CLLaplacianReconstruct::configure(const CLPyramid *pyramid, ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), pyramid, input, output, border_mode, constant_border_value);
+}
+
+void CLLaplacianReconstruct::configure(const CLCompileContext &compile_context, const CLPyramid *pyramid, ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == pyramid);
     ARM_COMPUTE_ERROR_ON(input == output);
@@ -68,17 +72,17 @@ void CLLaplacianReconstruct::configure(const CLPyramid *pyramid, ICLTensor *inpu
 
     const size_t last_level = num_levels - 1;
 
-    _addf[last_level].configure(input, pyramid->get_pyramid_level(last_level), _tmp_pyr.get_pyramid_level(last_level), ConvertPolicy::SATURATE);
+    _addf[last_level].configure(compile_context, input, pyramid->get_pyramid_level(last_level), _tmp_pyr.get_pyramid_level(last_level), ConvertPolicy::SATURATE);
 
     // Scale levels n-1 to 1, and add levels n-2 to 0
     for(size_t l = 0; l < last_level; ++l)
     {
-        _scalef[l].configure(_tmp_pyr.get_pyramid_level(l + 1), _tmp_pyr.get_pyramid_level(l), arm_compute::InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, constant_border_value);
-        _addf[l].configure(_tmp_pyr.get_pyramid_level(l), pyramid->get_pyramid_level(l), _tmp_pyr.get_pyramid_level(l), ConvertPolicy::SATURATE);
+        _scalef[l].configure(compile_context, _tmp_pyr.get_pyramid_level(l + 1), _tmp_pyr.get_pyramid_level(l), arm_compute::InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, constant_border_value);
+        _addf[l].configure(compile_context, _tmp_pyr.get_pyramid_level(l), pyramid->get_pyramid_level(l), _tmp_pyr.get_pyramid_level(l), ConvertPolicy::SATURATE);
     }
 
     // Convert level 0 from S16 to U8
-    _depthf.configure(_tmp_pyr.get_pyramid_level(0), output, ConvertPolicy::SATURATE, 0);
+    _depthf.configure(compile_context, _tmp_pyr.get_pyramid_level(0), output, ConvertPolicy::SATURATE, 0);
 
     _tmp_pyr.allocate();
 }

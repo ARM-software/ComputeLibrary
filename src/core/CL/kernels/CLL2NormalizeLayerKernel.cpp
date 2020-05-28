@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -97,6 +97,11 @@ CLL2NormalizeLayerKernel::CLL2NormalizeLayerKernel()
 
 void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, sum, output, axis, epsilon);
+}
+
+void CLL2NormalizeLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), sum->info(), output->info(), axis, epsilon));
 
@@ -131,7 +136,7 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
         default:
             ARM_COMPUTE_ERROR("Axis not supported");
     }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("l2_normalize_" + kernel_name, build_opts));
+    _kernel = create_kernel(compile_context, "l2_normalize_" + kernel_name, build_opts);
 
     // Set epsilon argument
     if(input->info()->data_type() == DataType::F32)

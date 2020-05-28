@@ -108,6 +108,11 @@ Status CLTransposeKernel::validate(const ITensorInfo *input, const ITensorInfo *
 
 void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLTransposeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
@@ -123,7 +128,7 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
     data_type_in_bytes << input->info()->element_size();
     build_opts.emplace("-DDATA_TYPE_IN_BYTES=" + data_type_in_bytes.str());
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("transpose", build_opts));
+    _kernel = create_kernel(compile_context, "transpose", build_opts);
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());

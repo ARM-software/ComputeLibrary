@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute::misc::shape_calculator;
 namespace arm_compute
@@ -84,6 +85,11 @@ CLBatchToSpaceLayerKernel::CLBatchToSpaceLayerKernel()
 
 void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape, output);
+}
+
+void CLBatchToSpaceLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), block_shape->info(), output->info()));
 
@@ -98,7 +104,7 @@ void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const ICLTenso
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DBATCH_SIZE=" + support::cpp11::to_string(input->info()->dimension(3)));
     build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_width)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batch_to_space_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
+    _kernel = create_kernel(compile_context, "batch_to_space_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -106,6 +112,11 @@ void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const ICLTenso
 }
 
 void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape_x, block_shape_y, output);
+}
+
+void CLBatchToSpaceLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const int32_t block_shape_x, const int32_t block_shape_y, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -121,12 +132,12 @@ void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const int32_t 
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
     build_opts.add_option("-DBATCH_SIZE=" + support::cpp11::to_string(input->info()->dimension(3)));
     build_opts.add_option("-DBLOCK_SHAPE_X=" + support::cpp11::to_string(block_shape_x));
     build_opts.add_option("-DBLOCK_SHAPE_Y=" + support::cpp11::to_string(block_shape_y));
     build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_width)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batch_to_space_static_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
+    _kernel = create_kernel(compile_context, "batch_to_space_static_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());

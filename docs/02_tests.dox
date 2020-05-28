@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2017-2019 ARM Limited.
+/// Copyright (c) 2017-2020 ARM Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -50,20 +50,20 @@ information is needed within the test (e.g. to validate the results).
     .
     `-- tests <- Top level test directory. All files in here are shared among validation and benchmark.
         |-- framework <- Underlying test framework.
-        |-- CL   \
+        |-- CL             \
+        |-- GLES_COMPUTE   \
         |-- NEON -> Backend specific files with helper functions etc.
         |-- benchmark <- Top level directory for the benchmarking files.
         |   |-- fixtures <- Fixtures for benchmark tests.
         |   |-- CL <- OpenCL backend test cases on a function level.
-        |   |   `-- SYSTEM <- OpenCL system tests, e.g. whole networks
+        |   |-- GLES_COMPUTE <- Same of OpenGL ES
         |   `-- NEON <- Same for NEON
-        |       `-- SYSTEM
         |-- datasets <- Datasets for benchmark and validation tests.
         |-- main.cpp <- Main entry point for the tests. Currently shared between validation and benchmarking.
-        |-- networks <- Network classes for system level tests.
         `-- validation -> Top level directory for validation files.
             |-- CPP -> C++ reference code
-            |-- CL   \
+            |-- CL             \
+            |-- GLES_COMPUTE   \
             |-- NEON -> Backend specific test cases
             `-- fixtures -> Fixtures shared among all backends. Used to setup target function and tensors.
 
@@ -401,7 +401,7 @@ To run the OpenCL precommit benchmark tests with OpenCL kernel timers in milisec
 
 	LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^CL.*" --instruments="opencl_timer_ms" --iterations=10
 
-@note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was build with OpenCL enabled.
+@note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was built with OpenCL enabled.
 */
 } // namespace test
 } // namespace arm_compute

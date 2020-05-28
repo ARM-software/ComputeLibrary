@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,10 +52,6 @@ public:
     CLHOGAccessor(const CLHOGAccessor &) = delete;
     /** Prevent instances of this class from being copied (As this class contains references). */
     CLHOGAccessor &operator=(const CLHOGAccessor &) = delete;
-    /** Allow instances of this class to be moved */
-    CLHOGAccessor(CLHOGAccessor &&) = default;
-    /** Allow instances of this class to be moved */
-    CLHOGAccessor &operator=(CLHOGAccessor &&) = default;
 
     /** Pointer to the first element of the array which stores the linear SVM coefficients of HOG descriptor
      *

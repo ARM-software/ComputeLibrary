@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,20 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function, unsigned int mask_size, MatrixPattern pattern, const uint8_t *mask,
+                   BorderMode border_mode, uint8_t constant_border_value = 0);
+    /** Initialize the function's source, destination, conv and border_mode.
+     *
+     * @param[in]     compile_context       The compile context to be used.
+     * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]    output                Destination tensor. Data types supported: U8
+     * @param[in]     function              Non linear function to perform
+     * @param[in]     mask_size             Mask size. Supported sizes: 3, 5
+     * @param[in]     pattern               Mask pattern
+     * @param[in]     mask                  The given mask. Will be used only if pattern is specified to PATTERN_OTHER
+     * @param[in]     border_mode           Strategy to use for borders.
+     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function, unsigned int mask_size, MatrixPattern pattern, const uint8_t *mask,
                    BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 }

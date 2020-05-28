@@ -70,6 +70,22 @@ public:
         scale_x = ((shape[idx_width] * scale_x) > max_width) ? (max_width / shape[idx_width]) : scale_x;
         scale_y = ((shape[idx_height] * scale_y) > max_height) ? (max_height / shape[idx_height]) : scale_y;
 
+        const bool align_corners_a = policy == InterpolationPolicy::BILINEAR
+                                     && sampling_policy == SamplingPolicy::TOP_LEFT
+                                     && align_corners;
+
+        if(align_corners_a)
+        {
+            /* When align_corners = true is used for bilinear, both width and height
+             * of output should be > 1 to avoid overflow during computation otherwise
+             * it fails while checking argument values.
+             */
+            constexpr float min_width  = 2.f;
+            constexpr float min_height = 2.f;
+            scale_x                    = ((shape[idx_width] * scale_x) < min_width) ? (min_width / shape[idx_width]) : scale_x;
+            scale_y                    = ((shape[idx_height] * scale_y) < min_height) ? (min_height / shape[idx_height]) : scale_y;
+        }
+
         std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
         T                                      constant_border_value = static_cast<T>(distribution_u8(generator));
 

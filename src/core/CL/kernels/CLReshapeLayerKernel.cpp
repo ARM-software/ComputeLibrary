@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,11 @@ CLReshapeLayerKernel::CLReshapeLayerKernel()
 
 void CLReshapeLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
@@ -72,7 +77,7 @@ void CLReshapeLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 
     // Create kernel
     std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()) };
-    _kernel                          = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_layer", build_opts));
+    _kernel                          = create_kernel(compile_context, "reshape_layer", build_opts);
 
     // Add static arguments
     const cl_int2 input_shape =

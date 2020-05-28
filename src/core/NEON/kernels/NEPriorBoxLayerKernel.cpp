@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,20 +71,6 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
     }
 
     return Status{};
-}
-
-std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, const PriorBoxLayerInfo &info)
-{
-    ARM_COMPUTE_UNUSED(input1, input2);
-
-    const int              num_priors                        = info.aspect_ratios().size() * info.min_sizes().size() + info.max_sizes().size();
-    const unsigned int     num_elems_processed_per_iteration = 4 * num_priors;
-    Window                 win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, output_access);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
 }
 } // namespace
 
@@ -221,17 +207,19 @@ void NEPriorBoxLayerKernel::configure(const ITensor *input1, const ITensor *inpu
     _output = output;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info(), info);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    const int   num_priors = info.aspect_ratios().size() * info.min_sizes().size() + info.max_sizes().size();
+    Window      win        = calculate_max_window(*output->info(), Steps(num_priors * 4));
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+
+    INEKernel::configure(win);
 }
 
 Status NEPriorBoxLayerKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const PriorBoxLayerInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get(), info)
-                                .first);
 
     return Status{};
 }

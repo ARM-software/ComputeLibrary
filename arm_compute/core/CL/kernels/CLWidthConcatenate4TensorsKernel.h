@@ -59,6 +59,16 @@ public:
      * @param[out] output Output tensor. Data types supported: Same as @p input1.
      */
     void configure(const ICLTensor *input1, const ICLTensor *input2, const ICLTensor *input3, const ICLTensor *input4, ICLTensor *output);
+    /** Initialise the kernel's input1s and output
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input1          First input tensor. Data types supported: All.
+     * @param[in]  input2          Second input tensor. Data types supported: same as @p input1
+     * @param[in]  input3          Third input tensor. Data types supported: same as @p input1
+     * @param[in]  input4          Fourth input tensor. Data types supported: same as @p input1
+     * @param[out] output          Output tensor. Data types supported: Same as @p input1.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, const ICLTensor *input3, const ICLTensor *input4, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLWidthConcatenate4TensorsKernel
      *
      * @param[in] input1 First tensor info. Data types supported: All.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,11 @@ BorderSize CLNonMaximaSuppression3x3Kernel::border_size() const
 
 void CLNonMaximaSuppression3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
+}
+
+void CLNonMaximaSuppression3x3Kernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::F32);
 
@@ -51,7 +56,7 @@ void CLNonMaximaSuppression3x3Kernel::configure(const ICLTensor *input, ICLTenso
 
     // Create kernel
     std::set<std::string> build_opts = { ("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())) };
-    _kernel                          = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("non_max_suppression", build_opts));
+    _kernel                          = create_kernel(compile_context, "non_max_suppression", build_opts);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;

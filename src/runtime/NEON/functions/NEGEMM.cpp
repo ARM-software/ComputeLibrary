@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -175,17 +175,22 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     const bool is_c_bias = gemm_info.reshape_b_only_on_first_run();
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(a);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::BFLOAT16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(0) != b->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
+    if(a->data_type() != DataType::BFLOAT16)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, output);
+    }
 
     if(c != nullptr && !is_c_bias)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.depth_output_gemm3d() != 0);
         ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.reinterpret_input_as_3d());
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, c);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(c, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(1) != c->dimension(1), "The C matrix must have the same number of rows as the matrix A");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(b->dimension(0) != c->dimension(0), "The C matrix must have the same number of columns as the matrix B");
     }
@@ -336,25 +341,33 @@ void NEGEMM::prepare()
 {
     if(!_is_prepared)
     {
+        const bool original_b_managed_by_weights_manager = _weights_manager && _weights_manager->are_weights_managed(_original_b);
         if(_asm_glue.is_configured())
         {
-            if(!_weights_manager || !_weights_manager->are_weights_managed(_original_b))
+            if(!original_b_managed_by_weights_manager)
             {
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
             _asm_glue.prepare();
+            if(!original_b_managed_by_weights_manager)
+            {
+                _original_b->mark_as_unused();
+            }
         }
         else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue.is_configured())
         {
-            if(!_weights_manager || !_weights_manager->are_weights_managed(_original_b))
+            if(!original_b_managed_by_weights_manager)
             {
                 ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
             }
 
             _tmp_b.allocator()->allocate();
             NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
-            _original_b->mark_as_unused();
+            if(!original_b_managed_by_weights_manager)
+            {
+                _original_b->mark_as_unused();
+            }
         }
 
         _is_prepared = true;

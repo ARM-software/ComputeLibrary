@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -106,6 +107,11 @@ BorderSize CLNormalizationLayerKernel::border_size() const
 
 void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, norm_info);
+}
+
+void CLNormalizationLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NormalizationLayerInfo norm_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto initialization if not yet initialized
@@ -155,7 +161,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
             kernel_name = "normalization_layer_in_map_nchw";
         }
     }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), norm_info);

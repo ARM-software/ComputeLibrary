@@ -28,15 +28,8 @@
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Window.h"
-
-#include <cmath>
-#include <cstdlib>
-#include <set>
-#include <string>
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -45,7 +38,7 @@ namespace
 constexpr unsigned int num_elems_processed_per_iteration = 16;
 
 Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
-                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(overflow_policy);
     ARM_COMPUTE_UNUSED(rounding_policy);
@@ -63,6 +56,7 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
                                                          DataType::S16, DataType::QSYMM16, DataType::F16,
                                                          DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(scale < 0, "Scale cannot be negative.");
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled() && !is_data_type_float(output->data_type()));
 
     const TensorShape &out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
 
@@ -75,7 +69,7 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
                                                              1,
                                                              DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                              DataType::S16, DataType::QSYMM16, DataType::F16,
-                                                             DataType::F32);
+                                                             DataType::S32, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::U8 && (input1->data_type() != DataType::U8 || input2->data_type() != DataType::U8),
                                         "Output can only be U8 if both inputs are U8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::QASYMM8 && (input1->data_type() != DataType::QASYMM8 || input2->data_type() != DataType::QASYMM8),
@@ -84,6 +78,8 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
                                         "Output can only be QASYMM8_SIGNED if both inputs are QASYMM8_SIGNED");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::QSYMM16 && (input1->data_type() != DataType::QSYMM16 || input2->data_type() != DataType::QSYMM16),
                                         "Output can only be QSYMM16 if both inputs are QSYMM16");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::S32 && (input1->data_type() != DataType::QSYMM16 || input2->data_type() != DataType::QSYMM16),
+                                        "Output can only be S32 if both inputs are QSYMM16");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output->tensor_shape(), 0), "Wrong shape for output");
     }
 
@@ -147,11 +143,17 @@ CLPixelWiseMultiplicationKernel::CLPixelWiseMultiplicationKernel()
 }
 
 void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
-                                                ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+                                                ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
+}
+
+void CLPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float scale,
+                                                ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info(),
-                                                  scale, overflow_policy, rounding_policy));
+                                                  scale, overflow_policy, rounding_policy, act_info));
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info());
@@ -175,22 +177,24 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
         scale_int = std::abs(exponent - 1);
     }
 
-    std::string compute_type;
+    std::string acc_type;
     // Check if it has float inputs and output
     if(is_data_type_float(input1->info()->data_type()) || is_data_type_float(input2->info()->data_type()))
     {
-        scale_int    = -1;
-        compute_type = (input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32) ? "float" : "half";
+        scale_int = -1;
+        acc_type  = (input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32) ? "float" : "half";
     }
     else
     {
-        if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
+        if(input1->info()->element_size() == 2 || input2->info()->element_size() == 2)
         {
-            compute_type = "int";
+            // Use 32-bit accumulator for 16-bit input
+            acc_type = "int";
         }
         else
         {
-            compute_type = "ushort";
+            // Use 16-bit accumulator for 8-bit input
+            acc_type = "ushort";
         }
     }
 
@@ -203,7 +207,7 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
     build_opts.add_option("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(input2->info()->data_type()));
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    if(is_quantized)
+    if(is_quantized && (output->info()->data_type() != DataType::S32))
     {
         const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
         const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
@@ -225,11 +229,17 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
         kernel_name += (scale_int >= 0) ? "_int" : "_float";
         build_opts.add_option_if_else(overflow_policy == ConvertPolicy::WRAP || is_data_type_float(output->info()->data_type()), "-DWRAP", "-DSATURATE");
         build_opts.add_option_if_else(rounding_policy == RoundingPolicy::TO_ZERO, "-DROUND=_rtz", "-DROUND=_rte");
-        build_opts.add_option("-DDATA_TYPE_RES=" + compute_type);
+        build_opts.add_option("-DACC_DATA_TYPE=" + acc_type);
+        if(act_info.enabled())
+        {
+            build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
+            build_opts.add_option("-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
+            build_opts.add_option("-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
+        }
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set scale argument
     unsigned int idx = 3 * num_arguments_per_3D_tensor(); // Skip the inputs and output parameters
@@ -247,10 +257,10 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
 }
 
 Status CLPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
-                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, scale, overflow_policy, rounding_policy));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, scale, overflow_policy, rounding_policy, act_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
     return Status{};
@@ -310,7 +320,7 @@ namespace
 {
 constexpr unsigned int num_elems_processed_per_iteration_complex = 1;
 
-Status validate_arguments_complex(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status validate_arguments_complex(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 2, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 2, DataType::F32);
@@ -318,6 +328,7 @@ Status validate_arguments_complex(const ITensorInfo *input1, const ITensorInfo *
     const TensorShape &out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled() && !is_data_type_float(output->data_type()));
 
     // Validate in case of configured output
     if(output->total_size() > 0)
@@ -363,10 +374,15 @@ CLComplexPixelWiseMultiplicationKernel::CLComplexPixelWiseMultiplicationKernel()
 {
 }
 
-void CLComplexPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLComplexPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
+}
+
+void CLComplexPixelWiseMultiplicationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1->info(), input2->info(), output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1->info(), input2->info(), output->info(), act_info));
 
     // Configure kernel window
     auto win_config = validate_and_configure_window_complex(input1->info(), input2->info(), output->info());
@@ -376,16 +392,24 @@ void CLComplexPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, 
     _input2 = input2;
     _output = output;
 
+    CLBuildOptions build_opts;
+    if(act_info.enabled())
+    {
+        build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
+        build_opts.add_option("-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
+        build_opts.add_option("-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
+    }
+
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("pixelwise_mul_complex"));
+    _kernel = create_kernel(compile_context, "pixelwise_mul_complex", build_opts.options());
 
     ICLKernel::configure_internal(win_config.second);
 }
 
-Status CLComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CLComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_complex(input1, input2, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_complex(input1, input2, output, act_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_complex(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
     return Status{};

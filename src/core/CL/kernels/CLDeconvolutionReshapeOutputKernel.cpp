@@ -30,6 +30,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -115,6 +116,13 @@ CLDeconvolutionReshapeOutputKernel::CLDeconvolutionReshapeOutputKernel()
 void CLDeconvolutionReshapeOutputKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info, const ITensorInfo *weights_info,
                                                    const PadStrideInfo &deconv_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, input_info, weights_info, deconv_info);
+}
+
+void CLDeconvolutionReshapeOutputKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const ITensorInfo *input_info,
+                                                   const ITensorInfo   *weights_info,
+                                                   const PadStrideInfo &deconv_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, input_info, weights_info);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), input_info, weights_info, deconv_info));
 
@@ -147,7 +155,7 @@ void CLDeconvolutionReshapeOutputKernel::configure(const ICLTensor *input, const
     build_opts.add_option_if(data_layout == DataLayout::NCHW, "-DNUM_FILTERS=" + support::cpp11::to_string(filter_b));
     build_opts.add_option_if(_add_bias, "-DADD_BIAS");
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("deconvolution_reshape", build_opts.options()));
+    _kernel = create_kernel(compile_context, "deconvolution_reshape", build_opts.options());
     ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning

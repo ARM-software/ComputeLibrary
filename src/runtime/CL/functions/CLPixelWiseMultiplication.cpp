@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,17 +25,23 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
 namespace arm_compute
 {
 void CLPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, float scale,
-                                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+                                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
+}
+
+void CLPixelWiseMultiplication::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, float scale,
+                                          ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLPixelWiseMultiplicationKernel>();
-    k->configure(input1, input2, output, scale, overflow_policy, rounding_policy);
+    k->configure(compile_context, input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
     _kernel = std::move(k);
 
     if(output->info()->dimension(0) > 1)
@@ -44,21 +50,26 @@ void CLPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *input2, 
 
         if(broadcasted_info->info()->dimension(0) == 1)
         {
-            _border_handler.configure(broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+            _border_handler.configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
         }
     }
 }
 
 Status CLPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
-                                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+                                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info)
 {
-    return CLPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy);
+    return CLPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
 }
 
-void CLComplexPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output)
+void CLComplexPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, act_info);
+}
+
+void CLComplexPixelWiseMultiplication::configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLComplexPixelWiseMultiplicationKernel>();
-    k->configure(input1, input2, output);
+    k->configure(compile_context, input1, input2, output, act_info);
     _kernel = std::move(k);
 
     if(output->info()->dimension(0) > 1)
@@ -67,13 +78,13 @@ void CLComplexPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *i
 
         if(broadcasted_info->info()->dimension(0) == 1)
         {
-            _border_handler.configure(broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+            _border_handler.configure(compile_context, broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
         }
     }
 }
 
-Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
-    return CLComplexPixelWiseMultiplicationKernel::validate(input1, input2, output);
+    return CLComplexPixelWiseMultiplicationKernel::validate(input1, input2, output, act_info);
 }
 } // namespace arm_compute

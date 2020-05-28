@@ -335,15 +335,16 @@ public:
                                                 ITensorAccessorUPtr mean_accessor = nullptr, ITensorAccessorUPtr std_accessor = nullptr);
     /** Adds a pad layer node to the graph
      *
-     * @param[in] g       Graph to add the node to
-     * @param[in] params  Common node parameters
-     * @param[in] input   Input to the reshape layer node as a NodeID-Index pair
-     * @param[in] padding The padding for each spatial dimension of the input tensor. The pair padding[i]
-     *                    specifies the front and the end padding in the i-th dimension.
+     * @param[in] g         Graph to add the node to
+     * @param[in] params    Common node parameters
+     * @param[in] input     Input to the reshape layer node as a NodeID-Index pair
+     * @param[in] paddings  The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                      specifies the front and the end padding in the i-th dimension.
+     * @param[in] pad_value Padding value to be used. Defaults to 0
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, PaddingList padding);
+    static NodeID add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, const PaddingList &paddings, PixelValue pad_value = PixelValue());
     /** Adds a permute layer node to the graph
      *
      * @param[in] g      Graph to add the node to

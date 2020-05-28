@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,10 @@ SimpleTensor<T> convolution_layer_nchw(const SimpleTensor<T> &src, const SimpleT
     const int end_xi      = output_wh.first * stride_xi;
     const int end_yi      = output_wh.second * stride_yi;
     const int num_batches = src.shape().total_size() / (width_in * height_in * depth_in);
+
+#if defined(_OPENMP) && !( defined(__arm__) && defined(__ANDROID__))
+    #pragma omp parallel for collapse(5)
+#endif /* _OPENMP */
     for(int r = 0; r < num_batches; ++r)
     {
         for(int yi = start_yi; yi < start_yi + end_yi; yi += stride_yi)
@@ -115,18 +119,7 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
     // Create reference
     SimpleTensor<T> dst{ output_shape, src.data_type(), 1, out_quant_info };
 
-    if(src.data_layout() == DataLayout::NHWC)
-    {
-        SimpleTensor<T>  src_nchw     = reference::permute<T>(src, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<TW> weights_nchw = reference::permute<TW>(weights, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<T>  dst_nchw     = reference::permute<T>(dst, PermutationVector(1U, 2U, 0U));
-
-        return reference::permute<T>(convolution_layer_nchw(src_nchw, weights_nchw, bias, dst_nchw, info, dilation, num_groups), PermutationVector(2U, 0U, 1U));
-    }
-    else
-    {
-        return convolution_layer_nchw(src, weights, bias, dst, info, dilation, num_groups);
-    }
+    return convolution_layer_nchw(src, weights, bias, dst, info, dilation, num_groups);
 }
 
 template SimpleTensor<float> convolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,

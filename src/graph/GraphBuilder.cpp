@@ -306,7 +306,7 @@ NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdx
     }
 
     // Create convolution node and connect
-    NodeID deconv_nid = g.add_node<DeconvolutionLayerNode>(deconv_info);
+    NodeID deconv_nid = g.add_node<DeconvolutionLayerNode>(descriptors::DeconvolutionLayerDescriptor{ deconv_info });
     g.add_connection(input.node_id, input.index, deconv_nid, 0);
     g.add_connection(w_nid, 0, deconv_nid, 1);
     if(has_bias)
@@ -438,7 +438,7 @@ NodeID GraphBuilder::add_elementwise_node(Graph &g, NodeParams params, NodeIdxPa
     check_nodeidx_pair(input0, g);
     check_nodeidx_pair(input1, g);
 
-    NodeID nid = g.add_node<EltwiseLayerNode>(operation);
+    NodeID nid = g.add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{ operation });
 
     g.add_connection(input0.node_id, input0.index, nid, 0);
     g.add_connection(input1.node_id, input1.index, nid, 1);
@@ -571,9 +571,9 @@ NodeID GraphBuilder::add_normalize_planar_yuv_node(Graph &g, NodeParams params, 
     return norm_planar_yuv_nid;
 }
 
-NodeID GraphBuilder::add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, PaddingList padding)
+NodeID GraphBuilder::add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, const PaddingList &paddings, PixelValue pad_value)
 {
-    return create_simple_single_input_output_node<PadLayerNode>(g, params, input, padding);
+    return create_simple_single_input_output_node<PadLayerNode>(g, params, input, paddings, pad_value);
 }
 
 NodeID GraphBuilder::add_permute_node(Graph &g, NodeParams params, NodeIdxPair input, PermutationVector perm, DataLayout layout)

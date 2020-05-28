@@ -49,7 +49,7 @@ public:
     ~CLPadLayerKernel() = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input          Source tensor. Data types supported: All.
+     * @param[in]  input          Source tensor. Data types supported: U8, S8, QASYMM8, QASYMM8_SIGNED, U16, S16, U32, S32, F16, F32.
      * @param[out] output         Output tensor. Data type supported: same as @p input
      * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                            specifies the front and the end padding in the i-th dimension.
@@ -58,9 +58,22 @@ public:
      *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
+    /** Set the input and output tensor.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: All.
+     * @param[out] output          Output tensor. Data type supported: same as @p input
+     * @param[in]  padding         The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                             specifies the front and the end padding in the i-th dimension.
+     * @param[in]  constant_value  (Optional) Constant value to be used for the padding.
+     * @param[in]  mode            (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
+     *                             or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(),
+                   PaddingMode mode = PaddingMode::CONSTANT);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPadLayerKernel
      *
-     * @param[in] input          Source tensor info. Data types supported: All.
+     * @param[in] input          Source tensor info. Data types supported: U8, S8, QASYMM8, QASYMM8_SIGNED, U16, S16, U32, S32, F16, F32.
      * @param[in] output         Output tensor info. Data type supported: same as @p input
      * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                           specifies the front and the end padding in the i-th dimension.

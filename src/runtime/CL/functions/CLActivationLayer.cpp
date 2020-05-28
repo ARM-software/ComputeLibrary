@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLRuntimeContext.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -37,10 +37,13 @@ CLActivationLayer::CLActivationLayer(CLRuntimeContext *ctx)
 
 void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
-    auto core_ctx = _ctx ? _ctx->core_runtime_context() : /* Legacy */ nullptr;
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
+}
 
-    auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>(core_ctx);
-    k->configure(input, output, act_info);
+void CLActivationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLActivationLayerKernel>();
+    k->configure(compile_context, input, output, act_info);
     _kernel = std::move(k);
 }
 

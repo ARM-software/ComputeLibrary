@@ -55,6 +55,15 @@ public:
      * @param[in]  axis    (Optional) The axis in @p input to gather @p indices from. Negative values wrap around. Defaults to 0
      */
     void configure(const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis = 0);
+    /** Initialise the kernel's inputs and outputs
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Supported tensor rank: up to 4. Data type supported: All.
+     * @param[in]  indices         Indices tensor. Supported tensor rank: up to 1. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis])
+     * @param[out] output          Destination tensor. Data type supported: Same as @p input
+     * @param[in]  axis            (Optional) The axis in @p input to gather @p indices from. Negative values wrap around. Defaults to 0
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLGatherKernel
      *

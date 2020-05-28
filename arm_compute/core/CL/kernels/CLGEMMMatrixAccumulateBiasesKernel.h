@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,13 @@ public:
      * @param[in]      biases The shared biases tensor to append. It must be 1D tensor. Data types supported: Same as @p input
      */
     void configure(ICLTensor *accum, const ICLTensor *biases);
+    /** Set the accumulate buffer and the biases of the kernel.
+     *
+     * @param[in]      compile_context The compile context to be used.
+     * @param[in, out] accum           The accumulate tensor to convert. Data types supported: F16/F32
+     * @param[in]      biases          The shared biases tensor to append. It must be 1D tensor. Data types supported: Same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *accum, const ICLTensor *biases);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixAccumulateBiasesKernel
      *
      * @param[in] accum      The accumulate tensor to convert. Data types supported: F16/F32

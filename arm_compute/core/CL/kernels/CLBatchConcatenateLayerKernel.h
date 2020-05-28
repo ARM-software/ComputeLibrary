@@ -61,6 +61,18 @@ public:
      *
      */
     void configure(const ICLTensor *input, unsigned int batch_offset, ICLTensor *output);
+    /** Initialise the kernel's inputs and output
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in]     input           Input tensor. Data types supported: All.
+     * @param[in]     batch_offset    The offset on axis # 3.
+     * @param[in,out] output          Output tensor. Data types supported: Same as @p input.
+     *
+     * @note: The output tensor's low two dimensions can't be smaller than the input one's.
+     * @note: The gaps between the two lowest dimensions of input and output need to be divisible by 2.
+     *
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int batch_offset, ICLTensor *output);
     /**  Static function to check if given info will lead to a valid configuration of @ref CLBatchConcatenateLayerKernel
      *
      * @param[in] input        Input tensor info. Data types supported: All.

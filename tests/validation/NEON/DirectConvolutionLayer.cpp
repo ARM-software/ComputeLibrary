@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -229,14 +229,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<float>, framewo
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
-
-const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
-});
-
 TEST_SUITE_END() // DirectConvolutionLayer
 TEST_SUITE_END() // NEON
 } // namespace validation

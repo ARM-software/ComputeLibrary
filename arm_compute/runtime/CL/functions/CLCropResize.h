@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,16 +62,34 @@ public:
      * @note Box indices may be outside of the bounds, in which case @p extrapolation_value is used.
      * @note Start and end indices of boxes are inclusive.
      *
-     * @param[in]  input               Source tensor containing N batches of 3D images to be cropped. Data type supported: F32
-     * @param[in]  boxes               Tensor containing the boxes used to crop the images. Data type supported: F32
+     * @param[in]  input               Source tensor containing N batches of 3D images to be cropped. Data type supported: : U16/S16/U32/S32/F16/F32
+     * @param[in]  boxes               Tensor containing the boxes used to crop the images. It has to be known before configuration. Data type supported: F32
      * @param[in]  box_ind             One dimensional tensor containing the batch index of the 3D image in @p input that the corresponding
-     *                                 box in @p boxes will be applied to. Data type supported: F32
+     *                                 box in @p boxes will be applied to. It has to be known before configuration. Data type supported: F32
      * @param[out] output              Destination tensor containing a cropped and resized image for each box in @p boxes. Data type supported: F32
      * @param[in]  crop_size           The dimensions that each cropped image will be resized to.
      * @param[in]  method              The policy to be used when resizing image. Default is bilinear.
      * @param[in]  extrapolation_value Value to be used for values outside of the image for cropping and resizing. Default is 0.
      */
     void configure(const ICLTensor *input, ICLTensor *boxes, ICLTensor *box_ind, ICLTensor *output, Coordinates2D crop_size,
+                   InterpolationPolicy method = InterpolationPolicy::BILINEAR, float extrapolation_value = 0);
+    /** Configure kernel
+     *
+     * @note Supported tensor rank: up to 4
+     * @note Box indices may be outside of the bounds, in which case @p extrapolation_value is used.
+     * @note Start and end indices of boxes are inclusive.
+     *
+     * @param[in]  compile_context     The compile context to be used.
+     * @param[in]  input               Source tensor containing N batches of 3D images to be cropped. Data type supported: U16/S16/U32/S32/F16/F32
+     * @param[in]  boxes               Tensor containing the boxes used to crop the images. It has to be known before configuration. Data type supported: F32
+     * @param[in]  box_ind             One dimensional tensor containing the batch index of the 3D image in @p input that the corresponding
+     *                                 box in @p boxes will be applied to. It has to be known before configuration. Data type supported: F32
+     * @param[out] output              Destination tensor containing a cropped and resized image for each box in @p boxes. Data type supported: F32
+     * @param[in]  crop_size           The dimensions that each cropped image will be resized to.
+     * @param[in]  method              The policy to be used when resizing image. Default is bilinear.
+     * @param[in]  extrapolation_value Value to be used for values outside of the image for cropping and resizing. Default is 0.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *boxes, ICLTensor *box_ind, ICLTensor *output, Coordinates2D crop_size,
                    InterpolationPolicy method = InterpolationPolicy::BILINEAR, float extrapolation_value = 0);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NESlice
@@ -109,6 +127,8 @@ public:
     std::vector<std::unique_ptr<CLCopyKernel>> _copy;
     std::vector<std::unique_ptr<CLTensor>>     _crop_results;
     std::vector<std::unique_ptr<CLTensor>>     _scaled_results;
+
+    std::vector<std::unique_ptr<ICLKernel>> _internal_kernels;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CL_CROP_RESIZE_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,18 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value = 0);
+    /** Initialize the function's source, destination, interpolation policy and border_mode.
+     *
+     * @param[in]     compile_context       The compile context to be used.
+     * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]    output                Destination tensor. Data types supported: U8.
+     * @param[in]     matrix                The perspective matrix. Must be 3x3 of type float.
+     * @param[in]     policy                The interpolation type.
+     * @param[in]     border_mode           Strategy to use for borders.
+     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
+                   uint8_t constant_border_value = 0);
 };
 }
 #endif /*ARM_COMPUTE_CLWARPPERSPECTIVE_H */

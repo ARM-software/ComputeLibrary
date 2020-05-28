@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,17 +36,9 @@ class CLGEMMReshapedOnlyRHSKernelConfigurationBifrost final : public ICLGEMMKern
 public:
     /** Constructor
      *
-     * @param[in] arch GPU target
+     * @param[in] gpu GPU target
      */
-    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget arch);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(const CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &operator=(const CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &) = delete;
-    /** Default Move Constructor. */
-    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &&) = default;
-    /** Default move assignment operator */
-    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &operator=(CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &&) = default;
+    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget gpu);
 
     // Inherited overridden method
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;

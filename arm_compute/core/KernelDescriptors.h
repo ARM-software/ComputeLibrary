@@ -54,14 +54,43 @@ struct FFTRadixStageKernelInfo
 /** Descriptor used by the GEMM kernels */
 struct GEMMKernelInfo
 {
-    unsigned int        m{ 0 };                           /**< Number of LHS rows*/
-    unsigned int        n{ 0 };                           /**< Number of RHS columns*/
-    unsigned int        k{ 0 };                           /**< Number of LHS columns or RHS rows */
-    unsigned int        depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
-    bool                reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
-    bool                broadcast_bias{ false };          /**< Flag used to broadcase the bias addition */
-    bool                fp_mixed_precision{ false };      /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
-    ActivationLayerInfo activation_info{};                /**< Activation function to perform after the matrix multiplication */
+    GEMMKernelInfo() = default;
+    GEMMKernelInfo(
+        unsigned int        im,
+        unsigned int        in,
+        unsigned int        ik,
+        unsigned int        idepth_output_gemm3d,
+        bool                ireinterpret_input_as_3d,
+        bool                ibroadcast_bias,
+        bool                ifp_mixed_precision,
+        ActivationLayerInfo iactivation_info,
+        int                 inmult_transpose1xW_width,
+        int                 imult_interleave4x4_height,
+        GEMMLHSMatrixInfo   ilhs_info,
+        GEMMRHSMatrixInfo   irhs_info,
+        int32_t             ina_offset,
+        int32_t             inb_offset)
+        : m(im), n(in), k(ik), depth_output_gemm3d(idepth_output_gemm3d), reinterpret_input_as_3d(ireinterpret_input_as_3d), broadcast_bias(ibroadcast_bias), fp_mixed_precision(ifp_mixed_precision),
+          activation_info(iactivation_info), mult_transpose1xW_width(inmult_transpose1xW_width), mult_interleave4x4_height(imult_interleave4x4_height), lhs_info(ilhs_info), rhs_info(irhs_info),
+          a_offset(ina_offset), b_offset(inb_offset)
+    {
+    }
+
+    unsigned int            m{ 0 };                           /**< Number of LHS rows*/
+    unsigned int            n{ 0 };                           /**< Number of RHS columns*/
+    unsigned int            k{ 0 };                           /**< Number of LHS columns or RHS rows */
+    unsigned int            depth_output_gemm3d{ 0 };         /**< Depth of the output tensor in case is reinterpreted as 3D */
+    bool                    reinterpret_input_as_3d{ false }; /**< Flag used to reinterpret the input as 3D */
+    bool                    broadcast_bias{ false };          /**< Flag used to broadcast the bias addition */
+    bool                    fp_mixed_precision{ false };      /**< Flag used to indicate wider accumulators (32 bit instead of 16 for FP16). */
+    ActivationLayerInfo     activation_info{};                /**< Activation function to perform after the matrix multiplication */
+    int                     mult_transpose1xW_width{ 1 };     /**< Multiplication factor for the width of the 1xW transposed block */
+    int                     mult_interleave4x4_height{ 1 };   /**< Multiplication factor for the height of the 4x4 interleaved block */
+    GEMMLHSMatrixInfo       lhs_info{};                       /**< LHS matrix information used to retrieve the number of rows processed by each thread */
+    GEMMRHSMatrixInfo       rhs_info{};                       /**< RHS matrix information used for reshaping the RHS matrix */
+    int32_t                 a_offset{ 0 };                    /**< Offset to be added to each element of the matrix A */
+    int32_t                 b_offset{ 0 };                    /**< Offset to be added to each element of the matrix B */
+    GEMMLowpOutputStageInfo output_stage{};                   /**< GEMMLowp output stage information */
 };
 
 /** Descriptor used by the depthwise convolution kernels */
@@ -116,6 +145,28 @@ struct InstanceNormalizationLayerKernelInfo
     float beta;                /**< The offset scalar value applied to the normalized tensor. Defaults to 0.0 */
     float epsilon;             /**< Lower bound value for the normalization. Defaults to 1e-12 */
     bool  use_mixed_precision; /**< Use mixed precision in case of FP16 execution. Defaults to true */
+};
+
+struct GEMMLowpReductionKernelInfo
+{
+    /** Default constructor */
+    GEMMLowpReductionKernelInfo() = default;
+    /** Constructor
+     *
+     * @param[in] k             Number of matrix columns/rows.
+     * @param[in] is_reshaped   True if the input tensor has been reshaped.
+     * @param[in] scalar        Scalar value to multiply each reduced column/row by.
+     * @param[in] mul_by_scalar True if each column/row reduction has to be multiplied by a scalar value.
+     */
+    GEMMLowpReductionKernelInfo(int32_t k, bool is_reshaped, int32_t scalar, bool mul_by_scalar)
+        : k(k), is_reshaped(is_reshaped), scalar(scalar), mul_by_scalar(mul_by_scalar)
+    {
+    }
+
+    int32_t k{ 0 };                 /**< Number of matrix columns/rows */
+    bool    is_reshaped{ false };   /**< True if the input tensor has been reshaped */
+    int32_t scalar{ 0 };            /**< Scalar value to multiply each reduced column/row by */
+    bool    mul_by_scalar{ false }; /**< True if each column/row reduction has to be multiplied by a scalar value */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */

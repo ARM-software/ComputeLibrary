@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,11 +36,9 @@ class EltwiseLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] op       Element-wise operation to perform
-     * @param[in] c_policy (Optional) Convert policy used for the operation
-     * @param[in] r_policy (Optional) Rounding policy used for the operation
+     * @param[in] descriptor Containing information for the node described in @ref descriptors::EltwiseLayerDescriptor
      */
-    EltwiseLayerNode(EltwiseOperation op, ConvertPolicy c_policy = ConvertPolicy::SATURATE, RoundingPolicy r_policy = RoundingPolicy::TO_ZERO);
+    EltwiseLayerNode(const descriptors::EltwiseLayerDescriptor &descriptor);
     /** Eltwise operation accessor
      *
      * @return Eltwise operation that is to be performed by the node
@@ -59,16 +57,28 @@ public:
      */
     RoundingPolicy rounding_policy() const;
 
+    /** Returns fused activation
+     *
+     * @return Fused activation
+     */
+    ActivationLayerInfo fused_activation() const;
+
+    /** Sets fused activation
+     *
+     * @param[in] fused_activation Fused activation to set
+     */
+    void set_fused_activation(ActivationLayerInfo fused_activation);
+
     // Inherited overridden methods:
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
 
+    static constexpr NodeType node_type = NodeType::EltwiseLayer;
+
 private:
-    EltwiseOperation _op;
-    ConvertPolicy    _convert_policy;
-    RoundingPolicy   _rounding_policy;
+    descriptors::EltwiseLayerDescriptor descriptor;
 };
 } // namespace graph
 } // namespace arm_compute

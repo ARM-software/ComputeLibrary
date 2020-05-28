@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,9 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
 
     if(srcs[0].data_type() == DataType::QASYMM8 && std::any_of(srcs.cbegin(), srcs.cend(), have_different_quantization_info))
     {
+#if defined(_OPENMP)
+        #pragma omp parallel for
+#endif /* _OPENMP */
         for(int b = 0; b < batches; ++b)
         {
             // input tensors can have smaller width and height than the output, so for each output's slice we need to requantize 0 (as this is the value

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "support/StringSupport.h"
 #include <map>
 
 namespace arm_compute
@@ -230,11 +231,16 @@ std::pair<Status, Window> validate_and_configure_window_for_division(ITensorInfo
 } // namespace
 
 CLElementwiseOperationKernel::CLElementwiseOperationKernel()
-    : _input1(nullptr), _input2(nullptr), _output(nullptr)
+    : _act_info(), _input1(nullptr), _input2(nullptr), _output(nullptr)
 {
 }
 
 void CLElementwiseOperationKernel::configure_common(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+{
+    configure_common(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
+}
+
+void CLElementwiseOperationKernel::configure_common(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
@@ -255,9 +261,15 @@ void CLElementwiseOperationKernel::configure_common(const ICLTensor *input1, con
 
     // Set kernel build options
     CLBuildOptions build_opts = generate_build_options(*input1->info(), *input2->info(), *output->info());
+    if(_act_info.enabled())
+    {
+        build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(_act_info.activation())));
+        build_opts.add_option("-DA_VAL=" + float_to_string_with_full_precision(_act_info.a()));
+        build_opts.add_option("-DB_VAL=" + float_to_string_with_full_precision(_act_info.b()));
+    }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     ICLKernel::configure_internal(win_config.second);
 
@@ -319,19 +331,30 @@ BorderSize CLElementwiseOperationKernel::border_size() const
 
 /** Arithmetic operations with saturation*/
 
-void CLSaturatedArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy)
+void CLSaturatedArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy,
+                                                     const ActivationLayerInfo &act_info)
 {
-    _policy = policy;
-    _op     = op;
-    configure_common(input1, input2, output);
+    configure(CLKernelLibrary::get().get_compile_context(), op, input1, input2, output, policy, act_info);
 }
 
-Status CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy)
+void CLSaturatedArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+                                                     const ConvertPolicy       &policy,
+                                                     const ActivationLayerInfo &act_info)
+{
+    _policy   = policy;
+    _op       = op;
+    _act_info = act_info;
+    configure_common(compile_context, input1, input2, output);
+}
+
+Status CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy,
+                                                      const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(op, policy);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_with_arithmetic_rules(*input1, *input2, *output));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_for_arithmetic_operators(*input1->clone(), *input2->clone(), *output->clone()).first);
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled() && !is_data_type_float(output->data_type()));
 
     return Status{};
 }
@@ -368,13 +391,20 @@ std::string CLSaturatedArithmeticOperationKernel::name()
 
 /** Arithmetic operations*/
 
-void CLArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+void CLArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info)
 {
-    _op = op;
-    configure_common(input1, input2, output);
+    configure(CLKernelLibrary::get().get_compile_context(), op, input1, input2, output, act_info);
 }
 
-Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+void CLArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+                                            const ActivationLayerInfo &act_info)
+{
+    _op       = op;
+    _act_info = act_info;
+    configure_common(compile_context, input1, input2, output);
+}
+
+Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
     if(op == ArithmeticOperation::DIV || op == ArithmeticOperation::POWER)
@@ -388,6 +418,7 @@ Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITens
         ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_with_arithmetic_rules(*input1, *input2, *output));
         ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_for_arithmetic_operators(*input1->clone(), *input2->clone(), *output->clone()).first);
     }
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled() && !is_data_type_float(output->data_type()));
 
     return Status{};
 }

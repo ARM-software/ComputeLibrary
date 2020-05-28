@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,14 @@ public:
      * @param[in]  config FFT related configuration
      */
     void configure(const ICLTensor *input, ICLTensor *output, const FFT2DInfo &config);
+    /** Initialise the function's source, destinations and border mode.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: F32.
+     * @param[out] output          Destination tensor. Data types and data layouts supported: Same as @p input.
+     * @param[in]  config          FFT related configuration
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const FFT2DInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFT2D.
      *
      * @param[in] input  Source tensor info. Data types supported: F32.

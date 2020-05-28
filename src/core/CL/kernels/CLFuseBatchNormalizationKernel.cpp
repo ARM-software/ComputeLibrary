@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -109,6 +109,14 @@ void CLFuseBatchNormalizationKernel::configure(const ICLTensor *input_weights, c
                                                const ICLTensor *input_bias, const ICLTensor *bn_beta, const ICLTensor *bn_gamma,
                                                float epsilon, FuseBatchNormalizationType fbn_type)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input_weights, bn_mean, bn_var, fused_weights, fused_bias, input_bias, bn_beta, bn_gamma, epsilon, fbn_type);
+}
+
+void CLFuseBatchNormalizationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var,
+                                               ICLTensor *fused_weights, ICLTensor *fused_bias,
+                                               const ICLTensor *input_bias, const ICLTensor *bn_beta, const ICLTensor *bn_gamma,
+                                               float epsilon, FuseBatchNormalizationType fbn_type)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input_weights, bn_mean, bn_var);
 
     _input_weights = input_weights;
@@ -162,7 +170,7 @@ void CLFuseBatchNormalizationKernel::configure(const ICLTensor *input_weights, c
     build_opts.add_option_if(bn_gamma != nullptr, "-DGAMMA");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("fuse_batchnormalization_layer", build_opts.options()));
+    _kernel = create_kernel(compile_context, "fuse_batchnormalization_layer", build_opts.options());
 }
 
 Status CLFuseBatchNormalizationKernel::validate(const ITensorInfo *input_weights, const ITensorInfo *bn_mean, const ITensorInfo *bn_var,

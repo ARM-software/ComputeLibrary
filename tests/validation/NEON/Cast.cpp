@@ -124,22 +124,6 @@ using NECastToQASYMM8_SIGNEDFixture = CastValidationFixture<Tensor, Accessor, NE
 
 #define CAST_SUITE(NAME, idt, odt, type, dataset, tolerance)                                                                     \
     TEST_SUITE(NAME)                                                                                                             \
-    DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), datasets::ConvertPolicies()),    \
-                   shape, policy)                                                                                                \
-    {                                                                                                                            \
-        Tensor src = create_tensor<Tensor>(shape, idt, 1);                                                                       \
-        Tensor dst = create_tensor<Tensor>(shape, odt, 1);                                                                       \
-        \
-        NECast cast;                                                                                                             \
-        cast.configure(&src, &dst, policy);                                                                                      \
-        \
-        const ValidRegion valid_region = shape_to_valid_region(shape);                                                           \
-        validate(dst.info()->valid_region(), valid_region);                                                                      \
-        \
-        const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();                                         \
-        validate(src.info()->padding(), padding);                                                                                \
-        validate(dst.info()->padding(), padding);                                                                                \
-    }                                                                                                                            \
     FIXTURE_DATA_TEST_CASE(RunSmall, type, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), dataset), \
                                                                                       datasets::ConvertPolicies()))              \
     {                                                                                                                            \

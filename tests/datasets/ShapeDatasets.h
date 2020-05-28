@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -156,7 +156,7 @@ public:
     }
 };
 
-/** Data set containing small tensor shapes. */
+/** Data set containing tiny tensor shapes. */
 class TinyShapes final : public ShapeDataset
 {
 public:
@@ -190,6 +190,25 @@ public:
     }
 };
 
+/** Data set containing pairs of tiny tensor shapes that are broadcast compatible. */
+class TinyShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
+{
+public:
+    TinyShapesBroadcast()
+        : ZipDataset<ShapeDataset, ShapeDataset>(
+              ShapeDataset("Shape0",
+    {
+        TensorShape{ 9U, 9U },
+                     TensorShape{ 10U, 2U, 14U, 2U },
+    }),
+    ShapeDataset("Shape1",
+    {
+        TensorShape{ 9U, 1U, 9U },
+        TensorShape{ 10U },
+    }))
+    {
+    }
+};
 /** Data set containing pairs of small tensor shapes that are broadcast compatible. */
 class SmallShapesBroadcast final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
 {

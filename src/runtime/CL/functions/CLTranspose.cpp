@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
 
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,8 +32,13 @@ using namespace arm_compute;
 
 void CLTranspose::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLTranspose::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLTransposeKernel>();
-    k->configure(input, output);
+    k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }
 

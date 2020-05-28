@@ -1,5 +1,0 @@
-<map id="Tensor" name="Tensor">
-<area shape="rect" id="node1" title="Basic implementation of the tensor interface." alt="" coords="74,80,137,107"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor." alt="" coords="5,5,72,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_memory_manageable.xhtml" title="Interface of an object than can be memory managed." alt="" coords="96,5,251,32"/>
-</map>

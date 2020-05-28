@@ -176,3 +176,7 @@ template class WinogradGEMM<4, 1, 5, 1, WinogradRoots::Integers>::Convolution<fl
 
 template class WinogradGEMM<1, 2, 1, 7, WinogradRoots::Integers>::Convolution<float, float, float, float>;
 template class WinogradGEMM<2, 1, 7, 1, WinogradRoots::Integers>::Convolution<float, float, float, float>;
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template class WinogradGEMM<4, 4, 3, 3, WinogradRoots::Integers>::Convolution<__fp16, __fp16, __fp16, __fp16>;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

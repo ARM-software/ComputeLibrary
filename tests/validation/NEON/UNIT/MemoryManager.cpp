@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
 #include "arm_compute/runtime/PoolManager.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,6 +96,12 @@ protected:
      *
      */
     void configure_common(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    /** Commmon configure function for element-wise operators with no additional options (e.g., Div, Min, Max, SquaredDiff)
+     *
+     */
+    void configure_common(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+
+    ActivationLayerInfo _act_info;
 
 private:
     const ICLTensor *_input1; /**< Source tensor 1 */
@@ -114,25 +120,40 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
      *
-     * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
-     * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor. Data types supported: Same as @p input1.
-     * @param[in] policy Policy to use to handle overflow.
+     * @param[in] op       Arithmetic operation to be executed.
+     * @param[in] input1   First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input2   Second tensor input. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor. Data types supported: Same as @p input1.
+     * @param[in] policy   Policy to use to handle overflow.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy);
+    void configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
+     *
+     * @param[in] compile_context The compile context to be used.
+     * @param[in] op              Arithmetic operation to be executed.
+     * @param[in] input1          First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input2          Second tensor input. Data types supported: Same as @p input1.
+     * @param[in] output          Output tensor. Data types supported: Same as @p input1.
+     * @param[in] policy          Policy to use to handle overflow.
+     * @param[in] act_info        (Optional) Activation layer information in case of a fused activation.
+     */
+    void configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ConvertPolicy &policy,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
      *
-     * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
-     * @param[in] policy Policy to use to handle overflow.
+     * @param[in] op       Arithmetic operation to be executed.
+     * @param[in] input1   First tensor input info. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] policy   Policy to use to handle overflow.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      *
      * @return a Status
      */
-    static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy);
+    static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ConvertPolicy &policy,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
 protected:
     // Inherited methods overridden:
@@ -157,23 +178,36 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
      *
-     * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
-     * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor. Data types supported: Same as @p input1.
+     * @param[in] op       Arithmetic operation to be executed.
+     * @param[in] input1   First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input2   Second tensor input. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor. Data types supported: Same as @p input1.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    void configure(ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
+     *
+     * @param[in] compile_context The compile context to be used.
+     * @param[in] op              Arithmetic operation to be executed.
+     * @param[in] input1          First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input2          Second tensor input. Data types supported: Same as @p input1.
+     * @param[in] output          Output tensor. Data types supported: Same as @p input1.
+     * @param[in] act_info        (Optional) Activation layer information in case of a fused activation.
+     */
+    void configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
      *
-     * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] op       Arithmetic operation to be executed.
+     * @param[in] input1   First tensor input info. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      *
      * @return a Status
      */
-    static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
 protected:
     // Inherited methods overridden:

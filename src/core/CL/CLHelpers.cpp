@@ -384,6 +384,14 @@ cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &ke
     }
 }
 
+cl::Kernel create_kernel(const CLCompileContext &ctx, const std::string &kernel_name, const std::set<std::string> &build_opts)
+{
+    const std::string program_name = CLKernelLibrary::get().get_program_name(kernel_name);
+    std::pair<std::string, bool> kernel_src = CLKernelLibrary::get().get_program(program_name);
+    const std::string kernel_path = CLKernelLibrary::get().get_kernel_path();
+    return static_cast<cl::Kernel>(ctx.create_kernel(kernel_name, program_name, kernel_src.first, kernel_path, build_opts, kernel_src.second));
+}
+
 cl::NDRange create_lws_hint_parallel_implementations(unsigned int input_dimension, unsigned int vector_size)
 {
     const unsigned int width_leftover = input_dimension % vector_size;

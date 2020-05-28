@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,9 @@ SimpleTensor<T> convert_fully_connected_weights(const SimpleTensor<T> &src, cons
     const unsigned int factor_2                  = is_nchw_to_nhwc ? num_channels : num_elems_per_input_plane;
 
     const uint32_t num_elements = src.num_elements();
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates coords_in = index2coords(src.shape(), i);

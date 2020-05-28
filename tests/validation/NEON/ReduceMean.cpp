@@ -44,9 +44,10 @@ namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<float> tolerance_f16(0.03f);   /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
-#endif                                                     // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric quantized type */
+constexpr AbsoluteTolerance<float> tolerance_f16(0.03f); /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
+#endif                                                   // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);    /**< Tolerance value for comparing reference's output against implementation's output for unsigned 8-bit asymmetric quantized type */
+constexpr AbsoluteTolerance<int8_t>  tolerance_s8(1);    /**< Tolerance value for comparing reference's output against implementation's output for signed 8-bit asymmetric quantized type */
 
 const auto axis_keep = combine(framework::dataset::make("Axis", { Coordinates(0), Coordinates(1, 0), Coordinates(1, 2), Coordinates(0, 2), Coordinates(1, 3), Coordinates(0, 1, 2, 3) }),
                                framework::dataset::make("KeepDims", { true }));
@@ -162,7 +163,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 5) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_u8);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge,
@@ -171,9 +172,28 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 5) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_u8);
 }
 TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReduceMeanQuantizedFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 127, -10), QuantizationInfo(1.f / 250, -20) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_s8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEReduceMeanQuantizedFixture<int8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), concat(axis_keep, axis_drop)), framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 127, 0) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_s8);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // ReduceMean
 TEST_SUITE_END() // NEON

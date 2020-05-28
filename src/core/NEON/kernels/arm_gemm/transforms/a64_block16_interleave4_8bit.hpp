@@ -38,7 +38,7 @@ void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, in
 
     uint8_t zerobuff[16] = { 0 };
 
-    for (int y=y0; y<ymax; y+=4) {
+    for (uint64_t y = y0 ; y < static_cast<uint64_t>(ymax) ; y+=4) {
         const uint8_t *inptr0 = inptr + y * ldin + k0;
         const uint8_t *inptr1 = inptr0 + ldin;
         const uint8_t *inptr2 = inptr1 + ldin;
@@ -52,7 +52,7 @@ void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, in
         int x=(kmax-k0);
         for (;x>15;x-=16) {
             /* Cope with ragged cases by copying from a buffer of zeroes instead */
-            if ((y + 3) >= ymax) {
+            if ((y + 3) >= static_cast<uint64_t>(ymax)) {
                 switch ((y + 3) - ymax) {
                     /* Everything falls through in here */
                     case 2:
@@ -90,7 +90,7 @@ void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, in
 
         if (x>0) {
             /* Need to duplicate this here, in case we didn't run the main loop. */
-            if ((y + 3) >= ymax) {
+            if ((y + 3) >= static_cast<uint64_t>(ymax)) {
                 switch ((y + 3) - ymax) {
                     /* Everything falls through in here */
                     case 2:

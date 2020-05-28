@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,15 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(ICLTensor *tensor, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
+    /** Initialize the function
+     *
+     * @param[in]     compile_context       The compile context to be used.
+     * @param[in,out] tensor                Source tensor. Data types supported: U8/S16
+     * @param[in]     border_width          The border width
+     * @param[in]     border_mode           Strategy to use for borders.
+     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *tensor, unsigned int border_width, BorderMode border_mode, const PixelValue &constant_border_value = PixelValue());
 };
 }
 #endif /*ARM_COMPUTE_FILLBORDER_H */

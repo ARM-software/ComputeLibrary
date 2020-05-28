@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,17 @@ public:
      * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(ICLTensor *input, ICLTensor *output, const IHOG *hog, BorderMode border_mode, uint8_t constant_border_value = 0);
+    /** Initialise the function's source, destination, HOG data-object and border mode
+     *
+     * @param[in]      compile_context       The compile context to be used.
+     * @param[in, out] input                 Input tensor. Data type supported: U8
+     *                                       (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]     output                Output tensor which stores the HOG descriptor. DataType supported: F32. The number of channels is equal to the number of histogram bins per block
+     * @param[in]      hog                   HOG data object which describes the HOG descriptor
+     * @param[in]      border_mode           Border mode to use.
+     * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const IHOG *hog, BorderMode border_mode, uint8_t constant_border_value = 0);
 
     // Inherited method overridden:
     void run() override;

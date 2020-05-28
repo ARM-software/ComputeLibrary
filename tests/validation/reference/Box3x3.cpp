@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,9 @@ SimpleTensor<T> box3x3(const SimpleTensor<T> &src, BorderMode border_mode, T con
     const std::array<T, 9> filter{ { 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
     const float    scale        = 1.f / static_cast<float>(filter.size());
     const uint32_t num_elements = src.num_elements();
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(uint32_t element_idx = 0; element_idx < num_elements; ++element_idx)
     {
         const Coordinates id = index2coord(src.shape(), element_idx);

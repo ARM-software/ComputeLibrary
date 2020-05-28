@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,7 @@ enum class GemmMethod
     GEMM_NATIVE,
     GEMM_HYBRID,
     GEMM_INTERLEAVED,
+    GEMM_INTERLEAVED_2D,
     QUANTIZE_WRAPPER,
     GEMM_HYBRID_QUANTIZED
 };

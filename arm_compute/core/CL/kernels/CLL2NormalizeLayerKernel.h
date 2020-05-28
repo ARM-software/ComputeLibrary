@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,18 @@ public:
      * @param[in]  epsilon Lower bound value for the normalization.
      */
     void configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: F16/F32. Data layouts supported: NCHW/NHWC.
+     * @param[in]  sum             Sum values tensor. Data types supported: same as @p input.
+     *                             Sum will have the same number of dimensions as input.
+     * @param[out] output          Destination tensor. Data types and data layouts supported: Same as @p input.
+     *                             Output will have the same number of dimensions as input.
+     * @param[in]  axis            Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
+     * @param[in]  epsilon         Lower bound value for the normalization.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayerKernel.
      *

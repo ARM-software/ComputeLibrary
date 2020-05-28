@@ -95,22 +95,22 @@ public:
     BorderSize border_size() const override;
 
 private:
-    template < typename T, typename TW, int S, bool has_biases, bool is_per_channel, typename std::enable_if < std::is_same<T, float>::value
+    template < typename T, typename TW, int S, typename std::enable_if < std::is_same<T, float>::value
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                                                                               || std::is_same<T, float16_t>::value
+                                                                         || std::is_same<T, float16_t>::value
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                                                                                                               ,
-                                                                                                               int >::type = 0 >
-    void run_depthwise(const Window &window);
+                                                                         ,
+                                                                         int >::type = 0 >
+    void run_depthwise(const Window &window, bool has_biases);
 
-    template < typename T, typename TW, int S, bool has_biases, bool is_per_channel, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
-    void run_depthwise(const Window &window);
+    template < typename T, typename TW, int S, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
+    void run_depthwise(const Window &window, bool has_biases);
 
     /** Common signature for all the specialised depthwise convolution native functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using DepthwiseFunctionPtr = void (NEDepthwiseConvolutionLayerNativeKernel::*)(const Window &window);
+    using DepthwiseFunctionPtr = void (NEDepthwiseConvolutionLayerNativeKernel::*)(const Window &window, bool has_biases);
 
     DepthwiseFunctionPtr _func;
     BorderSize           _border_size;
@@ -123,6 +123,7 @@ private:
     Size2D               _dilation;
     std::vector<int>     _output_multiplier;
     std::vector<int>     _output_shift;
+    bool                 _has_biases;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H */

@@ -25,7 +25,6 @@
 #include "arm_compute/core/Helpers.h"
 
 #include "arm_compute/core/Utils.h"
-#include "support/ToolchainSupport.h"
 
 #include <algorithm>
 #include <cmath>
@@ -35,15 +34,7 @@
 #include <string>
 
 using namespace arm_compute;
-#ifndef DOXYGEN_SKIP_THIS
-std::string arm_compute::build_information()
-{
-    static const std::string information =
-#include "arm_compute_version.embed"
-        ;
-    return information;
-}
-#endif /* DOXYGEN_SKIP_THIS */
+
 std::string arm_compute::read_file(const std::string &filename, bool binary)
 {
     std::string   out;
@@ -186,6 +177,8 @@ const std::string &arm_compute::string_from_activation_func(ActivationLayerInfo:
         { ActivationLayerInfo::ActivationFunction::SQUARE, "SQUARE" },
         { ActivationLayerInfo::ActivationFunction::TANH, "TANH" },
         { ActivationLayerInfo::ActivationFunction::IDENTITY, "IDENTITY" },
+        { ActivationLayerInfo::ActivationFunction::HARD_SWISH, "HARD_SWISH" }
+
     };
 
     return act_map[act];
@@ -500,6 +493,7 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
             print_consecutive_elements_impl<uint8_t>(s, ptr, n, stream_width, element_delim);
             break;
         case DataType::S8:
+        case DataType::QSYMM8:
         case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             print_consecutive_elements_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n, stream_width, element_delim);
@@ -518,11 +512,14 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
         case DataType::S32:
             print_consecutive_elements_impl<int32_t>(s, reinterpret_cast<const int32_t *>(ptr), n, stream_width, element_delim);
             break;
-        case DataType::F32:
-            print_consecutive_elements_impl<float>(s, reinterpret_cast<const float *>(ptr), n, stream_width, element_delim);
+        case DataType::BFLOAT16:
+            print_consecutive_elements_impl<bfloat16>(s, reinterpret_cast<const bfloat16 *>(ptr), n, stream_width, element_delim);
             break;
         case DataType::F16:
             print_consecutive_elements_impl<half>(s, reinterpret_cast<const half *>(ptr), n, stream_width, element_delim);
+            break;
+        case DataType::F32:
+            print_consecutive_elements_impl<float>(s, reinterpret_cast<const float *>(ptr), n, stream_width, element_delim);
             break;
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
@@ -537,6 +534,7 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
         case DataType::QASYMM8:
             return max_consecutive_elements_display_width_impl<uint8_t>(s, ptr, n);
         case DataType::S8:
+        case DataType::QSYMM8:
         case DataType::QASYMM8_SIGNED:
         case DataType::QSYMM8_PER_CHANNEL:
             return max_consecutive_elements_display_width_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n);
@@ -550,10 +548,12 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
             return max_consecutive_elements_display_width_impl<uint32_t>(s, reinterpret_cast<const uint32_t *>(ptr), n);
         case DataType::S32:
             return max_consecutive_elements_display_width_impl<int32_t>(s, reinterpret_cast<const int32_t *>(ptr), n);
-        case DataType::F32:
-            return max_consecutive_elements_display_width_impl<float>(s, reinterpret_cast<const float *>(ptr), n);
+        case DataType::BFLOAT16:
+            return max_consecutive_elements_display_width_impl<bfloat16>(s, reinterpret_cast<const bfloat16 *>(ptr), n);
         case DataType::F16:
             return max_consecutive_elements_display_width_impl<half>(s, reinterpret_cast<const half *>(ptr), n);
+        case DataType::F32:
+            return max_consecutive_elements_display_width_impl<float>(s, reinterpret_cast<const float *>(ptr), n);
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
     }

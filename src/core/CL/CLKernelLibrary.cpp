@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Utils.h"
+#include "support/StringSupport.h"
 
 #include <algorithm>
 #include <fstream>
@@ -34,113 +35,6 @@
 #include <vector>
 
 using namespace arm_compute;
-
-CLBuildOptions::CLBuildOptions()
-    : _build_opts()
-{
-}
-
-void CLBuildOptions::add_option(std::string option)
-{
-    _build_opts.emplace(std::move(option));
-}
-
-void CLBuildOptions::add_option_if(bool cond, std::string option)
-{
-    if(cond)
-    {
-        add_option(std::move(option));
-    }
-}
-
-void CLBuildOptions::add_option_if_else(bool cond, std::string option_true, std::string option_false)
-{
-    (cond) ? add_option(std::move(option_true)) : add_option(std::move(option_false));
-}
-
-void CLBuildOptions::add_options(const StringSet &options)
-{
-    _build_opts.insert(options.begin(), options.end());
-}
-
-void CLBuildOptions::add_options_if(bool cond, const StringSet &options)
-{
-    if(cond)
-    {
-        add_options(options);
-    }
-}
-
-const CLBuildOptions::StringSet &CLBuildOptions::options() const
-{
-    return _build_opts;
-}
-
-Program::Program()
-    : _context(), _device(), _is_binary(false), _name(), _source(), _binary()
-{
-}
-
-Program::Program(cl::Context context, std::string name, std::string source)
-    : _context(std::move(context)), _device(), _is_binary(false), _name(std::move(name)), _source(std::move(source)), _binary()
-{
-}
-
-Program::Program(cl::Context context, cl::Device device, std::string name, std::vector<unsigned char> binary)
-    : _context(std::move(context)), _device(std::move(device)), _is_binary(true), _name(std::move(name)), _source(), _binary(std::move(binary))
-{
-}
-
-Program::operator cl::Program() const
-{
-    if(_is_binary)
-    {
-        return cl::Program(_context, { _device }, { _binary });
-    }
-    else
-    {
-        return cl::Program(_context, _source, false);
-    }
-}
-
-bool Program::build(const cl::Program &program, const std::string &build_options)
-{
-    try
-    {
-        return program.build(build_options.c_str()) == CL_SUCCESS;
-    }
-    catch(const cl::Error &e)
-    {
-        cl_int     err        = CL_SUCCESS;
-        const auto build_info = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(&err);
-
-        for(auto &pair : build_info)
-        {
-            std::cerr << pair.second << std::endl;
-        }
-
-        return false;
-    }
-}
-
-cl::Program Program::build(const std::string &build_options) const
-{
-    cl::Program cl_program = static_cast<cl::Program>(*this);
-    build(cl_program, build_options);
-    return cl_program;
-}
-
-Kernel::Kernel()
-    : _name(), _kernel()
-{
-}
-
-Kernel::Kernel(std::string name, const cl::Program &program)
-    : _name(std::move(name)),
-      _kernel(cl::Kernel(program, _name.c_str()))
-{
-}
-
 const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
 {
     { "absdiff", "absdiff.cl" },
@@ -337,10 +231,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
     { "gemmlowp_matrix_a_reduction_dot8", "gemmlowp.cl" },
     { "gemmlowp_matrix_b_reduction", "gemmlowp.cl" },
-    { "gemmlowp_mm_midgard", "gemmlowp.cl" },
     { "gemmlowp_mm_native", "gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_only_rhs_t", "gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_only_rhs_t_fused_output_stage_fixedpoint", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "gemmlowp.cl" },
@@ -431,6 +325,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pooling_layer_MxN_quantized_nhwc", "pooling_layer_quantized.cl" },
     { "pooling_layer_MxN_quantized_nchw", "pooling_layer_quantized.cl" },
     { "prior_box_layer_nchw", "prior_box_layer.cl" },
+    { "qlstm_layer_normalization", "qlstm_layer_normalization.cl" },
     { "quantization_layer", "quantization_layer.cl" },
     { "range", "range.cl" },
     { "range_quantized", "range.cl" },
@@ -929,6 +824,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/prior_box_layer.clembed"
     },
     {
+        "qlstm_layer_normalization.cl",
+#include "./cl_kernels/qlstm_layer_normalization.clembed"
+    },
+    {
         "quantization_layer.cl",
 #include "./cl_kernels/quantization_layer.clembed"
     },
@@ -1064,7 +963,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 };
 
 CLKernelLibrary::CLKernelLibrary()
-    : _context(), _device(), _kernel_path("."), _programs_map(), _built_programs_map()
+    : _compile_context(), _kernel_path()
 {
     opencl_is_available(); // Make sure the OpenCL symbols are initialised *before* the CLKernelLibrary is built
 }
@@ -1075,7 +974,15 @@ CLKernelLibrary &CLKernelLibrary::get()
     return _kernel_library;
 }
 
-Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const StringSet &build_options_set) const
+Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const std::set<std::string> &build_options_set) const
+{
+    const std::string program_name = get_program_name(kernel_name);
+    auto              program      = get_program(program_name);
+
+    return _compile_context.create_kernel(kernel_name, program_name, program.first, _kernel_path, build_options_set, program.second);
+}
+
+std::string CLKernelLibrary::get_program_name(const std::string &kernel_name) const
 {
     // Find which program contains the kernel
     auto kernel_program_it = _kernel_program_map.find(kernel_name);
@@ -1084,99 +991,41 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     {
         ARM_COMPUTE_ERROR_VAR("Kernel %s not found in the CLKernelLibrary", kernel_name.c_str());
     }
-    std::string concat_str;
 
-#if defined(ARM_COMPUTE_DEBUG_ENABLED)
-    // Enable debug properties in CL kernels
-    concat_str += " -DARM_COMPUTE_DEBUG_ENABLED";
-#endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
+    const std::string program_name = kernel_program_it->second;
 
-    GPUTarget gpu_arch = get_arch_from_target(get_target_from_device(_device));
-    concat_str += " -DGPU_ARCH=" + support::cpp11::to_string(
-                      static_cast<std::underlying_type<GPUTarget>::type>(gpu_arch));
-    if(fp16_supported())
-    {
-        concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";
-    }
-
-    if(dot8_supported(_device))
-    {
-        concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ENABLED=1 ";
-    }
-
-    if(dot8_acc_supported(_device))
-    {
-        concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED=1 ";
-    }
-
-    if(get_cl_version(_device) == CLVersion::CL20)
-    {
-        concat_str += " -cl-std=CL2.0 ";
-    }
-    else if(arm_non_uniform_workgroup_supported(_device))
-    {
-        concat_str += " -cl-arm-non-uniform-work-group-size ";
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Non uniform workgroup size is not supported!!");
-    }
-
-    // Check if the program has been built before with same build options.
-    const std::string program_name  = kernel_program_it->second;
-    const std::string build_options = stringify_set(build_options_set) + concat_str;
-
-    const std::string built_program_name = program_name + "_" + build_options;
-    auto              built_program_it   = _built_programs_map.find(built_program_name);
-
-    cl::Program cl_program;
-
-    if(_built_programs_map.end() != built_program_it)
-    {
-        // If program has been built, retrieve to create kernel from it
-        cl_program = built_program_it->second;
-    }
-    else
-    {
-        // Get program
-        Program program = load_program(program_name);
-
-        // Build program
-        cl_program = program.build(build_options);
-
-        // Add built program to internal map
-        _built_programs_map.emplace(built_program_name, cl_program);
-    }
-
-    // Create and return kernel
-    return Kernel(kernel_name, cl_program);
+    return program_name;
 }
 
 void CLKernelLibrary::init(std::string kernel_path, cl::Context context, cl::Device device)
 {
-    _kernel_path = std::move(kernel_path);
-    _context     = std::move(context);
-    _device      = std::move(device);
+    _compile_context = CLCompileContext(context, device);
+    _kernel_path     = kernel_path;
 }
 
 void CLKernelLibrary::set_kernel_path(const std::string &kernel_path)
 {
-    _kernel_path = kernel_path;
+    _kernel_path = std::move(kernel_path);
 }
 
 cl::Context &CLKernelLibrary::context()
 {
-    return _context;
+    return _compile_context.context();
 }
 
-cl::Device &CLKernelLibrary::get_device()
+const cl::Device &CLKernelLibrary::get_device()
 {
-    return _device;
+    return _compile_context.get_device();
 }
 
 void CLKernelLibrary::set_device(cl::Device device)
 {
-    _device = std::move(device);
+    _compile_context.set_device(device);
+}
+
+void CLKernelLibrary::set_context(cl::Context context)
+{
+    _compile_context.set_context(context);
 }
 
 std::string CLKernelLibrary::get_kernel_path()
@@ -1186,117 +1035,32 @@ std::string CLKernelLibrary::get_kernel_path()
 
 void CLKernelLibrary::clear_programs_cache()
 {
-    _programs_map.clear();
-    _built_programs_map.clear();
+    _compile_context.clear_programs_cache();
 }
 
 const std::map<std::string, cl::Program> &CLKernelLibrary::get_built_programs() const
 {
-    return _built_programs_map;
+    return _compile_context.get_built_programs();
 }
 
 void CLKernelLibrary::add_built_program(const std::string &built_program_name, const cl::Program &program)
 {
-    _built_programs_map.emplace(built_program_name, program);
+    _compile_context.add_built_program(built_program_name, program);
 }
 
 bool CLKernelLibrary::fp16_supported() const
 {
-    return ::fp16_supported(_device);
+    return _compile_context.fp16_supported();
 }
 
 bool CLKernelLibrary::int64_base_atomics_supported() const
 {
-    return device_supports_extension(_device, "cl_khr_int64_base_atomics");
+    return _compile_context.int64_base_atomics_supported();
 }
 
-const Program &CLKernelLibrary::load_program(const std::string &program_name) const
+std::pair<std::string, bool> CLKernelLibrary::get_program(const std::string &program_name) const
 {
-    const auto program_it = _programs_map.find(program_name);
-
-    if(program_it != _programs_map.end())
-    {
-        return program_it->second;
-    }
-
-    Program program;
-
 #ifdef EMBEDDED_KERNELS
-    const auto program_source_it = _program_source_map.find(program_name);
-
-    if(_program_source_map.end() == program_source_it)
-    {
-        ARM_COMPUTE_ERROR_VAR("Embedded program for %s does not exist.", program_name.c_str());
-    }
-
-    program = Program(_context, program_name, program_source_it->second);
-#else  /* EMBEDDED_KERNELS */
-    // Check for binary
-    std::string source_name = _kernel_path + program_name;
-    std::string binary_name = source_name + "bin";
-
-    if(std::ifstream(binary_name).is_open())
-    {
-        const std::string program_binary = read_file(binary_name, true);
-        program                          = Program(_context, _device, program_name, std::vector<unsigned char>(program_binary.begin(), program_binary.end()));
-    }
-    else if(std::ifstream(source_name).is_open())
-    {
-        program = Program(_context, program_name, read_file(source_name, false));
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR_VAR("Kernel file %s does not exist.", source_name.c_str());
-    }
-#endif /* EMBEDDED_KERNELS */
-
-    // Insert program to program map
-    const auto new_program = _programs_map.emplace(program_name, std::move(program));
-
-    return new_program.first->second;
-}
-
-void CLKernelLibrary::set_context(cl::Context context)
-{
-    _context = std::move(context);
-    if(_context.get() == nullptr)
-    {
-        _device = cl::Device();
-    }
-    else
-    {
-        const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
-
-        if(cl_devices.empty())
-        {
-            _device = cl::Device();
-        }
-        else
-        {
-            _device = cl_devices[0];
-        }
-    }
-}
-
-std::string CLKernelLibrary::stringify_set(const StringSet &s) const
-{
-    std::string concat_set;
-
-#ifndef EMBEDDED_KERNELS
-    concat_set += "-I" + _kernel_path + " ";
-#endif /* EMBEDDED_KERNELS */
-
-    // Concatenate set
-    for(const auto &el : s)
-    {
-        concat_set += " " + el;
-    }
-
-    return concat_set;
-}
-
-std::string CLKernelLibrary::get_program_source(const std::string &program_name)
-{
     const auto program_source_it = _program_source_map.find(program_name);
 
     if(program_source_it == _program_source_map.end())
@@ -1304,46 +1068,53 @@ std::string CLKernelLibrary::get_program_source(const std::string &program_name)
         ARM_COMPUTE_ERROR_VAR("Embedded program for %s does not exist.", program_name.c_str());
     }
 
-    return program_source_it->second;
+    return std::make_pair(program_source_it->second, false);
+#else  /* EMBEDDED_KERNELS */
+    // Check for binary
+    std::string source_name = _kernel_path + program_name;
+    std::string binary_name = source_name + "bin";
+    std::string program_source{};
+    bool        is_binary = false;
+
+    if(std::ifstream(binary_name).is_open())
+    {
+        program_source = read_file(binary_name, true);
+        is_binary      = true;
+    }
+    else if(std::ifstream(source_name).is_open())
+    {
+        program_source = read_file(source_name, false);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR_VAR("Kernel file %s does not exist.", source_name.c_str());
+    }
+
+    return std::make_pair(program_source, is_binary);
+#endif /* EMBEDDED_KERNELS */
 }
 
 size_t CLKernelLibrary::max_local_workgroup_size(const cl::Kernel &kernel) const
 {
-    size_t result;
-
-    size_t err = kernel.getWorkGroupInfo(_device, CL_KERNEL_WORK_GROUP_SIZE, &result);
-    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetKernelWorkGroupInfo failed to return the maximum workgroup size for the kernel");
-    ARM_COMPUTE_UNUSED(err);
-
-    return result;
+    return _compile_context.max_local_workgroup_size(kernel);
 }
 
 cl::NDRange CLKernelLibrary::default_ndrange() const
 {
-    GPUTarget   _target = get_target_from_device(_device);
-    cl::NDRange default_range;
-
-    switch(_target)
-    {
-        case GPUTarget::MIDGARD:
-        case GPUTarget::T600:
-        case GPUTarget::T700:
-        case GPUTarget::T800:
-            default_range = cl::NDRange(128u, 1);
-            break;
-        default:
-            default_range = cl::NullRange;
-    }
-
-    return default_range;
+    return _compile_context.default_ndrange();
 }
 
 std::string CLKernelLibrary::get_device_version()
 {
-    return _device.getInfo<CL_DEVICE_VERSION>();
+    return _compile_context.get_device_version();
 }
 
 cl_uint CLKernelLibrary::get_num_compute_units()
 {
-    return _device.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
+    return _compile_context.get_num_compute_units();
+}
+
+CLCompileContext &CLKernelLibrary::get_compile_context()
+{
+    return _compile_context;
 }

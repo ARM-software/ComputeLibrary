@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>

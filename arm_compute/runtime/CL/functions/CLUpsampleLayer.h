@@ -60,6 +60,16 @@ public:
      */
     void configure(ICLTensor *input, ICLTensor *output,
                    const Size2D &info, const InterpolationPolicy upsampling_policy);
+    /** Initialize the function's source, destination, interpolation type and border_mode.
+     *
+     * @param[in]  compile_context   The compile context to be used.
+     * @param[in]  input             Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[out] output            Destination tensor. Data types supported: same as @p input.
+     * @param[in]  info              Contains stride information described in @ref Size2D.
+     * @param[in]  upsampling_policy Defines the policy to fill the intermediate pixels.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output,
+                   const Size2D &info, const InterpolationPolicy upsampling_policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayerUpsample
      *
      * @param[in] input             Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.

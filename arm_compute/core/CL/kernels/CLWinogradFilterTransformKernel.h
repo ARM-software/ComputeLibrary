@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,25 @@ public:
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
      */
     void configure(const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info);
+    /** Set the input and output tensor.
+     *
+     * @note Winograd filter transform supports the following configurations for NCWH data layout
+     *       F(output tile, kernel size):F(2x2, 3x3), F(2x1, 3x1), F(1x2, 1x3),
+     *                                   F(4x4, 3x3), F(4x1, 3x1), F(1x4, 1x3),
+     *                                   F(4x4, 5x5), F(4x1, 5x1), F(1x4, 1x5)
+     *
+     * @note Winograd filter transform supports the following configurations for NHWC data layout
+     *       F(output tile, kernel size):F(4x4, 3x3), F(4x1, 3x1), F(1x4, 1x3),
+     *                                   F(4x4, 5x5), F(4x1, 5x1), F(1x4, 1x5)
+     *
+     *       Strides: only unit strides
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout) or [IFM, kernel_x, kernel_y, OFM] (NHWC data layout). Data types supported: F16/F32.
+     * @param[out] output          The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_filter_transform_shape. Data types supported: Same as @p input
+     * @param[in]  winograd_info   Contains Winograd's information described in @ref WinogradInfo
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradFilterTransformKernel
      *
      * @note Winograd filter transform supports the following configurations for NCWH data layout

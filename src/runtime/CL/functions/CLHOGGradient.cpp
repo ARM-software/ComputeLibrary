@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,12 @@ CLHOGGradient::CLHOGGradient(std::shared_ptr<IMemoryManager> memory_manager)
 
 void CLHOGGradient::configure(ICLTensor *input, ICLTensor *output_magnitude, ICLTensor *output_phase, PhaseType phase_type, BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output_magnitude, output_phase, phase_type, border_mode, constant_border_value);
+}
+
+void CLHOGGradient::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output_magnitude, ICLTensor *output_phase, PhaseType phase_type, BorderMode border_mode,
+                              uint8_t constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_magnitude, 1, DataType::S16);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_phase, 1, DataType::U8);
@@ -52,16 +58,16 @@ void CLHOGGradient::configure(ICLTensor *input, ICLTensor *output_magnitude, ICL
     _memory_group.manage(&_gy);
 
     // Initialise derivate kernel
-    _derivative.configure(input, &_gx, &_gy, border_mode, constant_border_value);
+    _derivative.configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
 
     // Initialise magnitude/phase kernel
     if(PhaseType::UNSIGNED == phase_type)
     {
-        _mag_phase.configure(&_gx, &_gy, output_magnitude, output_phase, MagnitudeType::L2NORM, PhaseType::UNSIGNED);
+        _mag_phase.configure(compile_context, &_gx, &_gy, output_magnitude, output_phase, MagnitudeType::L2NORM, PhaseType::UNSIGNED);
     }
     else
     {
-        _mag_phase.configure(&_gx, &_gy, output_magnitude, output_phase, MagnitudeType::L2NORM, PhaseType::SIGNED);
+        _mag_phase.configure(compile_context, &_gx, &_gy, output_magnitude, output_phase, MagnitudeType::L2NORM, PhaseType::SIGNED);
     }
 
     // Allocate intermediate tensors

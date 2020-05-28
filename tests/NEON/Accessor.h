@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,8 +47,6 @@ public:
     Accessor &operator=(const Accessor &) = delete;
     /** Allow instances of this class to be move constructed */
     Accessor(Accessor &&) = default;
-    /** Allow instances of this class to be moved */
-    Accessor &operator=(Accessor &&) = default;
 
     /** Get the tensor data.
      *

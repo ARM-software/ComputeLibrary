@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ public:
     CPPDetectionPostProcessLayer &operator=(const CPPDetectionPostProcessLayer &) = delete;
     /** Configure the detection output layer CPP function
      *
-     * @param[in]  input_box_encoding The bounding box input tensor. Data types supported: F32, QASYMM8.
+     * @param[in]  input_box_encoding The bounding box input tensor. Data types supported: F32/QASYMM8/QASYMM8_SIGNED.
      * @param[in]  input_score        The class prediction input tensor. Data types supported: Same as @p input_box_encoding.
      * @param[in]  input_anchors      The anchors input tensor. Data types supported: Same as @p input_box_encoding.
      * @param[out] output_boxes       The boxes output tensor. Data types supported: F32.
@@ -69,8 +69,8 @@ public:
                    ITensor *output_boxes, ITensor *output_classes, ITensor *output_scores, ITensor *num_detection, DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CPPDetectionPostProcessLayer
      *
-     * @param[in]  input_box_encoding The bounding box input tensor info. Data types supported: F32, QASYMM8.
-     * @param[in]  input_class_score  The class prediction input tensor info. Data types supported: F32, QASYMM8.
+     * @param[in]  input_box_encoding The bounding box input tensor info. Data types supported: F32/QASYMM8/QASYMM8_SIGNED.
+     * @param[in]  input_class_score  The class prediction input tensor info. Data types supported: Same as @p input_box_encoding.
      * @param[in]  input_anchors      The anchors input tensor. Data types supported: F32, QASYMM8.
      * @param[out] output_boxes       The output tensor. Data types supported: F32.
      * @param[out] output_classes     The output tensor. Data types supported: Same as @p output_boxes.

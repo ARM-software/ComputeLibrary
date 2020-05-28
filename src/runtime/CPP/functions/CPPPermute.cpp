@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 
 #include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 

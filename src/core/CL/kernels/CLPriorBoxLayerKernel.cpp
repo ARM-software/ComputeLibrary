@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute::misc::shape_calculator;
 
@@ -101,6 +101,12 @@ CLPriorBoxLayerKernel::CLPriorBoxLayerKernel()
 }
 
 void CLPriorBoxLayerKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min, cl::Buffer *max, cl::Buffer *aspect_ratios)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, info, min, max, aspect_ratios);
+}
+
+void CLPriorBoxLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min,
+                                      cl::Buffer *max, cl::Buffer *aspect_ratios)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
 
@@ -170,7 +176,7 @@ void CLPriorBoxLayerKernel::configure(const ICLTensor *input1, const ICLTensor *
     }
 
     unsigned int idx = num_arguments_per_2D_tensor();
-    _kernel          = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("prior_box_layer_nchw", build_opts.options()));
+    _kernel          = create_kernel(compile_context, "prior_box_layer_nchw", build_opts.options());
 
     _kernel.setArg(idx++, *_min);
     _kernel.setArg(idx++, *_max);

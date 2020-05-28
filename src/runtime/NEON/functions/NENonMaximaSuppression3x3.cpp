@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NENonMaximaSuppression3x3.h"
 
 #include "arm_compute/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 

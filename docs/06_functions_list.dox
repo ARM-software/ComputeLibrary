@@ -66,7 +66,6 @@ namespace arm_compute
         - @ref NEScharr3x3
         - @ref NESelect
         - @ref NESobel3x3
-        - @ref NESplit
         - @ref NEStridedSlice
         - @ref NEWarpAffine
         - @ref NEWarpPerspective
@@ -124,7 +123,6 @@ namespace arm_compute
     - @ref NEDeconvolutionLayer
     - @ref NEDepthwiseConvolutionAssemblyDispatch
     - @ref NEDepthwiseConvolutionLayer
-    - @ref NEDepthwiseConvolutionLayerOptimized
     - @ref NEDequantizationLayer
     - @ref NEDerivative
     - @ref NEDetectionPostProcessLayer
@@ -161,6 +159,7 @@ namespace arm_compute
     - @ref NELocallyConnectedLayer
     - @ref NELSTMLayer
     - @ref NELSTMLayerQuantized
+    - @ref NEQLSTMLayer
     - @ref NEMeanStdDev
     - @ref NEMinMaxLocation
     - @ref NENormalizationLayer
@@ -180,6 +179,7 @@ namespace arm_compute
     - @ref NESoftmaxLayerGeneric &lt;IS_LOG&gt;
     - @ref NESpaceToBatchLayer
     - @ref NESpaceToDepthLayer
+    - @ref NESplit
     - @ref NEStackLayer
     - @ref NEUnstack
     - @ref NEUpsampleLayer
@@ -201,7 +201,6 @@ namespace arm_compute
     - @ref CLDeconvolutionLayerUpsample
     - @ref CLDepthToSpaceLayer
     - @ref CLDepthwiseConvolutionLayer
-    - @ref CLDepthwiseConvolutionLayer3x3
     - @ref CLDequantizationLayer
     - @ref CLDirectConvolutionLayer
     - @ref CLDirectDeconvolutionLayer
@@ -234,6 +233,7 @@ namespace arm_compute
     - @ref CLLocallyConnectedLayer
     - @ref CLLSTMLayer
     - @ref CLLSTMLayerQuantized
+    - @ref CLQLSTMLayer
     - @ref CLMeanStdDev
     - @ref CLMinMaxLocation
     - @ref CLNormalizationLayer

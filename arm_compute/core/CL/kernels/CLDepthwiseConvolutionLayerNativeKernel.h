@@ -68,6 +68,28 @@ public:
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const DWCWeightsKernelInfo &dwc_weights_info,
                    const DWCKernelInfo &dwc_info, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1, const Size2D &dilation = Size2D(1U, 1U),
                    const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
+    /** Initialize the function's source, destination and parameters
+     *
+     * @param[in]  compile_context    The compile context to be used.
+     * @param[in]  input              Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/FP32/FP16. Data layout supported: NHWC
+     * @param[in]  weights            Weights tensor. A 3D tensor with dimensions [IFM, N, M].
+     *                                Data type supported: Same as @p input or QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL when @p input is QASYMM8.
+     * @param[in]  biases             Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                                Data type supported: Same as @p input, S32 when input is QASYMM8/QASYMM8_SIGNED.
+     * @param[out] output             Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  dwc_weights_info   Depthwise convolution layer weights info to retrieve the number of output elements processed by each thread
+     * @param[in]  dwc_info           Depthwise convolution layer info
+     * @param[in]  conv_info          Padding and stride information to use for the convolution.
+     * @param[in]  depth_multiplier   (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]  dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  output_multipliers (Optional) Output multipliers tensor for quantized computations. In case of per-channel quantization,
+     *                                the number of multipliers must be equal to the number of filters (IFM). Supported data types: S32
+     * @param[in]  output_shifts      (Optional) Output shifts tensor for quantized computations. In case of per-channel quantization,
+     *                                the number of multipliers must be equal to the number of filters (IFM). Supported data types: S32
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const DWCWeightsKernelInfo &dwc_weights_info,
+                   const DWCKernelInfo &dwc_info, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1, const Size2D &dilation = Size2D(1U, 1U),
+                   const ICLTensor *output_multipliers = nullptr, const ICLTensor *output_shifts = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayerNativeKernel
      *
      * @param[in] input              Source tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/FP32/FP16. Data layout supported: NHWC

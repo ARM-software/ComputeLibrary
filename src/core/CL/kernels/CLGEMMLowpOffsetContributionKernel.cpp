@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -145,6 +145,13 @@ CLGEMMLowpOffsetContributionKernel::CLGEMMLowpOffsetContributionKernel()
 void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, int32_t k, int32_t a_offset,
                                                    int32_t b_offset)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), mm_result, vector_sum_col, vector_sum_row, bias, k, a_offset, b_offset);
+}
+
+void CLGEMMLowpOffsetContributionKernel::configure(const CLCompileContext &compile_context, ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias,
+                                                   int32_t k, int32_t a_offset,
+                                                   int32_t b_offset)
+{
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result->info(),
@@ -182,7 +189,7 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
     std::string kernel_name("gemmlowp_offset_contribution");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(mm_result->info(),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <vector>
 

@@ -29,7 +29,6 @@
 #include "Profiler.h"
 #include "TestCase.h"
 #include "TestCaseFactory.h"
-#include "TestFilter.h"
 #include "TestResult.h"
 #include "Utils.h"
 #include "instruments/Instruments.h"
@@ -41,11 +40,9 @@
 #include <memory>
 #include <numeric>
 #include <ostream>
-#include <regex>
 #include <set>
 #include <sstream>
 #include <string>
-#include <tuple>
 #include <vector>
 
 namespace arm_compute
@@ -54,6 +51,8 @@ namespace test
 {
 namespace framework
 {
+class TestFilter;
+
 /** Framework configuration structure */
 struct FrameworkConfig
 {
@@ -346,7 +345,7 @@ private:
     std::map<InstrumentsDescription, create_function *> _available_instruments{};
 
     std::set<framework::InstrumentsDescription> _instruments{ std::pair<InstrumentType, ScaleFactor>(InstrumentType::NONE, ScaleFactor::NONE) };
-    TestFilter                                  _test_filter{};
+    std::unique_ptr<TestFilter>                 _test_filter;
     LogLevel                                    _log_level{ LogLevel::ALL };
     const TestInfo                             *_current_test_info{ nullptr };
     TestResult                                 *_current_test_result{ nullptr };

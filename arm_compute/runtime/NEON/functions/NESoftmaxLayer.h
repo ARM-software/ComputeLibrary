@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,28 +65,30 @@ public:
     NESoftmaxLayerGeneric &operator=(NESoftmaxLayerGeneric &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in,out] input  Source tensor. Data types supported: QASYMM8/F16/F32. If the width is not a
+     * @param[in,out] input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32. If the width is not a
      *                       multiple of the internal processing block size, @ref NEFillBorderKernel replicates the
      *                       last value of each row to the nearest multiple.
      * @param[out]    output Destination tensor. Data types supported: same as @p input.
      * @param[in]     beta   (Optional) A scaling factor for the exponent.
-     * @param[in]     axis   (Optional) Reduction axis. Defaults to 1. Must be in range [1, input_num_dimensions).
+     * @param[in]     axis   (Optional) Reduction axis. Defaults to -1.
+     *                       Negative index is used to specify axis from the end (e.g. -1 for the last axis).Must be in range [-input_num_dimensions, input_num_dimensions).
      *                       It has the purpose of squashing the first @p axis dimensions together. For instance, given a [4x4x4x4] image,
      *                       when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
      */
-    void configure(ITensor *input, ITensor *output, float beta = 1.0f, size_t axis = 1);
+    void configure(ITensor *input, ITensor *output, float beta = 1.0f, int32_t axis = -1);
     /** Static function to check if given info will lead to a valid configuration of @ref NESoftmaxLayer
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output Destination tensor info. Data types supported: same as @p input
      * @param[in] beta   (Optional) A scaling factor for the exponent.
-     * @param[in] axis   (Optional) Reduction axis. Defaults to 1. Must be in range [1, input_num_dimensions).
+     * @param[in] axis   (Optional) Reduction axis. Defaults to -1.
+     *                   Negative index is used to specify axis from the end (e.g. -1 for the last axis).Must be in range [-input_num_dimensions, input_num_dimensions).
      *                   It has the purpose of squashing the first @p axis dimensions together. For instance, given a [4x4x4x4] image,
      *                   when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, size_t axis = 1);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, int32_t axis = -1);
 
     // Inherited methods overridden:
     void run() override;
@@ -101,11 +103,12 @@ private:
      *
      * @param[in] input  Original source tensor.
      * @param[in] output Original destination tensor.
-     * @param[in] axis   (Optional) Reduction axis. Defaults to 1. Must be in range [1, input_num_dimensions).
+     * @param[in] axis   (Optional) Reduction axis. Defaults to -1.
+     *                   Negative index is used to specify axis from the end (e.g. -1 for the last axis).Must be in range [-input_num_dimensions, input_num_dimensions).
      *                   It has the purpose of squashing the first @p axis dimensions together. For instance, given a [4x4x4x4] image,
      *                   when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
      */
-    void configure_reshape_input_kernel(const ITensor *input, const ITensor *output, size_t axis);
+    void configure_reshape_input_kernel(const ITensor *input, const ITensor *output, int32_t axis);
 
     MemoryGroup                     _memory_group;
     NELogits1DMaxKernel             _max_kernel;

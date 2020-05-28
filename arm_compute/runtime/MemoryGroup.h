@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,7 @@ class MemoryGroup final : public IMemoryGroup
 {
 public:
     /** Default Constructor */
-    MemoryGroup(IMemoryManager *memory_manager);
-    /** Default Constructor */
-    MemoryGroup(std::shared_ptr<IMemoryManager> = nullptr);
+    MemoryGroup(std::shared_ptr<IMemoryManager> = nullptr) noexcept;
     /** Default destructor */
     ~MemoryGroup() = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -71,8 +69,10 @@ private:
     MemoryMappings                  _mappings;       /**< Memory mappings of the group */
 };
 
-inline MemoryGroup::MemoryGroup(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_manager(memory_manager), _pool(nullptr), _mappings()
+inline MemoryGroup::MemoryGroup(std::shared_ptr<IMemoryManager> memory_manager) noexcept
+    : _memory_manager(memory_manager),
+      _pool(nullptr),
+      _mappings()
 {
 }
 

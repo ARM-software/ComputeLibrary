@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,12 +39,22 @@ CLBatchToSpaceLayer::CLBatchToSpaceLayer()
 
 void CLBatchToSpaceLayer::configure(const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output)
 {
-    _batch_to_space_kernel.configure(input, block_shape, output);
+    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape, output);
+}
+
+void CLBatchToSpaceLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, ICLTensor *output)
+{
+    _batch_to_space_kernel.configure(compile_context, input, block_shape, output);
 }
 
 void CLBatchToSpaceLayer::configure(const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output)
 {
-    _batch_to_space_kernel.configure(input, block_shape_x, block_shape_y, output);
+    configure(CLKernelLibrary::get().get_compile_context(), input, block_shape_x, block_shape_y, output);
+}
+
+void CLBatchToSpaceLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, int32_t block_shape_x, int32_t block_shape_y, ICLTensor *output)
+{
+    _batch_to_space_kernel.configure(compile_context, input, block_shape_x, block_shape_y, output);
 }
 
 Status CLBatchToSpaceLayer::validate(const ITensorInfo *input, const ITensorInfo *block_shape, const ITensorInfo *output)

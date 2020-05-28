@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,8 +46,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
-    ARM_COMPUTE_RETURN_ERROR_ON(min < 0 || min > max);
+    ARM_COMPUTE_RETURN_ERROR_ON(min > max);
 
     // Check biases if exist
     if(bias != nullptr)
@@ -224,7 +223,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     INEKernel::configure(win_config.second);
 
     // Check if we need to clamp the result using min and max
-    const bool is_bounded_relu = ((min != max) && !(min == 0 && max == 255));
+    const bool is_bounded_relu = !(min <= 0 && max >= 255);
     _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<false>;
 }
 

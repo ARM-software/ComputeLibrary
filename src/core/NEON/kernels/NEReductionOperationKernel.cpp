@@ -31,6 +31,7 @@
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/SaturateCast.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -42,6 +43,22 @@ namespace arm_compute
 {
 namespace
 {
+// Helper function that calls vqmovun/vqmvn, vcombine and vstore, allows templating of RedOpYZW_quantized
+template <typename T>
+void combine_and_store(int16x8_t t1, int16x8_t t2, Iterator &output)
+{
+    if(std::is_same<T, uint8_t>::value)
+    {
+        auto res = wrapper::vcombine(wrapper::vqmovun(t1), wrapper::vqmovun(t2));
+        wrapper::vstore(output.ptr(), res);
+    }
+    else
+    {
+        auto res = wrapper::vcombine(wrapper::vqmovn(t1), wrapper::vqmovn(t2));
+        wrapper::vstore(reinterpret_cast<int8_t *>(output.ptr()), res);
+    }
+}
+
 template <typename T>
 uint32x4x4_t calculate_index(uint32_t idx, T a, T b, uint32x4x4_t c, ReductionOperation op, int axis)
 {
@@ -65,8 +82,8 @@ uint32x4x4_t calculate_index(uint32_t idx, T a, T b, uint32x4x4_t c, ReductionOp
     return res;
 }
 
-template <>
-uint32x4x4_t calculate_index(uint32_t idx, uint8x16_t a, uint8x16_t b, uint32x4x4_t c, ReductionOperation op, int axis)
+template <typename T>
+uint32x4x4_t calculate_index_quantized(uint32_t idx, T a, T b, uint32x4x4_t c, ReductionOperation op, int axis)
 {
     uint32x4x4_t mask{ { 0 } };
     uint8x16_t   mask_u8{ 0 };
@@ -112,29 +129,46 @@ uint32x4x4_t calculate_index(uint32_t idx, uint8x16_t a, uint8x16_t b, uint32x4x
 }
 
 // Helper function to calculate the minimum value of the input vector. All the elements in the output vector contain the min value.
-float32x2_t calculate_min(float32x4_t in)
+template <typename T>
+inline typename std::enable_if < std::is_same<T, float32x4_t>::value || std::is_same<T, int32x4_t>::value,
+       typename std::conditional<std::is_same<T, float32x4_t>::value, float32x2_t, int32x2_t>::type >::type
+       calculate_min(T in)
 {
     auto pmin = wrapper::vpmin(wrapper::vgethigh(in), wrapper::vgetlow(in));
     return wrapper::vpmin(pmin, pmin);
 }
 
+// Helper function to calculate the minimum value of the input vector. All the elements in the output vector contain the min value.
+template <typename T>
+inline typename std::enable_if < std::is_same<T, uint8x16_t>::value || std::is_same<T, int8x16_t>::value,
+       typename std::conditional<std::is_same<T, uint8x16_t>::value, uint8x8_t, int8x8_t>::type >::type
+       calculate_min(T in)
+{
+    auto pmin = wrapper::vpmin(wrapper::vgethigh(in), wrapper::vgetlow(in));
+    pmin      = wrapper::vpmin(pmin, pmin);
+    pmin      = wrapper::vpmin(pmin, pmin);
+    return wrapper::vpmin(pmin, pmin);
+}
+
 // Helper function to calculate the maximum value of the input vector. All the elements in the output vector contain the max value.
-float32x2_t calculate_max(float32x4_t in)
+template <typename T>
+inline typename std::enable_if < std::is_same<T, float32x4_t>::value || std::is_same<T, int32x4_t>::value,
+       typename std::conditional<std::is_same<T, float32x4_t>::value, float32x2_t, int32x2_t>::type >::type
+       calculate_max(T in)
 {
     auto pmax = wrapper::vpmax(wrapper::vgethigh(in), wrapper::vgetlow(in));
     return wrapper::vpmax(pmax, pmax);
 }
-// Helper function to calculate the minimum value of the input vector. All the elements in the output vector contain the min value.
-int32x2_t calculate_min(int32x4_t in)
-{
-    auto pmin = wrapper::vpmin(wrapper::vgethigh(in), wrapper::vgetlow(in));
-    return wrapper::vpmin(pmin, pmin);
-}
 
 // Helper function to calculate the maximum value of the input vector. All the elements in the output vector contain the max value.
-int32x2_t calculate_max(int32x4_t in)
+template <typename T>
+inline typename std::enable_if < std::is_same<T, uint8x16_t>::value || std::is_same<T, int8x16_t>::value,
+       typename std::conditional<std::is_same<T, uint8x16_t>::value, uint8x8_t, int8x8_t>::type >::type
+       calculate_max(T in)
 {
     auto pmax = wrapper::vpmax(wrapper::vgethigh(in), wrapper::vgetlow(in));
+    pmax      = wrapper::vpmax(pmax, pmax);
+    pmax      = wrapper::vpmax(pmax, pmax);
     return wrapper::vpmax(pmax, pmax);
 }
 
@@ -165,25 +199,8 @@ uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, T vec_res_value, Reduc
     return (res - 0xFFFFFFFF);
 }
 
-// Helper function to calculate the minimum value of the input vector. All the elements in the output vector contain the min value.
-inline uint8x8_t calculate_min(uint8x16_t in)
-{
-    auto pmin = wrapper::vpmin(wrapper::vgethigh(in), wrapper::vgetlow(in));
-    pmin      = wrapper::vpmin(pmin, pmin);
-    pmin      = wrapper::vpmin(pmin, pmin);
-    return wrapper::vpmin(pmin, pmin);
-}
-// Helper function to calculate the maximum value of the input vector. All the elements in the output vector contain the max value.
-inline uint8x8_t calculate_max(uint8x16_t in)
-{
-    auto pmax = wrapper::vpmax(wrapper::vgethigh(in), wrapper::vgetlow(in));
-    pmax      = wrapper::vpmax(pmax, pmax);
-    pmax      = wrapper::vpmax(pmax, pmax);
-    return wrapper::vpmax(pmax, pmax);
-}
-
-template <>
-uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, uint8x16_t vec_res_value, ReductionOperation op)
+template <typename T>
+uint32_t calculate_vector_index_quantized(uint32x4x4_t vec_res_idx, T vec_res_value, ReductionOperation op)
 {
     uint32x4x4_t res_idx_mask{ { 0 } };
     uint32x4_t   mask_ones = vdupq_n_u32(0xFFFFFFFF);
@@ -228,6 +245,7 @@ uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, uint8x16_t vec_res_val
 
     return (res - 0xFFFFFFFF);
 }
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <>
 uint32x4x4_t calculate_index(uint32_t idx, float16x8_t a, float16x8_t b, uint32x4x4_t c, ReductionOperation op, int axis)
@@ -540,35 +558,38 @@ struct RedOpX
     }
 };
 
-struct RedOpX_qasymm8
+template <typename T>
+struct RedOpX_quantized
 {
     inline void operator()(Iterator &input, Iterator &output, Window &in_slice, Window &out_slice, const TensorInfo &in_info, const ReductionOperation op)
     {
         ARM_COMPUTE_UNUSED(out_slice);
 
+        using PromotedType = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
+
         const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
 
-        auto vec_res_value1 = vdupq_n_u32(static_cast<uint32_t>(0.f));
-        auto vec_res_value2 = vdupq_n_u32(static_cast<uint32_t>(0.f));
-        auto vec_res_value3 = vdupq_n_u32(static_cast<uint32_t>(0.f));
-        auto vec_res_value4 = vdupq_n_u32(static_cast<uint32_t>(0.f));
+        auto vec_res_value1 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
+        auto vec_res_value2 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
+        auto vec_res_value3 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
+        auto vec_res_value4 = wrapper::vdup_n(static_cast<PromotedType>(0.f), wrapper::traits::vector_128_tag{});
 
         auto vec_res_value1_f = vdupq_n_f32(static_cast<float>(1.f));
         auto vec_res_value2_f = vdupq_n_f32(static_cast<float>(1.f));
         auto vec_res_value3_f = vdupq_n_f32(static_cast<float>(1.f));
         auto vec_res_value4_f = vdupq_n_f32(static_cast<float>(1.f));
 
-        uint8x16_t vec_res_value = { 0 };
+        typename wrapper::traits::neon_vector<T, 16>::type vec_res_value = { 0 };
 
         if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN || op == ReductionOperation::MAX)
         {
-            vec_res_value = wrapper::vdup_n(*input.ptr(), wrapper::traits::vector_128_tag{});
+            vec_res_value = wrapper::vdup_n(*reinterpret_cast<T *>(input.ptr()), wrapper::traits::vector_128_tag{});
         }
 
         uint32x4x4_t vec_res_idx{ { 0 } };
         execute_window_loop(in_slice, [&](const Coordinates & id)
         {
-            const auto vec_elements = wrapper::vloadq(input.ptr());
+            const auto vec_elements = wrapper::vloadq(reinterpret_cast<T *>(input.ptr()));
             switch(op)
             {
                 case ReductionOperation::SUM:
@@ -593,18 +614,18 @@ struct RedOpX_qasymm8
                     const auto offset32x4f_4 = vdupq_n_f32(iq_info.offset);
                     const auto scale32x4f_4  = vdupq_n_f32(iq_info.scale);
 
-                    const auto temp16x8t_1 = vmovl_u8(vget_low_u8(vec_elements));
-                    const auto temp16x8t_2 = vmovl_u8(vget_high_u8(vec_elements));
+                    const auto temp16x8t_1 = wrapper::vmovl(wrapper::vgetlow(vec_elements));
+                    const auto temp16x8t_2 = wrapper::vmovl(wrapper::vgethigh(vec_elements));
 
-                    const auto temp32x4t_1 = vmovl_u16(vget_low_u16(temp16x8t_1));
-                    const auto temp32x4t_2 = vmovl_u16(vget_high_u16(temp16x8t_1));
-                    const auto temp32x4t_3 = vmovl_u16(vget_low_u16(temp16x8t_2));
-                    const auto temp32x4t_4 = vmovl_u16(vget_high_u16(temp16x8t_2));
+                    const auto temp32x4t_1 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_1));
+                    const auto temp32x4t_2 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_1));
+                    const auto temp32x4t_3 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_2));
+                    const auto temp32x4t_4 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_2));
 
-                    auto temp32x4f_1 = vcvtq_f32_u32(temp32x4t_1);
-                    auto temp32x4f_2 = vcvtq_f32_u32(temp32x4t_2);
-                    auto temp32x4f_3 = vcvtq_f32_u32(temp32x4t_3);
-                    auto temp32x4f_4 = vcvtq_f32_u32(temp32x4t_4);
+                    auto temp32x4f_1 = wrapper::vcvt<float>(temp32x4t_1);
+                    auto temp32x4f_2 = wrapper::vcvt<float>(temp32x4t_2);
+                    auto temp32x4f_3 = wrapper::vcvt<float>(temp32x4t_3);
+                    auto temp32x4f_4 = wrapper::vcvt<float>(temp32x4t_4);
 
                     //de-quantize vec_elements
                     temp32x4f_1 = vmulq_f32(vsubq_f32(temp32x4f_1, offset32x4f_4), scale32x4f_4);
@@ -621,14 +642,14 @@ struct RedOpX_qasymm8
                 case ReductionOperation::ARG_IDX_MIN:
                 {
                     auto temp_vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
-                    vec_res_idx             = calculate_index(id.x(), temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
+                    vec_res_idx             = calculate_index_quantized(id.x(), temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
                     vec_res_value           = temp_vec_res_value;
                     break;
                 }
                 case ReductionOperation::ARG_IDX_MAX:
                 {
                     auto temp_vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
-                    vec_res_idx             = calculate_index(id.x(), temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
+                    vec_res_idx             = calculate_index_quantized(id.x(), temp_vec_res_value, vec_res_value, vec_res_idx, op, 0);
                     vec_res_value           = temp_vec_res_value;
                     break;
                 }
@@ -653,18 +674,18 @@ struct RedOpX_qasymm8
             case ReductionOperation::ARG_IDX_MIN:
             case ReductionOperation::ARG_IDX_MAX:
             {
-                auto res                                      = calculate_vector_index(vec_res_idx, vec_res_value, op);
-                *(reinterpret_cast<uint32_t *>(output.ptr())) = res;
+                auto res                                          = calculate_vector_index_quantized(vec_res_idx, vec_res_value, op);
+                *(reinterpret_cast<PromotedType *>(output.ptr())) = res;
                 break;
             }
             case ReductionOperation::MIN:
             {
-                *(output.ptr()) = static_cast<uint8_t>(wrapper::vgetlane(calculate_min(vec_res_value), 0));
+                *(output.ptr()) = static_cast<T>(wrapper::vgetlane(calculate_min(vec_res_value), 0));
                 break;
             }
             case ReductionOperation::MAX:
             {
-                *(output.ptr()) = static_cast<uint8_t>(wrapper::vgetlane(calculate_max(vec_res_value), 0));
+                *(output.ptr()) = static_cast<T>(wrapper::vgetlane(calculate_max(vec_res_value), 0));
                 break;
             }
             case ReductionOperation::PROD:
@@ -679,8 +700,16 @@ struct RedOpX_qasymm8
                 res *= wrapper::vgetlane(carry_res, 3);
 
                 //re-quantize result
-                res             = quantize_qasymm8(res, iq_info);
-                *(output.ptr()) = static_cast<uint8_t>(res);
+                if(std::is_same<T, uint8_t>::value)
+                {
+                    res = quantize_qasymm8(res, iq_info);
+                }
+                else
+                {
+                    res = quantize_qasymm8_signed(res, iq_info);
+                }
+
+                *reinterpret_cast<T *>(output.ptr()) = static_cast<T>(res);
                 break;
             }
             default:
@@ -695,15 +724,14 @@ struct RedOpX_qasymm8
 
                 if(op == ReductionOperation::MEAN_SUM)
                 {
-                    res /= in_info.dimension(0);
+                    res /= static_cast<int32_t>(in_info.dimension(0));
                 }
                 else
                 {
                     // Subtract accumulated offsets
                     res -= (in_info.dimension(0) - 1) * iq_info.offset;
                 }
-
-                *(output.ptr()) = utils::cast::saturate_cast<uint8_t>(res);
+                *reinterpret_cast<T *>(output.ptr()) = utils::cast::saturate_cast<T>(res);
             }
         }
     }
@@ -873,33 +901,36 @@ struct RedOpYZW_complex
     }
 };
 
-struct RedOpYZW_qasymm8
+template <typename T>
+struct RedOpYZW_quantized
 {
     inline void operator()(Iterator &input, Iterator &output, Window &in_slice, Window &out_slice, const TensorInfo &in_info, int axis, const ReductionOperation op)
     {
         ARM_COMPUTE_UNUSED(out_slice);
+
+        using PromotedType = typename wrapper::traits::promote<typename wrapper::traits::promote<T>::type>::type;
 
         const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
 
         execute_window_loop(in_slice, [&](const Coordinates &)
         {
             uint32x4x4_t vec_res_idx{ { 0 } };
-            auto         vec_res_value1 = wrapper::vdup_n(static_cast<uint32_t>(0), wrapper::traits::vector_128_tag{});
-            auto         vec_res_value2 = wrapper::vdup_n(static_cast<uint32_t>(0), wrapper::traits::vector_128_tag{});
-            auto         vec_res_value3 = wrapper::vdup_n(static_cast<uint32_t>(0), wrapper::traits::vector_128_tag{});
-            auto         vec_res_value4 = wrapper::vdup_n(static_cast<uint32_t>(0), wrapper::traits::vector_128_tag{});
+            auto         vec_res_value1 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+            auto         vec_res_value2 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+            auto         vec_res_value3 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
+            auto         vec_res_value4 = wrapper::vdup_n(static_cast<PromotedType>(0), wrapper::traits::vector_128_tag{});
 
             auto vec_res_value1_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
             auto vec_res_value2_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
             auto vec_res_value3_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
             auto vec_res_value4_f = wrapper::vdup_n(static_cast<float>(1), wrapper::traits::vector_128_tag{});
 
-            auto vec_res_value = wrapper::vloadq(input.ptr());
+            auto vec_res_value = wrapper::vloadq(reinterpret_cast<T *>(input.ptr()));
 
             for(unsigned int index_dim = 0; index_dim < in_info.dimension(axis); ++index_dim)
             {
-                const uint8_t *in_ptr       = input.ptr() + in_info.strides_in_bytes()[axis] * index_dim;
-                const auto     vec_elements = wrapper::vloadq(in_ptr);
+                const T   *in_ptr       = reinterpret_cast<T *>(input.ptr()) + in_info.strides_in_bytes()[axis] * index_dim;
+                const auto vec_elements = wrapper::vloadq(in_ptr);
                 switch(op)
                 {
                     case ReductionOperation::SUM:
@@ -932,10 +963,10 @@ struct RedOpYZW_qasymm8
                         const auto temp32x4t_3 = wrapper::vmovl(wrapper::vgetlow(temp16x8t_2));
                         const auto temp32x4t_4 = wrapper::vmovl(wrapper::vgethigh(temp16x8t_2));
 
-                        auto temp32x4f_1 = vcvtq_f32_u32(temp32x4t_1);
-                        auto temp32x4f_2 = vcvtq_f32_u32(temp32x4t_2);
-                        auto temp32x4f_3 = vcvtq_f32_u32(temp32x4t_3);
-                        auto temp32x4f_4 = vcvtq_f32_u32(temp32x4t_4);
+                        auto temp32x4f_1 = wrapper::vcvt<float>(temp32x4t_1);
+                        auto temp32x4f_2 = wrapper::vcvt<float>(temp32x4t_2);
+                        auto temp32x4f_3 = wrapper::vcvt<float>(temp32x4t_3);
+                        auto temp32x4f_4 = wrapper::vcvt<float>(temp32x4t_4);
 
                         //de-quantize vec_elements
                         temp32x4f_1 = wrapper::vmul(wrapper::vsub(temp32x4f_1, offset32x4f_4), scale32x4f_4);
@@ -952,14 +983,14 @@ struct RedOpYZW_qasymm8
                     case ReductionOperation::ARG_IDX_MIN:
                     {
                         auto temp_vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
-                        vec_res_idx             = calculate_index(index_dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                        vec_res_idx             = calculate_index_quantized(index_dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
                         vec_res_value           = temp_vec_res_value;
                         break;
                     }
                     case ReductionOperation::ARG_IDX_MAX:
                     {
                         auto temp_vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
-                        vec_res_idx             = calculate_index(index_dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
+                        vec_res_idx             = calculate_index_quantized(index_dim, temp_vec_res_value, vec_res_value, vec_res_idx, op, axis);
                         vec_res_value           = temp_vec_res_value;
                         break;
                     }
@@ -981,15 +1012,15 @@ struct RedOpYZW_qasymm8
             if(op == ReductionOperation::MEAN_SUM)
             {
                 const auto vec_width_inv = wrapper::vinv(wrapper::vdup_n(static_cast<float>(in_info.dimension(axis)), wrapper::traits::vector_128_tag{}));
-                vec_res_value1_f         = wrapper::vmul(vcvtq_f32_u32(vec_res_value1), vec_width_inv);
-                vec_res_value2_f         = wrapper::vmul(vcvtq_f32_u32(vec_res_value2), vec_width_inv);
-                vec_res_value3_f         = wrapper::vmul(vcvtq_f32_u32(vec_res_value3), vec_width_inv);
-                vec_res_value4_f         = wrapper::vmul(vcvtq_f32_u32(vec_res_value4), vec_width_inv);
+                vec_res_value1_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value1), vec_width_inv);
+                vec_res_value2_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value2), vec_width_inv);
+                vec_res_value3_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value3), vec_width_inv);
+                vec_res_value4_f         = wrapper::vmul(wrapper::vcvt<float>(vec_res_value4), vec_width_inv);
 
-                vec_res_value1 = vcvtq_u32_f32(vec_res_value1_f);
-                vec_res_value2 = vcvtq_u32_f32(vec_res_value2_f);
-                vec_res_value3 = vcvtq_u32_f32(vec_res_value3_f);
-                vec_res_value4 = vcvtq_u32_f32(vec_res_value4_f);
+                vec_res_value1 = wrapper::vcvt<T>(vec_res_value1_f);
+                vec_res_value2 = wrapper::vcvt<T>(vec_res_value2_f);
+                vec_res_value3 = wrapper::vcvt<T>(vec_res_value3_f);
+                vec_res_value4 = wrapper::vcvt<T>(vec_res_value4_f);
             }
             else if(op == ReductionOperation::PROD)
             {
@@ -1002,10 +1033,10 @@ struct RedOpYZW_qasymm8
                 vec_res_value3_f = wrapper::vadd(wrapper::vmul(vec_res_value3_f, iscale32x4f_4), offset32x4f_4);
                 vec_res_value4_f = wrapper::vadd(wrapper::vmul(vec_res_value4_f, iscale32x4f_4), offset32x4f_4);
 
-                vec_res_value1 = vcvtq_u32_f32(vec_res_value1_f);
-                vec_res_value2 = vcvtq_u32_f32(vec_res_value2_f);
-                vec_res_value3 = vcvtq_u32_f32(vec_res_value3_f);
-                vec_res_value4 = vcvtq_u32_f32(vec_res_value4_f);
+                vec_res_value1 = wrapper::vcvt<T>(vec_res_value1_f);
+                vec_res_value2 = wrapper::vcvt<T>(vec_res_value2_f);
+                vec_res_value3 = wrapper::vcvt<T>(vec_res_value3_f);
+                vec_res_value4 = wrapper::vcvt<T>(vec_res_value4_f);
             }
 
             if(op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX)
@@ -1015,9 +1046,9 @@ struct RedOpYZW_qasymm8
                 wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 8, vec_res_idx.val[2]);
                 wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 12, vec_res_idx.val[3]);
             }
-            else if(op == ReductionOperation::ARG_IDX_MIN)
+            else if(op == ReductionOperation::MIN || op == ReductionOperation::MAX)
             {
-                wrapper::vstore(output.ptr(), vec_res_value);
+                wrapper::vstore(reinterpret_cast<T *>(output.ptr()), vec_res_value);
             }
             else
             {
@@ -1026,10 +1057,10 @@ struct RedOpYZW_qasymm8
                     // Subtract offsets
                     auto offsets = vdupq_n_s32((in_info.dimension(axis) - 1) * iq_info.offset);
 
-                    auto vec_res_s_value1 = vreinterpretq_s32_u32(vec_res_value1);
-                    auto vec_res_s_value2 = vreinterpretq_s32_u32(vec_res_value2);
-                    auto vec_res_s_value3 = vreinterpretq_s32_u32(vec_res_value3);
-                    auto vec_res_s_value4 = vreinterpretq_s32_u32(vec_res_value4);
+                    auto vec_res_s_value1 = wrapper::vreinterpret(vec_res_value1);
+                    auto vec_res_s_value2 = wrapper::vreinterpret(vec_res_value2);
+                    auto vec_res_s_value3 = wrapper::vreinterpret(vec_res_value3);
+                    auto vec_res_s_value4 = wrapper::vreinterpret(vec_res_value4);
 
                     vec_res_s_value1 = wrapper::vsub(vec_res_s_value1, offsets);
                     vec_res_s_value2 = wrapper::vsub(vec_res_s_value2, offsets);
@@ -1038,15 +1069,16 @@ struct RedOpYZW_qasymm8
 
                     const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_s_value1), wrapper::vqmovn(vec_res_s_value2));
                     const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_s_value3), wrapper::vqmovn(vec_res_s_value4));
-                    auto       res         = wrapper::vcombine(wrapper::vqmovun(temp16x8t_1), wrapper::vqmovun(temp16x8t_2));
-                    wrapper::vstore(output.ptr(), res);
+
+                    combine_and_store<T>(temp16x8t_1, temp16x8t_2, output);
                 }
                 else
                 {
                     const auto temp16x8t_1 = wrapper::vcombine(wrapper::vqmovn(vec_res_value1), wrapper::vqmovn(vec_res_value2));
                     const auto temp16x8t_2 = wrapper::vcombine(wrapper::vqmovn(vec_res_value3), wrapper::vqmovn(vec_res_value4));
                     auto       res         = wrapper::vcombine(wrapper::vqmovn(temp16x8t_1), wrapper::vqmovn(temp16x8t_2));
-                    wrapper::vstore(output.ptr(), res);
+
+                    wrapper::vstore(reinterpret_cast<T *>(output.ptr()), res);
                 }
             }
 
@@ -1088,7 +1120,9 @@ void reduce_op(const Window &window, const ITensor *input, ITensor *output, unsi
             switch(input->info()->data_type())
             {
                 case DataType::QASYMM8:
-                    return Reducer<RedOpX_qasymm8>::reduceX(window, input, output, RedOpX_qasymm8(), op);
+                    return Reducer<RedOpX_quantized<uint8_t>>::reduceX(window, input, output, RedOpX_quantized<uint8_t>(), op);
+                case DataType::QASYMM8_SIGNED:
+                    return Reducer<RedOpX_quantized<int8_t>>::reduceX(window, input, output, RedOpX_quantized<int8_t>(), op);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
                     return Reducer<RedOpX<float16_t, 8>>::reduceX(window, input, output, RedOpX<float16_t, 8>(), op);
@@ -1104,7 +1138,9 @@ void reduce_op(const Window &window, const ITensor *input, ITensor *output, unsi
             switch(input->info()->data_type())
             {
                 case DataType::QASYMM8:
-                    return Reducer<RedOpYZW_qasymm8>::reduceY(window, input, output, RedOpYZW_qasymm8(), op);
+                    return Reducer<RedOpYZW_quantized<uint8_t>>::reduceY(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
+                case DataType::QASYMM8_SIGNED:
+                    return Reducer<RedOpYZW_quantized<int8_t>>::reduceY(window, input, output, RedOpYZW_quantized<int8_t>(), op);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
                     return Reducer<RedOpYZW<float16_t, 8>>::reduceY(window, input, output, RedOpYZW<float16_t, 8>(), op);
@@ -1120,7 +1156,9 @@ void reduce_op(const Window &window, const ITensor *input, ITensor *output, unsi
             switch(input->info()->data_type())
             {
                 case DataType::QASYMM8:
-                    return Reducer<RedOpYZW_qasymm8>::reduceZ(window, input, output, RedOpYZW_qasymm8(), op);
+                    return Reducer<RedOpYZW_quantized<uint8_t>>::reduceZ(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
+                case DataType::QASYMM8_SIGNED:
+                    return Reducer<RedOpYZW_quantized<int8_t>>::reduceZ(window, input, output, RedOpYZW_quantized<int8_t>(), op);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
                     return Reducer<RedOpYZW<float16_t, 8>>::reduceZ(window, input, output, RedOpYZW<float16_t, 8>(), op);
@@ -1136,7 +1174,9 @@ void reduce_op(const Window &window, const ITensor *input, ITensor *output, unsi
             switch(input->info()->data_type())
             {
                 case DataType::QASYMM8:
-                    return Reducer<RedOpYZW_qasymm8>::reduceW(window, input, output, RedOpYZW_qasymm8(), op);
+                    return Reducer<RedOpYZW_quantized<uint8_t>>::reduceW(window, input, output, RedOpYZW_quantized<uint8_t>(), op);
+                case DataType::QASYMM8_SIGNED:
+                    return Reducer<RedOpYZW_quantized<int8_t>>::reduceW(window, input, output, RedOpYZW_quantized<int8_t>(), op);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
                     return Reducer<RedOpYZW<float16_t, 8>>::reduceW(window, input, output, RedOpYZW<float16_t, 8>(), op);
@@ -1162,7 +1202,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 
     if(input->num_channels() == 1)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
     }
     else
     {

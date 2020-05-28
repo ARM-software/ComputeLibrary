@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,9 @@ SimpleTensor<T> yolo_layer(const SimpleTensor<T> &src, const ActivationLayerInfo
     const T b(info.b());
 
     const uint32_t num_elements = src.num_elements();
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(uint32_t i = 0; i < num_elements; ++i)
     {
         const size_t z = index2coord(dst.shape(), i).z() % (num_classes + 5);

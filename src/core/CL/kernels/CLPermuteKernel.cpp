@@ -22,17 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
-
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -51,9 +44,8 @@ TensorShape get_output_shape(const ITensorInfo *input, const PermutationVector &
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output); 
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() < 1 || input->num_dimensions() > 4,
                                     "Permutation upto 4-D input tensor is supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(perm.num_dimensions() < 1 || perm.num_dimensions() > 4,
@@ -77,6 +69,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
 void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, perm);
+}
+
+void CLPermuteKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), perm));
 
@@ -90,7 +87,7 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
     build_opts.add_option("-DDEPTH_IN=" + support::cpp11::to_string(input->info()->dimension(2)));
     // New positions of  width(W), height(H), channel(C) and batch(D) based on permutation vector
     build_opts.add_option("-DP1=" + support::cpp11::to_string((_perm.num_dimensions() >= 1) ? perm[0] : 0));
@@ -98,7 +95,7 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
     build_opts.add_option("-DP3=" + support::cpp11::to_string((_perm.num_dimensions() >= 3) ? perm[2] : 2));
     build_opts.add_option("-DP4=" + support::cpp11::to_string((_perm.num_dimensions() >= 4) ? perm[3] : 3));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute", build_opts.options()));
+    _kernel = create_kernel(compile_context, "permute", build_opts.options());
 
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());

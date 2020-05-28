@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/GPUTarget.h"
-#include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"

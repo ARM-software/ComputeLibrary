@@ -22,18 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/kernels/CLGatherKernel.h"
-
-#include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Window.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 #include <string>
 
@@ -48,7 +40,6 @@ inline Status validate_arguments(const ITensorInfo *input, const ITensorInfo *in
     ARM_COMPUTE_RETURN_ERROR_ON(indices->num_dimensions() > 1);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(actual_axis >= input->num_dimensions());
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     if(output->total_size() != 0)
@@ -88,6 +79,11 @@ CLGatherKernel::CLGatherKernel()
 
 void CLGatherKernel::configure(const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, indices, output, axis);
+}
+
+void CLGatherKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *indices, ICLTensor *output, int axis)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, indices);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), indices->info(), output->info(), axis));
 
@@ -102,13 +98,13 @@ void CLGatherKernel::configure(const ICLTensor *input, const ICLTensor *indices,
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
     build_opts.add_option("-DOUTPUT_DIM_Z=" + support::cpp11::to_string(output->info()->dimension(2)));
     build_opts.add_option("-DINPUT_DIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
     build_opts.add_option("-DAXIS=" + support::cpp11::to_string(_axis));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gather", build_opts.options()));
+    _kernel = create_kernel(compile_context, "gather", build_opts.options());
     ICLKernel::configure_internal(win_config.second);
 }
 

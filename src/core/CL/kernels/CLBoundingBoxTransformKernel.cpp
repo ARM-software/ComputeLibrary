@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -89,6 +90,11 @@ CLBoundingBoxTransformKernel::CLBoundingBoxTransformKernel()
 
 void CLBoundingBoxTransformKernel::configure(const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), boxes, pred_boxes, deltas, info);
+}
+
+void CLBoundingBoxTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *boxes, ICLTensor *pred_boxes, const ICLTensor *deltas, const BoundingBoxTransformInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
     auto_init_if_empty(*pred_boxes->info(), deltas->info()->clone()->set_data_type(boxes->info()->data_type()).set_quantization_info(boxes->info()->quantization_info()));
 
@@ -136,7 +142,7 @@ void CLBoundingBoxTransformKernel::configure(const ICLTensor *boxes, ICLTensor *
 
     // Create kernel
     const std::string kernel_name = (is_quantized) ? "bounding_box_transform_quantized" : "bounding_box_transform";
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Since the number of columns is a multiple of 4 by definition, we don't need to pad the tensor
     const unsigned int num_elems_processed_per_iteration = 4;

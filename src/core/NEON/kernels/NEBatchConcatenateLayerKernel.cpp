@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,12 +37,12 @@
 
 #include <cstdint>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 template <typename T>
-void batch_concat(const ITensor *in, ITensor *out, int batch_offset, const Window &window)
+void batch_concat(const ITensor *in, ITensor *out, unsigned int batch_offset, const Window &window)
 {
     // Offset input
     uint8_t *input_ptr = in->buffer() + in->info()->offset_first_element_in_bytes();
@@ -50,62 +50,81 @@ void batch_concat(const ITensor *in, ITensor *out, int batch_offset, const Windo
     // Offset output
     uint8_t *output_ptr = out->buffer() + out->info()->offset_first_element_in_bytes() + batch_offset * out->info()->strides_in_bytes()[3];
 
-    Iterator input(in, window);
-    Iterator output(out, window);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int  window_step_x  = 16 / out->info()->element_size();
+
+    Window win{ window };
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    win.set(3, Window::Dimension(0, in->info()->tensor_shape()[3], 1));
+
+    Iterator input(in, win);
+    Iterator output(out, win);
 
     const DataType                dt           = in->info()->data_type();
     const UniformQuantizationInfo input_qinfo  = in->info()->quantization_info().uniform();
     const UniformQuantizationInfo output_qinfo = out->info()->quantization_info().uniform();
     if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
-        execute_window_loop(window, [&](const Coordinates &)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto in_ptr  = reinterpret_cast<const uint8_t *>(input_ptr + input.offset());
             const auto out_ptr = reinterpret_cast<uint8_t *>(output_ptr + output.offset());
-            vst1q_u8(out_ptr, vquantize(vdequantize(vld1q_u8(in_ptr), input_qinfo), output_qinfo));
+
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                wrapper::vstore(out_ptr, vquantize(vdequantize(wrapper::vloadq(in_ptr), input_qinfo), output_qinfo));
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                *(out_ptr + x) = quantize_qasymm8(dequantize_qasymm8(*(in_ptr + x), input_qinfo), output_qinfo);
+            }
         },
         input, output);
     }
     else if(dt == DataType::QASYMM8_SIGNED && input_qinfo != output_qinfo)
     {
-        execute_window_loop(window, [&](const Coordinates &)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto in_ptr  = reinterpret_cast<const int8_t *>(input_ptr + input.offset());
             const auto out_ptr = reinterpret_cast<int8_t *>(output_ptr + output.offset());
-            vst1q_s8(out_ptr, vquantize_signed(vdequantize(vld1q_s8(in_ptr), input_qinfo), output_qinfo));
+            int        x       = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                wrapper::vstore(out_ptr, vquantize_signed(vdequantize(wrapper::vloadq(in_ptr), input_qinfo), output_qinfo));
+            }
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                *(out_ptr + x) = quantize_qasymm8_signed(dequantize_qasymm8_signed(*(in_ptr + x), input_qinfo), output_qinfo);
+            }
         },
         input, output);
     }
     else
     {
-        execute_window_loop(window, [&](const Coordinates &)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto in_ptr  = reinterpret_cast<const T *>(input_ptr + input.offset());
             const auto out_ptr = reinterpret_cast<T *>(output_ptr + output.offset());
 
-            wrapper::vstore(out_ptr, wrapper::vloadq(in_ptr));
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                wrapper::vstore(out_ptr + x, wrapper::vloadq(in_ptr + x));
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                *(out_ptr + x) = *(in_ptr + x);
+            }
         },
         input, output);
     }
-}
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int batch_offset, ITensorInfo *output)
-{
-    ARM_COMPUTE_UNUSED(batch_offset);
-
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-
-    // The window needs to be based on input as we copy all the batchs of input
-    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-    win.set(3, Window::Dimension(0, input->tensor_shape()[3], 1));
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
 }
 
 Status validate_arguments(const ITensorInfo *input, unsigned int batch_offset, const ITensorInfo *output)
@@ -163,13 +182,11 @@ void NEBatchConcatenateLayerKernel::configure(const ITensor *input, unsigned int
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), batch_offset, output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-
-    INEKernel::configure(std::get<1>(win_config));
-
-    // Set output valid region
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    Window      win = calculate_max_window(*output->info(), Steps());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    INEKernel::configure(win);
 }
 
 Status NEBatchConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,
@@ -177,7 +194,6 @@ Status NEBatchConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *i
                                                const arm_compute::ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, batch_offset, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), batch_offset, output->clone().get()).first);
     return Status{};
 }
 
@@ -190,3 +206,4 @@ void NEBatchConcatenateLayerKernel::run(const Window &window, const ThreadInfo &
 
     (*_func)(_input, _output, _batch_offset, window);
 }
+} // namespace arm_compute

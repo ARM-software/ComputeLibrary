@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,21 +47,26 @@ SimpleTensor<T> col2im(const SimpleTensor<T> &src, const TensorShape &dst_shape,
     if(num_groups == 1)
     {
         // Batches are on the 3rd dimension of the input tensor
-        int dst_idx = 0;
+#if defined(_OPENMP)
+        #pragma omp parallel for collapse(3)
+#endif /* _OPENMP */
         for(size_t b = 0; b < batches; ++b)
         {
             for(size_t x = 0; x < src_width; ++x)
             {
                 for(size_t y = 0; y < src_height; ++y)
                 {
-                    dst[dst_idx++] = src[coord2index(src.shape(), Coordinates(x, y, b))];
+                    const int dst_idx = y + x * src_height + b * src_height * src_width;
+                    dst[dst_idx]      = src[coord2index(src.shape(), Coordinates(x, y, b))];
                 }
             }
         }
     }
     else
     {
-        int dst_idx = 0;
+#if defined(_OPENMP)
+        #pragma omp parallel for collapse(4)
+#endif /* _OPENMP */
         for(size_t b = 0; b < batches; ++b)
         {
             for(size_t g = 0; g < num_groups; ++g)
@@ -70,7 +75,8 @@ SimpleTensor<T> col2im(const SimpleTensor<T> &src, const TensorShape &dst_shape,
                 {
                     for(size_t y = 0; y < src_height; ++y)
                     {
-                        dst[dst_idx++] = src[coord2index(src.shape(), Coordinates(x, y, g, b))];
+                        const int dst_idx = y + x * src_height + g * src_height * src_width + b * src_height * src_width * num_groups;
+                        dst[dst_idx]      = src[coord2index(src.shape(), Coordinates(x, y, g, b))];
                     }
                 }
             }

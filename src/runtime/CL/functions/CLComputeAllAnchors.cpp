@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,15 +23,20 @@
  */
 #include "arm_compute/runtime/CL/functions/CLComputeAllAnchors.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void CLComputeAllAnchors::configure(const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), anchors, all_anchors, info);
+}
+
+void CLComputeAllAnchors::configure(const CLCompileContext &compile_context, const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)
+{
     // Configure ComputeAllAnchors kernel
     auto k = arm_compute::support::cpp14::make_unique<CLComputeAllAnchorsKernel>();
-    k->configure(anchors, all_anchors, info);
+    k->configure(compile_context, anchors, all_anchors, info);
     _kernel = std::move(k);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input  The input tensor to upsample. Data types supported: F32/F16/QASYMM8
+     * @param[in]  input  The input tensor to upsample. Data types supported: F32/F16/QASYMM8/QASYMM8_SIGNED
      * @param[out] output The output tensor. Data types supported: Same as @p input
      * @param[in]  info   Padding info.
      */

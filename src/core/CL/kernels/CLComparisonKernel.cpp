@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "support/StringSupport.h"
 
 #include <map>
 
@@ -107,6 +108,11 @@ CLComparisonKernel::CLComparisonKernel()
 
 void CLComparisonKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output, operation);
+}
+
+void CLComparisonKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ComparisonOperation operation)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info(), operation));
 
@@ -140,7 +146,7 @@ void CLComparisonKernel::configure(const ICLTensor *input1, const ICLTensor *inp
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts);
 
     ICLKernel::configure_internal(win_config.second);
 

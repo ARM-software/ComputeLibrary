@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,9 @@
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Error.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <cstring>
@@ -402,7 +403,7 @@ unsigned int get_threads_hint()
 {
     unsigned int num_threads_hint = 1;
 
-#ifndef BARE_METAL
+#if !defined(BARE_METAL)
     std::map<std::string, unsigned int> cpu_part_occurrence_map;
 
     // CPU part regex
@@ -447,7 +448,7 @@ unsigned int get_threads_hint()
 
     // Set thread hint
     num_threads_hint = cpu_part_occurrence_map.empty() ? std::thread::hardware_concurrency() : min_common_cores->second;
-#endif /* BARE_METAL */
+#endif /* !defined(BARE_METAL) */
 
     return num_threads_hint;
 }

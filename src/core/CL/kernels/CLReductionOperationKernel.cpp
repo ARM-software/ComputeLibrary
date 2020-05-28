@@ -35,7 +35,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -87,14 +87,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     {
         case 0:
         {
-            if(is_serial_op)
-            {
-                AccessWindowHorizontal input_access(input, 0, input->dimension(0));
-                AccessWindowHorizontal output_access(output, 0, 1);
-                window_changed = update_window_and_padding(win, input_access, output_access);
-                output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
-            }
-            else
+            if(!is_serial_op)
             {
                 const unsigned int     border_width = ((input->dimension(0) % border_val) != 0) ? border_val - input->dimension(0) % border_val : 0;
                 AccessWindowStatic     input_access(input, 0, 0, input->dimension(0) + border_width, 1);
@@ -135,6 +128,11 @@ BorderSize CLReductionOperationKernel::border_size() const
 }
 
 void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, op, width);
+}
+
+void CLReductionOperationKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, unsigned int width)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -234,7 +232,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
         default:
             ARM_COMPUTE_ERROR("Not supported");
     }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reduction_operation_" + kernel_axis_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, "reduction_operation_" + kernel_axis_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(_input->info(), _output->info(), axis, op);
@@ -269,8 +267,11 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
                 Window window_in{ window };
                 window_in.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _input->info()->dimension(0)));
 
-                Window in_slice  = window.first_slice_window_1D();
-                Window out_slice = window.first_slice_window_1D();
+                Window out_window{ window };
+                out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
+
+                Window in_slice  = window_in.first_slice_window_1D();
+                Window out_slice = out_window.first_slice_window_1D();
 
                 do
                 {
@@ -279,7 +280,7 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
                     add_1D_tensor_argument(idx, _output, out_slice);
                     enqueue(queue, *this, in_slice, lws_hint());
                 }
-                while(window_in.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(out_slice));
+                while(window_in.slide_window_slice_1D(in_slice) && out_window.slide_window_slice_1D(out_slice));
             }
             else
             {

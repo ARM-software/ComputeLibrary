@@ -41,11 +41,11 @@ public:
     }
     /** Initialize the union with a pixel value of chosen datatype
      *
-     * @param[in] v        int value.
+     * @param[in] v        value.
      * @param[in] datatype DataType that @p v have to be stored
      * @param[in] qinfo    (Optional) QuantizationInfo to apply in case of quantized data types to @p v
      */
-    PixelValue(int64_t v, DataType datatype, QuantizationInfo qinfo = QuantizationInfo())
+    PixelValue(double v, DataType datatype, QuantizationInfo qinfo = QuantizationInfo())
         : PixelValue()
     {
         switch(datatype)
@@ -57,13 +57,13 @@ public:
                 value.s8 = static_cast<int8_t>(v);
                 break;
             case DataType::QASYMM8:
-                value.u8 = quantize_qasymm8(static_cast<uint8_t>(v), qinfo);
+                value.u8 = quantize_qasymm8(static_cast<float>(v), qinfo);
                 break;
             case DataType::QASYMM8_SIGNED:
-                value.s8 = quantize_qasymm8_signed(static_cast<int8_t>(v), qinfo);
+                value.s8 = quantize_qasymm8_signed(static_cast<float>(v), qinfo);
                 break;
             case DataType::QSYMM8:
-                value.s8 = quantize_qsymm8(static_cast<int8_t>(v), qinfo);
+                value.s8 = quantize_qsymm8(static_cast<float>(v), qinfo);
                 break;
             case DataType::U16:
                 value.u16 = static_cast<uint16_t>(v);
@@ -72,10 +72,10 @@ public:
                 value.s16 = static_cast<int16_t>(v);
                 break;
             case DataType::QASYMM16:
-                value.u16 = quantize_qasymm16(static_cast<uint16_t>(v), qinfo);
+                value.u16 = quantize_qasymm16(static_cast<float>(v), qinfo);
                 break;
             case DataType::QSYMM16:
-                value.s16 = quantize_qsymm16(static_cast<int16_t>(v), qinfo);
+                value.s16 = quantize_qsymm16(static_cast<float>(v), qinfo);
                 break;
             case DataType::U32:
                 value.u32 = static_cast<uint32_t>(v);
@@ -89,6 +89,9 @@ public:
             case DataType::S64:
                 value.s64 = static_cast<int64_t>(v);
                 break;
+            case DataType::BFLOAT16:
+                value.bf16 = static_cast<bfloat16>(v);
+                break;
             case DataType::F16:
                 value.f16 = static_cast<half>(v);
                 break;
@@ -96,10 +99,8 @@ public:
                 value.f32 = static_cast<float>(v);
                 break;
             case DataType::F64:
-                value.f64 = static_cast<double>(v);
-                break;
             default:
-                value.s64 = v;
+                value.f64 = v;
                 break;
         }
     }
@@ -176,6 +177,15 @@ public:
     {
         value.s64 = v;
     }
+    /** Initialize the union with a BFLOAT16 pixel value
+     *
+     * @param[in] v F16 value.
+     */
+    PixelValue(bfloat16 v)
+        : PixelValue()
+    {
+        value.bf16 = v;
+    }
     /** Initialize the union with a F16 pixel value
      *
      * @param[in] v F16 value.
@@ -216,6 +226,7 @@ public:
             double   f64;     /**< Single channel double */
             float    f32;     /**< Single channel float 32 */
             half     f16;     /**< Single channel F16 */
+            bfloat16 bf16;    /**< Single channel brain floating-point number */
             uint8_t  u8;      /**< Single channel U8 */
             int8_t   s8;      /**< Single channel S8 */
             uint16_t u16;     /**< Single channel U16 */
@@ -286,6 +297,14 @@ public:
     void get(int64_t &v) const
     {
         v = value.s64;
+    }
+    /** Interpret the pixel value as a BFLOAT16
+     *
+     * @param[out] v Returned value
+     */
+    void get(bfloat16 &v) const
+    {
+        v = value.bf16;
     }
     /** Interpret the pixel value as a F16
      *

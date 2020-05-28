@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,13 +40,14 @@ SimpleTensor<T> depth_to_space(const SimpleTensor<T> &src, const TensorShape &ds
     ARM_COMPUTE_ERROR_ON(block_shape <= 0);
     SimpleTensor<T> result(dst_shape, src.data_type());
 
-    int        in_pos     = 0;
     const auto width_in   = static_cast<int>(src.shape()[0]);
     const auto height_in  = static_cast<int>(src.shape()[1]);
     const auto channel_in = static_cast<int>(src.shape()[2]);
     const auto batch_in   = static_cast<int>(src.shape()[3]);
     const int  r          = channel_in / (block_shape * block_shape);
-
+#if defined(_OPENMP)
+    #pragma omp parallel for collapse(4)
+#endif /* _OPENMP */
     for(int b = 0; b < batch_in; ++b)
     {
         for(int z = 0; z < channel_in; ++z)
@@ -58,8 +59,8 @@ SimpleTensor<T> depth_to_space(const SimpleTensor<T> &src, const TensorShape &ds
                     const int out_x   = (block_shape * x + (z / r) % block_shape);
                     const int out_y   = (block_shape * y + (z / r) / block_shape);
                     const int out_pos = out_x + dst_shape[0] * out_y + (z % r) * dst_shape[0] * dst_shape[1] + b * dst_shape[0] * dst_shape[1] * dst_shape[2];
+                    const int in_pos  = x + width_in * y + z * width_in * height_in + b * width_in * height_in * channel_in;
                     result[out_pos]   = src[in_pos];
-                    ++in_pos;
                 }
             }
         }

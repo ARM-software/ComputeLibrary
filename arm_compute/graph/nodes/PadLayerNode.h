@@ -36,15 +36,21 @@ class PadLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] padding The padding for each spatial dimension of the input tensor. The pair padding[i]
-     *                    specifies the front and the end padding in the i-th dimension.
+     * @param[in] padding   The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                      specifies the front and the end padding in the i-th dimension.
+     * @param[in] pad_value Padding value to be used. Defaults to 0
      */
-    PadLayerNode(const PaddingList &padding);
+    PadLayerNode(const PaddingList &padding, PixelValue pad_value = PixelValue());
     /** Padding list accessor
      *
      * @return Padding list
      */
     const PaddingList &padding() const;
+    /** Padding value accessor
+     *
+     * @return Padding value
+     */
+    PixelValue pad_value() const;
 
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -54,6 +60,7 @@ public:
 
 private:
     PaddingList _padding;
+    PixelValue  _pad_value;
 };
 } // namespace graph
 } // namespace arm_compute

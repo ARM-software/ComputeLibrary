@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <cmath>
 
@@ -137,6 +137,12 @@ CLWinogradOutputTransformKernel::CLWinogradOutputTransformKernel()
 
 void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, winograd_info, act_info);
+}
+
+void CLWinogradOutputTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info,
+                                                const ActivationLayerInfo &act_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto initialization if not yet initialized
@@ -188,7 +194,7 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
 
     // Create kernel
     std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info.output_tile_size);

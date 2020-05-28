@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,9 @@ SimpleTensor<T> erode(const SimpleTensor<T> &src, BorderMode border_mode, T cons
     SimpleTensor<T> dst(src.shape(), src.data_type());
 
     const uint32_t num_elements = src.num_elements();
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(uint32_t i = 0; i < num_elements; ++i)
     {
         Coordinates coord = index2coord(src.shape(), i);

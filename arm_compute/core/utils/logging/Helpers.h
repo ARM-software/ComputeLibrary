@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_LOGGING_HELPERS_H
 
 #include "arm_compute/core/utils/logging/Types.h"
+#include "support/MemorySupport.h"
 #include "support/ToolchainSupport.h"
 
 #include <cstddef>

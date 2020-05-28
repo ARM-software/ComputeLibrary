@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,6 @@
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
 #include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"
-#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
@@ -48,6 +47,11 @@ CLLaplacianPyramid::CLLaplacianPyramid() // NOLINT
 }
 
 void CLLaplacianPyramid::configure(ICLTensor *input, CLPyramid *pyramid, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, pyramid, output, border_mode, constant_border_value);
+}
+
+void CLLaplacianPyramid::configure(const CLCompileContext &compile_context, ICLTensor *input, CLPyramid *pyramid, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == pyramid);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
@@ -68,18 +72,18 @@ void CLLaplacianPyramid::configure(ICLTensor *input, CLPyramid *pyramid, ICLTens
     _conv_pyr.init(pyramid_info);
 
     // Create Gaussian Pyramid function
-    _gaussian_pyr_function.configure(input, &_gauss_pyr, border_mode, constant_border_value);
+    _gaussian_pyr_function.configure(compile_context, input, &_gauss_pyr, border_mode, constant_border_value);
 
     _convf.resize(_num_levels);
     _subf.resize(_num_levels);
 
     for(unsigned int i = 0; i < _num_levels; ++i)
     {
-        _convf[i].configure(_gauss_pyr.get_pyramid_level(i), _conv_pyr.get_pyramid_level(i), border_mode, constant_border_value);
-        _subf[i].configure(_gauss_pyr.get_pyramid_level(i), _conv_pyr.get_pyramid_level(i), pyramid->get_pyramid_level(i), ConvertPolicy::WRAP);
+        _convf[i].configure(compile_context, _gauss_pyr.get_pyramid_level(i), _conv_pyr.get_pyramid_level(i), border_mode, constant_border_value);
+        _subf[i].configure(compile_context, _gauss_pyr.get_pyramid_level(i), _conv_pyr.get_pyramid_level(i), pyramid->get_pyramid_level(i), ConvertPolicy::WRAP);
     }
 
-    _depth_function.configure(_conv_pyr.get_pyramid_level(_num_levels - 1), output, ConvertPolicy::WRAP, 0);
+    _depth_function.configure(compile_context, _conv_pyr.get_pyramid_level(_num_levels - 1), output, ConvertPolicy::WRAP, 0);
 
     _gauss_pyr.allocate();
     _conv_pyr.allocate();

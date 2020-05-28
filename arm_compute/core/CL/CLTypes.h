@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/GPUTarget.h"
 
+#include <set>
 #include <string>
 
 namespace arm_compute
@@ -47,12 +48,14 @@ enum class CLVersion
 /** OpenCL device options */
 struct CLDeviceOptions
 {
-    std::string name;        /**< Device name */
-    std::string extensions;  /**< List of supported extensions */
-    std::string ddk_version; /**< DDK version */
-    GPUTarget   gpu_target;  /**< GPU target architecture/instance */
-    size_t      num_cores;   /**< Number of cores */
-    size_t      cache_size;  /**< Cache size */
+    std::string           name{};           /**< Device name */
+    std::string           device_version{}; /**< Device version string */
+    std::set<std::string> extensions{};     /**< List of supported extensions */
+    std::string           ddk_version{};    /**< DDK version */
+    GPUTarget             gpu_target{};     /**< GPU target architecture/instance */
+    CLVersion             version{};        /**< Device OpenCL version */
+    size_t                compute_units{};  /**< Number of compute units */
+    size_t                cache_size{};     /**< Cache size */
 };
 
 /** OpenCL quantization data */

@@ -22,19 +22,12 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
-
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Window.h"
-
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/helpers/bit_ops.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -45,7 +38,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
                           int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape().num_dimensions() > 4);
@@ -101,6 +93,13 @@ void CLStridedSliceKernel::configure(const ICLTensor *input, ICLTensor *output,
                                      const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                                      int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+}
+
+void CLStridedSliceKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+                                     const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
+                                     int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), starts, ends, strides, begin_mask, end_mask, shrink_axis_mask));
 
@@ -138,7 +137,7 @@ void CLStridedSliceKernel::configure(const ICLTensor *input, ICLTensor *output,
 
     // Create build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(input->info()->data_type())));
     for(unsigned int i = 0; i < input_shape.num_dimensions(); ++i)
     {
         const bool is_shrink = arm_compute::helpers::bit_ops::is_bit_set(shrink_axis_mask, i);
@@ -156,7 +155,7 @@ void CLStridedSliceKernel::configure(const ICLTensor *input, ICLTensor *output,
                                   "-DDST_DEPTH=1");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("strided_slice", build_opts.options()));
+    _kernel = create_kernel(compile_context, "strided_slice", build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = "strided_slice";

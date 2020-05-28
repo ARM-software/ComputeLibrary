@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,15 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
-
-#include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -40,6 +35,13 @@ CLMemsetKernel::CLMemsetKernel()
 }
 
 void CLMemsetKernel::configure(ICLTensor        *tensor,
+                               const PixelValue &constant_value,
+                               Window           *window)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), tensor, constant_value, window);
+}
+
+void CLMemsetKernel::configure(const CLCompileContext &compile_context, ICLTensor *tensor,
                                const PixelValue &constant_value,
                                Window           *window)
 {
@@ -76,7 +78,7 @@ void CLMemsetKernel::configure(ICLTensor        *tensor,
     build_opts.add_option("-DCONSTANT_VALUE=" + string_from_pixel_value(constant_value, data_type));
     build_opts.add_option_if(multi_access_x, "-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
     build_opts.add_option_if(multi_access_x && remainder_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(output_width_x - vec_size_x, 0)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("memset", build_opts.options()));
+    _kernel = create_kernel(compile_context, "memset", build_opts.options());
 }
 
 Status CLMemsetKernel::validate(const ITensorInfo *tensor, const PixelValue &constant_value, Window *window)

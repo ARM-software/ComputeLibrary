@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>
@@ -62,7 +63,8 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_interleaved_transposed && reshape_info.reinterpret_input_as_3d(), "The input tensor cannot be reinterpreted as 3D if is_interleaved_transposed is true");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 2 && reshape_info.reinterpret_input_as_3d(), "The input1 tensor cannot have more than 2 dimensions if input0 has to be reinterpreted as 3D");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((reshape_info.reinterpret_input_as_3d() || reshape_info.depth_output_gemm3d() != 0) && (input2 != nullptr)
-                                    && (!reshape_info.broadcast_bias()), "Bias addition only supported with broadcast mode in case the input or output has to be reinterpreted as 3D");
+                                    && (!reshape_info.broadcast_bias()),
+                                    "Bias addition only supported with broadcast mode in case the input or output has to be reinterpreted as 3D");
 
     if(!is_interleaved_transposed)
     {
@@ -305,6 +307,12 @@ CLGEMMMatrixMultiplyKernel::CLGEMMMatrixMultiplyKernel()
 void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
                                            bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, bool fp_mixed_precision, const ActivationLayerInfo &activation_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, input2, output, alpha, beta, is_interleaved_transposed, reshape_info, fp_mixed_precision, activation_info);
+}
+
+void CLGEMMMatrixMultiplyKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
+                                           bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info, bool fp_mixed_precision, const ActivationLayerInfo &activation_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
     // Perform validate step
@@ -428,7 +436,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = "gemm_";

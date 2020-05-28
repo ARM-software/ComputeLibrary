@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,6 +92,33 @@ public:
      * @param[out] output_state_out            Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size].Data types supported: Same as @p input.
      */
     void configure(const ICLTensor *input,
+                   const ICLTensor *input_to_input_weights, const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
+                   const ICLTensor *recurrent_to_input_weights, const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
+                   const ICLTensor *input_gate_bias, const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
+                   ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                   ICLTensor *cell_state_out, ICLTensor *output_state_out);
+    /** Initialize function's tensors.
+     *
+     * @param[in]  compile_context             The compile context to be used.
+     * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: QASYMM8.
+     * @param[in]  input_to_input_weights      2D weights tensor with dimensions [input_size, output_size]. Data type supported: Same as @p input.
+     * @param[in]  input_to_forget_weights     2D weights tensor with dimensions [input_size, output_size]. Data type supported: Same as @p input.
+     * @param[in]  input_to_cell_weights       2D weights tensor with dimensions [input_size, output_size]. Data type supported: Same as @p input.
+     * @param[in]  input_to_output_weights     2D weights tensor with dimensions [input_size, output_size]. Data type supported: Same as @p input.
+     * @param[in]  recurrent_to_input_weights  2D weights tensor with dimensions [output_size, output_size]. Data type supported: Same as @p input.
+     * @param[in]  recurrent_to_forget_weights 2D weights tensor with dimensions [output_size, output_size]. Data type supported: Same as @p input.
+     * @param[in]  recurrent_to_cell_weights   2D weights tensor with dimensions [output_size, output_size]. Data type supported: Same as @p input.
+     * @param[in]  recurrent_to_output_weights 2D weights tensor with dimensions [output_size, output_size]. Data type supported: Same as @p input.
+     * @param[in]  input_gate_bias             1D weights tensor with dimensions [output_size]. Data type supported: S32.
+     * @param[in]  forget_gate_bias            1D weights tensor with dimensions [output_size]. Data type supported: S32.
+     * @param[in]  cell_bias                   1D weights tensor with dimensions [output_size]. Data type supported: S32.
+     * @param[in]  output_gate_bias            1D weights tensor with dimensions [output_size]. Data type supported: S32.
+     * @param[in]  cell_state_in               2D tensor with dimensions [output_size, batch_size]. Data type supported:  QSYMM16.
+     * @param[in]  output_state_in             2D tensor with dimensions [output_size, batch_size]. Data type supported: Same as @p input.
+     * @param[out] cell_state_out              Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size]. Data type supported:  QSYMM16.
+     * @param[out] output_state_out            Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size].Data types supported: Same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input,
                    const ICLTensor *input_to_input_weights, const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
                    const ICLTensor *recurrent_to_input_weights, const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
                    const ICLTensor *input_gate_bias, const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,

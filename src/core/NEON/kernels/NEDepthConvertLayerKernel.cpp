@@ -31,8 +31,9 @@
 #include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/SaturateCast.h"
 
-#include <arm_neon.h>
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 
 using namespace arm_compute;
 
@@ -42,11 +43,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_BF16_UNSUPPORTED(output);
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON(input == output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8, DataType::S16, DataType::U16, DataType::F16, DataType::F32, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16,
-                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8,
+                                                         DataType::S16, DataType::U16, DataType::BFLOAT16, DataType::F16,
+                                                         DataType::F32, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::U8,
+                                                         DataType::S16, DataType::U16, DataType::BFLOAT16, DataType::F16,
+                                                         DataType::U32, DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(shift >= 8);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8_SIGNED && (output->data_type() != DataType::S16 && output->data_type() != DataType::S32
@@ -67,15 +73,18 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S16 && (output->data_type() != DataType::QASYMM8_SIGNED && output->data_type() != DataType::U8 && output->data_type() != DataType::S32),
                                     "Only data_types supported [in] S16 ->  [out] U8, S32");
 
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::BFLOAT16 && output->data_type() != DataType::F32,
+                                    "Only data_types supported [in] BFLOAT16 ->  [out] F32");
+
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F16 && (output->data_type() != DataType::QASYMM8_SIGNED && output->data_type() != DataType::QASYMM8
                                                                             && output->data_type() != DataType::U8
                                                                             && output->data_type() != DataType::F32 && output->data_type() != DataType::S32),
                                     "Only data_types supported [in] F16 ->  [out] QASYMM8, F32, S32, U8");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F32 && (output->data_type() != DataType::QASYMM8_SIGNED && output->data_type() != DataType::QASYMM8
-                                                                            && output->data_type() != DataType::F16
+                                                                            && output->data_type() != DataType::F16 && output->data_type() != DataType::BFLOAT16
                                                                             && output->data_type() != DataType::S32 && output->data_type() != DataType::U8),
-                                    "Only data_types supported [in] F32 ->  [out] QASYMM8, F16, S32, U8");
+                                    "Only data_types supported [in] F32 ->  [out] QASYMM8, BFLOAT16, F16, S32, U8");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S32 && (output->data_type() != DataType::QASYMM8_SIGNED && output->data_type() != DataType::QASYMM8
                                                                             && output->data_type() != DataType::F16
@@ -89,21 +98,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
     }
 
     return Status{};
-}
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, output->valid_region());
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
 }
 } // namespace
 
@@ -127,16 +121,17 @@ void NEDepthConvertLayerKernel::configure(const ITensor *input, ITensor *output,
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy, shift));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICPPKernel::configure(win_config.second);
+    Window      win = calculate_max_window(*input->info(), Steps());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+
+    ICPPKernel::configure(win);
 }
 
 Status NEDepthConvertLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, policy, shift));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
-
     return Status{};
 }
 
@@ -148,8 +143,15 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
     ARM_COMPUTE_ERROR_ON_NULLPTR(_input, _output);
     ARM_COMPUTE_ERROR_ON(_input == _output);
 
-    Iterator input(_input, window);
-    Iterator output(_output, window);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int  window_step_x  = 16;
+
+    Window win{ window };
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input(_input, win);
+    Iterator output(_output, win);
 
     switch(_input->info()->data_type())
     {
@@ -162,20 +164,33 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::S16:
                 {
                     /* Up-conversion QASYMM8_SIGNED -> S16 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+                        const auto input_ptr  = reinterpret_cast<const int8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
+                        int        x          = window_start_x;
 
-                        const int16x8x2_t texels =
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
-                            {
-                                vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
-                                vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
-                            }
-                        };
+                            const int8x16_t texels_s8 = vld1q_s8(input_ptr + x);
 
-                        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()), texels.val[0]);
-                        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()) + 8, texels.val[1]);
+                            const int16x8x2_t texels =
+                            {
+                                {
+                                    vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
+                                    vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
+                                }
+                            };
+
+                            vst1q_s16(output_ptr + x, texels.val[0]);
+                            vst1q_s16(output_ptr + x + 8, texels.val[1]);
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<int16_t>(*(input_ptr + x) << _shift);
+                        }
                     },
                     input, output);
                     break;
@@ -183,22 +198,35 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::S32:
                 {
                     /* Up-conversion QASYMM8_SIGNED -> S32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+                        const auto input_ptr  = reinterpret_cast<const int8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int32_t *>(output.ptr());
+                        int        x          = window_start_x;
 
-                        const int16x8x2_t texels =
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
-                            {
-                                vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
-                                vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
-                            }
-                        };
+                            const int8x16_t texels_s8 = vld1q_s8(input_ptr + x);
 
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()), vmovl_s16(vget_low_s16(texels.val[0])));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 4, vmovl_s16(vget_high_s16(texels.val[0])));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 8, vmovl_s16(vget_low_s16(texels.val[1])));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 12, vmovl_s16(vget_high_s16(texels.val[1])));
+                            const int16x8x2_t texels =
+                            {
+                                {
+                                    vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
+                                    vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
+                                }
+                            };
+
+                            vst1q_s32(output_ptr + x, vmovl_s16(vget_low_s16(texels.val[0])));
+                            vst1q_s32(output_ptr + x + 4, vmovl_s16(vget_high_s16(texels.val[0])));
+                            vst1q_s32(output_ptr + x + 8, vmovl_s16(vget_low_s16(texels.val[1])));
+                            vst1q_s32(output_ptr + x + 12, vmovl_s16(vget_high_s16(texels.val[1])));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<int32_t>(*(input_ptr + x) << _shift);
+                        }
                     },
                     input, output);
                     break;
@@ -206,21 +234,34 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::F32:
                 {
                     /* Up-conversion QASYMM8_SIGNED -> F32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+                        const auto input_ptr  = reinterpret_cast<const int8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float *>(output.ptr());
 
-                        const int16x8x2_t texels =
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
+                            const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+
+                            const int16x8x2_t texels =
                             {
-                                vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
-                                vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
-                            }
-                        };
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()), vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[0]))));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[0]))));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8, vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[1]))));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[1]))));
+                                {
+                                    vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
+                                    vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
+                                }
+                            };
+                            vst1q_f32(output_ptr + x, vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[0]))));
+                            vst1q_f32(output_ptr + x + 4, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[0]))));
+                            vst1q_f32(output_ptr + x + 8, vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[1]))));
+                            vst1q_f32(output_ptr + x + 12, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[1]))));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<float>(*(input_ptr + x) << _shift);
+                        }
                     },
                     input, output);
                     break;
@@ -229,19 +270,32 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::F16:
                 {
                     /* Up-conversion QASYMM8_SIGNED -> F16 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const int8x16_t texels_s8 = vld1q_s8(reinterpret_cast<int8_t *>(input.ptr()));
+                        const auto input_ptr  = reinterpret_cast<const int8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
+                        int        x          = window_start_x;
 
-                        const int16x8x2_t texels =
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
+                            const int8x16_t texels_s8 = vld1q_s8(input_ptr + x);
+
+                            const int16x8x2_t texels =
                             {
-                                vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
-                                vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
-                            }
-                        };
-                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vcvtq_f16_s16(texels.val[0]));
-                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + 8, vcvtq_f16_s16(texels.val[1]));
+                                {
+                                    vshlq_s16(vmovl_s8(vget_low_s8(texels_s8)), b),
+                                    vshlq_s16(vmovl_s8(vget_high_s8(texels_s8)), b)
+                                }
+                            };
+                            vst1q_f16(output_ptr + x, vcvtq_f16_s16(texels.val[0]));
+                            vst1q_f16(output_ptr + x + 8, vcvtq_f16_s16(texels.val[1]));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<float16_t>(*(input_ptr + x) << _shift);
+                        }
                     },
                     input, output);
                     break;
@@ -264,20 +318,34 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::S16:
                 {
                     /* Up-conversion U8 -> S16 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const uint8x16_t texels_u8 = vld1q_u8(input.ptr());
+                        const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
 
-                        const int16x8x2_t texels =
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
-                            {
-                                vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(texels_u8))), b),
-                                vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(texels_u8))), b)
-                            }
-                        };
+                            const uint8x16_t texels_u8 = vld1q_u8(input_ptr + x);
 
-                        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()), texels.val[0]);
-                        vst1q_s16(reinterpret_cast<int16_t *>(output.ptr()) + 8, texels.val[1]);
+                            const int16x8x2_t texels =
+                            {
+                                {
+                                    vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(texels_u8))), b),
+                                    vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(texels_u8))), b)
+                                }
+                            };
+
+                            vst1q_s16(output_ptr + x, texels.val[0]);
+                            vst1q_s16(output_ptr + x + 8, texels.val[1]);
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            auto in           = static_cast<int32_t>(*(input_ptr + x));
+                            *(output_ptr + x) = in << _shift;
+                        }
                     },
                     input, output);
                     break;
@@ -285,22 +353,36 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::S32:
                 {
                     /* Up-conversion U8 -> S32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const uint8x16_t texels_u8 = vld1q_u8(input.ptr());
+                        const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int32_t *>(output.ptr());
 
-                        const int16x8x2_t texels =
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
-                            {
-                                vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(texels_u8))), b),
-                                vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(texels_u8))), b)
-                            }
-                        };
+                            const uint8x16_t texels_u8 = vld1q_u8(input_ptr + x);
 
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()), vmovl_s16(vget_low_s16(texels.val[0])));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 4, vmovl_s16(vget_high_s16(texels.val[0])));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 8, vmovl_s16(vget_low_s16(texels.val[1])));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 12, vmovl_s16(vget_high_s16(texels.val[1])));
+                            const int16x8x2_t texels =
+                            {
+                                {
+                                    vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(texels_u8))), b),
+                                    vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(texels_u8))), b)
+                                }
+                            };
+
+                            vst1q_s32(output_ptr + x, vmovl_s16(vget_low_s16(texels.val[0])));
+                            vst1q_s32(output_ptr + x + 4, vmovl_s16(vget_high_s16(texels.val[0])));
+                            vst1q_s32(output_ptr + x + 8, vmovl_s16(vget_low_s16(texels.val[1])));
+                            vst1q_s32(output_ptr + x + 12, vmovl_s16(vget_high_s16(texels.val[1])));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            auto in           = static_cast<uint32_t>(*(input_ptr + x));
+                            *(output_ptr + x) = in << _shift;
+                        }
                     },
                     input, output);
                     break;
@@ -308,21 +390,35 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::F32:
                 {
                     /* Up-conversion U8 -> F32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const uint8x16_t texels_u8 = vld1q_u8(input.ptr());
+                        const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float *>(output.ptr());
 
-                        const int16x8x2_t texels =
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
+                            const uint8x16_t texels_u8 = vld1q_u8(input_ptr + x);
+
+                            const int16x8x2_t texels =
                             {
-                                vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(texels_u8))), b),
-                                vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(texels_u8))), b)
-                            }
-                        };
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()), vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[0]))));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[0]))));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8, vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[1]))));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[1]))));
+                                {
+                                    vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(texels_u8))), b),
+                                    vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(texels_u8))), b)
+                                }
+                            };
+                            vst1q_f32(output_ptr + x, vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[0]))));
+                            vst1q_f32(output_ptr + x + 4, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[0]))));
+                            vst1q_f32(output_ptr + x + 8, vcvtq_f32_s32(vmovl_s16(vget_low_s16(texels.val[1]))));
+                            vst1q_f32(output_ptr + x + 12, vcvtq_f32_s32(vmovl_s16(vget_high_s16(texels.val[1]))));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            auto in           = static_cast<uint32_t>(*(input_ptr + x));
+                            *(output_ptr + x) = static_cast<float>(in << _shift);
+                        }
                     },
                     input, output);
                     break;
@@ -331,42 +427,67 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::F16:
                 {
                     /* Up-conversion U8 -> F16 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const uint8x16_t texels_u8 = vld1q_u8(input.ptr());
+                        const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
 
-                        const int16x8x2_t texels =
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
+                            const uint8x16_t texels_u8 = vld1q_u8(input_ptr + x);
+
+                            const int16x8x2_t texels =
                             {
-                                vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(texels_u8))), b),
-                                vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(texels_u8))), b)
-                            }
-                        };
-                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vcvtq_f16_s16(texels.val[0]));
-                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + 8, vcvtq_f16_s16(texels.val[1]));
+                                {
+                                    vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(texels_u8))), b),
+                                    vshlq_s16(vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(texels_u8))), b)
+                                }
+                            };
+                            vst1q_f16(output_ptr + x, vcvtq_f16_s16(texels.val[0]));
+                            vst1q_f16(output_ptr + x + 8, vcvtq_f16_s16(texels.val[1]));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<float16_t>(*(input_ptr + x) << _shift);
+                        }
                     },
                     input, output);
                     break;
                 }
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
                 case DataType::U16:
                 {
                     /* Up-conversion U8 -> U16 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const uint8x16_t texels_u8 = vld1q_u8(input.ptr());
+                        const auto input_ptr  = reinterpret_cast<const uint8_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<uint16_t *>(output.ptr());
 
-                        const uint16x8x2_t texels =
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
-                            {
-                                vshlq_u16(vmovl_u8(vget_low_u8(texels_u8)), b),
-                                vshlq_u16(vmovl_u8(vget_high_u8(texels_u8)), b)
-                            }
-                        };
+                            const uint8x16_t texels_u8 = vld1q_u8(input_ptr + x);
 
-                        vst1q_u16(reinterpret_cast<uint16_t *>(output.ptr()), texels.val[0]);
-                        vst1q_u16(reinterpret_cast<uint16_t *>(output.ptr()) + 8, texels.val[1]);
+                            const uint16x8x2_t texels =
+                            {
+                                {
+                                    vshlq_u16(vmovl_u8(vget_low_u8(texels_u8)), b),
+                                    vshlq_u16(vmovl_u8(vget_high_u8(texels_u8)), b)
+                                }
+                            };
+
+                            vst1q_u16(output_ptr + x, texels.val[0]);
+                            vst1q_u16(output_ptr + x + 8, texels.val[1]);
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<uint16_t>(*(input_ptr + x)) << _shift;
+                        }
                     },
                     input, output);
                     break;
@@ -387,33 +508,59 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     /* Down-conversion S16 -> QASYMM8_SIGNED */
                     if(ConvertPolicy::SATURATE == _policy)
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const int16x8x2_t texels =
-                            {
-                                {
-                                    vqshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr())), b),
-                                    vqshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr()) + 8), b)
-                                }
-                            };
+                            const auto input_ptr  = reinterpret_cast<const int16_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
 
-                            vst1q_s8(reinterpret_cast<int8_t *>(output.ptr()), vcombine_s8(vqmovn_s16(texels.val[0]), vqmovn_s16(texels.val[1])));
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                            {
+                                const int16x8x2_t texels =
+                                {
+                                    {
+                                        vqshlq_s16(vld1q_s16(input_ptr + x), b),
+                                        vqshlq_s16(vld1q_s16(input_ptr + x + 8), b)
+                                    }
+                                };
+
+                                vst1q_s8(output_ptr + x, vcombine_s8(vqmovn_s16(texels.val[0]), vqmovn_s16(texels.val[1])));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = utils::cast::saturate_cast<int8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }
                     else
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const int16x8x2_t texels =
-                            {
-                                {
-                                    vshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr())), b),
-                                    vshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr()) + 8), b)
-                                }
-                            };
+                            const auto input_ptr  = reinterpret_cast<const int16_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
 
-                            vst1q_s8(reinterpret_cast<int8_t *>(output.ptr()), vcombine_s8(vmovn_s16(texels.val[0]), vmovn_s16(texels.val[1])));
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                            {
+                                const int16x8x2_t texels =
+                                {
+                                    {
+                                        vshlq_s16(vld1q_s16(input_ptr + x), b),
+                                        vshlq_s16(vld1q_s16(input_ptr + x + 8), b)
+                                    }
+                                };
+
+                                vst1q_s8(output_ptr + x, vcombine_s8(vmovn_s16(texels.val[0]), vmovn_s16(texels.val[1])));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = static_cast<int8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }
@@ -426,34 +573,60 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     /* Down-conversion S16 -> U8 */
                     if(ConvertPolicy::SATURATE == _policy)
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const int16x8x2_t texels =
-                            {
-                                {
-                                    vqshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr())), b),
-                                    vqshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr()) + 8), b)
-                                }
-                            };
+                            const auto input_ptr  = reinterpret_cast<const int16_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-                            vst1q_u8(output.ptr(), vcombine_u8(vqmovun_s16(texels.val[0]), vqmovun_s16(texels.val[1])));
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                            {
+                                const int16x8x2_t texels =
+                                {
+                                    {
+                                        vqshlq_s16(vld1q_s16(input_ptr + x), b),
+                                        vqshlq_s16(vld1q_s16(input_ptr + x + 8), b)
+                                    }
+                                };
+
+                                vst1q_u8(output_ptr + x, vcombine_u8(vqmovun_s16(texels.val[0]), vqmovun_s16(texels.val[1])));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = utils::cast::saturate_cast<uint8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }
                     else
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const int16x8x2_t texels =
-                            {
-                                {
-                                    vshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr())), b),
-                                    vshlq_s16(vld1q_s16(reinterpret_cast<int16_t *>(input.ptr()) + 8), b)
-                                }
-                            };
+                            const auto input_ptr  = reinterpret_cast<const int16_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-                            vst1q_u8(output.ptr(), vcombine_u8(vmovn_u16(vreinterpretq_u16_s16(texels.val[0])),
-                                                               vmovn_u16(vreinterpretq_u16_s16(texels.val[1]))));
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                            {
+                                const int16x8x2_t texels =
+                                {
+                                    {
+                                        vshlq_s16(vld1q_s16(input_ptr + x), b),
+                                        vshlq_s16(vld1q_s16(input_ptr + x + 8), b)
+                                    }
+                                };
+
+                                vst1q_u8(output_ptr + x, vcombine_u8(vmovn_u16(vreinterpretq_u16_s16(texels.val[0])),
+                                                                     vmovn_u16(vreinterpretq_u16_s16(texels.val[1]))));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = static_cast<uint8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }
@@ -464,30 +637,43 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const int32x4_t b = vdupq_n_s32(_shift);
 
                     /* Up-conversion S16 -> S32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const int16x8x2_t texels =
-                        {
-                            {
-                                vld1q_s16(reinterpret_cast<int16_t *>(input.ptr())),
-                                vld1q_s16(reinterpret_cast<int16_t *>(input.ptr()) + 8)
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const int16_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int32_t *>(output.ptr());
 
-                        const int32x4x4_t texels_s32 =
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
                         {
+                            const int16x8x2_t texels =
                             {
-                                vshlq_s32(vmovl_s16(vget_low_s16(texels.val[0])), b),
-                                vshlq_s32(vmovl_s16(vget_high_s16(texels.val[0])), b),
-                                vshlq_s32(vmovl_s16(vget_low_s16(texels.val[1])), b),
-                                vshlq_s32(vmovl_s16(vget_high_s16(texels.val[1])), b)
-                            }
-                        };
+                                {
+                                    vld1q_s16(input_ptr + x),
+                                    vld1q_s16(input_ptr + x + 8)
+                                }
+                            };
 
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()), texels_s32.val[0]);
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 4, texels_s32.val[1]);
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 8, texels_s32.val[2]);
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 12, texels_s32.val[3]);
+                            const int32x4x4_t texels_s32 =
+                            {
+                                {
+                                    vshlq_s32(vmovl_s16(vget_low_s16(texels.val[0])), b),
+                                    vshlq_s32(vmovl_s16(vget_high_s16(texels.val[0])), b),
+                                    vshlq_s32(vmovl_s16(vget_low_s16(texels.val[1])), b),
+                                    vshlq_s32(vmovl_s16(vget_high_s16(texels.val[1])), b)
+                                }
+                            };
+
+                            vst1q_s32(output_ptr + x, texels_s32.val[0]);
+                            vst1q_s32(output_ptr + x + 4, texels_s32.val[1]);
+                            vst1q_s32(output_ptr + x + 8, texels_s32.val[2]);
+                            vst1q_s32(output_ptr + x + 12, texels_s32.val[3]);
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<int32_t>(*(input_ptr + x) << _shift);
+                        }
                     },
                     input, output);
                     break;
@@ -508,33 +694,60 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     /* Down-conversion U16 -> U8 */
                     if(ConvertPolicy::SATURATE == _policy)
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const uint16x8x2_t texels =
-                            {
-                                {
-                                    vqshlq_u16(vld1q_u16(reinterpret_cast<uint16_t *>(input.ptr())), b),
-                                    vqshlq_u16(vld1q_u16(reinterpret_cast<uint16_t *>(input.ptr()) + 8), b)
-                                }
-                            };
+                            const auto input_ptr  = reinterpret_cast<const uint16_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-                            vst1q_u8(output.ptr(), vcombine_u8(vqmovn_u16(texels.val[0]), vqmovn_u16(texels.val[1])));
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                            {
+                                const uint16x8x2_t texels =
+                                {
+                                    {
+                                        vqshlq_u16(vld1q_u16(input_ptr + x), b),
+                                        vqshlq_u16(vld1q_u16(input_ptr + x + 8), b)
+                                    }
+                                };
+
+                                vst1q_u8(output_ptr + x, vcombine_u8(vqmovn_u16(texels.val[0]), vqmovn_u16(texels.val[1])));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = utils::cast::saturate_cast<uint8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }
                     else
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const uint16x8x2_t texels =
-                            {
-                                {
-                                    vshlq_u16(vld1q_u16(reinterpret_cast<uint16_t *>(input.ptr())), b),
-                                    vshlq_u16(vld1q_u16(reinterpret_cast<uint16_t *>(input.ptr()) + 8), b)
-                                }
-                            };
+                            const auto input_ptr  = reinterpret_cast<const uint16_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-                            vst1q_u8(output.ptr(), vcombine_u8(vmovn_u16(texels.val[0]), vmovn_u16(texels.val[1])));
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                            {
+                                const uint16x8x2_t texels =
+                                {
+                                    {
+                                        vshlq_u16(vld1q_u16(input_ptr + x), b),
+                                        vshlq_u16(vld1q_u16(input_ptr + x + 8), b)
+                                    }
+                                };
+
+                                vst1q_u8(output_ptr + x, vcombine_u8(vmovn_u16(texels.val[0]), vmovn_u16(texels.val[1])));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = static_cast<uint8_t>(*(input_ptr + x) >> _shift);
+                            }
+
                         },
                         input, output);
                     }
@@ -545,20 +758,33 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const int32x4_t b = vdupq_n_s32(_shift);
 
                     /* Up-conversion U16 -> U32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const uint16x8x2_t texels =
-                        {
-                            {
-                                vld1q_u16(reinterpret_cast<uint16_t *>(input.ptr())),
-                                vld1q_u16(reinterpret_cast<uint16_t *>(input.ptr()) + 8)
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const uint16_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<uint32_t *>(output.ptr());
 
-                        vst1q_u32(reinterpret_cast<uint32_t *>(output.ptr()), vshlq_u32(vmovl_u16(vget_low_u16(texels.val[0])), b));
-                        vst1q_u32(reinterpret_cast<uint32_t *>(output.ptr()) + 4, vshlq_u32(vmovl_u16(vget_high_u16(texels.val[0])), b));
-                        vst1q_u32(reinterpret_cast<uint32_t *>(output.ptr()) + 8, vshlq_u32(vmovl_u16(vget_low_u16(texels.val[1])), b));
-                        vst1q_u32(reinterpret_cast<uint32_t *>(output.ptr()) + 12, vshlq_u32(vmovl_u16(vget_high_u16(texels.val[1])), b));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const uint16x8x2_t texels =
+                            {
+                                {
+                                    vld1q_u16(input_ptr + x),
+                                    vld1q_u16(input_ptr + x + 8)
+                                }
+                            };
+
+                            vst1q_u32(output_ptr + x, vshlq_u32(vmovl_u16(vget_low_u16(texels.val[0])), b));
+                            vst1q_u32(output_ptr + x + 4, vshlq_u32(vmovl_u16(vget_high_u16(texels.val[0])), b));
+                            vst1q_u32(output_ptr + x + 8, vshlq_u32(vmovl_u16(vget_low_u16(texels.val[1])), b));
+                            vst1q_u32(output_ptr + x + 12, vshlq_u32(vmovl_u16(vget_high_u16(texels.val[1])), b));
+                        }
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<uint32_t>(*(input_ptr + x) << _shift);
+                        }
+
                     },
                     input, output);
                     break;
@@ -568,26 +794,86 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
             }
             break;
         }
+#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+        case DataType::BFLOAT16:
+            switch(_output->info()->data_type())
+            {
+                case DataType::F32:
+                {
+                    /* Up-conversion BFLOAT16 -> F32 */
+                    execute_window_loop(win, [&](const Coordinates &)
+                    {
+                        const auto input_ptr  = reinterpret_cast<const bfloat16 *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float *>(output.ptr());
+
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const uint16x8x2_t texels =
+                            {
+                                {
+                                    vld1q_u16(reinterpret_cast<uint16_t *>(input.ptr())),
+                                    vld1q_u16(reinterpret_cast<uint16_t *>(input.ptr()) + 8)
+                                }
+                            };
+
+                            vst1q_f32(reinterpret_cast<float *>(output.ptr()),
+                                      vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vget_low_u16(texels.val[0])), 16)));
+                            vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4,
+                                      vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vget_high_u16(texels.val[0])), 16)));
+                            vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8,
+                                      vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vget_low_u16(texels.val[1])), 16)));
+                            vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12,
+                                      vreinterpretq_f32_u32(vshlq_n_u32(vmovl_u16(vget_high_u16(texels.val[1])), 16)));
+                        }
+
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = float(*(input_ptr + x));
+                        }
+                    },
+                    input, output);
+                    break;
+                }
+                default:
+                    ARM_COMPUTE_ERROR("Output data type unsupported");
+            }
+            break;
+#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
             switch(_output->info()->data_type())
             {
                 case DataType::QASYMM8_SIGNED:
                 {
-                    const float16x8_t scale = vdupq_n_f16(1 << _shift);
+                    const float16_t   scale_s = 1 << _shift;
+                    const float16x8_t scale   = vdupq_n_f16(scale_s);
 
                     /* Up-conversion F16 -> QASYMM8_SIGNED */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float16x8x2_t texels =
-                        {
-                            {
-                                vmulq_f16(vld1q_f16(reinterpret_cast<float16_t *>(input.ptr())), scale),
-                                vmulq_f16(vld1q_f16(reinterpret_cast<float16_t *>(input.ptr()) + 8), scale),
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
 
-                        vst1q_s8(reinterpret_cast<int8_t *>(output.ptr()), vcombine_s8(vqmovn_s16(vcvtq_s16_f16(texels.val[0])), vqmovn_s16(vcvtq_s16_f16(texels.val[1]))));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float16x8x2_t texels =
+                            {
+                                {
+                                    vmulq_f16(vld1q_f16(input_ptr + x), scale),
+                                    vmulq_f16(vld1q_f16(input_ptr + x + 8), scale),
+                                }
+                            };
+
+                            vst1q_s8(output_ptr + x, vcombine_s8(vqmovn_s16(vcvtq_s16_f16(texels.val[0])), vqmovn_s16(vcvtq_s16_f16(texels.val[1]))));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<int8_t>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
@@ -595,66 +881,108 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::QASYMM8:
                 case DataType::U8:
                 {
-                    const float16x8_t scale = vdupq_n_f16(1 << _shift);
+                    const float16_t   scale_s = 1 << _shift;
+                    const float16x8_t scale   = vdupq_n_f16(scale_s);
 
                     /* Up-conversion F16 -> U8 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float16x8x2_t texels =
-                        {
-                            {
-                                vmulq_f16(vld1q_f16(reinterpret_cast<float16_t *>(input.ptr())), scale),
-                                vmulq_f16(vld1q_f16(reinterpret_cast<float16_t *>(input.ptr()) + 8), scale),
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-                        vst1q_u8(reinterpret_cast<uint8_t *>(output.ptr()), vcombine_u8(vqmovun_s16(vcvtq_s16_f16(texels.val[0])), vqmovun_s16(vcvtq_s16_f16(texels.val[1]))));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float16x8x2_t texels =
+                            {
+                                {
+                                    vmulq_f16(vld1q_f16(input_ptr + x), scale),
+                                    vmulq_f16(vld1q_f16(input_ptr + x + 8), scale),
+                                }
+                            };
+
+                            vst1q_u8(output_ptr + x, vcombine_u8(vqmovun_s16(vcvtq_s16_f16(texels.val[0])), vqmovun_s16(vcvtq_s16_f16(texels.val[1]))));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<uint8_t>(*(input_ptr + x) * scale_s);
+                        }
+
                     },
                     input, output);
                     break;
                 }
                 case DataType::F32:
                 {
-                    const float32x4_t scale = vdupq_n_f32(1 << _shift);
+                    const float       scale_s = 1 << _shift;
+                    const float32x4_t scale   = vdupq_n_f32(scale_s);
 
                     /* Up-conversion F16 -> F32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float16x8x2_t texels =
-                        {
-                            {
-                                vld1q_f16(reinterpret_cast<float16_t *>(input.ptr())),
-                                vld1q_f16(reinterpret_cast<float16_t *>(input.ptr()) + 8)
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float *>(output.ptr());
 
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()), vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[0])), scale));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4, vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[0])), scale));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8, vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[1])), scale));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[1])), scale));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float16x8x2_t texels =
+                            {
+                                {
+                                    vld1q_f16(input_ptr + x),
+                                    vld1q_f16(input_ptr + x + 8)
+                                }
+                            };
+                            vst1q_f32(output_ptr + x, vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[0])), scale));
+                            vst1q_f32(output_ptr + x + 4, vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[0])), scale));
+                            vst1q_f32(output_ptr + x + 8, vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[1])), scale));
+                            vst1q_f32(output_ptr + x + 12, vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[1])), scale));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<float>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
                 }
                 case DataType::S32:
                 {
-                    const float32x4_t scale = vdupq_n_f32(1 << _shift);
+                    const float       scale_s = 1 << _shift;
+                    const float32x4_t scale   = vdupq_n_f32(scale_s);
 
                     /* Up-conversion F16 -> S32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float16x8x2_t texels =
-                        {
-                            {
-                                vld1q_f16(reinterpret_cast<float16_t *>(input.ptr())),
-                                vld1q_f16(reinterpret_cast<float16_t *>(input.ptr()) + 8)
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int32_t *>(output.ptr());
 
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()), vcvtq_s32_f32(vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[0])), scale)));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 4, vcvtq_s32_f32(vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[0])), scale)));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 8, vcvtq_s32_f32(vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[1])), scale)));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 12, vcvtq_s32_f32(vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[1])), scale)));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float16x8x2_t texels =
+                            {
+                                {
+                                    vld1q_f16(input_ptr + x),
+                                    vld1q_f16(input_ptr + x + 8)
+                                }
+                            };
+
+                            vst1q_s32(output_ptr + x, vcvtq_s32_f32(vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[0])), scale)));
+                            vst1q_s32(output_ptr + x + 4, vcvtq_s32_f32(vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[0])), scale)));
+                            vst1q_s32(output_ptr + x + 8, vcvtq_s32_f32(vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[1])), scale)));
+                            vst1q_s32(output_ptr + x + 12, vcvtq_s32_f32(vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[1])), scale)));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<int32_t>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
@@ -670,49 +998,104 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
                 {
-                    const float32x4_t scale = vdupq_n_f32(1.f / (1 << _shift));
+                    const float       scale_s = 1.f / (1 << _shift);
+                    const float32x4_t scale   = vdupq_n_f32(scale_s);
 
                     /* Down-conversion F32 -> F16 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float32x4x4_t texels =
-                        {
-                            {
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr())), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 4), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 8), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 12), scale)
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
 
-                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vcombine_f16(vcvt_f16_f32(texels.val[0]), vcvt_f16_f32(texels.val[1])));
-                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + 8, vcombine_f16(vcvt_f16_f32(texels.val[2]), vcvt_f16_f32(texels.val[3])));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float32x4x4_t texels =
+                            {
+                                {
+                                    vmulq_f32(vld1q_f32(input_ptr + x), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 4), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 8), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 12), scale)
+                                }
+                            };
+
+                            vst1q_f16(output_ptr + x, vcombine_f16(vcvt_f16_f32(texels.val[0]), vcvt_f16_f32(texels.val[1])));
+                            vst1q_f16(output_ptr + x + 8, vcombine_f16(vcvt_f16_f32(texels.val[2]), vcvt_f16_f32(texels.val[3])));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<float16_t>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
                 }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+                case DataType::BFLOAT16:
+                {
+                    /* Down-conversion F32 -> BFLOAT16 */
+                    execute_window_loop(win, [&](const Coordinates &)
+                    {
+                        const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<bfloat16 *>(output.ptr());
+
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            wrapper::vcvt_bf16_f32(reinterpret_cast<float *>(input.ptr()),
+                                                   reinterpret_cast<uint16_t *>(output.ptr()));
+                            wrapper::vcvt_bf16_f32(reinterpret_cast<float *>(input.ptr()) + 8,
+                                                   reinterpret_cast<uint16_t *>(output.ptr()) + 8);
+                        }
+
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = *(input_ptr + x);
+                        }
+                    },
+                    input, output);
+                    break;
+                }
+#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
                 case DataType::S32:
                 {
-                    const float32x4_t scale = vdupq_n_f32(1.f / (1 << _shift));
+                    const float       scale_s = 1.f / (1 << _shift);
+                    const float32x4_t scale   = vdupq_n_f32(scale_s);
 
                     /* Conversion F32 -> S32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float32x4x4_t texels =
-                        {
-                            {
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr())), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 4), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 8), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 12), scale),
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int32_t *>(output.ptr());
 
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()), vcvtq_s32_f32(texels.val[0]));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 4, vcvtq_s32_f32(texels.val[1]));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 8, vcvtq_s32_f32(texels.val[2]));
-                        vst1q_s32(reinterpret_cast<int32_t *>(output.ptr()) + 12, vcvtq_s32_f32(texels.val[3]));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float32x4x4_t texels =
+                            {
+                                {
+                                    vmulq_f32(vld1q_f32(input_ptr + x), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 4), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 8), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 12), scale),
+                                }
+                            };
+
+                            vst1q_s32(output_ptr + x, vcvtq_s32_f32(texels.val[0]));
+                            vst1q_s32(output_ptr + x + 4, vcvtq_s32_f32(texels.val[1]));
+                            vst1q_s32(output_ptr + x + 8, vcvtq_s32_f32(texels.val[2]));
+                            vst1q_s32(output_ptr + x + 12, vcvtq_s32_f32(texels.val[3]));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<int32_t>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
@@ -720,46 +1103,73 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::QASYMM8:
                 case DataType::U8:
                 {
-                    const float32x4_t scale = vdupq_n_f32(1.f / (1 << _shift));
+                    const float       scale_s = 1.f / (1 << _shift);
+                    const float32x4_t scale   = vdupq_n_f32(scale_s);
 
                     /* Down-conversion F32 -> U8 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float32x4x4_t texels =
-                        {
-                            {
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr())), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 4), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 8), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 12), scale),
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-                        vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vqmovn_u16(vcombine_u16(vqmovun_s32(vcvtq_s32_f32(texels.val[0])), vqmovun_s32(vcvtq_s32_f32(texels.val[1])))));
-                        vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()) + 8, vqmovn_u16(vcombine_u16(vqmovun_s32(vcvtq_s32_f32(texels.val[2])), vqmovun_s32(vcvtq_s32_f32(texels.val[3])))));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float32x4x4_t texels =
+                            {
+                                {
+                                    vmulq_f32(vld1q_f32(input_ptr + x), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 4), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 8), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 12), scale),
+                                }
+                            };
+
+                            vst1_u8(output_ptr + x, vqmovn_u16(vcombine_u16(vqmovun_s32(vcvtq_s32_f32(texels.val[0])), vqmovun_s32(vcvtq_s32_f32(texels.val[1])))));
+                            vst1_u8(output_ptr + x + 8, vqmovn_u16(vcombine_u16(vqmovun_s32(vcvtq_s32_f32(texels.val[2])), vqmovun_s32(vcvtq_s32_f32(texels.val[3])))));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = utils::cast::saturate_cast<uint8_t>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
                 }
                 case DataType::QASYMM8_SIGNED:
                 {
-                    const float32x4_t scale = vdupq_n_f32(1.f / (1 << _shift));
+                    const float       scale_s = 1.f / (1 << _shift);
+                    const float32x4_t scale   = vdupq_n_f32(scale_s);
 
                     /* Down-conversion F32 -> QASYMM8_SIGNED */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float32x4x4_t texels =
-                        {
-                            {
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr())), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 4), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 8), scale),
-                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 12), scale),
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
 
-                        vst1_s8(reinterpret_cast<int8_t *>(output.ptr()), vqmovn_s16(vcombine_s16(vqmovn_s32(vcvtq_s32_f32(texels.val[0])), vqmovn_s32(vcvtq_s32_f32(texels.val[1])))));
-                        vst1_s8(reinterpret_cast<int8_t *>(output.ptr()) + 8, vqmovn_s16(vcombine_s16(vqmovn_s32(vcvtq_s32_f32(texels.val[2])), vqmovn_s32(vcvtq_s32_f32(texels.val[3])))));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float32x4x4_t texels =
+                            {
+                                {
+                                    vmulq_f32(vld1q_f32(input_ptr + x), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 4), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 8), scale),
+                                    vmulq_f32(vld1q_f32(input_ptr + x + 12), scale),
+                                }
+                            };
+
+                            vst1_s8(output_ptr + x, vqmovn_s16(vcombine_s16(vqmovn_s32(vcvtq_s32_f32(texels.val[0])), vqmovn_s32(vcvtq_s32_f32(texels.val[1])))));
+                            vst1_s8(output_ptr + x + 8, vqmovn_s16(vcombine_s16(vqmovn_s32(vcvtq_s32_f32(texels.val[2])), vqmovn_s32(vcvtq_s32_f32(texels.val[3])))));
+                        }
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = utils::cast::saturate_cast<int8_t>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
@@ -776,23 +1186,37 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                 case DataType::F16:
                 {
-                    const float32x4_t scale = vdupq_n_f32(1.f / (1 << _shift));
+                    const float       scale_s = 1.f / (1 << _shift);
+                    const float32x4_t scale   = vdupq_n_f32(scale_s);
 
                     /* Down-conversion S32 -> F16 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const float32x4x4_t texels =
-                        {
-                            {
-                                vmulq_f32(vcvtq_f32_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()))), scale),
-                                vmulq_f32(vcvtq_f32_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 4)), scale),
-                                vmulq_f32(vcvtq_f32_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 8)), scale),
-                                vmulq_f32(vcvtq_f32_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12)), scale)
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const int32_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
 
-                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vcombine_f16(vcvt_f16_f32(texels.val[0]), vcvt_f16_f32(texels.val[1])));
-                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + 8, vcombine_f16(vcvt_f16_f32(texels.val[2]), vcvt_f16_f32(texels.val[3])));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const float32x4x4_t texels =
+                            {
+                                {
+                                    vmulq_f32(vcvtq_f32_s32(vld1q_s32(input_ptr + x)), scale),
+                                    vmulq_f32(vcvtq_f32_s32(vld1q_s32(input_ptr + x + 4)), scale),
+                                    vmulq_f32(vcvtq_f32_s32(vld1q_s32(input_ptr + x + 8)), scale),
+                                    vmulq_f32(vcvtq_f32_s32(vld1q_s32(input_ptr + x + 12)), scale)
+                                }
+                            };
+
+                            vst1q_f16(output_ptr + x, vcombine_f16(vcvt_f16_f32(texels.val[0]), vcvt_f16_f32(texels.val[1])));
+                            vst1q_f16(output_ptr + x + 8, vcombine_f16(vcvt_f16_f32(texels.val[2]), vcvt_f16_f32(texels.val[3])));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<int8_t>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
@@ -800,25 +1224,39 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
                 case DataType::F32:
                 {
-                    const int32x4_t scale = vdupq_n_s32(1.f / (1 << _shift));
+                    const int       scale_s = 1.f / (1 << _shift);
+                    const int32x4_t scale   = vdupq_n_s32(scale_s);
 
                     /* Conversion S32 -> F32 */
-                    execute_window_loop(window, [&](const Coordinates &)
+                    execute_window_loop(win, [&](const Coordinates &)
                     {
-                        const int32x4x4_t texels =
-                        {
-                            {
-                                vmulq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr())), scale),
-                                vmulq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 4), scale),
-                                vmulq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 8), scale),
-                                vmulq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12), scale),
-                            }
-                        };
+                        const auto input_ptr  = reinterpret_cast<const int32_t *>(input.ptr());
+                        const auto output_ptr = reinterpret_cast<float *>(output.ptr());
 
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()), vcvtq_f32_s32(texels.val[0]));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4, vcvtq_f32_s32(texels.val[1]));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8, vcvtq_f32_s32(texels.val[2]));
-                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, vcvtq_f32_s32(texels.val[3]));
+                        int x = window_start_x;
+                        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                        {
+                            const int32x4x4_t texels =
+                            {
+                                {
+                                    vmulq_s32(vld1q_s32(input_ptr + x), scale),
+                                    vmulq_s32(vld1q_s32(input_ptr + x + 4), scale),
+                                    vmulq_s32(vld1q_s32(input_ptr + x + 8), scale),
+                                    vmulq_s32(vld1q_s32(input_ptr + x + 12), scale),
+                                }
+                            };
+
+                            vst1q_f32(output_ptr + x, vcvtq_f32_s32(texels.val[0]));
+                            vst1q_f32(output_ptr + x + 4, vcvtq_f32_s32(texels.val[1]));
+                            vst1q_f32(output_ptr + x + 8, vcvtq_f32_s32(texels.val[2]));
+                            vst1q_f32(output_ptr + x + 12, vcvtq_f32_s32(texels.val[3]));
+                        }
+
+                        // Compute left-over elements
+                        for(; x < window_end_x; ++x)
+                        {
+                            *(output_ptr + x) = static_cast<float>(*(input_ptr + x) * scale_s);
+                        }
                     },
                     input, output);
                     break;
@@ -830,38 +1268,64 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     /* Down-conversion S32 -> QASYMM8_SIGNED */
                     if(ConvertPolicy::SATURATE == _policy)
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const int32x4x4_t texels =
+                            const auto input_ptr  = reinterpret_cast<const int32_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
+
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
                             {
+                                const int32x4x4_t texels =
                                 {
-                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr())), b),
-                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 4), b),
-                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 8), b),
-                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12), b)
-                                }
-                            };
-                            vst1_s8(reinterpret_cast<int8_t *>(output.ptr()), vqmovn_s16(vcombine_s16(vqmovn_s32(texels.val[0]), vqmovn_s32(texels.val[1]))));
-                            vst1_s8(reinterpret_cast<int8_t *>(output.ptr()) + 8, vqmovn_s16(vcombine_s16(vqmovn_s32(texels.val[2]), vqmovn_s32(texels.val[3]))));
+                                    {
+                                        vqshlq_s32(vld1q_s32(input_ptr + x), b),
+                                        vqshlq_s32(vld1q_s32(input_ptr + x + 4), b),
+                                        vqshlq_s32(vld1q_s32(input_ptr + x + 8), b),
+                                        vqshlq_s32(vld1q_s32(input_ptr + x + 12), b)
+                                    }
+                                };
+                                vst1_s8(output_ptr + x, vqmovn_s16(vcombine_s16(vqmovn_s32(texels.val[0]), vqmovn_s32(texels.val[1]))));
+                                vst1_s8(output_ptr + x + 8, vqmovn_s16(vcombine_s16(vqmovn_s32(texels.val[2]), vqmovn_s32(texels.val[3]))));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = utils::cast::saturate_cast<int8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }
                     else
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const int32x4x4_t texels =
-                            {
-                                {
-                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr())), b),
-                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 4), b),
-                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 8), b),
-                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12), b)
-                                }
-                            };
+                            const auto input_ptr  = reinterpret_cast<const int32_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
 
-                            vst1_s8(reinterpret_cast<int8_t *>(output.ptr()), vmovn_s16(vcombine_s16(vmovn_s32(texels.val[0]), vmovn_s32(texels.val[1]))));
-                            vst1_s8(reinterpret_cast<int8_t *>(output.ptr()) + 8, vmovn_s16(vcombine_s16(vmovn_s32(texels.val[2]), vmovn_s32(texels.val[3]))));
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                            {
+                                const int32x4x4_t texels =
+                                {
+                                    {
+                                        vshlq_s32(vld1q_s32(input_ptr + x), b),
+                                        vshlq_s32(vld1q_s32(input_ptr + x + 4), b),
+                                        vshlq_s32(vld1q_s32(input_ptr + x + 8), b),
+                                        vshlq_s32(vld1q_s32(input_ptr + x + 12), b)
+                                    }
+                                };
+
+                                vst1_s8(output_ptr + x, vmovn_s16(vcombine_s16(vmovn_s32(texels.val[0]), vmovn_s32(texels.val[1]))));
+                                vst1_s8(output_ptr + x + 8, vmovn_s16(vcombine_s16(vmovn_s32(texels.val[2]), vmovn_s32(texels.val[3]))));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = static_cast<int8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }
@@ -875,38 +1339,64 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     /* Down-conversion S32 -> U8 */
                     if(ConvertPolicy::SATURATE == _policy)
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const int32x4x4_t texels =
+                            const auto input_ptr  = reinterpret_cast<const int32_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
+
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
                             {
+                                const int32x4x4_t texels =
                                 {
-                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr())), b),
-                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 4), b),
-                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 8), b),
-                                    vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12), b)
-                                }
-                            };
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[0]), vqmovun_s32(texels.val[1]))));
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()) + 8, vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[2]), vqmovun_s32(texels.val[3]))));
+                                    {
+                                        vqshlq_s32(vld1q_s32(input_ptr + x), b),
+                                        vqshlq_s32(vld1q_s32(input_ptr + x + 4), b),
+                                        vqshlq_s32(vld1q_s32(input_ptr + x + 8), b),
+                                        vqshlq_s32(vld1q_s32(input_ptr + x + 12), b)
+                                    }
+                                };
+                                vst1_u8(output_ptr + x, vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[0]), vqmovun_s32(texels.val[1]))));
+                                vst1_u8(output_ptr + x + 8, vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[2]), vqmovun_s32(texels.val[3]))));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = utils::cast::saturate_cast<uint8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }
                     else
                     {
-                        execute_window_loop(window, [&](const Coordinates &)
+                        execute_window_loop(win, [&](const Coordinates &)
                         {
-                            const int32x4x4_t texels =
-                            {
-                                {
-                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr())), b),
-                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 4), b),
-                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 8), b),
-                                    vshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12), b)
-                                }
-                            };
+                            const auto input_ptr  = reinterpret_cast<const int32_t *>(input.ptr());
+                            const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vmovn_u16(vcombine_u16(vmovn_u32(vreinterpretq_u32_s32(texels.val[0])), vmovn_u32(vreinterpretq_u32_s32(texels.val[1])))));
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()) + 8, vmovn_u16(vcombine_u16(vmovn_u32(vreinterpretq_u32_s32(texels.val[2])), vmovn_u32(vreinterpretq_u32_s32(texels.val[3])))));
+                            int x = window_start_x;
+                            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+                            {
+                                const int32x4x4_t texels =
+                                {
+                                    {
+                                        vshlq_s32(vld1q_s32(input_ptr + x), b),
+                                        vshlq_s32(vld1q_s32(input_ptr + x + 4), b),
+                                        vshlq_s32(vld1q_s32(input_ptr + x + 8), b),
+                                        vshlq_s32(vld1q_s32(input_ptr + x + 12), b)
+                                    }
+                                };
+
+                                vst1_u8(output_ptr + x, vmovn_u16(vcombine_u16(vmovn_u32(vreinterpretq_u32_s32(texels.val[0])), vmovn_u32(vreinterpretq_u32_s32(texels.val[1])))));
+                                vst1_u8(output_ptr + x + 8, vmovn_u16(vcombine_u16(vmovn_u32(vreinterpretq_u32_s32(texels.val[2])), vmovn_u32(vreinterpretq_u32_s32(texels.val[3])))));
+                            }
+
+                            // Compute left-over elements
+                            for(; x < window_end_x; ++x)
+                            {
+                                *(output_ptr + x) = static_cast<uint8_t>(*(input_ptr + x) >> _shift);
+                            }
                         },
                         input, output);
                     }

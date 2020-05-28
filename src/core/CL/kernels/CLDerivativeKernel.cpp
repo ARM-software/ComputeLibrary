@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>
@@ -48,6 +49,11 @@ BorderSize CLDerivativeKernel::border_size() const
 }
 
 void CLDerivativeKernel::configure(const ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output_x, output_y, border_undefined);
+}
+
+void CLDerivativeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON((output_x == nullptr) && (output_y == nullptr));
@@ -84,7 +90,7 @@ void CLDerivativeKernel::configure(const ICLTensor *input, ICLTensor *output_x, 
 
     // Create kernel
     const std::string kernel_name = std::string("derivative");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,11 @@ using namespace arm_compute;
 
 void CLBitwiseNotKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLBitwiseNotKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
@@ -40,7 +45,7 @@ void CLBitwiseNotKernel::configure(const ICLTensor *input, ICLTensor *output)
     _output = output;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("bitwise_not"));
+    _kernel = create_kernel(compile_context, "bitwise_not");
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;

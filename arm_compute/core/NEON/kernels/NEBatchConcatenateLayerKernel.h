@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,7 +79,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    using BatchConcatFunction = void(const ITensor *in, ITensor *out, int batch_offset, const Window &window);
+    using BatchConcatFunction = void(const ITensor *in, ITensor *out, unsigned int batch_offset, const Window &window);
 
 private:
     BatchConcatFunction *_func;

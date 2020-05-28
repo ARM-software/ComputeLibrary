@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,6 +67,21 @@ public:
      * @param[in]  idx_class               (Optional) Index of the class used for evaluating which class the detection window belongs to
      */
     void configure(const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, cl::Buffer *num_detection_windows, const Size2D &detection_window_stride, float threshold = 0.0f,
+                   uint16_t idx_class = 0);
+    /** Initialise the kernel's input, HOG data-object, detection window, the stride of the detection window, the threshold and index of the object to detect
+     *
+     * @param[in]  compile_context         The compile context to be used.
+     * @param[in]  input                   Input tensor which stores the HOG descriptor obtained with @ref CLHOGOrientationBinningKernel. Data type supported: F32. Number of channels supported: equal to the number of histogram bins per block
+     * @param[in]  hog                     HOG data object used by @ref CLHOGOrientationBinningKernel and  @ref CLHOGBlockNormalizationKernel
+     * @param[out] detection_windows       Array of @ref DetectionWindow. This array stores all the detected objects
+     * @param[in]  num_detection_windows   Number of detected objects
+     * @param[in]  detection_window_stride Distance in pixels between 2 consecutive detection windows in x and y directions.
+     *                                     It must be multiple of the hog->info()->block_stride()
+     * @param[in]  threshold               (Optional) Threshold for the distance between features and SVM classifying plane
+     * @param[in]  idx_class               (Optional) Index of the class used for evaluating which class the detection window belongs to
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, cl::Buffer *num_detection_windows,
+                   const Size2D &detection_window_stride, float threshold = 0.0f,
                    uint16_t idx_class = 0);
 
     // Inherited methods overridden:

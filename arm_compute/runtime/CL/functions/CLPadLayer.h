@@ -63,6 +63,19 @@ public:
      *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
      */
     void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
+    /** Initialize the function
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: All.
+     * @param[out] output          Output tensor. Data type supported: same as @p input
+     * @param[in]  padding         The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                             specifies the front and the end padding in the i-th dimension.
+     * @param[in]  constant_value  (Optional) Constant value to be used for the padding.
+     * @param[in]  mode            (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
+     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(),
+                   PaddingMode mode = PaddingMode::CONSTANT);
 
     /**  Static function to check if given info will lead to a valid configuration of @ref CLPadLayer.
      *

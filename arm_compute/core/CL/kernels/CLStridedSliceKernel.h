@@ -67,6 +67,24 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output,
                    const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                    int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
+    /** Configure kernel
+     *
+     * @note Supported tensor rank: up to 4
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data type supported: All.
+     * @param[out] output           Destination tensor. Data type supported: Same as @p input
+     * @param[in]  starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in]  ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in]  strides          The strides of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in]  begin_mask       If the ith bit of begin_mask is set, starts[i] is ignored and the fullest possible range in that dimension is used instead.
+     * @param[in]  end_mask         If the ith bit of end_mask is set, ends[i] is ignored and the fullest possible range in that dimension is used instead.
+     * @param[in]  shrink_axis_mask If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
+     *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+                   const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
+                   int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSliceKernel
      *

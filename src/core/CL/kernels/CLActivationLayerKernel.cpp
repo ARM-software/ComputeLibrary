@@ -34,7 +34,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/helpers/float_ops.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <cmath>
 #include <set>
@@ -54,7 +54,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
         ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::LOGISTIC,
-        ActivationLayerInfo::ActivationFunction::TANH
+        ActivationLayerInfo::ActivationFunction::TANH,
+        ActivationLayerInfo::ActivationFunction::HARD_SWISH
     };
     const DataType                                data_type = input->data_type();
     const QuantizationInfo                       &oq_info   = (output != nullptr) ? output->quantization_info() : input->quantization_info();
@@ -114,12 +115,17 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-CLActivationLayerKernel::CLActivationLayerKernel(CLCoreRuntimeContext *ctx)
-    : _input(nullptr), _output(nullptr), _run_in_place(false), _ctx(ctx)
+CLActivationLayerKernel::CLActivationLayerKernel()
+    : _input(nullptr), _output(nullptr), _run_in_place(false)
 {
 }
 
 void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info);
+}
+
+void CLActivationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
@@ -139,9 +145,10 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     float              a_const                           = act_info.a();
     float              b_const                           = act_info.b();
 
-    const ActivationLayerInfo::ActivationFunction f_act                       = act_info.activation();
-    const bool                                    is_quantized                = is_data_type_quantized(dt);
-    const bool                                    perform_activation_in_float = (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) || (f_act == ActivationLayerInfo::ActivationFunction::TANH);
+    const ActivationLayerInfo::ActivationFunction f_act        = act_info.activation();
+    const bool                                    is_quantized = is_data_type_quantized(dt);
+    const bool                                    perform_activation_in_float =
+        (f_act == ActivationLayerInfo::ActivationFunction::LOGISTIC) || (f_act == ActivationLayerInfo::ActivationFunction::TANH) || (f_act == ActivationLayerInfo::ActivationFunction::HARD_SWISH);
 
     // Set build options
     CLBuildOptions build_opts;
@@ -224,7 +231,8 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     // Create kernel
-    _kernel = create_opencl_kernel(_ctx, kernel_name, build_opts);
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
+
     // Make sure _kernel is initialized before calling the parent's configure
     _input  = input;
     _output = output;

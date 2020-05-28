@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,17 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy, bool border_undefined);
+    /** Initialize the kernel's input, output and border mode.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data types supported: U8.
+     * @param[in]  map_x            Map for X coordinates. Data types supported: F32.
+     * @param[in]  map_y            Map for Y coordinates. Data types supported: F32.
+     * @param[out] output           Destination tensor. Data types supported: U8. All but the lowest two dimensions must be the same size as in the input tensor, i.e. remapping is only performed within the XY-plane.
+     * @param[in]  policy           The interpolation type.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *map_x, const ICLTensor *map_y, ICLTensor *output, InterpolationPolicy policy, bool border_undefined);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

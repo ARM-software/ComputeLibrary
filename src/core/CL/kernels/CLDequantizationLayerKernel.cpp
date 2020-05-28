@@ -32,6 +32,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -76,6 +77,11 @@ CLDequantizationLayerKernel::CLDequantizationLayerKernel()
 
 void CLDequantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLDequantizationLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
@@ -119,7 +125,7 @@ void CLDequantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *o
     build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(output_width_x - vec_size_x, 0)));
 
     // Create kernel name
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 }
 
 Status CLDequantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)

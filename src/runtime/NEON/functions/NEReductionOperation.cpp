@@ -142,54 +142,12 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
             }
             case ReductionOperation::MIN:
             {
-                switch(input->info()->data_type())
-                {
-                    case DataType::F32:
-                    {
-                        pixelValue = PixelValue(std::numeric_limits<float>::max());
-                        break;
-                    }
-                    case DataType::F16:
-                    {
-                        pixelValue = PixelValue(static_cast<half>(65504.0f));
-                        break;
-                    }
-                    case DataType::QASYMM8:
-                    {
-                        pixelValue = std::get<1>(get_min_max(input->info()->data_type()));
-                        break;
-                    }
-                    default:
-                    {
-                        ARM_COMPUTE_ERROR("Unsupported DataType");
-                    }
-                }
+                pixelValue = std::get<1>(get_min_max(input->info()->data_type()));
                 break;
             }
             case ReductionOperation::MAX:
             {
-                switch(input->info()->data_type())
-                {
-                    case DataType::F32:
-                    {
-                        pixelValue = PixelValue(-std::numeric_limits<float>::max());
-                        break;
-                    }
-                    case DataType::F16:
-                    {
-                        pixelValue = PixelValue(static_cast<half>(-65504.0f));
-                        break;
-                    }
-                    case DataType::QASYMM8:
-                    {
-                        pixelValue = std::get<0>(get_min_max(input->info()->data_type()));
-                        break;
-                    }
-                    default:
-                    {
-                        ARM_COMPUTE_ERROR("Unsupported DataType");
-                    }
-                }
+                pixelValue = std::get<0>(get_min_max(input->info()->data_type()));
                 break;
             }
             case ReductionOperation::ARG_IDX_MAX:

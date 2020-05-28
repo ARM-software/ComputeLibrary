@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,16 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
-
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLKernelLibrary.h"
-#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -42,7 +36,6 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(num_groups == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::NHWC && num_groups > 1);
@@ -78,6 +71,11 @@ CLWeightsReshapeKernel::CLWeightsReshapeKernel()
 
 void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, biases, output, num_groups);
+}
+
+void CLWeightsReshapeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
@@ -96,12 +94,12 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
 
     // Create build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(data_type)));
     build_opts.add_option("-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
     build_opts.add_option_if(biases != nullptr, "-DHAS_BIAS");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_to_columns", build_opts.options()));
+    _kernel = create_kernel(compile_context, "reshape_to_columns", build_opts.options());
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());

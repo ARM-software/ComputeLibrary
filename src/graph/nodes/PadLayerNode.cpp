@@ -32,8 +32,8 @@ namespace arm_compute
 {
 namespace graph
 {
-PadLayerNode::PadLayerNode(const PaddingList &padding)
-    : _padding(padding)
+PadLayerNode::PadLayerNode(const PaddingList &padding, PixelValue pad_value)
+    : _padding(padding), _pad_value(pad_value)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -42,6 +42,11 @@ PadLayerNode::PadLayerNode(const PaddingList &padding)
 const PaddingList &PadLayerNode::padding() const
 {
     return _padding;
+}
+
+PixelValue PadLayerNode::pad_value() const
+{
+    return _pad_value;
 }
 
 bool PadLayerNode::forward_descriptors()

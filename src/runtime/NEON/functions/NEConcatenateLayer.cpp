@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -178,7 +178,7 @@ void NEConcatenateLayer::run()
 {
     for(auto &kernel : _concat_kernels)
     {
-        NEScheduler::get().schedule(kernel.get(), _axis);
+        NEScheduler::get().schedule(kernel.get(), Window::DimY);
     }
 }
 } // namespace arm_compute

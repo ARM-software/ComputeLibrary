@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,9 @@
  */
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
 #include "arm_compute/core/Types.h"
-#include "tests/CL/Helper.h"
 
 #include "tests/CL/CLAccessor.h"
-#include "tests/datasets/Col2ImLayerDataset.h"
+#include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -44,83 +43,130 @@ TEST_SUITE(Col2Im)
 
 using CLCol2Im = CLSynthetizeFunction<CLCol2ImKernel>;
 
-// *INDENT-OFF*
-// clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::S64),    // Unsupported data type
-                                                       TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),    // Mismatching data type
-                                                       TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),    // Invalid output shape
-                                                       TensorInfo(TensorShape(3U, 12U, 4U, 2U), 1, DataType::F32),
-                                                     }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(3U, 3U, 10U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(3U, 4U, 12U, 2U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("ConvolvedWidth", { 3, 3, 3, 3 })),
-               framework::dataset::make("ConvolvedHeight", { 4, 4, 4, 4 })),
-               framework::dataset::make("NumGroups", { 1, 1, 1, 4 })),
-               framework::dataset::make("Expected", { false, false, false, true })),
-               input_info, output_info, convolved_width, convolved_height, num_groups, expected)
+/** Negative tests
+ *
+ * A series of validation tests on configurations which according to the API specification
+ * the function should fail against.
+ *
+ * Checks performed in order:
+ *     - Pass unsupported data type for input
+ *     - Pass NHWC as output data layout
+ *     - Pass an invalid output shape
+ */
+TEST_CASE(Negative, framework::DatasetMode::ALL)
 {
-    bool status = bool(CLCol2Im::validate(&input_info, &output_info, Size2D(convolved_width, convolved_height), num_groups));
-    ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
+    // Unsupported data type
+    {
+        const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::SIZET);
+        const auto output    = TensorInfo(TensorShape(3U, 4U, 10U, 1U, 2U), 1, DataType::F32);
+        const auto conv_size = Size2D(3, 4);
+        const auto status    = CLCol2ImKernel::validate(&input, &output, conv_size);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // NHWC as output data layout
+    {
+        const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32);
+        const auto output    = TensorInfo(TensorShape(3U, 4U, 10U, 1U, 2U), 1, DataType::F32, DataLayout::NHWC);
+        const auto conv_size = Size2D(3, 4);
+        const auto status    = CLCol2ImKernel::validate(&input, &output, conv_size);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // Invalid output size
+    {
+        const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32);
+        const auto output    = TensorInfo(TensorShape(3U, 4U, 10U, 2U, 2U), 1, DataType::F32);
+        const auto conv_size = Size2D(3, 4);
+        const auto status    = CLCol2ImKernel::validate(&input, &output, conv_size);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
 }
-// clang-format on
-// *INDENT-ON*
 
 template <typename T>
 using CLCol2ImFixture = Col2ImValidationFixture<CLTensor, CLAccessor, CLCol2Im, T, true>;
 
-TEST_SUITE(Float)
-TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLCol2ImFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGroupedCol2ImLayerDataset(), framework::dataset::make("DataType", DataType::F32)))
+/** Test kernel for single-precision floating point
+ *
+ * @note 8 elements processed per iteration
+ *
+ * Three main tests will be run:
+ *  - Channels are multiple of elements processed
+ *  - Channels larger and non multiple of elements used
+ *  - Channels smaller and not multiple of elements used
+ *
+ *  The above will be repeated with a different group size
+ *
+ *  Kernel tested col2im
+ */
+FIXTURE_DATA_TEST_CASE(FP32,
+                       CLCol2ImFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(
+                                                   framework::dataset::make("InputShape", { TensorShape(8U, 16U, 3U, 1U), TensorShape(17U, 16U, 3U, 1U), TensorShape(7U, 16U, 3U, 1U) }),
+                                                   framework::dataset::make("ConvolvedWidth", 4)),
+                                               framework::dataset::make("ConvolvedHeight", 4)),
+                                       framework::dataset::make("Groups", { 1, 3 })),
+                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLCol2ImFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGroupedCol2ImLayerDataset(), framework::dataset::make("DataType", DataType::F32)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLCol2ImFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGroupedCol2ImLayerDataset(), framework::dataset::make("DataType", DataType::F16)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLCol2ImFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGroupedCol2ImLayerDataset(), framework::dataset::make("DataType", DataType::F16)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE_END()
-
-TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLCol2ImFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGroupedCol2ImLayerDataset(), framework::dataset::make("DataType",
-                                                                                                      DataType::QASYMM8)))
+/** Test kernel for half-precision floating point
+ *
+ * @note 8 elements processed per iteration
+ *
+ * One main tests will be run:
+ *  - Channels larger and non multiple of elements used
+ *
+ *  We just need to test the difference in the data type size.
+ *  Any other issues can be identified by the main FP32 tests
+ *
+ *  Kernel tested col2im
+ */
+FIXTURE_DATA_TEST_CASE(F16,
+                       CLCol2ImFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(
+                                                   framework::dataset::make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
+                                                   framework::dataset::make("ConvolvedWidth", 4)),
+                                               framework::dataset::make("ConvolvedHeight", 4)),
+                                       framework::dataset::make("Groups", 3)),
+                               framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLCol2ImFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGroupedCol2ImLayerDataset(), framework::dataset::make("DataType",
-                                                                                                    DataType::QASYMM8)))
+/** Test kernel for unsigned asymmetric quantized type
+ *
+ * @note 8 elements processed per iteration
+ *
+ * One main tests will be run:
+ *  - Channels larger and non multiple of elements used
+ *
+ *  We just need to test the difference in the data type size.
+ *  Any other issues can be identified by the main FP32 tests
+ *
+ *  Kernel tested col2im
+ */
+FIXTURE_DATA_TEST_CASE(QASYMM8,
+                       CLCol2ImFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(
+                                                   framework::dataset::make("InputShape", TensorShape(17U, 16U, 3U, 1U)),
+                                                   framework::dataset::make("ConvolvedWidth", 4)),
+                                               framework::dataset::make("ConvolvedHeight", 4)),
+                                       framework::dataset::make("Groups", 3)),
+                               framework::dataset::make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // CL
+TEST_SUITE_END() // Col2Im
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

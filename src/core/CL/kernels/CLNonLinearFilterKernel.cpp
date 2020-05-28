@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,13 @@ void CLNonLinearFilterKernel::configure(const ICLTensor *input, ICLTensor *outpu
                                         unsigned int mask_size, MatrixPattern pattern, const uint8_t *mask,
                                         bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, function, mask_size, pattern, mask, border_undefined);
+}
+
+void CLNonLinearFilterKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, NonLinearFilterFunction function,
+                                        unsigned int mask_size, MatrixPattern pattern, const uint8_t *mask,
+                                        bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(mask_size != 3 && mask_size != 5);
@@ -78,7 +85,7 @@ void CLNonLinearFilterKernel::configure(const ICLTensor *input, ICLTensor *outpu
     ss << "non_linear_filter_" << pattern_name << mask_size << "x" << mask_size;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(ss.str(), build_opts));
+    _kernel = create_kernel(compile_context, ss.str(), build_opts);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;

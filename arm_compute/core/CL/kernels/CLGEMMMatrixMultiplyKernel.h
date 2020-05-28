@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,6 +67,23 @@ public:
      *
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta = 0.f,
+                   bool is_interleaved_transposed = true, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo(), bool fp_mixed_precision = false, const ActivationLayerInfo &activation_info = ActivationLayerInfo());
+    /** Initialise the kernel's input, output and alpha
+     *
+     * @param[in]  compile_context           The compile context to be used.
+     * @param[in]  input0                    Input tensor containing the Matrix A. Data types supported: F16/F32
+     * @param[in]  input1                    Input tensor containing the Matrix B. Data type supported: same as @p input0
+     * @param[in]  input2                    Input tensor containing the Matrix C (bias). Can be nullptr. Data type supported: same as @p input0
+     * @param[out] output                    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
+     * @param[in]  alpha                     Weight of the matrix product
+     * @param[in]  beta                      (Optional) Weight of vector C. Default value is 0. Only beta = 1 is currently supported.
+     * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMReshapeLHSMatrixKernel and @ref CLGEMMReshapeRHSMatrixKernel
+     * @param[in]  reshape_info              (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
+     * @param[in]  fp_mixed_precision        (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy
+     * @param[in]  activation_info           (Optional) Activation to apply after the matrix multiplication
+     *
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta = 0.f,
                    bool is_interleaved_transposed = true, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo(), bool fp_mixed_precision = false, const ActivationLayerInfo &activation_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyKernel
      *

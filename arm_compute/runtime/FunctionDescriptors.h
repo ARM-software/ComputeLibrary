@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,8 +44,9 @@ struct FFT1DInfo
 /** Descriptor used by the FFT2D function */
 struct FFT2DInfo
 {
-    std::pair<unsigned int, unsigned int> axes{ 0, 1 }; /**< Axes to run on. If same, multiple transforms are performed on single axis*/
-    FFTDirection direction{ FFTDirection::Forward };    /**< Direction of the FFT. */
+    unsigned int axis0{ 0 };                         /**< Axis to run first pass on. If same, multiple transforms are performed on single axis*/
+    unsigned int axis1{ 1 };                         /**< Axis to run second pass on. If same, multiple transforms are performed on single axis*/
+    FFTDirection direction{ FFTDirection::Forward }; /**< Direction of the FFT. */
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DirectConvolutionValidationGenericFixture : public framework::Fixture
 {
 public:
-    using TBias = typename std::conditional<std::is_same<typename std::decay<T>::type, uint8_t>::value, int32_t, T>::type;
+    using TBias = typename std::conditional < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int32_t, T >::type;
 
 public:
     template <typename...>
@@ -100,6 +100,13 @@ protected:
             case DataType::QASYMM8:
             {
                 std::uniform_int_distribution<uint8_t> distribution(0, 50);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            case DataType::QASYMM8_SIGNED:
+            {
+                // Use small input range to avoid all the test results being saturated at the end.
+                std::uniform_int_distribution<int8_t> distribution(-25, 25);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -209,10 +216,10 @@ class DirectConvolutionValidationQuantizedFixture : public DirectConvolutionVali
 public:
     template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels, DataType data_type, QuantizationInfo quantization_info,
-               ActivationLayerInfo act_info)
+               ActivationLayerInfo act_info, DataLayout data_layout)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, quantization_info,
-                                                                                                    act_info, DataLayout::NCHW);
+                                                                                                    act_info, data_layout);
     }
 };
 
@@ -222,10 +229,10 @@ class DirectConvolutionValidationWithTensorShapesQuantizedFixture : public Direc
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
-               DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+               DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, quantization_info,
-                                                                                                    act_info, DataLayout::NCHW);
+                                                                                                    act_info, data_layout);
     }
 };
 

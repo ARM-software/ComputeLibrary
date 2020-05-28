@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,7 +134,7 @@ TEST_CASE(Float, framework::DatasetMode::ALL)
     validate(Accessor(output), expected_output);
 }
 
-TEST_CASE(Quantized, framework::DatasetMode::ALL)
+TEST_CASE(QASYMM8, framework::DatasetMode::ALL)
 {
     const unsigned int k = 5;
 
@@ -184,6 +184,59 @@ TEST_CASE(Quantized, framework::DatasetMode::ALL)
     // Validate against the expected values
     SimpleTensor<uint8_t> expected_output(TensorShape(20), DataType::U8);
     fill_tensor(expected_output, std::vector<uint8_t> { 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0 });
+    validate(Accessor(output), expected_output);
+}
+
+TEST_CASE(QASYMM8_SIGNED, framework::DatasetMode::ALL)
+{
+    const unsigned int k = 5;
+
+    Tensor predictions = create_tensor<Tensor>(TensorShape(10, 20), DataType::QASYMM8_SIGNED, 1, QuantizationInfo());
+    Tensor targets     = create_tensor<Tensor>(TensorShape(20), DataType::U32);
+
+    predictions.allocator()->allocate();
+    targets.allocator()->allocate();
+
+    // Fill the tensors with random pre-generated values
+    fill_tensor(Accessor(predictions), std::vector<int8_t>
+    {
+        123, -34, 69, 118, 20, -45, 99, -98, 127, 117,  //-34
+        -99, 1, -128, 90, 60, 25, 102, 76, 24, -110,    //25
+        99, 119, 49, 43, -40, 60, 43, 84, 29, 67,       //84
+        33, 109, 74, 90, 90, 44, 98, 90, 35, 123,       //74
+        62, 118, 24, -32, 34, 21, 114, 113, 124, 20,    //124
+        74, 98, 48, 107, 127, 125, 6, -98, 127, 59,     //98
+        75, 83, 75, -118, 56, 101, 85, 97, 49, 127,     //75
+        72, -20, 40, 14, 28, -30, 109, 43, 127, -31,    //-20
+        78, 121, 109, 66, 29, 90, 70, 21, 38, 48,       //109
+        18, 10, 115, 124, 17, 123, 51, 54, 15, 17,      //17
+        66, 46, -66, 125, 104, 90, 123, 113, -54, -126, //125
+        58, -85, 74, 39, 115, 39, 111, -27, 44, 51,     //51
+        71, 122, -34, -123, 94, 113, 125, 111, 38, 64,  //94
+        -17, 40, 42, 68, 96, 68, 101, 40, 79, 71,       //40
+        89, 88, 54, 82, 127, 12, 112, 52, 125, 22,      //22
+        -128, 56, 82, 31, 98, 94, 102, 105, 127, 123,   //123
+        112, 50, 61, 41, 39, 63, -77, 92, 26, 70,       //39
+        2, 90, 31, 99, -34, 114, 112, 126, 127, 87,     //90
+        125, 63, 56, 123, 50, -77, 97, -93, 1, 29,      //56
+        100, -35, 116, 64, 36, 92, 56, 82, -22, -118    //36
+    });
+
+    fill_tensor(Accessor(targets), std::vector<int> { 1, 5, 7, 2, 8, 1, 2, 1, 2, 4, 3, 9, 4, 1, 9, 9, 4, 1, 2, 4 });
+
+    // Determine the output through the CPP kernel
+    Tensor   output;
+    CPPTopKV topkv;
+    topkv.configure(&predictions, &targets, &output, k);
+
+    output.allocator()->allocate();
+
+    // Run the kernel
+    topkv.run();
+
+    // Validate against the expected values
+    SimpleTensor<int8_t> expected_output(TensorShape(20), DataType::U8);
+    fill_tensor(expected_output, std::vector<int8_t> { 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0 });
     validate(Accessor(output), expected_output);
 }
 

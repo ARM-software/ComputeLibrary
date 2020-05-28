@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "GEMM.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -55,6 +56,9 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
     const int c_stride_z = N * M;
     const int c_stride_w = N * M * D;
 
+#if defined(_OPENMP) && !( defined(__arm__) && defined(__ANDROID__))
+    #pragma omp parallel for collapse(2)
+#endif /* _OPENMP */
     for(int w = 0; w < W; ++w)
     {
         for(int depth = 0; depth < D; ++depth)
@@ -107,6 +111,9 @@ SimpleTensor<T> gemm_mixed_precision(const SimpleTensor<T> &a, const SimpleTenso
     const int c_stride_z = N * M;
     const int c_stride_w = N * M * D;
 
+#if defined(_OPENMP) && !( defined(__arm__) && defined(__ANDROID__))
+    #pragma omp parallel for collapse(2)
+#endif /* _OPENMP */
     for(int w = 0; w < W; ++w)
     {
         for(int depth = 0; depth < D; ++depth)

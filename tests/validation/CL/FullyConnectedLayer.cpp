@@ -67,60 +67,27 @@ const auto QuantizationData = framework::dataset::make("QuantizationInfo",
     QuantizationInfo(1.f / 255.f, 10),
     QuantizationInfo(1.1f, 10),
 });
+
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.75f, 0.25f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH)
+});
+
+const auto ActivationFunctionsQuantizedDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.75f, 0.25f)
+});
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(FullyConnectedLayer)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                                                                           FullyConnectedParameters),
-                                                                   CNNDataTypes),
-               src_shape, weights_shape, bias_shape, dst_shape, transpose_weights, reshape_weights, data_type)
-{
-    const DataType         bias_data_type    = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
-    const QuantizationInfo quantization_info = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(2.f / 255.f, 127) : QuantizationInfo();
-
-    TensorShape ws(weights_shape);
-
-    // Transpose weights if not done in the function
-    if(!reshape_weights || !transpose_weights)
-    {
-        const size_t shape_x = ws.x();
-        ws.set(0, ws.y());
-        ws.set(1, shape_x);
-    }
-
-    // Create tensors
-    CLTensor src     = create_tensor<CLTensor>(src_shape, data_type, 1, quantization_info);
-    CLTensor weights = create_tensor<CLTensor>(ws, data_type, 1, quantization_info);
-    CLTensor bias    = create_tensor<CLTensor>(bias_shape, bias_data_type, 1, quantization_info);
-    CLTensor dst     = create_tensor<CLTensor>(dst_shape, data_type, 1, quantization_info);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    const QuantizationInfo src_quantization_info     = src.info()->quantization_info();
-    const QuantizationInfo weights_quantization_info = weights.info()->quantization_info();
-
-    // Create Fully Connected layer info
-    FullyConnectedLayerInfo fc_info;
-    fc_info.transpose_weights    = transpose_weights;
-    fc_info.are_weights_reshaped = !reshape_weights;
-
-    // Create and configure function.
-    CLFullyConnectedLayer fc;
-    fc.configure(&src, &weights, &bias, &dst, fc_info);
-
-    // Validate valid region
-    const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
-    validate(dst.info()->valid_region(), dst_valid_region);
-
-    // Validate QuantizationInfo
-    ARM_COMPUTE_EXPECT(src.info()->quantization_info() == src_quantization_info, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
-}
 
 // *INDENT-OFF*
 // clang-format off
@@ -174,16 +141,18 @@ using CLFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<CLTens
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
                                                                                                                         FullyConnectedParameters),
-                                                                                                                framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(),
                                                                                                                       FullyConnectedParameters),
-                                                                                                              framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
+                                                                                                              ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
@@ -191,14 +160,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<half>, framework::
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                 ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
-                                                                                                               framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
+                                                                                                               ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
@@ -212,13 +183,15 @@ using CLFullyConnectedLayerQuantizedFixture = FullyConnectedLayerValidationQuant
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8)), QuantizationData))
+                       combine(combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8)), QuantizationData),
+                               ActivationFunctionsQuantizedDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8)), QuantizationData))
+                       combine(combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8)), QuantizationData),
+                               ActivationFunctionsQuantizedDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -226,7 +199,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerQuantizedFixture<uint8_t>,
 TEST_SUITE_END() /* QASYMM8 */
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), QuantizationData))
+                       combine(combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(), FullyConnectedParameters), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED)), QuantizationData),
+                               ActivationFunctionsQuantizedDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

@@ -48,6 +48,11 @@ CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights()
 
 void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), weights, biases, output, num_groups);
+}
+
+void CLConvolutionLayerReshapeWeights::configure(const CLCompileContext &compile_context, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
+{
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayerReshapeWeights::validate(weights->info(),
@@ -58,7 +63,7 @@ void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const
     const bool       append_biases = (biases != nullptr) && !is_data_type_quantized_asymmetric(weights->info()->data_type());
     const ICLTensor *biases_to_use = (append_biases) ? biases : nullptr;
 
-    _weights_reshape_kernel.configure(weights, biases_to_use, output, num_groups);
+    _weights_reshape_kernel.configure(compile_context, weights, biases_to_use, output, num_groups);
 
     output->info()->set_quantization_info(weights->info()->quantization_info());
 }
@@ -100,7 +105,8 @@ CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> m
 {
 }
 
-void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
+void CLGEMMConvolutionLayer::configure_mm(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                          const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
                                           int gemm_3d_depth, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
@@ -127,7 +133,7 @@ void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTenso
         input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.uniform().scale, -input_quantization_info.uniform().offset));
         weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.uniform().scale, -weights_quantization_info.uniform().offset));
 
-        _mm_gemmlowp.configure(input, weights, biases, output, gemm_info);
+        _mm_gemmlowp.configure(compile_context, input, weights, biases, output, gemm_info);
 
         // Revert back QuantizatioInfo as input and weights could be used in other convolution layers
         input->info()->set_quantization_info(input_quantization_info);
@@ -136,7 +142,7 @@ void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTenso
     else
     {
         // Configure matrix multiply function
-        _mm_gemm.configure(input, weights, biases, output, 1.0f, 1.0f, gemm_info);
+        _mm_gemm.configure(compile_context, input, weights, biases, output, 1.0f, 1.0f, gemm_info);
     }
 }
 
@@ -180,6 +186,13 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
 
 void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
                                        const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups);
+}
+
+void CLGEMMConvolutionLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                       const PadStrideInfo &conv_info,
+                                       const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
@@ -252,24 +265,24 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
 
         if(_weights_manager && _weights_manager->are_weights_managed(weights))
         {
-            _reshape_weights_managed.configure(weights, biases, num_groups);
+            _reshape_weights_managed.configure(compile_context, weights, biases, num_groups);
             weights_to_use = utils::cast::polymorphic_downcast<ICLTensor *>(_weights_manager->acquire(weights, &_reshape_weights_managed));
         }
         else
         {
-            _reshape_weights.configure(weights, biases, &_weights_reshaped, num_groups);
+            _reshape_weights.configure(compile_context, weights, biases, &_weights_reshaped, num_groups);
         }
     }
     else
     {
         if(_weights_manager && _weights_manager->are_weights_managed(weights))
         {
-            _reshape_weights_managed.configure(weights, nullptr, num_groups);
+            _reshape_weights_managed.configure(compile_context, weights, nullptr, num_groups);
             weights_to_use = utils::cast::polymorphic_downcast<ICLTensor *>(_weights_manager->acquire(weights, &_reshape_weights_managed));
         }
         else
         {
-            _reshape_weights.configure(weights, nullptr, &_weights_reshaped, num_groups);
+            _reshape_weights.configure(compile_context, weights, nullptr, &_weights_reshaped, num_groups);
         }
     }
 
@@ -279,7 +292,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         _memory_group.manage(&_im2col_output);
 
         // Configure and tune im2col. im2col output shape is auto-initialized
-        _im2col_kernel.configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation, num_groups);
+        _im2col_kernel.configure(compile_context, input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation, num_groups);
 
         // Set quantization info
         _im2col_output.info()->set_quantization_info(input->info()->quantization_info());
@@ -333,8 +346,12 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         gemmlowp_output_stage.gemmlowp_multiplier = gemmlowp_output_stage.gemmlowp_multipliers[0];
         gemmlowp_output_stage.gemmlowp_shift      = gemmlowp_output_stage.gemmlowp_shifts[0];
 
-        int min_activation = 0;
-        int max_activation = 0;
+        PixelValue min_val{};
+        PixelValue max_val{};
+        std::tie(min_val, max_val) = get_min_max(output->info()->data_type());
+
+        auto min_activation = min_val.get<int32_t>();
+        auto max_activation = max_val.get<int32_t>();
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
@@ -363,7 +380,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     // In case of NHWC, we need to run GEMM3D (gemm_3d_depth != 0) in order to avoid reshaping the output matrix
     const unsigned int gemm_3d_depth = (data_layout == DataLayout::NHWC) ? conv_h : 0;
 
-    configure_mm(gemm_input_to_use, weights_to_use, biases_to_use, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, act_info);
+    configure_mm(compile_context, gemm_input_to_use, weights_to_use, biases_to_use, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, act_info);
 
     if(!_skip_im2col)
     {
@@ -373,7 +390,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     if(!_skip_col2im)
     {
         // Configure and tune Col2Im
-        _col2im_kernel.configure(gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups);
+        _col2im_kernel.configure(compile_context, gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups);
         CLScheduler::get().tune_kernel_static(_col2im_kernel);
     }
 
@@ -387,7 +404,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
 
     if(!_fuse_activation)
     {
-        _activationlayer_function.configure(output, nullptr, act_info);
+        _activationlayer_function.configure(compile_context, output, nullptr, act_info);
     }
 
     ARM_COMPUTE_UNUSED(weights_info);

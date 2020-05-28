@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,13 +81,13 @@ const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
 const auto k0_values_precommit = framework::dataset::make("K0", { 16 });
 
 /** M0 values to test - Nightly */
-const auto m0_values_nightly = framework::dataset::make("M0", 2, 7);
+const auto m0_values_nightly = framework::dataset::make("M0", 1, 2, 7);
 
 /** N0 values to test - Nightly */
-const auto n0_values_nightly = framework::dataset::make("N0", { 2, 3, 4, 8 });
+const auto n0_values_nightly = framework::dataset::make("N0", { 1, 2, 3, 4, 8 });
 
 /** K0 values to test - Nightly */
-const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8, 16 });
+const auto k0_values_nightly = framework::dataset::make("K0", { 1, 2, 3, 4, 8, 16 });
 } // namespace
 
 TEST_SUITE(CL)
@@ -105,7 +105,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyNativeFixture, framewor
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyNativeFixture, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyNativeFixture, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(m_values,
                                                                 n_values),
                                                                 k_values),
@@ -132,7 +132,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMLowpMatrixMultiplyNative3DFixture, fram
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyNative3DFixture, framework::DatasetMode::DISABLED,
+FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyNative3DFixture, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(m_w_values,
                                                                         m_h_values),
                                                                         n_values),

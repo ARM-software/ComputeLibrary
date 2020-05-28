@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <cmath>
 #include <set>
@@ -71,6 +72,11 @@ CLROIPoolingLayerKernel::CLROIPoolingLayerKernel()
 }
 
 void CLROIPoolingLayerKernel::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
+}
+
+void CLROIPoolingLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, rois, output);
 
@@ -114,7 +120,7 @@ void CLROIPoolingLayerKernel::configure(const ICLTensor *input, const ICLTensor 
 
     // Create kernel
     std::string kernel_name = "roi_pooling_layer";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts);
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_3D_tensor() + num_arguments_per_1D_array();

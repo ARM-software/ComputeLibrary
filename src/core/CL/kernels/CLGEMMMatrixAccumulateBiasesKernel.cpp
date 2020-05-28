@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -78,6 +79,11 @@ CLGEMMMatrixAccumulateBiasesKernel::CLGEMMMatrixAccumulateBiasesKernel()
 
 void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTensor *biases)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), accum, biases);
+}
+
+void CLGEMMMatrixAccumulateBiasesKernel::configure(const CLCompileContext &compile_context, ICLTensor *accum, const ICLTensor *biases)
+{
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(accum, biases);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(accum->info(), biases->info()));
@@ -100,7 +106,7 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
     build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_accumulate_biases", build_opts.options()));
+    _kernel = create_kernel(compile_context, "gemm_accumulate_biases", build_opts.options());
 }
 
 Status CLGEMMMatrixAccumulateBiasesKernel::validate(const ITensorInfo *accum, const ITensorInfo *biases, GPUTarget gpu_target)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>
@@ -44,6 +45,12 @@ CLMagnitudePhaseKernel::CLMagnitudePhaseKernel()
 }
 
 void CLMagnitudePhaseKernel::configure(const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase,
+                                       MagnitudeType mag_type, PhaseType phase_type)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), gx, gy, magnitude, phase, mag_type, phase_type);
+}
+
+void CLMagnitudePhaseKernel::configure(const CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase,
                                        MagnitudeType mag_type, PhaseType phase_type)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(gx, 1, DataType::S16, DataType::S32);
@@ -117,7 +124,7 @@ void CLMagnitudePhaseKernel::configure(const ICLTensor *gx, const ICLTensor *gy,
 
     // Create kernel
     const std::string kernel_name = std::string("magnitude_phase");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;

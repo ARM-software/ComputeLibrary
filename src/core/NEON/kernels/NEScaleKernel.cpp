@@ -25,20 +25,12 @@
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 
 #include <arm_neon.h>
-#include <cstddef>
-#include <cstdint>
 
 namespace arm_compute
 {
@@ -49,7 +41,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
                           BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding, bool align_corners)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
@@ -251,9 +243,8 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 
     int border_size = (border_mode == BorderMode::UNDEFINED) ? 0 : 1;
 
-    const bool                    is_quantized = (input->info()->data_type() == DataType::QASYMM8);
-    const UniformQuantizationInfo iq_info      = input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo oq_info      = output->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -309,13 +300,21 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 
             T res = 0;
             //dequantize quantized input
-            if(is_quantized)
+            if(input->info()->data_type() == DataType::QASYMM8)
             {
                 float inp00 = dequantize_qasymm8(a00, iq_info);
                 float inp01 = dequantize_qasymm8(a01, iq_info);
                 float inp10 = dequantize_qasymm8(a10, iq_info);
                 float inp11 = dequantize_qasymm8(a11, iq_info);
                 res         = static_cast<T>(quantize_qasymm8((inp00 * w1 + inp01 * w2 + inp10 * w3 + inp11 * w4), oq_info));
+            }
+            else if(input->info()->data_type() == DataType::QASYMM8_SIGNED)
+            {
+                float inp00 = dequantize_qasymm8_signed(a00, iq_info);
+                float inp01 = dequantize_qasymm8_signed(a01, iq_info);
+                float inp10 = dequantize_qasymm8_signed(a10, iq_info);
+                float inp11 = dequantize_qasymm8_signed(a11, iq_info);
+                res         = static_cast<T>(quantize_qasymm8_signed((inp00 * w1 + inp01 * w2 + inp10 * w3 + inp11 * w4), oq_info));
             }
             else
             {
@@ -469,6 +468,42 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
 
     switch(_input->info()->data_type())
     {
+        case DataType::QASYMM8_SIGNED:
+        {
+            int8x16_t tmp = vdupq_n_s8(0);
+
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const auto           offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
+                const uint8_t *const in_ptr      = in.ptr();
+
+                const int in_yi         = std::floor((id.y() + _sampling_offset) * hr);
+                const int in_yi_clamped = std::min(static_cast<int>(_input->info()->dimension(1)), std::max(in_yi, -1));
+                ARM_COMPUTE_ERROR_ON(in_yi_clamped < -1 || in_yi_clamped > static_cast<int>(_input->info()->dimension(1)));
+                const int offset_row = in_yi_clamped * input_stride;
+
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[0] + offset_row], tmp, 0);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[1] + offset_row], tmp, 1);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[2] + offset_row], tmp, 2);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[3] + offset_row], tmp, 3);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[4] + offset_row], tmp, 4);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[5] + offset_row], tmp, 5);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[6] + offset_row], tmp, 6);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[7] + offset_row], tmp, 7);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[8] + offset_row], tmp, 8);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[9] + offset_row], tmp, 9);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[10] + offset_row], tmp, 10);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[11] + offset_row], tmp, 11);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[12] + offset_row], tmp, 12);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[13] + offset_row], tmp, 13);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[14] + offset_row], tmp, 14);
+                tmp = vsetq_lane_s8(in_ptr[offsets_ptr[15] + offset_row], tmp, 15);
+
+                vst1q_s8(reinterpret_cast<int8_t *>(out.ptr()), tmp);
+            },
+            in, offsets, out);
+            break;
+        }
         case DataType::QASYMM8:
         case DataType::U8:
         {
@@ -639,7 +674,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
 
 void NEScaleKernel::scale_bilinear_nchw(const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::F32);
 
     // Compute the ratio between source height and destination height
     const auto hr = arm_compute::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
@@ -669,13 +704,89 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
     const size_t in_stide_in_bytes = _input->info()->strides_in_bytes()[1];
     const size_t in_stride         = in_stide_in_bytes / _input->info()->element_size();
 
-    const bool                    is_quantized = (_input->info()->data_type() == DataType::QASYMM8);
-    const UniformQuantizationInfo iq_info      = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo oq_info      = _output->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq_info = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info = _output->info()->quantization_info().uniform();
 
     switch(_input->info()->data_type())
     {
+        case DataType::QASYMM8_SIGNED:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
+                const auto dx_ptr      = reinterpret_cast<const float *>(dx.ptr());
+                const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
+                const auto in_ptr      = reinterpret_cast<const int8_t *>(in.ptr());
+
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
+                const int offset_row = in_yi * in_stide_in_bytes;
+
+                int8x8_t tmp0 = vdup_n_s8(0);
+
+                tmp0 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0], iq_info, oq_info), tmp0, 0);
+                tmp0 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1], iq_info, oq_info), tmp0, 1);
+                tmp0 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2], iq_info, oq_info), tmp0, 2);
+                tmp0 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3], iq_info, oq_info), tmp0, 3);
+                tmp0 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4], iq_info, oq_info), tmp0, 4);
+                tmp0 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5], iq_info, oq_info), tmp0, 5);
+                tmp0 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6], iq_info, oq_info), tmp0, 6);
+                tmp0 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7], iq_info, oq_info), tmp0, 7);
+
+                int8x8_t tmp1 = vdup_n_s8(0);
+
+                tmp1 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8], iq_info, oq_info), tmp1, 0);
+                tmp1 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9], iq_info, oq_info), tmp1, 1);
+                tmp1 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10], iq_info, oq_info), tmp1, 2);
+                tmp1 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11], iq_info, oq_info), tmp1, 3);
+                tmp1 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12], iq_info, oq_info), tmp1, 4);
+                tmp1 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13], iq_info, oq_info), tmp1, 5);
+                tmp1 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14], iq_info, oq_info), tmp1, 6);
+                tmp1 = vset_lane_s8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15], iq_info, oq_info), tmp1, 7);
+
+                vst1q_s8(reinterpret_cast<int8_t *>(out.ptr()), vcombine_s8(tmp0, tmp1));
+            },
+            in, offsets, dx, dy, out);
+            break;
+        }
         case DataType::QASYMM8:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
+                const auto dx_ptr      = reinterpret_cast<const float *>(dx.ptr());
+                const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
+                const auto in_ptr      = reinterpret_cast<const uint8_t *>(in.ptr());
+
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
+                const int offset_row = in_yi * in_stide_in_bytes;
+
+                uint8x8_t tmp0 = vdup_n_u8(0);
+
+                tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0], iq_info, oq_info), tmp0, 0);
+                tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1], iq_info, oq_info), tmp0, 1);
+                tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2], iq_info, oq_info), tmp0, 2);
+                tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3], iq_info, oq_info), tmp0, 3);
+                tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4], iq_info, oq_info), tmp0, 4);
+                tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5], iq_info, oq_info), tmp0, 5);
+                tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6], iq_info, oq_info), tmp0, 6);
+                tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7], iq_info, oq_info), tmp0, 7);
+
+                uint8x8_t tmp1 = vdup_n_u8(0);
+
+                tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8], iq_info, oq_info), tmp1, 0);
+                tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9], iq_info, oq_info), tmp1, 1);
+                tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10], iq_info, oq_info), tmp1, 2);
+                tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11], iq_info, oq_info), tmp1, 3);
+                tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12], iq_info, oq_info), tmp1, 4);
+                tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13], iq_info, oq_info), tmp1, 5);
+                tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14], iq_info, oq_info), tmp1, 6);
+                tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15], iq_info, oq_info), tmp1, 7);
+
+                vst1q_u8(out.ptr(), vcombine_u8(tmp0, tmp1));
+            },
+            in, offsets, dx, dy, out);
+            break;
+        }
         case DataType::U8:
         {
             execute_window_loop(window, [&](const Coordinates & id)
@@ -689,51 +800,27 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
                 const int offset_row = in_yi * in_stide_in_bytes;
 
                 uint8x8_t tmp0 = vdup_n_u8(0);
-                if(is_quantized)
-                {
-                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0], iq_info, oq_info), tmp0, 0);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1], iq_info, oq_info), tmp0, 1);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2], iq_info, oq_info), tmp0, 2);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3], iq_info, oq_info), tmp0, 3);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4], iq_info, oq_info), tmp0, 4);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5], iq_info, oq_info), tmp0, 5);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6], iq_info, oq_info), tmp0, 6);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7], iq_info, oq_info), tmp0, 7);
-                }
-                else
-                {
-                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0]), tmp0, 0);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1]), tmp0, 1);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2]), tmp0, 2);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3]), tmp0, 3);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4]), tmp0, 4);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5]), tmp0, 5);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6]), tmp0, 6);
-                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7]), tmp0, 7);
-                }
+
+                tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0]), tmp0, 0);
+                tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1]), tmp0, 1);
+                tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2]), tmp0, 2);
+                tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3]), tmp0, 3);
+                tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4]), tmp0, 4);
+                tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5]), tmp0, 5);
+                tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6]), tmp0, 6);
+                tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7]), tmp0, 7);
+
                 uint8x8_t tmp1 = vdup_n_u8(0);
-                if(is_quantized)
-                {
-                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8], iq_info, oq_info), tmp1, 0);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9], iq_info, oq_info), tmp1, 1);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10], iq_info, oq_info), tmp1, 2);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11], iq_info, oq_info), tmp1, 3);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12], iq_info, oq_info), tmp1, 4);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13], iq_info, oq_info), tmp1, 5);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14], iq_info, oq_info), tmp1, 6);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15], iq_info, oq_info), tmp1, 7);
-                }
-                else
-                {
-                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8]), tmp1, 0);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9]), tmp1, 1);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10]), tmp1, 2);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11]), tmp1, 3);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12]), tmp1, 4);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13]), tmp1, 5);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14]), tmp1, 6);
-                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15]), tmp1, 7);
-                }
+
+                tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8]), tmp1, 0);
+                tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9]), tmp1, 1);
+                tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10]), tmp1, 2);
+                tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11]), tmp1, 3);
+                tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12]), tmp1, 4);
+                tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13]), tmp1, 5);
+                tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14]), tmp1, 6);
+                tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15]), tmp1, 7);
+
                 vst1q_u8(out.ptr(), vcombine_u8(tmp0, tmp1));
             },
             in, offsets, dx, dy, out);
@@ -950,6 +1037,19 @@ void NEScaleKernel::scale_nhwc(const Window &window)
 
     switch(_input->info()->data_type())
     {
+        case DataType::QASYMM8_SIGNED:
+        {
+            if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+            {
+                scale_nearest_nhwc_core<int8_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
+            }
+            else
+            {
+                scale_bilinear_nhwc_core<int8_t, int8_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
+                                                         window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode, _constant_border_value, _use_padding);
+            }
+            break;
+        }
         case DataType::QASYMM8:
         case DataType::U8:
         {

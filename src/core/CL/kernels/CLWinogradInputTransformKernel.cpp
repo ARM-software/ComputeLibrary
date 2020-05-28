@@ -34,7 +34,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -109,6 +109,11 @@ BorderSize CLWinogradInputTransformKernel::border_size() const
 }
 
 void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, winograd_info);
+}
+
+void CLWinogradInputTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), winograd_info));
@@ -195,7 +200,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     kernel_name += support::cpp11::to_string(_step_z);
     kernel_name += "_" + lower_string(string_from_data_layout(_data_layout));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Create window and update padding
     auto win_config = validate_and_configure_window(input->info(), output->info(), winograd_info);

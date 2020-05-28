@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,16 +56,16 @@ public:
     ~NEQuantizationLayerKernel() = default;
     /** Set the input, output.
      *
-     * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: F32/F16.
-     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM16.
+     * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
      * @note Output auto initialization is not supported by this kernel
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEQuantizationLayerKernel
      *
-     * @param[in] input  Input tensor info. Data types supported: F32/F16.
-     * @param[in] output Output tensor info. Data types supported: QASYMM8/QASYMM16.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F32/F16.
+     * @param[in] output Output tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QASYMM16.
      *
      * @return a status
      */
@@ -80,7 +80,7 @@ private:
      * @param[in] window Region on which to execute the kernel.
      */
     using QuantizationFunctionExecutorPtr = void (NEQuantizationLayerKernel::*)(const Window &window);
-    /** Function to apply QASYMM8 quantization on a tensor.
+    /** Function to apply QASYMM8 or QASYMM8_SIGNED quantization on a tensor.
      *
      * @param[in] window Region on which to execute the kernel.
      */

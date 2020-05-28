@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {

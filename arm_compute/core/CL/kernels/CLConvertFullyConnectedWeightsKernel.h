@@ -61,6 +61,15 @@ public:
      * @param[in]  data_layout          The data layout the weights have been trained in.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape, DataLayout data_layout);
+    /** Set the input and output tensor.
+     *
+     * @param[in]  compile_context      The compile context to be used.
+     * @param[in]  input                Source weights tensor to convert. Must be 2 dimensional. Data types supported: All.
+     * @param[out] output               The converted weights tensor. Shape and Data Type: Same as @p input.
+     * @param[in]  original_input_shape Shape of the original input tensor (the one entering fully connected layer).
+     * @param[in]  data_layout          The data layout the weights have been trained in.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape, DataLayout data_layout);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvertFullyConnectedWeightsKernel
      *
      * @param[in] input                Source weights tensor info to convert. Must be 2 dimensional. Data types supported: All.

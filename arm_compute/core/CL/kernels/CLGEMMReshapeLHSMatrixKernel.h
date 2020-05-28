@@ -61,6 +61,21 @@ public:
      * @param[in]  reinterpret_input_as_3d (Optional) True if the input has to be reinterpreted as 3D tensor
      */
     void configure(const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d = false);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context         The compile context to be used.
+     * @param[in]  input                   Input tensor. Data types supported: All
+     * @param[out] output                  Output tensor. Data type supported: same as @p input
+     * @param[in]  lhs_info                LHS matrix information to be used for reshaping. This object contains all the necessary
+     *                                     information to reshape the input tensor. Only the following values are supported:
+     *                                     lhs_info.m0: 2,3,4,5,6,7,8
+     *                                     lhs_info.k0: 2,3,4,8,16
+     *                                     lhs_info.v0: greater than 0
+     *                                     lhs_info.transpose: true, false
+     *                                     lhs_info.interleave: true, false
+     * @param[in]  reinterpret_input_as_3d (Optional) True if the input has to be reinterpreted as 3D tensor
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMReshapeLHSMatrixKernel
      *
      * @param[in] input                   Input tensor info. Data types supported: All

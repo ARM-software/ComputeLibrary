@@ -26,6 +26,8 @@
 #include "gemm_hybrid.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
+#include "gemm_interleaved_2d.hpp"
+#include "gemm_interleaved_pretransposed_2d.hpp"
 #include "gemm_native.hpp"
 #include "gemv_batched.hpp"
 #include "gemv_native_transposed.hpp"
@@ -44,6 +46,7 @@
 #include "kernels/sve_hybrid_fp32_mla_4VLx4.hpp"
 #include "kernels/sve_interleaved_fp32_mla_3VLx8.hpp"
 #include "kernels/sve_native_fp32_mla_4VLx4.hpp"
+#include "kernels/sve_smallK_hybrid_fp32_mla_1VLx8.hpp"
 
 namespace arm_gemm {
 
@@ -73,7 +76,14 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 
 #ifdef __ARM_FEATURE_SVE
-// SVE native / hybrid methods
+// SVE smallk / native / hybrid methods
+{
+    GemmMethod::GEMM_HYBRID,
+    "smallK_hybrid_fp32_mla_1VLx8",
+    [](const GemmArgs &args) { return (args._Ksize <= 24) && !args._trA && args._pretransposed_hint; },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmHybrid<smallK_hybrid_fp32_mla_1VLx8, float, float>(args); }
+},
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_fp32_mla_4VLx4",
@@ -136,13 +146,31 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs &args) { return new GemmInterleaved<interleaved_fp32_mla_3VLx8, float, float>(args); }
 },
 #endif // __ARM_FEATURE_SVE
+//Pretranpose, 2D split
+{
+    GemmMethod::GEMM_INTERLEAVED_2D,
+    "sgemm_12x8",
+    [](const GemmArgs &args) { return args._pretransposed_hint; },
+    [](const GemmArgs &args) { return args._pretransposed_hint; },
+    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<sgemm_12x8, float, float>(args); }
+},
+//Tranpose, 2D split, no blockmanager
+{
+    GemmMethod::GEMM_INTERLEAVED_2D,
+    "sgemm_12x8",
+    [](const GemmArgs &args) { return (!args._pretransposed_hint) && args._maxthreads >= 8; },
+    [](const GemmArgs &args) { return (!args._pretransposed_hint) && args._maxthreads >= 8; },
+    [](const GemmArgs &args) { return new GemmInterleaved2d<sgemm_12x8, float, float>(args); }
+},
+//Tranpose, 1D split, with blockmanager
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sgemm_12x8",
-    nullptr,
-    nullptr,
+    [](const GemmArgs &args) { return (!args._pretransposed_hint); },
+    [](const GemmArgs &args) { return (!args._pretransposed_hint); },
     [](const GemmArgs &args) { return new GemmInterleaved<sgemm_12x8, float, float>(args); }
 },
+
 #endif // __aarch64__
 
 #ifdef __arm__

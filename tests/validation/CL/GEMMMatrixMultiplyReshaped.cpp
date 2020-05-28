@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,7 +88,7 @@ RelativeTolerance<float> rel_tolerance_f16(0.001f);
 constexpr float          abs_tolerance_f16(0.01f);
 
 /** M values to test */
-const auto m_values = framework::dataset::make("M", 37);
+const auto m_values = framework::dataset::make("M", 17);
 
 /** M_W values to test */
 const auto m_w_values = framework::dataset::make("M_W", 5);
@@ -97,18 +97,17 @@ const auto m_w_values = framework::dataset::make("M_W", 5);
 const auto m_h_values = framework::dataset::make("M_H", 7);
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", 51);
+const auto n_values = framework::dataset::make("N", 21);
 
 /** K values to test */
-const auto k_values = framework::dataset::make("K", 23);
+const auto k_values = framework::dataset::make("K", 13);
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", 1, 3);
+const auto b_values = framework::dataset::make("batch_size", 2, 3);
 
 /** Activation values to test */
 const auto act_values = framework::dataset::make("Activation",
 {
-    ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
 });
 
@@ -169,6 +168,161 @@ const auto lhs_transpose_values = framework::dataset::make("lhs_transpose", { fa
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMMMatrixMultiplyReshaped)
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
+               framework::dataset::make("Input0Info", { TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F32),      // OK
+                                                        TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F16),      // OK
+                                                        TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::QASYMM8),  // Data type not supported
+                                                        TensorInfo(TensorShape(10U, 5U, 2U), 1, DataType::F32),      // Incorrect dimension bias
+                                                        TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F32),      // Mismatching shapes
+                                                        TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F16),      // OK, do not broadcast bias
+                                                        TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F16),      // OK, wider accummulation
+                                                        TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F16),      // OK, RHS 4,4,2
+
+                                                      }),
+               framework::dataset::make("Input1Info",{ TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(128U, 3U, 2U), 1, DataType::F16),
+
+                      })),
+               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(21U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(21U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(21U), 1, DataType::QASYMM8),
+                                                        TensorInfo(TensorShape(21U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(21U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(21U,17U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(21U,17U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
+
+                                                      })),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(21U,17U,2U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
+
+                           })),
+               framework::dataset::make("LHSMInfo",{
+                                                          GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                          GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                          GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                          GEMMLHSMatrixInfo(4,2,4,false,false),
+                                                          GEMMLHSMatrixInfo(4,2,4,false,false),
+                                                          GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                          GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                          GEMMLHSMatrixInfo(4,4,1,false,true),
+
+                                })),
+               framework::dataset::make("RHSMInfo",{
+                                                          GEMMRHSMatrixInfo(4,4,1,true,true),
+                                                          GEMMRHSMatrixInfo(4,4,1, true,true),
+                                                          GEMMRHSMatrixInfo(4,4,1,true,true),
+                                                          GEMMRHSMatrixInfo(2,2,1,true,false),
+                                                          GEMMRHSMatrixInfo(2,2,1,true,false),
+                                                          GEMMRHSMatrixInfo(4,4,1,true,true),
+                                                          GEMMRHSMatrixInfo(4,4,1,true,true),
+                                                          GEMMRHSMatrixInfo(4,4,2,true,false),
+
+
+                           })),
+
+
+               framework::dataset::make("GEMMInfo",{
+                                                            GEMMKernelInfo( 17 /**<M Number of LHS rows*/,
+                                                                            21 /**<N Number of RHS columns*/,
+                                                                            13 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                                     false /**< reinterpret the input as 3D */,
+                                                                     true  /**< Flag used to broadcast the bias addition */,
+                                                                     false /**< wider accumm */,
+                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                                     1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                                     1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                                     GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                                     GEMMRHSMatrixInfo(4,4,1,true,true),
+                                                                     0  /**< Offset to be added to each element of the matrix A */,
+                                                                     0 /**< Offset to be added to each element of the matrix B */),
+
+                                                            GEMMKernelInfo( 17 /**<M Number of LHS rows*/,
+                                                                            21 /**<N Number of RHS columns*/,
+                                                                            13 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                                     false /**< reinterpret the input as 3D */,
+                                                                     true  /**< Flag used to broadcast the bias addition */,
+                                                                     false /**< wider accumm */,
+                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                                     1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                                     1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                                     GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                                     GEMMRHSMatrixInfo(4,4,1,true,true),
+                                                                     0  /**< Offset to be added to each element of the matrix A */,
+                                                                     0 /**< Offset to be added to each element of the matrix B */),
+                                                            GEMMKernelInfo(),
+                                                            GEMMKernelInfo(),
+                                                            GEMMKernelInfo(),
+
+                                                            GEMMKernelInfo( 17 /**<M Number of LHS rows*/,
+                                                                            21 /**<N Number of RHS columns*/,
+                                                                            13 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                                     false /**< reinterpret the input as 3D */,
+                                                                     false  /**< Flag used to broadcast the bias addition */,
+                                                                     false /**< wider accumm */,
+                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                                     1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                                     1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                                     GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                                     GEMMRHSMatrixInfo(4,4,1,true,true),
+                                                                     0  /**< Offset to be added to each element of the matrix A */,
+                                                                     0 /**< Offset to be added to each element of the matrix B */),
+
+
+                                                            GEMMKernelInfo( 17 /**<M Number of LHS rows*/,
+                                                                            21 /**<N Number of RHS columns*/,
+                                                                            13 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                                     false /**< reinterpret the input as 3D */,
+                                                                     false  /**< Flag used to broadcast the bias addition */,
+                                                                     true /**< wider accumm */,
+                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                                     1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                                     1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                                     GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                                     GEMMRHSMatrixInfo(4,4,1,true,true),
+                                                                     0  /**< Offset to be added to each element of the matrix A */,
+                                                                     0 /**< Offset to be added to each element of the matrix B */),
+
+                                                            GEMMKernelInfo( 17 /**<M Number of LHS rows*/,
+                                                                            21 /**<N Number of RHS columns*/,
+                                                                            13 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
+                                                                     false /**< reinterpret the input as 3D */,
+                                                                     false  /**< Flag used to broadcast the bias addition */,
+                                                                     false /**< wider accumm */,
+                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                                     1   /**< Multiplication factor for the width of the 1xW transposed block */,
+                                                                     1   /**< Multiplication factor for the height of the 4x4 interleaved block */,
+                                                                     GEMMLHSMatrixInfo(4,4,1,false,true),
+                                                                     GEMMRHSMatrixInfo(4,4,2,true,false),
+                                                                     0  /**< Offset to be added to each element of the matrix A */,
+                                                                     0 /**< Offset to be added to each element of the matrix B */),
+                                                    })),
+               framework::dataset::make("Expected", { true, true, false, false, false, true, true,true})),
+                    input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
+{
+   ARM_COMPUTE_EXPECT(bool(CLGEMMMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
+                                                          &input1_info.clone()->set_is_resizable(true),
+                                                          &input2_info.clone()->set_is_resizable(true),
+                                                          &output_info.clone()->set_is_resizable(true),1.f,1.f,
+                                                          lhs_info,
+                                                          rhs_info,
+                                                          gemm_info)) == expected, framework::LogLevel::ERRORS);
+}
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 

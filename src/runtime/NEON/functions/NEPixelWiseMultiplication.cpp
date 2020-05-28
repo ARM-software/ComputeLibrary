@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,16 @@
 
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
 namespace arm_compute
 {
-void NEPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+void NEPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+                                          const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEPixelWiseMultiplicationKernel>();
     k->configure(input1, input2, output, scale, overflow_policy, rounding_policy);
     _kernel = std::move(k);
@@ -47,13 +49,16 @@ void NEPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITen
         }
     }
 }
-Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+                                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy);
 }
 
-void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITensor *output)
+void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEComplexPixelWiseMultiplicationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
@@ -69,8 +74,9 @@ void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input
     }
 }
 
-Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return NEComplexPixelWiseMultiplicationKernel::validate(input1, input2, output);
 }
 

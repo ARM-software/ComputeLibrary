@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 
 #include "DatasetModes.h"
 #include "TestCase.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <memory>
 #include <string>

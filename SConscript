@@ -24,8 +24,11 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v20.02.1"
-SONAME_VERSION="18.1.0"
+VERSION = "v20.05"
+LIBRARY_VERSION_MAJOR = 19
+LIBRARY_VERSION_MINOR =  1
+LIBRARY_VERSION_PATCH =  0
+SONAME_VERSION = str(LIBRARY_VERSION_MAJOR) + "." + str(LIBRARY_VERSION_MINOR) + "." + str(LIBRARY_VERSION_PATCH)
 
 Import('env')
 Import('vars')
@@ -160,6 +163,12 @@ Default(generate_embed)
 if env["build"] == "embed_only":
     Return()
 
+# Append version defines for semantic versioning
+arm_compute_env.Append(CPPDEFINES = [('ARM_COMPUTE_VERSION_MAJOR', LIBRARY_VERSION_MAJOR),
+                                     ('ARM_COMPUTE_VERSION_MINOR', LIBRARY_VERSION_MINOR),
+                                     ('ARM_COMPUTE_VERSION_PATCH', LIBRARY_VERSION_PATCH)])
+
+
 # Don't allow undefined references in the libraries:
 arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined'])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
@@ -202,6 +211,7 @@ if env['opencl']:
 
     runtime_files += Glob('src/runtime/CL/*.cpp')
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
+    runtime_files += Glob('src/runtime/CL/gemm/*.cpp')
     runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
@@ -247,6 +257,12 @@ if env['gles_compute']:
     runtime_files += Glob('src/runtime/GLES_COMPUTE/functions/*.cpp')
 
     graph_files += Glob('src/graph/backends/GLES/*.cpp')
+if env['tracing']:
+    arm_compute_env.Append(CPPDEFINES = ['ARM_COMPUTE_TRACING_ENABLED'])
+else:
+    # Remove TracePoint files if tracing is disabled:
+    core_files = [ f for f in core_files if not "TracePoint" in str(f)]
+    runtime_files = [ f for f in runtime_files if not "TracePoint" in str(f)]
 
 bootcode_o = []
 if env['os'] == 'bare_metal':

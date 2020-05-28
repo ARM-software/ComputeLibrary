@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,7 +81,8 @@ const auto k_values = framework::dataset::make("K", 23);
 const auto b_values = framework::dataset::make("batch_size", 1, 3);
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit = framework::dataset::make("M0", {4, 6});
+const auto m0_values_precommit_1 = framework::dataset::make("M0", { 4 });
+const auto m0_values_precommit_2 = framework::dataset::make("M0", { 6 });
 
 /** N0 values to test - Precommit */
 const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
@@ -119,26 +120,31 @@ const auto i_values_rhs = framework::dataset::make("interleave_rhs", { true, fal
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMMLowpMatrixMultiplyReshaped)
+
+TEST_SUITE(QUANTIZED)
+
+TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyReshapedFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
                                                                    k_values),
                                                                    b_values),
-                                                                   m0_values_precommit),
+                                                                   m0_values_precommit_1),
                                                                    n0_values_precommit),
                                                                    k0_values_precommit),
                                                                    v0_values_precommit),
                                                                    h0_values_precommit),
                                                                    i_values_lhs),
-                                                                   i_values_rhs))
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyReshapedFixture, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
                                                                    k_values),
@@ -149,33 +155,35 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyReshapedFixture, framew
                                                                    v0_values_nightly),
                                                                    h0_values_nightly),
                                                                    i_values_lhs),
-                                                                   i_values_rhs))
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMLowpMatrixMultiplyReshaped3DFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
                                                                    k_values),
                                                                    b_values),
-                                                                   m0_values_precommit),
+                                                                   m0_values_precommit_1),
                                                                    n0_values_precommit),
                                                                    k0_values_precommit),
                                                                    v0_values_precommit),
                                                                    h0_values_precommit),
                                                                    i_values_lhs),
-                                                                   i_values_rhs))
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyReshaped3DFixture, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -187,11 +195,55 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyReshaped3DFixture, fr
                                                                    v0_values_nightly),
                                                                    h0_values_nightly),
                                                                    i_values_lhs),
-                                                                   i_values_rhs))
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", { DataType::QASYMM8 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyReshapedFixture, framework::DatasetMode::ALL,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit_2),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   v0_values_precommit),
+                                                                   h0_values_precommit),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMLowpMatrixMultiplyReshaped3DFixture, framework::DatasetMode::ALL,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit_2),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   v0_values_precommit),
+                                                                   h0_values_precommit),
+                                                                   i_values_lhs),
+                                                                   i_values_rhs),
+                                                                   framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
+TEST_SUITE_END() // QUANTIZED
 TEST_SUITE_END() // GEMMLowpMatrixMultiplyReshaped
 TEST_SUITE_END() // CL
 } // namespace validation

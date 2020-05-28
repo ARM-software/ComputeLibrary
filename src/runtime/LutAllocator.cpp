@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/LutAllocator.h"
-
-#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 

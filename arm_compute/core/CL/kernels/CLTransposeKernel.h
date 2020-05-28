@@ -44,6 +44,13 @@ public:
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor. Data types supported: All.
+     * @param[out] output          Output tensor. Data type supported: Same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLTransposeKernel
      *
      * @param[in] input  Input tensor. Data types supported: All.

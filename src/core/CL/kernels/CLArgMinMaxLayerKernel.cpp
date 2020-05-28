@@ -34,7 +34,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -116,6 +116,11 @@ CLArgMinMaxLayerKernel::CLArgMinMaxLayerKernel()
 
 void CLArgMinMaxLayerKernel::configure(const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, prev_output, output, axis, op);
+}
+
+void CLArgMinMaxLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *prev_output, ICLTensor *output, unsigned int axis, ReductionOperation op)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (prev_output != nullptr) ? prev_output->info() : nullptr, output->info(), axis, op));
     auto win_config = validate_and_configure_window(input->info(), (prev_output != nullptr) ? prev_output->info() : nullptr, output->info(), axis, op);
@@ -167,7 +172,7 @@ void CLArgMinMaxLayerKernel::configure(const ICLTensor *input, const ICLTensor *
         default:
             ARM_COMPUTE_ERROR("Not supported");
     }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("arg_min_max_" + kernel_axis_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, "arg_min_max_" + kernel_axis_name, build_opts.options());
 
     // Configure kernel window
     ICLKernel::configure_internal(std::get<1>(win_config), lws_hint);

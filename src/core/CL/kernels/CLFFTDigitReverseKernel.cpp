@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -74,6 +75,11 @@ CLFFTDigitReverseKernel::CLFFTDigitReverseKernel()
 
 void CLFFTDigitReverseKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, idx, config);
+}
+
+void CLFFTDigitReverseKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, idx);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), idx->info(), config));
 
@@ -86,7 +92,7 @@ void CLFFTDigitReverseKernel::configure(const ICLTensor *input, ICLTensor *outpu
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(input->info()->num_channels()));
     build_opts.add_option_if(config.conjugate, "-DCONJ");
     std::string kernel_name = "fft_digit_reverse_axis_" + support::cpp11::to_string(config.axis);
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), idx->info(), config);

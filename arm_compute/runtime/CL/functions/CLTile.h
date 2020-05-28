@@ -43,6 +43,14 @@ public:
      * @param[out] output    Destination tensor. Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output, const Multiples &multiples);
+    /** Set the source, destination of the kernel
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data type supported: All.
+     * @param[in]  multiples       Contains the number of times the input tensor should be replicated on the given dimension.
+     * @param[out] output          Destination tensor. Same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Multiples &multiples);
     /** Static function to check if given info will lead to a valid configuration of @ref CLTile
      *
      * @param[in] input     Source tensor info. Data type supported: All.

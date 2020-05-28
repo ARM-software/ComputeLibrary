@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,9 @@ namespace
 template <typename T>
 void rdft_1d_step(const T *src_ptr, size_t N, T *dst_ptr, size_t K)
 {
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(unsigned int k = 0; k < K; ++k)
     {
         float Xr = 0;
@@ -77,6 +80,9 @@ void rdft_1d_step(const T *src_ptr, size_t N, T *dst_ptr, size_t K)
 template <typename T>
 void dft_1d_step(const T *src_ptr, T *dst_ptr, size_t N)
 {
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(unsigned int k = 0; k < N; ++k)
     {
         float Xr = 0;
@@ -111,7 +117,9 @@ void irdft_1d_step(const T *src_ptr, size_t K, T *dst_ptr, size_t N)
     const bool         is_odd     = N % 2;
     const unsigned int Nleft      = N - K;
     const int          tail_start = is_odd ? K - 1 : K - 2;
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(unsigned int n = 0; n < N; ++n)
     {
         float xr = 0;
@@ -142,6 +150,9 @@ void irdft_1d_step(const T *src_ptr, size_t K, T *dst_ptr, size_t N)
 template <typename T>
 void idft_1d_step(const T *src_ptr, T *dst_ptr, size_t N)
 {
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(unsigned int n = 0; n < N; ++n)
     {
         float xr = 0;
@@ -181,6 +192,9 @@ SimpleTensor<T> rdft_1d_core(const SimpleTensor<T> &src, FFTDirection direction,
     SimpleTensor<T> dst(dst_shape, src.data_type(), num_channels);
 
     const unsigned int upper_dims = src.shape().total_size_upper(1);
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(unsigned int du = 0; du < upper_dims; ++du)
     {
         const T *src_row_ptr = src.data() + du * N * src.num_channels();
@@ -201,6 +215,9 @@ SimpleTensor<T> dft_1d_core(const SimpleTensor<T> &src, FFTDirection direction)
     SimpleTensor<T> dst(src.shape(), src.data_type(), src.num_channels());
 
     const unsigned int upper_dims = src.shape().total_size_upper(1);
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(unsigned int du = 0; du < upper_dims; ++du)
     {
         const T *src_row_ptr = src.data() + du * N * src.num_channels();
@@ -221,6 +238,9 @@ void scale(SimpleTensor<T> &tensor, T scaling_factor)
 {
     const int total_elements = tensor.num_elements() * tensor.num_channels();
     T        *data_ptr       = tensor.data();
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < total_elements; ++i)
     {
         data_ptr[i] /= scaling_factor;

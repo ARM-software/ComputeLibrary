@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,10 +52,10 @@ public:
     NEHistogramKernel(const NEHistogramKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEHistogramKernel &operator=(const NEHistogramKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEHistogramKernel(NEHistogramKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEHistogramKernel &operator=(NEHistogramKernel &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHistogramKernel(NEHistogramKernel &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHistogramKernel &operator=(NEHistogramKernel &&) = delete;
 
     /** Set the input image and the distribution output.
      *

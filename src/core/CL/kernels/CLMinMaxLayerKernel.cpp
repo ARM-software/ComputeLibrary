@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 #include <climits>
 
@@ -87,6 +88,11 @@ CLMinMaxLayerKernel::CLMinMaxLayerKernel()
 
 void CLMinMaxLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLMinMaxLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
@@ -99,7 +105,7 @@ void CLMinMaxLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
     build_opts.emplace("-DDEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("minmax_layer", build_opts));
+    _kernel = create_kernel(compile_context, "minmax_layer", build_opts);
 
     auto win_config = validate_and_configure_window(input->info(), output->info());
 

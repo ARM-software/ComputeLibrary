@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,6 +74,26 @@ public:
      *                              available which may introduce a drop of accuracy as well. Default is false
      */
     void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
+    /** Set the input and output tensors.
+     *
+     * @note: This function only works with 3x3,3x1,1x3,5x5,5x1,1x5,7x1 and 1x7 kernels along with unit strides for both NCHW and NHWC data layout
+     * @note  Some Winograd configurations (i.e. F(4x4, 5x5)) are supported only with enable_fast_math = true
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
+     *                              while every optional dimension from 4 and above represent a batch of inputs.
+     *                              Data types supported: F16/F32.
+     * @param[in]  weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
+     * @param[in]  biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].Data type supported: Same as @p input
+     * @param[out] output           Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
+     *                              Data types supported: Same as @p input.
+     * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
+     *                              available which may introduce a drop of accuracy as well. Default is false
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
                    const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradConvolutionLayer
      *

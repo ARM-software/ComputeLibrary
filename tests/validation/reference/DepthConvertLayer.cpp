@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,9 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     // Up-casting
     if(element_size_from_data_type(src.data_type()) < element_size_from_data_type(dt_out))
     {
+#if defined(_OPENMP)
+        #pragma omp parallel for
+#endif /* _OPENMP */
         for(int i = 0; i < src.num_elements(); ++i)
         {
             result[i] = src[i] << shift;
@@ -54,6 +57,9 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     // Down-casting
     else
     {
+#if defined(_OPENMP)
+        #pragma omp parallel for
+#endif /* _OPENMP */
         for(int i = 0; i < src.num_elements(); ++i)
         {
             T1 val    = src[i] >> shift;
@@ -63,14 +69,14 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     return result;
 }
 
-template < typename T1, typename T2, typename std::enable_if < is_floating_point<T1>::value &&!std::is_same<T1, T2>::value, int >::type >
+template < typename T1, typename T2, typename std::enable_if < is_floating_point<T1>::value &&(!std::is_same<T1, T2>::value &&!std::is_same<T2, bfloat16>::value), int >::type >
 SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
 {
     SimpleTensor<T2> result(src.shape(), dt_out);
     ARM_COMPUTE_ERROR_ON(shift != 0);
     ARM_COMPUTE_UNUSED(policy, shift);
 
-    if(!is_floating_point<T2>::value)
+    if(!std::is_same<T2, bfloat16>::value && !is_floating_point<T2>::value)
     {
         // Always saturate on floats
         for(int i = 0; i < src.num_elements(); ++i)
@@ -86,6 +92,21 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
             result[i] = static_cast<T2>(src[i]);
         }
     }
+    return result;
+}
+
+template < typename T1, typename T2, typename std::enable_if < std::is_same<T1, bfloat16>::value || std::is_same<T2, bfloat16>::value, int >::type >
+SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
+{
+    SimpleTensor<T2> result(src.shape(), dt_out);
+    ARM_COMPUTE_ERROR_ON(shift != 0);
+    ARM_COMPUTE_UNUSED(policy, shift);
+
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        result[i] = static_cast<T2>(src[i]);
+    }
+
     return result;
 }
 
@@ -143,6 +164,9 @@ template SimpleTensor<uint32_t> depth_convert(const SimpleTensor<int32_t> &src, 
 template SimpleTensor<half> depth_convert(const SimpleTensor<int32_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<float> depth_convert(const SimpleTensor<int32_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 
+// BFLOAT16
+template SimpleTensor<float> depth_convert(const SimpleTensor<bfloat16> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+
 // F16
 template SimpleTensor<uint8_t> depth_convert(const SimpleTensor<half> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<int8_t> depth_convert(const SimpleTensor<half> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
@@ -160,6 +184,7 @@ template SimpleTensor<int16_t> depth_convert(const SimpleTensor<float> &src, Dat
 template SimpleTensor<uint32_t> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<int32_t> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<half> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<bfloat16> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 
 } // namespace reference
 } // namespace validation

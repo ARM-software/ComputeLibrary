@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1031,12 +1031,12 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns LHS matrix
  *
- * @param[in]  lhs_ptr                            Pointer to the LHS reshaped matrix. Supported data type: F16/F32
- * @param[in]  lhs_stride_x                       Stride of the LHS reshaped matrix in X dimension (in bytes)
+ * @param[in]  lhs_ptr                            Pointer to the LHS matrix. Supported data type: F16/F32
+ * @param[in]  lhs_stride_x                       Stride of the LHS matrix in X dimension (in bytes)
  * @param[in]  lhs_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  lhs_stride_y                       Stride of the LHS reshaped matrix in Y dimension (in bytes)
+ * @param[in]  lhs_stride_y                       Stride of the LHS matrix in Y dimension (in bytes)
  * @param[in]  lhs_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  lhs_offset_first_element_in_bytes  The offset of the first element in the LHS reshaped matrix
+ * @param[in]  lhs_offset_first_element_in_bytes  The offset of the first element in the LHS matrix
  * @param[in]  rhs_ptr                            Pointer to the RHS reshaped matrix. Supported data type: same as @p lhs_ptr
  * @param[in]  rhs_stride_x                       Stride of the RHS reshaped matrix in X dimension (in bytes)
  * @param[in]  rhs_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1055,7 +1055,7 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
- * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
+ * @param[in]  lhs_stride_z                       Stride of the LHS matrix in Z dimension (in bytes)
  * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
@@ -1112,7 +1112,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
     // Compute LHS matrix address
     uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
 
-    // Compute RHS matrix address
+    // Compute RHS reshaped matrix address
     uint rhs_offset = rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X * sizeof(DATA_TYPE) + (x / (uint)H0) * rhs_stride_y;
 
 #if defined(MATRIX_B_DEPTH)
@@ -1158,7 +1158,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
         // Load values from LHS matrix
         LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
-        // Load values from RHS matrix
+        // Load values from RHS reshaped matrix
         LOAD_BLOCK(N0, K0, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X * sizeof(DATA_TYPE), zero);
 
         // Accumulate
@@ -1195,7 +1195,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
         // Load values from LHS matrix
         LOAD_BLOCK(M0, 1, DATA_TYPE, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
 
-        // Load values from RHS matrix
+        // Load values from RHS reshaped matrix
         LOAD_BLOCK(N0, 1, DATA_TYPE, b, rhs_ptr, rhs_offset, RHS_STEP_X * sizeof(DATA_TYPE), zero);
 
         // Accumulate
@@ -1411,12 +1411,12 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns LHS matrix
  *
- * @param[in]  lhs_ptr                            Pointer to the LHS reshaped matrix. Supported data type: F16/F32
- * @param[in]  lhs_stride_x                       Stride of the LHS reshaped matrix in X dimension (in bytes)
+ * @param[in]  lhs_ptr                            Pointer to the LHS matrix. Supported data type: F16/F32
+ * @param[in]  lhs_stride_x                       Stride of the LHS matrix in X dimension (in bytes)
  * @param[in]  lhs_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  lhs_stride_y                       Stride of the LHS reshaped matrix in Y dimension (in bytes)
+ * @param[in]  lhs_stride_y                       Stride of the LHS matrix in Y dimension (in bytes)
  * @param[in]  lhs_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  lhs_offset_first_element_in_bytes  The offset of the first element in the LHS reshaped matrix
+ * @param[in]  lhs_offset_first_element_in_bytes  The offset of the first element in the LHS matrix
  * @param[in]  rhs_ptr                            Pointer to the RHS reshaped matrix. Supported data type: same as @p lhs_ptr
  * @param[in]  rhs_stride_x                       Stride of the RHS reshaped matrix in X dimension (in bytes)
  * @param[in]  rhs_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1435,7 +1435,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
- * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
+ * @param[in]  lhs_stride_z                       Stride of the LHS matrix in Z dimension (in bytes)
  * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
@@ -1492,7 +1492,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
     // Compute LHS matrix address
     uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
 
-    // Compute RHS matrix address
+    // Compute RHS reshaped matrix address
     uint rhs_offset = rhs_offset_first_element_in_bytes + (x % H0) * (uint)RHS_OFFSET_X * sizeof(DATA_TYPE) + (x / (uint)H0) * rhs_stride_y;
 
 #if defined(MATRIX_B_DEPTH)

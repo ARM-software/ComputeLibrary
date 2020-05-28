@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -156,6 +157,11 @@ CLCopyKernel::CLCopyKernel()
 
 void CLCopyKernel::configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding, Window *output_window)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, padding, output_window);
+}
+
+void CLCopyKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding, Window *output_window)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), padding, output_window));
 
@@ -198,7 +204,7 @@ void CLCopyKernel::configure(const ICLTensor *input, ICLTensor *output, const Pa
         }
 
         // Build kernel
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("copy_tensor", build_opts.options()));
+        _kernel = create_kernel(compile_context, "copy_tensor", build_opts.options());
     }
     else
     {
@@ -216,7 +222,7 @@ void CLCopyKernel::configure(const ICLTensor *input, ICLTensor *output, const Pa
         }
 
         // Build kernel
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("copy_pad_tensor", build_opts.options()));
+        _kernel = create_kernel(compile_context, "copy_pad_tensor", build_opts.options());
 
         // Configure window
         win_config = validate_and_configure_window_with_padding(input->info(), output->info(), padding);

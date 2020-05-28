@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,23 +47,24 @@ public:
      *
      * Valid conversions Input -> Output :
      *
-     *   - QASYMM8 -> F16, F32
-     *   - U8 -> U16, S16, S32
-     *   - U16 -> U8, U32
-     *   - S16 -> U8, S32
-     *   - F16 -> QASYMM8, F32
-     *   - F32 -> QASYMM8, F16
+     *   - QASYMM8  -> F16, F32
+     *   - U8       -> U16, S16, S32
+     *   - U16      -> U8, U32
+     *   - S16      -> U8, S32
+     *   - BFLOAT16 -> F32
+     *   - F16      -> QASYMM8, F32
+     *   - F32      -> QASYMM8, F16, BFLOAT16
      *
-     * @param[in]  input  The input tensor to convert. Data types supported: QASYMM8/U8/U16/S16/F16/F32.
-     * @param[out] output The output tensor. Data types supported: QASYMM8/U8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input  The input tensor to convert. Data types supported: QASYMM8/U8/U16/S16/BFLOAT16/F16/F32.
+     * @param[out] output The output tensor. Data types supported: QASYMM8/U8/U16/S16/U32/S32/BFLOAT16/F16/F32.
      * @param[in]  policy Conversion policy.
      * @param[in]  shift  (Optional) Value for down/up conversions. Must be 0 <= shift < 8.
      */
     void configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthConvertLayer
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/U8/U16/S16/F16/F32.
-     * @param[in] output Destination tensor info. Data type supported: QASYMM8/U8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/U8/U16/S16/BFLOAT16/F16/F32.
+     * @param[in] output Destination tensor info. Data type supported: QASYMM8/U8/U16/S16/U32/S32/BFLOAT16/F16/F32.
      * @param[in] policy Conversion policy.
      * @param[in] shift  (Optional) Value for down/up conversions. Must be 0 <= shift < 8.
      *

@@ -26,7 +26,6 @@
 #include "arm_compute/core/utils/io/FileHandler.h"
 
 #include "arm_compute/core/Error.h"
-#include "support/ToolchainSupport.h"
 
 using namespace arm_compute::io;
 

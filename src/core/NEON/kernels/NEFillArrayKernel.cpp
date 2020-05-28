@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,13 +47,9 @@ void NEFillArrayKernel::configure(const IImage *input, uint8_t threshold, IKeyPo
     _threshold = threshold;
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
-    constexpr unsigned int num_elems_read_per_iteration      = 1;
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
-    update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_read_per_iteration));
-
     INEKernel::configure(win);
 }
 

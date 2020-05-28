@@ -82,6 +82,158 @@ inline int32x4x3_t load_matrix_row(const T *ptr, int weights_offset = 0)
     return r;
 }
 
+/** Stores a float32x4x2_t array into a memory location.
+ *
+ * @param[in] buffer Pointer to the memory location where the values will be stored.
+ * @param[in] values Values that will be stored.
+ *
+ */
+template <unsigned int stridex>
+void store_results(float *buffer, const float32x4x2_t &values);
+
+template <>
+inline void store_results<1>(float *buffer, const float32x4x2_t &values)
+{
+    vst1q_f32(buffer, values.val[0]);
+    vst1q_f32(buffer + 4, values.val[1]);
+}
+
+template <>
+inline void store_results<2>(float *buffer, const float32x4x2_t &values)
+{
+    vst1q_f32(buffer, values.val[0]);
+}
+
+template <>
+inline void store_results<3>(float *buffer, const float32x4x2_t &values)
+{
+    vst1_f32(buffer, vget_low_f32(values.val[0]));
+}
+
+/** Stores a uint32_t array into a memory location.
+ *
+ * @param[in] buffer Pointer to the memory location where the values will be stored.
+ * @param[in] values Values that will be stored.
+ *
+ */
+template <unsigned int stridex>
+void store_results(int32_t *buffer, const int32x4x2_t &values);
+
+template <>
+inline void store_results<1>(int32_t *buffer, const int32x4x2_t &values)
+{
+    vst1q_s32(buffer, values.val[0]);
+    vst1q_s32(buffer + 4, values.val[1]);
+}
+
+template <>
+inline void store_results<2>(int32_t *buffer, const int32x4x2_t &values)
+{
+    vst1q_s32(buffer, values.val[0]);
+}
+
+template <>
+inline void store_results<3>(int32_t *buffer, const int32x4x2_t &values)
+{
+    vst1_s32(buffer, vget_low_s32(values.val[0]));
+}
+
+template <unsigned int stridex>
+inline void accumulate_results(float *buffer, const float32x4x2_t &values);
+
+template <>
+inline void accumulate_results<1>(float *buffer, const float32x4x2_t &values)
+{
+    vst1q_f32(buffer, vaddq_f32(vld1q_f32(buffer), values.val[0]));
+    vst1q_f32(buffer + 4, vaddq_f32(vld1q_f32(buffer + 4), values.val[1]));
+}
+
+template <>
+inline void accumulate_results<2>(float *buffer, const float32x4x2_t &values)
+{
+    vst1q_f32(buffer, vaddq_f32(vld1q_f32(buffer), values.val[0]));
+}
+
+template <>
+inline void accumulate_results<3>(float *buffer, const float32x4x2_t &values)
+{
+    vst1_f32(buffer, vadd_f32(vld1_f32(buffer), vget_low_f32(values.val[0])));
+}
+
+template <unsigned int stridex>
+void accumulate_results(int32_t *buffer, const int32x4x2_t &values);
+
+template <>
+inline void accumulate_results<1>(int32_t *buffer, const int32x4x2_t &values)
+{
+    vst1q_s32(buffer, vaddq_s32(vld1q_s32(buffer), values.val[0]));
+    vst1q_s32(buffer + 4, vaddq_s32(vld1q_s32(buffer + 4), values.val[1]));
+}
+
+template <>
+inline void accumulate_results<2>(int32_t *buffer, const int32x4x2_t &values)
+{
+    vst1q_s32(buffer, vaddq_s32(vld1q_s32(buffer), values.val[0]));
+}
+
+template <>
+inline void accumulate_results<3>(int32_t *buffer, const int32x4x2_t &values)
+{
+    vst1_s32(buffer, vadd_s32(vld1_s32(buffer), vget_low_s32(values.val[0])));
+}
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+/** Stores a float16x8x2_t array into a memory location.
+ *
+ * @param[in] buffer Pointer to the memory location where the values will be stored.
+ * @param[in] values Values that will be stored.
+ *
+ */
+template <unsigned int stridex>
+void store_results(float16_t *buffer, const float16x8x2_t &values);
+
+template <>
+inline void store_results<1>(float16_t *buffer, const float16x8x2_t &values)
+{
+    vst1q_f16(buffer, values.val[0]);
+    vst1q_f16(buffer + 8, values.val[1]);
+}
+
+template <>
+inline void store_results<2>(float16_t *buffer, const float16x8x2_t &values)
+{
+    vst1q_f16(buffer, values.val[0]);
+}
+
+template <>
+inline void store_results<3>(float16_t *buffer, const float16x8x2_t &values)
+{
+    vst1_f16(buffer, vget_low_f16(values.val[0]));
+}
+
+template <unsigned int stridex>
+inline void accumulate_results(float16_t *buffer, const float16x8x2_t &values);
+
+template <>
+inline void accumulate_results<1>(float16_t *buffer, const float16x8x2_t &values)
+{
+    vst1q_f16(buffer, vaddq_f16(vld1q_f16(buffer), values.val[0]));
+    vst1q_f16(buffer + 8, vaddq_f16(vld1q_f16(buffer + 8), values.val[1]));
+}
+
+template <>
+inline void accumulate_results<2>(float16_t *buffer, const float16x8x2_t &values)
+{
+    vst1q_f16(buffer, vaddq_f16(vld1q_f16(buffer), values.val[0]));
+}
+
+template <>
+inline void accumulate_results<3>(float16_t *buffer, const float16x8x2_t &values)
+{
+    vst1_f16(buffer, vadd_f16(vld1_f16(buffer), vget_low_f16(values.val[0])));
+}
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
 /** Perform a 3x3 convolution for 4 consecutive elements on float32 when dilation.x() or dilation.y() is not 1.
  *
  * @param[in] in_top       Pointer to the first row of the input.
@@ -181,23 +333,26 @@ inline float32x4x2_t convolve_3x3_dilation(const float *in_top, const float *in_
 
 /** Perform a convolve3x3 on float32.
  *
- * @param[in] in_top       Pointer to the first row of the input.
- * @param[in] in_mid       Pointer to the second row of the input.
- * @param[in] in_low       Pointer to the third row of the input.
- * @param[in] m0           First row of the filter.
- * @param[in] m1           Second row of the filter.
- * @param[in] m2           Third row of the filter.
- * @param[in] stridex      Stride value in elements across x.
- * @param[in] input_offset (Optional) Input quantization offset.
+ * @param[in]  in_top       Pointer to the first row of the input.
+ * @param[in]  in_mid       Pointer to the second row of the input.
+ * @param[in]  in_low       Pointer to the third row of the input.
+ * @param[out] out_ptr      Pointer to the output.
+ * @param[in]  m0           First row of the filter.
+ * @param[in]  m1           Second row of the filter.
+ * @param[in]  m2           Third row of the filter.
+ * @param[in]  stridex      Stride value in elements across x.
+ * @param[in]  input_offset (Optional) Input quantization offset.
  *
  */
-float32x4x2_t convolve_3x3(const float *in_top, const float *in_mid, const float *in_low,
-                           const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
-                           unsigned int stridex, int input_offset = 0);
+template <bool accumulate>
+void convolve_3x3(const float *in_top, const float *in_mid, const float *in_low, float *out_ptr,
+                  const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
+                  unsigned int stridex, int input_offset = 0);
 
-inline float32x4x2_t convolve_3x3(const float *in_top, const float *in_mid, const float *in_low,
-                                  const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
-                                  unsigned int stridex, int input_offset)
+template <bool accumulate>
+inline void convolve_3x3(const float *in_top, const float *in_mid, const float *in_low, float *out_ptr,
+                         const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
+                         unsigned int stridex, int input_offset)
 {
     ARM_COMPUTE_UNUSED(input_offset);
     ARM_COMPUTE_ERROR_ON(stridex > 3);
@@ -230,6 +385,8 @@ inline float32x4x2_t convolve_3x3(const float *in_top, const float *in_mid, cons
         out.val[0] = vmlaq_f32(out.val[0], vlow.val[0], m2.val[0]);
         out.val[0] = vmlaq_f32(out.val[0], vlow.val[1], m2.val[1]);
         out.val[0] = vmlaq_f32(out.val[0], vextq_f32(vlow.val[0], vlow_end, 1), m2.val[2]);
+
+        accumulate ? accumulate_results<2>(out_ptr, out) : store_results<2>(out_ptr, out);
     }
     else
     {
@@ -285,10 +442,13 @@ inline float32x4x2_t convolve_3x3(const float *in_top, const float *in_mid, cons
         if(stridex == 3)
         {
             out.val[0] = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 3), out.val[0], 1);
+            accumulate ? accumulate_results<3>(out_ptr, out) : store_results<3>(out_ptr, out);
+        }
+        else
+        {
+            accumulate ? accumulate_results<1>(out_ptr, out) : store_results<1>(out_ptr, out);
         }
     }
-
-    return out;
 }
 
 /** Perform a 3x3 convolution for 4 consecutive 8-bit elements when dilation.x() or dilation.y() is not 1.
@@ -419,23 +579,24 @@ inline int32x4x2_t convolve_3x3_dilation(const T *in_top, const T *in_mid, const
 
 /** Perform a convolve3x3 on 8-bit elements
  *
- * @param[in] in_top       Pointer to the first row of the input.
- * @param[in] in_mid       Pointer to the second row of the input.
- * @param[in] in_low       Pointer to the third row of the input.
- * @param[in] m0           First row of the filter.
- * @param[in] m1           Second row of the filter.
- * @param[in] m2           Third row of the filter.
- * @param[in] stridex      Stride value in elements across x.
- * @param[in] input_offset Input quantization offset.
+ * @param[in]  in_top       Pointer to the first row of the input.
+ * @param[in]  in_mid       Pointer to the second row of the input.
+ * @param[in]  in_low       Pointer to the third row of the input.
+ * @param[out] out_ptr      Pointer to the output.
+ * @param[in]  m0           First row of the filter.
+ * @param[in]  m1           Second row of the filter.
+ * @param[in]  m2           Third row of the filter.
+ * @param[in]  stridex      Stride value in elements across x.
+ * @param[in]  input_offset Input quantization offset.
  *
  */
-template < typename T, REQUIRES_TA(std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value) >
-int32x4x2_t convolve_3x3(const T *in_top, const T *in_mid, const T *in_low,
-                         const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
-                         unsigned int stridex, int32_t input_offset)
+template < bool accumulate, typename T1, typename T2, REQUIRES_TA(std::is_same<T1, uint8_t>::value || std::is_same<T1, int8_t>::value) >
+void convolve_3x3(const T1 *in_top, const T1 *in_mid, const T1 *in_low, T2 *out_ptr,
+                  const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
+                  unsigned int stridex, int32_t input_offset)
 {
     ARM_COMPUTE_ERROR_ON(stridex > 3);
-    using VectorType    = typename std::conditional<std::is_same<T, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
+    using VectorType    = typename std::conditional<std::is_same<T1, uint8_t>::value, uint8x8x2_t, int8x8x2_t>::type;
     using OutputTagType = typename wrapper::traits::neon_bitvector_tag_t<int32_t, wrapper::traits::BitWidth::W128>;
 
     const int32x4_t v_input_offset = wrapper::vdup_n(input_offset, OutputTagType{});
@@ -521,73 +682,23 @@ int32x4x2_t convolve_3x3(const T *in_top, const T *in_mid, const T *in_low,
     out.val[1] = wrapper::vmla(out.val[1], wrapper::vext_1(vlow_s32.val[1], vlow_s32.val[2]), m2.val[1]);
     out.val[1] = wrapper::vmla(out.val[1], wrapper::vext_2(vlow_s32.val[1], vlow_s32.val[2]), m2.val[2]);
 
-    if(stridex == 2)
+    if(stridex == 1)
+    {
+        accumulate ? accumulate_results<1>(out_ptr, out) : store_results<1>(out_ptr, out);
+    }
+    else if(stridex == 2)
     {
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[0], 2), out.val[0], 1);
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[1], 0), out.val[0], 2);
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[1], 2), out.val[0], 3);
+
+        accumulate ? accumulate_results<2>(out_ptr, out) : store_results<2>(out_ptr, out);
     }
     else if(stridex == 3)
     {
         out.val[0] = wrapper::vsetlane(wrapper::vgetlane(out.val[0], 3), out.val[0], 1);
+        accumulate ? accumulate_results<3>(out_ptr, out) : store_results<3>(out_ptr, out);
     }
-    return out;
-}
-
-/** Stores a float32x4x2_t array into a memory location.
- *
- * @param[in] buffer Pointer to the memory location where the values will be stored.
- * @param[in] values Values that will be stored.
- *
- */
-template <unsigned int stridex>
-void store_results(float *buffer, const float32x4x2_t &values);
-
-template <>
-inline void store_results<1>(float *buffer, const float32x4x2_t &values)
-{
-    vst1q_f32(buffer, values.val[0]);
-    vst1q_f32(buffer + 4, values.val[1]);
-}
-
-template <>
-inline void store_results<2>(float *buffer, const float32x4x2_t &values)
-{
-    vst1q_f32(buffer, values.val[0]);
-}
-
-template <>
-inline void store_results<3>(float *buffer, const float32x4x2_t &values)
-{
-    vst1_f32(buffer, vget_low_f32(values.val[0]));
-}
-
-/** Stores a uint32_t array into a memory location.
- *
- * @param[in] buffer Pointer to the memory location where the values will be stored.
- * @param[in] values Values that will be stored.
- *
- */
-template <unsigned int stridex>
-void store_results(int32_t *buffer, const int32x4x2_t &values);
-
-template <>
-inline void store_results<1>(int32_t *buffer, const int32x4x2_t &values)
-{
-    vst1q_s32(buffer, values.val[0]);
-    vst1q_s32(buffer + 4, values.val[1]);
-}
-
-template <>
-inline void store_results<2>(int32_t *buffer, const int32x4x2_t &values)
-{
-    vst1q_s32(buffer, values.val[0]);
-}
-
-template <>
-inline void store_results<3>(int32_t *buffer, const int32x4x2_t &values)
-{
-    vst1_s32(buffer, vget_low_s32(values.val[0]));
 }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -716,19 +827,21 @@ inline float16x8x2_t convolve_3x3_dilation(const float16_t *in_top, const float1
 
 /** Perform a convolve3x3 on float16.
  *
- * @param[in] in_top       Pointer to the first row of the input.
- * @param[in] in_mid       Pointer to the second row of the input.
- * @param[in] in_low       Pointer to the third row of the input.
- * @param[in] m0           First row of the filter.
- * @param[in] m1           Second row of the filter.
- * @param[in] m2           Third row of the filter.
- * @param[in] stridex      Stride value in elements across x.
- * @param[in] input_offset (Optional) Input quantization offset.
+ * @param[in]  in_top       Pointer to the first row of the input.
+ * @param[in]  in_mid       Pointer to the second row of the input.
+ * @param[in]  in_low       Pointer to the third row of the input.
+ * @param[out] out_ptr      Pointer to the output.
+ * @param[in]  m0           First row of the filter.
+ * @param[in]  m1           Second row of the filter.
+ * @param[in]  m2           Third row of the filter.
+ * @param[in]  stridex      Stride value in elements across x.
+ * @param[in]  input_offset (Optional) Input quantization offset.
  *
  */
-inline float16x8x2_t convolve_3x3(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
-                                  const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
-                                  unsigned int stridex, int input_offset = 0)
+template <bool accumulate>
+inline void convolve_3x3(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low, float16_t *out_ptr,
+                         const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                         unsigned int stridex, int input_offset = 0)
 {
     ARM_COMPUTE_UNUSED(input_offset);
 
@@ -760,6 +873,8 @@ inline float16x8x2_t convolve_3x3(const float16_t *in_top, const float16_t *in_m
         out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vlow.val[0], m2.val[0]));
         out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vlow.val[1], m2.val[1]));
         out.val[0] = vaddq_f16(out.val[0], vmulq_f16(vextq_f16(vlow.val[0], vlow_end, 1), m2.val[2]));
+
+        accumulate ? accumulate_results<2>(out_ptr, out) : store_results<2>(out_ptr, out);
     }
     else
     {
@@ -812,40 +927,16 @@ inline float16x8x2_t convolve_3x3(const float16_t *in_top, const float16_t *in_m
             out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 3), out.val[0], 1);
             out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 2);
             out.val[0] = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 1), out.val[0], 3);
+
+            accumulate ? accumulate_results<3>(out_ptr, out) : store_results<3>(out_ptr, out);
+        }
+        else
+        {
+            accumulate ? accumulate_results<1>(out_ptr, out) : store_results<1>(out_ptr, out);
         }
     }
-
-    return out;
 }
-
-/** Stores a float16x8x2_t array into a memory location.
- *
- * @param[in] buffer Pointer to the memory location where the values will be stored.
- * @param[in] values Values that will be stored.
- *
- */
-template <unsigned int stridex>
-void store_results(float16_t *buffer, const float16x8x2_t &values);
-
-template <>
-inline void store_results<1>(float16_t *buffer, const float16x8x2_t &values)
-{
-    vst1q_f16(buffer, values.val[0]);
-    vst1q_f16(buffer + 8, values.val[1]);
-}
-
-template <>
-inline void store_results<2>(float16_t *buffer, const float16x8x2_t &values)
-{
-    vst1q_f16(buffer, values.val[0]);
-}
-
-template <>
-inline void store_results<3>(float16_t *buffer, const float16x8x2_t &values)
-{
-    vst1_f16(buffer, vget_low_f16(values.val[0]));
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif /** __ARM_FEATURE_FP16_VECTOR_ARITHMETIC **/
 
 /** Get the number of elements processed on 3x3 convolution.
  *

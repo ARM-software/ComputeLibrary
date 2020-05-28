@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,30 +79,27 @@ protected:
         TensorType boxes_ind = create_tensor<TensorType>(TensorShape(boxes_shape[1]), DataType::S32);
         TensorType dst       = create_tensor<TensorType>(dst_shape, DataType::F32, 1, QuantizationInfo(), DataLayout::NHWC);
 
+        boxes.allocator()->allocate();
+        boxes_ind.allocator()->allocate();
+        fill(AccessorType(boxes), 1, is_outside_bounds ? 0.0f - out_of_bounds_reach : 0.0f, is_outside_bounds ? 1.0f + out_of_bounds_reach : 1.0f);
+        fill(AccessorType(boxes_ind), 2, 0, static_cast<int32_t>(src_shape[3] - 1));
+
         // Create and configure function
         FunctionType crop;
         crop.configure(&src, &boxes, &boxes_ind, &dst, crop_size, method, extrapolation_value);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(boxes.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(boxes_ind.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         src.allocator()->allocate();
-        boxes.allocator()->allocate();
-        boxes_ind.allocator()->allocate();
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!boxes.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!boxes_ind.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(src), 0);
-        fill(AccessorType(boxes), 1, is_outside_bounds ? 0.0f - out_of_bounds_reach : 0.0f, is_outside_bounds ? 1.0f + out_of_bounds_reach : 1.0f);
-        fill(AccessorType(boxes_ind), 2, 0, static_cast<int32_t>(src_shape[3] - 1));
 
         // Compute function
         crop.run();

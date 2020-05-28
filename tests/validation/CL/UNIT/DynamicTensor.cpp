@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,6 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
-#include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <cmath>
 
@@ -84,6 +85,11 @@ CLFFTRadixStageKernel::CLFFTRadixStageKernel()
 
 void CLFFTRadixStageKernel::configure(ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, config);
+}
+
+void CLFFTRadixStageKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, config));
 
@@ -100,7 +106,7 @@ void CLFFTRadixStageKernel::configure(ICLTensor *input, ICLTensor *output, const
     kernel_name += "_radix_" + support::cpp11::to_string(config.radix);
     kernel_name += (config.is_first_stage) ? "_first_stage" : "";
     kernel_name += "_axis_" + support::cpp11::to_string(config.axis);
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set static arguments if not the first stage
     if(!config.is_first_stage)

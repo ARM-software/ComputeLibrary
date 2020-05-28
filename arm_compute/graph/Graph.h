@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,10 +64,10 @@ public:
     Graph(const Graph &) = delete;
     /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     Graph &operator=(const Graph &) = delete;
-    /** Allow instances of this class to be moved */
-    Graph(Graph &&) = default;
-    /** Allow instances of this class to be move assigned */
-    Graph &operator=(Graph &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    Graph(Graph &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    Graph &operator=(Graph &&) = delete;
     /** Adds a node to the graph
      *
      * @note Models a single output node

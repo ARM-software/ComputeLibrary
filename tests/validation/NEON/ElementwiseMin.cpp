@@ -41,7 +41,8 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float> tolerance_fp32(0.000001f);
+constexpr RelativeTolerance<float>  tolerance_fp32(0.000001f);
+constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_signed(1);
 /** Input data sets **/
 const auto ElementwiseMinQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
                                                   framework::dataset::make("DataType",
@@ -79,7 +80,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),                // Mismatching shapes
                                                         TensorInfo(TensorShape(4U, 4U, 2U), 1, DataType::QASYMM8_SIGNED),       // Ok
                                                         TensorInfo(TensorShape(4U, 4U, 2U), 1, DataType::QASYMM8_SIGNED),       // Mismatching types, cannot mix QASYMM8_SIGNED with QASYMM8
-                                                        TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::QASYMM8_SIGNED,QuantizationInfo(0.1f, 2) ),   // Mismatching qinfo
                                                       }),
                framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
@@ -88,7 +88,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U, 4U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                        TensorInfo(TensorShape(4U, 4U, 2U), 1, DataType::QASYMM8),
-                                                       TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::QASYMM8_SIGNED,QuantizationInfo(0.5f, 1) ),
                                                      })),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S32),
@@ -97,10 +96,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4U, 4U, 2U), 1, DataType::QASYMM8_SIGNED),
                                                        TensorInfo(TensorShape(4U, 4U, 2U), 1, DataType::QASYMM8_SIGNED),
-                                                       TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::QASYMM8_SIGNED,QuantizationInfo(0.5f, 1) ),
                                                      })),
                framework::dataset::make("Expected", { true, true, true, false,
-                                                      false,true,false,false})),
+                                                      false,true,false})),
                input1_info, input2_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEElementwiseMin::validate(
@@ -161,12 +159,12 @@ TEST_SUITE_END()
 TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMinQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
                                                                                                                       ElementwiseMaxQASYMM8SignedDataset),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, 2) })),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, 2) })),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, 2) })))
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(10.f, 20) })),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f, 0) })),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f, -27) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
 
 TEST_SUITE_END()

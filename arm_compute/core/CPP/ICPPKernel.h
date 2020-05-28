@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,25 @@ public:
      * @param[in] window Region on which to execute the kernel. (Must be a region of the window returned by window())
      * @param[in] info   Info about executing thread and CPU.
      */
-    virtual void run(const Window &window, const ThreadInfo &info) = 0;
+    virtual void run(const Window &window, const ThreadInfo &info)
+    {
+        ARM_COMPUTE_UNUSED(window);
+        ARM_COMPUTE_UNUSED(info);
+        ARM_COMPUTE_ERROR("default implementation of legacy run() virtual member function invoked");
+    }
+
+    /** legacy compatibility layer for implemantions which do not support thread_locator
+     * In these cases we simply narrow the interface down the legacy version
+     *
+     * @param[in] window         Region on which to execute the kernel. (Must be a region of the window returned by window())
+     * @param[in] info           Info about executing thread and CPU.
+     * @param[in] thread_locator Specifies "where" the current thread is in the multi-dimensional space
+     */
+    virtual void run_nd(const Window &window, const ThreadInfo &info, const Window &thread_locator)
+    {
+        ARM_COMPUTE_UNUSED(thread_locator);
+        run(window, info);
+    }
 
     /** Name of the kernel
      *

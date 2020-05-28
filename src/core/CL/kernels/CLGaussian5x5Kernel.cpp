@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,17 +29,27 @@ using namespace arm_compute;
 
 void CLGaussian5x5HorKernel::configure(const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
+}
+
+void CLGaussian5x5HorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+{
     const std::array<int16_t, 5> matrix = { 1, 4, 6, 4, 1 };
 
     // Set arguments
-    CLSeparableConvolution5x5HorKernel::configure(input, output, matrix.data(), border_undefined);
+    CLSeparableConvolution5x5HorKernel::configure(compile_context, input, output, matrix.data(), border_undefined);
 }
 
 void CLGaussian5x5VertKernel::configure(const ICLTensor *input, ICLTensor *output, bool border_undefined)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
+}
+
+void CLGaussian5x5VertKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
     const uint32_t scale = 256;
     const std::array<int16_t, 5> matrix = { 1, 4, 6, 4, 1 };
 
     // Set arguments
-    CLSeparableConvolution5x5VertKernel::configure(input, output, matrix.data(), scale, border_undefined);
+    CLSeparableConvolution5x5VertKernel::configure(compile_context, input, output, matrix.data(), scale, border_undefined);
 }

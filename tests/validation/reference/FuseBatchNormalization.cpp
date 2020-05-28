@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "FuseBatchNormalization.h"
+#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
@@ -45,6 +46,9 @@ void fuse_batch_normalization_dwc_layer(const SimpleTensor<T> &w, const SimpleTe
     const unsigned int height = w.shape()[1];
     const unsigned int dim2   = w.shape()[2];
 
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(unsigned int b = 0; b < dim2; ++b)
     {
         const auto mean_val  = mean.data()[b];

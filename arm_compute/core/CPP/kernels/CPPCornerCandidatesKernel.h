@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/NEON/INEKernel.h"
+
 #include "support/Mutex.h"
 
 #include <cstdint>
@@ -51,10 +52,10 @@ public:
     CPPCornerCandidatesKernel(const CPPCornerCandidatesKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CPPCornerCandidatesKernel &operator=(const CPPCornerCandidatesKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    CPPCornerCandidatesKernel(CPPCornerCandidatesKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    CPPCornerCandidatesKernel &operator=(CPPCornerCandidatesKernel &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    CPPCornerCandidatesKernel(CPPCornerCandidatesKernel &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    CPPCornerCandidatesKernel &operator=(CPPCornerCandidatesKernel &&) = delete;
     /** Default destructor */
     ~CPPCornerCandidatesKernel() = default;
 

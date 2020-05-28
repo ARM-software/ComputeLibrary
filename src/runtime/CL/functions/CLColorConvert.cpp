@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLColorConvert.h"
 
 #include "arm_compute/core/CL/kernels/CLColorConvertKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,28 +32,48 @@ using namespace arm_compute;
 
 void CLColorConvert::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLColorConvert::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLColorConvertKernel>();
-    k->configure(input, output);
+    k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }
 
 void CLColorConvert::configure(const ICLImage *input, ICLMultiImage *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLColorConvert::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLMultiImage *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLColorConvertKernel>();
-    k->configure(input, output);
+    k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }
 
 void CLColorConvert::configure(const ICLMultiImage *input, ICLImage *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLColorConvert::configure(const CLCompileContext &compile_context, const ICLMultiImage *input, ICLImage *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLColorConvertKernel>();
-    k->configure(input, output);
+    k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }
 
 void CLColorConvert::configure(const ICLMultiImage *input, ICLMultiImage *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLColorConvert::configure(const CLCompileContext &compile_context, const ICLMultiImage *input, ICLMultiImage *output)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLColorConvertKernel>();
-    k->configure(input, output);
+    k->configure(compile_context, input, output);
     _kernel = std::move(k);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,7 @@ TEST_SUITE(NEON)
 TEST_SUITE(ElementwiseDivision)
 
 template <typename T>
-using NEElementwiseDivisionFixture = ElementwiseDivisionValidationFixture<Tensor, Accessor, NEElementwiseDivision, T>;
+using NEElementwiseDivisionFixture = ArithmeticDivisionValidationFixture<Tensor, Accessor, NEElementwiseDivision, T>;
 
 // *INDENT-OFF*
 // clang-format off
@@ -124,7 +124,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseDivisionFixture<float>, framework:
 }
 
 template <typename T>
-using NEElementwiseDivisionBroadcastFixture = ElementwiseDivisionBroadcastValidationFixture<Tensor, Accessor, NEElementwiseDivision, T>;
+using NEElementwiseDivisionBroadcastFixture = ArithmeticDivisionBroadcastValidationFixture<Tensor, Accessor, NEElementwiseDivision, T>;
 
 FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseDivisionBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
                        ElementwiseDivisionFP32Dataset))

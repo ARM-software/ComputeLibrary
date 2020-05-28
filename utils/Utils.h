@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,8 @@
 #pragma GCC diagnostic ignored "-Wstrict-overflow"
 #include "libnpy/npy.hpp"
 #pragma GCC diagnostic pop
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
+#include "support/StringSupport.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
@@ -821,18 +822,6 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2, T tolerance)
 
     return num_mismatches;
 }
-
-/** This function saves opencl kernels library to a file
- *
- * @param[in] filename Name of the file to be used to save the library
- */
-void save_program_cache_to_file(const std::string &filename = "cache.bin");
-
-/** This function loads prebuilt opencl kernels from a file
- *
- * @param[in] filename Name of the file to be used to load the kernels
- */
-void restore_program_cache_from_file(const std::string &filename = "cache.bin");
 } // namespace utils
 } // namespace arm_compute
 #endif /* __UTILS_UTILS_H__*/

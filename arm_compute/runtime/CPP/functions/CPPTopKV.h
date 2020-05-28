@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ class CPPTopKV : public ICPPSimpleFunction
 public:
     /** Set the input and output of the kernel.
      *
-     * @param[in]  predictions A batch_size x classes tensor. Data types supported: F16/S32/F32/QASYMM8
+     * @param[in]  predictions A batch_size x classes tensor. Data types supported: F16/S32/F32/QASYMM8/QASYMM8_SIGNED
      * @param[in]  targets     A batch_size 1D tensor of class ids. Data types supported: S32
      * @param[out] output      Computed precision at @p k as a bool 1D tensor. Data types supported: U8
      * @param[in]  k           Number of top elements to look at for computing precision.
@@ -47,7 +47,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CPPTopKVKernel
      *
-     * @param[in] predictions A batch_size x classes tensor info. Data types supported: F16/S32/F32/QASYMM8
+     * @param[in] predictions A batch_size x classes tensor info. Data types supported: F16/S32/F32/QASYMM8/QASYMM8_SIGNED
      * @param[in] targets     A batch_size 1D tensor info of class ids. Data types supported: S32
      * @param[in] output      Computed precision at @p k as a bool 1D tensor info. Data types supported: U8
      * @param[in] k           Number of top elements to look at for computing precision.

@@ -26,14 +26,19 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
 #include "arm_compute/core/Error.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void CLPermute::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, perm);
+}
+
+void CLPermute::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLPermuteKernel>();
-    k->configure(input, output, perm);
+    k->configure(compile_context, input, output, perm);
     _kernel = std::move(k);
 }
 

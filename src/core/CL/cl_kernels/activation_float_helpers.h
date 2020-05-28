@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,10 @@
 #else // GPU_ARCH == GPU_ARCH_BIFROST
 #define MLA(a, b, c) ((b) * (c) + (a))
 #endif // GPU_ARCH == GPU_ARCH_BIFROST
+
+// Hard-Swish
+#define hard_swish_op(DATA_TYPE, x, A_VAL, B_VAL) (x * ((min(max((x + (DATA_TYPE)3.0), (DATA_TYPE)0.0), (DATA_TYPE)6.0)) * (DATA_TYPE)0.166666667))
+
 // Logistic Activation
 #define logistic_op(DATA_TYPE, x, A_VAL, B_VAL) ((DATA_TYPE)1.0 / ((DATA_TYPE)1.0 + exp(-x)))
 
@@ -68,6 +72,6 @@
 // Identity Activation
 #define identity_op(DATA_TYPE, x, A_VAL, B_VAL) (x)
 
-#define OP(op, DATA_TYPE, x, A_VAL, B_VAL) op##_op(DATA_TYPE, x, A_VAL, B_VAL)
+#define ACT_OP(op, DATA_TYPE, x, A_VAL, B_VAL) op##_op(DATA_TYPE, x, A_VAL, B_VAL)
 
-#define ACTIVATION(op, DATA_TYPE, x, A_VAL, B_VAL) OP(op, DATA_TYPE, x, A_VAL, B_VAL)
+#define ACTIVATION(op, DATA_TYPE, x, A_VAL, B_VAL) ACT_OP(op, DATA_TYPE, x, A_VAL, B_VAL)

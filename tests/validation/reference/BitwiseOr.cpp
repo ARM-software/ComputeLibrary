@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,9 @@ template <typename T>
 SimpleTensor<T> bitwise_or(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2)
 {
     SimpleTensor<T> dst(src1.shape(), src1.data_type());
-
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int i = 0; i < src1.num_elements(); ++i)
     {
         dst[i] = src1[i] | src2[i];

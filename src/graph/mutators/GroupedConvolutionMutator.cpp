@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,8 @@
 #include "arm_compute/graph/nodes/Nodes.h"
 
 #include "arm_compute/core/utils/misc/Cast.h"
+
+#include "support/StringSupport.h"
 
 #include <set>
 

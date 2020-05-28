@@ -34,7 +34,7 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/Utils.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -191,6 +191,11 @@ ICLTensor *CLReductionOperation::configure_intermediate_result_vector(ICLTensor 
 
 void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, axis, op, keep_dims);
+}
+
+void CLReductionOperation::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op, bool keep_dims)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     _op                  = op;
     _num_of_stages       = calculate_number_of_stages_only_x_axis(input->info()->dimension(0), axis);
@@ -218,7 +223,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
             _memory_group.manage(&_results_vector.back());
         }
 
-        _reduction_kernels_vector[0].configure(input, output_internal, axis, op, 0);
+        _reduction_kernels_vector[0].configure(compile_context, input, output_internal, axis, op, 0);
     }
     else
     {
@@ -318,15 +323,15 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
                 ARM_COMPUTE_ERROR("Not supported");
         }
 
-        _reduction_kernels_vector[0].configure(input, &_results_vector[0], axis, first_kernel_op);
-        _border_handlers_vector[0].configure(input, _reduction_kernels_vector[0].border_size(), BorderMode::CONSTANT, pixelValue);
+        _reduction_kernels_vector[0].configure(compile_context, input, &_results_vector[0], axis, first_kernel_op);
+        _border_handlers_vector[0].configure(compile_context, input, _reduction_kernels_vector[0].border_size(), BorderMode::CONSTANT, pixelValue);
 
         // Apply ReductionOperation on intermediate stages
         for(unsigned int i = 1; i < _num_of_stages - 1; ++i)
         {
             _memory_group.manage(&_results_vector[i]);
-            _reduction_kernels_vector[i].configure(&_results_vector[i - 1], &_results_vector[i], axis, intermediate_kernel_op);
-            _border_handlers_vector[i].configure(&_results_vector[i - 1], _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, pixelValue);
+            _reduction_kernels_vector[i].configure(compile_context, &_results_vector[i - 1], &_results_vector[i], axis, intermediate_kernel_op);
+            _border_handlers_vector[i].configure(compile_context, &_results_vector[i - 1], _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, pixelValue);
             _results_vector[i - 1].allocator()->allocate();
         }
 
@@ -339,14 +344,14 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
             _memory_group.manage(&_results_vector.back());
         }
 
-        _reduction_kernels_vector[last_stage].configure(&_results_vector[last_stage - 1], output_internal, axis, last_kernel_op, input_width);
-        _border_handlers_vector[last_stage].configure(&_results_vector[last_stage - 1], _reduction_kernels_vector[last_stage].border_size(), BorderMode::CONSTANT, pixelValue);
+        _reduction_kernels_vector[last_stage].configure(compile_context, &_results_vector[last_stage - 1], output_internal, axis, last_kernel_op, input_width);
+        _border_handlers_vector[last_stage].configure(compile_context, &_results_vector[last_stage - 1], _reduction_kernels_vector[last_stage].border_size(), BorderMode::CONSTANT, pixelValue);
         _results_vector[last_stage - 1].allocator()->allocate();
     }
 
     if(_is_reshape_required)
     {
-        _reshape_kernel.configure(&_results_vector.back(), output);
+        _reshape_kernel.configure(compile_context, &_results_vector.back(), output);
         _results_vector.back().allocator()->allocate();
     }
 }

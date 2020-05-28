@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,7 +75,9 @@ SimpleTensor<TOut> dequantization_layer(const SimpleTensor<TIn> &src)
         const int N  = src.shape().total_size() / (WH * C);
 
         const std::vector<float> qscales = src.quantization_info().scale();
-
+#if defined(_OPENMP)
+        #pragma omp parallel for collapse(2)
+#endif /* _OPENMP */
         for(int n = 0; n < N; ++n)
         {
             for(int c = 0; c < C; ++c)
@@ -95,7 +97,9 @@ SimpleTensor<TOut> dequantization_layer(const SimpleTensor<TIn> &src)
     {
         const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
         ARM_COMPUTE_ERROR_ON(quantization_info.offset != 0 && src_data_type == DataType::QSYMM8);
-
+#if defined(_OPENMP)
+        #pragma omp parallel for
+#endif /* _OPENMP */
         for(int i = 0; i < src.num_elements(); ++i)
         {
             dst[i] = static_cast<TOut>(dequantize<TOut>(static_cast<TIn>(src[i]), quantization_info, src_data_type));

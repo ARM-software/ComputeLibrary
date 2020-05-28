@@ -41,20 +41,22 @@ class NEElementwiseMax : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor. Data types supported: Same as @p input1.
+     * @param[in, out] input1   First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
+     * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
+     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output);
+    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for max
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref NEArithmeticOperationKernel for min
@@ -67,20 +69,22 @@ class NEElementwiseMin : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor. Data types supported: Same as @p input1.
+     * @param[in, out] input1   First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
+     * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
+     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output);
+    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for min
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref NEArithmeticOperationKernel for squared difference
@@ -93,20 +97,22 @@ class NEElementwiseSquaredDiff : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor. Data types supported: Same as @p input1.
+     * @param[in, out] input1   First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
+     * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
+     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output);
+    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for squared difference
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] input1   First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref NEArithmeticOperationKernel for division
@@ -119,20 +125,22 @@ class NEElementwiseDivision : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: F16/F32.
-     * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor. Data types supported: Same as @p input1.
+     * @param[in, out] input1   First tensor input. Data types supported: F16/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
+     * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
+     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output);
+    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for division
      *
-     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] input1   First tensor input info. Data types supported: F16/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref NEArithmeticOperationKernel for power
@@ -146,20 +154,22 @@ class NEElementwisePower : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: F16/F32.
-     * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor. Data types supported: Same as @p input1.
+     * @param[in, out] input1   First tensor input. Data types supported: F16/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: Same as @p input1.
+     * @param[out]     output   Output tensor. Data types supported: Same as @p input1.
+     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output);
+    void configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel for power
      *
-     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] input1   First tensor input info. Data types supported: F16/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 
 /** Basic function to run @ref NEComparisonOperationKernel.

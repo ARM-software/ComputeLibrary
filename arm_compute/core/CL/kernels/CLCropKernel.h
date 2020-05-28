@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,21 @@ public:
      * @param[in]  output_window       Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
      */
     void configure(const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0, Window *output_window = nullptr);
+    /** Configure kernel
+     *
+     * @note Supported tensor rank: up to 4
+     *
+     * @param[in]  compile_context     The compile context to be used.
+     * @param[in]  input               Source tensor. Data type supported: U16/S16/U32/S32/F16/F32. Data layouts supported: NHWC.
+     * @param[out] output              Destination tensor. Data type supported: F32
+     * @param[in]  start               Coordinates of where to start cropping the image.
+     * @param[in]  end                 Coordinates of where to end cropping the image.
+     * @param[in]  batch_index         Fourth dimension index of the 3D image to crop in @p input.
+     * @param[in]  extrapolation_value Value to be used for values outside of the image. Default is 0.
+     * @param[in]  output_window       Output window to be used in case cropped image is being copied into a tensor. Default is nullptr.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value = 0,
+                   Window *output_window = nullptr);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLStridedSliceKernel
      *

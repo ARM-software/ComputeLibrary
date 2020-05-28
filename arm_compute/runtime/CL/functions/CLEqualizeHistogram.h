@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,13 @@ public:
      * @param[out] output Output of same data type with equalized brightness and contrast.
      */
     void configure(const ICLImage *input, ICLImage *output);
+    /** Initialise the kernel's inputs.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input image. Data types supported: U8.
+     * @param[out] output          Output of same data type with equalized brightness and contrast.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, ICLImage *output);
 
     // Inherited methods overridden:
     void run() override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,30 +76,6 @@ Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxe
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *boxes, ITensorInfo *pred_boxes, ITensorInfo *deltas, const BoundingBoxTransformInfo &bb_info)
-{
-    ARM_COMPUTE_UNUSED(bb_info);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(boxes, pred_boxes);
-
-    auto_init_if_empty(*pred_boxes, deltas->clone()->set_data_type(boxes->data_type()).set_quantization_info(boxes->quantization_info()));
-
-    const unsigned int num_boxes = boxes->dimension(1);
-
-    Window window;
-    window.set(Window::DimX, Window::Dimension(0, 1u));
-    window.set(Window::DimY, Window::Dimension(0, num_boxes));
-
-    AccessWindowHorizontal input_access(boxes, 0, 4u);
-    AccessWindowHorizontal output_access(pred_boxes, 0, 4u);
-
-    const bool window_changed = update_window_and_padding(window, input_access, output_access);
-    output_access.set_valid_region(window, ValidRegion(Coordinates(), pred_boxes->tensor_shape()));
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, window);
-}
-
 } // namespace
 
 NEBoundingBoxTransformKernel::NEBoundingBoxTransformKernel()
@@ -109,11 +85,11 @@ NEBoundingBoxTransformKernel::NEBoundingBoxTransformKernel()
 
 void NEBoundingBoxTransformKernel::configure(const ITensor *boxes, ITensor *pred_boxes, const ITensor *deltas, const BoundingBoxTransformInfo &info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(boxes->info(), pred_boxes->info(), deltas->info(), info));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(boxes->info(), pred_boxes->info(), deltas->info(), info);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    auto_init_if_empty(*pred_boxes->info(), deltas->info()->clone()->set_data_type(boxes->info()->data_type()).set_quantization_info(boxes->info()->quantization_info()));
 
     // Set instance variables
     _boxes      = boxes;
@@ -121,7 +97,15 @@ void NEBoundingBoxTransformKernel::configure(const ITensor *boxes, ITensor *pred
     _deltas     = deltas;
     _bbinfo     = info;
 
-    INEKernel::configure(win_config.second);
+    const unsigned int num_boxes = boxes->info()->dimension(1);
+    Window             win       = calculate_max_window(*pred_boxes->info(), Steps());
+    Coordinates        coord;
+    coord.set_num_dimensions(pred_boxes->info()->num_dimensions());
+    pred_boxes->info()->set_valid_region(ValidRegion(coord, pred_boxes->info()->tensor_shape()));
+    win.set(Window::DimX, Window::Dimension(0, 1u));
+    win.set(Window::DimY, Window::Dimension(0, num_boxes));
+
+    INEKernel::configure(win);
 }
 
 Status NEBoundingBoxTransformKernel::validate(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info)

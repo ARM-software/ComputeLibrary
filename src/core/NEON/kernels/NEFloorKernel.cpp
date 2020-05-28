@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,22 +53,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    auto_init_if_empty(*output, *input);
-
-    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-
-    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, input->valid_region());
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 void NEFloorKernel::configure(const ITensor *input, ITensor *output)
@@ -85,16 +69,18 @@ void NEFloorKernel::configure(const ITensor *input, ITensor *output)
     _output = output;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Window win = calculate_max_window(*input->info(), Steps());
+
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+
+    INEKernel::configure(win);
 }
 
 Status NEFloorKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
-
     return Status{};
 }
 
@@ -106,25 +92,57 @@ void NEFloorKernel::run(const Window &window, const ThreadInfo &info)
 
     const DataType data_type = _input->info()->data_type();
 
-    Iterator input(_input, window);
-    Iterator output(_output, window);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int  window_step_x  = 16 / _input->info()->element_size();
+
+    Window win{ window };
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Iterator input(_input, win);
+    Iterator output(_output, win);
 
     if(data_type == DataType::F32)
     {
-        execute_window_loop(window, [&](const Coordinates &)
+        execute_window_loop(win, [&](const Coordinates &)
         {
-            const float32x4_t res = vfloorq_f32(vld1q_f32(reinterpret_cast<const float *>(input.ptr())));
-            vst1q_f32(reinterpret_cast<float *>(output.ptr()), res);
+            const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
+            const auto output_ptr = reinterpret_cast<float *>(output.ptr());
+
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const float32x4_t res = vfloorq_f32(vld1q_f32(input_ptr + x));
+                vst1q_f32(output_ptr + x, res);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                *(output_ptr + x) = std::floor(*(input_ptr + x));
+            }
         },
         input, output);
     }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     else if(data_type == DataType::F16)
     {
-        execute_window_loop(window, [&](const Coordinates &)
+        execute_window_loop(win, [&](const Coordinates &)
         {
-            const float16x8_t res = vfloorq_f16(vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr())));
-            vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), res);
+            const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
+            const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
+
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const float16x8_t res = vfloorq_f16(vld1q_f16(input_ptr + x));
+                vst1q_f16(output_ptr + x, res);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                *(output_ptr + x) = std::floor(*(input_ptr + x));
+            }
         },
         input, output);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,21 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLImage *input1, const ICLImage *input2, ICLImage *output,
+                   int32_t block_size, float norm_factor, float strength_thresh, float sensitivity,
+                   bool border_undefined);
+    /** Setup the kernel parameters
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input1           Source image (gradient X). Data types supported S16, S32. (Must be the same as input2)
+     * @param[in]  input2           Source image (gradient Y). Data types supported S16, S32. (Must be the same as input1)
+     * @param[out] output           Destination image (harris score). Data types supported F32
+     * @param[in]  block_size       The block window size used to compute the Harris Corner score.  Supports: 3, 5 and 7
+     * @param[in]  norm_factor      Normalization factor to use accordingly with the gradient size (Must be different from 0)
+     * @param[in]  strength_thresh  Minimum threshold with which to eliminate Harris Corner scores (computed using the normalized Sobel kernel).
+     * @param[in]  sensitivity      Sensitivity threshold k from the Harris-Stephens equation.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLImage *input1, const ICLImage *input2, ICLImage *output,
                    int32_t block_size, float norm_factor, float strength_thresh, float sensitivity,
                    bool border_undefined);
 

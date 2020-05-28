@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,9 +56,6 @@ public:
             cmd_parser.print_help(argv[0]);
             return false;
         }
-
-        // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -211,9 +208,10 @@ public:
 
         // Finalize graph
         GraphConfig config;
-        config.num_threads = common_params.threads;
-        config.use_tuner   = common_params.enable_tuner;
-        config.tuner_file  = common_params.tuner_file;
+        config.num_threads      = common_params.threads;
+        config.use_tuner        = common_params.enable_tuner;
+        config.tuner_file       = common_params.tuner_file;
+        config.convert_to_uint8 = (common_params.data_type == DataType::QASYMM8);
 
         graph.finalize(common_params.target, config);
 
@@ -292,7 +290,7 @@ private:
         tanh_ss.forward_tail(tanh_nid);
 
         // Add (third split)
-        NodeID add_nid = graph.graph().add_node<EltwiseLayerNode>(EltwiseOperation::Add);
+        NodeID add_nid = graph.graph().add_node<EltwiseLayerNode>(descriptors::EltwiseLayerDescriptor{ EltwiseOperation::Add });
         graph.graph().add_connection(split_nid, 2, add_nid, 0);
         graph.graph().add_connection(add_y.tail_node(), 0, add_nid, 1);
         set_node_params(graph.graph(), add_nid, add_params);

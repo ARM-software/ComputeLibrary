@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 #include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Types.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 

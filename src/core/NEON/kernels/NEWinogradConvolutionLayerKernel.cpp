@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -41,23 +41,34 @@ namespace arm_compute
 
 namespace
 {
-inline bool is_kernel_size_supported(Size2D size)
+inline bool is_kernel_size_supported(DataType data_type, Size2D size)
 {
-    const std::array<Size2D, 8> supported_input_sizes = { { Size2D(1, 3), Size2D(3, 1), Size2D(5, 5), Size2D(3, 3), Size2D(1, 5), Size2D(5, 1), Size2D(7, 1), Size2D(1, 7) } };
-    return std::end(supported_input_sizes) != std::find(std::begin(supported_input_sizes), std::end(supported_input_sizes), size);
+    const std::array<Size2D, 8> f32_support = { { Size2D(1, 3), Size2D(3, 1), Size2D(5, 5), Size2D(3, 3), Size2D(1, 5), Size2D(5, 1), Size2D(7, 1), Size2D(1, 7) } };
+    const std::array<Size2D, 8> f16_support = { { Size2D(3, 3) } };
+
+    switch(data_type)
+    {
+        case DataType::F16:
+            return std::end(f16_support) != std::find(std::begin(f16_support), std::end(f16_support), size);
+        case DataType::F32:
+            return std::end(f32_support) != std::find(std::begin(f32_support), std::end(f32_support), size);
+        default:
+            return false;
+    }
 }
 
 Status validate_arguments_winograd_weight_trans(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
 
     const size_t idx_width    = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height   = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
     const auto   input_width  = input->dimension(idx_width);
     const auto   input_height = input->dimension(idx_height);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(Size2D(input_width, input_height)), "Only 1x3, 3x1, 1x5, 5x1, 7x1, 1x7, 3x3 and 5x5 kernels are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(input->data_type(), Size2D(input_width, input_height)),
+                                    "Only 1x3, 3x1, 1x5, 5x1, 7x1, 1x7, 3x3 and 5x5 kernels are supported");
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     const Size2D &output_tile = winograd_info.output_tile_size;
     const std::array<Size2D, 8> supported_tile_sizes = { { Size2D(2U, 2U), Size2D(4U, 4U), Size2D(1U, 6U), Size2D(6U, 1U), Size2D(4, 1), Size2D(1, 4), Size2D(2, 1), Size2D(1, 2) } };
@@ -89,9 +100,9 @@ Status validate_arguments_winograd_input_trans(const ITensorInfo *input, const I
     const PadStrideInfo &conv_info   = winograd_info.convolution_info;
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd input transform only supports unit strides");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(Size2D(kernel_dims.width, kernel_dims.height)),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(input->data_type(), Size2D(kernel_dims.width, kernel_dims.height)),
                                     "Only 1x3, 3x1, 3x3 and 5x5 kernels are supported");
 
     // Validate configured output
@@ -128,9 +139,9 @@ Status validate_arguments_winograd_output_trans(const ITensorInfo *input, const 
 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != num_tiles.area());
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(Size2D(kernel_dims.width, kernel_dims.height)),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(input->data_type(), Size2D(kernel_dims.width, kernel_dims.height)),
                                     "Only 1x3, 3x1, 3x3 and 5x5 kernels are supported");
 
     const std::array<unsigned int, 3> supported_gemm_sizes = { { 8U, 16U, 36U } };
@@ -162,21 +173,18 @@ std::pair<Status, Window> validate_and_configure_window_winograd_output_trans(IT
 }
 } // namespace
 
-template <typename T>
-Status INEWinogradLayerTransformWeightsKernel<T>::validate(const ITensorInfo *input, const ITensorInfo *weights)
+Status INEWinogradLayerTransformWeightsKernel::validate(const ITensorInfo *input, const ITensorInfo *weights)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     const DataLayout   data_layout = input->data_layout();
     const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(Size2D(weights->dimension(width_idx), weights->dimension(height_idx))),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(input->data_type(), Size2D(weights->dimension(width_idx), weights->dimension(height_idx))),
                                     "Only 1x3, 3x1, 3x3 and 5x5 kernels are supported");
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
     return Status{};
 }
-
-template class INEWinogradLayerTransformWeightsKernel<float>;
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 unsigned int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_weight_storage_size(int num_output_channels, int num_input_channels) const
@@ -262,6 +270,11 @@ template class NEWinogradLayerTransformWeightsKernel<float, 1, 4, 1, 5>;
 template class NEWinogradLayerTransformWeightsKernel<float, 4, 1, 5, 1>;
 template class NEWinogradLayerTransformWeightsKernel<float, 1, 2, 1, 7>;
 template class NEWinogradLayerTransformWeightsKernel<float, 2, 1, 7, 1>;
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template class NEWinogradLayerTransformWeightsKernel<__fp16, 4, 4, 3, 3>;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 // Input transform
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -396,6 +409,10 @@ template class NEWinogradLayerTransformInputKernel<float, 4, 1, 5, 1>;
 template class NEWinogradLayerTransformInputKernel<float, 1, 2, 1, 7>;
 template class NEWinogradLayerTransformInputKernel<float, 2, 1, 7, 1>;
 
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template class NEWinogradLayerTransformInputKernel<__fp16, 4, 4, 3, 3>;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 // Output transform
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -524,4 +541,7 @@ template class NEWinogradLayerTransformOutputKernel<float, 4, 1, 5, 1>;
 template class NEWinogradLayerTransformOutputKernel<float, 1, 2, 1, 7>;
 template class NEWinogradLayerTransformOutputKernel<float, 2, 1, 7, 1>;
 
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template class NEWinogradLayerTransformOutputKernel<__fp16, 4, 4, 3, 3>;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 } // namespace arm_compute

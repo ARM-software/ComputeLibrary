@@ -35,7 +35,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <map>
 
@@ -86,6 +86,11 @@ CLBatchConcatenateLayerKernel::CLBatchConcatenateLayerKernel()
 
 void CLBatchConcatenateLayerKernel::configure(const ICLTensor *input, unsigned int batch_offset, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, batch_offset, output);
+}
+
+void CLBatchConcatenateLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, unsigned int batch_offset, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), batch_offset, output->info()));
 
@@ -111,7 +116,7 @@ void CLBatchConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate", build_opts.options()));
+    _kernel = create_kernel(compile_context, "concatenate", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), batch_offset, output->info());

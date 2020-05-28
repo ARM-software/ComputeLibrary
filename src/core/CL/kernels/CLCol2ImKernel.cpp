@@ -32,6 +32,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 #include <cmath>
 
@@ -90,6 +91,11 @@ CLCol2ImKernel::CLCol2ImKernel()
 
 void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, convolved_dims, num_groups);
+}
+
+void CLCol2ImKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
@@ -109,7 +115,7 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     build_opts.add_option("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.width));
     build_opts.add_option("-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts.options()));
+    _kernel = create_kernel(compile_context, "col2im", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), _convolved_dims, num_groups);

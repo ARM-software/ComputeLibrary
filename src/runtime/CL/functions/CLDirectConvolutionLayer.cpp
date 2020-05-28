@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,19 +39,26 @@ CLDirectConvolutionLayer::CLDirectConvolutionLayer()
 
 void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, act_info);
+}
+
+void CLDirectConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                         const PadStrideInfo &conv_info,
+                                         const ActivationLayerInfo &act_info)
+{
     // Set GPU target
     _direct_conv_kernel.set_target(CLScheduler::get().target());
 
     // Configure direct convolution
-    _direct_conv_kernel.configure(input, weights, biases, output, conv_info);
+    _direct_conv_kernel.configure(compile_context, input, weights, biases, output, conv_info);
 
     // Configure border handler
     PixelValue &&zero_value(0.f);
     if(is_data_type_quantized_asymmetric(input->info()->data_type()))
     {
-        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().uniform().offset));
+        zero_value = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
     }
-    _input_border_handler.configure(input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, zero_value);
+    _input_border_handler.configure(compile_context, input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, zero_value);
 
     // Tune kernels
     CLScheduler::get().tune_kernel_static(_direct_conv_kernel);
@@ -61,7 +68,7 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
     //Configure Activation Layer
     if(_is_activationlayer_enabled)
     {
-        _activationlayer_function.configure(output, nullptr, act_info);
+        _activationlayer_function.configure(compile_context, output, nullptr, act_info);
     }
 }
 

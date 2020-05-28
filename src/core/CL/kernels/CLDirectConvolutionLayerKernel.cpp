@@ -36,7 +36,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -45,7 +45,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
     const DataLayout data_layout = input->data_layout();
@@ -423,6 +423,12 @@ BorderSize CLDirectConvolutionLayerKernel::border_size() const
 
 void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info);
+}
+
+void CLDirectConvolutionLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                               const PadStrideInfo &conv_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     _data_layout          = input->info()->data_layout();
@@ -491,7 +497,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(channel_idx))));
 
         kernel_name << "_f32_bifrost";
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_options.options()));
+        _kernel = create_kernel(compile_context, kernel_name.str(), build_options.options());
     }
     else
     {
@@ -509,6 +515,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
             build_options.add_option(std::string("-DSRC_WIDTH=" + support::cpp11::to_string(_input->info()->dimension(width_idx))));
             build_options.add_option(std::string("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left())));
             build_options.add_option(std::string("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top())));
+            build_options.add_option(std::string("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom())));
             build_options.add_option(std::string("-DSTRIDE_Y=" + support::cpp11::to_string(_conv_stride_y)));
             if(run_optimized_for_bifrost_nhwc)
             {
@@ -534,7 +541,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
             build_options.add_option("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size));
 
             // Create kernel
-            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("direct_convolution_quantized", build_options.options()));
+            _kernel = create_kernel(compile_context, "direct_convolution_quantized", build_options.options());
 
             // Set static kernel arguments
             unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0) + 1;
@@ -545,7 +552,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
         else
         {
             // Create kernel
-            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_options.options()));
+            _kernel = create_kernel(compile_context, kernel_name.str(), build_options.options());
         }
     }
 

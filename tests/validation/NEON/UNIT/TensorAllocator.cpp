@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,7 @@
 #include "arm_compute/runtime/MemoryRegion.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include "tests/Globals.h"
 #include "tests/Utils.h"

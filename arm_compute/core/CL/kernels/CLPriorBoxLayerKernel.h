@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,19 @@ public:
      * @param[in]  aspect_ratios Aspect ratio values
      */
     void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min, cl::Buffer *max, cl::Buffer *aspect_ratios);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input1          First source tensor. Data types supported: F32. Data layouts supported: NCHW/NHWC.
+     * @param[in]  input2          Second source tensor. Data types and layouts supported: same as @p input1
+     * @param[out] output          Destination tensor. Output dimensions are [W * H * num_priors * 4, 2]. Data types and layouts supported: same as @p input1
+     * @param[in]  info            Prior box layer info.
+     * @param[in]  min             Minimum prior box values
+     * @param[in]  max             Maximum prior box values
+     * @param[in]  aspect_ratios   Aspect ratio values
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, const PriorBoxLayerInfo &info, cl::Buffer *min, cl::Buffer *max,
+                   cl::Buffer *aspect_ratios);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPriorBoxLayerKernel
      *
      * @param[in] input1 First source tensor info. Data types supported: F32. Data layouts supported: NCHW/NHWC.

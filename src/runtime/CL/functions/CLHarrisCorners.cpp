@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/Scheduler.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <utility>
@@ -62,6 +62,13 @@ CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager)
 }
 
 void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist,
+                                float sensitivity, int32_t gradient_size, int32_t block_size, ICLKeyPointArray *corners,
+                                BorderMode border_mode, uint8_t constant_border_value, bool use_fp16)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, threshold, min_dist, sensitivity, gradient_size, block_size, corners, border_mode, constant_border_value, use_fp16);
+}
+
+void CLHarrisCorners::configure(const CLCompileContext &compile_context, ICLImage *input, float threshold, float min_dist,
                                 float sensitivity, int32_t gradient_size, int32_t block_size, ICLKeyPointArray *corners,
                                 BorderMode border_mode, uint8_t constant_border_value, bool use_fp16)
 {
@@ -96,21 +103,21 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
         case 3:
         {
             auto k = arm_compute::support::cpp14::make_unique<CLSobel3x3>();
-            k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
+            k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 5:
         {
             auto k = arm_compute::support::cpp14::make_unique<CLSobel5x5>();
-            k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
+            k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
         case 7:
         {
             auto k = arm_compute::support::cpp14::make_unique<CLSobel7x7>();
-            k->configure(input, &_gx, &_gy, border_mode, constant_border_value);
+            k->configure(compile_context, input, &_gx, &_gy, border_mode, constant_border_value);
             _sobel = std::move(k);
             break;
         }
@@ -126,11 +133,11 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _memory_group.manage(&_score);
 
     // Set/init Harris Score kernel accordingly with block_size
-    _harris_score.configure(&_gx, &_gy, &_score, block_size, pow4_normalization_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
+    _harris_score.configure(compile_context, &_gx, &_gy, &_score, block_size, pow4_normalization_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
 
     // Configure border filling using harris score kernel's block size
-    _border_gx.configure(&_gx, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
-    _border_gy.configure(&_gy, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_gx.configure(compile_context, &_gx, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_gy.configure(compile_context, &_gy, _harris_score.border_size(), border_mode, PixelValue(constant_border_value));
 
     // Allocate intermediate buffers
     _gx.allocator()->allocate();
@@ -140,7 +147,7 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _memory_group.manage(&_nonmax);
 
     // Init non-maxima suppression function
-    _non_max_suppr.configure(&_score, &_nonmax, border_mode);
+    _non_max_suppr.configure(compile_context, &_score, &_nonmax, border_mode);
 
     // Allocate intermediate buffers
     _score.allocator()->allocate();

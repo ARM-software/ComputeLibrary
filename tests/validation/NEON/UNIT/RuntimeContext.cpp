@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,6 @@
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/SchedulerFactory.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "support/ToolchainSupport.h"
 #include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/Utils.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,10 +47,10 @@ public:
     PoolManager(const PoolManager &) = delete;
     /** Prevent instances of this class to be copied */
     PoolManager &operator=(const PoolManager &) = delete;
-    /** Allow instances of this class to be move constructed */
-    PoolManager(PoolManager &&) = default;
-    /** Allow instances of this class to be moved */
-    PoolManager &operator=(PoolManager &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    PoolManager(PoolManager &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    PoolManager &operator=(PoolManager &&) = delete;
 
     // Inherited methods overridden:
     IMemoryPool *lock_pool() override;

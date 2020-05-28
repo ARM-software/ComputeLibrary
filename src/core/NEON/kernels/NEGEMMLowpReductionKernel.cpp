@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -37,25 +38,28 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 namespace
 {
 Status validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8);
 
+    if(output->total_size() > 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(0) != input->dimension(1), "Output vector must have length equal to the number of rows of the input matrix");
+    }
     return Status{};
 }
 std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITensorInfo *input, ITensorInfo *output, bool is_reshaped)
 {
     const unsigned int num_elems_processed_per_iteration = is_reshaped ? 4 : 1;
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output, TensorShape(input->dimension(1)), 1, DataType::S32);
 
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
@@ -72,15 +76,23 @@ std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITens
 
 Status validate_arguments_matrix_b_reduction(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
 
+    if(output->total_size() > 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(0) != input->dimension(0), "Output vector must have length equal to the number of columns of the input matrix");
+    }
     return Status{};
 }
 
 std::pair<Status, Window> validate_and_configure_window_matrix_b_reduction(ITensorInfo *input, ITensorInfo *output)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output, TensorShape(input->dimension(0)), 1, DataType::S32);
 
     // Configure kernel window
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
@@ -98,20 +110,22 @@ std::pair<Status, Window> validate_and_configure_window_matrix_b_reduction(ITens
 } // namespace
 
 INEGEMMLowpReductionKernel::INEGEMMLowpReductionKernel()
-    : _input(), _output(), _k(0), _is_reshaped(false)
+    : _input(), _output(), _k(0), _is_reshaped(false), _scalar(0), _mul_by_scalar(false)
 {
 }
 
-void NEGEMMLowpMatrixAReductionKernel::configure(const ITensor *mtx_a, ITensor *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4)
+void NEGEMMLowpMatrixAReductionKernel::configure(const ITensor *mtx_a, ITensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_a, vector_sum_row);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_a_reduction(mtx_a->info(), vector_sum_row->info()));
 
-    _input       = mtx_a;
-    _output      = vector_sum_row;
-    _k           = num_mtx_a_cols;
-    _is_reshaped = is_interleaved4x4;
+    _input         = mtx_a;
+    _output        = vector_sum_row;
+    _k             = info.k;
+    _is_reshaped   = info.is_reshaped;
+    _scalar        = info.scalar;
+    _mul_by_scalar = info.mul_by_scalar;
 
     // Configure kernel window
     auto win_config = validate_and_configure_window_matrix_a_reduction(_input->info(), _output->info(), _is_reshaped);
@@ -119,11 +133,10 @@ void NEGEMMLowpMatrixAReductionKernel::configure(const ITensor *mtx_a, ITensor *
     INEKernel::configure(win_config.second);
 }
 
-Status NEGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4)
+Status NEGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info)
 {
-    ARM_COMPUTE_UNUSED(num_mtx_a_cols);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_a_reduction(mtx_a, vector_sum_row));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_matrix_a_reduction(mtx_a->clone().get(), vector_sum_row->clone().get(), is_interleaved4x4).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_matrix_a_reduction(mtx_a->clone().get(), vector_sum_row->clone().get(), info.is_reshaped).first);
 
     return Status{};
 }
@@ -145,11 +158,12 @@ void NEGEMMLowpMatrixAReductionKernel::run_internal(const arm_compute::Window &w
     Iterator in(_input, win_input);
     Iterator out(_output, collapsed_window);
 
+    const auto vec_scalar = wrapper::vdup_n(static_cast<TAcc>(_scalar), wrapper::traits::vector_128_tag{});
+
     if(_is_reshaped)
     {
         execute_window_loop(collapsed_window, [&](const Coordinates & id)
         {
-            // Note: Since the input is unsigned char, we can safely use unsigned int for the accumulation
             auto sum_row = wrapper::vdup_n(static_cast<TAcc>(0), wrapper::traits::vector_128_tag{});
 
             const T *matrix_a = reinterpret_cast<const T *>((in.ptr() + (id.x() / 4) * _input->info()->strides_in_bytes()[1] + id.y() * _input->info()->strides_in_bytes()[2]));
@@ -192,6 +206,12 @@ void NEGEMMLowpMatrixAReductionKernel::run_internal(const arm_compute::Window &w
 
                 // Accumulate to U32
                 sum_row = wrapper::vaddw(sum_row, a0_d16);
+            }
+
+            // Multiply by scalar if necessary
+            if(_mul_by_scalar)
+            {
+                sum_row = wrapper::vmul(sum_row, vec_scalar);
             }
 
             auto vector_sum_row = reinterpret_cast<int32_t *>(out.ptr());
@@ -243,6 +263,12 @@ void NEGEMMLowpMatrixAReductionKernel::run_internal(const arm_compute::Window &w
             sum_row += wrapper::vgetlane(tmp, 0);
 #endif // __aarch64__
 
+            // Multiply by scalar if necessary
+            if(_mul_by_scalar)
+            {
+                sum_row *= _scalar;
+            }
+
             *(reinterpret_cast<int *>(out.ptr())) = static_cast<int32_t>(sum_row);
         },
         in, out);
@@ -261,6 +287,7 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
             run_internal<uint8_t>(window);
             break;
         case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             run_internal<int8_t>(window);
             break;
@@ -269,15 +296,17 @@ void NEGEMMLowpMatrixAReductionKernel::run(const Window &window, const ThreadInf
     }
 }
 
-void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b, ITensor *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW)
+void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b, ITensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(mtx_b, vector_sum_col);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_matrix_b_reduction(mtx_b->info(), vector_sum_col->info()));
 
-    _input       = mtx_b;
-    _output      = vector_sum_col;
-    _k           = num_mtx_b_rows;
-    _is_reshaped = is_transposed1xW;
+    _input         = mtx_b;
+    _output        = vector_sum_col;
+    _k             = info.k;
+    _is_reshaped   = info.is_reshaped;
+    _scalar        = info.scalar;
+    _mul_by_scalar = info.mul_by_scalar;
 
     // Configure kernel window
     auto win_config = validate_and_configure_window_matrix_b_reduction(_input->info(), _output->info());
@@ -285,10 +314,9 @@ void NEGEMMLowpMatrixBReductionKernel::configure(const ITensor *mtx_b, ITensor *
     INEKernel::configure(win_config.second);
 }
 
-Status NEGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW)
+Status NEGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info)
 {
-    ARM_COMPUTE_UNUSED(num_mtx_b_rows);
-    ARM_COMPUTE_UNUSED(is_transposed1xW);
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_matrix_b_reduction(mtx_b, vector_sum_col));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_matrix_b_reduction(mtx_b->clone().get(), vector_sum_col->clone().get()).first);
 
@@ -303,6 +331,8 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
     using TAcc  = wrapper::traits::promote_t<TIAcc>;
 
     Window collapsed_window = window.collapse_if_possible(IKernel::window(), Window::DimY);
+
+    const auto vec_scalar = wrapper::vdup_n(static_cast<TAcc>(_scalar), wrapper::traits::vector_128_tag{});
 
     if(_is_reshaped)
     {
@@ -348,6 +378,15 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
                 sum_col[1] = wrapper::vaddw(sum_col[1], wrapper::vgethigh(b0_b16[0]));
                 sum_col[2] = wrapper::vaddw(sum_col[2], wrapper::vgetlow(b0_b16[1]));
                 sum_col[3] = wrapper::vaddw(sum_col[3], wrapper::vgethigh(b0_b16[1]));
+            }
+
+            // Multiply by scalar if necessary
+            if(_mul_by_scalar)
+            {
+                sum_col[0] = wrapper::vmul(sum_col[0], vec_scalar);
+                sum_col[1] = wrapper::vmul(sum_col[1], vec_scalar);
+                sum_col[2] = wrapper::vmul(sum_col[2], vec_scalar);
+                sum_col[3] = wrapper::vmul(sum_col[3], vec_scalar);
             }
 
             auto vector_sum_col = reinterpret_cast<int32_t *>(out.ptr());
@@ -465,6 +504,15 @@ void NEGEMMLowpMatrixBReductionKernel::run_internal(const Window &window, const 
                 matrix_b += in_b_stride;
             }
 
+            // Multiply by scalar if necessary
+            if(_mul_by_scalar)
+            {
+                sum_col[0] = wrapper::vmul(sum_col[0], vec_scalar);
+                sum_col[1] = wrapper::vmul(sum_col[1], vec_scalar);
+                sum_col[2] = wrapper::vmul(sum_col[2], vec_scalar);
+                sum_col[3] = wrapper::vmul(sum_col[3], vec_scalar);
+            }
+
             auto vector_sum_col = reinterpret_cast<int32_t *>(out.ptr());
 
             wrapper::vstore(vector_sum_col + 0, wrapper::vreinterpret(sum_col[0]));
@@ -488,6 +536,7 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
             run_internal<uint8_t>(window, info);
             break;
         case DataType::QASYMM8_SIGNED:
+        case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
             run_internal<int8_t>(window, info);
             break;
@@ -495,3 +544,4 @@ void NEGEMMLowpMatrixBReductionKernel::run(const Window &window, const ThreadInf
             ARM_COMPUTE_ERROR("Unsupported data type");
     }
 }
+} // namespace arm_compute

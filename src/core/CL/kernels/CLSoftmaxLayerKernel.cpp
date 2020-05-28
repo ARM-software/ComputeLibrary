@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>
@@ -219,6 +220,11 @@ CLLogits1DMaxShiftExpSumKernel::CLLogits1DMaxShiftExpSumKernel()
 
 void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, max, output, sum, info);
+}
+
+void CLLogits1DMaxShiftExpSumKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *max, ICLTensor *output, ICLTensor *sum, const SoftmaxKernelInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, max, sum, output);
 
     // Output auto initialization if not yet initialized
@@ -276,7 +282,7 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
     }
 
     // Create kernel.
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set static arguments. Both the kernels use the same arguments
     unsigned int idx = 4 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
@@ -342,6 +348,11 @@ CLLogits1DNormKernel::CLLogits1DNormKernel()
 
 void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, sum, output, info);
+}
+
+void CLLogits1DNormKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, const SoftmaxKernelInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
 
     // Note: output should always have a scale of 1/256 and offset 0
@@ -375,7 +386,7 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
 
     // Create kernel
     std::string kernel_name = is_quantized_asymmetric ? "softmax_layer_norm_quantized" : "softmax_layer_norm";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure window
     auto win_config = validate_and_configure_window_1DNorm(input->info(), output->info(), sum->info(), info);

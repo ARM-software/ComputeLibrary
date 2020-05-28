@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,13 +35,13 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> log_softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis)
+SimpleTensor<T> log_softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis)
 {
     return softmax_layer_generic<T>(src, beta, axis, true);
 }
 
-template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int>::type>
-SimpleTensor<T> log_softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis)
+template < typename T, typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int >::type >
+SimpleTensor<T> log_softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis)
 {
     const QuantizationInfo output_quantization_info = arm_compute::get_softmax_output_quantization_info(src.data_type(), true);
 
@@ -51,10 +51,10 @@ SimpleTensor<T> log_softmax_layer(const SimpleTensor<T> &src, float beta, size_t
     return dst;
 }
 
-template SimpleTensor<float> log_softmax_layer(const SimpleTensor<float> &src, float beta, size_t axis);
-template SimpleTensor<half> log_softmax_layer(const SimpleTensor<half> &src, float beta, size_t axis);
-template SimpleTensor<uint8_t> log_softmax_layer(const SimpleTensor<uint8_t> &src, float beta, size_t axis);
-template SimpleTensor<int8_t> log_softmax_layer(const SimpleTensor<int8_t> &src, float beta, size_t axis);
+template SimpleTensor<float> log_softmax_layer(const SimpleTensor<float> &src, float beta, int32_t axis);
+template SimpleTensor<half> log_softmax_layer(const SimpleTensor<half> &src, float beta, int32_t axis);
+template SimpleTensor<uint8_t> log_softmax_layer(const SimpleTensor<uint8_t> &src, float beta, int32_t axis);
+template SimpleTensor<int8_t> log_softmax_layer(const SimpleTensor<int8_t> &src, float beta, int32_t axis);
 } // namespace reference
 } // namespace validation
 } // namespace test

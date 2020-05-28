@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute::misc::shape_calculator;
 namespace arm_compute
@@ -67,6 +68,11 @@ CLSpaceToDepthLayerKernel::CLSpaceToDepthLayerKernel()
 
 void CLSpaceToDepthLayerKernel::configure(const ICLTensor *input, ICLTensor *output, int32_t block_shape)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, block_shape);
+}
+
+void CLSpaceToDepthLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     TensorShape output_shape = compute_depth_to_space_shape(input->info(), block_shape);
@@ -83,11 +89,11 @@ void CLSpaceToDepthLayerKernel::configure(const ICLTensor *input, ICLTensor *out
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(data_size_from_type(output->info()->data_type())));
     build_opts.add_option("-DCHANNEL_SIZE=" + support::cpp11::to_string(output->info()->dimension(idx_channel)));
     build_opts.add_option("-DBLOCK_SHAPE=" + support::cpp11::to_string(block_shape));
     build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(output->info()->dimension(idx_width)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("space_to_depth_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
+    _kernel = create_kernel(compile_context, "space_to_depth_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps());

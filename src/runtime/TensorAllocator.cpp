@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryRegion.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <cstddef>
 

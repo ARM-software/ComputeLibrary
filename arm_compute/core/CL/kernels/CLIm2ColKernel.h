@@ -75,11 +75,30 @@ public:
      * @param[in]  kernel_dims The kernel dimensions (width and height).
      * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
+     *                         This is valid only for non-quantized inputs.
      * @param[in]  dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in]  num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
+     * @param[in]  num_groups  (Optional) Number of groups when performing a grouped convolution.
+     *                         Number of groups other than 1 is only supported for NCHW data layout.
+     *                         Number of groups should be multiple to the number of channels.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U),
                    unsigned int num_groups = 1);
+    /** Set the input and output of the kernel.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                             while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32
+     * @param[out] output          The output tensor. First 2 lower dimensions represent a transform of each 3D input,
+     *                             while every dimension above represents a batch. Data types supported: Same as @p input
+     * @param[in]  kernel_dims     The kernel dimensions (width and height).
+     * @param[in]  conv_info       Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  has_bias        In case biases are provided expands the matrix with 1.
+     * @param[in]  dilation        (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  num_groups      (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias,
+                   const Size2D &dilation   = Size2D(1U, 1U),
+                   unsigned int  num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLIm2ColKernel
      *
      * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
@@ -89,8 +108,11 @@ public:
      * @param[in] kernel_dims The kernel dimensions (width and height).
      * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] has_bias    In case biases are provided expands the matrix with 1.
+     *                        This is valid only for non-quantized inputs.
      * @param[in] dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in] num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
+     * @param[in] num_groups  (Optional) Number of groups when performing a grouped convolution.
+     *                        Number of groups other than 1 is only supported for NCHW data layout.
+     *                        Number of groups should be multiple to the number of channels.
      *
      * @return a status
      */

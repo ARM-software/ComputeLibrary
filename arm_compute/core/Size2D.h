@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,8 @@
 #ifndef ARM_COMPUTE_SIZE2D_H
 #define ARM_COMPUTE_SIZE2D_H
 
-#include "support/ToolchainSupport.h"
 #include <cstddef>
+#include <string>
 #include <utility>
 
 namespace arm_compute
@@ -65,10 +65,7 @@ public:
         return !(*this == other);
     }
 
-    std::string to_string() const
-    {
-        return support::cpp11::to_string(width) + std::string("x") + support::cpp11::to_string(height);
-    }
+    std::string to_string() const;
 
     /** Semantic accessor for width as x.
      *

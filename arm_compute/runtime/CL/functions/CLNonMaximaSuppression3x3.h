@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,18 @@ public:
      *                                   The implementation supports just 2 border modes: UNDEFINED and CONSTANT
      */
     void configure(ICLTensor *input, ICLTensor *output, BorderMode border_mode);
+    /** Initialise the function's source, destinations and border mode.
+     *
+     * @note The implementation supports just 2 border modes: UNDEFINED and CONSTANT
+     *       The constant values used with CONSTANT border mode is 0
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] input           Source tensor. Data types supported: U8, F32. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]    output          Destination for the Non-Maxima suppressions 3x3. Data types supported: same as @p input.
+     * @param[in]     border_mode     Border mode to use for non-maxima suppression.
+     *                                   The implementation supports just 2 border modes: UNDEFINED and CONSTANT
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, BorderMode border_mode);
 };
 }
 #endif /* ARM_COMPUTE_CLNONMAXIMASUPPRESSION3X3_H */

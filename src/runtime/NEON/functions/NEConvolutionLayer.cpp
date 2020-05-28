@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <cmath>
 #include <tuple>
@@ -50,7 +50,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
     ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
                                                             enable_fast_math));
 
-    switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info))
+    switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info, enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
         {
@@ -91,7 +91,7 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1), "Grouping (num_groups != 1) is not supported on NEON");
 
-    switch(NEConvolutionLayer::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info))
+    switch(NEConvolutionLayer::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info, enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
             //Validate Winograd
@@ -102,7 +102,7 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
             ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info));
             break;
         case ConvolutionMethod::DIRECT:
-            //Validate Gemm-based Convolution
+            //Validate Direct Convolution
             ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info));
             break;
         case ConvolutionMethod::FFT:
@@ -167,7 +167,8 @@ ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *
     else
     {
         // SRGAN
-        if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9)
+        // Output might not be initialized when it is an internal tensor of the layer using the convolution
+        if(input->total_size() > 1e7 && (weights->dimension(idx_h) > 7)
            && (NEDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
         {
             return ConvolutionMethod::DIRECT;

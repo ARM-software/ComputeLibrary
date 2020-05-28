@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -43,6 +44,11 @@ BorderSize CLGaussianPyramidHorKernel::border_size() const
 
 void CLGaussianPyramidHorKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLGaussianPyramidHorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U16);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != output->info()->dimension(1));
@@ -57,7 +63,7 @@ void CLGaussianPyramidHorKernel::configure(const ICLTensor *input, ICLTensor *ou
 
     // Create kernel
     const std::string kernel_name = std::string("gaussian1x5_sub_x");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel                       = create_kernel(compile_context, kernel_name);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;
@@ -149,6 +155,11 @@ BorderSize CLGaussianPyramidVertKernel::border_size() const
 
 void CLGaussianPyramidVertKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLGaussianPyramidVertKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U16);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != output->info()->dimension(0));
@@ -163,7 +174,7 @@ void CLGaussianPyramidVertKernel::configure(const ICLTensor *input, ICLTensor *o
 
     // Create kernel
     const std::string kernel_name = std::string("gaussian5x1_sub_y");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gaussian5x1_sub_y"));
+    _kernel                       = create_kernel(compile_context, "gaussian5x1_sub_y");
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;

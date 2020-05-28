@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,8 @@ namespace arm_compute
 {
 namespace graph
 {
-EltwiseLayerNode::EltwiseLayerNode(EltwiseOperation op, ConvertPolicy c_policy, RoundingPolicy r_policy)
-    : _op(op), _convert_policy(c_policy), _rounding_policy(r_policy)
+EltwiseLayerNode::EltwiseLayerNode(const descriptors::EltwiseLayerDescriptor &descriptor)
+    : descriptor(descriptor)
 {
     _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -39,17 +39,27 @@ EltwiseLayerNode::EltwiseLayerNode(EltwiseOperation op, ConvertPolicy c_policy, 
 
 EltwiseOperation EltwiseLayerNode::eltwise_operation() const
 {
-    return _op;
+    return descriptor.op;
 }
 
 ConvertPolicy EltwiseLayerNode::convert_policy() const
 {
-    return _convert_policy;
+    return descriptor.c_policy;
 }
 
 RoundingPolicy EltwiseLayerNode::rounding_policy() const
 {
-    return _rounding_policy;
+    return descriptor.r_policy;
+}
+
+ActivationLayerInfo EltwiseLayerNode::fused_activation() const
+{
+    return descriptor.fused_activation;
+}
+
+void EltwiseLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)
+{
+    descriptor.fused_activation = fused_activation;
 }
 
 bool EltwiseLayerNode::forward_descriptors()
@@ -66,12 +76,19 @@ bool EltwiseLayerNode::forward_descriptors()
 
 TensorDescriptor EltwiseLayerNode::configure_output(size_t idx) const
 {
-    ARM_COMPUTE_UNUSED(idx, _op, _convert_policy, _rounding_policy);
+    ARM_COMPUTE_UNUSED(idx);
 
     const Tensor *src = input(0);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
-    return src->desc();
+    auto output_info = src->desc();
+
+    if(!descriptor.out_quant_info.empty())
+    {
+        output_info.set_quantization_info(descriptor.out_quant_info);
+    }
+
+    return output_info;
 }
 
 NodeType EltwiseLayerNode::type() const

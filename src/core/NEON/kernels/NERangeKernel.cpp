@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,6 @@ namespace
 template <typename T>
 void range_function(ITensor *output, float start, float step, const Window &window)
 {
-    const unsigned int num_elems_processed_per_iteration = 16 / sizeof(T);
     /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector<T, wrapper::traits::BitWidth::W128>::tag_type;
 
@@ -49,17 +48,37 @@ void range_function(ITensor *output, float start, float step, const Window &wind
     const auto start_vec = wrapper::vdup_n(static_cast<T>(start), ExactTagType{});
     auto       id_vec    = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
 
-    Iterator output_it(output, window);
-    execute_window_loop(window, [&](const Coordinates & id)
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int  window_step_x  = 16 / sizeof(T);
+
+    Window win{ window };
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Iterator output_it(output, win);
+
+    execute_window_loop(win, [&](const Coordinates &)
     {
-        for(unsigned int count = 0; count < num_elems_processed_per_iteration; ++count)
-        {
-            id_vec = wrapper::vsetlane(static_cast<T>(id.x() + count), id_vec, count);
-        }
-        // start + step * id
-        const auto res_vec = wrapper::vmla(start_vec, id_vec, step_vec);
+        int        x       = window_start_x;
         const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
-        wrapper::vstore(out_ptr, res_vec);
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            for(int count = 0; count < window_step_x; ++count)
+            {
+                id_vec = wrapper::vsetlane(static_cast<T>(x + count), id_vec, count);
+            }
+
+            // start + step * id
+            const auto res_vec = wrapper::vmla(start_vec, id_vec, step_vec);
+            wrapper::vstore(out_ptr + x, res_vec);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            const auto res = start + x * step;
+            *(out_ptr + x) = res;
+        }
+
     },
     output_it);
 }
@@ -88,22 +107,6 @@ Status validate_arguments(const ITensorInfo &output, const float start, const fl
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo &output, const float start, const float end, const float step)
-{
-    const unsigned int num_elems_processed_per_iteration = 16 / output.element_size();
-
-    // Auto initialize output if not initialized
-    auto_init_if_empty(output, TensorShape(num_of_elements_in_range(start, end, step)), 1, output.data_type(), output.quantization_info());
-
-    // Configure kernel window
-    Window                 win = calculate_max_window(output, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
-    bool                   window_changed = update_window_and_padding(win, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), TensorShape(num_of_elements_in_range(start, end, step))));
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 NERangeKernel::NERangeKernel()
@@ -117,9 +120,14 @@ void NERangeKernel::configure(ITensor *output, float start, float end, float ste
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*(output->info()), start, end, step));
 
+    // Auto initialize output if not initialized
+    auto_init_if_empty(*output->info(), TensorShape(num_of_elements_in_range(start, end, step)), 1, output->info()->data_type(), output->info()->quantization_info());
+
     // Configure kernel window
-    auto win_config = validate_and_configure_window(*(output->info()), start, end, step);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    Window      win = calculate_max_window(*output->info(), Steps());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
     _start  = start;
     _end    = end;
@@ -158,7 +166,7 @@ void NERangeKernel::configure(ITensor *output, float start, float end, float ste
             break;
     }
 
-    INEKernel::configure(win_config.second);
+    INEKernel::configure(win);
 }
 
 Status NERangeKernel::validate(const ITensorInfo *output, float start, float end, float step)
@@ -166,7 +174,6 @@ Status NERangeKernel::validate(const ITensorInfo *output, float start, float end
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(*output, start, end, step));
-    ARM_COMPUTE_RETURN_ON_ERROR((validate_and_configure_window(*(output->clone()), start, end, step)).first);
 
     return Status{};
 }

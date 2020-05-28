@@ -29,7 +29,7 @@ template<>
 void MergeResults<3, 8, true>(__fp16 *out, const __fp16 *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const __fp16 *bias, Activation act, bool append)
 {
     const __fp16 *inptr = in;
-    __fp16 nullbias[384] = { 0 };
+    __fp16 nullbias[384];
     __fp16 minval = - static_cast<__fp16>(std::numeric_limits<float>::infinity());
     __fp16 maxval =   static_cast<__fp16>(std::numeric_limits<float>::infinity());
 

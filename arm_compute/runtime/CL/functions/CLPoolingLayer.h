@@ -46,17 +46,28 @@ public:
      * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]    output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]     pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[out]    indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
+    void configure(ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices = nullptr);
+    /** Set the input and output tensors.
+     *
+     * @param[in]     compile_context The compile context to be used.
+     * @param[in,out] input           Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[out]    output          Destination tensor. Data types supported: Same as @p input.
+     * @param[in]     pool_info       Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[out]    indices         (optional) The indices of the maximal values. Data type supported: U32.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayer
      *
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[in] indices   (optional) The indices of the maximal values. Data type supported: U32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CLPOOLINGLAYER_H */

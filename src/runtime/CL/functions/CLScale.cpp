@@ -28,17 +28,23 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding,
                         bool align_corners)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, policy, border_mode, constant_border_value, sampling_policy, use_padding, align_corners);
+}
+
+void CLScale::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value,
+                        SamplingPolicy sampling_policy, bool use_padding, bool align_corners)
+{
     ARM_COMPUTE_UNUSED(use_padding);
     auto k = arm_compute::support::cpp14::make_unique<CLScaleKernel>();
     k->set_target(CLScheduler::get().target());
-    k->configure(input, output, policy, border_mode, sampling_policy, align_corners);
+    k->configure(compile_context, input, output, policy, border_mode, sampling_policy, align_corners);
     _kernel = std::move(k);
 
     // Tune kernels
@@ -50,7 +56,7 @@ void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy
     {
         border_mode = BorderMode::CONSTANT;
     }
-    _border_handler.configure(input, _kernel->border_size(), border_mode, constant_border_value);
+    _border_handler.configure(compile_context, input, _kernel->border_size(), border_mode, constant_border_value);
 }
 
 Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy,

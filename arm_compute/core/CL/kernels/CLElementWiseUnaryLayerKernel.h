@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,14 @@ public:
      * @param[in]  op     Element wise unary operation to perform.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const ElementWiseUnary &op);
+    /** Initialise the kernel's inputs, output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           First tensor input. Data types supported: F16/F32.
+     * @param[out] output          Output tensor. Data types supported: Same as @p input.
+     * @param[in]  op              Element wise unary operation to perform.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ElementWiseUnary &op);
     /** Static function to check if given info will lead to a valid configuration of @ref CLElementWiseUnaryLayerKernel
      *
      * @param[in] input  First tensor input info. Data types supported: F16/F32.

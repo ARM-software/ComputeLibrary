@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,12 +37,13 @@ class GCPixelWiseMultiplication : public IGCSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and convertion policy.
      *
-     * @param[in]  input1 First tensor input. Data types supported: F32.
-     * @param[in]  input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[out] output Output tensor. Data types supported: Same as @p input1.
-     * @param[in]  scale  Scale to apply after multiplication. Must be a positive value.
+     * @param[in]  input1   First tensor input. Data types supported: F32.
+     * @param[in]  input2   Second tensor input. Data types supported: Same as @p input1.
+     * @param[out] output   Output tensor. Data types supported: Same as @p input1.
+     * @param[in]  scale    Scale to apply after multiplication. Must be a positive value.
+     * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, float scale);
+    void configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, float scale, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 }
 #endif /*ARM_COMPUTE_GCPIXELWISEMULTIPLICATION_H */

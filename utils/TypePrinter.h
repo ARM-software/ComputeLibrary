@@ -29,11 +29,13 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/HOGInfo.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTunerTypes.h"
+#include "support/StringSupport.h"
 
 #include <ostream>
 #include <sstream>
@@ -59,6 +61,7 @@ std::string to_string_if_not_null(T *arg)
         return to_string(*arg);
     }
 }
+
 /** Formatted output of the Dimensions type.
  *
  * @param[out] os         Output stream.
@@ -233,6 +236,95 @@ inline std::string to_string(const ROIPoolingLayerInfo &pool_info)
     return str.str();
 }
 
+/** Formatted output of the GEMMKernelInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  gemm_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMKernelInfo &gemm_info)
+{
+    os << "( m= " << gemm_info.m;
+    os << " n= " << gemm_info.n;
+    os << " k= " << gemm_info.k;
+    os << " depth_output_gemm3d= " << gemm_info.depth_output_gemm3d;
+    os << " reinterpret_input_as_3d= " << gemm_info.reinterpret_input_as_3d;
+    os << " broadcast_bias= " << gemm_info.broadcast_bias;
+    os << " fp_mixed_precision= " << gemm_info.fp_mixed_precision;
+    os << " mult_transpose1xW_width= " << gemm_info.mult_transpose1xW_width;
+    os << " mult_interleave4x4_height= " << gemm_info.mult_interleave4x4_height;
+    os << " a_offset = " << gemm_info.a_offset;
+    os << " b_offset = " << gemm_info.b_offset;
+    os << ")";
+    return os;
+}
+
+/** Formatted output of the GEMMLHSMatrixInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  gemm_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMLHSMatrixInfo &gemm_info)
+{
+    os << "( m0= " << (unsigned int)gemm_info.m0 << " k0= " << gemm_info.k0 << "  v0= " << gemm_info.v0 << "  trans= " << gemm_info.transpose << "  inter= " << gemm_info.interleave << "})";
+    return os;
+}
+
+/** Formatted output of the GEMMRHSMatrixInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  gemm_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMRHSMatrixInfo &gemm_info)
+{
+    os << "( n0= " << (unsigned int)gemm_info.n0 << " k0= " << gemm_info.k0 << "  h0= " << gemm_info.h0 << "  trans= " << gemm_info.transpose << "  inter= " << gemm_info.interleave << "})";
+    return os;
+}
+
+/** Formatted output of the GEMMRHSMatrixInfo type.
+ *
+ * @param[in] gemm_info GEMMRHSMatrixInfo to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMRHSMatrixInfo &gemm_info)
+{
+    std::stringstream str;
+    str << gemm_info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMLHSMatrixInfo type.
+ *
+ * @param[in] gemm_info GEMMLHSMatrixInfo to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMLHSMatrixInfo &gemm_info)
+{
+    std::stringstream str;
+    str << gemm_info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMKernelInfo type.
+ *
+ * @param[in] gemm_info GEMMKernelInfo Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMKernelInfo &gemm_info)
+{
+    std::stringstream str;
+    str << gemm_info;
+    return str.str();
+}
+
 /** Formatted output of the BoundingBoxTransformInfo type.
  *
  * @param[out] os        Output stream.
@@ -391,6 +483,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::IDENTITY:
             os << "IDENTITY";
             break;
+        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
+            os << "HARD_SWISH";
+            break;
+
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -660,6 +756,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
             break;
         case DataType::S64:
             os << "S64";
+            break;
+        case DataType::BFLOAT16:
+            os << "BFLOAT16";
             break;
         case DataType::F16:
             os << "F16";
@@ -1084,7 +1183,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
     os << "{is_a_reshaped=" << info.is_a_reshaped() << ",";
     os << "is_b_reshaped=" << info.is_b_reshaped() << ",";
     os << "reshape_b_only_on_first_run=" << info.reshape_b_only_on_first_run() << ",";
-    os << "}";
+    os << "depth_output_gemm3d=" << info.depth_output_gemm3d() << ",";
+    os << "reinterpret_input_as_3d=" << info.reinterpret_input_as_3d() << ",";
+    os << "retain_internal_weights=" << info.retain_internal_weights() << ",";
+    os << "fp_mixed_precision=" << info.fp_mixed_precision() << ",";
+    os << "broadcast_bias=" << info.broadcast_bias() << ",";
+    os << "pretranpose_B=" << info.pretranpose_B() << ",";
 
     return os;
 }

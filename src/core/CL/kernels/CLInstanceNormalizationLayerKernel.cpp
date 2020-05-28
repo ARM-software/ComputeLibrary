@@ -32,7 +32,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -77,6 +77,11 @@ CLInstanceNormalizationLayerKernel::CLInstanceNormalizationLayerKernel()
 
 void CLInstanceNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
+}
+
+void CLInstanceNormalizationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const InstanceNormalizationLayerKernelInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     _input  = input;
@@ -100,7 +105,7 @@ void CLInstanceNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *
     build_opts.add_option_if(_input->info()->data_layout() == DataLayout::NHWC, "-DNHWC");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("instance_normalization", build_opts.options()));
+    _kernel = create_kernel(compile_context, "instance_normalization", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(_input->info(), _output->info());

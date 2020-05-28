@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,9 +33,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-#include "support/ToolchainSupport.h"
-
-using namespace arm_compute;
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -45,8 +43,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
                           int min, int max)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON(max > 32767);
-    ARM_COMPUTE_RETURN_ERROR_ON(min < -32768 || min > max);
+    ARM_COMPUTE_RETURN_ERROR_ON(min > max);
 
     // Check biases if exist
     if(bias != nullptr)
@@ -99,9 +96,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-class Coordinates;
-} // namespace arm_compute
-
 CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel()
     : _input(nullptr), _bias(nullptr), _output(nullptr)
 {
@@ -124,6 +118,13 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(const 
                                                                           int result_fixedpoint_multiplier, int result_shift,
                                                                           int min, int max)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, bias, output, result_fixedpoint_multiplier, result_shift, min, max);
+}
+
+void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                                          int result_fixedpoint_multiplier, int result_shift,
+                                                                          int min, int max)
+{
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(),
@@ -137,12 +138,12 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::configure(const 
     CLBuildOptions build_opts;
     build_opts.add_option("-DRESULT_FIXEDPOINT_MULTIPLIER=" + support::cpp11::to_string(result_fixedpoint_multiplier));
     build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(result_shift));
-    build_opts.add_option_if((min != -32768) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
-    build_opts.add_option_if((max != 32767) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
+    build_opts.add_option_if((min > -32768), "-DMIN_BOUND=" + support::cpp11::to_string(min));
+    build_opts.add_option_if((max < 32767), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16", build_opts.options()));
+    _kernel = create_kernel(compile_context, "gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
@@ -178,3 +179,4 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

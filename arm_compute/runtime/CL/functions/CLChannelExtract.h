@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,11 +46,27 @@ public:
     void configure(const ICLTensor *input, Channel channel, ICLTensor *output);
     /** Initialize the function's source, destination
      *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           The input tensor to extract the channel from. Formats supported: RGB888/RGBA8888/YUYV422/UYVY422
+     * @param[in]  channel         The channel to extract.
+     * @param[out] output          The extracted channel. Must be of U8 format.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, Channel channel, ICLTensor *output);
+    /** Initialize the function's source, destination
+     *
      * @param[in]  input   The multi-planar input image to extract channel from. Formats supported: NV12/NV21/IYUV/YUV444
      * @param[in]  channel The channel to extract.
      * @param[out] output  The extracted 2D channel. Must be of U8 format.
      */
     void configure(const ICLMultiImage *input, Channel channel, ICLImage *output);
+    /** Initialize the function's source, destination
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           The multi-planar input image to extract channel from. Formats supported: NV12/NV21/IYUV/YUV444
+     * @param[in]  channel         The channel to extract.
+     * @param[out] output          The extracted 2D channel. Must be of U8 format.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLMultiImage *input, Channel channel, ICLImage *output);
 };
 }
 #endif /*ARM_COMPUTE_CLCHANNELEXTRACT_H*/

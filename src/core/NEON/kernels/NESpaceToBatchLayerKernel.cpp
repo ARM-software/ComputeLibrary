@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,7 +89,7 @@ Status validate_arguments_static(const ITensorInfo *input, const int block_shape
 } // namespace
 
 NESpaceToBatchLayerKernel::NESpaceToBatchLayerKernel()
-    : _input(nullptr), _block_shape(nullptr), _paddings(nullptr), _output(nullptr), _padding_left(), _block_shape_x(), _block_shape_y()
+    : _input(nullptr), _block_shape(nullptr), _paddings(nullptr), _output(nullptr), _data_layout(DataLayout::UNKNOWN), _padding_left(), _block_shape_x(), _block_shape_y()
 {
 }
 
@@ -102,6 +102,7 @@ void NESpaceToBatchLayerKernel::configure(const ITensor *input, const ITensor *b
     _block_shape = block_shape;
     _paddings    = paddings;
     _output      = output;
+    _data_layout = input->info()->data_layout();
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps());
@@ -123,6 +124,7 @@ void NESpaceToBatchLayerKernel::configure(const ITensor *input, const int block_
     _block_shape_x = block_shape_x;
     _block_shape_y = block_shape_y;
     _padding_left  = padding_left;
+    _data_layout   = input->info()->data_layout();
 
     // Configure kernel window
     Window win = calculate_max_window(*output->info(), Steps());
@@ -160,21 +162,21 @@ void NESpaceToBatchLayerKernel::run(const Window &window, const ThreadInfo &info
         const size_t pad_left_y = *reinterpret_cast<const size_t *>(_paddings->ptr_to_element({ 1, 0 }));
         _padding_left           = Size2D(pad_left_x, pad_left_y);
     }
-    const DataLayout data_layout  = _input->info()->data_layout();
-    const int        height_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int        width_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const int        element_size = _input->info()->element_size();
+    const int height_idx   = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+    const int width_idx    = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+    const int batch_idx    = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::BATCHES);
+    const int element_size = _input->info()->element_size();
 
     const size_t height     = _input->info()->dimension(height_idx);
     const size_t width      = _input->info()->dimension(width_idx);
-    const size_t batch_size = _input->info()->dimension(3);
+    const size_t batch_size = _input->info()->dimension(batch_idx);
 
     Window slice_out = window.first_slice_window_3D();
 
     int batch_id = 0;
 
     // Main loop for NCHW and NHWC
-    if(_output->info()->data_layout() == DataLayout::NCHW)
+    if(_data_layout == DataLayout::NCHW)
     {
         do
         {

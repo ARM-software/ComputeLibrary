@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
@@ -49,12 +49,22 @@ CLConcatenateLayer::CLConcatenateLayer()
 
 void CLConcatenateLayer::configure(std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
 {
-    configure_internal(std::move(inputs_vector), output, axis);
+    configure(CLKernelLibrary::get().get_compile_context(), inputs_vector, output, axis);
+}
+
+void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+{
+    configure_internal(compile_context, std::move(inputs_vector), output, axis);
 }
 
 void CLConcatenateLayer::configure(std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
 {
-    configure_internal(std::move(inputs_vector), output, axis);
+    configure(CLKernelLibrary::get().get_compile_context(), inputs_vector, output, axis);
+}
+
+void CLConcatenateLayer::configure(const CLCompileContext &compile_context, std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+{
+    configure_internal(compile_context, std::move(inputs_vector), output, axis);
 }
 
 Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
@@ -68,7 +78,7 @@ Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inpu
 }
 
 template <typename TensorType>
-void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_vector, ICLTensor *output, size_t axis)
+void CLConcatenateLayer::configure_internal(const CLCompileContext &compile_context, std::vector<TensorType *> &&inputs_vector, ICLTensor *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
     _axis       = axis;
@@ -97,7 +107,7 @@ void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_v
                 {
                     // Configure WidthConcatenate2Tensors kernel
                     auto kernel = support::cpp14::make_unique<CLWidthConcatenate2TensorsKernel>();
-                    kernel->configure(inputs_vector.at(0), inputs_vector.at(1), output);
+                    kernel->configure(compile_context, inputs_vector.at(0), inputs_vector.at(1), output);
                     _concat_kernels.emplace_back(std::move(kernel));
                     break;
                 }
@@ -105,7 +115,7 @@ void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_v
                 {
                     // Configure WidthConcatenate4Tensors kernel
                     auto kernel = support::cpp14::make_unique<CLWidthConcatenate4TensorsKernel>();
-                    kernel->configure(inputs_vector.at(0), inputs_vector.at(1), inputs_vector.at(2), inputs_vector.at(3), output);
+                    kernel->configure(compile_context, inputs_vector.at(0), inputs_vector.at(1), inputs_vector.at(2), inputs_vector.at(3), output);
                     _concat_kernels.emplace_back(std::move(kernel));
                     break;
                 }
@@ -115,7 +125,7 @@ void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_v
                     for(unsigned int i = 0; i < _num_inputs; ++i)
                     {
                         auto kernel = support::cpp14::make_unique<CLWidthConcatenateLayerKernel>();
-                        kernel->configure(inputs_vector.at(i), offset, output);
+                        kernel->configure(compile_context, inputs_vector.at(i), offset, output);
                         offset += inputs_vector.at(i)->info()->dimension(_axis);
                         _concat_kernels.emplace_back(std::move(kernel));
                     }
@@ -129,7 +139,7 @@ void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_v
             for(unsigned int i = 0; i < _num_inputs; ++i)
             {
                 auto kernel = support::cpp14::make_unique<CLHeightConcatenateLayerKernel>();
-                kernel->configure(inputs_vector.at(i), offset, output);
+                kernel->configure(compile_context, inputs_vector.at(i), offset, output);
                 offset += inputs_vector.at(i)->info()->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
             }
@@ -140,7 +150,7 @@ void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_v
             for(unsigned int i = 0; i < _num_inputs; ++i)
             {
                 auto kernel = support::cpp14::make_unique<CLDepthConcatenateLayerKernel>();
-                kernel->configure(inputs_vector.at(i), offset, output);
+                kernel->configure(compile_context, inputs_vector.at(i), offset, output);
                 offset += inputs_vector.at(i)->info()->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
             }
@@ -151,7 +161,7 @@ void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_v
             for(unsigned int i = 0; i < _num_inputs; ++i)
             {
                 auto kernel = support::cpp14::make_unique<CLBatchConcatenateLayerKernel>();
-                kernel->configure(inputs_vector.at(i), offset, output);
+                kernel->configure(compile_context, inputs_vector.at(i), offset, output);
                 offset += inputs_vector.at(i)->info()->dimension(_axis);
                 _concat_kernels.emplace_back(std::move(kernel));
             }

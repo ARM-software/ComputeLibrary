@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,13 @@ const auto ArithmeticDivisionFP16Dataset = combine(combine(framework::dataset::m
                                                    framework::dataset::make("DataType", DataType::F16));
 const auto ArithmeticDivisionFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
                                                    framework::dataset::make("DataType", DataType::F32));
+const auto EmptyActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{ ActivationLayerInfo() });
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.75f, 0.25f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.75f, 0.25f)
+});
 } // namespace
 
 TEST_SUITE(CL)
@@ -87,11 +94,18 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using CLArithmeticDivisionFixture = ArithmeticDivisionValidationFixture<CLTensor, CLAccessor, CLArithmeticDivision, T>;
+using CLArithmeticDivisionFloatFixture = ArithmeticDivisionValidationFloatFixture<CLTensor, CLAccessor, CLArithmeticDivision, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticDivisionFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ArithmeticDivisionFP16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticDivisionFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticDivisionFP16Dataset),
+                                                                                                              EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLArithmeticDivisionFloatFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ArithmeticDivisionFP16Dataset),
+                                                                                                                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
@@ -122,30 +136,47 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticDivisionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ArithmeticDivisionFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticDivisionFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticDivisionFP32Dataset),
+                                                                                                                     EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivation, CLArithmeticDivisionFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), ArithmeticDivisionFP32Dataset),
+                                                                                                                        ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLArithmeticDivisionFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ArithmeticDivisionFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLArithmeticDivisionFloatFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticDivisionFP32Dataset),
+                                                                                                                   EmptyActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 
 template <typename T>
-using CLArithmeticDivisionBroadcastFixture = ArithmeticDivisionBroadcastValidationFixture<CLTensor, CLAccessor, CLArithmeticDivision, T>;
+using CLArithmeticDivisionBroadcastFloatFixture = ArithmeticDivisionBroadcastValidationFloatFixture<CLTensor, CLAccessor, CLArithmeticDivision, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLArithmeticDivisionBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapesBroadcast(),
-                       ArithmeticDivisionFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLArithmeticDivisionBroadcastFloatFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapesBroadcast(),
+                       ArithmeticDivisionFP32Dataset),
+                       EmptyActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunWithActivationBroadcast, CLArithmeticDivisionBroadcastFloatFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapesBroadcast(),
+                       ArithmeticDivisionFP32Dataset),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLArithmeticDivisionBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
-                       ArithmeticDivisionFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLArithmeticDivisionBroadcastFloatFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapesBroadcast(),
+                       ArithmeticDivisionFP32Dataset),
+                       EmptyActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

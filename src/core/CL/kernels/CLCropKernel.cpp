@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,7 @@
 #include "arm_compute/core/utils/helpers/bit_ops.h"
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 #include <map>
 
@@ -47,6 +48,12 @@ CLCropKernel::CLCropKernel()
 }
 
 void CLCropKernel::configure(const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value, Window *output_window)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, start, end, batch_index, extrapolation_value, output_window);
+}
+
+void CLCropKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index,
+                             float extrapolation_value, Window *output_window)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), start, end, batch_index, extrapolation_value, output_window));
@@ -85,7 +92,7 @@ void CLCropKernel::configure(const ICLTensor *input, ICLTensor *output, Coordina
     build_opts.add_option_if(multi_access_x && remainder_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(output_width_x - vec_size_x, 0)));
     build_opts.add_option_if(start.x > end.x, "-DWIDTH_FLIPPED=");
     build_opts.add_option_if(start.y > end.y, "-DHEIGHT_FLIPPED=");
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("crop_tensor", build_opts.options()));
+    _kernel = create_kernel(compile_context, "crop_tensor", build_opts.options());
 }
 
 Status CLCropKernel::validate(const ITensorInfo *input, const ITensorInfo *output, Coordinates2D start, Coordinates2D end, uint32_t batch_index, float extrapolation_value, Window *output_window)

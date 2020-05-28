@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,8 @@ namespace validation
 namespace
 {
 const auto PaddingSizesDataset3D = framework::dataset::make("PaddingSize",
-{   PaddingList{ { 0, 0 } },
+{
+    PaddingList{ { 0, 0 } },
     PaddingList{ { 1, 1 } },
     PaddingList{ { 33, 33 } },
     PaddingList{ { 1, 1 }, { 5, 5 } },
@@ -50,7 +51,8 @@ const auto PaddingSizesDataset3D = framework::dataset::make("PaddingSize",
     PaddingList{ { 0, 0 }, { 0, 0 }, { 0, 0 } }
 });
 const auto PaddingSizesDataset4D = framework::dataset::make("PaddingSize",
-{   PaddingList{ { 1, 1 }, { 1, 0 }, { 1, 1 }, { 0, 0 } },
+{
+    PaddingList{ { 1, 1 }, { 1, 0 }, { 1, 1 }, { 0, 0 } },
     PaddingList{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 1, 1 } },
     PaddingList{ { 0, 1 }, { 1, 0 }, { 2, 2 }, { 1, 0 } },
     PaddingList{ { 1, 1 }, { 1, 1 }, { 1, 1 }, { 3, 3 } }
@@ -175,6 +177,17 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<uint8_t>, framework::DatasetMo
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE(QASYMM8_SIGNED)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPaddingFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8_SIGNED })), PaddingSizesDataset3D),
+                               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // QASYMM8_SIGNED
+
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // PadLayer

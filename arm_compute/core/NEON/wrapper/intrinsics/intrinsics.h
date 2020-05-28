@@ -33,6 +33,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/cgt.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/clt.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/combine.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/cvt.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/div.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/dup_n.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/eor.h"

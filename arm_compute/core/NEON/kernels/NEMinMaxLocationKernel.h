@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,10 +49,10 @@ public:
     NEMinMaxKernel(const NEMinMaxKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEMinMaxKernel &operator=(const NEMinMaxKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEMinMaxKernel(NEMinMaxKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEMinMaxKernel &operator=(NEMinMaxKernel &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMinMaxKernel(NEMinMaxKernel &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEMinMaxKernel &operator=(NEMinMaxKernel &&) = delete;
     /** Default destructor */
     ~NEMinMaxKernel() = default;
 

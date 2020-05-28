@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,22 @@ public:
      * @param[in]  idx_class               (Optional) Index of the class used for evaluating which class the detection window belongs to
      */
     void configure(const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, const Size2D &detection_window_stride, float threshold = 0.0f, size_t idx_class = 0);
+    /** Initialise the kernel's input, output, HOG data object, detection window stride, threshold and index class
+     *
+     * @attention The function does not reset the number of values in @ref IDetectionWindowArray so it is caller's responsibility to clear it.
+     *
+     * @param[in]  compile_context         The compile context to be used.
+     * @param[in]  input                   Input tensor. It is the output of @ref CLHOGDescriptor. Data type supported: F32
+     * @param[in]  hog                     HOG data-object that describes the HOG descriptor
+     * @param[out] detection_windows       Array of @ref DetectionWindow used to store the detected objects
+     * @param[in]  detection_window_stride Distance in pixels between 2 consecutive detection windows in x and y directions.
+     *                                     It must be multiple of the block stride stored in hog
+     * @param[in]  threshold               (Optional) Threshold for the distance between features and SVM classifying plane
+     * @param[in]  idx_class               (Optional) Index of the class used for evaluating which class the detection window belongs to
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, const Size2D &detection_window_stride,
+                   float threshold = 0.0f,
+                   size_t idx_class = 0);
 
     // Inherited methods overridden:
     void run() override;

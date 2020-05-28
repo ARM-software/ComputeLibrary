@@ -36,7 +36,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -55,7 +55,14 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+    if(input0->data_type() == DataType::QASYMM8)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::QSYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL);
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input0->num_dimensions() > 4, "The number of dimensions for the LHS matrix must be <= 4");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 3, "The number of dimensions for the RHS matrix must be <= 3");
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 != rhs_info.k0);
@@ -173,6 +180,13 @@ CLGEMMLowpMatrixMultiplyNativeKernel::CLGEMMLowpMatrixMultiplyNativeKernel()
 void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
                                                      const GEMMReshapeInfo &gemm_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, output, lhs_info, rhs_info, gemm_info);
+}
+
+void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info,
+                                                     const GEMMRHSMatrixInfo &rhs_info,
+                                                     const GEMMReshapeInfo   &gemm_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), lhs_info, rhs_info, gemm_info));
@@ -223,7 +237,7 @@ void CLGEMMLowpMatrixMultiplyNativeKernel::configure(const ICLTensor *input0, co
     std::string kernel_name("gemmlowp_mm_native");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -41,7 +42,7 @@ GCCol2ImKernel::GCCol2ImKernel()
 {
 }
 
-void GCCol2ImKernel::configure(const IGCTensor *input, IGCTensor    *output,
+void GCCol2ImKernel::configure(const IGCTensor *input, IGCTensor *output,
                                std::pair<unsigned int, unsigned int> convolved_dims)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);

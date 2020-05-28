@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,17 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
+    /** Initialize the function's source, destination, conv and border_mode.
+     *
+     * @param[in]     compile_context       The compile context to be used.
+     * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]    output                Destination tensor, Data types supported: U8 or S16.
+     * @param[in]     conv                  matrix_size x matrix_size S16 coefficients structured as a row-major 2D array in a linear buffer.
+     * @param[in]     scale                 Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
+     * @param[in]     border_mode           Strategy to use for borders.
+     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 
 /** Basic function to execute square convolution.Currently it supports 5x5, 7x7, 9x9. This function calls the following OpenCL kernels:
@@ -84,6 +95,17 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
+    /** Initialize the function's source, destination, conv and border_mode.
+     *
+     * @param[in]     compile_context       The compile context to be used.
+     * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]    output                Destination tensor, Data types supported: U8 or S16.
+     * @param[in]     conv                  matrix_size x matrix_size S16 coefficients structured as a row-major 2D array in a linear buffer.
+     * @param[in]     scale                 Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
+     * @param[in]     border_mode           Strategy to use for borders.
+     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
 
     // Inherited methods overriden:
     void run() override;
@@ -127,6 +149,20 @@ public:
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
     void configure(ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t rows, uint32_t cols, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value = 0);
+    /** Initialize the function's source, destination, conv and border_mode.
+     *
+     * @param[in]     compile_context       The compile context to be used.
+     * @param[in,out] input                 Source tensor. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
+     * @param[out]    output                Destination tensor, Data types supported: U8 or S16.
+     * @param[in]     conv                  Matrix_size x matrix_size S16 coefficients structured as a row-major 2D array in a linear buffer.
+     * @param[in]     rows                  Rows of convolution kernel.
+     * @param[in]     cols                  Columns of convolution kernel.
+     * @param[in]     scale                 Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
+     * @param[in]     border_mode           Strategy to use for borders.
+     * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t rows, uint32_t cols, uint32_t scale, BorderMode border_mode,
+                   uint8_t constant_border_value = 0);
 };
 }
 #endif /*ARM_COMPUTE_CLCONVOLUTION_H */

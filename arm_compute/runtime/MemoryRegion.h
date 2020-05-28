@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/IMemoryRegion.h"
 
 #include "arm_compute/core/Error.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <cstddef>
 

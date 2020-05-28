@@ -51,6 +51,17 @@ public:
      * @param[out] output         Destination tensor. Data type supported: Same as @p input
      */
     void configure(ICLTensor *input, const Coordinates &reduction_axis, bool keep_dims, ICLTensor *output);
+    /** Configure kernel
+     *
+     * @note Supported tensor rank: up to 4
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/F16/F32
+     * @param[in]  reduction_axis  Reduction axis vector.
+     * @param[in]  keep_dims       If positive, retains reduced dimensions with length 1.
+     * @param[out] output          Destination tensor. Data type supported: Same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, const Coordinates &reduction_axis, bool keep_dims, ICLTensor *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReduceMean
      *

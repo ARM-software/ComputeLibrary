@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,19 @@
 
 #include "arm_compute/core/CL/kernels/CLChannelShuffleLayerKernel.h"
 #include "arm_compute/core/Types.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 namespace arm_compute
 {
 void CLChannelShuffleLayer::configure(const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, num_groups);
+}
+
+void CLChannelShuffleLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, unsigned int num_groups)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLChannelShuffleLayerKernel>();
-    k->configure(input, output, num_groups);
+    k->configure(compile_context, input, output, num_groups);
     _kernel = std::move(k);
 }
 

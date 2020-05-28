@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,6 +80,9 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
             break;
         case ActivationLayerInfo::ActivationFunction::IDENTITY:
             ret = x;
+            break;
+        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
+            ret = x * ((std::min(std::max(static_cast<T>(x + 3), static_cast<T>(0.0f)), static_cast<T>(6.0f))) * 0.166666667f);
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported activation function");

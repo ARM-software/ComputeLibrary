@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLAccumulate.h"
 
 #include "arm_compute/core/CL/kernels/CLAccumulateKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,21 +32,36 @@ using namespace arm_compute;
 
 void CLAccumulate::configure(const ICLTensor *input, ICLTensor *accum)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, accum);
+}
+
+void CLAccumulate::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLAccumulateKernel>();
-    k->configure(input, accum);
+    k->configure(compile_context, input, accum);
     _kernel = std::move(k);
 }
 
 void CLAccumulateWeighted::configure(const ICLTensor *input, float alpha, ICLTensor *accum)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, alpha, accum);
+}
+
+void CLAccumulateWeighted::configure(const CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLAccumulateWeightedKernel>();
-    k->configure(input, alpha, accum);
+    k->configure(compile_context, input, alpha, accum);
     _kernel = std::move(k);
 }
 
 void CLAccumulateSquared::configure(const ICLTensor *input, uint32_t shift, ICLTensor *accum)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, shift, accum);
+}
+
+void CLAccumulateSquared::configure(const CLCompileContext &compile_context, const ICLTensor *input, uint32_t shift, ICLTensor *accum)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLAccumulateSquaredKernel>();
-    k->configure(input, shift, accum);
+    k->configure(compile_context, input, shift, accum);
     _kernel = std::move(k);
 }

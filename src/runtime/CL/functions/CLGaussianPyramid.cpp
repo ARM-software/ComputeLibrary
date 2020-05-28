@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "support/ToolchainSupport.h"
 
 #include "arm_compute/runtime/CL/CLPyramid.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -57,6 +56,11 @@ CLGaussianPyramidHalf::CLGaussianPyramidHalf() // NOLINT
 }
 
 void CLGaussianPyramidHalf::configure(ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, pyramid, border_mode, constant_border_value);
+}
+
+void CLGaussianPyramidHalf::configure(const CLCompileContext &compile_context, ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(pyramid == nullptr);
@@ -91,16 +95,16 @@ void CLGaussianPyramidHalf::configure(ICLTensor *input, CLPyramid *pyramid, Bord
         for(size_t i = 0; i < num_levels - 1; ++i)
         {
             /* Configure horizontal kernel */
-            _horizontal_reduction[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
+            _horizontal_reduction[i].configure(compile_context, _pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
 
             /* Configure vertical kernel */
-            _vertical_reduction[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
+            _vertical_reduction[i].configure(compile_context, _tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
 
             /* Configure border */
-            _horizontal_border_handler[i].configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
+            _horizontal_border_handler[i].configure(compile_context, _pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
 
             /* Configure border */
-            _vertical_border_handler[i].configure(_tmp.get_pyramid_level(i), _vertical_reduction[i].border_size(), border_mode, PixelValue(pixel_value_u16));
+            _vertical_border_handler[i].configure(compile_context, _tmp.get_pyramid_level(i), _vertical_reduction[i].border_size(), border_mode, PixelValue(pixel_value_u16));
         }
         _tmp.allocate();
     }
@@ -138,6 +142,11 @@ CLGaussianPyramidOrb::CLGaussianPyramidOrb() // NOLINT
 
 void CLGaussianPyramidOrb::configure(ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, pyramid, border_mode, constant_border_value);
+}
+
+void CLGaussianPyramidOrb::configure(const CLCompileContext &compile_context, ICLTensor *input, CLPyramid *pyramid, BorderMode border_mode, uint8_t constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(nullptr == pyramid);
     ARM_COMPUTE_ERROR_ON(input->info()->num_dimensions() != pyramid->get_pyramid_level(0)->info()->num_dimensions());
@@ -163,10 +172,10 @@ void CLGaussianPyramidOrb::configure(ICLTensor *input, CLPyramid *pyramid, Borde
         for(size_t i = 0; i < num_levels - 1; ++i)
         {
             /* Configure gaussian 5x5 */
-            _gauss5x5[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode, constant_border_value);
+            _gauss5x5[i].configure(compile_context, _pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode, constant_border_value);
 
             /* Configure scale image kernel */
-            _scale_nearest[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, SamplingPolicy::CENTER);
+            _scale_nearest[i].configure(compile_context, _tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, SamplingPolicy::CENTER);
         }
 
         _tmp.allocate();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,6 +61,16 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined);
+    /** Initialise the kernel's input, output and border mode.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data types supported: U8.
+     * @param[out] output           Destination tensor, Data types supported: U8, S16.
+     * @param[in]  conv             Convolution matrix to apply to the input tensor.
+     * @param[in]  scale            Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
@@ -94,6 +104,15 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const int16_t *conv, bool border_undefined);
+    /** Initialise the kernel's input, output and border mode.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data types supported: U8.
+     * @param[out] output           Destination tensor, Data types supported: S16.
+     * @param[in]  conv             Convolution matrix to apply to the input tensor.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, bool border_undefined);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
@@ -124,6 +143,17 @@ public:
      * @param[in]  data_type        Data type to use for intermeidate result. @sa data_type_for_convolution
      */
     void configure(const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined, DataType data_type = DataType::S32);
+    /** Initialise the kernel's input, output and border mode.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data types supported: S16.
+     * @param[out] output           Destination tensor, Data types supported: U8, S16.
+     * @param[in]  conv             Convolution matrix to apply to the input tensor.
+     * @param[in]  scale            Scale of the convolution matrix.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     * @param[in]  data_type        Data type to use for intermeidate result. @sa data_type_for_convolution
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined, DataType data_type = DataType::S32);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
@@ -168,6 +198,18 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale, bool border_undefined);
+    /** Initialise the kernel's input, output and border mode.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data types supported: U8.
+     * @param[out] output           Destination tensor, Data types supported: U8, S16.
+     * @param[in]  conv             Convolution matrix to apply to the input tensor.
+     * @param[in]  width            Width of convolution matrix (Number of columns)
+     * @param[in]  height           Height of convolution matrix (Number of rows)
+     * @param[in]  scale            Scale of the convolution matrix. If 0 is passed, it will be set to the sum of the coefficients of the convolution or 1 if they add up to 0.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale, bool border_undefined);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

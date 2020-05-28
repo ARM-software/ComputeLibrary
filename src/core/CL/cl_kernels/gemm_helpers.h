@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -139,6 +139,118 @@
 #define LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
 #define LOAD_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
 /** @} */ // end of group LOAD_BLOCK
+
+/** Loads the elements from 0 to n-1 in the given variables (BASENAME0 to BASENAMEn-1).
+ * @name LOAD_ELEMENT_n
+ *
+ * @param[in] N0        The number of rows to load
+ * @param[in] DATA_TYPE The data type of variables
+ * @param[in] BASENAME  The basename of the destination variables for the loaded rows
+ * @param[in] PTR       The base pointer
+ * @param[in] OFFSET    The offset within a row
+ * @param[in] STRIDE_Y  The stride value in y-axis direction
+ * @{
+ */
+#define LOAD_ELEMENT_1(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##0 = *((__global DATA_TYPE *)(PTR + OFFSET + 0 * STRIDE_Y));
+
+#define LOAD_ELEMENT_2(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_1(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##1 = *((__global DATA_TYPE *)(PTR + OFFSET + 1 * STRIDE_Y));
+
+#define LOAD_ELEMENT_3(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_2(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##2 = *((__global DATA_TYPE *)(PTR + OFFSET + 2 * STRIDE_Y));
+
+#define LOAD_ELEMENT_4(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_3(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##3 = *((__global DATA_TYPE *)(PTR + OFFSET + 3 * STRIDE_Y));
+
+#define LOAD_ELEMENT_5(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_4(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##4 = *((__global DATA_TYPE *)(PTR + OFFSET + 4 * STRIDE_Y));
+
+#define LOAD_ELEMENT_6(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_5(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##5 = *((__global DATA_TYPE *)(PTR + OFFSET + 5 * STRIDE_Y));
+
+#define LOAD_ELEMENT_7(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_6(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##6 = *((__global DATA_TYPE *)(PTR + OFFSET + 6 * STRIDE_Y));
+
+#define LOAD_ELEMENT_8(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_7(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##7 = *((__global DATA_TYPE *)(PTR + OFFSET + 7 * STRIDE_Y));
+
+#define LOAD_ELEMENT_9(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_8(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                       \
+    BASENAME##8 = *((__global DATA_TYPE *)(PTR + OFFSET + 8 * STRIDE_Y));
+
+#define LOAD_ELEMENT_10(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_9(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)      \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                        \
+    BASENAME##9 = *((__global DATA_TYPE *)(PTR + OFFSET + 9 * STRIDE_Y));
+
+#define LOAD_ELEMENT_11(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_10(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                        \
+    BASENAME##A = *((__global DATA_TYPE *)(PTR + OFFSET + 10 * STRIDE_Y));
+
+#define LOAD_ELEMENT_12(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_11(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                        \
+    BASENAME##B = *((__global DATA_TYPE *)(PTR + OFFSET + 11 * STRIDE_Y));
+
+#define LOAD_ELEMENT_13(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_12(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                        \
+    BASENAME##C = *((__global DATA_TYPE *)(PTR + OFFSET + 12 * STRIDE_Y));
+
+#define LOAD_ELEMENT_14(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_13(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                        \
+    BASENAME##D = *((__global DATA_TYPE *)(PTR + OFFSET + 13 * STRIDE_Y));
+
+#define LOAD_ELEMENT_15(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_14(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                        \
+    BASENAME##E = *((__global DATA_TYPE *)(PTR + OFFSET + 14 * STRIDE_Y));
+
+#define LOAD_ELEMENT_16(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) \
+    LOAD_ELEMENT_15(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)     \
+    VEC_DATA_TYPE(DATA_TYPE, N0)                                        \
+    BASENAME##F = *((__global DATA_TYPE *)(PTR + OFFSET + 15 * STRIDE_Y));
+
+/** @}*/ // end of group LOAD_ELEMENT_n
+
+/** Load Scalar as Vector (consecutive elements).
+ * @name LOAD_SCALAR_AS_VECTOR
+ *
+ * Supported cases are M0=1,2,3,...,16 and N0=1,2,3,4,8,16
+ * The data to load is expected to have consecutive names for each row.
+ * E.g., for M0=3, and BASENAME=c, the expected data is c0, c1 and c2.
+ *
+ * @param[in] M0        The number of consecutive rows
+ * @param[in] N0        The number of consecutive columns
+ * @param[in] DATA_TYPE The data type of the target
+ * @param[in] BASENAME  The basename of the result variables
+ * @param[in] PTR       The base pointer for the data
+ * @param[in] OFFSET    The offset within a row
+ * @param[in] STRIDE_Y  The stride in y-axis direction
+ * @{
+ */
+#define LOAD_SCALAR_AS_VECTOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) LOAD_ELEMENT_##M0(N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)
+#define LOAD_SCALAR_AS_VECTOR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y) LOAD_SCALAR_AS_VECTOR_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y)
+/** @} */ // end of group LOAD_SCALAR_AS_VECTOR
 
 /** Basic macros to calculate Z offset values from Z0 to Zn-1
  * @name CALCULATE_Z_OFFSET_n
@@ -581,6 +693,34 @@
     BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 16))((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL, (X##8).s##IDX_COL, (X##9).s##IDX_COL, (X##A).s##IDX_COL, (X##B).s##IDX_COL, (X##C).s##IDX_COL, (X##D).s##IDX_COL, (X##E).s##IDX_COL, (X##F).s##IDX_COL);
 /** @} */ // end of group COLUMN_VECTORn
 
+/** Create a new vector containing the values at the given index. Utility macros for transposing a colum-vector
+ * @name COLUMN_VECTOR_SCALARn
+ *
+ * @param[in] IDX_COL  The index value
+ * @param[in] BASENAME The basename of the destination vectors
+ * @param[in] X        The basename of the source vectors
+ * @param[in] TYPE     The data type of the destination vectors
+ * @{
+ */
+#define COLUMN_VECTOR_SCALAR1(IDX_COL, BASENAME, X, TYPE) \
+    TYPE BASENAME##IDX_COL = (TYPE)((X##0));
+#define COLUMN_VECTOR_SCALAR2(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 2)                                \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 2))((X##0), (X##1));
+#define COLUMN_VECTOR_SCALAR3(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 3)                                \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 3))((X##0), (X##1), (X##2));
+#define COLUMN_VECTOR_SCALAR4(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 4)                                \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 4))((X##0), (X##1), (X##2), (X##3));
+#define COLUMN_VECTOR_SCALAR8(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 8)                                \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 8))((X##0), (X##1), (X##2), (X##3), (X##4), (X##5), (X##6), (X##7));
+#define COLUMN_VECTOR_SCALAR16(IDX_COL, BASENAME, X, TYPE) \
+    VEC_DATA_TYPE(TYPE, 16)                                \
+    BASENAME##IDX_COL = (VEC_DATA_TYPE(TYPE, 16))((X##0), (X##1), (X##2), (X##3), (X##4), (X##5), (X##6), (X##7), (X##8), (X##9), (X##A), (X##B), (X##C), (X##D), (X##E), (X##F));
+/** @} */ // end of group COLUMN_VECTORn
+
 /** Create transposed vectors of the given vectors
  * @name TRANSPOSE_K0Xn
  *
@@ -591,9 +731,9 @@
  * @{
  */
 #define TRANSPOSE_K0X1(K0, BASENAME, B, TYPE) \
-    COLUMN_VECTOR(K0, 0, BASENAME, B, TYPE);
+    COLUMN_VECTOR_SCALAR(K0, 0, BASENAME, B, TYPE);
 #define TRANSPOSE_K0X2(K0, BASENAME, B, TYPE) \
-    TRANSPOSE_K0X1(K0, BASENAME, B, TYPE);    \
+    COLUMN_VECTOR(K0, 0, BASENAME, B, TYPE);  \
     COLUMN_VECTOR(K0, 1, BASENAME, B, TYPE);
 #define TRANSPOSE_K0X3(K0, BASENAME, B, TYPE) \
     TRANSPOSE_K0X2(K0, BASENAME, B, TYPE);    \
@@ -630,6 +770,18 @@
  */
 #define COLUMN_VECTOR(K0, IDX_COL, BASENAME, B, TYPE) \
     CONCAT(COLUMN_VECTOR, K0)                         \
+    (IDX_COL, BASENAME, B, TYPE);
+
+/** Create column vectors to contain the values at the given index. Utility macro for transposing a column-vector
+ *
+ * @param[in] K0       The number of source vectors
+ * @param[in] IDX_COL  The index value
+ * @param[in] BASENAME The basename of the destination vectors
+ * @param[in] B        The basename of the source vectors
+ * @param[in] TYPE     The data type of the destination vectors
+ */
+#define COLUMN_VECTOR_SCALAR(K0, IDX_COL, BASENAME, B, TYPE) \
+    CONCAT(COLUMN_VECTOR_SCALAR, K0)                         \
     (IDX_COL, BASENAME, B, TYPE);
 
 /** Create transposed vectors form the given source vectors

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Utils.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -92,6 +93,11 @@ CLRangeKernel::CLRangeKernel()
 
 void CLRangeKernel::configure(ICLTensor *output, const float start, const float end, const float step)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), output, start, end, step);
+}
+
+void CLRangeKernel::configure(const CLCompileContext &compile_context, ICLTensor *output, const float start, const float end, const float step)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*(output->info()), start, end, step));
@@ -122,7 +128,7 @@ void CLRangeKernel::configure(ICLTensor *output, const float start, const float 
         kernel_name += "_quantized";
     }
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
     ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning

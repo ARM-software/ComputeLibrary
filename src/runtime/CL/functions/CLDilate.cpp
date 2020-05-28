@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #include "arm_compute/core/CL/kernels/CLDilateKernel.h"
 #include "arm_compute/core/PixelValue.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -33,8 +33,13 @@ using namespace arm_compute;
 
 void CLDilate::configure(ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_mode, constant_border_value);
+}
+
+void CLDilate::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLDilateKernel>();
-    k->configure(input, output, border_mode == BorderMode::UNDEFINED);
+    k->configure(compile_context, input, output, border_mode == BorderMode::UNDEFINED);
     _kernel = std::move(k);
-    _border_handler.configure(input, BorderSize(1), border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(compile_context, input, BorderSize(1), border_mode, PixelValue(constant_border_value));
 }

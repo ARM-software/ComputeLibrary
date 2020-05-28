@@ -53,6 +53,8 @@ namespace arm_compute
 namespace test
 {
 std::unique_ptr<AssetsLibrary> library;
+static constexpr uint32_t      fixed_seed = 1;
+std::unique_ptr<AssetsLibrary> fixed_library;
 } // namespace test
 namespace utils
 {
@@ -136,7 +138,8 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
         g_example_argv.emplace_back(const_cast<char *>(arg.c_str())); // NOLINT
     }
 
-    library = support::cpp14::make_unique<AssetsLibrary>("." /* Only using random values */, seed->value());
+    library       = support::cpp14::make_unique<AssetsLibrary>("." /* Only using random values */, seed->value());
+    fixed_library = support::cpp14::make_unique<AssetsLibrary>(".", fixed_seed);
 
     if(options.log_level->value() > framework::LogLevel::NONE)
     {

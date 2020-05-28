@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -214,6 +214,14 @@ void CLGEMMMatrixMultiplyNativeKernel::configure(const ICLTensor *input0, const 
                                                  const GEMMLHSMatrixInfo &lhs_info,
                                                  const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input0, input1, input2, output, alpha, beta, lhs_info, rhs_info, gemm_info);
+}
+
+void CLGEMMMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha,
+                                                 float                    beta,
+                                                 const GEMMLHSMatrixInfo &lhs_info,
+                                                 const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), (input2 != nullptr ? input2->info() : nullptr), output->info(), alpha, beta, lhs_info, rhs_info, gemm_info));
@@ -281,7 +289,7 @@ void CLGEMMMatrixMultiplyNativeKernel::configure(const ICLTensor *input0, const 
     std::string kernel_name("gemm_mm_native");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;

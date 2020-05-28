@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,13 @@ CLHistogram::CLHistogram()
 
 void CLHistogram::configure(const ICLImage *input, ICLDistribution1D *output)
 {
-    _kernel.configure(input, output);
-    _kernel_border.configure(input, output);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLHistogram::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output)
+{
+    _kernel.configure(compile_context, input, output);
+    _kernel_border.configure(compile_context, input, output);
 }
 
 void CLHistogram::run()

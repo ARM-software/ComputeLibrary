@@ -49,7 +49,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                           bool has_bias, const Size2D &dilation, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized(input->data_type()) && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Number of groups greater than one are not supported on NEON");
@@ -376,6 +376,11 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
             case DataType::F32:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float, false, true> : &NEIm2ColKernel::run_im2col<float, true, true>;
                 break;
+#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+            case DataType::BFLOAT16:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<bfloat16, false, true> : &NEIm2ColKernel::run_im2col<bfloat16, true, true>;
+                break;
+#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float16_t, false, true> : &NEIm2ColKernel::run_im2col<float16_t, true, true>;
@@ -397,6 +402,11 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
             case DataType::F32:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float, false, false> : &NEIm2ColKernel::run_im2col<float, true, false>;
                 break;
+#if defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16)
+            case DataType::BFLOAT16:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<bfloat16, false, false> : &NEIm2ColKernel::run_im2col<bfloat16, true, false>;
+                break;
+#endif /* defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || defined(ARM_COMPUTE_FORCE_BF16) */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float16_t, false, false> : &NEIm2ColKernel::run_im2col<float16_t, true, false>;

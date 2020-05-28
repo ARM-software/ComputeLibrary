@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,10 @@ SimpleTensor<T> reorg_layer(const SimpleTensor<T> &src, int32_t stride)
 
     // Calculate layer reorg in NCHW
     Coordinates map_coords;
+
+#if defined(_OPENMP)
+    #pragma omp parallel for private(map_coords)
+#endif /* _OPENMP */
     for(unsigned int b = 0; b < outer_dims; ++b)
     {
         map_coords.set(3, b);

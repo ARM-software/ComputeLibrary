@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,15 @@ public:
      * @param[in]  mag_type (Optional) Magnitude calculation type. Default: L2NORM.
      */
     void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, MagnitudeType mag_type = MagnitudeType::L2NORM);
+    /** Initialise the kernel's inputs.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input1          First tensor input. Data types supported: S16.
+     * @param[in]  input2          Second tensor input. Data types supported: S16.
+     * @param[out] output          Output tensor. Data types supported: S16.
+     * @param[in]  mag_type        (Optional) Magnitude calculation type. Default: L2NORM.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, MagnitudeType mag_type = MagnitudeType::L2NORM);
 };
 }
 #endif /*ARM_COMPUTE_CLMAGNITUDE_H */

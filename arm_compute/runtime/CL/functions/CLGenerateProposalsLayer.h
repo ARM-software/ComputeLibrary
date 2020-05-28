@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,12 +65,8 @@ public:
     CLGenerateProposalsLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLGenerateProposalsLayer(const CLGenerateProposalsLayer &) = delete;
-    /** Default move constructor */
-    CLGenerateProposalsLayer(CLGenerateProposalsLayer &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLGenerateProposalsLayer &operator=(const CLGenerateProposalsLayer &) = delete;
-    /** Default move assignment operator */
-    CLGenerateProposalsLayer &operator=(CLGenerateProposalsLayer &&) = default;
 
     /** Set the input and output tensors.
      *
@@ -89,6 +85,24 @@ public:
      */
     void configure(const ICLTensor *scores, const ICLTensor *deltas, const ICLTensor *anchors, ICLTensor *proposals, ICLTensor *scores_out, ICLTensor *num_valid_proposals,
                    const GenerateProposalsInfo &info);
+    /** Set the input and output tensors.
+     *
+     * @param[in]  compile_context     The compile context to be used.
+     * @param[in]  scores              Scores from convolution layer of size (W, H, A), where H and W are the height and width of the feature map, and A is the number of anchors.
+     *                                 Data types supported: QASYMM8/F16/F32
+     * @param[in]  deltas              Bounding box deltas from convolution layer of size (W, H, 4*A). Data types supported: Same as @p scores
+     * @param[in]  anchors             Anchors tensor of size (4, A). Data types supported: QSYMM16 with scale of 0.125 if @p scores is QASYMM8, otherwise same as @p scores
+     * @param[out] proposals           Box proposals output tensor of size (5, W*H*A).
+     *                                 Data types supported: QASYMM16 with scale of 0.125 and 0 offset if @p scores is QASYMM8, otherwise same as @p scores
+     * @param[out] scores_out          Box scores output tensor of size (W*H*A). Data types supported: Same as @p scores
+     * @param[out] num_valid_proposals Scalar output tensor which says which of the first proposals are valid. Data types supported: U32
+     * @param[in]  info                Contains GenerateProposals operation information described in @ref GenerateProposalsInfo
+     *
+     * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the @ref GenerateProposalsInfo struct.
+     * @note Proposals contains all the proposals. Of those, only the first num_valid_proposals are valid.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *scores, const ICLTensor *deltas, const ICLTensor *anchors, ICLTensor *proposals, ICLTensor *scores_out,
+                   ICLTensor *num_valid_proposals, const GenerateProposalsInfo &info);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLGenerateProposalsLayer
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,8 @@
 
 #include <arm_neon.h>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info, int32_t num_classes)
@@ -61,38 +62,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
     return Status{};
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
-{
-    if(output != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-        // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output, *input);
-    }
-
-    const bool         is_nchw                           = input->data_layout() == DataLayout::NCHW;
-    const unsigned int num_elems_processed_per_iteration = is_nchw ? 16 / input->element_size() : 1;
-
-    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    bool   window_changed = false;
-
-    if(output != nullptr)
-    {
-        AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = update_window_and_padding(win, input_access, output_access);
-        output_access.set_valid_region(win, input->valid_region());
-    }
-    else
-    {
-        window_changed = update_window_and_padding(win, AccessWindowHorizontal(input, 0, num_elems_processed_per_iteration));
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
 } // namespace
 
 NEYOLOLayerKernel::NEYOLOLayerKernel()
@@ -100,39 +69,67 @@ NEYOLOLayerKernel::NEYOLOLayerKernel()
 {
 }
 
-void NEYOLOLayerKernel::yolo_layer_fp32_nchw(const Window &window)
+template <typename T, int S>
+void NEYOLOLayerKernel::yolo_layer_nchw(const Window &window)
 {
-    Iterator input(_input, window);
-    Iterator output(_output, window);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int  window_step_x  = S;
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    Window win{ window };
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Iterator input(_input, win);
+    Iterator output(_output, win);
+
+    execute_window_loop(win, [&](const Coordinates & id)
     {
-        float32x4_t res = vld1q_f32(reinterpret_cast<float *>(input.ptr()));
+        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
+        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
+        int        x          = window_start_x;
+        const int  box_ch_id  = id.z() % (_num_classes + 5);
+        const bool activate   = box_ch_id != 2 && box_ch_id != 3;
 
-        const int  box_ch_id = id.z() % (_num_classes + 5);
-        const bool activate  = box_ch_id != 2 && box_ch_id != 3;
-
-        // Perform activation
-        if(activate)
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
-            auto activation = ::detail::logistic<float, 4>(_act_info);
-            activation(res);
+            auto res = wrapper::vloadq(input_ptr + x);
+
+            // Perform activation
+            if(activate)
+            {
+                auto activation = detail::logistic<T, S>(_act_info);
+                activation(res);
+            }
+
+            // Store results
+            wrapper::vstore(output_ptr + x, res);
         }
 
-        // Store results
-        vst1q_f32(reinterpret_cast<float *>(output.ptr()), res);
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            auto res = *(input_ptr + x);
+
+            // Perform activation
+            if(activate)
+            {
+                res = 1.f / (1.f + std::exp(-res));
+            }
+
+            *(output_ptr + x) = res;
+        }
     },
     input, output);
 }
 
-void NEYOLOLayerKernel::yolo_layer_fp32_nhwc(const Window &window)
+template <typename T>
+void NEYOLOLayerKernel::yolo_layer_nhwc(const Window &window)
 {
     Iterator input(_input, window);
     Iterator output(_output, window);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        float res = *(reinterpret_cast<float *>(input.ptr()));
+        auto res = *(reinterpret_cast<T *>(input.ptr()));
 
         const int  box_ch_id = id.x() % (_num_classes + 5);
         const bool activate  = box_ch_id != 2 && box_ch_id != 3;
@@ -144,61 +141,10 @@ void NEYOLOLayerKernel::yolo_layer_fp32_nhwc(const Window &window)
         }
 
         // Store result
-        *(reinterpret_cast<float *>(output.ptr())) = res;
+        *(reinterpret_cast<T *>(output.ptr())) = res;
     },
     input, output);
 }
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-void NEYOLOLayerKernel::yolo_layer_fp16_nchw(const Window &window)
-{
-    Iterator input(_input, window);
-    Iterator output(_output, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        float16x8_t res = vld1q_f16(reinterpret_cast<float16_t *>(input.ptr()));
-
-        const int  box_ch_id = id.z() % (_num_classes + 5);
-        const bool activate  = box_ch_id != 2 && box_ch_id != 3;
-
-        // Perform activation
-        if(activate)
-        {
-            auto activation = ::detail::logistic<float16_t, 8>(_act_info);
-            activation(res);
-        }
-
-        // Store results
-        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), res);
-    },
-    input, output);
-}
-
-void NEYOLOLayerKernel::yolo_layer_fp16_nhwc(const Window &window)
-{
-    Iterator input(_input, window);
-    Iterator output(_output, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        float16_t res = *(reinterpret_cast<float16_t *>(input.ptr()));
-
-        const int  box_ch_id = id.x() % (_num_classes + 5);
-        const bool activate  = box_ch_id != 2 && box_ch_id != 3;
-
-        // Perform activation
-        if(activate)
-        {
-            res = 1.f / (1.f + std::exp(-res));
-        }
-
-        // Store result
-        *(reinterpret_cast<float16_t *>(output.ptr())) = res;
-    },
-    input, output);
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 void NEYOLOLayerKernel::configure(ITensor *input, ITensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
 {
@@ -214,27 +160,37 @@ void NEYOLOLayerKernel::configure(ITensor *input, ITensor *output, const Activat
     {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            _func = (_input->info()->data_layout() == DataLayout::NHWC) ? &NEYOLOLayerKernel::yolo_layer_fp16_nhwc : &NEYOLOLayerKernel::yolo_layer_fp16_nchw;
+            _func = (_input->info()->data_layout() == DataLayout::NHWC) ? &NEYOLOLayerKernel::yolo_layer_nhwc<float16_t> : &NEYOLOLayerKernel::yolo_layer_nchw<float16_t, 8>;
             break;
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F32:
-            _func = (_input->info()->data_layout() == DataLayout::NHWC) ? &NEYOLOLayerKernel::yolo_layer_fp32_nhwc : &NEYOLOLayerKernel::yolo_layer_fp32_nchw;
+            _func = (_input->info()->data_layout() == DataLayout::NHWC) ? &NEYOLOLayerKernel::yolo_layer_nhwc<float> : &NEYOLOLayerKernel::yolo_layer_nchw<float, 4>;
             break;
         default:
             ARM_COMPUTE_ERROR("Element size not supported");
             break;
     }
 
+    Window win = calculate_max_window(*input->info(), Steps());
+
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (output == nullptr) ? nullptr : output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICPPKernel::configure(win_config.second);
+    if(output != nullptr)
+    {
+        // Output auto inizialitation if not yet initialized
+        auto_init_if_empty(*output->info(), *input->info());
+
+        Coordinates coord;
+        coord.set_num_dimensions(output->info()->num_dimensions());
+
+        output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    }
+
+    ICPPKernel::configure(win);
 }
 
 Status NEYOLOLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info, int32_t num_classes)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, act_info, num_classes));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (output == nullptr) ? nullptr : output->clone().get()).first);
 
     return Status{};
 }
@@ -248,3 +204,4 @@ void NEYOLOLayerKernel::run(const Window &window, const ThreadInfo &info)
 
     (this->*_func)(window);
 }
+} // namespace arm_compute

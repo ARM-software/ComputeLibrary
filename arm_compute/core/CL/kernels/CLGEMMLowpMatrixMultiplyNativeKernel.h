@@ -58,6 +58,22 @@ public:
      * @param[in]  gemm_info GEMM information used to retrieve the original dimensions of the input matrices
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info, const GEMMReshapeInfo &gemm_info);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input0          Input tensor containing the LHS matrix. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in]  input1          Input tensor containing the RHS matrix. Data type supported: same as @p input0
+     * @param[out] output          Output tensor to store the result of matrix multiplication. Data type supported: S32
+     * @param[in]  lhs_info        LHS matrix information used to retrieve the number of rows to be processed by each thread
+     *                             lhs_info.m0: 2,3,4,5,6,7,8
+     *                             lhs_info.k0: 2,3,4,8,16
+     * @param[in]  rhs_info        RHS matrix information used to retrieve the number of columns to be processed by each thread
+     *                             rhs_info.n0: 2,3,4,8,16
+     *                             rhs_info.k0: same as lhs_info.k0
+     * @param[in]  gemm_info       GEMM information used to retrieve the original dimensions of the input matrices
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
+                   const GEMMReshapeInfo &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyNativeKernel
      *
      * @param[in] input0    Input tensor info for the LHS matrix. Data type supported: QASYMM8/QASYMM8_SIGNED

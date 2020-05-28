@@ -35,6 +35,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>
@@ -55,10 +56,11 @@ void auto_init(const ITensorInfo *input, ITensorInfo *output, PoolingLayerInfo p
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(out_shape));
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(indices, "Indices not supported in the CL backend.");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type == PoolingType::L2),
                                     "Unsupported combination of parameters!");
@@ -165,7 +167,7 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
 } // namespace
 
 CLPoolingLayerKernel::CLPoolingLayerKernel()
-    : _input(nullptr), _output(nullptr), _pool_info(), _data_layout(DataLayout::UNKNOWN), _border_size(0), _num_elems_processed_per_iteration(1)
+    : _input(nullptr), _output(nullptr), _indices(nullptr), _pool_info(), _data_layout(DataLayout::UNKNOWN), _border_size(0), _num_elems_processed_per_iteration(1)
 {
 }
 
@@ -174,16 +176,21 @@ BorderSize CLPoolingLayerKernel::border_size() const
     return _border_size;
 }
 
-void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info)
+void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, pool_info, indices);
+}
+
+void CLPoolingLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Set instance variables
-    _input       = input;
-    _output      = output;
-    _pool_info   = pool_info;
-    _data_layout = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
-
+    _input                              = input;
+    _output                             = output;
+    _pool_info                          = pool_info;
+    _data_layout                        = pool_info.data_layout == DataLayout::UNKNOWN ? input->info()->data_layout() : pool_info.data_layout;
+    _indices                            = indices;
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
     const PoolingType   pool_type       = pool_info.pool_type;
@@ -214,7 +221,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
 
     // Check output dimensions
     auto_init(input->info(), output->info(), pool_info);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, (indices) ? indices->info() : nullptr));
 
     const DataType data_type = input->info()->data_type();
 
@@ -273,12 +280,12 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
 
                 std::string kernel_name = ((is_pool3x3_stride_le3) ? "pooling_layer_optimized_" : "pooling_layer_")
                                           + support::cpp11::to_string(pool_size_x);
-                _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+                _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
             }
             else // Run general case
             {
                 std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "pooling_layer_MxN_quantized_nchw" : "pooling_layer_MxN_nchw";
-                _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+                _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
             }
             break;
         }
@@ -290,7 +297,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
             build_opts.add_option_if(output->info()->tensor_shape().total_size_upper(3) > 1,
                                      "-DDST_DEPTH=" + support::cpp11::to_string(output->info()->dimension(idx_height)));
             std::string kernel_name = is_data_type_quantized_asymmetric(data_type) ? "pooling_layer_MxN_quantized_nhwc" : "pooling_layer_MxN_nhwc";
-            _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+            _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
             break;
         }
         default:
@@ -330,9 +337,9 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
 }
 
-Status CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+Status CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, indices));
     ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), pool_info)));
 
     return Status{};

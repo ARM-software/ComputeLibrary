@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLDepthToSpaceLayer.h"
 
 #include "arm_compute/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,8 +32,13 @@ namespace arm_compute
 {
 void CLDepthToSpaceLayer::configure(const ICLTensor *input, ICLTensor *output, int32_t block_shape)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, block_shape);
+}
+
+void CLDepthToSpaceLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t block_shape)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLDepthToSpaceLayerKernel>();
-    k->configure(input, output, block_shape);
+    k->configure(compile_context, input, output, block_shape);
     _kernel = std::move(k);
 }
 

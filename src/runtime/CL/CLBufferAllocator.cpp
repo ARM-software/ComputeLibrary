@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLMemoryRegion.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <cstddef>
 

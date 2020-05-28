@@ -62,7 +62,7 @@ Status NEConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(weights);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1,
                                                          DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL,
-                                                         DataType::F16, DataType::F32);
+                                                         DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
     if(biases != nullptr)
@@ -330,6 +330,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     }
 
     // Create temporary GEMM output tensor in case we cannot skip col2im
+    const DataType output_data_type = data_type == DataType::BFLOAT16 ? DataType::F32 : data_type;
     if(!_skip_col2im)
     {
         TensorShape shape_gemm;
@@ -340,7 +341,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         shape_gemm.set(1, conv_w * conv_h);
 
         // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
-        TensorInfo info_gemm(shape_gemm, 1, data_type);
+        TensorInfo info_gemm(shape_gemm, 1, output_data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
         _memory_group.manage(&_gemm_output);
@@ -392,8 +393,8 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::BFLOAT16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL, DataType::BFLOAT16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Grouping (num_groups != 1) is not supported on NEON");
 
@@ -417,6 +418,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     const bool append_bias  = false;
     const bool is_quantized = is_data_type_quantized_asymmetric(data_type);
+    const bool is_bf16      = data_type == DataType::BFLOAT16;
     bool       skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
 
     // Get convolved dimensions
@@ -462,6 +464,10 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
+        else if(is_bf16)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::F32);
+        }
         else
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
@@ -497,16 +503,17 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     }
 
     // Create temporary GEMM output tensor in case we cannot skip col2im
+    const DataType output_data_type = data_type == DataType::BFLOAT16 ? DataType::F32 : data_type;
     if(!skip_col2im)
     {
         TensorShape shape_gemm = gemm_input_to_use->tensor_shape();
         shape_gemm.set(0, mat_weights_cols);
         shape_gemm.set(1, conv_w * conv_h);
-        info_gemm = TensorInfo(shape_gemm, 1, data_type);
+        info_gemm = TensorInfo(shape_gemm, 1, output_data_type);
     }
     else
     {
-        info_gemm = TensorInfo(output->tensor_shape(), 1, data_type);
+        info_gemm = TensorInfo(output->tensor_shape(), 1, output_data_type);
     }
     info_gemm.set_quantization_info(output->quantization_info()).set_data_layout(input->data_layout());
     gemm_output_to_use = &info_gemm;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,14 @@ public:
      * @param[out]     stddev (Optional) Output standard deviation of pixel values.
      */
     void configure(ICLImage *input, float *mean, float *stddev = nullptr);
+    /** Initialise the kernel's inputs and outputs.
+     *
+     * @param[in]      compile_context The compile context to be used.
+     * @param[in, out] input           Input image. Data types supported: U8/F16/F32. (Written to only for border filling)
+     * @param[out]     mean            Output average pixel value.
+     * @param[out]     stddev          (Optional) Output standard deviation of pixel values.
+     */
+    void configure(const CLCompileContext &compile_context, ICLImage *input, float *mean, float *stddev = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLMeanStdDev
      *
      * @param[in] input  Input image. Data types supported: U8/F16/F32.

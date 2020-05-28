@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
 
 #include "arm_gemm.hpp"
 
-#include "ndrange.hpp"
+#include "arm_compute/core/NEON/kernels/arm_gemm/ndrange.hpp"
 
 #ifdef CYCLE_PROFILING
 #include "profiler.hpp"
@@ -87,8 +87,8 @@ public:
                  _window_range(iceildiv(_Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmultis) { }
 
     // Window is amount per multi multiplied by total number of multis.
-    unsigned int get_window_size() const override {
-        return _window_range.total_size();
+    ndrange_t get_window_size() const override {
+        return { _window_range.total_size(), 1u, 1u, 1u, 1u, 1u };
     }
 
     // Native GEMMs can always be dynamically scheduled (whether requested or not)
@@ -97,7 +97,7 @@ public:
     }
 
     // Actually execute the GEMM.
-    void execute(unsigned int start, unsigned int end, int) override {
+    void execute_1d(unsigned int start, unsigned int end, int) {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -138,6 +138,16 @@ public:
                            (ymax - y0), (nmax - n0));
             }
         } while (p.next_dim1());
+    }
+
+    //Execute
+    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
+        UNUSED(thread_locator);
+
+        const auto start = work_range.get_position(0);
+        const auto stop  = work_range.get_position_end(0);
+
+        execute_1d(start, stop, threadid);
     }
 };
 

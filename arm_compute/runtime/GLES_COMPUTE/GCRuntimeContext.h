@@ -43,12 +43,8 @@ public:
     ~GCRuntimeContext() = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCRuntimeContext(const GCRuntimeContext &) = delete;
-    /** Default move constructor */
-    GCRuntimeContext(GCRuntimeContext &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCRuntimeContext &operator=(const GCRuntimeContext &) = delete;
-    /** Default move assignment operator */
-    GCRuntimeContext &operator=(GCRuntimeContext &&) = default;
     /** CPU Scheduler setter */
     void set_gpu_scheduler(GCScheduler *scheduler);
 

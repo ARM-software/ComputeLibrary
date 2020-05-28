@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,9 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
     const auto rows       = static_cast<int>(src.shape()[1]);
     const auto depth      = static_cast<int>(src.shape()[2]);
     const int  upper_dims = src.shape().total_size() / (cols * rows * depth);
-
+#if defined(_OPENMP)
+    #pragma omp parallel for schedule(dynamic, 1) collapse(4)
+#endif /* _OPENMP */
     for(int r = 0; r < upper_dims; ++r)
     {
         for(int i = 0; i < depth; ++i)

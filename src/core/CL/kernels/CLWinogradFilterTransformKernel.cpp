@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
@@ -101,6 +101,11 @@ CLWinogradFilterTransformKernel::CLWinogradFilterTransformKernel()
 
 void CLWinogradFilterTransformKernel::configure(const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, winograd_info);
+}
+
+void CLWinogradFilterTransformKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto initialization if not yet initialized
@@ -119,7 +124,7 @@ void CLWinogradFilterTransformKernel::configure(const ICLTensor *input, ICLTenso
 
     // Create kernel
     std::string kernel_name = "winograd_filter_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(input->info()->data_layout()));
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                 = create_kernel(compile_context, kernel_name, build_opts.options());
 
     _input  = input;
     _output = output;

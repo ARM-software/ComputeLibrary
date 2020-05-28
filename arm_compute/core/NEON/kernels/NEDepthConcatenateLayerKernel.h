@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,7 +79,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    using DepthConcatFunction = void(const ITensor *in, ITensor *out, int depth_offset, const Window &window);
+    using DepthConcatFunction = void(const ITensor *in, ITensor *out, unsigned int depth_offset, const Window &window);
 
 private:
     DepthConcatFunction *_func;

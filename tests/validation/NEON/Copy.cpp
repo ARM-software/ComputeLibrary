@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,7 +62,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
-
+TEST_SUITE(FixedSeed)
 TEST_SUITE(F32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NECopyFixture<float>, framework::DatasetMode::ALL, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
                                                                                             DataType::F32)))
@@ -89,6 +89,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NECopyFixture<uint16_t>, framework::DatasetMode
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END() // U16
+TEST_SUITE_END() // FixedSeed
 
 TEST_SUITE_END() // Copy
 TEST_SUITE_END() // NEON

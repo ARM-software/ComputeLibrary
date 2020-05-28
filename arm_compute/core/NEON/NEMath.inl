@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include <cmath>
+#include <limits>
 
 #ifndef M_PI
 #define M_PI (3.14159265358979323846)
@@ -147,6 +148,8 @@ inline float32x4_t vexpq_f32(float32x4_t x)
 {
     static const float32x4_t CONST_LN2          = vdupq_n_f32(0.6931471805f); // ln(2)
     static const float32x4_t CONST_INV_LN2      = vdupq_n_f32(1.4426950408f); // 1/ln(2)
+    static const float32x4_t CONST_INF          = vdupq_n_f32(std::numeric_limits<float>::infinity());
+    static const float32x4_t CONST_MAX_INPUT    = vdupq_n_f32(88.7f);
     static const float32x4_t CONST_0            = vdupq_n_f32(0.f);
     static const int32x4_t   CONST_NEGATIVE_126 = vdupq_n_s32(-126);
 
@@ -159,7 +162,8 @@ inline float32x4_t vexpq_f32(float32x4_t x)
 
     // Reconstruct
     poly = vreinterpretq_f32_s32(vqaddq_s32(vreinterpretq_s32_f32(poly), vqshlq_n_s32(m, 23)));
-    poly = vbslq_f32(vcltq_s32(m, CONST_NEGATIVE_126), CONST_0, poly);
+    poly = vbslq_f32(vcltq_s32(m, CONST_NEGATIVE_126), CONST_0, poly); // Handle underflow
+    poly = vbslq_f32(vcgtq_f32(x, CONST_MAX_INPUT), CONST_INF, poly);  // Handle overflow
 
     return poly;
 }
@@ -343,6 +347,18 @@ inline float32x4x4_t convert_int8x16_to_float32x4x4(const int8x16_t &in)
     out.val[2]      = vcvtq_f32_s32(vmovl_s16(vget_low_s16(tmp2)));
     out.val[3]      = vcvtq_f32_s32(vmovl_s16(vget_high_s16(tmp2)));
     return out;
+}
+
+template <>
+inline float32x4x4_t convert_to_float32x4x4(const uint8x16_t &in)
+{
+    return convert_uint8x16_to_float32x4x4(in);
+}
+
+template <>
+inline float32x4x4_t convert_to_float32x4x4(const int8x16_t &in)
+{
+    return convert_int8x16_to_float32x4x4(in);
 }
 
 inline void convert_float32x4x3_to_uint8x8x3(const float32x4x3_t &in1, const float32x4x3_t &in2, uint8x8x3_t &out)

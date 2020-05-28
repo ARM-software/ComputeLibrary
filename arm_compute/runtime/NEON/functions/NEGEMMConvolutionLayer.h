@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,18 +63,22 @@ public:
     NEConvolutionLayerReshapeWeights &operator=(NEConvolutionLayerReshapeWeights &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
+     * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                     Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                     Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
-     * @param[out] output  Destination tensor. Data types supported: Same as @p weights.
+     *                     Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED, FP32 if @p weights is BFLOAT16
+     * @param[out] output  Destination tensor.
+     *                     Data types supported: Same as @p weights, FP32 if @p weights is BFLOAT16
      */
     void configure(const ITensor *weights, const ITensor *biases, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayerReshapeWeights
      *
-     * @param[in] weights Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
+     * @param[in] weights Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                    Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in] biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                    Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED.
-     * @param[in] output  Destination tensor. Data types supported: Same as @p weights.
+     *                    Data type supported: Same as @p weights, S32 if @p weights is QASYMM8/QASYMM8_SIGNED, FP32 if @p weights is BFLOAT16
+     * @param[in] output  Destination tensor.
+     *                    Data types supported: Same as @p weights FP32 if @p weights is BFLOAT16
      *
      * @return an error status
      */
@@ -136,7 +140,7 @@ private:
 /** Basic function to compute the convolution layer. This function calls the following NEON kernels/functions:
  *
  * -# @ref NEIm2ColKernel
- * -# @ref NEGEMM (if the data type is FP32 or FP16)
+ * -# @ref NEGEMM (if the data type is BFLOAT16/FP16/FP32)
  * -# @ref NEGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8/QASYMM8_SIGNED)
  * -# @ref NEArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
@@ -160,8 +164,9 @@ public:
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
+     *                          Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
+     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                          Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                          Data type supported: Should match @p input data type, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
      * @param[out] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
@@ -179,8 +184,9 @@ public:
      *
      * @param[in] input        Source tensor info. 3 lower dimensions represent a single input [width, height, IFM],
      *                         while every optional dimension from 4 and above represent a batch of inputs.
-     *                         Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] weights      Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
+     *                         Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
+     * @param[in] weights      Weights tensor info. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                         Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in] biases       Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                         Data type supported: Should match @p input data type, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
      * @param[in] output       Destination tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
@@ -204,8 +210,8 @@ public:
 private:
     /** Configures the appropriate matrix multiply routine
      *
-     * @param[in]  input         Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in]  weights       Weights tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
+     * @param[in]  input         Input tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
+     * @param[in]  weights       Weights tensor. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in]  biases        Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                           Data type supported: Should match @p input data type, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
      * @param[out] output        Output tensor. Data types supported: Same as @p input,
@@ -216,8 +222,8 @@ private:
     void configure_mm(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo(), int gemm_3d_depth = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer matrix multiply routines
      *
-     * @param[in] input         Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] weights       Weights tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/F16/F32.
+     * @param[in] input         Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
+     * @param[in] weights       Weights tensor info. Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in] biases        Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                          Data type supported: Should match @p input data type, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input,
@@ -232,8 +238,8 @@ private:
                               int gemm_3d_depth = 1, bool skip_im2col = false);
     /** Static function to check if GEMM3D is supported in @ref NEGEMM or in @ref NEGEMMLowpMatrixMultiplyCore
      *
-     * @param[in] input_info    Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
-     * @param[in] weights_info  Weights tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in] input_info    Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
+     * @param[in] weights_info  Weights tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
      * @param[in] act_info      Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      * @param[in] gemm_3d_depth Depth of GEMM 3D
      * @param[in] skip_im2col   Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout

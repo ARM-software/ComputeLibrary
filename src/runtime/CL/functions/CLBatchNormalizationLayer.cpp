@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,14 @@ CLBatchNormalizationLayer::CLBatchNormalizationLayer()
 void CLBatchNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon,
                                           ActivationLayerInfo act_info)
 {
-    _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon, act_info);
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, var, beta, gamma, epsilon, act_info);
+}
+
+void CLBatchNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta,
+                                          const ICLTensor *gamma, float epsilon,
+                                          ActivationLayerInfo act_info)
+{
+    _norm_kernel.configure(compile_context, input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
 Status CLBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output,

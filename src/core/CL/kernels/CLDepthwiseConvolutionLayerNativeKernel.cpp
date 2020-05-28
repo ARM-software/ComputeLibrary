@@ -36,6 +36,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -195,6 +196,14 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const ICLTensor *input, 
                                                         const DWCKernelInfo &dwc_info, const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation,
                                                         const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation, output_multipliers, output_shifts);
+}
+
+void CLDepthwiseConvolutionLayerNativeKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
+                                                        const DWCWeightsKernelInfo &dwc_weights_info,
+                                                        const DWCKernelInfo &dwc_info, const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation,
+                                                        const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(),
                                                   dwc_weights_info, dwc_info, conv_info, depth_multiplier, dilation,
@@ -283,7 +292,7 @@ void CLDepthwiseConvolutionLayerNativeKernel::configure(const ICLTensor *input, 
     }
 
     ICLKernel::configure_internal(win_config.second);
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;

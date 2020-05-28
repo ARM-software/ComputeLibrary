@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,14 @@ protected:
             {
                 std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
                 std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+
+                library->fill(tensor, distribution, 0);
+                break;
+            }
+            case DataType::QASYMM8_SIGNED:
+            {
+                std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::uniform_int_distribution<int8_t> distribution(bounds.first, bounds.second);
 
                 library->fill(tensor, distribution, 0);
                 break;

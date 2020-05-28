@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,19 @@ public:
      *
      */
     void configure(ICLTensor *input, CLPyramid *pyramid, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value);
+    /** Initialise the function's source, destinations and border mode.
+     *
+     * @param[in]  compile_context       The compile context to be used.
+     * @param[in]  input                 Source tensor. Data types supported: U8.
+     * @param[out] pyramid               Destination pyramid tensors, Data types supported at each level: S16.
+     * @param[out] output                The lowest resolution tensor necessary to reconstruct the input tensor from the pyramid. Data types supported: S16.
+     *                                   The first two dimensions of this tensor must match the first two dimensions of the tensor in the last level of the pyramid, that is:
+     *                                   output.width = input.width() / pow(2,pyramid_levels-1) and out.height = in.height() / pow(2,pyramid_levels-1)
+     * @param[in]  border_mode           Border mode to use.
+     * @param[in]  constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
+     *
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, CLPyramid *pyramid, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value);
 
     // Inherited methods overridden:
     void run() override;

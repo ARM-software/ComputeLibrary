@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -76,7 +77,7 @@ CLFloorKernel::CLFloorKernel()
 {
 }
 
-void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
+void CLFloorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -89,18 +90,23 @@ void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
     _input  = input;
     _output = output;
 
-    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
-
-    // Create kernel
+    const unsigned int    num_elems_processed_per_iteration = 16 / input->info()->element_size();
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("floor_layer", build_opts));
+
+    // Create kernel
+    _kernel = create_kernel(compile_context, "floor_layer", build_opts);
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
+}
+
+void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
 }
 
 Status CLFloorKernel::validate(const ITensorInfo *input, const ITensorInfo *output)

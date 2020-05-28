@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_NESYMM_H
 
 #include "arm_compute/core/NEON/NEMath.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -228,6 +229,27 @@ inline qsymm16x8x2_t vquantize_qsymm16(const float32x4x4_t &qv, const UniformQua
     };
 
     return res;
+}
+
+/** Multiply a neon vector using quantized multiplier and shift
+ *
+ * @param[in] input Input vector to mutiply values to be quantized.
+ * @param[in] qmul  Quantized multipler
+ * @param[in] shift Left bit shift
+ *
+ * @return A neon vector holding the multiplied value
+ */
+inline int32x4x2_t multiply_by_quantized_multiplier_2row(int32x4x2_t input, int32_t qmul, int32_t shift)
+{
+    const auto left_shift  = shift > 0 ? shift : 0;
+    const auto right_shift = shift > 0 ? 0 : -shift;
+    const auto one_shifted = 1 << left_shift;
+
+    int32x4x2_t result;
+    result.val[0] = rounding_divide_by_pow2(vqrdmulhq_n_s32(vmulq_n_s32(input.val[0], one_shifted), qmul), right_shift);
+    result.val[1] = rounding_divide_by_pow2(vqrdmulhq_n_s32(vmulq_n_s32(input.val[1], one_shifted), qmul), right_shift);
+
+    return result;
 }
 
 } // namespace arm_compute

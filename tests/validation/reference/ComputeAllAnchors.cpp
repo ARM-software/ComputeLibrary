@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,9 @@ SimpleTensor<T> compute_all_anchors(const SimpleTensor<T> &anchors, const Comput
     T              *all_anchors_ptr = all_anchors.data();
 
     // Iterate over the input grid and anchors
+#if defined(_OPENMP)
+    #pragma omp parallel for schedule(dynamic, 1) collapse(3)
+#endif /* _OPENMP */
     for(int y = 0; y < height; y++)
     {
         for(int x = 0; x < width; x++)

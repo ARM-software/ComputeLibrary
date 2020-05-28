@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,6 +66,11 @@ Status CLMeanStdDev::validate(ITensorInfo *input, float *mean, float *stddev)
 
 void CLMeanStdDev::configure(ICLImage *input, float *mean, float *stddev)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, mean, stddev);
+}
+
+void CLMeanStdDev::configure(const CLCompileContext &compile_context, ICLImage *input, float *mean, float *stddev)
+{
     // In the case of F16/F32 we call reduction operation for calculating CLMeanStdDev
     _data_type = input->info()->data_type();
 
@@ -74,14 +79,14 @@ void CLMeanStdDev::configure(ICLImage *input, float *mean, float *stddev)
         _num_pixels = input->info()->dimension(0) * input->info()->dimension(1);
 
         _memory_group.manage(&_reduction_output_mean);
-        _reduction_operation_mean.configure(input, &_reduction_output_mean, 0, ReductionOperation::SUM);
+        _reduction_operation_mean.configure(compile_context, input, &_reduction_output_mean, 0, ReductionOperation::SUM);
         _reduction_output_mean.allocator()->allocate();
         _mean = mean;
 
         if(stddev != nullptr)
         {
             _memory_group.manage(&_reduction_output_stddev);
-            _reduction_operation_stddev.configure(input, &_reduction_output_stddev, 0, ReductionOperation::SUM_SQUARE);
+            _reduction_operation_stddev.configure(compile_context, input, &_reduction_output_stddev, 0, ReductionOperation::SUM_SQUARE);
             _reduction_output_stddev.allocator()->allocate();
             _stddev     = stddev;
             _run_stddev = true;
@@ -96,8 +101,8 @@ void CLMeanStdDev::configure(ICLImage *input, float *mean, float *stddev)
             _global_sum_squared = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(cl_ulong));
         }
 
-        _mean_stddev_kernel.configure(input, mean, &_global_sum, stddev, &_global_sum_squared);
-        _fill_border_kernel.configure(input, _mean_stddev_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
+        _mean_stddev_kernel.configure(compile_context, input, mean, &_global_sum, stddev, &_global_sum_squared);
+        _fill_border_kernel.configure(compile_context, input, _mean_stddev_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
     }
 }
 

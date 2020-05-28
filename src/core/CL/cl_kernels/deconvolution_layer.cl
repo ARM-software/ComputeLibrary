@@ -64,7 +64,7 @@ __kernel void deconvolution_upsample(
  * @note The height of the input should be given as a preprocessor argument using -DSRC_HEIGHT=width, e.g., -DSRC_HEIGHT=10
  * @note The output data layout is NHWC if the preprocessor argument NUM_FILTERS is defined, NCHW if NUM_FILTERS is not defined
  *
- * @param[in]  src_ptr                            Pointer to the source image. Supported data types: QASYMM8/F16/F32
+ * @param[in]  src_ptr                            Pointer to the source image. Supported data types: QASYMM8/QASYMM8_SIGNED/F16/F32
  * @param[in]  src_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  src_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                       Stride of the source image in Y dimension (in bytes)

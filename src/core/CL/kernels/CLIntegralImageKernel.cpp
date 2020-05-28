@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,12 +31,18 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <cstddef>
 
 using namespace arm_compute;
 
 void CLIntegralImageHorKernel::configure(const ICLTensor *input, ICLTensor *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLIntegralImageHorKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
@@ -46,7 +52,7 @@ void CLIntegralImageHorKernel::configure(const ICLTensor *input, ICLTensor *outp
 
     // Create kernel
     const std::string kernel_name = std::string("integral_horizontal");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel                       = create_kernel(compile_context, kernel_name);
 
     // Configure kernel window
     const unsigned int num_elems_processed_per_iteration = input->info()->dimension(0);
@@ -84,13 +90,18 @@ CLIntegralImageVertKernel::CLIntegralImageVertKernel()
 
 void CLIntegralImageVertKernel::configure(ICLTensor *in_out)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), in_out);
+}
+
+void CLIntegralImageVertKernel::configure(const CLCompileContext &compile_context, ICLTensor *in_out)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(in_out, 1, DataType::U32);
 
     _in_out = in_out;
 
     // Create kernel
     const std::string kernel_name = std::string("integral_vertical");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel                       = create_kernel(compile_context, kernel_name);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration_x = 8;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,6 +66,16 @@ public:
      * @param[in]  border_mode         Strategy to use for borders.
      */
     void configure(const ICLImage *input, ICLImage *output, float threshold, bool non_max_suppression, BorderMode border_mode);
+    /** Initialise the kernel.
+     *
+     * @param[in]  compile_context     The compile context to be used.
+     * @param[in]  input               Source image. Data types supported: U8.
+     * @param[out] output              Output image. Data types supported: U8.
+     * @param[in]  threshold           Threshold on difference between intensity of the central pixel and pixels on Bresenham's circle of radius 3.
+     * @param[in]  non_max_suppression True if non-maxima suppresion is applied, false otherwise.
+     * @param[in]  border_mode         Strategy to use for borders.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, ICLImage *output, float threshold, bool non_max_suppression, BorderMode border_mode);
 
     // Inherited methods overridden
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -101,6 +111,15 @@ public:
      * @param[out] num_buffers   Number of keypoints to store the results.
      */
     void configure(const ICLImage *input, bool update_number, ICLKeyPointArray *corners, cl::Buffer *num_buffers);
+    /** Initialise the kernel.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source image. Data types supported: U8.
+     * @param[in]  update_number   Flag to indicate whether we need to update the number of corners
+     * @param[out] corners         Array of keypoints to store the results.
+     * @param[out] num_buffers     Number of keypoints to store the results.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLImage *input, bool update_number, ICLKeyPointArray *corners, cl::Buffer *num_buffers);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

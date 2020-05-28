@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,15 @@ public:
      * @param[in]  output_window (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
+    /** Initialize the kernel's input, output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[out] output          Destination tensor. Data types supported: same as @p input.
+     * @param[in]  padding         (Optional) Padding to be applied to the input tensor
+     * @param[in]  output_window   (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCopyKernel
      *
      * @param[in] input         Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.

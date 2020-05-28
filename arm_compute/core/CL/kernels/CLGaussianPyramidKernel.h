@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,13 @@ public:
      * @param[out] output Destination tensor. Output should have half the input width. Data types supported: U16.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialise the kernel's source, destination and border mode.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: U8.
+     * @param[out] output          Destination tensor. Output should have half the input width. Data types supported: U16.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -85,6 +92,13 @@ public:
      * @param[out] output Destination tensor. Output should have half the input height. Data types supported: U8.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialise the kernel's source, destination and border mode.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: U16.
+     * @param[out] output          Destination tensor. Output should have half the input height. Data types supported: U8.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

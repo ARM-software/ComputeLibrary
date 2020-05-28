@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,10 @@ SimpleTensor<T> reverse(const SimpleTensor<T> &src, const SimpleTensor<uint32_t>
     }
 
     const uint32_t num_elements = src.num_elements();
+
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates  src_coord = index2coord(src.shape(), i);

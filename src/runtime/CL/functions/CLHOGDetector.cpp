@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,13 +38,19 @@ CLHOGDetector::CLHOGDetector()
 
 void CLHOGDetector::configure(const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, const Size2D &detection_window_stride, float threshold, size_t idx_class)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, hog, detection_windows, detection_window_stride, threshold, idx_class);
+}
+
+void CLHOGDetector::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLHOG *hog, ICLDetectionWindowArray *detection_windows, const Size2D &detection_window_stride,
+                              float threshold, size_t idx_class)
+{
     _detection_windows = detection_windows;
 
     // Allocate buffer for storing the number of detected objects
     _num_detection_windows = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(unsigned int));
 
     // Configure HOGDetectorKernel
-    _hog_detector_kernel.configure(input, hog, detection_windows, &_num_detection_windows, detection_window_stride, threshold, idx_class);
+    _hog_detector_kernel.configure(compile_context, input, hog, detection_windows, &_num_detection_windows, detection_window_stride, threshold, idx_class);
 }
 
 void CLHOGDetector::run()

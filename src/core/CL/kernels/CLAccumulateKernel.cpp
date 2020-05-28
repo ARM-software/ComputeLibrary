@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,11 +40,16 @@ constexpr unsigned int num_elems_processed_per_iteration = 16;
 
 void CLAccumulateKernel::configure(const ICLTensor *input, ICLTensor *accum)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, accum);
+}
+
+void CLAccumulateKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *accum)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::S16);
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("accumulate"));
+    _kernel = create_kernel(compile_context, "accumulate");
 
     // Make sure _kernel is initialized before calling the parent's configure
     ICLSimple2DKernel::configure(input, accum, num_elems_processed_per_iteration);
@@ -52,12 +57,17 @@ void CLAccumulateKernel::configure(const ICLTensor *input, ICLTensor *accum)
 
 void CLAccumulateWeightedKernel::configure(const ICLTensor *input, float alpha, ICLTensor *accum)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, alpha, accum);
+}
+
+void CLAccumulateWeightedKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, float alpha, ICLTensor *accum)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(alpha < 0.0 || alpha > 1.0);
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("accumulate_weighted"));
+    _kernel = create_kernel(compile_context, "accumulate_weighted");
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
@@ -69,12 +79,17 @@ void CLAccumulateWeightedKernel::configure(const ICLTensor *input, float alpha, 
 
 void CLAccumulateSquaredKernel::configure(const ICLTensor *input, uint32_t shift, ICLTensor *accum)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, shift, accum);
+}
+
+void CLAccumulateSquaredKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, uint32_t shift, ICLTensor *accum)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::S16);
     ARM_COMPUTE_ERROR_ON(shift > 15);
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("accumulate_squared"));
+    _kernel = create_kernel(compile_context, "accumulate_squared");
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters

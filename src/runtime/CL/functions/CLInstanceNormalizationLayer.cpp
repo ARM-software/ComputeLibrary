@@ -34,8 +34,13 @@ CLInstanceNormalizationLayer::CLInstanceNormalizationLayer()
 
 void CLInstanceNormalizationLayer::configure(ICLTensor *input, ICLTensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, gamma, beta, epsilon, use_mixed_precision);
+}
+
+void CLInstanceNormalizationLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, float gamma, float beta, float epsilon, bool use_mixed_precision)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLInstanceNormalizationLayerKernel>();
-    k->configure(input, output, InstanceNormalizationLayerKernelInfo(gamma, beta, epsilon, use_mixed_precision));
+    k->configure(compile_context, input, output, InstanceNormalizationLayerKernelInfo(gamma, beta, epsilon, use_mixed_precision));
     _kernel = std::move(k);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -139,6 +139,13 @@ CLBatchNormalizationLayerKernel::CLBatchNormalizationLayerKernel()
 void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma,
                                                 float epsilon, ActivationLayerInfo act_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, mean, var, beta, gamma, epsilon, act_info);
+}
+
+void CLBatchNormalizationLayerKernel::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta,
+                                                const ICLTensor *gamma,
+                                                float epsilon, ActivationLayerInfo act_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, mean, var);
 
     _input   = input;
@@ -169,7 +176,7 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     build_opts.add_option_if(gamma == nullptr, "-DUSE_DEFAULT_GAMMA");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batchnormalization_layer_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
+    _kernel = create_kernel(compile_context, "batchnormalization_layer_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options());
 
     // Set kernel static arguments
     unsigned int include_output = (!_run_in_place) ? 1 : 0;

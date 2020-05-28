@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,24 @@ public:
      */
     void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta = nullptr, const ICLTensor *gamma = nullptr, float epsilon = 0.001f,
                    ActivationLayerInfo act_info = ActivationLayerInfo());
+    /** Set the input and output tensors.
+     *
+     * @note If the output tensor is a nullptr, the batch normalization function will be performed in-place
+     *
+     * @param[in]      compile_context The compile context to be used.
+     * @param[in, out] input           Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
+     *                                 3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                                 The rest are optional and used for representing batches. Data types supported: F16/F32. Data layouts supported: NCHW/NHWC.
+     * @param[out]     output          Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in]      mean            Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      var             Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      beta            (Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as @p input
+     * @param[in]      gamma           (Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as @p input
+     * @param[in]      epsilon         (Optional) Small value to avoid division with zero. Default value is 0.001f.
+     * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     */
+    void configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta = nullptr,
+                   const ICLTensor *gamma = nullptr, float epsilon = 0.001f, ActivationLayerInfo act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchNormalizationLayerKernel
      *
      * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result.

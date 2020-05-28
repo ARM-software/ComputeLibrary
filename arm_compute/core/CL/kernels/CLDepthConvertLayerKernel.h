@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,26 @@ public:
      * @param[in]  shift  Value for down/up conversions. Must be 0 <= shift < 8.
      */
     void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
+    /** Set the input and output of the kernel.
+     *
+     * Valid conversions Input -> Output :
+     *
+     *   - QSYMM8_PER_CHANNEL -> QASYMM8 (ATTENTION: it is the user's responsibility to keep track of the quantization info in the TensorInfo meta-data)
+     *   - U8  -> S8, U16, S16, U32, S32, F16, F32
+     *   - U16 -> U8, S8, S16, U32, S32, F16, F32
+     *   - S16 -> U8, S8, U16, U32, S32, F16, F32
+     *   - U32 -> U8, S8, U16, S16, S32, F16, F32
+     *   - S32 -> U8, S8, U16, S16, U32, F16, F32
+     *   - F16 -> U8, S8, U16, S16, U32, F32
+     *   - F32 -> U8, S8, U16, S16, U32, F16
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           The input tensor to convert. Data types supported: U8/S8/QSYMM8_PER_CHANNEL/U16/S16/U32/S32/F16/F32.
+     * @param[out] output          The output tensor. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  policy          Conversion policy
+     * @param[in]  shift           Value for down/up conversions. Must be 0 <= shift < 8.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConvertLayerKernel
      *
      * @param[in] input  Source tensor info. Data types supported: U8/S8/QSYMM8_PER_CHANNEL/U16/S16/U32/S32/F16/F32.

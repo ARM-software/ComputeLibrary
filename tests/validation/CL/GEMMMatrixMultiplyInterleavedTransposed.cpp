@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,41 +76,26 @@ constexpr float          abs_tolerance_f32(0.0001f);
 RelativeTolerance<half> rel_tolerance_f16(half(0.2));
 constexpr float         tolerance_num_f16 = 0.02f;
 
-/** Alpha values to test - Precommit */
+/** Alpha values to test */
 const auto alpha_values = framework::dataset::make("alpha", {1.0f, -0.75f} );
 
-/** Beta values to test - Precommit */
+/** Beta values to test */
 const auto beta_values = framework::dataset::make("beta", {-0.35f, 0.0f} );
 
-/** M values to test - Precommit */
-const auto m_values_precommit = framework::dataset::make("M", 37);
+/** M values to test */
+const auto m_values = framework::dataset::make("M", {37, 1});
 
-/** N values to test - Precommit */
-const auto n_values_precommit = framework::dataset::make("N", 51);
+/** N values to test */
+const auto n_values = framework::dataset::make("N", 51);
 
-/** K values to test - Precommit */
-const auto k_values_precommit = framework::dataset::make("K", 23);
+/** K values to test */
+const auto k_values = framework::dataset::make("K", 23);
 
-/** M values to test - Nightly */
-const auto m_values_nightly = framework::dataset::make("M", {421, 1});
+/** M_W values to test */
+const auto m_w_values = framework::dataset::make("M_W", 5);
 
-/** N values to test - Nightly */
-const auto n_values_nightly = framework::dataset::make("N", 323);
-
-/** K values to test - Nightly */
-const auto k_values_nightly = framework::dataset::make("K", 207);
-
-/** M_W values to test - Precommit */
-const auto m_w_values_precommit = framework::dataset::make("M_W", 5);
-
-/** M_H values to test - Precommit */
-const auto m_h_values_precommit = framework::dataset::make("M_H", 7);
-
-/** M_W values to test - Nightly */
-const auto m_w_values_nightly = framework::dataset::make("M_W", 13);
-
-/** M_H values to test - Nightly */
-const auto m_h_values_nightly = framework::dataset::make("M_H", 27);
+/** M_H values to test */
+const auto m_h_values = framework::dataset::make("M_H", 7);
 
 /** Batch size values to test */
 const auto b_values = framework::dataset::make("batch_size", 1, 3);
@@ -122,17 +107,11 @@ const auto act_values = framework::dataset::make("Activation",
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
 });
 
-/** V0 values to test - Precommit */
-const auto v0_values_precommit = framework::dataset::make("V0", 2);
+/** V0 values to test */
+const auto v0_values = framework::dataset::make("V0", 2);
 
-/** H0 values to test - Precommit */
-const auto h0_values_precommit = framework::dataset::make("H0", 4);
-
-/** V0 values to test - Nightly */
-const auto v0_values_nightly = framework::dataset::make("V0", {2, 4});
-
-/** H0 values to test - Nightly */
-const auto h0_values_nightly = framework::dataset::make("H0", { 2, 4 });
+/** H0 values to test */
+const auto h0_values = framework::dataset::make("H0", 4);
 
 /** Broadcast bias from vector to matrix */
 const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", {false, true} );
@@ -153,111 +132,118 @@ const auto data_type_values = framework::dataset::make("DataType",
 
 /** M values to test */
 const auto fp16_mixed_precision_values = framework::dataset::make("fp16_mixed_precision", {true, false});
-
-/** Configuration test */
-void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value, unsigned int v0_value, unsigned int h0_value, bool broadcast_bias, bool fp16_mixed_precision, const ActivationLayerInfo &act_info, DataType data_type, GPUTarget gpu_arch_value)
-{
-    GEMMLHSMatrixInfo lhs_info;
-    lhs_info.m0         = 4;
-    lhs_info.k0         = 4;
-    lhs_info.v0         = v0_value;
-    lhs_info.interleave = true;
-    lhs_info.transpose  = true;
-
-    GEMMRHSMatrixInfo rhs_info;
-    rhs_info.n0         = data_type == DataType::F32? 4 : 8;
-    rhs_info.k0         = 1;
-    rhs_info.h0         = h0_value;
-    rhs_info.interleave = false;
-    rhs_info.transpose  = false;
-
-    GEMMReshapeInfo reshape_info(m_value, n_value, k_value, rhs_info.h0, lhs_info.v0, 0, false, broadcast_bias);
-
-    const TensorShape lhs_shape(k_value, m_value, b_value);
-    const TensorShape lhs_shape_reshaped = compute_lhs_reshaped_shape(TensorInfo(lhs_shape, 1, data_type),
-                                                                      lhs_info,
-                                                                      false);
-
-    const TensorShape rhs_shape(n_value, k_value, b_value);
-    const TensorShape rhs_shape_reshaped = compute_rhs_reshaped_shape(TensorInfo(rhs_shape, 1, data_type),
-                                                                      rhs_info);
-
-    const TensorShape dst_shape = compute_mm_shape(TensorInfo(lhs_shape_reshaped, 1, data_type),
-                                                   TensorInfo(rhs_shape_reshaped, 1, data_type),
-                                                   reshape_info);
-
-    const TensorShape bias_shape(n_value,
-                                 broadcast_bias? 1 : m_value,
-                                 broadcast_bias? 1 : b_value);
-
-    // Create tensors
-    CLTensor lhs_reshaped = create_tensor<CLTensor>(lhs_shape_reshaped, data_type);
-    CLTensor rhs_reshaped = create_tensor<CLTensor>(rhs_shape_reshaped, data_type);
-    CLTensor bias         = create_tensor<CLTensor>(bias_shape, data_type);
-    CLTensor dst          = create_tensor<CLTensor>(dst_shape, data_type);
-
-    ARM_COMPUTE_EXPECT(lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLGEMMMatrixMultiplyReshaped gemm;
-    gemm.configure(gpu_arch_value, &lhs_reshaped, &rhs_reshaped, &bias, &dst, 1.0f, 2.0f, true, reshape_info, fp16_mixed_precision, act_info);
-}
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(GEMMMatrixMultiplyInterleavedTransposed)
+TEST_CASE(Negative, framework::DatasetMode::ALL)
+{
+    // The following tests are already integrated in the GEMMMatrixMultiply validation because
+    // in common with this validation
+    // - Unsupported QASYMM8 data type
+    // - Unsupported SIZE_T data type
+    // - Mixed precision with F32
+    // - Max number of dimensions LHS matrix
+    // - Max number of dimensions RHS matrix
+
+    // Invalid LHS dimensions
+    {
+        // The correct shape should be: lhs = TensorInfo(TensorShape(256U, 1U, 1U, 1U), 1, DataType::F32);
+        const auto lhs                       = TensorInfo(TensorShape(256U, 2U, 1U, 1U), 1, DataType::F32);
+        const auto rhs                       = TensorInfo(TensorShape(104U, 3U, 1U, 1U), 1, DataType::F32);
+        const auto bias                      = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        const auto out                       = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        constexpr float alpha                = 1.3f;
+        constexpr float beta                 = 0.7f;
+        const bool is_interleaved_transposed = true;
+        const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(16, 24, 13, 2, 4, 0, false, false);
+        const GPUTarget gpu_target           = GPUTarget::MIDGARD;
+        const bool fp_mixed_precision        = false;
+        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // Invalid RHS dimensions
+    {
+        const auto lhs                       = TensorInfo(TensorShape(256U, 1U, 1U, 1U), 1, DataType::F32);
+        // The correct shape should be rhs = TensorInfo(TensorShape(104U, 3U, 1U, 1U), 1, DataType::F32);
+        const auto rhs                       = TensorInfo(TensorShape(104U, 4U, 1U, 1U), 1, DataType::F32);
+        const auto bias                      = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        const auto out                       = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        constexpr float alpha                = 1.3f;
+        constexpr float beta                 = 0.7f;
+        const bool is_interleaved_transposed = true;
+        const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(16, 24, 13, 2, 4, 0, false, false);
+        const GPUTarget gpu_target           = GPUTarget::MIDGARD;
+        const bool fp_mixed_precision        = false;
+        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // Broadcast bias
+    {
+        const auto lhs                       = TensorInfo(TensorShape(256U, 1U, 1U, 1U), 1, DataType::F32);
+        const auto rhs                       = TensorInfo(TensorShape(104U, 3U, 1U, 1U), 1, DataType::F32);
+        // The correct shape should be bias = TensorInfo(TensorShape(24U, 1U, 1U, 1U), 1, DataType::F32);
+        const auto bias                      = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        const auto out                       = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        constexpr float alpha                = 1.3f;
+        constexpr float beta                 = 0.7f;
+        const bool is_interleaved_transposed = true;
+        const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(16, 24, 13, 2, 4, 0, false, true);
+        const GPUTarget gpu_target           = GPUTarget::MIDGARD;
+        const bool fp_mixed_precision        = false;
+        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // Invalid dimensions for the bias
+    {
+        const auto lhs                       = TensorInfo(TensorShape(256U, 1U, 1U, 1U), 1, DataType::F32);
+        const auto rhs                       = TensorInfo(TensorShape(104U, 3U, 1U, 1U), 1, DataType::F32);
+        // The correct shape should be bias = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        const auto bias                      = TensorInfo(TensorShape(25U, 16U, 1U, 1U), 1, DataType::F32);
+        const auto out                       = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        constexpr float alpha                = 1.3f;
+        constexpr float beta                 = 0.7f;
+        const bool is_interleaved_transposed = true;
+        const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(16, 24, 13, 2, 4, 0, false, false);
+        const GPUTarget gpu_target           = GPUTarget::MIDGARD;
+        const bool fp_mixed_precision        = false;
+        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // Invalid dimensions for the output
+    {
+        const auto lhs                       = TensorInfo(TensorShape(256U, 1U, 1U, 1U), 1, DataType::F32);
+        const auto rhs                       = TensorInfo(TensorShape(104U, 3U, 1U, 1U), 1, DataType::F32);
+        const auto bias                      = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        // The correct shape should be out = TensorInfo(TensorShape(24U, 16U, 1U, 1U), 1, DataType::F32);
+        const auto out                       = TensorInfo(TensorShape(24U, 13U, 1U, 1U), 1, DataType::F32);
+        constexpr float alpha                = 1.3f;
+        constexpr float beta                 = 0.7f;
+        const bool is_interleaved_transposed = true;
+        const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(16, 24, 13, 2, 4, 0, false, false);
+        const GPUTarget gpu_target           = GPUTarget::MIDGARD;
+        const bool fp_mixed_precision        = false;
+        const auto status    = CLGEMMMatrixMultiplyKernel::validate(&lhs, &rhs, &bias, &out, alpha, beta, is_interleaved_transposed, reshape_info, gpu_target, fp_mixed_precision);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+}
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values_precommit,
-                                                                   n_values_precommit),
-                                                                   k_values_precommit),
-                                                                   framework::dataset::make("batch_size", 1)),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   framework::dataset::make("fp16_mixed_precision", false)),
-                                                                   act_values),
-                                                                   data_type_values),
-                                                                   gpu_arch_values),
-m_value, n_value, k_value, b_value, v0_value, h0_value, broadcast_bias, fp16_mixed_precision_value, act_value, data_type_value, gpu_arch_value)
-{
-    validate_configuration(m_value, n_value, k_value, b_value, v0_value, h0_value, broadcast_bias, fp16_mixed_precision_value, act_value, data_type_value, gpu_arch_value);
-}
-
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values_precommit,
-                                                                   n_values_precommit),
-                                                                   k_values_precommit),
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
                                                                    b_values),
                                                                    alpha_values),
                                                                    beta_values),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   framework::dataset::make("fp16_mixed_precision", false)),
-                                                                   act_values),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   gpu_arch_values))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values_nightly,
-                                                                   n_values_nightly),
-                                                                   k_values_nightly),
-                                                                   b_values),
-                                                                   alpha_values),
-                                                                   beta_values),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
+                                                                   v0_values),
+                                                                   h0_values),
                                                                    broadcast_bias_values),
                                                                    framework::dataset::make("fp16_mixed_precision", false)),
                                                                    act_values),
@@ -270,36 +256,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values_precommit,
-                                                                   m_h_values_precommit),
-                                                                   n_values_precommit),
-                                                                   k_values_precommit),
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
                                                                    b_values),
                                                                    alpha_values),
                                                                    beta_values),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   framework::dataset::make("fp16_mixed_precision", false)),
-                                                                   act_values),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   gpu_arch_values))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values_nightly,
-                                                                   m_h_values_nightly),
-                                                                   n_values_nightly),
-                                                                   k_values_nightly),
-                                                                   b_values),
-                                                                   alpha_values),
-                                                                   beta_values),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
+                                                                   v0_values),
+                                                                   h0_values),
                                                                    broadcast_bias_values),
                                                                    framework::dataset::make("fp16_mixed_precision", false)),
                                                                    act_values),
@@ -315,34 +280,14 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values_precommit,
-                                                                   n_values_precommit),
-                                                                   k_values_precommit),
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
                                                                    b_values),
                                                                    alpha_values),
                                                                    beta_values),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   fp16_mixed_precision_values),
-                                                                   act_values),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   gpu_arch_values))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values_nightly,
-                                                                   n_values_nightly),
-                                                                   k_values_nightly),
-                                                                   b_values),
-                                                                   alpha_values),
-                                                                   beta_values),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
+                                                                   v0_values),
+                                                                   h0_values),
                                                                    broadcast_bias_values),
                                                                    fp16_mixed_precision_values),
                                                                    act_values),
@@ -355,36 +300,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::ALL,
                 combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values_precommit,
-                                                                   m_h_values_precommit),
-                                                                   n_values_precommit),
-                                                                   k_values_precommit),
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
                                                                    b_values),
                                                                    alpha_values),
                                                                    beta_values),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   fp16_mixed_precision_values),
-                                                                   act_values),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   gpu_arch_values))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values_nightly,
-                                                                   m_h_values_nightly),
-                                                                   n_values_nightly),
-                                                                   k_values_nightly),
-                                                                   b_values),
-                                                                   alpha_values),
-                                                                   beta_values),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
+                                                                   v0_values),
+                                                                   h0_values),
                                                                    broadcast_bias_values),
                                                                    fp16_mixed_precision_values),
                                                                    act_values),

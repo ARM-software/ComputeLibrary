@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,27 +34,36 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, size_t axis, bool is_log)
+SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, int32_t axis, bool is_log)
 {
     // Create reference
     SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
+
+    // Negative index is used to specify axis from the end (e.g. -1 for the last axis).
+    if(axis < 0)
+    {
+        axis += src.shape().num_dimensions();
+    }
 
     // Compute reference. Lower dims are the collapsing of the first axis
     // dimensions (i.e., the flattened dimension of each batch). The upper dims are
     // instead the batches we want to normalize
 
     int lower_dims = 1;
-    for(size_t i = 0; i < axis; i++)
+    for(size_t i = 0; i < static_cast<size_t>(axis); ++i)
     {
         lower_dims *= src.shape()[i];
     }
 
     int upper_dims = 1;
-    for(size_t i = axis; i < TensorShape::num_max_dimensions; i++)
+    for(size_t i = static_cast<size_t>(axis); i < TensorShape::num_max_dimensions; ++i)
     {
         upper_dims *= src.shape()[i];
     }
 
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(int r = 0; r < upper_dims; ++r)
     {
         const T *src_row_ptr = src.data() + r * lower_dims;
@@ -98,17 +107,17 @@ SimpleTensor<T> softmax_layer_generic(const SimpleTensor<T> &src, float beta, si
     return dst;
 }
 
-template SimpleTensor<float> softmax_layer_generic(const SimpleTensor<float> &src, float beta, size_t axis, bool is_log);
-template SimpleTensor<half> softmax_layer_generic(const SimpleTensor<half> &src, float beta, size_t axis, bool is_log);
+template SimpleTensor<float> softmax_layer_generic(const SimpleTensor<float> &src, float beta, int32_t axis, bool is_log);
+template SimpleTensor<half> softmax_layer_generic(const SimpleTensor<half> &src, float beta, int32_t axis, bool is_log);
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis)
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis)
 {
     return softmax_layer_generic<T>(src, beta, axis, false);
 }
 
-template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int>::type>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis)
+template < typename T, typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int >::type >
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis)
 {
     const QuantizationInfo output_quantization_info = arm_compute::get_softmax_output_quantization_info(src.data_type(), false);
 
@@ -118,10 +127,10 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axi
     return dst;
 }
 
-template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float beta, size_t axis);
-template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta, size_t axis);
-template SimpleTensor<uint8_t> softmax_layer(const SimpleTensor<uint8_t> &src, float beta, size_t axis);
-template SimpleTensor<int8_t> softmax_layer(const SimpleTensor<int8_t> &src, float beta, size_t axis);
+template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float beta, int32_t axis);
+template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta, int32_t axis);
+template SimpleTensor<uint8_t> softmax_layer(const SimpleTensor<uint8_t> &src, float beta, int32_t axis);
+template SimpleTensor<int8_t> softmax_layer(const SimpleTensor<int8_t> &src, float beta, int32_t axis);
 } // namespace reference
 } // namespace validation
 } // namespace test

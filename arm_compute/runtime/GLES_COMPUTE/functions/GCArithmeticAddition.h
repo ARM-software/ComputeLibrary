@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,22 +41,24 @@ class GCArithmeticAddition : public IGCSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and convertion policy.
      *
-     * @param[in]  input1 First tensor input. Data types supported: F16.
-     * @param[in]  input2 Second tensor input. Data types supported: F16.
-     * @param[out] output Output tensor. Data types supported: F16.
-     * @param[in]  policy Policy to use to handle overflow.
+     * @param[in]  input1   First tensor input. Data types supported: F16.
+     * @param[in]  input2   Second tensor input. Data types supported: F16.
+     * @param[out] output   Output tensor. Data types supported: F16.
+     * @param[in]  policy   Policy to use to handle overflow.
+     * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, ConvertPolicy policy);
+    void configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref GCArithmeticAddition
      *
-     * @param[in] input1 First tensor input info. Data types supported: F16.
-     * @param[in] input2 Second tensor input info. Data types supported: F16.
-     * @param[in] output Output tensor info. Data types supported: F16.
-     * @param[in] policy Policy to use to handle overflow.
+     * @param[in] input1   First tensor input info. Data types supported: F16.
+     * @param[in] input2   Second tensor input info. Data types supported: F16.
+     * @param[in] output   Output tensor info. Data types supported: F16.
+     * @param[in] policy   Policy to use to handle overflow.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
 }
 #endif /* ARM_COMPUTE_GCARITHMETICADDITION_H */

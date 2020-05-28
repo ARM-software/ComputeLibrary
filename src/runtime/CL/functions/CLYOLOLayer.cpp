@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,19 @@
 
 #include "arm_compute/core/CL/kernels/CLYOLOLayerKernel.h"
 #include "arm_compute/core/Types.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 using namespace arm_compute;
 
 void CLYOLOLayer::configure(ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, act_info, num_classes);
+}
+
+void CLYOLOLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, ICLTensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLYOLOLayerKernel>();
-    k->configure(input, output, act_info, num_classes);
+    k->configure(compile_context, input, output, act_info, num_classes);
     _kernel = std::move(k);
 }
 

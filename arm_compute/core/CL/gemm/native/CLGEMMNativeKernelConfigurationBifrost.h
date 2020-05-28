@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,17 +36,9 @@ class CLGEMMNativeKernelConfigurationBifrost final : public ICLGEMMKernelConfigu
 public:
     /** Constructor
      *
-     * @param[in] arch GPU target
+     * @param[in] gpu GPU target
      */
-    CLGEMMNativeKernelConfigurationBifrost(GPUTarget arch);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMNativeKernelConfigurationBifrost(const CLGEMMNativeKernelConfigurationBifrost &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLGEMMNativeKernelConfigurationBifrost &operator=(const CLGEMMNativeKernelConfigurationBifrost &) = delete;
-    /** Default Move Constructor. */
-    CLGEMMNativeKernelConfigurationBifrost(CLGEMMNativeKernelConfigurationBifrost &&) = default;
-    /** Default move assignment operator */
-    CLGEMMNativeKernelConfigurationBifrost &operator=(CLGEMMNativeKernelConfigurationBifrost &&) = default;
+    CLGEMMNativeKernelConfigurationBifrost(GPUTarget gpu);
 
     // Inherited overridden method
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;

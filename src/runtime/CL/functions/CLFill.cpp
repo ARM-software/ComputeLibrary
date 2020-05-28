@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,11 +30,15 @@
 
 namespace arm_compute
 {
-
 void CLFill::configure(ICLTensor *tensor, PixelValue constant_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), tensor, constant_value);
+}
+
+void CLFill::configure(const CLCompileContext &compile_context, ICLTensor *tensor, PixelValue constant_value)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLMemsetKernel>();
-    k->configure(tensor, constant_value);
+    k->configure(compile_context, tensor, constant_value);
     _kernel = std::move(k);
 }
 } // namespace arm_compute

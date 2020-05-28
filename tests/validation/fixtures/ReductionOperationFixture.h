@@ -61,22 +61,31 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(tensor.data_type() == DataType::QASYMM8)
+        if(!is_data_type_quantized(tensor.data_type()))
         {
-            std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-            std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
-            library->fill(tensor, distribution, 0);
-        }
-        else if(tensor.data_type() == DataType::QASYMM8_SIGNED)
-        {
-            std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-            std::uniform_int_distribution<int8_t> distribution(bounds.first, bounds.second);
+            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
             library->fill(tensor, distribution, 0);
         }
         else
         {
-            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-            library->fill(tensor, distribution, 0);
+            if(tensor.data_type() == DataType::QASYMM8)
+            {
+                std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+
+                library->fill(tensor, distribution, 0);
+            }
+            else if(tensor.data_type() == DataType::QASYMM8_SIGNED)
+            {
+                std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::uniform_int_distribution<int8_t> distribution(bounds.first, bounds.second);
+
+                library->fill(tensor, distribution, 0);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Not supported");
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,13 @@ void dequantize_tensor(const ITensor *input, ITensor *output)
             },
             input_it, output_it);
             break;
+        case DataType::QASYMM8_SIGNED:
+            execute_window_loop(window, [&](const Coordinates &)
+            {
+                *reinterpret_cast<float *>(output_it.ptr()) = dequantize_qasymm8_signed(*reinterpret_cast<const int8_t *>(input_it.ptr()), qinfo);
+            },
+            input_it, output_it);
+            break;
         case DataType::QASYMM16:
             execute_window_loop(window, [&](const Coordinates &)
             {
@@ -77,6 +84,13 @@ void quantize_tensor(const ITensor *input, ITensor *output)
             execute_window_loop(window, [&](const Coordinates &)
             {
                 *reinterpret_cast<uint8_t *>(output_it.ptr()) = quantize_qasymm8(*reinterpret_cast<const float *>(input_it.ptr()), qinfo);
+            },
+            input_it, output_it);
+            break;
+        case DataType::QASYMM8_SIGNED:
+            execute_window_loop(window, [&](const Coordinates &)
+            {
+                *reinterpret_cast<int8_t *>(output_it.ptr()) = quantize_qasymm8_signed(*reinterpret_cast<const float *>(input_it.ptr()), qinfo);
             },
             input_it, output_it);
             break;
@@ -121,7 +135,7 @@ void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, co
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
 
-    _is_qasymm8 = scores_in->info()->data_type() == DataType::QASYMM8;
+    _is_qasymm8 = scores_in->info()->data_type() == DataType::QASYMM8 || scores_in->info()->data_type() == DataType::QASYMM8_SIGNED;
 
     _scores_in        = scores_in;
     _boxes_in         = boxes_in;
@@ -198,9 +212,9 @@ Status validate(const ITensorInfo *scores_in, const ITensorInfo *boxes_in, const
 {
     ARM_COMPUTE_UNUSED(batch_splits_in, batch_splits_out, keeps, keeps_size, info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores_in, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores_in, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
 
-    const bool is_qasymm8 = scores_in->data_type() == DataType::QASYMM8;
+    const bool is_qasymm8 = scores_in->data_type() == DataType::QASYMM8 || scores_in->data_type() == DataType::QASYMM8_SIGNED;
     if(is_qasymm8)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(boxes_in, 1, DataType::QASYMM16);

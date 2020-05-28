@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,11 @@ using namespace arm_compute;
 
 void CLTableLookupKernel::configure(const ICLTensor *input, const ICLLut *lut, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, lut, output);
+}
+
+void CLTableLookupKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLLut *lut, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
     ARM_COMPUTE_ERROR_ON(lut == nullptr);
@@ -46,7 +51,7 @@ void CLTableLookupKernel::configure(const ICLTensor *input, const ICLLut *lut, I
 
     // Create kernel
     std::string kernel_name = (DataType::S16 == lut->type()) ? "tablelookup_S16" : "tablelookup_U8";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel                 = create_kernel(compile_context, kernel_name);
 
     // Set lut argument
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters

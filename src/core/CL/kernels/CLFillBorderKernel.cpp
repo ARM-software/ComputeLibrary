@@ -33,6 +33,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <cstdint>
 #include <set>
@@ -61,6 +62,11 @@ void CLFillBorderKernel::set_constant_border(unsigned int idx, const PixelValue 
 
 void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), tensor, border_size, border_mode, constant_border_value);
+}
+
+void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ICLTensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
+{
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
     ARM_COMPUTE_ERROR_ON(tensor->info()->num_channels() != 1);
 
@@ -86,7 +92,7 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     build_opts.add_option("-DBORDER_SIZE_RIGHT=" + support::cpp11::to_string(border_size.right));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
     _tensor = tensor;
 
     // Create static kernel arguments

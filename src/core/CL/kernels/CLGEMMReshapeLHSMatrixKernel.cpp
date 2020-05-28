@@ -36,6 +36,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -120,6 +121,11 @@ CLGEMMReshapeLHSMatrixKernel::CLGEMMReshapeLHSMatrixKernel()
 
 void CLGEMMReshapeLHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, lhs_info, reinterpret_input_as_3d);
+}
+
+void CLGEMMReshapeLHSMatrixKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validate step
@@ -145,7 +151,7 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *
     kernel_name += lhs_info.transpose ? "t" : "nt";
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), lhs_info, reinterpret_input_as_3d);

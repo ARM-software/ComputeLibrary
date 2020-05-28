@@ -56,6 +56,17 @@ public:
      * @param[out] output Output tensor. Data types supported: Same as @p input.
      */
     void configure(const std::vector<ICLTensor *> &input, int axis, ICLTensor *output);
+    /** Initialise the kernel's inputs vector and output.
+     *
+     * @note Supported input tensor rank: up to 4
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           The vectors containing all the tensors with the same shape to stack. Data types supported: All.
+     * @param[in]  axis            The dimension to stack the tensors along. It must be smaller than the number of input dimensions.
+     *                             Negative values wrap around
+     * @param[out] output          Output tensor. Data types supported: Same as @p input.
+     */
+    void configure(const CLCompileContext &compile_context, const std::vector<ICLTensor *> &input, int axis, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4

@@ -33,6 +33,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <string>
@@ -181,6 +182,12 @@ const ICLTensor *CLScaleKernel::output() const
 
 void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy, bool align_corners)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, policy, border_mode, sampling_policy, align_corners);
+}
+
+void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
+                              bool align_corners)
+{
     _align_corners = policy == InterpolationPolicy::BILINEAR
                      && sampling_policy == SamplingPolicy::TOP_LEFT
                      && align_corners;
@@ -235,7 +242,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     std::string kernel_name = "scale_" + interpolation_name;
     kernel_name += call_quantized_kernel ? "_quantized_" : "_";
     kernel_name += lower_string(string_from_data_layout(_data_layout));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     unsigned int idx = is_nhwc ? 2 * num_arguments_per_4D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
 

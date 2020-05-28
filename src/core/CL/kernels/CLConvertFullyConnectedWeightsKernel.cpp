@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -38,6 +39,12 @@ CLConvertFullyConnectedWeightsKernel::CLConvertFullyConnectedWeightsKernel()
 }
 
 void CLConvertFullyConnectedWeightsKernel::configure(const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
+                                                     DataLayout data_layout)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, original_input_shape, data_layout);
+}
+
+void CLConvertFullyConnectedWeightsKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const TensorShape &original_input_shape,
                                                      DataLayout data_layout)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
@@ -69,7 +76,7 @@ void CLConvertFullyConnectedWeightsKernel::configure(const ICLTensor *input, ICL
     build_opts.add_option("-DFACTOR_2=" + support::cpp11::to_string(factor_2));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convert_fc_weights", build_opts.options()));
+    _kernel = create_kernel(compile_context, "convert_fc_weights", build_opts.options());
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());

@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -50,6 +51,11 @@ Status validate_arguments(const ITensorInfo &input, const ITensorInfo &output)
 } // namespace
 
 void CLElementWiseUnaryLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const ElementWiseUnary &op)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, op);
+}
+
+void CLElementWiseUnaryLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ElementWiseUnary &op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input->info(), *output->info()));
@@ -104,7 +110,7 @@ void CLElementWiseUnaryLayerKernel::configure(const ICLTensor *input, ICLTensor 
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 }
 
 Status CLElementWiseUnaryLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ElementWiseUnary &op)

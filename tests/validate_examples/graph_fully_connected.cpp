@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,6 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph.h"
-
-#include "support/ToolchainSupport.h"
 
 #include "tests/NEON/Accessor.h"
 #include "tests/validation/Validation.h"

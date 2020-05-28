@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,14 @@ public:
      * @param[out] output Output tensor. Data types supported: U8 and S16
      */
     void configure(const ICLTensor *input, const ICLLut *lut, ICLTensor *output);
+    /** Initialise the kernel's inputs and output
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           First tensor input. Data types supported: U8 and S16
+     * @param[in]  lut             Input lookup table. Data types supported: U8 and S16
+     * @param[out] output          Output tensor. Data types supported: U8 and S16
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLLut *lut, ICLTensor *output);
 };
 }
 #endif /*ARM_COMPUTE_CLTABLELOOKUP_H */

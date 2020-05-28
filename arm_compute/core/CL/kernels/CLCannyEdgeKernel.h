@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,18 @@ public:
      * @param[in]  norm_type Normalization type. if 1, L1-Norm otherwise L2-Norm.
      */
     void configure(const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase, int32_t norm_type);
+    /** Initialise the kernel's sources, destinations and border mode.
+     *
+     * @note gx, gy and mag must all be the same size (either 16 or 32).
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  gx              Source tensor - Gx component. Data types supported: S16/S32.
+     * @param[in]  gy              Source tensor - Gy component. Data types supported: Same as gx.
+     * @param[out] magnitude       Destination tensor - Magnitude. Data types supported: U16/U32. Must match the pixel size of gx, gy.
+     * @param[out] phase           Destination tensor - Quantized phase. Data types supported: U8.
+     * @param[in]  norm_type       Normalization type. if 1, L1-Norm otherwise L2-Norm.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *gx, const ICLTensor *gy, ICLTensor *magnitude, ICLTensor *phase, int32_t norm_type);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -90,6 +102,16 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *magnitude, const ICLTensor *phase, ICLTensor *output, int32_t lower_thr, bool border_undefined);
+    /** Initialise the kernel's sources, destination and border mode.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  magnitude        Source tensor - Magnitude. Data types supported: U16/U32.
+     * @param[in]  phase            Source tensor - Quantized phase. Data types supported: U8.
+     * @param[out] output           Destination tensor. Data types supported: U16/U32.
+     * @param[in]  lower_thr        Lower threshold.
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *magnitude, const ICLTensor *phase, ICLTensor *output, int32_t lower_thr, bool border_undefined);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -128,6 +150,24 @@ public:
      *                                              Expected to be initialized to 0 before each run.
      */
     void configure(const ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr,
+                   ICLTensor *visited, ICLTensor *recorded, ICLTensor *l1_stack, ICLTensor *l1_stack_counter);
+    /** Initialise the kernel's source, destination and border mode.
+     *
+     * @param[in]     compile_context  The compile context to be used.
+     * @param[in]     input            Source tensor. Data types supported: U8.
+     * @param[out]    output           Destination tensor. Data types supported: U8.
+     * @param[in]     upper_thr        Upper threshold used for the hysteresis
+     * @param[in]     lower_thr        Lower threshold used for the hysteresis
+     * @param[in,out] visited          Tensor for keeping the visited pixels. Data types supported: U32.
+     *                                 Expected to be initialized to 0 before each run.
+     * @param[in,out] recorded         Tensor for keeping the recorded pixels. Data types supported: U32
+     *                                 Expected to be initialized to 0 before each run.
+     * @param[in,out] l1_stack         Tensor with the L1 stack for each pixel. Data types supported: S32.
+     *                                 Expected to be initialized to 0 before each run.
+     * @param[in,out] l1_stack_counter Tensor for counting the elements in the L1 stack of each pixel. Data types supported: U8.
+     *                                              Expected to be initialized to 0 before each run.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr,
                    ICLTensor *visited, ICLTensor *recorded, ICLTensor *l1_stack, ICLTensor *l1_stack_counter);
 
     // Inherited methods overridden:

@@ -38,7 +38,7 @@
 #include "arm_compute/core/utils/helpers/tensor_info.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -114,6 +114,12 @@ Status CLWidthConcatenate4TensorsKernel::validate(const ITensorInfo *input1, con
 
 void CLWidthConcatenate4TensorsKernel::configure(const ICLTensor *input1, const ICLTensor *input2, const ICLTensor *input3, const ICLTensor *input4, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, input3, input4, output);
+}
+
+void CLWidthConcatenate4TensorsKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, const ICLTensor *input3, const ICLTensor *input4,
+                                                 ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, input3, input4, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), input3->info(), input4->info(), output->info()));
 
@@ -156,7 +162,7 @@ void CLWidthConcatenate4TensorsKernel::configure(const ICLTensor *input1, const 
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate_width_x4", build_opts.options()));
+    _kernel = create_kernel(compile_context, "concatenate_width_x4", build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input1->info(), input2->info(), input3->info(), input4->info(), output->info());

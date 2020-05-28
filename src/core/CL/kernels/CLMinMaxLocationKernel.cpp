@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <climits>
 
@@ -60,6 +61,11 @@ CLMinMaxKernel::CLMinMaxKernel()
 }
 
 void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, min_max);
+}
+
+void CLMinMaxKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
@@ -108,7 +114,7 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("minmax", build_opts));
+    _kernel = create_kernel(compile_context, "minmax", build_opts);
 
     // Set fixed arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters
@@ -168,6 +174,12 @@ CLMinMaxLocationKernel::CLMinMaxLocationKernel()
 
 void CLMinMaxLocationKernel::configure(const ICLImage *input, cl::Buffer *min_max, cl::Buffer *min_max_count, ICLCoordinates2DArray *min_loc, ICLCoordinates2DArray *max_loc)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, min_max, min_max_count, min_loc, max_loc);
+}
+
+void CLMinMaxLocationKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, cl::Buffer *min_max, cl::Buffer *min_max_count, ICLCoordinates2DArray *min_loc,
+                                       ICLCoordinates2DArray *max_loc)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(min_max == nullptr);
@@ -188,7 +200,7 @@ void CLMinMaxLocationKernel::configure(const ICLImage *input, cl::Buffer *min_ma
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("minmaxloc", build_opts));
+    _kernel = create_kernel(compile_context, "minmaxloc", build_opts);
 
     // Set static arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters

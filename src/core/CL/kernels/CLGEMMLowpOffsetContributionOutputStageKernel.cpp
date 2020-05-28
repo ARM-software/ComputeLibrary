@@ -33,7 +33,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -113,22 +113,9 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
         ARM_COMPUTE_RETURN_ERROR_ON(output_stage.output_data_type != output->data_type());
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mm_result, output);
-        PixelValue min_val{};
-        PixelValue max_val{};
-        std::tie(min_val, max_val) = get_min_max(output->data_type());
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > max_val.get<int32_t>());
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < min_val.get<int32_t>() || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
-    }
-    else
-    {
-        // Output will be configured as depending on the chosen output data type in the output stage
-        PixelValue min_val{};
-        PixelValue max_val{};
-        std::tie(min_val, max_val) = get_min_max(output_stage.output_data_type);
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > max_val.get<int32_t>());
-        ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < min_val.get<int32_t>() || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
     }
 
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_stage.gemmlowp_multipliers.size() != output_stage.gemmlowp_shifts.size(), "per channel quantization info is incorrect");
 
     return Status{};
@@ -197,6 +184,14 @@ void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const ICLTensor *m
                                                               int32_t k, int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage,
                                                               const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), mm_result, vector_sum_col, vector_sum_row, bias, output, k, a_offset, b_offset, output_stage, output_multipliers, output_shifts);
+}
+
+void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const CLCompileContext &compile_context, const ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row,
+                                                              const ICLTensor *bias, ICLTensor *output,
+                                                              int32_t k, int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage,
+                                                              const ICLTensor *output_multipliers, const ICLTensor *output_shifts)
+{
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result, output, output_multipliers, output_shifts);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result->info(),
@@ -248,14 +243,14 @@ void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const ICLTensor *m
     PixelValue min_val{};
     PixelValue max_val{};
     std::tie(min_val, max_val) = get_min_max(output->info()->data_type());
-    build_opts.add_option_if((min != min_val.get<int32_t>()) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
-    build_opts.add_option_if((max != max_val.get<int32_t>()) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
+    build_opts.add_option_if((min > min_val.get<int32_t>()), "-DMIN_BOUND=" + support::cpp11::to_string(min));
+    build_opts.add_option_if((max < max_val.get<int32_t>()), "-DMAX_BOUND=" + support::cpp11::to_string(max));
 
     std::string kernel_name("gemmlowp_offset_contribution");
     kernel_name += "_" + string_from_gemmlowp_output_stage(output_stage.type);
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(mm_result->info(),

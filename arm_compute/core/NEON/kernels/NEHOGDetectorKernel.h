@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,10 +47,10 @@ public:
     NEHOGDetectorKernel(const NEHOGDetectorKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEHOGDetectorKernel &operator=(const NEHOGDetectorKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEHOGDetectorKernel(NEHOGDetectorKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEHOGDetectorKernel &operator=(NEHOGDetectorKernel &&) = default;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHOGDetectorKernel(NEHOGDetectorKernel &&) = delete;
+    /** Prevent instances of this class from being moved (As this class contains non movable objects) */
+    NEHOGDetectorKernel &operator=(NEHOGDetectorKernel &&) = delete;
     /** Default destructor */
     ~NEHOGDetectorKernel() = default;
 

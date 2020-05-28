@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,21 +36,26 @@ CLFFT2D::CLFFT2D(std::shared_ptr<IMemoryManager> memory_manager)
 
 void CLFFT2D::configure(const ICLTensor *input, ICLTensor *output, const FFT2DInfo &config)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, config);
+}
+
+void CLFFT2D::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const FFT2DInfo &config)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLFFT2D::validate(input->info(), output->info(), config));
 
     // Setup first pass
     FFT1DInfo first_pass_config;
-    first_pass_config.axis      = config.axes.first;
+    first_pass_config.axis      = config.axis0;
     first_pass_config.direction = config.direction;
     _memory_group.manage(&_first_pass_tensor);
-    _first_pass_func.configure(input, &_first_pass_tensor, first_pass_config);
+    _first_pass_func.configure(compile_context, input, &_first_pass_tensor, first_pass_config);
 
     // Setup second pass
     FFT1DInfo second_pass_config;
-    second_pass_config.axis      = config.axes.second;
+    second_pass_config.axis      = config.axis1;
     second_pass_config.direction = config.direction;
-    _second_pass_func.configure(&_first_pass_tensor, output, second_pass_config);
+    _second_pass_func.configure(compile_context, &_first_pass_tensor, output, second_pass_config);
     _first_pass_tensor.allocator()->allocate();
 }
 
@@ -63,13 +68,13 @@ Status CLFFT2D::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
     // Validate first pass
     FFT1DInfo first_pass_config;
-    first_pass_config.axis      = config.axes.first;
+    first_pass_config.axis      = config.axis0;
     first_pass_config.direction = config.direction;
     ARM_COMPUTE_RETURN_ON_ERROR(CLFFT1D::validate(input, &first_pass_tensor, first_pass_config));
 
     // Validate second pass
     FFT1DInfo second_pass_config;
-    second_pass_config.axis      = config.axes.second;
+    second_pass_config.axis      = config.axis1;
     second_pass_config.direction = config.direction;
     ARM_COMPUTE_RETURN_ON_ERROR(CLFFT1D::validate(&first_pass_tensor, output, second_pass_config));
 

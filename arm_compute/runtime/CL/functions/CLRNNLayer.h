@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,19 @@ public:
      * @param[in]     info              Activation layer parameter.
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *recurrent_weights, const ICLTensor *bias, ICLTensor *hidden_state, ICLTensor *output, ActivationLayerInfo &info);
+    /** Initialize the function
+     *
+     * @param[in]     compile_context   The compile context to be used.
+     * @param[in]     input             Input is a 2-D tensor of shape [input_size, batch_size]. Data types supported: F16/F32
+     * @param[in]     weights           Weights tensor of shape [input_size, num_units] that multiplies the input. Data types supported: Same as @p input
+     * @param[in]     recurrent_weights Weights tensor of shape [num_units, num_units] that multiplies the current 'state'. Data types supported: Same as @p input
+     * @param[in]     bias              Bias vector of shape [num_units]. Data types supported: Same as @p input
+     * @param[out]    output            Output tensor of shape [num_units, batch_size]. Data types supported: Same as @p input
+     * @param[in,out] hidden_state      Output tensor of shape [num_units, batch_size]. Data types supported: Same as @p input
+     * @param[in]     info              Activation layer parameter.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *weights, const ICLTensor *recurrent_weights, const ICLTensor *bias, ICLTensor *hidden_state,
+                   ICLTensor *output, ActivationLayerInfo &info);
     /** Initialize the function
      *
      * @param[in] input             Input is a 2-D tensor of shape [input_size, batch_size]. Data types supported: F16/F32

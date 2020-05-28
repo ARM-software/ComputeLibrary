@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,9 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
+struct GEMMLowpReductionKernelInfo;
 
 /** Common interface for all NEON reduction kernels */
 class INEGEMMLowpReductionKernel : public INEKernel
@@ -47,18 +49,23 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input       Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[out] output      Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
-     * @param[in]  k           Number of matrix A columns (or matrix B rows)
-     * @param[in]  is_reshaped True if the input tensor has been reshaped
+     * @param[in]  input  Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[out] output Output row-vector of sums of all the entries in each row/col of input tensor. Data type supported: S32
+     * @param[in]  info   Kernel metadata:
+     *                    - k            Number of matrix columns/rows depending on the type of reduction.
+     *                    - is_reshaped  True if the matrix has been reshaped.
+     *                    - scalar       Scalar value to multiply each reduced column/row by.
+     *                    - mul_byscalar True if each reduced column/row must be multiplied by a scalar value.
      */
-    virtual void configure(const ITensor *input, ITensor *output, int32_t k, bool is_reshaped) = 0;
+    virtual void configure(const ITensor *input, ITensor *output, const GEMMLowpReductionKernelInfo &info) = 0;
 
 protected:
     const ITensor *_input;
     ITensor       *_output;
     int32_t        _k;
     bool           _is_reshaped;
+    int32_t        _scalar;
+    bool           _mul_by_scalar;
 };
 
 /** NEON kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
@@ -75,22 +82,28 @@ public:
     }
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_a             Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[out] vector_sum_row    Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
-     * @param[in]  num_mtx_a_cols    Number of matrix A columns
-     * @param[in]  is_interleaved4x4 True if the matrix A has been interleaved4x4
+     * @param[in]  mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[out] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
+     * @param[in]  info           Kernel metadata:
+     *                            - k            (num_mtx_a_cols) Number of matrix A columns
+     *                            - is_reshaped  (is_interleaved4x4) True if the matrix A has been interleaved4x4
+     *                            - scalar       Scalar value to multiply each reduced row by.
+     *                            - mul_byscalar True if each reduced column must be multiplied by a scalar value.
      */
-    void configure(const ITensor *mtx_a, ITensor *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4) override;
+    void configure(const ITensor *mtx_a, ITensor *vector_sum_row, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixAReductionKernel
      *
-     * @param[in] mtx_a             Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[in] vector_sum_row    Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
-     * @param[in] num_mtx_a_cols    Number of matrix A columns
-     * @param[in] is_interleaved4x4 True if the matrix A has been interleaved4x4
+     * @param[in] mtx_a          Input tensor. Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in] vector_sum_row Output row-vector of sums of all the entries in each row of mtx_a. Data type supported: S32
+     * @param[in] info           Kernel metadata:
+     *                           - k            (num_mtx_a_cols) Number of matrix A columns
+     *                           - is_reshaped  (is_interleaved4x4) True if the matrix A has been interleaved4x4
+     *                           - scalar       Scalar value to multiply each reduced row by.
+     *                           - mul_byscalar True if each reduced column must be multiplied by a scalar value.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, int32_t num_mtx_a_cols, bool is_interleaved4x4);
+    static Status validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row, const GEMMLowpReductionKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -118,22 +131,28 @@ public:
     }
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[out] vector_sum_col   Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
-     * @param[in]  num_mtx_b_rows   Number of matrix B rows
-     * @param[in]  is_transposed1xW True if the input tensor is transposed 1xW
+     * @param[in]  mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[out] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
+     * @param[in]  info           Kernel metadata:
+     *                            - k            (num_mtx_b_rows) Number of matrix B rows.
+     *                            - is_reshaped  (is_transposed1xW) True if the input tensor is transposed 1xW.
+     *                            - scalar       Scalar value to multiply each reduced row by.
+     *                            - mul_byscalar True if each reduced row must be multiplied by a scalar value.
      */
-    void configure(const ITensor *mtx_b, ITensor *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW) override;
+    void configure(const ITensor *mtx_b, ITensor *vector_sum_col, const GEMMLowpReductionKernelInfo &info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixBReductionKernel
      *
-     * @param[in] mtx_b            Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
-     * @param[in] vector_sum_col   Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
-     * @param[in] num_mtx_b_rows   Number of matrix B rows
-     * @param[in] is_transposed1xW True if the input tensor is transposed 1xW
+     * @param[in] mtx_b          Input tensor. Data type supported: Data type supported: QASYMM8/QASYMM8_SIGNED
+     * @param[in] vector_sum_col Output row-vector of sums of all the entries in each column of mtx_b. Data type supported: S32
+     * @param[in] info           Kernel metadata:
+     *                           - k            (num_mtx_b_rows) Number of matrix B rows.
+     *                           - is_reshaped  (is_transposed1xW) True if the input tensor is transposed 1xW.
+     *                           - scalar       Scalar value to multiply each reduced row by.
+     *                           - mul_byscalar True if each reduced row must be multiplied by a scalar value.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, int32_t num_mtx_b_rows, bool is_transposed1xW);
+    static Status validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col, const GEMMLowpReductionKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

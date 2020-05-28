@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,8 +117,10 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F32,
 });
 
+const auto NeonActivationFunctionsDataset = concat(datasets::ActivationFunctions(), framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH));
+
 /** Input data sets. */
-const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), datasets::ActivationFunctions()), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), NeonActivationFunctionsDataset), framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -196,16 +198,9 @@ using NEActivationLayerFixture = ActivationValidationFixture<Tensor, Accessor, N
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset),
-                                                                                                            framework::dataset::make("DataType",
-                                                                                                                    DataType::F16)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
-                                                                                                          framework::dataset::make("DataType",
-                                                                                                                  DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset),
+                                                                                                      framework::dataset::make("DataType",
+                                                                                                              DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
@@ -214,15 +209,9 @@ TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
-                                                                                                             DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
+                                                                                                       DataType::F32)))
 
-{
-    // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
-                                                                                                           framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
@@ -240,23 +229,17 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
                                                                                                   ActivationLayerInfo::ActivationFunction::LOGISTIC,
                                                                                                   ActivationLayerInfo::ActivationFunction::TANH
                                                                                                 });
-const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), QuantizedActivationFunctionsDataset),
+
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }),
+                                                        concat(QuantizedActivationFunctionsDataset, framework::dataset::make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH))),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::QASYMM8)),
-                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::QASYMM8)),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+                                                                                                                  framework::dataset::make("DataType",
+                                                                                                                          DataType::QASYMM8)),
+                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -264,18 +247,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, fra
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
-                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                               DataType::QASYMM8_SIGNED)),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
-                                                                                                                     framework::dataset::make("DataType",
-                                                                                                                             DataType::QASYMM8_SIGNED)),
-                                                                                                                     framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), QuantizedActivationDataset),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::QASYMM8_SIGNED)),
+                                                                                                                 framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -290,18 +265,10 @@ const auto Int16QuantizedActivationDataset = combine(combine(framework::dataset:
                                                      framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 TEST_SUITE(QSYMM16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), Int16QuantizedActivationDataset),
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::QSYMM16)),
-                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 32768.f, 0.f) })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qsymm16);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), Int16QuantizedActivationDataset),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::QSYMM16)),
-                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 32768.f, 0.f) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), Int16QuantizedActivationDataset),
+                                                                                                                  framework::dataset::make("DataType",
+                                                                                                                          DataType::QSYMM16)),
+                                                                                                                  framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 32768.f, 0.f) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qsymm16);

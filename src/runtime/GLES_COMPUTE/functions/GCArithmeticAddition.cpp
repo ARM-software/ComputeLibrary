@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,20 +24,22 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCArithmeticAddition.h"
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCArithmeticAdditionKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
 using namespace arm_compute;
 
-void GCArithmeticAddition::configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, ConvertPolicy policy)
+void GCArithmeticAddition::configure(const IGCTensor *input1, const IGCTensor *input2, IGCTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<GCArithmeticAdditionKernel>();
     k->configure(input1, input2, output, policy);
     _kernel = std::move(k);
 }
 
-Status GCArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
+Status GCArithmeticAddition::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled());
     return GCArithmeticAdditionKernel::validate(input1, input2, output, policy);
 }

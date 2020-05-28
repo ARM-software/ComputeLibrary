@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,4 +66,4 @@ public:
     static Status validate(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info);
 };
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_CLBOUNDINGBOXTRANSFORM_H */
+#endif /* ARM_COMPUTE_NEBOUNDINGBOXTRANSFORM_H */

@@ -35,6 +35,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute::misc::shape_calculator;
 
@@ -104,6 +105,11 @@ CLROIAlignLayerKernel::CLROIAlignLayerKernel()
 
 void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, rois, output, pool_info);
+}
+
+void CLROIAlignLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, rois);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->info(), output->info(), pool_info));
 
@@ -148,7 +154,7 @@ void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *r
 
     // Create kernel
     const std::string kernel_name = (is_qasymm) ? "roi_align_layer_quantized" : "roi_align_layer";
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts.options());
 
     ICLKernel::configure_internal(win_config.second);
 }

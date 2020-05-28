@@ -56,6 +56,16 @@ public:
      * @param[in] perm   Permutation vector
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm);
+    /** Set the input and output of the kernel.
+     *
+     * @note Arbitrary permutation vectors are supported with rank not greater than 4
+     *
+     * @param[in] compile_context The compile context to be used.
+     * @param[in] input           The input tensor to permute. Data types supported: All.
+     * @param[in] output          The output tensor. Data types supported: Same as @p input
+     * @param[in] perm            Permutation vector
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PermutationVector &perm);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPermuteKernel
      *
      * @note Arbitrary permutation vectors are supported with rank not greater than 4

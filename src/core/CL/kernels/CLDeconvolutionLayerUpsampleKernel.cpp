@@ -70,6 +70,12 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
 void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTensor *output,
                                                    const PadStrideInfo &info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
+}
+
+void CLDeconvolutionLayerUpsampleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+                                                   const PadStrideInfo &info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
@@ -83,7 +89,7 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTe
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size())));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("deconvolution_upsample", build_opts.options()));
+    _kernel = create_kernel(compile_context, "deconvolution_upsample", build_opts.options());
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
 

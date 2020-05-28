@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,13 @@ CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_ma
 void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
                                    const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, weights, biases, output, conv_info, weights_info, dilation, act_info, enable_fast_math, num_groups);
+}
+
+void CLConvolutionLayer::configure(const CLCompileContext &compile_context, ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                                   const WeightsInfo &weights_info,
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
                                                             enable_fast_math, num_groups));
@@ -57,7 +64,7 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
         {
             ARM_COMPUTE_ERROR_ON(num_groups != 1);
             auto f = arm_compute::support::cpp14::make_unique<CLWinogradConvolutionLayer>(_memory_manager);
-            f->configure(input, weights, biases, output, conv_info, act_info, enable_fast_math);
+            f->configure(compile_context, input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _function = std::move(f);
             break;
         }
@@ -65,21 +72,21 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
         {
             ARM_COMPUTE_ERROR_ON(num_groups != 1);
             auto f = arm_compute::support::cpp14::make_unique<CLDirectConvolutionLayer>();
-            f->configure(input, weights, biases, output, conv_info, act_info);
+            f->configure(compile_context, input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::GEMM:
         {
             auto f = arm_compute::support::cpp14::make_unique<CLGEMMConvolutionLayer>(_memory_manager);
-            f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups);
+            f->configure(compile_context, input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups);
             _function = std::move(f);
             break;
         }
         case ConvolutionMethod::FFT:
         {
             auto f = arm_compute::support::cpp14::make_unique<CLFFTConvolutionLayer>(_memory_manager);
-            f->configure(input, weights, biases, output, conv_info, act_info);
+            f->configure(compile_context, input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
             break;
         }

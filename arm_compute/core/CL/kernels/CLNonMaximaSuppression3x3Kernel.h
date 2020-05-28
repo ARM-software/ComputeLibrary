@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,14 @@ public:
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ICLTensor *input, ICLTensor *output, bool border_undefined);
+    /** Initialise the kernel's sources, destinations and border mode.
+     *
+     * @param[in]  compile_context  The compile context to be used.
+     * @param[in]  input            Source tensor. Data types supported: U8, F32. (Must be the same as the output tensor)
+     * @param[out] output           Destination tensor. Data types supported: U8, F32. (Must be the same as the input tensor)
+     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;

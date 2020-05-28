@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,18 +50,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8_SIGNED, DataType::QASYMM8, DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    static std::set<ActivationLayerInfo::ActivationFunction> qasymm8_supported_activations =
+    const static std::set<ActivationLayerInfo::ActivationFunction> qasymm8_supported_activations =
     {
         ActivationLayerInfo::ActivationFunction::RELU,
         ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
         ActivationLayerInfo::ActivationFunction::LOGISTIC,
-        ActivationLayerInfo::ActivationFunction::TANH
+        ActivationLayerInfo::ActivationFunction::TANH,
+        ActivationLayerInfo::ActivationFunction::HARD_SWISH
     };
-    static std::set<ActivationLayerInfo::ActivationFunction> qsymm16_supported_activations =
+    const static std::set<ActivationLayerInfo::ActivationFunction> qsymm16_supported_activations =
     {
         ActivationLayerInfo::ActivationFunction::LOGISTIC,
-        ActivationLayerInfo::ActivationFunction::TANH
+        ActivationLayerInfo::ActivationFunction::TANH,
+        ActivationLayerInfo::ActivationFunction::HARD_SWISH
     };
     const DataType                                data_type = input->data_type();
     const QuantizationInfo                       &oq_info   = (output != nullptr) ? output->quantization_info() : input->quantization_info();
@@ -156,6 +158,8 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float> },
         { ActivationFunction::IDENTITY, &NEActivationLayerKernel::activation<ActivationFunction::IDENTITY, float> },
+        { ActivationFunction::HARD_SWISH, &NEActivationLayerKernel::activation<ActivationFunction::HARD_SWISH, float> },
+
     };
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -175,6 +179,8 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float16_t> },
         { ActivationFunction::IDENTITY, &NEActivationLayerKernel::activation<ActivationFunction::IDENTITY, float16_t> },
+        { ActivationFunction::HARD_SWISH, &NEActivationLayerKernel::activation<ActivationFunction::HARD_SWISH, float16_t> },
+
     };
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
 
@@ -187,6 +193,8 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qasymm8_signed_t> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qasymm8_signed_t> },
         { ActivationFunction::IDENTITY, &NEActivationLayerKernel::activation<ActivationFunction::IDENTITY, qasymm8_signed_t> },
+        { ActivationFunction::HARD_SWISH, &NEActivationLayerKernel::activation<ActivationFunction::HARD_SWISH, qasymm8_signed_t> },
+
     };
 
     // Activation functions : QASYMM8
@@ -198,6 +206,8 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qasymm8_t> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qasymm8_t> },
         { ActivationFunction::IDENTITY, &NEActivationLayerKernel::activation<ActivationFunction::IDENTITY, qasymm8_t> },
+        { ActivationFunction::HARD_SWISH, &NEActivationLayerKernel::activation<ActivationFunction::HARD_SWISH, qasymm8_t> },
+
     };
 
     // Activation functions : QSYMM16
@@ -205,6 +215,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     {
         { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qsymm16_t> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qsymm16_t> },
+
     };
 
     switch(input->info()->data_type())
@@ -254,14 +265,17 @@ NEActivationLayerKernel::activation(const Window &window)
     Iterator input(_input, win_collapsed);
     Iterator output(_output, win_collapsed);
 
-    const auto epsilon = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType{});
-    const auto const_1 = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
-    const auto const_0 = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
-    const auto va      = wrapper::vdup_n(static_cast<T>(_act_info.a()), ExactTagType{});
-    const auto vb      = wrapper::vdup_n(static_cast<T>(_act_info.b()), ExactTagType{});
-    const auto a       = static_cast<T>(_act_info.a());
-    const auto b       = static_cast<T>(_act_info.b());
+    const auto epsilon     = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType{});
+    const auto const_1     = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
+    const auto const_0     = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
+    const auto const_6     = wrapper::vdup_n(static_cast<T>(6.f), ExactTagType{});
+    const auto const_3     = wrapper::vdup_n(static_cast<T>(3.f), ExactTagType{});
+    const auto const_inv_6 = wrapper::vdup_n(static_cast<T>(0.166666667f), ExactTagType{});
 
+    const auto va = wrapper::vdup_n(static_cast<T>(_act_info.a()), ExactTagType{});
+    const auto vb = wrapper::vdup_n(static_cast<T>(_act_info.b()), ExactTagType{});
+    const auto a  = static_cast<T>(_act_info.a());
+    const auto b  = static_cast<T>(_act_info.b());
     execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
         const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
@@ -315,6 +329,9 @@ NEActivationLayerKernel::activation(const Window &window)
                 case ActivationFunction::IDENTITY:
                     tmp = vin;
                     break;
+                case ActivationFunction::HARD_SWISH:
+                    tmp = wrapper::vmul(vin, wrapper::vmul(const_inv_6, wrapper::vmin(const_6, wrapper::vmax(const_0, wrapper::vadd(vin, const_3)))));
+                    break;
                 default:
                     ARM_COMPUTE_ERROR("Unsupported activation function");
             }
@@ -367,6 +384,9 @@ NEActivationLayerKernel::activation(const Window &window)
                 case ActivationFunction::IDENTITY:
                     tmp = in;
                     break;
+                case ActivationFunction::HARD_SWISH:
+                    tmp = in * ((std::min(std::max((in + 3), 0.0f), 6.0f)) * 0.166666667f);
+                    break;
                 default:
                     ARM_COMPUTE_ERROR("Unsupported activation function");
             }
@@ -390,19 +410,23 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
     Iterator input(_input, win_collapsed);
     Iterator output(_output, win_collapsed);
 
-    const UniformQuantizationInfo qi_in    = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out   = _output->info()->quantization_info().uniform();
-    const qasymm8x16_t            va       = vdupq_n_u8(quantize_qasymm8(_act_info.a(), qi_in));
-    const qasymm8x16_t            vb       = vdupq_n_u8(quantize_qasymm8(_act_info.b(), qi_in));
-    const qasymm8_t               a        = quantize_qasymm8(_act_info.a(), qi_in);
-    const qasymm8_t               b        = quantize_qasymm8(_act_info.b(), qi_in);
-    const qasymm8_t               const_0  = quantize_qasymm8(0.f, qi_in);
-    const qasymm8x16_t            vconst_0 = vdupq_n_u8(const_0);
-    const auto                    vconst_1 = vdupq_n_f32(1.f);
-    const float32x4_t             va_f32   = vdupq_n_f32(_act_info.a());
-    const float32x4_t             vb_f32   = vdupq_n_f32(_act_info.b());
-    const float                   a_f32    = _act_info.a();
-    const float                   b_f32    = _act_info.b();
+    const UniformQuantizationInfo qi_in           = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out          = _output->info()->quantization_info().uniform();
+    const qasymm8x16_t            va              = vdupq_n_u8(quantize_qasymm8(_act_info.a(), qi_in));
+    const qasymm8x16_t            vb              = vdupq_n_u8(quantize_qasymm8(_act_info.b(), qi_in));
+    const qasymm8_t               a               = quantize_qasymm8(_act_info.a(), qi_in);
+    const qasymm8_t               b               = quantize_qasymm8(_act_info.b(), qi_in);
+    const qasymm8_t               const_0         = quantize_qasymm8(0.f, qi_in);
+    const qasymm8x16_t            vconst_0        = vdupq_n_u8(const_0);
+    const auto                    vconst_1        = vdupq_n_f32(1.f);
+    const float32x4_t             va_f32          = vdupq_n_f32(_act_info.a());
+    const float32x4_t             vb_f32          = vdupq_n_f32(_act_info.b());
+    const float                   a_f32           = _act_info.a();
+    const float                   b_f32           = _act_info.b();
+    const auto                    const_6_f32     = vdupq_n_f32(6.f);
+    const auto                    const_0_f32     = vdupq_n_f32(0.f);
+    const auto                    const_3_f32     = vdupq_n_f32(3.f);
+    const auto                    const_inv_6_f32 = vdupq_n_f32(0.166666667f);
 
     // Initialise scale/offset for re-quantization
     float       s  = qi_in.scale / qi_out.scale;
@@ -477,6 +501,23 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
                 // Re-quantize to new output space
                 tmp = vquantize(tmp_dep, qi_out);
             }
+            else if(act == ActivationFunction::HARD_SWISH)
+            {
+                // De-quantize
+                const auto vin_deq = vdequantize(vin, qi_in);
+                // Perform activation
+                const float32x4x4_t tmp_dep =
+                {
+                    {
+                        wrapper::vmul(vin_deq.val[0], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[0], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[1], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[1], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[2], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[2], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[3], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[3], const_3_f32))))),
+                    }
+                };
+                // Re-quantize to new output space
+                tmp = vquantize(tmp_dep, qi_out);
+            }
             else
             {
                 ARM_COMPUTE_ERROR("Unsupported activation function");
@@ -492,17 +533,17 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
             if(act == ActivationFunction::RELU)
             {
                 tmp = std::max(const_0, in);
-                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(const_0, in));
-                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::LU_BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(b, in));
-                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+                tmp = utility::clamp<int32_t, qasymm8_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::LOGISTIC)
             {
@@ -514,6 +555,12 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
             {
                 float tmp_f = dequantize_qasymm8(in, qi_in);
                 tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
+                tmp         = quantize_qasymm8(tmp_f, qi_out);
+            }
+            else if(act == ActivationFunction::HARD_SWISH)
+            {
+                float tmp_f = dequantize_qasymm8(in, qi_in);
+                tmp_f       = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
                 tmp         = quantize_qasymm8(tmp_f, qi_out);
             }
             else
@@ -540,19 +587,23 @@ typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NE
     Iterator input(_input, win_collapsed);
     Iterator output(_output, win_collapsed);
 
-    const UniformQuantizationInfo qi_in    = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out   = _output->info()->quantization_info().uniform();
-    const qasymm8x16_signed_t     va       = vdupq_n_s8(quantize_qasymm8_signed(_act_info.a(), qi_in));
-    const qasymm8x16_signed_t     vb       = vdupq_n_s8(quantize_qasymm8_signed(_act_info.b(), qi_in));
-    const qasymm8_signed_t        a        = quantize_qasymm8_signed(_act_info.a(), qi_in);
-    const qasymm8_signed_t        b        = quantize_qasymm8_signed(_act_info.b(), qi_in);
-    const qasymm8_signed_t        const_0  = quantize_qasymm8_signed(0.f, qi_in);
-    const qasymm8x16_signed_t     vconst_0 = vdupq_n_s8(const_0);
-    const auto                    vconst_1 = vdupq_n_f32(1.f);
-    const float32x4_t             va_f32   = vdupq_n_f32(_act_info.a());
-    const float32x4_t             vb_f32   = vdupq_n_f32(_act_info.b());
-    const float                   a_f32    = _act_info.a();
-    const float                   b_f32    = _act_info.b();
+    const UniformQuantizationInfo qi_in           = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out          = _output->info()->quantization_info().uniform();
+    const qasymm8x16_signed_t     va              = vdupq_n_s8(quantize_qasymm8_signed(_act_info.a(), qi_in));
+    const qasymm8x16_signed_t     vb              = vdupq_n_s8(quantize_qasymm8_signed(_act_info.b(), qi_in));
+    const qasymm8_signed_t        a               = quantize_qasymm8_signed(_act_info.a(), qi_in);
+    const qasymm8_signed_t        b               = quantize_qasymm8_signed(_act_info.b(), qi_in);
+    const qasymm8_signed_t        const_0         = quantize_qasymm8_signed(0.f, qi_in);
+    const qasymm8x16_signed_t     vconst_0        = vdupq_n_s8(const_0);
+    const auto                    vconst_1        = vdupq_n_f32(1.f);
+    const float32x4_t             va_f32          = vdupq_n_f32(_act_info.a());
+    const float32x4_t             vb_f32          = vdupq_n_f32(_act_info.b());
+    const float                   a_f32           = _act_info.a();
+    const float                   b_f32           = _act_info.b();
+    const auto                    const_6_f32     = vdupq_n_f32(6.f);
+    const auto                    const_0_f32     = vdupq_n_f32(0.f);
+    const auto                    const_3_f32     = vdupq_n_f32(3.f);
+    const auto                    const_inv_6_f32 = vdupq_n_f32(0.166666667f);
 
     // Initialise scale/offset for re-quantization
     float       s  = qi_in.scale / qi_out.scale;
@@ -627,6 +678,23 @@ typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NE
                 // Re-quantize to new output space
                 tmp = vquantize_signed(tmp_dep, qi_out);
             }
+            else if(act == ActivationFunction::HARD_SWISH)
+            {
+                // De-quantize
+                const auto vin_deq = vdequantize(vin, qi_in);
+                // Perform activation
+                const float32x4x4_t tmp_dep =
+                {
+                    {
+                        wrapper::vmul(vin_deq.val[0], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[0], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[1], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[1], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[2], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[2], const_3_f32))))),
+                        wrapper::vmul(vin_deq.val[3], wrapper::vmul(const_inv_6_f32, wrapper::vmin(const_6_f32, wrapper::vmax(const_0_f32, wrapper::vadd(vin_deq.val[3], const_3_f32))))),
+                    }
+                };
+                // Re-quantize to new output space
+                tmp = vquantize_signed(tmp_dep, qi_out);
+            }
             else
             {
                 ARM_COMPUTE_ERROR("Unsupported activation function");
@@ -642,17 +710,17 @@ typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NE
             if(act == ActivationFunction::RELU)
             {
                 tmp = std::max(const_0, in);
-                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(const_0, in));
-                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::LU_BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(b, in));
-                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+                tmp = utility::clamp<int32_t, qasymm8_signed_t>(tmp * s + o);
             }
             else if(act == ActivationFunction::LOGISTIC)
             {
@@ -664,6 +732,12 @@ typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NE
             {
                 float tmp_f = dequantize_qasymm8_signed(in, qi_in);
                 tmp_f       = a_f32 * std::tanh(b_f32 * tmp_f);
+                tmp         = quantize_qasymm8_signed(tmp_f, qi_out);
+            }
+            else if(act == ActivationFunction::HARD_SWISH)
+            {
+                float tmp_f = dequantize_qasymm8_signed(in, qi_in);
+                tmp_f       = tmp_f * ((std::min(std::max((tmp_f + 3), 0.0f), 6.0f)) * 0.166666667f);
                 tmp         = quantize_qasymm8_signed(tmp_f, qi_out);
             }
             else

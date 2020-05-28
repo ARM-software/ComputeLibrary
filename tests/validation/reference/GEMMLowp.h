@@ -59,6 +59,14 @@ SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_fixedpoint(const SimpleTensor
 template <typename TIn, typename TOut>
 SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_fixedpoint(const SimpleTensor<TIn> &in, const SimpleTensor<TIn> &bias, std::vector<int32_t> result_fixedpoint_multiplier,
                                                               std::vector<int32_t> result_shift, int32_t result_offset_after_shift, int32_t min = 0, int32_t max = 0);
+
+template <typename TIn, typename TOut>
+SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_float(const SimpleTensor<TIn> &in, const SimpleTensor<TIn> &bias,
+                                                         std::vector<float_t> result_real_multiplier, int32_t result_offset, int32_t min = 0, int32_t max = 0);
+
+template <typename TIn, typename TOut>
+SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_float(const SimpleTensor<TIn> &in,
+                                                         std::vector<float_t> result_real_multiplier, int32_t result_offset, int32_t min = 0, int32_t max = 0);
 } // namespace reference
 } // namespace validation
 } // namespace test

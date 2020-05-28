@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "support/StringSupport.h"
 
 using namespace arm_compute;
 
@@ -38,6 +39,11 @@ BorderSize CLMedian3x3Kernel::border_size() const
 
 void CLMedian3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, border_undefined);
+}
+
+void CLMedian3x3Kernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
 
@@ -46,7 +52,7 @@ void CLMedian3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, boo
 
     // Create kernel
     const std::string kernel_name = std::string("non_linear_filter_box3x3");
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, { "-DMEDIAN" }));
+    _kernel                       = create_kernel(compile_context, kernel_name, { "-DMEDIAN" });
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;

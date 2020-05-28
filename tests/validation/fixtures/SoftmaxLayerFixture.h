@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,7 +73,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape, DataType data_type,
-                              QuantizationInfo quantization_info, float beta, size_t axis)
+                              QuantizationInfo quantization_info, float beta, int32_t axis)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
@@ -103,7 +103,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type,
-                                      QuantizationInfo quantization_info, float beta, size_t axis)
+                                      QuantizationInfo quantization_info, float beta, int32_t axis)
     {
         // Create reference
         SimpleTensor<T> src{ shape, data_type, 1, quantization_info };

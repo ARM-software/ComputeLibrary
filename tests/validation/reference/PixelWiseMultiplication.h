@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,9 +34,10 @@ namespace validation
 {
 namespace reference
 {
-template <typename T1, typename T2>
-SimpleTensor<T2> pixel_wise_multiplication(const SimpleTensor<T1> &src1, const SimpleTensor<T2> &src2, float scale,
-                                           ConvertPolicy convert_policy, RoundingPolicy rounding_policy, const QuantizationInfo &qout = QuantizationInfo());
+template <typename T1, typename T2, typename T3>
+SimpleTensor<T3> pixel_wise_multiplication(const SimpleTensor<T1> &src1, const SimpleTensor<T2> &src2, float scale,
+                                           ConvertPolicy convert_policy, RoundingPolicy rounding_policy, DataType dt_out,
+                                           const QuantizationInfo &qout = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -55,17 +55,29 @@ public:
      * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[out] indices   (optional) The indices of the maximal values. Data type supported: U32.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
+    void configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices = nullptr);
+    /** Set the input and output tensors.
+     *
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[out] output          Destination tensor. Data types supported: Same as @p input.
+     * @param[in]  pool_info       Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[out] indices         (optional) The indices of the maximal values. Data type supported: U32.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info, ICLTensor *indices = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayerKernel
      *
      * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     * @param[in] indices   (optional) The indices of the maximal values. Data type supported: U32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -74,6 +86,7 @@ public:
 public:
     const ICLTensor *_input;
     ICLTensor       *_output;
+    ICLTensor       *_indices;
     PoolingLayerInfo _pool_info;
     DataLayout       _data_layout;
     BorderSize       _border_size;

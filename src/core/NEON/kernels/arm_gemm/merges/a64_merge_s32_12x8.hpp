@@ -31,7 +31,7 @@ void MergeResults<12, 8, false>(int32_t *out, const int32_t *in, const int ldout
     UNUSED(act);
 
     const int32_t *inptr = in;
-    int32_t nullbias[12] = { 0 };
+    int32_t nullbias[12];
 
 
     if (!append && !bias)

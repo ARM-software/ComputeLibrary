@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/CL/functions/CLCast.h"
 
 #include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
-#include "support/ToolchainSupport.h"
+#include "support/MemorySupport.h"
 
 #include <utility>
 
@@ -32,8 +32,13 @@ namespace arm_compute
 {
 void CLCast::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, policy);
+}
+
+void CLCast::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, ConvertPolicy policy)
+{
     auto k = arm_compute::support::cpp14::make_unique<CLDepthConvertLayerKernel>();
-    k->configure(input, output, policy, 0);
+    k->configure(compile_context, input, output, policy, 0);
     _kernel = std::move(k);
 }
 

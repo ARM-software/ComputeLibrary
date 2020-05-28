@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/StringSupport.h"
 
 namespace arm_compute
 {
@@ -101,6 +102,11 @@ CLGEMMReshapeRHSMatrixKernel::CLGEMMReshapeRHSMatrixKernel()
 
 void CLGEMMReshapeRHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, rhs_info);
+}
+
+void CLGEMMReshapeRHSMatrixKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validate step
@@ -123,7 +129,7 @@ void CLGEMMReshapeRHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *
     kernel_name += rhs_info.transpose ? "t" : "nt";
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), rhs_info);

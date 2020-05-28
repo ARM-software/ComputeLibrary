@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "support/StringSupport.h"
 
 #include <set>
 #include <sstream>
@@ -58,6 +59,12 @@ BorderSize             CLConvolutionKernel<matrix_size>::border_size() const
 
 template <unsigned int matrix_size>
 void CLConvolutionKernel<matrix_size>::configure(const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, conv, scale, border_undefined);
+}
+
+template <unsigned int matrix_size>
+void CLConvolutionKernel<matrix_size>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t scale, bool border_undefined)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
@@ -91,7 +98,7 @@ void CLConvolutionKernel<matrix_size>::configure(const ICLTensor *input, ICLTens
     out_type << "-DDATA_TYPE_OUT=" << get_cl_type_from_data_type(output->info()->data_type());
     build_opts.add_option(out_type.str());
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_opts.options()));
+    _kernel = create_kernel(compile_context, kernel_name.str(), build_opts.options());
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -129,6 +136,12 @@ BorderSize             CLSeparableConvolutionHorKernel<matrix_size>::border_size
 template <unsigned int matrix_size>
 void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *input, ICLTensor *output, const int16_t *conv, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, conv, border_undefined);
+}
+
+template <unsigned int matrix_size>
+void CLSeparableConvolutionHorKernel<matrix_size>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U16, DataType::S16, DataType::S32);
 
@@ -155,7 +168,7 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
 
     // Create kernel
     const std::string kernel_name = "convolution_separable1x" + support::cpp11::to_string(matrix_size) + "_static";
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -199,6 +212,13 @@ template <unsigned int matrix_size>
 void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *input, ICLTensor *output,
                                                               const int16_t *conv, uint32_t scale, bool border_undefined, DataType data_type)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, conv, scale, border_undefined, data_type);
+}
+
+template <unsigned int matrix_size>
+void CLSeparableConvolutionVertKernel<matrix_size>::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output,
+                                                              const int16_t *conv, uint32_t scale, bool border_undefined, DataType data_type)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U16, DataType::S16, DataType::S32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
     ARM_COMPUTE_ERROR_ON((matrix_size != 5) && (matrix_size != 7) && (matrix_size != 9));
@@ -229,7 +249,7 @@ void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *i
 
     // Create kernel
     const std::string kernel_name = "convolution_separable" + support::cpp11::to_string(matrix_size) + "x1_static";
-    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                       = create_kernel(compile_context, kernel_name, build_opts);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -280,6 +300,12 @@ BorderSize CLConvolutionRectangleKernel::border_size() const
 
 void CLConvolutionRectangleKernel::configure(const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale, bool border_undefined)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, conv, width, height, scale, border_undefined);
+}
+
+void CLConvolutionRectangleKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const int16_t *conv, uint32_t width, uint32_t height, uint32_t scale,
+                                             bool border_undefined)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16);
     ARM_COMPUTE_ERROR_ON(nullptr == conv);
@@ -316,7 +342,7 @@ void CLConvolutionRectangleKernel::configure(const ICLTensor *input, ICLTensor *
     options.insert("-DMATRIX_WIDTH=" + support::cpp11::to_string(width));
     options.insert("-DMATRIX_HEIGHT=" + support::cpp11::to_string(height));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("convolution_rectangle", options));
+    _kernel = create_kernel(compile_context, "convolution_rectangle", options);
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;

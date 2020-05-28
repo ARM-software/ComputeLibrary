@@ -35,7 +35,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "support/ToolchainSupport.h"
+#include "support/StringSupport.h"
 
 #include <cmath>
 #include <tuple>
@@ -295,6 +295,13 @@ CLIm2ColKernel::CLIm2ColKernel()
 void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,
                                unsigned int num_groups)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, kernel_dims, conv_info, has_bias, dilation, num_groups);
+}
+
+void CLIm2ColKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias,
+                               const Size2D &dilation,
+                               unsigned int  num_groups)
+{
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, num_groups));
 
@@ -311,7 +318,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     Im2ColConfiguration im2col_config = configure_opencl_kernel(input->info(), kernel_dims, conv_info, has_bias, dilation, num_groups);
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(im2col_config.kernel_name, im2col_config.build_options));
+    _kernel = create_kernel(compile_context, im2col_config.kernel_name, im2col_config.build_options);
 
     _input                             = input;
     _output                            = output;

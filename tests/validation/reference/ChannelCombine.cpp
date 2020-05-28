@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,6 +92,9 @@ std::vector<SimpleTensor<T>> channel_combine(const TensorShape &shape, const std
 {
     std::vector<SimpleTensor<T>> dst = create_image_planes<T>(shape, format);
 
+#if defined(_OPENMP)
+    #pragma omp parallel for
+#endif /* _OPENMP */
     for(unsigned int plane_idx = 0; plane_idx < dst.size(); ++plane_idx)
     {
         SimpleTensor<T> &dst_tensor   = dst[plane_idx];

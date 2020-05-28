@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,9 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
+
 /** Basic function to simulate a convolution layer. This function calls the following NEON kernels:
  * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
  * -# @ref NEWinogradLayerTransformInputKernel
@@ -59,7 +61,7 @@ public:
      *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                              while every optional dimension from 4 and above represent a batch of inputs.
-     *                              Data types supported: F32.
+     *                              Data types supported: F16/F32.
      * @param[in]  weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      *                              Currently only 3x3 and 5x5 kernels are supported.
      * @param[in]  biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
@@ -81,7 +83,7 @@ public:
      *
      * @param[in] input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                             while every optional dimension from 4 and above represent a batch of inputs.
-     *                             Data types supported: F32.
+     *                             Data types supported: F16/F32.
      * @param[in] weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
      *                             Currently only 3x3 and 5x5 kernels are supported.
      * @param[in] biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
@@ -127,5 +129,5 @@ private:
     bool           _is_prepared;
     bool           _is_activationlayer_enabled;
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H */

@@ -38,7 +38,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {
@@ -116,8 +115,7 @@ public:
                 {
                     if(dilation == Size2D(1U, 1U))
                     {
-                        auto vres = detail::convolve_3x3(in_top, in_mid, in_low, vw_r0, vw_r1, vw_r2, stridex, input_offset);
-                        detail::store_results<stridex>(p_out, vres);
+                        detail::convolve_3x3<false>(in_top, in_mid, in_low, p_out, vw_r0, vw_r1, vw_r2, stridex, input_offset);
                     }
                     else
                     {

@@ -55,6 +55,15 @@ public:
      * @param[out] output      Tensor output. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output);
+    /** Initialise the kernel's inputs and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Tensor input. Supported tensor rank: 4. Data types supported: All.
+     * @param[in]  block_shape     1-D tensor with shape [M]. Data types supported: S32
+     * @param[in]  paddings        2-D tensor with shape [2, M]. Data types supported: S32
+     * @param[out] output          Tensor output. Data types supported: same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *block_shape, const ICLTensor *paddings, ICLTensor *output);
     /** Initialise the kernel's input and output. (Static block shape and paddings)
      *
      * @param[in]  input         Tensor input. Supported tensor rank: 4. Data types supported: All.
@@ -65,6 +74,17 @@ public:
      * @param[out] output        Tensor output. Data types supported: same as @p input
      */
     void configure(const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ICLTensor *output);
+    /** Initialise the kernel's input and output. (Static block shape and paddings)
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Tensor input. Supported tensor rank: 4. Data types supported: All.
+     * @param[in]  block_shape_x   Block shape x value.
+     * @param[in]  block_shape_y   Block shape y value.
+     * @param[in]  padding_left    The left padding of the output tensor.
+     * @param[in]  padding_right   The right padding of the output tensor.
+     * @param[out] output          Tensor output. Data types supported: same as @p input
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, const int block_shape_x, const int block_shape_y, const Size2D &padding_left, const Size2D &padding_right, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSpaceToBatchLayerKernel
      *
      * @param[in] input       Tensor input. Supported tensor rank: 4. Data types supported: All.

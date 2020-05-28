@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "support/StringSupport.h"
 
 #include <cstring>
 #include <string>
@@ -51,6 +52,11 @@ CLHistogramKernel::CLHistogramKernel()
 }
 
 void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLHistogramKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(nullptr == output);
@@ -83,7 +89,7 @@ void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *outp
     // Create kernel
     bool              is_fixed_size = (256 == num_bins) && (1 == window_size) && (0 == offset) && (256 == offrange);
     const std::string kernel_name   = is_fixed_size ? "hist_local_kernel_fixed" : "hist_local_kernel";
-    _kernel                         = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel                         = create_kernel(compile_context, kernel_name);
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters
@@ -157,6 +163,11 @@ CLHistogramBorderKernel::CLHistogramBorderKernel()
 
 void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLHistogramBorderKernel::configure(const CLCompileContext &compile_context, const ICLImage *input, ICLDistribution1D *output)
+{
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON(nullptr == output);
 
@@ -189,7 +200,7 @@ void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D
     // Create kernel
     bool              is_fixed_size = (256 == num_bins) && (1 == window_size) && (0 == offset) && (256 == offrange);
     const std::string kernel_name   = is_fixed_size ? "hist_border_kernel_fixed" : "hist_border_kernel";
-    _kernel                         = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel                         = create_kernel(compile_context, kernel_name);
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,11 @@ CLBitwiseAndKernel::CLBitwiseAndKernel()
 }
 void CLBitwiseAndKernel::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
+    configure(CLKernelLibrary::get().get_compile_context(), input1, input2, output);
+}
+
+void CLBitwiseAndKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
+{
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
@@ -48,7 +53,7 @@ void CLBitwiseAndKernel::configure(const ICLTensor *input1, const ICLTensor *inp
     _output = output;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("bitwise_and"));
+    _kernel = create_kernel(compile_context, "bitwise_and");
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;

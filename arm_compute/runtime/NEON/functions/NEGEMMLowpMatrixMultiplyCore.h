@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,12 @@
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvertQuantizedSignednessKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpReductionKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -60,7 +63,7 @@ class NEGEMMLowpMatrixMultiplyCore : public IFunction
 {
 public:
     /** Constructor */
-    NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr, IWeightsManager *weights_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEGEMMLowpMatrixMultiplyCore(const NEGEMMLowpMatrixMultiplyCore &) = delete;
     /** Default move constructor */
@@ -81,7 +84,7 @@ public:
      * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8/QASYMM8_SIGNED otherwise
      *
      * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
-     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[in]  b         Second input tensor (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL.
      * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
      * @param[out] output    Output tensor. Data type supported: Data type supported: S32/QASYMM8/QASYMM8_SIGNED
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
@@ -93,7 +96,7 @@ public:
      * @note The @p output type is S32 if @p gemm_info.type == GEMMLowpOutputStageType::NONE. It is QASYMM8/QASYMM8_SIGNED otherwise
      *
      * @param[in] a         First input tensor info  (Matrix A). Data type supported: QASYMM8/QASYMM8_SIGNED.
-     * @param[in] b         Second input tensor info (Matrix B). Data type supported: same as @p a
+     * @param[in] b         Second input tensor info (Matrix B). Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8/QSYMM8_PER_CHANNEL.
      * @param[in] c         Third input tensor  info (Matrix C). It can be a nullptr. Data type supported: S32
      * @param[in] output    Output tensor info. Data type supported: Data type supported: S32/QASYMM8/QASYMM8_SIGNED
      * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
@@ -109,10 +112,11 @@ public:
 
 private:
     MemoryGroup                                   _memory_group;
+    IWeightsManager                              *_weights_manager;
     NEGEMMAssemblyDispatch                        _asm_glue;
-    std::unique_ptr<INEKernel>                    _mm_kernel;
-    std::unique_ptr<INEKernel>                    _mtx_a_reshape_kernel;
-    std::unique_ptr<INEKernel>                    _mtx_b_reshape_kernel;
+    NEGEMMLowpMatrixMultiplyKernel                _mm_kernel;
+    NEGEMMInterleave4x4Kernel                     _mtx_a_reshape_kernel;
+    NEGEMMTranspose1xWKernel                      _mtx_b_reshape_kernel;
     NEGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
     NEGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;
     NEGEMMLowpOffsetContributionKernel            _offset_contribution_kernel;

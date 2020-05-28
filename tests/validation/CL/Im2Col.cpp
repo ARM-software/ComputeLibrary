@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,9 @@
  */
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/Types.h"
-#include "tests/CL/Helper.h"
 
 #include "tests/CL/CLAccessor.h"
-#include "tests/datasets/ShapeDatasets.h"
+#include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -39,183 +38,365 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
-// *INDENT-OFF*
-// clang-format off
-const auto conv_filter_sizes = framework::dataset::make("KernelDims", { Size2D(3U, 3U),
-                                                                        Size2D(5U, 5U),
-                                                                        Size2D(3U, 1U),
-                                                                        Size2D(1U, 3U),
-                                                                        Size2D(5U, 3U),
-                                                                        Size2D(1U, 1U),
-                                                                        Size2D(9U, 9U),
-                                                                        Size2D(11U, 11U)} );
-const auto padstrides        = framework::dataset::make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U),
-                                                                       PadStrideInfo(1U, 1U, 1U, 1U),
-                                                                       PadStrideInfo(2U, 2U, 0U, 2U) });
-const auto conv_args         = combine(combine(combine(combine(conv_filter_sizes, padstrides),
-                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
-                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                       framework::dataset::make("NumGroups", { 1 }));
-const auto grouped_args      = combine(combine(combine(combine(conv_filter_sizes, padstrides),
-                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
-                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                       framework::dataset::make("NumGroups", { 2, 3, 4 }));
-
-const auto conv_filter_sizes_small = framework::dataset::make("KernelDims", { Size2D(3U, 3U),
-                                                                              Size2D(3U, 1U)});
-const auto padstrides_small        = framework::dataset::make("PadStride", {PadStrideInfo(2U, 2U, 0U, 2U)});
-const auto conv_args_small         = combine(combine(combine(combine(conv_filter_sizes_small, padstrides_small),
-                                                             framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
-                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                             framework::dataset::make("NumGroups", { 1 }));
-const auto grouped_args_small      = combine(combine(combine(combine(conv_filter_sizes_small, padstrides_small),
-                                                            framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
-                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                            framework::dataset::make("NumGroups", { 2 }));
-} // namespace
 TEST_SUITE(CL)
 TEST_SUITE(Im2Col)
 
 using CLIm2Col = CLSynthetizeFunction<CLIm2ColKernel>;
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::U8),      // Unsupported data type
-                                                       TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::F32),     // Mismatching data type
-                                                       TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Bias not supported with QASYMM8
-                                                       TensorInfo(TensorShape(10U, 12U, 2U, 2U), 1, DataType::QASYMM8),
-                                                     }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(3U, 3U, 10U, 2U), 1, DataType::QASYMM8),
-                                                       TensorInfo(TensorShape(18U, 80U, 2U, 1U), 1, DataType::QASYMM8),
-                                                     })),
-               framework::dataset::make("HasBias", { true, true, true, false })),
-               framework::dataset::make("Expected", { false, false, false, true })),
-               input_info, output_info, has_bias, expected)
+/** Negative tests
+ *
+ * A series of validation tests on configurations which according to the API specification
+ * the function should fail against.
+ *
+ * Checks performed in order:
+ *     - Pass unsupported data type for input
+ *     - Pass a quantized input and ask to compress the bias into the resulting matrix
+ *     - Pass a dilation factor of 0
+ *     - Check NHWC data layout while requesting to perform a grouped operation
+ *     - Check NCHW grouped operation when the number of channels is not multiple of the groups
+ *     - Pass an invalid output shape
+ */
+TEST_CASE(Negative, framework::DatasetMode::ALL)
 {
+    // Unsupported data type
+    {
+        const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::SIZET);
+        const auto output    = TensorInfo(TensorShape(9U, 10U, 12U, 2U), 1, DataType::F32);
+        const auto conv_size = Size2D(3, 3);
+        const bool has_bias  = false;
+        const auto status    = CLIm2ColKernel::validate(&input, &output, conv_size, PadStrideInfo(), has_bias);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
 
-    bool status = bool(CLIm2Col::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias));
-    ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
+    // Passing quantized input and ask to merge the bias in the output
+    {
+        const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::QASYMM8);
+        const auto output    = TensorInfo(TensorShape(9U, 80U, 2U), 1, DataType::QASYMM8);
+        const auto conv_size = Size2D(3, 3);
+        const bool has_bias  = true;
+        const auto status    = CLIm2ColKernel::validate(&input, &output, conv_size, PadStrideInfo(), has_bias);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // Invalid dilation
+    {
+        const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32);
+        const auto output    = TensorInfo(TensorShape(9U, 80U, 2U), 1, DataType::F32);
+        const auto conv_size = Size2D(3, 3);
+        const auto dilation  = Size2D(0, 1);
+        const bool has_bias  = false;
+        const auto status    = CLIm2ColKernel::validate(&input, &output, conv_size, PadStrideInfo(), has_bias, dilation);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // NHWC and grouping greater than 1
+    {
+        const auto         input      = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32, DataLayout::NHWC);
+        const auto         output     = TensorInfo(TensorShape(9U, 80U, 2U), 1, DataType::F32);
+        const auto         conv_size  = Size2D(3, 3);
+        const auto         dilation   = Size2D(1, 1);
+        const bool         has_bias   = false;
+        const unsigned int num_groups = 2;
+        const auto         status     = CLIm2ColKernel::validate(&input, &output, conv_size, PadStrideInfo(), has_bias, dilation, num_groups);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // NCWH and channels % num_groups !=0
+    {
+        const auto         input      = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32, DataLayout::NCHW);
+        const auto         output     = TensorInfo(TensorShape(9U, 80U, 2U), 1, DataType::F32);
+        const auto         conv_size  = Size2D(3, 3);
+        const auto         dilation   = Size2D(1, 1);
+        const bool         has_bias   = false;
+        const unsigned int num_groups = 2;
+        const auto         status     = CLIm2ColKernel::validate(&input, &output, conv_size, PadStrideInfo(), has_bias, dilation, num_groups);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
+
+    // Invalid output shape
+    {
+        const auto input     = TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32);
+        const auto output    = TensorInfo(TensorShape(9U, 81U, 2U), 1, DataType::F32);
+        const auto conv_size = Size2D(3, 3);
+        const bool has_bias  = false;
+        const auto status    = CLIm2ColKernel::validate(&input, &output, conv_size, PadStrideInfo(), has_bias);
+        ARM_COMPUTE_EXPECT(bool(status) == false, framework::LogLevel::ERRORS);
+    }
 }
-// clang-format on
-// *INDENT-ON*
 
 template <typename T>
 using CLIm2ColFixture = Im2ColValidationFixture<CLTensor, CLAccessor, CLIm2Col, T, true>;
-TEST_SUITE(Float)
-TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)),
-                                                                                                    conv_args_small))
+
+TEST_SUITE(NHWC)
+
+/** Test special kernel used for NHWC for 3x3 kernels
+ *
+ * @note 2 elements processed per iteration
+ *
+ * Three tests will be run:
+ *  - Channels are multiple of elements processed
+ *  - Channels larger and non multiple of elements used
+ *  - Channels smaller and not multiple of elements used
+ *
+ *  Kernel tested im2col3x3_nhwc
+ */
+FIXTURE_DATA_TEST_CASE(W3x3,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape",
+{
+    TensorShape(2U, 5U, 7U, 2U), TensorShape(3U, 4U, 6U, 2U), TensorShape(1U, 5U, 3U, 2U),
+}),
+framework::dataset::make("DataType", DataType::F32)),
+framework::dataset::make("Kernel", Size2D(3, 3))),
+framework::dataset::make("PadStride", PadStrideInfo(1, 2, 1, 2))),
+framework::dataset::make("QInfo", QuantizationInfo())),
+framework::dataset::make("DataLayout", DataLayout::NHWC)),
+framework::dataset::make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::MediumShapes()), framework::dataset::make("DataType",
-                                                                                                          DataType::F32)),
-                                                                                                  conv_args))
+/** Test special kernel used for NHWC for 9x9 kernels
+ *
+ * @note 2 elements processed per iteration
+ *
+ * Three tests will be run:
+ *  - Channels are multiple of elements processed
+ *  - Channels larger and non multiple of elements used
+ *  - Channels smaller and not multiple of elements used
+ *
+ *  Kernel tested im2col9x9_nhwc
+ */
+FIXTURE_DATA_TEST_CASE(W9x9,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape",
+{
+    TensorShape(2U, 13U, 15U, 2U), TensorShape(3U, 15U, 12U, 2U), TensorShape(1U, 1U, 2U, 2U),
+}),
+framework::dataset::make("DataType", DataType::F32)),
+framework::dataset::make("Kernel", Size2D(9, 9))),
+framework::dataset::make("PadStride", PadStrideInfo(2, 2, 1, 2))),
+framework::dataset::make("QInfo", QuantizationInfo())),
+framework::dataset::make("DataLayout", DataLayout::NHWC)),
+framework::dataset::make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // NHWC
 
-TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)),
-                                                                                                   conv_args_small))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::MediumShapes()), framework::dataset::make("DataType",
-                                                                                                         DataType::F16)),
-                                                                                                 conv_args))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE(NCHW)
 
-TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                      conv_args_small))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::MediumShapes()),
-                                                                                                            framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                    conv_args))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(Grouped)
-TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::GroupedIm2ColSmallShapes(), framework::dataset::make("DataType",
-                                                                                                            DataType::F32)),
-                                                                                                    grouped_args_small))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::GroupedIm2ColSmallShapes(), datasets::GroupedIm2ColLargeShapes()),
-                                                                                                          framework::dataset::make("DataType",
-                                                                                                                  DataType::F32)),
-                                                                                                  grouped_args))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::GroupedIm2ColSmallShapes(), framework::dataset::make("DataType",
-                                                                                                           DataType::F16)),
-                                                                                                   grouped_args_small))
+/** Test special kernel used for NCHW for 1x1 kernels with stride 1 and no padding
+ *
+ * @note 4 elements processed per iteration
+ *
+ * Three tests will be run:
+ *  - Channels are multiple of elements processed
+ *  - Channels larger and non multiple of elements used
+ *  - Channels smaller and not multiple of elements used
+ *
+ *  Kernel tested im2col1x1_stridex1_nchw
+ */
+FIXTURE_DATA_TEST_CASE(W1x1_Stride1_NoPad,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape", { TensorShape(4U, 4U, 3U, 2U), TensorShape(5U, 4U, 3U, 2U), TensorShape(3U, 4U, 3U, 2U) }),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                               framework::dataset::make("Kernel", Size2D(1, 1))),
+                                                       framework::dataset::make("PadStride", PadStrideInfo(1, 1, 0, 0))),
+                                               framework::dataset::make("QInfo", QuantizationInfo())),
+                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
+                               framework::dataset::make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::GroupedIm2ColSmallShapes(), datasets::GroupedIm2ColLargeShapes()),
-                                                                                                         framework::dataset::make("DataType",
-                                                                                                                 DataType::F16)),
-                                                                                                 grouped_args))
+/** Test special kernel used for NCHW for 3x3 kernels
+ *
+ * @note 1 elements processed per iteration
+ *
+ * Executed single test as padding is required.
+ *
+ *  Kernel tested im2col3x3_nchw
+ */
+FIXTURE_DATA_TEST_CASE(W3x3,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape", TensorShape(4U, 4U, 3U, 2U)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                               framework::dataset::make("Kernel", Size2D(3, 3))),
+                                                       framework::dataset::make("PadStride", PadStrideInfo(1, 2, 1, 2))),
+                                               framework::dataset::make("QInfo", QuantizationInfo())),
+                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
+                               framework::dataset::make("Groups", { 1, 3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
 
-TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::GroupedIm2ColSmallShapes(), framework::dataset::make("DataType",
-                                                                                                              DataType::QASYMM8)),
-                                                                                                      grouped_args_small))
+/** Test special kernel used for NCHW for 5x5 kernels
+ *
+ * @note 1 elements processed per iteration
+ *
+ * Executed single test as padding is required.
+ *
+ *  Kernel tested im2col5x5_nchw
+ */
+FIXTURE_DATA_TEST_CASE(W5x5,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape", TensorShape(7U, 4U, 3U, 2U)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                               framework::dataset::make("Kernel", Size2D(5, 5))),
+                                                       framework::dataset::make("PadStride", PadStrideInfo(2, 1, 2, 1))),
+                                               framework::dataset::make("QInfo", QuantizationInfo())),
+                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
+                               framework::dataset::make("Groups", { 1, 3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::GroupedIm2ColSmallShapes(), datasets::GroupedIm2ColLargeShapes()),
-                                                                                                            framework::dataset::make("DataType",
-                                                                                                                    DataType::QASYMM8)),
-                                                                                                    grouped_args))
+/** Test special kernel used for NCHW for 11x11 kernels when no padding present
+ *
+ * @note 1 elements processed per iteration
+ *
+ * Two tests will be run:
+ *  - Without padding requirements
+ *  - With padding requirements
+ *
+ * Kernel tested im2col11x11_padx0_pady0_nchw
+ */
+FIXTURE_DATA_TEST_CASE(W11x11_NoPad,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape", { TensorShape(11U, 11U, 2U, 2U), TensorShape(14U, 13U, 1U, 2U) }),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                               framework::dataset::make("Kernel", Size2D(11, 11))),
+                                                       framework::dataset::make("PadStride", PadStrideInfo(1, 1, 0, 0))),
+                                               framework::dataset::make("QInfo", QuantizationInfo())),
+                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
+                               framework::dataset::make("Groups", 1)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+/** Test special kernel used for NCHW for kernels which do not fall in the categories above and have no padding present
+ *
+ * @note 1 elements processed per iteration
+ *
+ * Executed single test as padding is required.
+ *
+ * Kernel tested im2col_generic_padx0_pady0_nchw
+ */
+FIXTURE_DATA_TEST_CASE(GenericZeroPad,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                               framework::dataset::make("Kernel", Size2D(3, 2))),
+                                                       framework::dataset::make("PadStride", PadStrideInfo(2, 1, 0, 0))),
+                                               framework::dataset::make("QInfo", QuantizationInfo())),
+                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
+                               framework::dataset::make("Groups", { 1, 2 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // NCHW
+
+/** Generic NCHW/NHWC kernel
+ *
+ * @note 1 elements processed per iteration
+ *
+ * Padding is not needed thus executed sample tests with different kernels sizes
+ * and stride/padding information
+ *
+ * Kernel tested im2col_generic_(nchw|nhwc)
+ */
+FIXTURE_DATA_TEST_CASE(Generic,
+                       CLIm2ColFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                               framework::dataset::make("Kernel", { Size2D(3, 2), Size2D(3, 5) })),
+                                                       framework::dataset::make("PadStride", PadStrideInfo(2, 1, 2, 1))),
+                                               framework::dataset::make("QInfo", QuantizationInfo())),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               framework::dataset::make("Groups", 1)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+/** Tests to check that quantized padding value is set correctly
+ *
+ * Kernels tested:
+ *  - im2col_generic_nhwc
+ *  - im2col_generic_nchw
+ *  - im2col5x5_nchw
+ *  - im2col3x3_nhwc
+ *  - im2col3x3_nchw
+ *  - im2col9x9_nhwc
+ */
+FIXTURE_DATA_TEST_CASE(Quantized,
+                       CLIm2ColFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
+                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                               framework::dataset::make("Kernel", { Size2D(1, 1), Size2D(3, 3), Size2D(5, 5), Size2D(3, 5), Size2D(9, 9) })),
+                                                       framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
+                                               framework::dataset::make("QInfo", QuantizationInfo(0.5f, 10))),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               framework::dataset::make("Groups", 1)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+/** Tests to check that half-precision execution
+ *
+ * Kernels tested:
+ *  - im2col_generic_nhwc
+ *  - im2col_generic_nchw
+ *  - im2col5x5_nchw
+ *  - im2col3x3_nhwc
+ *  - im2col3x3_nchw
+ *  - im2col9x9_nhwc
+ */
+FIXTURE_DATA_TEST_CASE(FP16,
+                       CLIm2ColFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(combine(combine(
+                                                                   framework::dataset::make("InputShape", TensorShape(13U, 11U, 2U, 2U)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                               framework::dataset::make("Kernel", { Size2D(1, 1), Size2D(3, 3), Size2D(5, 5), Size2D(3, 5), Size2D(9, 9) })),
+                                                       framework::dataset::make("PadStride", { PadStrideInfo(1, 2, 1, 1) })),
+                                               framework::dataset::make("QInfo", QuantizationInfo())),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               framework::dataset::make("Groups", 1)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+TEST_SUITE_END() // Im2Col
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

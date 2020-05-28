@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/tuners/BifrostTuner.h"
-#include "support/ToolchainSupport.h"
 #include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"

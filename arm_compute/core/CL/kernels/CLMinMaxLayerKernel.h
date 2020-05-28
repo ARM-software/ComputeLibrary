@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,14 @@ public:
      *                    The dimensions over the second must match the batched dimensions of the input tensor. Data types supported: F32.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Initialise the kernel's input and output.
+     *
+     * @param[in]  compile_context The compile context to be used.
+     * @param[in]  input           Input tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches.Data types supported: F32.
+     * @param[out] output          Output tensor with shape [2, batches, ...] which stores the minimum and maximum values for each 3D input tensor.
+     *                    The dimensions over the second must match the batched dimensions of the input tensor. Data types supported: F32.
+     */
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLMinMaxLayerKernel
      *
      * @param[in] input  Input tensor info.  Data types supported: F32.
