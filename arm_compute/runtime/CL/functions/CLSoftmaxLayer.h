@@ -50,6 +50,10 @@ class ICLTensor;
  * -# @ref CLLogits1DMaxKernel
  * -# @ref CLLogits1DShiftExpSumKernel
  * -# @ref CLLogits1DNormKernel
+ * And if the reduce_end_axis is not 0, the function will use one of the the following kernels to reshape the input and
+ * perform softmax on the reshaped input:
+ * -# @ref CLFlattenLayerKernel
+ * -# @ref CLReshapeLayerKernel
  */
 template <bool IS_LOG = false>
 class CLSoftmaxLayerGeneric : public IFunction
@@ -59,36 +63,39 @@ public:
     CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32
-     * @param[out] output Destination tensor. Data types supported: same as @p input
-     * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
-     * @param[in]  axis   (Optional) Reduction axis. It has the purpose of squashing the first @p axis
-     *                    dimensions together. For instance, given a [4x4x4x4] image,
-     *                    when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/F16/F32
+     * @param[out] output          Destination tensor. Data types supported: same as @p input
+     * @param[in]  beta            (Optional) A scaling factor for the exponent. Defaults to 1.f
+     * @param[in]  reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
+     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
+     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
+     *                   Must be in range [0, input_num_dimensions).
      */
-    void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f, size_t axis = 1);
+    void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f, size_t reduce_end_axis = 0);
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
      * @param[in]  input           Source tensor. Data types supported: QASYMM8/F16/F32
      * @param[out] output          Destination tensor. Data types supported: same as @p input
      * @param[in]  beta            (Optional) A scaling factor for the exponent. Defaults to 1.f
-     * @param[in]  axis            (Optional) Reduction axis. It has the purpose of squashing the first @p axis
-     *                    dimensions together. For instance, given a [4x4x4x4] image,
-     *                    when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in]  reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
+     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
+     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
+     *                   Must be in range [0, input_num_dimensions).
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta = 1.0f, size_t axis = 1);
+    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, float beta = 1.0f, size_t reduce_end_axis = 0);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSoftmaxLayer
      *
-     * @param[in] input  Source tensor. Data types supported: QASYMM8/F16/F32
-     * @param[in] output Destination tensor. Data types supported: same as @p input
-     * @param[in] beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
-     * @param[in] axis   (Optional) Reduction axis. It has the purpose of squashing the first @p axis
-     *                    dimensions together. For instance, given a [4x4x4x4] image,
-     *                    when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in] input           Source tensor. Data types supported: QASYMM8/F16/F32
+     * @param[in] output          Destination tensor. Data types supported: same as @p input
+     * @param[in] beta            (Optional) A scaling factor for the exponent. Defaults to 1.f
+     * @param[in] reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
+     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
+     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
+     *                   Must be in range [0, input_num_dimensions).
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, size_t axis = 1);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, size_t reduce_end_axis = 0);
 
     // Inherited methods overridden:
     void run() override;
@@ -101,13 +108,14 @@ private:
      * it initializes the kernel @p _flatten_kernel and the tensors @p _input_flat and
      * @p _output_flat
      *
-     * @param[in] input  Original source tensor.
-     * @param[in] output Original destination tensor.
-     * @param[in] axis   (Optional) Reduction axis. It has the purpose of squashing the first @p axis
-     *                    dimensions together. For instance, given a [4x4x4x4] image,
-     *                    when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in] input           Original source tensor.
+     * @param[in] output          Original destination tensor.
+     * @param[in] reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
+     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
+     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
+     *                   Must be in range [0, input_num_dimensions).
      */
-    void configure_reshape_input_kernel(const ICLTensor *input, const ICLTensor *output, size_t axis);
+    void configure_reshape_input_kernel(const ICLTensor *input, const ICLTensor *output, size_t reduce_end_axis);
     /** Utility method to configure the kernels needed to flatten the input
      * tensor.
      *
@@ -118,11 +126,12 @@ private:
      * @param[in] compile_context The compile context to be used.
      * @param[in] input           Original source tensor.
      * @param[in] output          Original destination tensor.
-     * @param[in] axis            (Optional) Reduction axis. It has the purpose of squashing the first @p axis
-     *                    dimensions together. For instance, given a [4x4x4x4] image,
-     *                    when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     * @param[in] reduce_end_axis (Optional) The last axis of the first n dimensions (inclusive)to reduce. Defaults to 0.
+     *                   It has the purpose of squashing together the first n dimensions till (including) the @p reduce_end_axis. For instance, given a [2x3x4x5] image,
+     *                   when @p reduce_end_axis is 1, the reduction will be applied to axes 0 and 1, and the Softmax op will be applied on each of the [2x3] planes of the input image.
+     *                   Must be in range [0, input_num_dimensions).
      */
-    void configure_reshape_input_kernel(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *output, size_t axis);
+    void configure_reshape_input_kernel(const CLCompileContext &compile_context, const ICLTensor *input, const ICLTensor *output, size_t reduce_end_axis);
 
     MemoryGroup                    _memory_group;
     CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;

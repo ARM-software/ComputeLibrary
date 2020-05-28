@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,7 +70,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLLogSoftmaxLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                      framework::dataset::make("Axis", { 1, 2 })))
+                                                                                                      framework::dataset::make("ReduceEndAxis", { 0, 1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -78,7 +78,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLLogSoftmaxLayerFixture<half>, framework::Data
 FIXTURE_DATA_TEST_CASE(RunLarge, CLLogSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
                                                                                                                   framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                          framework::dataset::make("Axis", { 1, 2 })))
+                                                                                                          framework::dataset::make("ReduceEndAxis", { 0, 1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -86,7 +86,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLLogSoftmaxLayerFixture<half>, framework::Data
 FIXTURE_DATA_TEST_CASE(Run4D, CLLogSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                       framework::dataset::make("Axis", { 1, 2, 3 })))
+                                                                                                       framework::dataset::make("ReduceEndAxis", { 0, 1, 2 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -97,7 +97,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLLogSoftmaxLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                       framework::dataset::make("Axis", { 1, 2 })))
+                                                                                                       framework::dataset::make("ReduceEndAxis", { 0, 1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -105,7 +105,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLLogSoftmaxLayerFixture<float>, framework::Dat
 FIXTURE_DATA_TEST_CASE(RunLarge, CLLogSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                                                                    framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                           framework::dataset::make("Axis", { 1, 2 })))
+                                                                                                           framework::dataset::make("ReduceEndAxis", { 0, 1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -113,7 +113,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLLogSoftmaxLayerFixture<float>, framework::Dat
 FIXTURE_DATA_TEST_CASE(Run4D, CLLogSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayer4DShapes(),
                                                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                                                                                 framework::dataset::make("Beta", { 1.0f, 2.0f })),
-                                                                                                        framework::dataset::make("Axis", { 1, 2, 3 })))
+                                                                                                        framework::dataset::make("ReduceEndAxis", { 0, 1, 2 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -130,7 +130,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLLogSoftmaxLayerQuantizedFixture<uint8_t>, fra
                                                                                                                   framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                                   combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
                                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.f }))),
-                                                                                                                  framework::dataset::make("Axis", { 1, 2 })))
+                                                                                                                  framework::dataset::make("ReduceEndAxis", { 0, 1 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -139,7 +139,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLLogSoftmaxLayerQuantizedFixture<uint8_t>, fra
                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                                       combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
                                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.0f }))),
-                                                                                                                      framework::dataset::make("Axis", { 1 })))
+                                                                                                                      framework::dataset::make("ReduceEndAxis", { 0 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -148,7 +148,7 @@ FIXTURE_DATA_TEST_CASE(Run4D, CLLogSoftmaxLayerQuantizedFixture<uint8_t>, framew
                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                                    combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
                                                                                                                            framework::dataset::make("Beta", { 1.0f, 2.0f }))),
-                                                                                                                   framework::dataset::make("Axis", { 1, 2, 3 })))
+                                                                                                                   framework::dataset::make("ReduceEndAxis", { 0, 1, 2 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

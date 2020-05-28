@@ -27,9 +27,6 @@
 #include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
-#include "utils/TypePrinter.h"
-
-#include <cfloat>
 
 namespace arm_compute
 {
@@ -41,28 +38,31 @@ NESoftmaxLayerGeneric<IS_LOG>::NESoftmaxLayerGeneric(std::shared_ptr<IMemoryMana
 }
 
 template <bool IS_LOG>
-void NESoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ITensor *input, const ITensor *output, int32_t axis)
+void NESoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ITensor *input, const ITensor *output, int32_t first_n_reduce_axes)
 {
     // Flatten the input
-    const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input->info(), axis);
+    const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input->info(), first_n_reduce_axes);
 
     // Initialize the flat input
     _input_flattened.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_flatten));
 
     // If we need to flatten the input, we can use NEFlattenKernel or NEReshapeKernel
-    // If flattening on the third axes, we use NEFlattenKernel.
+    // If the number of reduced axes is 3 (max dimension), which means collapsing all axes except the batch axis, we use NEFlattenKernel.
     // In all other cases we have to use NEReshapeKernel
-    if(axis != 3)
-    {
-        auto reshape_kernel_ptr = support::cpp14::make_unique<NEReshapeLayerKernel>();
-        reshape_kernel_ptr->configure(input, &_input_flattened);
-        _flat_or_reshape_kernel_ptr = std::move(reshape_kernel_ptr);
-    }
-    else
+    // Note that the "other cases" include both:
+    //   1. first_n_reduce_axes < 3: Reduce the first 1 (no need to reduce) or 2 dimensions (inclusive)
+    //   2. first_n_reduce_axes == 4: Reduce all 4 dimensions. This can only be handled by NEReshapeKernel instead of NEFlattenKernel.
+    if(first_n_reduce_axes == 3)
     {
         auto flatten_kernel_ptr = support::cpp14::make_unique<NEFlattenLayerKernel>();
         flatten_kernel_ptr->configure(input, &_input_flattened);
         _flat_or_reshape_kernel_ptr = std::move(flatten_kernel_ptr);
+    }
+    else
+    {
+        auto reshape_kernel_ptr = support::cpp14::make_unique<NEReshapeLayerKernel>();
+        reshape_kernel_ptr->configure(input, &_input_flattened);
+        _flat_or_reshape_kernel_ptr = std::move(reshape_kernel_ptr);
     }
 
     // We need to init the output tensor here. Indeed, the reshape kernel expects
@@ -71,17 +71,17 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const ITensor
 }
 
 template <bool IS_LOG>
-void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, float beta, int32_t axis)
+void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, float beta, int32_t reduce_end_axis)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NESoftmaxLayerGeneric::validate(input->info(), output->info(), beta, axis));
+    ARM_COMPUTE_ERROR_THROW_ON(NESoftmaxLayerGeneric::validate(input->info(), output->info(), beta, reduce_end_axis));
 
-    // Handle negative axis, negative index is used to specify axis from the end (e.g. -1 for the last axis).
-    axis = wrap_around(axis, static_cast<int32_t>(input->info()->num_dimensions()));
+    // Convert reduce-before axis (inclusive) to first n axes to reduce
+    size_t first_n_reduce_axes = dim_index_2_num_dims(reduce_end_axis, static_cast<int32_t>(input->info()->num_dimensions()));
 
-    // We don't need flattening only in the case the input is 2D and axis is 1
-    _needs_flattening = axis != 1;
+    // We only need flattening when the number of axes to reduce is greater than 1
+    _needs_flattening = first_n_reduce_axes > 1;
 
     // If we are dealing with a 4D tensor, we will:
     // - Flatten the input, so that we end up with a [width*height*depth] * batches 2D tensor
@@ -93,7 +93,7 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
         _memory_group.manage(&_input_flattened);
 
         // Configure  _flatten_kernel and _input_flattened
-        configure_reshape_input_kernel(input, output, axis);
+        configure_reshape_input_kernel(input, output, first_n_reduce_axes);
     }
 
     // We want to deal with a 2D input. Either it is the flattened version of the original input (4D case)
@@ -145,16 +145,16 @@ void NESoftmaxLayerGeneric<IS_LOG>::configure(ITensor *input, ITensor *output, f
 }
 
 template <bool IS_LOG>
-Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t axis)
+Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, int32_t reduce_end_axis)
 {
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 4, "Only up to 4 dimensions are supported");
     ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_RETURN_ERROR_ON(axis < static_cast<int32_t>(-input->num_dimensions()) || static_cast<int32_t>(input->num_dimensions()) <= axis);
+    ARM_COMPUTE_RETURN_ERROR_ON(reduce_end_axis < static_cast<int32_t>(-input->num_dimensions()) || static_cast<int32_t>(input->num_dimensions()) <= reduce_end_axis);
 
-    // Handle negative axis, negative index is used to specify axis from the end (e.g. -1 for the last axis).
-    axis = wrap_around(axis, static_cast<int32_t>(input->num_dimensions()));
+    // Convert reduce-before axis (inclusive) to first n axes to reduce
+    size_t first_n_reduce_axes = dim_index_2_num_dims(reduce_end_axis, static_cast<int32_t>(input->num_dimensions()));
 
     // Create intermediate tensor info
     DataType         tmp_data_type = input->data_type();
@@ -165,20 +165,20 @@ Status NESoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
     const TensorInfo tensor_info_max_sum(input->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(input->quantization_info()).set_is_resizable(true));
     const TensorInfo dont_care;
 
-    const bool needs_flattening = (axis != 1);
+    const bool needs_flattening = (first_n_reduce_axes > 1);
 
     if(needs_flattening)
     {
-        const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input, axis);
+        const TensorShape shape_flatten = misc::shape_calculator::compute_softmax_shape(input, first_n_reduce_axes);
         TensorInfo        tensor_info_flat(input->clone()->set_tensor_shape(shape_flatten).set_is_resizable(true));
 
-        if(axis != 3)
+        if(first_n_reduce_axes == 3)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(input, &tensor_info_flat));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEFlattenLayerKernel::validate(input, &tensor_info_flat));
         }
         else
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEFlattenLayerKernel::validate(input, &tensor_info_flat));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(input, &tensor_info_flat));
         }
     }
 
