@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -192,6 +192,8 @@ template SimpleTensor<float> crop_and_resize(const SimpleTensor<int16_t> &src, c
 template SimpleTensor<float> crop_and_resize(const SimpleTensor<int32_t> &src, const SimpleTensor<float> &boxes, SimpleTensor<int32_t> box_ind,
                                              Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value);
 template SimpleTensor<float> crop_and_resize(const SimpleTensor<half> &src, const SimpleTensor<float> &boxes, SimpleTensor<int32_t> box_ind,
+                                             Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value);
+template SimpleTensor<float> crop_and_resize(const SimpleTensor<uint8_t> &src, const SimpleTensor<float> &boxes, SimpleTensor<int32_t> box_ind,
                                              Coordinates2D crop_size, InterpolationPolicy method, float extrapolation_value);
 } // namespace reference
 } // namespace validation
