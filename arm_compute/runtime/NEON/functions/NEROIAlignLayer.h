@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEROIALIGNLAYER_H
 #define ARM_COMPUTE_NEROIALIGNLAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
 namespace arm_compute
