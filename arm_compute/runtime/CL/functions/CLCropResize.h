@@ -62,7 +62,7 @@ public:
      * @note Box indices may be outside of the bounds, in which case @p extrapolation_value is used.
      * @note Start and end indices of boxes are inclusive.
      *
-     * @param[in]  input               Source tensor containing N batches of 3D images to be cropped. Data type supported: : U16/S16/U32/S32/F16/F32
+     * @param[in]  input               Source tensor containing N batches of 3D images to be cropped. Data type supported: All
      * @param[in]  boxes               Tensor containing the boxes used to crop the images. It has to be known before configuration. Data type supported: F32
      * @param[in]  box_ind             One dimensional tensor containing the batch index of the 3D image in @p input that the corresponding
      *                                 box in @p boxes will be applied to. It has to be known before configuration. Data type supported: F32
@@ -80,7 +80,7 @@ public:
      * @note Start and end indices of boxes are inclusive.
      *
      * @param[in]  compile_context     The compile context to be used.
-     * @param[in]  input               Source tensor containing N batches of 3D images to be cropped. Data type supported: U16/S16/U32/S32/F16/F32
+     * @param[in]  input               Source tensor containing N batches of 3D images to be cropped. Data type supported: All
      * @param[in]  boxes               Tensor containing the boxes used to crop the images. It has to be known before configuration. Data type supported: F32
      * @param[in]  box_ind             One dimensional tensor containing the batch index of the 3D image in @p input that the corresponding
      *                                 box in @p boxes will be applied to. It has to be known before configuration. Data type supported: F32
@@ -98,7 +98,7 @@ public:
      * @note Box indices may be outside of the bounds, in which case @p extrapolation_value is used.
      * @note Start and end indices of boxes are inclusive.
      *
-     * @param[in] input               Source tensor info containing N batches of 3D images to be cropped. Data type supported: U16/S16/U32/S32/F16/F32
+     * @param[in] input               Source tensor info containing N batches of 3D images to be cropped. Data type supported: All
      * @param[in] boxes               Tensor info for the tensor containing the boxes used to crop the images. Data type supported: F32
      * @param[in] box_ind             Tensor info for the one dimensional tensor containing the batch index of the 3D image in @p input
      *                                that the corresponding box in @p boxes will be applied to. Data type supported: F32

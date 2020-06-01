@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,6 @@ using CLCropResizeFixture = CropResizeFixture<CLTensor, CLAccessor, CLCropResize
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32),
-                                                       TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::U8),  // Invalid input data type.
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid box_ind shape.
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid output shape.
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid output data type.
@@ -64,11 +63,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(3, 20), 1, DataType::F32),
                                                      })),
                framework::dataset::make("BoxIndInfo",{ TensorInfo(TensorShape(20), 1, DataType::S32),
-                                                       TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(10), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
@@ -77,13 +74,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                      })),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 10U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(5U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
                                                      })),
-               framework::dataset::make("Expected", { true, false, false, false, false, false, false})),
+               framework::dataset::make("Expected", { true, false, false, false, false, false})),
                input, boxes, box_ind, output, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLCropResize::validate(&input.clone()->set_data_layout(DataLayout::NHWC).set_is_resizable(false),
@@ -124,6 +120,19 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 }
 TEST_SUITE_END() // F32
 TEST_SUITE_END() // Float
+
+TEST_SUITE(U8)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLCropResizeFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallCropResizeDataset(),
+                               combine(framework::dataset::make("IsOutOfBounds", { true, false }),
+                                       framework::dataset::make("DataType", DataType::U8))))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
+}
+TEST_SUITE_END() // U8
 
 TEST_SUITE(U16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
