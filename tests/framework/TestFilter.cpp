@@ -57,7 +57,7 @@ bool TestFilter::is_selected(const TestInfo &info) const
     {
         bool found = false;
 
-        for(const auto range : _id_filter)
+        for(const auto &range : _id_filter)
         {
             if(range.first <= info.id && info.id <= range.second)
             {
