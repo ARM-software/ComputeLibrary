@@ -28,11 +28,22 @@
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEThreshold::configure(const ITensor *input, ITensor *output, uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
 {
+    configure(input, output, ThresholdKernelInfo(threshold, false_value, true_value, type, upper));
+}
+
+void NEThreshold::configure(const ITensor *input, ITensor *output, const ThresholdKernelInfo &info)
+{
     auto k = arm_compute::support::cpp14::make_unique<NEThresholdKernel>();
-    k->configure(input, output, threshold, false_value, true_value, type, upper);
+    k->configure(input, output, info);
     _kernel = std::move(k);
 }
+
+Status NEThreshold::validate(const ITensorInfo *input, const ITensorInfo *output, const ThresholdKernelInfo &info)
+{
+    return NEThresholdKernel::validate(input, output, info);
+}
+} // namespace arm_compute

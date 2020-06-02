@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datas
 
     // Create and configure function
     CLThreshold thrsh;
-    thrsh.configure(&src, &dst, threshold, false_value, true_value, type, upper);
+    thrsh.configure(&src, &dst, ThresholdKernelInfo(threshold, false_value, true_value, type, upper));
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);

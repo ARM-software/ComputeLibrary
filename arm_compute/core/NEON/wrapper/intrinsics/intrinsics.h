@@ -31,6 +31,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/ceq.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/cge.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/cgt.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/cle.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/clt.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/combine.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/cvt.h"

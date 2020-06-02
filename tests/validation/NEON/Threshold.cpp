@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,16 +53,15 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datas
 
     // Create and configure function
     NEThreshold thrsh;
-    thrsh.configure(&src, &dst, threshold, false_value, true_value, type, upper);
+    thrsh.configure(&src, &dst, ThresholdKernelInfo(threshold, false_value, true_value, type, upper));
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+    validate(src.info()->padding(), PaddingSize());
+    validate(dst.info()->padding(), PaddingSize());
 }
 
 template <typename T>

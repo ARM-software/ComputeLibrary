@@ -237,6 +237,12 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v20.08 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - Deprecated interfaces
+    - Non-descriptor based interfaces for @ref NEThreshold, @ref CLThreshold
+
 v20.05 Public major release
  - Various bug fixes.
  - Various optimisations.

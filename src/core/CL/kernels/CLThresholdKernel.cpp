@@ -32,16 +32,14 @@
 
 #include <string>
 
-using namespace arm_compute;
-
-void CLThresholdKernel::configure(const ICLTensor *input, ICLTensor *output, uint8_t threshold,
-                                  uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
+namespace arm_compute
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output, threshold, false_value, true_value, type, upper);
+void CLThresholdKernel::configure(const ICLTensor *input, ICLTensor *output, const ThresholdKernelInfo &info)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output, info);
 }
 
-void CLThresholdKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, uint8_t threshold,
-                                  uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
+void CLThresholdKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output, const ThresholdKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
@@ -49,7 +47,7 @@ void CLThresholdKernel::configure(const CLCompileContext &compile_context, const
     // Construct kernel name
     std::string kernel_name = "threshold";
 
-    switch(type)
+    switch(info.type)
     {
         case ThresholdType::BINARY:
             kernel_name += "_binary";
@@ -67,16 +65,17 @@ void CLThresholdKernel::configure(const CLCompileContext &compile_context, const
 
     // Set arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
-    _kernel.setArg(idx++, false_value);
-    _kernel.setArg(idx++, true_value);
-    _kernel.setArg(idx++, threshold);
+    _kernel.setArg(idx++, info.false_value);
+    _kernel.setArg(idx++, info.true_value);
+    _kernel.setArg(idx++, info.threshold);
 
-    if(ThresholdType::RANGE == type)
+    if(ThresholdType::RANGE == info.type)
     {
-        _kernel.setArg(idx++, upper);
+        _kernel.setArg(idx++, info.upper);
     }
 
     // Make sure _kernel is initialized before calling the parent's configure
     constexpr unsigned int num_elems_processed_per_iteration = 16;
     ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
 }
+} // namespace arm_compute

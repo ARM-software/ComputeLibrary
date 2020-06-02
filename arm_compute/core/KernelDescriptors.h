@@ -203,5 +203,29 @@ struct ScaleKernelInfo
     bool                use_padding;           /**< Indication of using padding */
     bool                align_corners;         /**< Align corners of input and output */
 };
+
+struct ThresholdKernelInfo
+{
+    /** Default constructor */
+    ThresholdKernelInfo() = default;
+    /** Constructor
+     *
+     * @param[in] threshold   Threshold. When the threshold type is RANGE, this is used as the lower threshold.
+     * @param[in] false_value value to set when the condition is not respected.
+     * @param[in] true_value  value to set when the condition is respected.
+     * @param[in] type        Thresholding type. Either RANGE or BINARY.
+     * @param[in] upper       Upper threshold. Only used when the thresholding type is RANGE.
+     */
+    ThresholdKernelInfo(uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType type, uint8_t upper)
+        : threshold(threshold), false_value(false_value), true_value(true_value), type(type), upper(upper)
+    {
+    }
+
+    uint8_t       threshold{ 0 };
+    uint8_t       false_value{ 0 };
+    uint8_t       true_value{ 0 };
+    ThresholdType type{ ThresholdType::BINARY };
+    uint8_t       upper{ 0 };
+};
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H */

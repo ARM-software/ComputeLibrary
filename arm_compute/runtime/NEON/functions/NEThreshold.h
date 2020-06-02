@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_NETHRESHOLD_H
 #define ARM_COMPUTE_NETHRESHOLD_H
 
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
@@ -31,6 +32,7 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
 /** Basic function to run @ref NEThresholdKernel */
@@ -47,8 +49,25 @@ public:
      * @param[in]  type        Thresholding type. Can either be BINARY or RANGE.
      * @param[in]  upper       Upper threshold. Only used with RANGE thresholding
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.08)
     void configure(const ITensor *input, ITensor *output, uint8_t threshold, uint8_t false_value = 0, uint8_t true_value = 0,
                    ThresholdType type = ThresholdType::BINARY, uint8_t upper = 0);
+    /** Initialise the function's source, destination, thresholds and threshold type
+     *
+     * @param[in]  input  First tensor input. Data type supported: U8.
+     * @param[out] output Output tensor. Data type supported: U8.
+     * @param[in]  info   Threshold descriptor
+     */
+    void configure(const ITensor *input, ITensor *output, const ThresholdKernelInfo &info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEThreshold
+     *
+     * @param[in] input  First tensor input. Data type supported: U8.
+     * @param[in] output Output tensor. Data type supported: U8.
+     * @param[in] info   Threshold descriptor.
+     *
+     * @return A status, containing an error code in case of failure
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ThresholdKernelInfo &info);
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NETHRESHOLD_H */
