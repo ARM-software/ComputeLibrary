@@ -94,7 +94,6 @@ private:
     const ITensor      *_input;
     ITensor            *_output;
     Size2D              _info;
-    unsigned int        _num_elems_processed_per_iteration_x;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEUPSAMPLELAYERKERNEL_H */

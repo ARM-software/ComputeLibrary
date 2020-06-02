@@ -27,11 +27,11 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/core/NEON/wrapper/wrapper.h"
 
 #include <arm_neon.h>
 
@@ -50,48 +50,9 @@ inline T get_data_out(T data, int offset)
     }
     return out;
 }
-
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, int num_elems_processed_per_iteration_x, const Size2D &info)
-{
-    std::pair<Status, Window> win_config;
-    switch(input->data_layout())
-    {
-        case DataLayout::NCHW:
-        {
-            const int              num_elems_processed_per_iteration_x_out = num_elems_processed_per_iteration_x * info.x();
-            Window                 win                                     = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x_out));
-            AccessWindowRectangle  input_access(input, 0, 0, num_elems_processed_per_iteration_x, 1, 0.5f, 0.5f);
-            AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_x_out);
-            bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-            output_access.set_valid_region(win, output->valid_region());
-
-            Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-            win_config = std::make_pair(err, win);
-            break;
-        }
-        case DataLayout::NHWC:
-        {
-            Window                 win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x));
-            AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration_x);
-            AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_x);
-            bool                   window_changed = update_window_and_padding(win, input_access, output_access);
-            output_access.set_valid_region(win, output->valid_region());
-
-            Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-            win_config = std::make_pair(err, win);
-            break;
-        }
-        default:
-        {
-            win_config = std::make_pair(ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported data layout!"), Window{});
-        }
-    }
-
-    return win_config;
-}
 } // namespace
 NEUpsampleLayerKernel::NEUpsampleLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _info(), _num_elems_processed_per_iteration_x()
+    : _func(nullptr), _input(nullptr), _output(nullptr), _info()
 {
 }
 
@@ -118,11 +79,6 @@ Status NEUpsampleLayerKernel::validate(const ITensorInfo *input, const ITensorIn
         ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_height) != info.y() * input->dimension(idx_height));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
-
-    const int num_elems_processed_per_iteration_x = 16 / input->element_size();
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
-                                                              output->clone().get(), num_elems_processed_per_iteration_x, info)
-                                .first);
     return Status{};
 }
 
@@ -132,10 +88,15 @@ void NEUpsampleLayerKernel::upsample_nchw(const arm_compute::Window &window)
     using VectorType = typename wrapper::traits::neon_vector<T, S>::type;
 
     Window window_in(window);
-    window_in.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _num_elems_processed_per_iteration_x));
+    window_in.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Window window_out(window);
+    window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
     window_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), _info.y()));
+
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int  window_step_x  = S;
 
     Iterator  input(_input, window_in);
     Iterator  output(_output, window_out);
@@ -143,15 +104,30 @@ void NEUpsampleLayerKernel::upsample_nchw(const arm_compute::Window &window)
 
     execute_window_loop(window_out, [&](const Coordinates &)
     {
-        const VectorType data      = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr()));
-        const VectorType data_out1 = get_data_out<VectorType, S>(data, 0);
-        const VectorType data_out2 = get_data_out<VectorType, S>(data, S / 2);
-        auto              out       = reinterpret_cast<T *>(output.ptr());
+        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
+        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
 
-        wrapper::vstore(out, data_out1);
-        wrapper::vstore(out + S, data_out2);
-        wrapper::vstore(out + offset_y_out, data_out1);
-        wrapper::vstore(out + offset_y_out + S, data_out2);
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const VectorType data      = wrapper::vloadq(reinterpret_cast<const T *>(input_ptr + x));
+            const VectorType data_out1 = get_data_out<VectorType, S>(data, 0);
+            const VectorType data_out2 = get_data_out<VectorType, S>(data, S / 2);
+
+            wrapper::vstore(output_ptr + 2 * x, data_out1);
+            wrapper::vstore(output_ptr + 2 * x + S, data_out2);
+            wrapper::vstore(output_ptr + 2 * x + offset_y_out, data_out1);
+            wrapper::vstore(output_ptr + 2 * x + offset_y_out + S, data_out2);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            *(output_ptr + 2 * x)                    = *(input_ptr + x);
+            *(output_ptr + 2 * x + 1)                = *(input_ptr + x);
+            *(output_ptr + 2 * x + offset_y_out)     = *(input_ptr + x);
+            *(output_ptr + 2 * x + offset_y_out + 1) = *(input_ptr + x);
+        }
     },
     input, output);
 }
@@ -162,23 +138,47 @@ void NEUpsampleLayerKernel::upsample_nhwc(const arm_compute::Window &window)
     using VectorType = typename wrapper::traits::neon_vector<T, S>::type;
 
     Window window_out(window);
+    window_out.set(Window::DimX, Window::Dimension(0, 1, 1));
     window_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), _info.x()));
     window_out.set(Window::DimZ, Window::Dimension(0, _output->info()->dimension(2), _info.y()));
 
-    Iterator input(_input, window);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+    const int  window_step_x  = S;
+
+    Window window_in{ window };
+    window_in.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input(_input, window_in);
     Iterator output(_output, window_out);
 
     const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(T);
     const int offset_z_out = _output->info()->strides_in_bytes().z() / sizeof(T);
+
     execute_window_loop(window_out, [&](const Coordinates &)
     {
-        const VectorType data = wrapper::vloadq(reinterpret_cast<const T *>(input.ptr()));
-        auto              out  = reinterpret_cast<T *>(output.ptr());
+        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
+        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
 
-        wrapper::vstore(out, data);
-        wrapper::vstore(out + offset_y_out, data);
-        wrapper::vstore(out + offset_z_out, data);
-        wrapper::vstore(out + offset_y_out + offset_z_out, data);
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const VectorType data = wrapper::vloadq(reinterpret_cast<const T *>(input_ptr + x));
+
+            wrapper::vstore(output_ptr + x, data);
+            wrapper::vstore(output_ptr + x + offset_y_out, data);
+            wrapper::vstore(output_ptr + x + offset_z_out, data);
+            wrapper::vstore(output_ptr + x + offset_y_out + offset_z_out, data);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            *(output_ptr + x)                               = *(input_ptr + x);
+            *(output_ptr + x + offset_y_out)                = *(input_ptr + x);
+            *(output_ptr + x + offset_z_out)                = *(input_ptr + x);
+            *(output_ptr + x + offset_y_out + offset_z_out) = *(input_ptr + x);
+        }
     },
     input, output);
 }
@@ -200,8 +200,6 @@ void NEUpsampleLayerKernel::configure(const ITensor *input, ITensor *output, con
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(NEUpsampleLayerKernel::validate(input->info(), output->info(), info, policy));
-
-    _num_elems_processed_per_iteration_x = 16 / output->info()->element_size();
 
     switch(data_layout)
     {
@@ -257,12 +255,11 @@ void NEUpsampleLayerKernel::configure(const ITensor *input, ITensor *output, con
     }
 
     // Configure window
-    std::pair<Status, Window> win_config = validate_and_configure_window(input->info(),
-                                                                         output->info(),
-                                                                         _num_elems_processed_per_iteration_x,
-                                                                         info);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    INEKernel::configure(win_config.second);
+    Window      win = calculate_max_window(*input->info(), Steps());
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
+    INEKernel::configure(win);
 }
 
 void NEUpsampleLayerKernel::run(const Window &window, const ThreadInfo &info)
