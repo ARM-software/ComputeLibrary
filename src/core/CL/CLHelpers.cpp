@@ -370,6 +370,27 @@ bool preferred_dummy_work_items_support(const cl::Device &device)
     return true;
 }
 
+bool image2d_from_buffer_supported(const cl::Device &device)
+{
+    return device_supports_extension(device, "cl_khr_image2d_from_buffer");
+}
+
+size_t get_cl_image_pitch_alignment(const cl::Device &device)
+{
+    cl_uint pixel_aligment = 0;
+
+    cl_int err = clGetDeviceInfo(device(), CL_DEVICE_IMAGE_PITCH_ALIGNMENT, sizeof(cl_uint), &pixel_aligment, nullptr);
+
+    if(err == CL_SUCCESS)
+    {
+        return pixel_aligment;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 cl::Kernel create_opencl_kernel(CLCoreRuntimeContext *ctx, const std::string &kernel_name, const CLBuildOptions &build_opts)
 {
     if(ctx && ctx->kernel_library())

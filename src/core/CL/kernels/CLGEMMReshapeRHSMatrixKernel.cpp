@@ -54,6 +54,23 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.n0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON((rhs_info.k0 == 1) && (rhs_info.transpose));
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image && ((rhs_info.n0 != 4) || input->data_type() != DataType::F32), "Export to cl_image only supported with n0 = 4 and F32 data type");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image
+                                    && !image2d_from_buffer_supported(CLKernelLibrary::get().get_device()), "The extension cl_khr_image2d_from_buffer is not supported on the target platform");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image && (get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0), "Impossible to retrieve the cl_image pitch alignment");
+
+    if(rhs_info.export_to_cl_image)
+    {
+        TensorShape output_shape = compute_rhs_reshaped_shape(*input, rhs_info);
+
+        // Check the width and height of the output tensor.
+        // Since we cannot create a 3d image from a buffer, the third dimension is collapsed with the second dimension
+        size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
+        size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_shape[0] > max_image_w * 4, "Not supported width for cl_image");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_shape[1] * output_shape[2] > max_image_h, "Not supported height for cl_image");
+    }
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
@@ -85,6 +102,19 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     window_changed = update_window_and_padding(win, input_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+
+    if(rhs_info.export_to_cl_image)
+    {
+        constexpr unsigned int num_floats_per_pixel = 4;
+
+        const unsigned int stride_y_in_elements = output->strides_in_bytes()[1] / output->element_size();
+        const unsigned int pixel_aligment       = get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device());
+        const unsigned int row_pitch_alignment  = pixel_aligment * num_floats_per_pixel;
+        const unsigned int round_up_width       = ((stride_y_in_elements + row_pitch_alignment - 1) / row_pitch_alignment) * row_pitch_alignment;
+        const unsigned int padding              = round_up_width - stride_y_in_elements;
+
+        output->extend_padding(PaddingSize(0, padding, 0, 0));
+    }
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS

@@ -134,6 +134,7 @@ public:
     DECLARE_FUNCTION_PTR(clEnqueueSVMUnmap);
     DECLARE_FUNCTION_PTR(clEnqueueMarker);
     DECLARE_FUNCTION_PTR(clWaitForEvents);
+    DECLARE_FUNCTION_PTR(clCreateImage);
 
     // Third-party extensions
     DECLARE_FUNCTION_PTR(clImportMemoryARM);
