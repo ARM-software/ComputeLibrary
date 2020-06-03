@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,6 +45,7 @@ struct dummy
     {
         ARM_COMPUTE_UNUSED(act_info);
     }
+
     /** Run activation function.
      *
      * @param[in] vval Vector of values.
@@ -52,6 +53,15 @@ struct dummy
     void operator()(ExactType &vval)
     {
         ARM_COMPUTE_UNUSED(vval);
+    }
+
+    /** Run activation function.
+     *
+     * @param[in] val Scalar value.
+     */
+    void operator()(T &val)
+    {
+        ARM_COMPUTE_UNUSED(val);
     }
 };
 /** Linear activation object */
@@ -68,8 +78,10 @@ struct linear
      * @param[in] act_info Activation layer information.
      */
     explicit linear(ActivationLayerInfo act_info)
-        : valpha(wrapper::vdup_n(static_cast<T>(act_info.a()), ExactTagType{})),
-          vbeta(wrapper::vdup_n(static_cast<T>(act_info.b()), ExactTagType{}))
+        : alpha(act_info.a()),
+          beta(act_info.b()),
+          valpha(wrapper::vdup_n(static_cast<T>(alpha), ExactTagType{})),
+          vbeta(wrapper::vdup_n(static_cast<T>(beta), ExactTagType{}))
     {
     }
 
@@ -79,13 +91,22 @@ struct linear
      */
     void operator()(ExactType &vval)
     {
-        vval = wrapper::vmla(vval, valpha, vbeta);
+        vval = wrapper::vmla(vbeta, vval, valpha);
     }
 
-    /** Vector of alphas. */
-    const ExactType valpha;
-    /** Vector of betas. */
-    const ExactType vbeta;
+    /** Run activation function.
+     *
+     * @param[in] val Scalar value.
+     */
+    void operator()(T &val)
+    {
+        val = alpha * val + beta;
+    }
+
+    const T         alpha;  /**< Scalar alpha */
+    const T         beta;   /**< Scalar alpha */
+    const ExactType valpha; /**< Vector of alphas. */
+    const ExactType vbeta;  /**< Vector of betas. */
 };
 /** Square activation object */
 template <typename T, int S>
@@ -113,6 +134,15 @@ struct square
     {
         vval = wrapper::vmul(vval, vval);
     }
+
+    /** Run activation function.
+     *
+     * @param[in] val Scalar value.
+     */
+    void operator()(T &val)
+    {
+        val = val * val;
+    }
 };
 /** Logistic activation object */
 template <typename T, int S>
@@ -128,7 +158,7 @@ struct logistic
      * @param[in] act_info Activation layer information.
      */
     explicit logistic(ActivationLayerInfo act_info)
-        : vone(wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{}))
+        : vone(wrapper::vdup_n(static_cast<T>(1), ExactTagType{}))
     {
         ARM_COMPUTE_UNUSED(act_info);
     }
@@ -140,6 +170,15 @@ struct logistic
     void operator()(ExactType &vval)
     {
         vval = wrapper::vinv(wrapper::vadd(vone, wrapper::vexpq(wrapper::vneg(vval))));
+    }
+
+    /** Run activation function.
+     *
+     * @param[in] val Scalar value.
+     */
+    void operator()(T &val)
+    {
+        val = 1 / (1 + std::exp(-val));
     }
 
     /** Vector of ones. */
@@ -159,7 +198,7 @@ struct relu
      * @param[in] act_info Activation layer information.
      */
     explicit relu(ActivationLayerInfo act_info)
-        : vzero(wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{}))
+        : vzero(wrapper::vdup_n(static_cast<T>(0), ExactTagType{}))
     {
         ARM_COMPUTE_UNUSED(act_info);
     }
@@ -171,6 +210,15 @@ struct relu
     void operator()(ExactType &vval)
     {
         vval = wrapper::vmax(vzero, vval);
+    }
+
+    /** Run activation function.
+     *
+     * @param[in] val Scalar value.
+     */
+    void operator()(T &val)
+    {
+        val = std::max(static_cast<T>(0), val);
     }
 
     /** Vector of zeroes. */
@@ -190,7 +238,8 @@ struct brelu
      * @param[in] act_info Activation layer information.
      */
     explicit brelu(ActivationLayerInfo act_info)
-        : vzero(wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{})),
+        : alpha(act_info.a()),
+          vzero(wrapper::vdup_n(static_cast<T>(0), ExactTagType{})),
           valpha(wrapper::vdup_n(static_cast<T>(act_info.a()), ExactTagType{}))
     {
     }
@@ -204,10 +253,18 @@ struct brelu
         vval = wrapper::vmin(valpha, wrapper::vmax(vzero, vval));
     }
 
-    /** Vector of zeroes. */
-    const ExactType vzero;
-    /** Vector of alphas. */
-    const ExactType valpha;
+    /** Run activation function.
+     *
+     * @param[in] val Scalar value.
+     */
+    void operator()(T &val)
+    {
+        val = std::min(alpha, std::max(static_cast<T>(0), val));
+    }
+
+    const T         alpha;  /** Scalar alpha */
+    const ExactType vzero;  /** Vector of zeroes. */
+    const ExactType valpha; /** Vector of alphas. */
 };
 /** Lower-Upper Bounded RELU activation object */
 template <typename T, int S>
@@ -223,7 +280,9 @@ struct lubrelu
      * @param[in] act_info Activation layer information.
      */
     explicit lubrelu(ActivationLayerInfo act_info)
-        : valpha(wrapper::vdup_n(static_cast<T>(act_info.a()), ExactTagType{})),
+        : alpha(act_info.a()),
+          beta(act_info.b()),
+          valpha(wrapper::vdup_n(static_cast<T>(act_info.a()), ExactTagType{})),
           vbeta(wrapper::vdup_n(static_cast<T>(act_info.b()), ExactTagType{}))
     {
     }
@@ -237,10 +296,19 @@ struct lubrelu
         vval = wrapper::vmin(valpha, wrapper::vmax(vbeta, vval));
     }
 
-    /** Vector of alphas. */
-    const ExactType valpha;
-    /** Vector of betas. */
-    const ExactType vbeta;
+    /** Run activation function.
+     *
+     * @param[in] val Scalar value.
+     */
+    void operator()(T &val)
+    {
+        val = std::min(alpha, std::max(beta, val));
+    }
+
+    const T         alpha;  /**< Scalar alpha */
+    const T         beta;   /**< Scalar alpha */
+    const ExactType valpha; /** Vector of alphas. */
+    const ExactType vbeta;  /** Vector of betas. */
 };
 } // namespace detail
 } // namespace arm_compute
