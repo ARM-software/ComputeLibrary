@@ -47,6 +47,7 @@ void InPlaceOperationMutator::mutate(Graph &g)
         NodeType::ActivationLayer,
         NodeType::BatchNormalizationLayer,
         NodeType::EltwiseLayer,
+        NodeType::UnaryEltwiseLayer,
         NodeType::PrintLayer
     };
 

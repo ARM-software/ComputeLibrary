@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,14 +24,14 @@
 #ifndef ARM_COMPUTE_NEELEMENTWISEUNARYLAYER_H
 #define ARM_COMPUTE_NEELEMENTWISEUNARYLAYER_H
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to perform inverse square root on an input tensor. */
-class NERsqrtLayer : public INESimpleFunction
+class NERsqrtLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function
@@ -51,7 +51,7 @@ public:
 };
 
 /** Basic function to perform exponential on an input tensor. */
-class NEExpLayer : public INESimpleFunction
+class NEExpLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function
@@ -71,7 +71,7 @@ public:
 };
 
 /** Basic function to negate an input tensor. */
-class NENegLayer : public INESimpleFunction
+class NENegLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function
@@ -91,7 +91,7 @@ public:
 };
 
 /** Basic function to compute the natural logarithm of an input tensor. */
-class NELogLayer : public INESimpleFunction
+class NELogLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function
@@ -111,7 +111,7 @@ public:
 };
 
 /** Basic function to compute the absolute value of an input tensor. */
-class NEAbsLayer : public INESimpleFunction
+class NEAbsLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function
@@ -131,7 +131,7 @@ public:
 };
 
 /** Basic function to compute the round value elementwise of an input tensor. */
-class NERoundLayer : public INESimpleFunction
+class NERoundLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function
@@ -151,7 +151,7 @@ public:
 };
 
 /** Basic function to compute the sine of an input tensor. */
-class NESinLayer : public INESimpleFunction
+class NESinLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function

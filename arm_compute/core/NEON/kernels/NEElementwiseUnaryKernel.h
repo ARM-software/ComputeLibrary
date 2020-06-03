@@ -57,11 +57,11 @@ public:
     /** Default destructor */
     ~NEElementwiseUnaryKernel() = default;
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NEElementwiseUnaryKernel
+    /** Function to configure the @ref NEElementwiseUnaryKernel
      *
-     * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input  First tensor input. Data types supported: F16/F32.
-     * @param[in] output Output tensor. Data types supported: Same as @p input.
+     * @param[in]  op     Arithmetic operation to be executed.
+     * @param[in]  input  First tensor input. Data types supported: F16/F32.
+     * @param[out] output Output tensor. Data types supported: Same as @p input.
      */
     void configure(ElementWiseUnary op, const ITensor *input, ITensor *output);
 
