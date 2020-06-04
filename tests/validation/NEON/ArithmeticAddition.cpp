@@ -104,13 +104,33 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                               ConvertPolicy::WRAP);
     ARM_COMPUTE_EXPECT(bool(s) == expected, framework::LogLevel::ERRORS);
 }
+
+DATA_TEST_CASE(ValidateInPlace, framework::DatasetMode::ALL, zip(zip(
+               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                        TensorInfo(TensorShape(1U, 13U, 2U), 1, DataType::U8), // Unsupported broadcast on input1 with in-place computation
+                                                      }),
+               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(1U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                     })),
+               framework::dataset::make("Expected", { true, true, false })),
+               input1_info, input2_info, expected)
+{
+    Status s = NEArithmeticAddition::validate(&input1_info.clone()->set_is_resizable(false),
+                                              &input2_info.clone()->set_is_resizable(false),
+                                              nullptr,
+                                              ConvertPolicy::WRAP);
+    ARM_COMPUTE_EXPECT(bool(s) == expected, framework::LogLevel::ERRORS);
+}
 // clang-format on
 // *INDENT-ON*
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),
-                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),
+                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                  framework::dataset::make("InPlace", { false, true })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -118,15 +138,17 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionS16Dataset),
-                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionS16Dataset),
+                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                  framework::dataset::make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticAdditionS16Dataset),
-                                                                                                                framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ArithmeticAdditionS16Dataset),
+                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                framework::dataset::make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -134,8 +156,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<int16_t>, framework
 TEST_SUITE_END() // S16
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<int32_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticAdditionS32Dataset),
-                                                                                                            framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<int32_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionS32Dataset),
+                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                            framework::dataset::make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -146,8 +169,9 @@ TEST_SUITE_END() // Integer
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP16Dataset),
-                                                                                                         framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP16Dataset),
+                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                         framework::dataset::make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -156,15 +180,17 @@ TEST_SUITE_END() // F16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP32Dataset),
-                                                                                                                framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP32Dataset),
+                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                framework::dataset::make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticAdditionFP32Dataset),
-                                                                                                              framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ArithmeticAdditionFP32Dataset),
+                                                                                                                      framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                              framework::dataset::make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -173,17 +199,28 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<float>, framework::
 template <typename T>
 using NEArithmeticAdditionBroadcastFixture = ArithmeticAdditionBroadcastValidationFixture<Tensor, Accessor, NEArithmeticAddition, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapesBroadcast(),
                        ArithmeticAdditionFP32Dataset),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcastInPlace, NEArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapesBroadcastInPlace(),
                        ArithmeticAdditionFP32Dataset),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("InPlace", { true })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapesBroadcast(),
+                       ArithmeticAdditionFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("InPlace", { false })))
 {
     // Validate output
     validate(Accessor(_target), _reference);

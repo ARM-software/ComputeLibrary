@@ -68,12 +68,12 @@ public:
      *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
      *   - (QSYMM16,QSYMM16) -> QSYMM16
      *
-     * @param[in]  input1 First input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in]  input2 Second input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
-     * @param[in]  policy Overflow policy.
+     * @param[in, out] input1 First input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]      input2 Second input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[out]     output (Optional) The output tensor. Can be nullptr. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
+     * @param[in]      policy Overflow policy.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
+    void configure(ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAdditionKernel
      *
      * @param[in] input1 First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
@@ -91,11 +91,11 @@ public:
 private:
     /** Common signature for all the specialised add functions
      *
-     * @param[in]  input1 First input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32
-     * @param[in]  input2 Second input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32.
-     * @param[in]  policy Overflow policy.
-     * @param[in]  window Region on which to execute the kernel.
+     * @param[in, out] input1 First input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32
+     * @param[in]      input2 Second input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32
+     * @param[out]     output (Optional) The output tensor. Can be nullptr. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32.
+     * @param[in]      policy Overflow policy.
+     * @param[in]      window Region on which to execute the kernel.
      */
     using AddFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const Window &window);
     /** Add function to use for the particular tensor types passed to configure() */
