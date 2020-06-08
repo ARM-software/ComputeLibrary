@@ -60,6 +60,7 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
         case ActivationLayerInfo::ActivationFunction::ELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
+        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
             switch(data_type)
             {
                 case DataType::F16:
@@ -87,6 +88,7 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
+        case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
             switch(data_type)
             {
                 case DataType::F16:

@@ -265,7 +265,12 @@ NEActivationLayerKernel::activation(const Window &window)
     Iterator input(_input, win_collapsed);
     Iterator output(_output, win_collapsed);
 
-    const auto epsilon     = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType{});
+    // A small delta added to the input to prevent NAN values caused by zeros in inputs to SQRT
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    const auto delta = wrapper::vdup_n(static_cast<T>(1e-7), ExactTagType{});
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+    const auto delta = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType{});
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     const auto const_1     = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
     const auto const_0     = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
     const auto const_6     = wrapper::vdup_n(static_cast<T>(6.f), ExactTagType{});
@@ -318,7 +323,7 @@ NEActivationLayerKernel::activation(const Window &window)
                     tmp = wrapper::vbsl(wrapper::vcge(vin, const_0), vin, wrapper::vmul(va, wrapper::vsub(wrapper::vexpq(vin), const_1)));
                     break;
                 case ActivationFunction::SQRT:
-                    tmp = wrapper::vinv(wrapper::vinvsqrt(vin + epsilon));
+                    tmp = wrapper::vinv(wrapper::vinvsqrt(wrapper::vadd(vin, delta)));
                     break;
                 case ActivationFunction::SQUARE:
                     tmp = wrapper::vmul(vin, vin);

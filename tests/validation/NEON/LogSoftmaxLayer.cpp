@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,12 +77,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELogSoftmaxLayerFixture<half>, framework::Data
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunSmall4D, NELogSoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small4DShapes(),
-                                                                                                                      framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
                                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f })),
                                                                                                               framework::dataset::make("Axis", { 1, 2, 3 })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NELogSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
