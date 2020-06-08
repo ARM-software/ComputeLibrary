@@ -28,13 +28,9 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
-#include "tests/datasets/BorderModeDataset.h"
-#include "tests/datasets/InterpolationPolicyDataset.h"
-#include "tests/datasets/SamplingPolicyDataset.h"
-#include "tests/datasets/ShapeDatasets.h"
+#include "tests/datasets/ScaleValidationDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ScaleFixture.h"
@@ -47,94 +43,14 @@ namespace validation
 {
 namespace
 {
-using test::datasets::ShapeDataset;
-
-/** Class to generate boundary values for the given template parameters
- * including shapes with large differences between width and height
- */
-template <uint32_t channel, uint32_t batch, uint32_t element_per_vector, uint32_t vector_size>
-class ScaleShapesBaseDataSet : public ShapeDataset
-{
-    static constexpr auto boundary_minus_one = element_per_vector * vector_size - 1;
-    static constexpr auto boundary_plus_one  = element_per_vector * vector_size + 1;
-    static constexpr auto small_size         = 3;
-
-public:
-    // These tensor shapes are NCHW layout, fixture will convert to NHWC.
-    ScaleShapesBaseDataSet()
-        : ShapeDataset("Shape",
-    {
-        TensorShape{ small_size, boundary_minus_one, channel, batch },
-                     TensorShape{ small_size, boundary_plus_one, channel, batch },
-                     TensorShape{ boundary_minus_one, small_size, channel, batch },
-                     TensorShape{ boundary_plus_one, small_size, channel, batch },
-                     TensorShape{ boundary_minus_one, boundary_plus_one, channel, batch },
-                     TensorShape{ boundary_plus_one, boundary_minus_one, channel, batch },
-    })
-    {
-    }
-};
-
-/** For the single vector, only larger value (+1) than boundary
- * since smaller value (-1) could cause some invalid shapes like
- * - invalid zero size
- * - size 1 which isn't compatible with scale with aligned corners.
- */
-template <uint32_t channel, uint32_t batch, uint32_t element_per_vector>
-class ScaleShapesBaseDataSet<channel, batch, element_per_vector, 1> : public ShapeDataset
-{
-    static constexpr auto small_size        = 3;
-    static constexpr auto boundary_plus_one = element_per_vector + 1;
-
-public:
-    // These tensor shapes are NCHW layout, fixture will convert to NHWC.
-    ScaleShapesBaseDataSet()
-        : ShapeDataset("Shape",
-    {
-        TensorShape{ small_size, boundary_plus_one, channel, batch },
-                     TensorShape{ boundary_plus_one, small_size, channel, batch },
-    })
-    {
-    }
-};
-
-/** For the shapes smaller than one vector, only pre-defined tiny shapes
- * are tested (3x2, 2x3) as smaller shapes are more likely to cause
- * issues and easier to debug.
- */
-template <uint32_t channel, uint32_t batch, uint32_t element_per_vector>
-class ScaleShapesBaseDataSet<channel, batch, element_per_vector, 0> : public ShapeDataset
-{
-    static constexpr auto small_size                 = 3;
-    static constexpr auto zero_vector_boundary_value = 2;
-
-public:
-    // These tensor shapes are NCHW layout, fixture will convert to NHWC.
-    ScaleShapesBaseDataSet()
-        : ShapeDataset("Shape",
-    {
-        TensorShape{ small_size, zero_vector_boundary_value, channel, batch },
-                     TensorShape{ zero_vector_boundary_value, small_size, channel, batch },
-    })
-    {
-    }
-};
-
-/** Generated shaeps
- * - 2D shapes with 0, 1, 2 vector iterations
- * - 3D shapes with 0, 1 vector iterations
- * - 4D shapes with 0 vector iterations
- */
-#define SCALE_SHAPE_DATASET(element_per_vector)                                                  \
-    concat(concat(concat(concat(concat(ScaleShapesBaseDataSet<1, 1, (element_per_vector), 0>(),  \
-                                       ScaleShapesBaseDataSet<1, 1, (element_per_vector), 1>()), \
-                                ScaleShapesBaseDataSet<1, 1, (element_per_vector), 2>()),        \
-                         ScaleShapesBaseDataSet<3, 3, (element_per_vector), 0>()),               \
-                  ScaleShapesBaseDataSet<3, 3, (element_per_vector), 1>()),                      \
-           ScaleShapesBaseDataSet<3, 7, (element_per_vector), 0>())
+using datasets::ScaleShapesBaseDataSet;
+using datasets::ScaleInterpolationPolicySet;
+using datasets::ScaleDataLayouts;
+using datasets::ScaleSamplingPolicySet;
+using datasets::ScaleAlignCornersSamplingPolicySet;
 
 /** We consider vector size in byte 64 since the maximum size of
- * a vector used by @ref ScaleKernelInfo is currently 64-byte (float32x4x4).
+ * a vector used by @ref NEScaleKernel is currently 64-byte (float32x4x4).
  * There are possibility to reduce test time further by using
  * smaller vector sizes for different data types where applicable.
  */
@@ -154,52 +70,11 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
     DataType::F32,
 });
 
-/** Interpolation policy test set */
-const auto InterpolationPolicySet = framework::dataset::make("InterpolationPolicy",
-{
-    InterpolationPolicy::NEAREST_NEIGHBOR,
-    InterpolationPolicy::BILINEAR,
-});
-
-/** Scale data types */
-const auto ScaleDataLayouts = framework::dataset::make("DataLayout",
-{
-    DataLayout::NCHW,
-    DataLayout::NHWC,
-});
-
-/** Sampling policy data set */
-const auto SamplingPolicySet = combine(datasets::SamplingPolicies(),
-                                       framework::dataset::make("AlignCorners", { false }));
-
-/** Sampling policy data set for Aligned Corners which only allows TOP_LEFT poicy.*/
-const auto AlignCornersSamplingPolicySet = combine(framework::dataset::make("SamplingPolicy",
-{
-    SamplingPolicy::TOP_LEFT,
-}),
-framework::dataset::make("AlignCorners", { true }));
-
-/** Generating dataset for non-quantized data tyeps with the given shapes */
-#define ASSEMBLE_DATASET(shape, samping_policy_set)             \
-    combine(combine(combine(combine((shape), ScaleDataLayouts), \
-                            InterpolationPolicySet),            \
-                    datasets::BorderModes()),                   \
-            samping_policy_set)
-
 /** Quantization information data set */
 const auto QuantizationInfoSet = framework::dataset::make("QuantizationInfo",
 {
     QuantizationInfo(0.5f, -10),
 });
-
-/** Generating dataset for quantized data tyeps with the given shapes */
-#define ASSEMBLE_QUANTIZED_DATASET(shape, sampling_policy_set)    \
-    combine(combine(combine(combine(combine(shape,                \
-                                            QuantizationInfoSet), \
-                                    ScaleDataLayouts),            \
-                            InterpolationPolicySet),              \
-                    datasets::BorderModes()),                     \
-            sampling_policy_set)
 
 /** Tolerance */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
@@ -355,6 +230,21 @@ TEST_CASE(AreaWithNonU8, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
+TEST_CASE(AlignedCornerNotSupported, framework::DatasetMode::ALL)
+{
+    // Aligned corners require sampling policy to be TOP_LEFT.
+    constexpr auto interpolation_policy = InterpolationPolicy::BILINEAR;
+    constexpr bool align_corners        = true;
+    constexpr auto sampling_policy      = SamplingPolicy::CENTER;
+
+    const auto input  = TensorInfo{ input_shape, 1, default_data_type, default_data_layout };
+    const auto output = TensorInfo{ output_shape, 1, default_data_type, default_data_layout };
+    Status     result{};
+
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), sampling_policy, default_use_padding, align_corners });
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
 TEST_CASE(InvalidAlignedCornerOutput, framework::DatasetMode::ALL)
 {
     // Bilinear with aligned corners require at least 2x2 output to prevent overflow.
@@ -381,7 +271,7 @@ using NEScaleQuantizedFixture = ScaleValidationQuantizedFixture<Tensor, Accessor
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 const auto f32_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<float>())), framework::dataset::make("DataType", DataType::F32));
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, SamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -390,7 +280,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, AlignCornersSamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<float>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f32_shape, ScaleAlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -403,7 +293,7 @@ TEST_SUITE_END() // FP32
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 const auto f16_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<half>())), framework::dataset::make("DataType", DataType::F16));
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<half>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f16_shape, SamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<half>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f16_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -412,7 +302,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<half>, framework::DatasetMode::A
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<half>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f16_shape, AlignCornersSamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<half>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(f16_shape, ScaleAlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
@@ -428,7 +318,7 @@ TEST_SUITE_END() // Float
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
 const auto u8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::U8));
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(u8_shape, SamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(u8_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -437,7 +327,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_u8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(u8_shape, AlignCornersSamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(u8_shape, ScaleAlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -449,7 +339,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<uint8_t>, framework:
 TEST_SUITE_END() // U8
 TEST_SUITE(S16)
 const auto s16_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int16_t>())), framework::dataset::make("DataType", DataType::S16));
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(s16_shape, SamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(s16_shape, ScaleSamplingPolicySet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -458,7 +348,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_s16, tolerance_num_s16);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(s16_shape, AlignCornersSamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, ASSEMBLE_DATASET(s16_shape, ScaleAlignCornersSamplingPolicySet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -473,7 +363,7 @@ TEST_SUITE_END() // Integer
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 const auto qasymm8_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<uint8_t>())), framework::dataset::make("DataType", DataType::QASYMM8));
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape, SamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -482,7 +372,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<uint8_t>, framework::Da
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_u8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape, AlignCornersSamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_shape, ScaleAlignCornersSamplingPolicySet,
+                       QuantizationInfoSet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
@@ -493,24 +384,26 @@ FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleQuantizedFixture<uint8_t>, f
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE(QASYMM8_SIGNED)
-const auto qasymm8_signed_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int8_t>())), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_signed_shape, SamplingPolicySet))
+const auto                          qasymm8_signed_shape = combine((SCALE_SHAPE_DATASET(num_elements_per_vector<int8_t>())), framework::dataset::make("DataType", DataType::QASYMM8_SIGNED));
+constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_signed{ 1 };
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_signed_shape, ScaleSamplingPolicySet, QuantizationInfoSet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
     ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_u8);
+    validate(Accessor(_target), _reference, valid_region, tolerance_qasymm8_signed);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_signed_shape, AlignCornersSamplingPolicySet))
+FIXTURE_DATA_TEST_CASE(RunSmallAlignCorners, NEScaleQuantizedFixture<int8_t>, framework::DatasetMode::ALL, ASSEMBLE_QUANTIZED_DATASET(qasymm8_signed_shape, ScaleAlignCornersSamplingPolicySet,
+                       QuantizationInfoSet))
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
     ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
-    validate(Accessor(_target), _reference, valid_region, tolerance_u8);
+    validate(Accessor(_target), _reference, valid_region, tolerance_qasymm8_signed);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
