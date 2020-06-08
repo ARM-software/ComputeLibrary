@@ -44,13 +44,13 @@ namespace arm_compute
 {
 namespace
 {
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int height_offset, ITensorInfo *output, unsigned int &num_elems_processed_per_iteration)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int &num_elems_processed_per_iteration)
 {
     num_elems_processed_per_iteration = 4;
     // The window needs to be based on input as we copy all the heights of input
     Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, height_offset, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access, output_access);
 
     Window win_collapsed = win.collapse(win, Window::DimZ);
@@ -85,7 +85,7 @@ Status CLHeightConcatenateLayerKernel::validate(const ITensorInfo *input, unsign
 {
     unsigned int num_elems_processed_per_iteration;
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, height_offset, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), height_offset, output->clone().get(), num_elems_processed_per_iteration).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), num_elems_processed_per_iteration).first);
     return Status{};
 }
 
@@ -103,7 +103,7 @@ void CLHeightConcatenateLayerKernel::configure(const CLCompileContext &compile_c
     _output        = output;
     _height_offset = height_offset;
 
-    auto win_config = validate_and_configure_window(input->info(), height_offset, output->info(), _num_elems_processed_per_iteration);
+    auto win_config = validate_and_configure_window(input->info(), output->info(), _num_elems_processed_per_iteration);
 
     // Add build options
     CLBuildOptions build_opts;
