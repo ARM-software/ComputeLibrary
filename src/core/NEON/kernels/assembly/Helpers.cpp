@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/NEON/kernels/assembly/Helpers.h"
+#include "src/core/NEON/kernels/assembly/Helpers.h"
 
 namespace arm_compute
 {

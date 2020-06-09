@@ -150,7 +150,6 @@
 #include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEYOLOLayerKernel.h"
 
 #endif /* ARM_COMPUTE_NEKERNELS_H */

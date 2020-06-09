@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
+#include "arm_gemm.hpp"
 
 #include <cstddef>
 #include <utility>

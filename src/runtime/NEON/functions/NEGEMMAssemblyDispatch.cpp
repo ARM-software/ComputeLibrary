@@ -23,9 +23,13 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 
+#include "src/core/NEON/kernels/assembly/arm_gemm.hpp"
+
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NESimpleAssemblyFunction.h"
+
+#include "src/core/NEON/kernels/assembly/NEGEMMAssemblyWrapperKernel.h"
 
 #include <arm_neon.h>
 
@@ -433,7 +437,6 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
     {
         const int granule_threshold = 200;
         scheduling_hint             = IScheduler::Hints(Window::DimX, IScheduler::StrategyHint::DYNAMIC, granule_threshold);
-
     }
     else if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED_2D && _d->info()->data_type() == DataType::F32)
     {
@@ -467,6 +470,7 @@ void create_arm_gemm_quant(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &a
                            const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, arm_gemm::Activation activation, const GEMMInfo &gemm_info,
                            IWeightsManager *weights_manager)
 {
+    ARM_COMPUTE_UNUSED(activation);
     INEGEMMWrapperKernel::Params p           = INEGEMMWrapperKernel::extract_parameters(a, b, d, gemm_info);
     const CPUInfo               &ci          = NEScheduler::get().cpu_info();
     unsigned int                 num_threads = NEScheduler::get().num_threads();

@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H
 #define ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H
 
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm_compute_iface.hpp"
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_gemm_compute_iface.hpp"
 
 #include "gemm_common.hpp"
 
@@ -67,15 +67,14 @@ public:
         return _name.c_str();
     }
 
-
     void run(const Window &window, const ThreadInfo &info) override
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void *>(_kernel)));
         ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
 
-        auto win=arm_gemm::to_ndcoord(window);
+        auto win = arm_gemm::to_ndcoord(window);
 
-        arm_gemm::ndcoord_t thread_locator { };
+        arm_gemm::ndcoord_t thread_locator{};
 
         _kernel->execute(win, thread_locator, info.thread_id);
     }
@@ -101,7 +100,7 @@ public:
     void configure(arm_gemm::GemmCommon<TypeInput, TypeOutput> *kernel, std::string kernel_name_tag)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void *>(kernel)));
-        _kernel         = kernel;
+        _kernel = kernel;
 
         Window win = to_window(kernel->get_window_size());
 

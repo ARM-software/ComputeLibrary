@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm_compute_iface.hpp"
+#include "arm_gemm_compute_iface.hpp"
 
 #include <cstddef>
 #include <cassert>

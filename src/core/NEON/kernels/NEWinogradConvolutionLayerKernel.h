@@ -27,7 +27,8 @@
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/NEON/kernels/convolution/common/convolution.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/tensor.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_layer.hpp"
+
+#include "src/core/NEON/kernels/convolution/winograd/winograd_layer.hpp"
 
 namespace arm_compute
 {

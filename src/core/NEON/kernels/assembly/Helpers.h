@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 #include "arm_compute/core/Utils.h"
 
 #include "arm_compute/core/NEON/kernels/assembly/INEGEMMWrapperKernel.h"
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
+#include "arm_gemm.hpp"
 
 namespace arm_compute
 {

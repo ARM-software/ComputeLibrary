@@ -230,6 +230,8 @@ if env['neon']:
     arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/convolution/common/",
                                       "arm_compute/core/NEON/kernels/convolution/winograd/",
                                       "arm_compute/core/NEON/kernels/convolution/depthwise/",
+                                      "src/core/NEON/kernels/assembly/",
+                                      "src/core/NEON/kernels/convolution/winograd/",
                                       "arm_compute/core/NEON/kernels/assembly/"])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
