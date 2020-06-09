@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ public:
         dst.allocator()->init(dst_tensor_info);
 
         // Configure Scale function object:
-        scale.configure(&src, &dst, InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED);
+        scale.configure(&src, &dst, ScaleKernelInfo{ InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED });
 
         // Allocate all the images
         src.allocator()->allocate();

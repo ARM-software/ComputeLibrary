@@ -1401,7 +1401,7 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
 
     // Create and configure function
     auto func = support::cpp14::make_unique<ResizeLayerFunction>();
-    func->configure(input, output, policy, BorderMode::CONSTANT);
+    func->configure(input, output, ScaleKernelInfo{ policy, BorderMode::CONSTANT });
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "

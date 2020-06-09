@@ -56,6 +56,7 @@ public:
      * @param[in]      use_padding           (Optional) Is padding in use or not. Defaults to true.
      * @param[in]      align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.08)
     void configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
                    SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
     /** Initialize the function's source, destination, interpolation type and border_mode.
@@ -78,6 +79,7 @@ public:
      *
      * @return a status
      */
+    ARM_COMPUTE_DEPRECATED_REL(20.08)
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode,
                            PixelValue constant_border_value = PixelValue(), SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true, bool align_corners = false);
     /** Static function to check if given info will lead to a valid configuration of @ref NEScale

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,7 +67,7 @@ public:
         tmp_median_gauss.allocator()->init(dst_info);
 
         //Configure the functions:
-        scale.configure(&src, &tmp_scale_median, InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::REPLICATE);
+        scale.configure(&src, &tmp_scale_median, ScaleKernelInfo{ InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::REPLICATE });
         median.configure(&tmp_scale_median, &tmp_median_gauss, BorderMode::REPLICATE);
         gauss.configure(&tmp_median_gauss, &dst, BorderMode::REPLICATE);
 

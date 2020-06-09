@@ -77,7 +77,7 @@ void CLLaplacianReconstruct::configure(const CLCompileContext &compile_context, 
     // Scale levels n-1 to 1, and add levels n-2 to 0
     for(size_t l = 0; l < last_level; ++l)
     {
-        _scalef[l].configure(compile_context, _tmp_pyr.get_pyramid_level(l + 1), _tmp_pyr.get_pyramid_level(l), arm_compute::InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, constant_border_value);
+        _scalef[l].configure(compile_context, _tmp_pyr.get_pyramid_level(l + 1), _tmp_pyr.get_pyramid_level(l), ScaleKernelInfo{ arm_compute::InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, constant_border_value });
         _addf[l].configure(compile_context, _tmp_pyr.get_pyramid_level(l), pyramid->get_pyramid_level(l), _tmp_pyr.get_pyramid_level(l), ConvertPolicy::SATURATE);
     }
 

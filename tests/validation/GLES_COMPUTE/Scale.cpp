@@ -90,7 +90,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Create and configure function
     GCScale gcscale;
-    gcscale.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy);
+    gcscale.configure(&src, &dst, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy });
 
     // Get border size depending on border mode
     const BorderSize border_size(border_mode == BorderMode::UNDEFINED ? 0 : 1);

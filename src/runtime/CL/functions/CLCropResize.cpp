@@ -135,7 +135,7 @@ void CLCropResize::configure(const CLCompileContext &compile_context, const ICLT
         configure_crop(_input, _boxes, _box_ind, _crop_results[num_box].get(), num_box, start, end, batch_index);
 
         auto scale_kernel = support::cpp14::make_unique<CLScale>();
-        scale_kernel->configure(compile_context, _crop_results[num_box].get(), _scaled_results[num_box].get(), _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT);
+        scale_kernel->configure(compile_context, _crop_results[num_box].get(), _scaled_results[num_box].get(), ScaleKernelInfo{ _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT });
         _scale.emplace_back(std::move(scale_kernel));
 
         Window win = calculate_max_window(*_output->info());

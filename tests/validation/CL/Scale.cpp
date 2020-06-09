@@ -121,7 +121,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 input_info, output_info, policy, border_mode, expected)
 {
     Status status = CLScale::validate(&input_info.clone()->set_is_resizable(false),
-                                      &output_info.clone()->set_is_resizable(false), policy, border_mode);
+                                      &output_info.clone()->set_is_resizable(false), ScaleKernelInfo{policy, border_mode});
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 
@@ -153,7 +153,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Create and configure function
     CLScale clscale;
-    clscale.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy);
+    clscale.configure(&src, &dst, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy });
 
     // Get border size depending on border mode
     const BorderSize border_size(border_mode == BorderMode::UNDEFINED ? 0 : 1);

@@ -45,13 +45,13 @@ BorderSize GCScaleKernel::border_size() const
     return BorderSize(1);
 }
 
-void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy)
+void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON(output == input);
-    ARM_COMPUTE_ERROR_ON(policy != InterpolationPolicy::NEAREST_NEIGHBOR);
+    ARM_COMPUTE_ERROR_ON(info.interpolation_policy != InterpolationPolicy::NEAREST_NEIGHBOR);
 
     _input  = input;
     _output = output;
@@ -61,16 +61,18 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
     const auto hr = static_cast<float>(input->info()->dimension(1)) / static_cast<float>(output->info()->dimension(1));
 
     // Compute actual border size
-    BorderSize border = border_undefined ? BorderSize(0) : border_size();
+    const bool border_undefined = info.border_mode == BorderMode::UNDEFINED;
+    BorderSize border           = border_undefined ? BorderSize(0) : border_size();
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
-    if(policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
+    auto interpolation_policy_to_use = info.interpolation_policy;
+    if(interpolation_policy_to_use == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
     {
-        policy = InterpolationPolicy::NEAREST_NEIGHBOR;
+        interpolation_policy_to_use = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
     else
     {
-        ARM_COMPUTE_ERROR_ON(policy == InterpolationPolicy::AREA);
+        ARM_COMPUTE_ERROR_ON(interpolation_policy_to_use == InterpolationPolicy::AREA);
     }
 
     // Create kernel
@@ -81,7 +83,7 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
 
     build_opts.emplace("#define DATA_TYPE_FP16");
     build_opts.emplace("#define BORDER_SIZE " + support::cpp11::to_string(border.right));
-    if(sampling_policy == SamplingPolicy::TOP_LEFT)
+    if(info.sampling_policy == SamplingPolicy::TOP_LEFT)
     {
         build_opts.emplace("#define SAMPLING_POLICY_TOP_LEFT");
     }
@@ -106,7 +108,7 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
         build_opts.emplace("#define SCALE_NEAREST_GENERIC");
     }
 
-    std::string interpolation_name = string_from_interpolation_policy(policy); // NOLINT
+    std::string interpolation_name = string_from_interpolation_policy(interpolation_policy_to_use); // NOLINT
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
     std::string kernel_name = "scale_" + interpolation_name;
     _kernel                 = GCKernelLibrary::get().create_kernel(kernel_name, build_opts);
@@ -130,8 +132,8 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
 
     output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()),
                                                                      output->info()->tensor_shape(),
-                                                                     policy,
-                                                                     sampling_policy,
+                                                                     info.interpolation_policy,
+                                                                     info.sampling_policy,
                                                                      border_undefined));
 
     IGCKernel::configure(win);

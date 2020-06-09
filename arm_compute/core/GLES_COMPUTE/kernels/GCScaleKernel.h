@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_GCSCALEKERNEL_H
 
 #include "arm_compute/core/GLES_COMPUTE/IGCSimple3DKernel.h"
-#include "arm_compute/core/Types.h"
+#include "arm_compute/core/KernelDescriptors.h"
 
 namespace arm_compute
 {
@@ -37,14 +37,12 @@ class GCScaleKernel : public IGCSimple3DKernel
 public:
     /** Initialise the kernel's inputs, output and interpolation policy
      *
-     * @param[in]  input            Source tensor. Data types supported: F16
-     * @param[out] output           Destination tensor. Data types supported: Same as @p input
-     *                              All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in]  policy           Interpolation type to use
-     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
-     * @param[in]  sampling_policy  (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     * @param[in]  input  Source tensor. Data types supported: F16
+     * @param[out] output Destination tensor. Data types supported: Same as @p input
+     *                    All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in]  info   @ref ScaleKernelInfo descriptor to be used to configure
      */
-    void configure(const IGCTensor *input, IGCTensor *output, InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+    void configure(const IGCTensor *input, IGCTensor *output, const ScaleKernelInfo &info);
 
     // Inherited methods overridden:
     void run(const Window &window) override;

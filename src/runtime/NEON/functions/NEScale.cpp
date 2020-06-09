@@ -37,8 +37,8 @@
 #include <cstddef>
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float wr, float hr, size_t input_element_size, SamplingPolicy sampling_policy)
@@ -237,3 +237,4 @@ void NEScale::run()
     }
     NEScheduler::get().schedule(&_scale_kernel, Window::DimY);
 }
+} // namespace arm_compute

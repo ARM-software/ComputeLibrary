@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ public:
         shape_scaled.set(1, shape[1] * scale_y);
         dst = create_tensor<TensorType>(shape_scaled, data_type);
 
-        scale_layer.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy);
+        scale_layer.configure(&src, &dst, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy });
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);

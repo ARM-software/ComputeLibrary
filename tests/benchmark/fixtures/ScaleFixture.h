@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,7 +75,7 @@ public:
         dst = create_tensor<TensorType>(shape_scaled, data_type);
 
         // Create and configure function
-        scale_func.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy);
+        scale_func.configure(&src, &dst, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy });
 
         // Allocate tensors
         src.allocator()->allocate();
