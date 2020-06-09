@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@ using namespace utils;
     os << "N : " << common_params.N << std::endl;
     os << "K : " << common_params.K << std::endl;
     os << "B : " << common_params.B << std::endl;
+    os << "Data type : " << common_params.data_type << std::endl;
     return os;
 }
 
@@ -42,22 +43,33 @@ CommonGemmExampleOptions::CommonGemmExampleOptions(CommandLineParser &parser)
       M(parser.add_positional_option<SimpleOption<size_t>>("M", 100)),
       N(parser.add_positional_option<SimpleOption<size_t>>("N", 100)),
       K(parser.add_positional_option<SimpleOption<size_t>>("K", 50)),
-      B(parser.add_positional_option<SimpleOption<size_t>>("B", 1))
+      B(parser.add_positional_option<SimpleOption<size_t>>("B", 1)),
+      data_type()
 {
+    const std::set<DataType> supported_data_types
+    {
+        DataType::F16,
+        DataType::F32,
+    };
+
+    data_type = parser.add_option<EnumOption<DataType>>("type", supported_data_types, DataType::F32);
+
     help->set_help("Show this help message.");
     M->set_help("Number of lhs matrix rows.");
     N->set_help("Number of rhs matrix columns.");
     K->set_help("Number of lhs matrix columns/rhs matrix rows.");
     B->set_help("Batch size.");
+    data_type->set_help("Data type to use");
 }
 
 CommonGemmExampleParams consume_common_gemm_example_parameters(const CommonGemmExampleOptions &options)
 {
     CommonGemmExampleParams common_params;
-    common_params.M = options.M->value();
-    common_params.N = options.N->value();
-    common_params.K = options.K->value();
-    common_params.B = options.B->value();
+    common_params.M         = options.M->value();
+    common_params.N         = options.N->value();
+    common_params.K         = options.K->value();
+    common_params.B         = options.B->value();
+    common_params.data_type = options.data_type->value();
     return common_params;
 }
 } // namespace gemm_tuner
