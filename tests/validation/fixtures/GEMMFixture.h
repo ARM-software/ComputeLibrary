@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -678,7 +678,7 @@ class GEMMMatrixMultiplyReshapedValidationFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0, bool interleave_lhs,
-               bool interleave_rhs, DataType data_type, float alpha, float beta, bool broadcast_bias, bool lhs_transpose, const ActivationLayerInfo &act_info)
+               bool interleave_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, bool broadcast_bias, bool lhs_transpose, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = m0;
@@ -688,11 +688,12 @@ public:
         lhs_info.transpose  = lhs_transpose;
 
         GEMMRHSMatrixInfo rhs_info;
-        rhs_info.n0         = n0;
-        rhs_info.k0         = k0;
-        rhs_info.h0         = h0;
-        rhs_info.interleave = interleave_rhs;
-        rhs_info.transpose  = !lhs_transpose;
+        rhs_info.n0                 = n0;
+        rhs_info.k0                 = k0;
+        rhs_info.h0                 = h0;
+        rhs_info.interleave         = interleave_rhs;
+        rhs_info.transpose          = !lhs_transpose;
+        rhs_info.export_to_cl_image = export_to_cl_image;
 
         // Set the tensor shapes for LHS and RHS matrices
         const TensorShape lhs_shape(k, m, batch_size);
@@ -833,8 +834,7 @@ class GEMMMatrixMultiplyReshaped3DValidationFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0,
-               bool interleave_lhs,
-               bool interleave_rhs, DataType data_type, float alpha, float beta, bool lhs_transpose, const ActivationLayerInfo &act_info)
+               bool interleave_lhs, bool interleave_rhs, bool export_to_cl_image, DataType data_type, float alpha, float beta, bool lhs_transpose, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = m0;
@@ -844,11 +844,12 @@ public:
         lhs_info.transpose  = lhs_transpose;
 
         GEMMRHSMatrixInfo rhs_info;
-        rhs_info.n0         = n0;
-        rhs_info.k0         = k0;
-        rhs_info.h0         = h0;
-        rhs_info.interleave = interleave_rhs;
-        rhs_info.transpose  = !lhs_transpose;
+        rhs_info.n0                 = n0;
+        rhs_info.k0                 = k0;
+        rhs_info.h0                 = h0;
+        rhs_info.interleave         = interleave_rhs;
+        rhs_info.transpose          = !lhs_transpose;
+        rhs_info.export_to_cl_image = export_to_cl_image;
 
         // In case of GEMM3D, m is the product between m_w and m_h
         const unsigned int m = m_w * m_h;

@@ -79,6 +79,23 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
                                     "Bias addition only supported with broadcast mode in case the input or output has to be reinterpreted as 3D");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.fp_mixed_precision && (input0->data_type() == DataType::F32), "Mixed precision only supported for F16 data type");
 
+    if(rhs_info.export_to_cl_image)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.n0 == 2) || (rhs_info.n0 == 3), "Export to cl_image only supported with n0 = 4, 8 or 16");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.k0 == 2) || (rhs_info.k0 == 3), "Export to cl_image only supported with k0 = 4, 8 or 16");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->data_type() != DataType::F32, "Export to cl_image only supported with F32 data type");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()), "The extension cl_khr_image2d_from_buffer is not supported on the target platform");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0, "Impossible to retrieve the cl_image pitch alignment");
+
+        // Check the width and height of the output tensor.
+        // Since we cannot create a 3d image from a buffer, the third dimension is collapsed with the second dimension
+        size_t max_image_w = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_WIDTH>();
+        size_t max_image_h = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_IMAGE2D_MAX_HEIGHT>();
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->tensor_shape()[0] > max_image_w * 4, "Not supported width for cl_image");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->tensor_shape()[1] * input1->tensor_shape()[2] > max_image_h, "Not supported height for cl_image");
+    }
+
     const unsigned int m = gemm_info.m;
     const unsigned int n = gemm_info.n;
     const unsigned int k = gemm_info.k;
@@ -207,8 +224,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 } // namespace
 
 CLGEMMMatrixMultiplyReshapedKernel::CLGEMMMatrixMultiplyReshapedKernel()
-    : _input0(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_output_as_3d(false), _k(1), _use_dummy_work_items(false), _add_bias(false),
-      _broadcast_bias(false)
+    : _input0(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_output_as_3d(false), _use_dummy_work_items(false), _add_bias(false),
+      _broadcast_bias(false), _export_to_cl_image(false)
 {
 }
 
@@ -233,10 +250,10 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compi
     _input2                   = helpers::float_ops::is_zero(beta) ? nullptr : input2;
     _output                   = output;
     _reinterpret_output_as_3d = gemm_info.depth_output_gemm3d != 0;
-    _k                        = gemm_info.k;
     _use_dummy_work_items     = preferred_dummy_work_items_support(CLKernelLibrary::get().get_device());
     _add_bias                 = _input2 != nullptr;
     _broadcast_bias           = gemm_info.broadcast_bias;
+    _export_to_cl_image       = rhs_info.export_to_cl_image;
 
     // Check if we need to slide the matrix B
     const unsigned int num_dimensions_input0 = _input0->info()->num_dimensions();
@@ -270,10 +287,13 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compi
     build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.a()));
     build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.b()));
     build_opts.add_option_if(enable_mixed_precision, "-DMIXED_PRECISION");
+    build_opts.add_option_if(rhs_info.export_to_cl_image, "-DOPENCL_IMAGE_SUPPORT");
+    build_opts.add_option("-DRHS_HEIGHT=" + support::cpp11::to_string(input1->info()->dimension(1)));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DDATA_TYPE_ACCUMULATOR=" + (enable_mixed_precision ? get_cl_type_from_data_type(DataType::F32) : get_cl_type_from_data_type(data_type)));
     build_opts.add_option("-DM=" + support::cpp11::to_string(gemm_info.m));
     build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n));
+    build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(lhs_info.k0));
@@ -283,6 +303,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compi
     std::string kernel_name("gemm_mm_reshaped_");
     kernel_name += lhs_info.transpose ? "lhs_t_" : "lhs_nt_";
     kernel_name += rhs_info.transpose ? "rhs_t" : "rhs_nt";
+    kernel_name += rhs_info.export_to_cl_image ? "_texture" : "";
 
     // Create kernel
     _kernel = create_kernel(compile_context, kernel_name, build_opts.options());
@@ -356,20 +377,31 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
     slice_matrix_b.set(Window::DimX, Window::Dimension(0, 1, 1));
     slice_matrix_b.set(Window::DimY, Window::Dimension(0, 1, 1));
 
-    if(_reinterpret_output_as_3d)
+    const unsigned int total_cross_plane_pad = _output->info()->padding().top + _output->info()->padding().bottom;
+
+    cl_mem      cl_image;
+    cl_int      err = CL_SUCCESS;
+    cl::Image2D input1_image2d;
+
+    if(_export_to_cl_image)
     {
-        // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
-        unsigned int idx0;
-        if(_add_bias)
-        {
-            idx0 = 4 * num_arguments_per_2D_tensor() + 5;
-        }
-        else
-        {
-            idx0 = 3 * num_arguments_per_2D_tensor() + 4;
-        }
-        const unsigned int total_cross_plane_pad = _output->info()->padding().top + _output->info()->padding().bottom;
-        _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));
+        // Create OpenCL image object from OpenCL buffer
+        const cl_image_format format = { CL_RGBA, CL_FLOAT };
+
+        cl_image_desc desc;
+        memset(&desc, 0, sizeof(desc));
+        desc.image_type      = CL_MEM_OBJECT_IMAGE2D;
+        desc.mem_object      = _input1->cl_buffer()();
+        desc.image_row_pitch = _input1->info()->strides_in_bytes()[1];
+        desc.image_width     = _input1->info()->dimension(0) / 4;
+        desc.image_height    = _input1->info()->dimension(1) * _input1->info()->dimension(2);
+
+        cl_image = clCreateImage(CLKernelLibrary::get().context()(), CL_MEM_READ_ONLY, &format, &desc, nullptr, &err);
+
+        ARM_COMPUTE_UNUSED(err);
+        ARM_COMPUTE_ERROR_ON_MSG(err != CL_SUCCESS, "Error during the creation of CL image from buffer");
+
+        input1_image2d = cl::Image2D(cl_image);
     }
 
     do
@@ -383,18 +415,48 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
         }
 
         unsigned int idx = 0;
+
+        // LHS buffer
         add_2D_tensor_argument(idx, _input0, slice);
-        add_2D_tensor_argument(idx, _input1, slice_b);
-        add_2D_tensor_argument_if((_add_bias), idx, _input2, slice);
+
+        // RHS buffer or RHS OpenCL image (_export_to_cl_image == true)
+        if(_export_to_cl_image)
+        {
+            _kernel.setArg(idx++, input1_image2d);
+        }
+        else
+        {
+            add_2D_tensor_argument(idx, _input1, slice_b);
+        }
+
+        // Bias buffer (_add_bias == true)
+        add_2D_tensor_argument_if(_add_bias, idx, _input2, slice);
+
+        // Output buffer
         add_2D_tensor_argument(idx, _output, slice);
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_k));
+
+        // LHS stride_z
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));
+
+        // RHS stride_z (not used if _export_to_cl_image == true)
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input1->info()->strides_in_bytes()[2]));
+
+        // Bias stride_z (if _add_bias == true)
         if(_add_bias)
         {
             _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input2->info()->strides_in_bytes()[2]));
         }
+
+        // Output stride_z
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
+
+        // Cross-plan padding (if _reinterpret_output_as_3d = true)
+        if(_reinterpret_output_as_3d)
+        {
+            _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(total_cross_plane_pad));
+        }
+
+        // Dispatch kernel
         enqueue(queue, *this, slice, lws_hint(), _use_dummy_work_items);
     }
     while(window.slide_window_slice_3D(slice));

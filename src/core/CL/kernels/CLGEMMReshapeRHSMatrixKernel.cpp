@@ -54,13 +54,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.n0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON((rhs_info.k0 == 1) && (rhs_info.transpose));
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image && ((rhs_info.n0 != 4) || input->data_type() != DataType::F32), "Export to cl_image only supported with n0 = 4 and F32 data type");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image
-                                    && !image2d_from_buffer_supported(CLKernelLibrary::get().get_device()), "The extension cl_khr_image2d_from_buffer is not supported on the target platform");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(rhs_info.export_to_cl_image && (get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0), "Impossible to retrieve the cl_image pitch alignment");
 
     if(rhs_info.export_to_cl_image)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.n0 == 2) || (rhs_info.n0 == 3), "Export to cl_image only supported with n0 = 4, 8 or 16");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.k0 == 2) || (rhs_info.k0 == 3), "Export to cl_image only supported with k0 = 4, 8 or 16");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() != DataType::F32, "Export to cl_image only supported with F32 data type");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()), "The extension cl_khr_image2d_from_buffer is not supported on the target platform");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device()) == 0, "Impossible to retrieve the cl_image pitch alignment");
+
         TensorShape output_shape = compute_rhs_reshaped_shape(*input, rhs_info);
 
         // Check the width and height of the output tensor.

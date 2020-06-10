@@ -1859,7 +1859,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
  * @note The data type used for the accumulators must be passed at compile time using -DDATA_TYPE_ACCUMULATOR (e.g. -DDATA_TYPE_ACCUMULATOR=float)
  * @note The F16 computation also supports mixed precision through the option -DMIXED_PRECISION passed at compile time. If enabled, DATA_TYPE_ACCUMULATOR should be set to float
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
- * @note The GEMM's dimensions M and N must be passed at compile time using -DM and -DN (e.g. -DM=52 and -DN=90).
+ * @note The GEMM's dimensions M, N and K must be passed at compile time using -DM, -DN and -DK (e.g. -DM=52, -DN=90 and -DK=24).
  * @note The block's dimensions used for reshaping the LHS matrix and the RHS matrix (M0, N0 and K0) must be passed at compile time using -DM0, -DN0 and -DK0 (e.g. -DM0=4, -DN0=8, -DK0=4).
  * @note The number of M0xK0 vertical blocks stored on the same output row of the reshaped LHS matrix must be passed at compile time using -DV0 (e.g. -DV0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
@@ -1904,7 +1904,6 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
- * @param[in]  k                                  Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
@@ -1917,7 +1916,6 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
                                             IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                             IMAGE_DECLARATION(dst),
-                                            uint k,
                                             uint lhs_stride_z,
                                             uint rhs_stride_z,
 #if defined(BETA)
@@ -1984,7 +1982,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zlhs, 0); //uint zlhs0=0,zlhs1=0,zlhs2=0,... zlhs7=0;
     REPEAT_VAR_INIT_TO_CONST(16, uint, zero, 0);
 
-    for(int i = 0; i < k; i += K0)
+    for(int i = 0; i < K; i += K0)
     {
         // Supported cases (M0, K0):
         // 1,2 - 1,3 - 1,4 - 1,8 - 1,16
@@ -2114,7 +2112,270 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
+#undef LHS_STEP_LOOP
+#undef RHS_STEP_LOOP
 }
+
+#if defined(OPENCL_IMAGE_SUPPORT)
+/** This OpenCL kernel computes the matrix multiplication between 2 matrices. The RHS matrix is stored in OpenCL image object.
+ *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
+ *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
+ *
+ * @note -DOPENCL_IMAGE_SUPPORT must be passed at compile time in order to compile this OpenCL kernel
+ * @note The data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
+ * @note The data type used for the accumulators must be passed at compile time using -DDATA_TYPE_ACCUMULATOR (e.g. -DDATA_TYPE_ACCUMULATOR=float)
+ * @note The F16 computation also supports mixed precision through the option -DMIXED_PRECISION passed at compile time. If enabled, DATA_TYPE_ACCUMULATOR should be set to float
+ * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
+ * @note The GEMM's dimensions M, N and K must be passed at compile time using -DM, -DN and -DK (e.g. -DM=52, -DN=90 and -DK=24).
+ * @note The block's dimensions used for reshaping the LHS matrix and the RHS matrix (M0, N0 and K0) must be passed at compile time using -DM0, -DN0 and -DK0 (e.g. -DM0=4, -DN0=8, -DK0=4).
+ * @note The number of M0xK0 vertical blocks stored on the same output row of the reshaped LHS matrix must be passed at compile time using -DV0 (e.g. -DV0=2)
+ * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
+ * @note If the M0xK0 blocks in the reshaped LHS matrix have been interleaved, the option -DLHS_INTERLEAVE must passed at compile time.
+ * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note Only the following configurations of M0, N0 and K0 are currently supported:
+ *  - M0 = 2, 3, 4, 5, 6, 7, 8
+ *  - N0 = 4, 8, 16
+ *  - K0 = 4, 8, 16
+ *  - V0 >= 1
+ *  - H0 >= 1
+ *
+ * @note If the activation type were passed at compile time through -DACTIVATION_TYPE (e.g. -DACTIVATION_TYPE=RELU), A, B variables, required by some activation functions, should be passed at compile time as well using -DA_VAL= and -DB_VAL= respectively.
+ *       The activation function is performed after the bias addition
+ * @note In case the output has to be reinterpreted as a 3D tensor (e.g. output of convolution layer), the following information must be passed at compile time:
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns LHS matrix NOT reshaped
+ *
+ * @param[in]  lhs_ptr                            Pointer to the LHS reshaped matrix. Supported data type: F32
+ * @param[in]  lhs_stride_x                       Stride of the LHS reshaped matrix in X dimension (in bytes)
+ * @param[in]  lhs_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  lhs_stride_y                       Stride of the LHS reshaped matrix in Y dimension (in bytes)
+ * @param[in]  lhs_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  lhs_offset_first_element_in_bytes  The offset of the first element in the LHS reshaped matrix
+ * @param[in]  rhs_img                            The RHS reshaped matrix as OpenCL image object. Supported data type: same as @p lhs_ptr
+ * @param[in]  bias_ptr                           (Optional) Pointer to the bias matrix. Supported data type: same as @p lhs_ptr
+ * @param[in]  bias_stride_x                      (Optional) Stride of the bias matrix in X dimension (in bytes)
+ * @param[in]  bias_step_x                        (Optional) bias_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  bias_stride_y                      (Optional) Stride of the bias matrix in Y dimension (in bytes)
+ * @param[in]  bias_step_y                        (Optional) bias_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  bias_offset_first_element_in_bytes (Optional) The offset of the first element in the bias matrix
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data type: same as @p lhs_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
+ * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
+ * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_cross_plane_pad                (Optional) Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ */
+__kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
+                                                    __read_only image2d_t rhs_img,
+#if defined(BETA)
+                                                    IMAGE_DECLARATION(bias),
+#endif // defined(BETA)
+                                                    IMAGE_DECLARATION(dst),
+                                                    uint lhs_stride_z,
+                                                    uint rhs_stride_z,
+#if defined(BETA)
+                                                    uint bias_stride_z,
+#endif //defined(BETA)
+                                                    uint dst_stride_z
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                                    ,
+                                                    uint dst_cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D
+                                                   )
+{
+    // Pixel unit
+#define PIXEL_UNIT CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(K0)
+
+    // Block size
+#define LHS_BLOCK_SIZE ((K0) * (M0))
+
+#if defined(LHS_INTERLEAVE)
+#define LHS_OFFSET_X (K0)
+#define LHS_STEP_X ((K0) * (V0))
+#define LHS_STEP_LOOP (1)
+#else // defined(INTERLEAVE)
+#define LHS_OFFSET_X (LHS_BLOCK_SIZE)
+#define LHS_STEP_X (K0)
+#define LHS_STEP_LOOP (V0)
+#endif // defined(INTERLEAVE)
+
+    // Block size
+#define RHS_BLOCK_SIZE (PIXEL_UNIT * (N0))
+
+    // RHS offset and step X
+#if defined(RHS_INTERLEAVE)
+#define RHS_OFFSET_X (PIXEL_UNIT)
+#define RHS_STEP_X (PIXEL_UNIT * (H0))
+#define RHS_STEP_LOOP (1)
+#else // defined(RHS_INTERLEAVE)
+#define RHS_OFFSET_X (RHS_BLOCK_SIZE)
+#define RHS_STEP_X PIXEL_UNIT
+#define RHS_STEP_LOOP (H0)
+#endif // defined(RHS_INTERLEAVE)
+
+#if defined(DUMMY_WORK_ITEMS)
+    if((get_global_id(0) * N0 >= N) || (get_global_id(1) * M0 >= M))
+    {
+        return;
+    }
+#endif // defined(DUMMY_WORK_ITEMS)
+
+    // Compute LHS matrix address
+    __global uchar *lhs_addr = lhs_ptr + lhs_offset_first_element_in_bytes + (get_global_id(1) % V0) * (uint)LHS_OFFSET_X * sizeof(DATA_TYPE) + (get_global_id(1) / V0) * (uint)lhs_stride_y +
+                               (get_global_id(2) * lhs_stride_z);
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    const uint z_rhs = (get_global_id(2) % MATRIX_B_DEPTH);
+#else  // defined(MATRIX_B_DEPTH)
+    const uint z_rhs = get_global_id(2);
+#endif // defined(MATRIX_B_DEPTH)
+
+    // Compute RHS matrix coordinates
+    uint       x_rhs = (get_global_id(0) % H0) * (uint)RHS_OFFSET_X;
+    const uint y_rhs = (get_global_id(0) / (uint)H0) + z_rhs * RHS_HEIGHT;
+
+    // Initialize the accumulators
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, N0), c, 0);
+
+    REPEAT_VAR_INIT_TO_CONST(M0, uint, zlhs, 0); //uint zlhs0=0,zlhs1=0,zlhs2=0,... zlhs7=0;
+    REPEAT_VAR_INIT_TO_CONST(16, uint, zero, 0);
+
+    for(int i = 0; i < K; i += K0)
+    {
+        // Load values from LHS matrix
+        LOAD_BLOCK(M0, K0, DATA_TYPE, a, lhs_addr, 0, LHS_STEP_X * sizeof(DATA_TYPE), zlhs);
+
+        // Load values from RHS matrix stored in a cl_image
+        REPEAT_VAR_INIT_TO_CONST(N0, VEC_DATA_TYPE(DATA_TYPE, K0), b, 0);
+        LOAD_TEXTURE2D(N0, PIXEL_UNIT, DATA_TYPE, b, rhs_img, x_rhs, y_rhs, RHS_STEP_X, 0);
+
+        // Accumulate
+        ARM_DOT_K0XN0(a0, b, c0);
+#if M0 > 1
+        ARM_DOT_K0XN0(a1, b, c1);
+#endif // M0 > 1
+#if M0 > 2
+        ARM_DOT_K0XN0(a2, b, c2);
+#endif // M0 > 2
+#if M0 > 3
+        ARM_DOT_K0XN0(a3, b, c3);
+#endif // M0 > 3
+#if M0 > 4
+        ARM_DOT_K0XN0(a4, b, c4);
+#endif // M0 > 4
+#if M0 > 5
+        ARM_DOT_K0XN0(a5, b, c5);
+#endif // M0 > 5
+#if M0 > 6
+        ARM_DOT_K0XN0(a6, b, c6);
+#endif // M0 > 6
+#if M0 > 7
+        ARM_DOT_K0XN0(a7, b, c7);
+#endif // M0 > 7
+
+        lhs_addr += (M0 * LHS_STEP_X * LHS_STEP_LOOP) * sizeof(DATA_TYPE);
+
+        x_rhs += N0 * RHS_STEP_X * RHS_STEP_LOOP;
+    }
+
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * dst_stride_y);
+
+    REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
+
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+
+    // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
+    CALCULATE_Z_OFFSET(M0, uint, zout, get_global_id(1), HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst_addr += get_global_id(2) * dst_stride_z * DEPTH_GEMM3D;
+
+#else // defined(REINTERPRET_OUTPUT_AS_3D)
+
+    // Add offset for batched GEMM
+    dst_addr += get_global_id(2) * dst_stride_z;
+
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
+
+    // Multiply by the weight of matrix-matrix product and store the result
+#if defined(ALPHA)
+    SCALE_BLOCK(M0, DATA_TYPE, c, ALPHA);
+#endif // defined(ALPHA)
+
+    // Add beta*bias
+#if defined(BETA)
+#if defined(BROADCAST_BIAS)
+    __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE));
+
+    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+
+#ifndef UNIT_BETA
+    SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
+#endif // UNIT_BIAS
+
+    // c = c + bias[broadcasted]
+#if defined(MIXED_PRECISION)
+    CONVERT_BLOCK(1, N0, DATA_TYPE_ACCUMULATOR, bias, bias_hp);
+    ADD_BLOCK_BROADCAST(M0, c, bias_hp0);
+#else  // defined(MIXED_PRECISION)
+    ADD_BLOCK_BROADCAST(M0, c, bias0);
+#endif // defined(MIXED_PRECISION)
+
+#else // defined(BROADCAST_BIAS)
+    __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * bias_stride_y) + get_global_id(
+                                    2) * bias_stride_z;
+
+    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+
+#ifndef UNIT_BETA
+    SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
+#endif // UNIT_BIAS
+
+    // c = c + bias
+#if defined(MIXED_PRECISION)
+    CONVERT_BLOCK(M0, N0, DATA_TYPE_ACCUMULATOR, bias, bias_hp);
+    ADD_BLOCK(M0, c, bias_hp);
+#else  // defined(MIXED_PRECISION)
+    ADD_BLOCK(M0, c, bias);
+#endif // defined(MIXED_PRECISION)
+
+#endif // defined(BROADCAST_BIAS)
+#endif // defined(BETA)
+
+#if defined(ACTIVATION_TYPE)
+#if defined(MIXED_PRECISION)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
+#else  // defined(MIXED_PRECISION)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+#endif // defined(MIXED_PRECISION)
+#endif // defined(ACTIVATION_TYPE)
+
+    // Store output block
+#if defined(MIXED_PRECISION)
+    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+#else  // defined(MIXED_PRECISION)
+    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+#endif // defined(MIXED_PRECISION)
+
+#undef LHS_BLOCK_SIZE
+#undef LHS_OFFSET_X
+#undef LHS_STEP_X
+#undef RHS_BLOCK_SIZE
+#undef RHS_OFFSET_X
+#undef RHS_STEP_X
+#undef PIXEL_UNIT
+#undef LHS_STEP_LOOP
+#undef RHS_STEP_LOOP
+}
+#endif // defined(OPENCL_IMAGE_SUPPORT)
 
 #if defined(LHS_TRANSPOSE)
 
@@ -2232,7 +2493,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  *
  * @note LHS_TRANSPOSE should be passed at compile time in order to compile this OpenCL kernel (e.g. -DLHS_TRANSPOSE).
  * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
- * @note The GEMM's dimensions M and N must be passed at compile time using -DM and -DN (e.g. -DM=52 and -DN=90).
+ * @note The GEMM's dimensions M, N and K must be passed at compile time using -DM, -DN and -DK (e.g. -DM=52, -DN=90 and -DK=24).
  * @note The block's dimensions used for reshaping the LHS matrix and the RHS matrix (M0, N0 and K0) must be passed at compile time using -DM0, -DN0 and -DK0 (e.g. -DM0=4, -DN0=8, -DK0=4).
  * @note The number of M0xK0 vertical blocks stored on the same output row of the reshaped LHS matrix must be passed at compile time using -DV0 (e.g. -DV0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
@@ -2277,7 +2538,6 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
- * @param[in]  k                                  Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
@@ -2290,7 +2550,6 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
                                             IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                             IMAGE_DECLARATION(dst),
-                                            uint k,
                                             uint lhs_stride_z,
                                             uint rhs_stride_z,
 #if defined(BETA)
@@ -2360,11 +2619,14 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
     __global DATA_TYPE *lhs = (__global DATA_TYPE *)(lhs_addr);
     __global DATA_TYPE *rhs = (__global DATA_TYPE *)(rhs_addr);
 
-    for(int i = 0; i < k; i += K0)
+    for(int i = 0; i < K; i += K0)
     {
         VEC_DATA_TYPE(DATA_TYPE, M0)
-        a0 = VLOAD(M0)(0, lhs);
+        a0;
         VEC_DATA_TYPE(DATA_TYPE, N0)
+        b0;
+
+        a0 = VLOAD(M0)(0, lhs);
         b0 = VLOAD(N0)(0, rhs);
 
         ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
@@ -2595,6 +2857,367 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
 }
+
+#if defined(OPENCL_IMAGE_SUPPORT)
+/** This OpenCL kernel computes the matrix multiplication between 2 matrices. The RHS matrix is stored in OpenCL image object.
+ *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be transposed
+ *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be NOT transposed
+ *
+ * @note -DOPENCL_IMAGE_SUPPORT must be passed at compile time in order to compile this OpenCL kernel
+ * @note LHS_TRANSPOSE should be passed at compile time in order to compile this OpenCL kernel (e.g. -DLHS_TRANSPOSE).
+ * @note The height of the RHS matrix should be passed at compile time using -DRHS_HEIGHT=<value> (e.g. -DRHS_HEIGHT=32)
+ * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
+ * @note The GEMM's dimensions M, N and K must be passed at compile time using -DM, -DN and -DK (e.g. -DM=52, -DN=90 and -DK=24).
+ * @note The block's dimensions used for reshaping the LHS matrix and the RHS matrix (M0, N0 and K0) must be passed at compile time using -DM0, -DN0 and -DK0 (e.g. -DM0=4, -DN0=8, -DK0=4).
+ * @note The number of M0xK0 vertical blocks stored on the same output row of the reshaped LHS matrix must be passed at compile time using -DV0 (e.g. -DV0=2)
+ * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
+ * @note If the M0xK0 blocks in the reshaped LHS matrix have been interleaved, the option -DLHS_INTERLEAVE must passed at compile time.
+ * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note Only the following configurations of M0, N0 and K0 are currently supported:
+ *  - M0 = 2, 3, 4, 8
+ *  - N0 = 4, 8, 16
+ *  - K0 = 4, 8, 16
+ *  - V0 >= 1
+ *  - H0 >= 1
+ *
+ * @note If the activation type were passed at compile time through -DACTIVATION_TYPE (e.g. -DACTIVATION_TYPE=RELU), A, B variables, required by some activation functions, should be passed at compile time as well using -DA_VAL= and -DB_VAL= respectively.
+ *       The activation function is performed after the bias addition
+ * @note In case the output has to be reinterpreted as a 3D tensor (e.g. output of convolution layer), the following information must be passed at compile time:
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns LHS matrix NOT reshaped
+ *
+ * @param[in]  lhs_ptr                            Pointer to the LHS reshaped matrix. Supported data type: F32
+ * @param[in]  lhs_stride_x                       Stride of the LHS reshaped matrix in X dimension (in bytes)
+ * @param[in]  lhs_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  lhs_stride_y                       Stride of the LHS reshaped matrix in Y dimension (in bytes)
+ * @param[in]  lhs_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  lhs_offset_first_element_in_bytes  The offset of the first element in the LHS reshaped matrix
+ * @param[in]  rhs_img                            The RHS reshaped matrix as cl_image 2d. Supported data type: same as @p lhs_ptr
+ * @param[in]  bias_ptr                           (Optional) Pointer to the bias matrix. Supported data type: same as @p lhs_ptr
+ * @param[in]  bias_stride_x                      (Optional) Stride of the bias matrix in X dimension (in bytes)
+ * @param[in]  bias_step_x                        (Optional) bias_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  bias_stride_y                      (Optional) Stride of the bias matrix in Y dimension (in bytes)
+ * @param[in]  bias_step_y                        (Optional) bias_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  bias_offset_first_element_in_bytes (Optional) The offset of the first element in the bias matrix
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data type: same as @p lhs_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
+ * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
+ * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_cross_plane_pad                (Optional) Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ */
+__kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
+                                                    __read_only image2d_t rhs_img,
+#if defined(BETA)
+                                                    IMAGE_DECLARATION(bias),
+#endif // defined(BETA)
+                                                    IMAGE_DECLARATION(dst),
+                                                    uint lhs_stride_z,
+                                                    uint rhs_stride_z,
+#if defined(BETA)
+                                                    uint bias_stride_z,
+#endif //defined(BETA)
+                                                    uint dst_stride_z
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                                    ,
+                                                    uint dst_cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D
+                                                   )
+{
+    // Pixel unit
+#define PIXEL_UNIT CONVERT_VECTOR_SIZE_TO_PIXEL_UNIT(N0)
+
+    // Block size
+#define LHS_BLOCK_SIZE ((K0) * (M0))
+
+#if defined(LHS_INTERLEAVE)
+#define LHS_OFFSET_X (M0)
+#define LHS_STEP_X ((M0) * (V0))
+#define LHS_STEP_LOOP (1)
+#else // defined(INTERLEAVE)
+#define LHS_OFFSET_X (LHS_BLOCK_SIZE)
+#define LHS_STEP_X (M0)
+#define LHS_STEP_LOOP (V0)
+#endif // defined(INTERLEAVE)
+
+    // Block size
+#define RHS_BLOCK_SIZE ((K0) * (PIXEL_UNIT))
+
+    // RHS offset and step X
+#if defined(RHS_INTERLEAVE)
+#define RHS_OFFSET_X (PIXEL_UNIT)
+#define RHS_STEP_X ((PIXEL_UNIT) * (H0))
+#else // defined(RHS_INTERLEAVE)
+#define RHS_OFFSET_X (RHS_BLOCK_SIZE)
+#define RHS_STEP_X (PIXEL_UNIT)
+#endif // defined(RHS_INTERLEAVE)
+
+    const uint x = get_global_id(0);
+    const uint y = get_global_id(1);
+    const uint z = get_global_id(2);
+
+#if defined(DUMMY_WORK_ITEMS)
+    if((x * N0 >= N) || (y * M0 >= M))
+    {
+        return;
+    }
+#endif // defined(DUMMY_WORK_ITEMS)
+
+    // Compute LHS matrix address
+    __global uchar *lhs_addr = lhs_ptr + lhs_offset_first_element_in_bytes + (y % V0) * (uint)LHS_OFFSET_X * sizeof(DATA_TYPE) + (y / V0) * (uint)lhs_stride_y + (z * lhs_stride_z);
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    const uint z_rhs = (z % MATRIX_B_DEPTH);
+#else  // defined(MATRIX_B_DEPTH)
+    const uint z_rhs = z;
+#endif // defined(MATRIX_B_DEPTH)
+
+    // Compute RHS matrix coordinates
+    uint       x_rhs = (x % H0) * (uint)RHS_OFFSET_X;
+    const uint y_rhs = (x / (uint)H0) + z_rhs * RHS_HEIGHT;
+
+    // Initialize the accumulators
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE_ACCUMULATOR, N0), c, 0);
+
+    REPEAT_VAR_INIT_TO_CONST(M0, uint, zero, 0);
+
+    __global DATA_TYPE *lhs = (__global DATA_TYPE *)(lhs_addr);
+
+    for(int i = 0; i < K; i += K0)
+    {
+        VEC_DATA_TYPE(DATA_TYPE, M0)
+        a0;
+        VEC_DATA_TYPE(DATA_TYPE, N0)
+        b0;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 0 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+#if K0 > 1
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 1 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+#endif // K0 > 1
+
+#if K0 > 2
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 2 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+#endif // K0 > 2
+
+#if K0 > 3
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 3 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+#endif // K0 > 3
+
+#if K0 > 4
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 4 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 5 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 6 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 7 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+#endif // K0 > 4
+
+#if K0 > 8
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 8 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 9 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 10 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 11 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 12 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 13 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 14 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+
+        a0 = VLOAD(M0)(0, lhs);
+        b0 = READ_IMAGE2D(DATA_TYPE, PIXEL_UNIT, rhs_img, (x_rhs + 15 * RHS_STEP_X), (y_rhs));
+
+        ARM_MM_T_NT(M0, N0, 1, DATA_TYPE, a, b, c);
+
+        lhs += LHS_STEP_X;
+#endif // K0 > 8
+
+#ifndef LHS_INTERLEAVE
+        lhs += (M0 * K0 * (V0 - 1));
+#endif // LHS_INTERLEAVE
+
+        x_rhs += K0 * RHS_STEP_X;
+#ifndef RHS_INTERLEAVE
+        x_rhs += (PIXEL_UNIT * K0 * (H0 - 1));
+#endif // RHS_INTERLEAVE
+    }
+
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (y * (uint)M0 * dst_stride_y);
+
+    REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0);
+
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+
+    // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
+    CALCULATE_Z_OFFSET(M0, uint, zout, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst_addr += z * dst_stride_z * DEPTH_GEMM3D;
+
+#else // defined(REINTERPRET_OUTPUT_AS_3D)
+
+    // Add offset for batched GEMM
+    dst_addr += z * dst_stride_z;
+
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
+
+    // Multiply by the weight of matrix-matrix product and store the result
+#if defined(ALPHA)
+    SCALE_BLOCK(M0, DATA_TYPE, c, ALPHA);
+#endif // defined(ALPHA)
+
+    // Add beta*bias
+#if defined(BETA)
+#if defined(BROADCAST_BIAS)
+    __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE));
+
+    LOAD_BLOCK(1, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+
+#ifndef UNIT_BETA
+    SCALE_BLOCK(1, DATA_TYPE, bias, BETA);
+#endif // UNIT_BIAS
+
+    // c = c + bias[broadcasted]
+#if defined(MIXED_PRECISION)
+    CONVERT_BLOCK(1, N0, DATA_TYPE_ACCUMULATOR, bias, bias_hp);
+    ADD_BLOCK_BROADCAST(M0, c, bias_hp0);
+#else  // defined(MIXED_PRECISION)
+    ADD_BLOCK_BROADCAST(M0, c, bias0);
+#endif // defined(MIXED_PRECISION)
+
+#else // defined(BROADCAST_BIAS)
+    __global uchar *bias_addr = bias_ptr + bias_offset_first_element_in_bytes + (x * (uint)N0 * sizeof(DATA_TYPE)) + (y * (uint)M0 * bias_stride_y) + z * bias_stride_z;
+
+    LOAD_BLOCK(M0, N0, DATA_TYPE, bias, bias_addr, 0, bias_stride_y, zero);
+
+#ifndef UNIT_BETA
+    SCALE_BLOCK(M0, DATA_TYPE, bias, BETA);
+#endif // UNIT_BIAS
+
+#if defined(MIXED_PRECISION)
+    CONVERT_BLOCK(M0, N0, DATA_TYPE_ACCUMULATOR, bias, bias_hp);
+    ADD_BLOCK(M0, c, bias_hp);
+#else  // defined(MIXED_PRECISION)
+    ADD_BLOCK(M0, c, bias);
+#endif // defined(MIXED_PRECISION)
+
+#endif // defined(BROADCAST_BIAS)
+#endif // defined(BETA)
+
+#if defined(ACTIVATION_TYPE)
+#if defined(MIXED_PRECISION)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE_ACCUMULATOR, c, A_VAL, B_VAL);
+#else  // defined(MIXED_PRECISION)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+#endif // defined(MIXED_PRECISION)
+#endif // defined(ACTIVATION_TYPE)
+
+    // Store output block
+#if defined(MIXED_PRECISION)
+    CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+#else  // defined(MIXED_PRECISION)
+    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+#endif // defined(MIXED_PRECISION)
+
+#undef LHS_BLOCK_SIZE
+#undef LHS_OFFSET_X
+#undef LHS_STEP_X
+#undef RHS_BLOCK_SIZE
+#undef RHS_OFFSET_X
+#undef RHS_STEP_X
+#undef PIXEL_UNIT
+#undef LHS_STEP_LOOP
+#undef RHS_STEP_LOOP
+}
+#endif // defined(OPENCL_IMAGE_SUPPORT)
 
 #endif // defined(LHS_TRANSPOSE)
 

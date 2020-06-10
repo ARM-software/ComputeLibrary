@@ -1912,8 +1912,8 @@ struct GEMMLHSMatrixInfo
 struct GEMMRHSMatrixInfo
 {
     GEMMRHSMatrixInfo() = default;
-    GEMMRHSMatrixInfo(unsigned int n, unsigned int k, unsigned int h, bool trans, bool inter)
-        : n0(n), k0(k), h0(h), transpose(trans), interleave(inter)
+    GEMMRHSMatrixInfo(unsigned int n, unsigned int k, unsigned int h, bool trans, bool inter, bool export_to_cl_img)
+        : n0(n), k0(k), h0(h), transpose(trans), interleave(inter), export_to_cl_image(export_to_cl_img)
     {
     }
     unsigned int n0{ 1 };                     /**< Number of columns processed by the matrix multiplication */
