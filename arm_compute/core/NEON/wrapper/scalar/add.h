@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,13 @@ inline int16_t add_sat(const int16_t &a, const int16_t &b)
     const int16x4_t va = { a, 0, 0, 0 };
     const int16x4_t vb = { b, 0, 0, 0 };
     return vget_lane_s16(vqadd_s16(va, vb), 0);
+}
+
+inline int32_t add_sat(const int32_t &a, const int32_t &b)
+{
+    const int32x2_t va = { a, 0 };
+    const int32x2_t vb = { b, 0 };
+    return vget_lane_s32(vqadd_s32(va, vb), 0);
 }
 
 inline float add_sat(const float &a, const float &b)

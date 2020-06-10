@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,23 +61,24 @@ public:
      *   - (S16,U8)          -> S16
      *   - (U8,S16)          -> S16
      *   - (S16,S16)         -> S16
+     *   - (S32,S32)         -> S32
      *   - (F16,F16)         -> F16
      *   - (F32,F32)         -> F32
      *   - (QASYMM8,QASYMM8) -> QASYMM8
      *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
      *   - (QSYMM16,QSYMM16) -> QSYMM16
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in]  input1 First input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  input2 Second input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in]  policy Overflow policy.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAdditionKernel
      *
-     * @param[in] input1 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in] input2 An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32
-     * @param[in] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in] input1 First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in] input2 Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in] output The output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in] policy Overflow policy.
      *
      * @return a status
@@ -90,9 +91,9 @@ public:
 private:
     /** Common signature for all the specialised add functions
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
+     * @param[in]  input1 First input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32
+     * @param[in]  input2 Second input tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/S32/F32.
      * @param[in]  policy Overflow policy.
      * @param[in]  window Region on which to execute the kernel.
      */

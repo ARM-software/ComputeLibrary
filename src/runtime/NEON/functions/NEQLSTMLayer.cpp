@@ -189,6 +189,10 @@ void NEQLSTMLayer::configure(const ITensor *input,
     if(_has_projection)
     {
         _projection_reduction.configure(_projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
+        if(_projection_bias != nullptr)
+        {
+            _projection_bias_add.configure(_projection_bias, &_projection_eff_bias, &_projection_eff_bias, ConvertPolicy::SATURATE);
+        }
     }
 
     // Pre-transpose weights to be used in GEMM.
@@ -612,6 +616,11 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixAReductionKernel::validate(lstm_params.projection_weights(), &projection_eff_bias_info, GEMMLowpReductionKernelInfo(output_size, false,
                                                                                lstm_params.hidden_state_zero(),
                                                                                true)));
+        if(lstm_params.projection_bias() != nullptr)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lstm_params.projection_bias(), 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(lstm_params.projection_bias(), &projection_eff_bias_info, &projection_eff_bias_info, ConvertPolicy::SATURATE));
+        }
     }
 
     const TensorInfo input_weights_transposed(TensorShape(num_units, input_size), 1, input_to_forget_weights->data_type(), input_to_forget_weights->quantization_info());
@@ -804,7 +813,6 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     if(lstm_params.has_projection())
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(recurrent_to_forget_weights, lstm_params.projection_weights());
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(forget_gate_bias, lstm_params.projection_bias());
         ARM_COMPUTE_RETURN_ERROR_ON(qoutput_state_in.scale == 0);
 
         const UniformQuantizationInfo qprojection      = lstm_params.projection_weights()->quantization_info().uniform();
@@ -1065,10 +1073,11 @@ void NEQLSTMLayer::prepare()
 
         if(_has_projection)
         {
+            _projection_eff_bias.allocator()->allocate();
+            NEScheduler::get().schedule(&_projection_reduction, Window::DimY);
             if(_projection_bias != nullptr)
             {
-                _projection_eff_bias.allocator()->allocate();
-                NEScheduler::get().schedule(&_projection_reduction, Window::DimY);
+                NEScheduler::get().schedule(&_projection_bias_add, Window::DimY);
                 _projection_bias->mark_as_unused();
             }
 

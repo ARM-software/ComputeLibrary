@@ -93,9 +93,13 @@ Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &inp
 Status validate_arguments_with_arithmetic_rules(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S32, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input2);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S32, DataType::F32);
 
     const bool is_quantized = is_data_type_quantized(input1.data_type()) || is_data_type_quantized(input2.data_type());
     if(is_quantized)
@@ -119,7 +123,9 @@ Status validate_arguments_with_arithmetic_rules(const ITensorInfo &input1, const
     if(output.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                             DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                             DataType::S32, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((output.data_type() == DataType::U8) && ((input1.data_type() != DataType::U8) || (input2.data_type() != DataType::U8)),
                                         "Output can only be U8 if both inputs are U8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),

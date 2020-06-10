@@ -815,8 +815,12 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
     ARM_COMPUTE_UNUSED(policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                         DataType::S16, DataType::QSYMM16, DataType::F16,
+                                                         DataType::S32, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
 
@@ -834,6 +838,7 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
+            && !(input1.data_type() == DataType::S32 && input2.data_type() == DataType::S32 && output.data_type() == DataType::S32)
             && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32 && output.data_type() == DataType::F32)
             && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16 && output.data_type() == DataType::F16)
             && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8)
@@ -861,6 +866,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
         if(input1.data_type() == DataType::S16 || input2.data_type() == DataType::S16)
         {
             set_format_if_unknown(output, Format::S16);
+        }
+        if(input1.data_type() == DataType::S32 || input2.data_type() == DataType::S32)
+        {
+            set_format_if_unknown(output, Format::S32);
         }
         else if(input1.data_type() == DataType::F16 || input2.data_type() == DataType::F16)
         {
@@ -926,6 +935,8 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
         { "add_saturate_U8_U8_S16", &add_U8_U8_S16 },
         { "add_wrap_S16_S16_S16", &add_same<int16_t> },
         { "add_saturate_S16_S16_S16", &add_same<int16_t> },
+        { "add_wrap_S32_S32_S32", &add_same<int32_t> },
+        { "add_saturate_S32_S32_S32", &add_same<int32_t> },
         { "add_wrap_F32_F32_F32", &add_same<float> },
         { "add_saturate_F32_F32_F32", &add_same<float> },
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
