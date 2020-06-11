@@ -809,10 +809,7 @@ inline T wrap_around(T x, T m)
  *
  * @return The number of dimensions in the range [0, @p dim_axis]
  */
-inline size_t dim_index_2_num_dims(int32_t dim_axis, int32_t num_dims)
-{
-    return static_cast<size_t>(wrap_around(dim_axis, num_dims)) + 1;
-}
+inline size_t dim_index_2_num_dims(int32_t dim_axis, int32_t num_dims);
 
 /** Convert negative coordinates to positive in the range [0, num_dims_input]
  *

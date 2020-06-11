@@ -29,6 +29,11 @@
 
 namespace arm_compute
 {
+inline size_t dim_index_2_num_dims(int32_t dim_axis, int32_t num_dims)
+{
+    return static_cast<size_t>(wrap_around(dim_axis, num_dims)) + 1;
+}
+
 inline uint8_t pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float wr, float hr, int x, int y)
 {
     ARM_COMPUTE_ERROR_ON(first_pixel_ptr == nullptr);
