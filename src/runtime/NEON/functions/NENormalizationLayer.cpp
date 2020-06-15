@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,10 +30,10 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NENormalizationLayer::NENormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _norm_kernel(), _multiply_kernel(), _border_handler(), _input_squared()
+    : _memory_group(std::move(memory_manager)), _norm_kernel(), _multiply_kernel(), _input_squared()
 {
 }
 
@@ -50,7 +50,6 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, cons
     // Configure kernels
     _norm_kernel.configure(input, &_input_squared, output, norm_info);
     _multiply_kernel.configure(input, input, &_input_squared, 1.0f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-    _border_handler.configure(&_input_squared, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0.0f));
 
     // Allocate the tensor once the configure methods have been called
     _input_squared.allocator()->allocate();
@@ -72,6 +71,6 @@ void NENormalizationLayer::run()
     MemoryGroupResourceScope scope_mg(_memory_group);
 
     NEScheduler::get().schedule(&_multiply_kernel, Window::DimY);
-    NEScheduler::get().schedule(&_border_handler, Window::DimY);
     NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
+}
 }

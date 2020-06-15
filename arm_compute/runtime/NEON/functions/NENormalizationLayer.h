@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,7 +78,6 @@ private:
     MemoryGroup                     _memory_group;    /**< Function memory group */
     NENormalizationLayerKernel      _norm_kernel;     /**< Normalization layer kernel */
     NEPixelWiseMultiplicationKernel _multiply_kernel; /**< Pixel multiplication kernel */
-    NEFillBorderKernel              _border_handler;  /**< Kernel to handle  borders */
     Tensor                          _input_squared;   /**< The intermediate buffer which stores results of squaring input */
 };
 }

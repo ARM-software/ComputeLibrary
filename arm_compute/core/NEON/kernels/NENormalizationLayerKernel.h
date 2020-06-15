@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,6 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
     /** Function to perform normalization depending on the given template
@@ -104,7 +103,6 @@ private:
     const ITensor         *_input_squared;
     ITensor               *_output;
     NormalizationLayerInfo _norm_info;
-    BorderSize             _border_size;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NENORMALIZATIONLAYERKERNEL_H */

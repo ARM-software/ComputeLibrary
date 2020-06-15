@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,8 +61,6 @@ const auto NormalizationDatasetFP32 = combine(combine(combine(datasets::Normaliz
 TEST_SUITE(NEON)
 TEST_SUITE(NormalizationLayer)
 
-//TODO(COMPMID-415): Missing configuration?
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
@@ -95,6 +93,27 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 // clang-format on
 // *INDENT-ON*
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)),
+               shape, data_type)
+{
+    NormalizationLayerInfo info(NormType::IN_MAP_1D, 3U, 5.0f, 2.0f, 1.f, false);
+
+    // Create tensors
+    Tensor src = create_tensor<Tensor>(shape, data_type);
+    Tensor dst = create_tensor<Tensor>(shape, data_type);
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NENormalizationLayer norm;
+    norm.configure(&src, &dst, info);
+
+    // To enable check on src as soon as NEPixelWiseMultiplicationKernel stops using padding anymore: COMPMID-3477
+    //validate(src.info()->padding(), PaddingSize(0,0,0,0));
+    validate(dst.info()->padding(), PaddingSize());
+}
 
 template <typename T>
 using NENormalizationLayerFixture = NormalizationValidationFixture<Tensor, Accessor, NENormalizationLayer, T>;
