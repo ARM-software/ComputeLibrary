@@ -182,11 +182,7 @@ void sub_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const W
     const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
     const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
 
-    const float32x4_t vscale1    = vdupq_n_f32(iq1_info.scale);
-    const float32x4_t vscale2    = vdupq_n_f32(iq2_info.scale);
     const float32x4_t invvscaleo = vdupq_n_f32(1.f / oq_info.scale);
-    const int32x4_t   voffset1   = vdupq_n_s32(iq1_info.offset);
-    const int32x4_t   voffset2   = vdupq_n_s32(iq2_info.offset);
     const float32x4_t voffseto   = vdupq_n_f32(oq_info.offset);
 
     if(is_broadcast_across_x)
@@ -198,6 +194,10 @@ void sub_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const W
         const ITensor                *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
         const UniformQuantizationInfo broadcast_qinfo      = broadcast_tensor->info()->quantization_info().uniform();
         const UniformQuantizationInfo non_broadcast_qinfo  = non_broadcast_tensor->info()->quantization_info().uniform();
+        const float32x4_t             vscale1              = is_broadcast_input_2 ? vdupq_n_f32(iq1_info.scale) : vdupq_n_f32(iq2_info.scale);
+        const float32x4_t             vscale2              = is_broadcast_input_2 ? vdupq_n_f32(iq2_info.scale) : vdupq_n_f32(iq1_info.scale);
+        const int32x4_t               voffset1             = is_broadcast_input_2 ? vdupq_n_s32(iq1_info.offset) : vdupq_n_s32(iq2_info.offset);
+        const int32x4_t               voffset2             = is_broadcast_input_2 ? vdupq_n_s32(iq2_info.offset) : vdupq_n_s32(iq1_info.offset);
 
         // Clear X Dimension on execution window as we handle manually
         non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -223,7 +223,6 @@ void sub_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const W
                     vmulq_f32(vcvtq_f32_s32(vsubq_s32(wrapper::vreinterpret(wrapper::vmovl(wrapper::vgethigh(wrapper::vmovl(wrapper::vgethigh(broadcast_value_vec))))), voffset2)), vscale2),
                 }
             };
-            const float bfs = static_cast<int32_t>(broadcast_value - broadcast_qinfo.offset) * broadcast_qinfo.scale;
 
             // Compute S elements per iteration
             int x = window_start_x;
@@ -244,16 +243,16 @@ void sub_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const W
                 const int32x4x4_t rf =
                 {
                     {
-#ifdef __aarch64__
-                        vcvtnq_s32_f32(vmlaq_f32(voffseto, is_broadcast_input_2 ? vsubq_f32(bf.val[0], af.val[0]) : vsubq_f32(af.val[0], bf.val[0]), invvscaleo)),
-                        vcvtnq_s32_f32(vmlaq_f32(voffseto, is_broadcast_input_2 ? vsubq_f32(bf.val[1], af.val[1]) : vsubq_f32(af.val[1], bf.val[1]), invvscaleo)),
-                        vcvtnq_s32_f32(vmlaq_f32(voffseto, is_broadcast_input_2 ? vsubq_f32(bf.val[2], af.val[2]) : vsubq_f32(af.val[2], bf.val[2]), invvscaleo)),
-                        vcvtnq_s32_f32(vmlaq_f32(voffseto, is_broadcast_input_2 ? vsubq_f32(bf.val[3], af.val[3]) : vsubq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#ifdef __aarch64_
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, !is_broadcast_input_2 ? vsubq_f32(bf.val[0], af.val[0]) : vsubq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, !is_broadcast_input_2 ? vsubq_f32(bf.val[1], af.val[1]) : vsubq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, !is_broadcast_input_2 ? vsubq_f32(bf.val[2], af.val[2]) : vsubq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, !is_broadcast_input_2 ? vsubq_f32(bf.val[3], af.val[3]) : vsubq_f32(af.val[3], bf.val[3]), invvscaleo)),
 #else  //__aarch64__
-                        vcvtq_s32_f32(vmlaq_f32(voffseto, is_broadcast_input_2 ? vsubq_f32(bf.val[0], af.val[0]) : vsubq_f32(af.val[0], bf.val[0]), invvscaleo)),
-                        vcvtq_s32_f32(vmlaq_f32(voffseto, is_broadcast_input_2 ? vsubq_f32(bf.val[1], af.val[1]) : vsubq_f32(af.val[1], bf.val[1]), invvscaleo)),
-                        vcvtq_s32_f32(vmlaq_f32(voffseto, is_broadcast_input_2 ? vsubq_f32(bf.val[2], af.val[2]) : vsubq_f32(af.val[2], bf.val[2]), invvscaleo)),
-                        vcvtq_s32_f32(vmlaq_f32(voffseto, is_broadcast_input_2 ? vsubq_f32(bf.val[3], af.val[3]) : vsubq_f32(af.val[3], bf.val[3]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, !is_broadcast_input_2 ? vsubq_f32(bf.val[0], af.val[0]) : vsubq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, !is_broadcast_input_2 ? vsubq_f32(bf.val[1], af.val[1]) : vsubq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, !is_broadcast_input_2 ? vsubq_f32(bf.val[2], af.val[2]) : vsubq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                        vcvtq_s32_f32(vmlaq_f32(voffseto, !is_broadcast_input_2 ? vsubq_f32(bf.val[3], af.val[3]) : vsubq_f32(af.val[3], bf.val[3]), invvscaleo)),
 #endif //__aarch64__
                     }
                 };
@@ -267,13 +266,19 @@ void sub_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const W
             for(; x < window_end_x; ++x)
             {
                 const float afs   = static_cast<int32_t>(*(non_broadcast_input_ptr + x) - non_broadcast_qinfo.offset) * non_broadcast_qinfo.scale;
-                *(output_ptr + x) = quantize<T>((afs - bfs), out->info()->quantization_info());
+                const float bfs   = static_cast<int32_t>(broadcast_value - broadcast_qinfo.offset) * broadcast_qinfo.scale;
+                *(output_ptr + x) = quantize<T>(is_broadcast_input_2 ? afs - bfs : bfs - afs, out->info()->quantization_info());
             }
         },
         broadcast_input, non_broadcast_input, output);
     }
     else
     {
+        const float32x4_t vscale1  = vdupq_n_f32(iq1_info.scale);
+        const float32x4_t vscale2  = vdupq_n_f32(iq2_info.scale);
+        const int32x4_t   voffset1 = vdupq_n_s32(iq1_info.offset);
+        const int32x4_t   voffset2 = vdupq_n_s32(iq2_info.offset);
+
         // Clear X Dimension on execution window as we handle manually
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));

@@ -142,9 +142,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<uint8_t>, framew
 }
 TEST_SUITE_END() // U8
 
-using NEArithmeticSubtractionQASYMM8Fixture       = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, uint8_t>;
-using NEArithmeticSubtractionQASYMM8SignedFixture = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, int8_t>;
-using NEArithmeticSubtractionQSYMM16Fixture       = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, int16_t>;
+using NEArithmeticSubtractionQASYMM8Fixture                = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, uint8_t>;
+using NEArithmeticSubtractionQASYMM8SignedFixture          = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, int8_t>;
+using NEArithmeticSubtractionQASYMM8SignedBroadcastFixture = ArithmeticSubtractionValidationQuantizedBroadcastFixture<Tensor, Accessor, NEArithmeticSubtraction, int8_t>;
+using NEArithmeticSubtractionQSYMM16Fixture                = ArithmeticSubtractionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticSubtraction, int16_t>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
@@ -163,6 +164,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQASYMM8SignedFixture, fr
                                                                                                                        ArithmeticSubtractionQASYMM8SIGNEDDataset),
                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                                                                                                                    ArithmeticSubtractionQuantizationInfoSignedDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionQASYMM8SignedBroadcastFixture, framework::DatasetMode::ALL, combine(combine(combine(
+                           datasets::SmallShapesBroadcast(),
+                           ArithmeticSubtractionQASYMM8SIGNEDDataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                       ArithmeticSubtractionQuantizationInfoSignedDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
