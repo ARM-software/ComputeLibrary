@@ -474,7 +474,7 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
                                                                               RoundingPolicy::TO_ZERO));
         ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_gate, forget_gate_bias, &forget_gate, ConvertPolicy::SATURATE));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&forget_gate, &forget_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&forget_gate, &forget_gate, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
 
     // Validate input gate
     if(!lstm_params.has_cifg_opt())
@@ -508,7 +508,7 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
             ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&input_gate, lstm_params.input_layer_norm_weights(), &input_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
             ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&input_gate, lstm_params.input_gate_bias(), &input_gate, ConvertPolicy::SATURATE));
         }
-        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&input_gate, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&input_gate, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
     }
     else
     {
@@ -526,14 +526,14 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
                                                                               RoundingPolicy::TO_ZERO));
         ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&cell_state_tmp, cell_bias, &cell_state_tmp, ConvertPolicy::SATURATE));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&cell_state_tmp, nullptr, activation_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&cell_state_tmp, nullptr, activation_info));
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&cell_state_tmp, &input_gate, &cell_state_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&cell_state_tmp, &forget_gate, &cell_state_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&cell_state_tmp, &cell_state_tmp, &cell_state_tmp, ConvertPolicy::SATURATE));
     if(cell_threshold != 0.f)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&cell_state_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -cell_threshold,
-                                                                                                                    cell_threshold)));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&cell_state_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -cell_threshold,
+                                                                                                              cell_threshold)));
     }
 
     // Validate output gate tmp
@@ -559,18 +559,18 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
                                                                               RoundingPolicy::TO_ZERO));
         ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&output_gate_tmp, output_gate_bias, &output_gate_tmp, ConvertPolicy::SATURATE));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&output_gate_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&output_gate_tmp, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
 
     // Validate output state
-    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&cell_state_tmp, &cell_state_tmp, activation_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&cell_state_tmp, &cell_state_tmp, activation_info));
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&cell_state_tmp, &output_gate_tmp, &output_gate_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     if(lstm_params.has_projection())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(&output_gate_tmp, lstm_params.projection_weights(), lstm_params.projection_bias(), output_state_out));
         if(projection_threshold != 0.f)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(output_state_out, output_state_out,
-                                                                          ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -projection_threshold, projection_threshold)));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output_state_out, output_state_out,
+                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -projection_threshold, projection_threshold)));
         }
     }
 
@@ -612,7 +612,7 @@ void NELSTMLayer::run()
         NEScheduler::get().schedule(&_pixelwise_mul_forget_gate_coeff, Window::DimY);
         NEScheduler::get().schedule(&_accum_forget_gate_bias, Window::DimY);
     }
-    NEScheduler::get().schedule(&_activation_forget_gate, Window::DimY);
+    _activation_forget_gate.run();
 
     if(_run_cifg_opt)
     {
@@ -642,7 +642,7 @@ void NELSTMLayer::run()
             NEScheduler::get().schedule(&_pixelwise_mul_input_gate_coeff, Window::DimY);
             NEScheduler::get().schedule(&_accum_input_gate_bias, Window::DimY);
         }
-        NEScheduler::get().schedule(&_activation_input_gate, Window::DimY);
+        _activation_input_gate.run();
     }
 
     _fully_connected_cell_state.run();
@@ -655,14 +655,14 @@ void NELSTMLayer::run()
         NEScheduler::get().schedule(&_pixelwise_mul_cell_gate_coeff, Window::DimY);
         NEScheduler::get().schedule(&_accum_cell_gate_bias, Window::DimY);
     }
-    NEScheduler::get().schedule(&_activation_cell_state, Window::DimY);
+    _activation_cell_state.run();
     NEScheduler::get().schedule(&_pixelwise_mul_cell_state1, Window::DimY);
     NEScheduler::get().schedule(&_pixelwise_mul_cell_state2, Window::DimY);
     NEScheduler::get().schedule(&_accum_cell_state2, Window::DimY);
 
     if(_perform_cell_clipping)
     {
-        NEScheduler::get().schedule(&_cell_clip, Window::DimY);
+        _cell_clip.run();
     }
 
     _fully_connected_output.run();
@@ -677,9 +677,9 @@ void NELSTMLayer::run()
         NEScheduler::get().schedule(&_pixelwise_mul_output_gate_coeff, Window::DimY);
         NEScheduler::get().schedule(&_accum_output_gate_bias, Window::DimY);
     }
-    NEScheduler::get().schedule(&_activation_output, Window::DimY);
+    _activation_output.run();
 
-    NEScheduler::get().schedule(&_activation_output_state, Window::DimY);
+    _activation_output_state.run();
     NEScheduler::get().schedule(&_pixelwise_mul_output_state2, Window::DimY);
 
     if(_has_projection_weights)
@@ -687,7 +687,7 @@ void NELSTMLayer::run()
         _fully_connected_output_state.run();
         if(_perform_projection_clipping)
         {
-            NEScheduler::get().schedule(&_projection_clip, Window::DimY);
+            _projection_clip.run();
         }
     }
 

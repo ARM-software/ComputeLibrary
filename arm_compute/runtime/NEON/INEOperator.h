@@ -54,8 +54,8 @@ public:
     INEOperator &operator=(INEOperator &&) = default;
 
     // Inherited methods overridden:
-    void run(std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs, std::vector<OperatorTensors *> &workspace) override final;
-    void prepare(std::vector<OperatorTensors *> constants) override final;
+    void run(std::vector<InputTensor> inputs, std::vector<OutputTensor> outputs, std::vector<OperatorTensor> workspace) override final;
+    void prepare(std::vector<OperatorTensor> constants) override final;
 
 protected:
     std::unique_ptr<INEKernel> _kernel;

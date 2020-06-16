@@ -39,6 +39,18 @@ class ITensor;
 class NEReshapeLayer : public IFunction
 {
 public:
+    /** Default Constructor */
+    NEReshapeLayer();
+    /** Default Destructor */
+    ~NEReshapeLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEReshapeLayer(const NEReshapeLayer &) = delete;
+    /** Default move constructor */
+    NEReshapeLayer(NEReshapeLayer &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEReshapeLayer &operator=(const NEReshapeLayer &) = delete;
+    /** Default move assignment operator */
+    NEReshapeLayer &operator=(NEReshapeLayer &&);
     /** Initialise the kernel's inputs and outputs
      *
      * @param[in]  input  Input tensor. Data type supported: All
@@ -59,12 +71,8 @@ public:
     void run() override;
 
 private:
-    const ITensor *_input
-    {
-        nullptr
-    };
-    ITensor                              *_output{ nullptr };
-    std::unique_ptr<NEReshapeLayerKernel> _kernel{ nullptr };
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 
 namespace experimental

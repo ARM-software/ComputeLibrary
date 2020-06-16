@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,11 +24,11 @@
 #ifndef ARM_COMPUTE_NERNNLAYER_H
 #define ARM_COMPUTE_NERNNLAYER_H
 
-#include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NECopyKernel.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 
@@ -85,7 +85,7 @@ private:
     MemoryGroup                _memory_group;
     NEGEMM                     _gemm_state_f;
     NEArithmeticAdditionKernel _add_kernel;
-    NEActivationLayerKernel    _activation_kernel;
+    NEActivationLayer          _activation;
     NEFullyConnectedLayer      _fully_connected;
     NECopyKernel               _copy_kernel;
     Tensor                     _fully_connected_out;

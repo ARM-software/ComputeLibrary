@@ -83,7 +83,7 @@ void OMPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     }
 }
 
-void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs)
+void OMPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
     ARM_COMPUTE_ERROR_ON_MSG(hints.strategy() == StrategyHint::DYNAMIC,

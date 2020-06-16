@@ -44,7 +44,7 @@ void NEReshapeLayer::configure(const ITensorInfo *input, ITensorInfo *output)
 
 Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return arm_compute::NEReshapeLayer::validate(input, output);
+    return arm_compute::NEReshapeLayerKernel::validate(input, output);
 }
 
 MemoryRequirements NEReshapeLayer::workspace() const
@@ -53,32 +53,44 @@ MemoryRequirements NEReshapeLayer::workspace() const
 }
 } // namespace experimental
 
+struct NEReshapeLayer::Impl
+{
+    const ITensor                                *src{ nullptr };
+    ITensor                                      *dst{ nullptr };
+    std::unique_ptr<experimental::NEReshapeLayer> op{ nullptr };
+};
+
+NEReshapeLayer::NEReshapeLayer()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+
+NEReshapeLayer::NEReshapeLayer(NEReshapeLayer &&) = default;
+
+NEReshapeLayer &NEReshapeLayer::operator=(NEReshapeLayer &&) = default;
+
+NEReshapeLayer::~NEReshapeLayer() = default;
+
 void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
 {
-    _input  = input;
-    _output = output;
-
-    auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();
-    k->configure(input->info(), output->info());
-    _kernel = std::move(k);
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::NEReshapeLayer>();
+    _impl->op->configure(input->info(), output->info());
 }
 
 Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(experimental::NEReshapeLayer::validate(input, output));
 
     return Status{};
 }
 
 void NEReshapeLayer::run()
 {
-    InputOperatorTensors  src_0 = std::make_pair(TensorType::ACL_SRC, _input);
-    OutputOperatorTensors dst_0 = std::make_pair(TensorType::ACL_DST, _output);
-
-    std::vector<InputOperatorTensors *>  inputs  = { &src_0 };
-    std::vector<OutputOperatorTensors *> outputs = { &dst_0 };
-
-    NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, inputs, outputs);
+    const InputTensor src{ TensorType::ACL_SRC, _impl->src };
+    OutputTensor      dst{ TensorType::ACL_DST, _impl->dst };
+    _impl->op->run({ src }, { dst }, {});
 }
 } // namespace arm_compute

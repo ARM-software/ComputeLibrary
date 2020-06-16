@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/INEOperator.h"
 
 namespace arm_compute
 {
@@ -37,7 +38,7 @@ class ITensor;
  *
  * @note The function simulates an activation layer with the specified activation function.
  */
-class NEActivationLayer : public INESimpleFunctionNoBorder
+class NEActivationLayer : public IFunction
 {
 public:
     /** Constructor
@@ -45,14 +46,16 @@ public:
      * @param[in] ctx Runtime context to be used by the function
      */
     NEActivationLayer(IRuntimeContext *ctx = nullptr);
+    /** Destructor */
+    ~NEActivationLayer();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEActivationLayer(const NEActivationLayer &) = delete;
     /** Default move constructor */
-    NEActivationLayer(NEActivationLayer &&) = default;
+    NEActivationLayer(NEActivationLayer &&);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEActivationLayer &operator=(const NEActivationLayer &) = delete;
     /** Default move assignment operator */
-    NEActivationLayer &operator=(NEActivationLayer &&) = default;
+    NEActivationLayer &operator=(NEActivationLayer &&);
     /** [NEActivationLayer snippet] **/
     /** Set the input and output tensor.
      *
@@ -75,6 +78,41 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
+
+    // Inherited methods overridden
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
+
+namespace experimental
+{
+/** Basic function to run @ref NEActivationLayerKernel */
+class NEActivationLayer : public INEOperator
+{
+public:
+    /** Set the input and output tensor.
+     *
+     * @param[in]  input           Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
+     * @param[out] output          Destination tensor info. Data type supported: same as @p input
+     * @param[in]  activation_info Activation layer parameters.
+     */
+    void configure(const ITensorInfo *input, ITensorInfo *output, const ActivationLayerInfo &activation_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEActivationLayer
+     *
+     * @param[in] input    Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/QSYMM16/F16/F32.
+     * @param[in] output   Destination tensor info. Data type supported: same as @p input
+     * @param[in] act_info Activation layer information.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
+
+    // Inherited methods overridden:
+    MemoryRequirements workspace() const override;
+};
+} // namespace experimental
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEACTIVATIONLAYER_H */

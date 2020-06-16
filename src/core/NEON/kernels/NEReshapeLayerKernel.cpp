@@ -86,29 +86,32 @@ void NEReshapeLayerKernel::configure(const ITensorInfo *input, ITensorInfo *outp
     INEKernel::configure(win);
 }
 
-void NEReshapeLayerKernel::run_op(const std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs, const Window &window, const ThreadInfo &info)
+void NEReshapeLayerKernel::run_op(const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    switch(inputs[0]->second->info()->data_type())
+    const auto src = inputs[0].tensor;
+    auto       dst = outputs[0].tensor;
+
+    switch(src->info()->data_type())
     {
         case DataType::U8:
         case DataType::S8:
         case DataType::QASYMM8:
         case DataType::QASYMM8_SIGNED:
-            reshape_tensor<uint8_t>(window, inputs[0]->second, outputs[0]->second);
+            reshape_tensor<uint8_t>(window, src, dst);
             break;
         case DataType::U16:
         case DataType::S16:
         case DataType::F16:
-            reshape_tensor<uint16_t>(window, inputs[0]->second, outputs[0]->second);
+            reshape_tensor<uint16_t>(window, src, dst);
             break;
         case DataType::U32:
         case DataType::S32:
         case DataType::F32:
-            reshape_tensor<uint32_t>(window, inputs[0]->second, outputs[0]->second);
+            reshape_tensor<uint32_t>(window, src, dst);
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported data type!");

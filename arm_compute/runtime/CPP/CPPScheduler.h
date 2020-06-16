@@ -77,7 +77,7 @@ public:
      * @param[in] inputs  Vector that contains the input tensors.
      * @param[in] outputs Vector that contains the output tensors.
      */
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs) override;
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs) override;
 
 protected:
     /** Will run the workloads in parallel using num_threads
@@ -87,7 +87,7 @@ protected:
     void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
-    void schedule_common(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs);
+    void schedule_common(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs);
     struct Impl;
     std::unique_ptr<Impl> _impl;
 };

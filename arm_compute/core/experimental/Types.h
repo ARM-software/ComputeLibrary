@@ -36,21 +36,43 @@ class ITensor;
 /** Memory type */
 enum class TensorType
 {
-    ACL_SRC   = 0,
-    ACL_SRC_0 = 0,
-    ACL_SRC_1 = 1,
-    ACL_SRC_2 = 2,
-    ACL_DST   = 30,
-    ACL_DST_0 = 30,
-    ACL_DST_1 = 31,
-    ACL_INT   = 50,
-    ACL_INT_0 = 50,
-    ACL_INT_1 = 51,
-    ACL_INT_2 = 52
+    ACL_UNKNOWN = -1,
+    ACL_SRC     = 0,
+    ACL_SRC_0   = 0,
+    ACL_SRC_1   = 1,
+    ACL_SRC_2   = 2,
+    ACL_DST     = 30,
+    ACL_DST_0   = 30,
+    ACL_DST_1   = 31,
+    ACL_INT     = 50,
+    ACL_INT_0   = 50,
+    ACL_INT_1   = 51,
+    ACL_INT_2   = 52
 };
-using InputOperatorTensors  = std::pair<TensorType /* tensor type */, const ITensor * /* tensor object */>;
-using OutputOperatorTensors = std::pair<TensorType /* tensor type */, ITensor * /* tensor object */>;
-using OperatorTensors       = OutputOperatorTensors;
+
+/** Input tensor aggregate */
+struct InputTensor
+{
+    InputTensor(TensorType type, const ITensor *tensor)
+        : type(type), tensor(tensor)
+    {
+    }
+
+    TensorType     type{ TensorType::ACL_UNKNOWN };
+    const ITensor *tensor{ nullptr };
+};
+/** Output tensor aggregate */
+struct OutputTensor
+{
+    OutputTensor(TensorType type, ITensor *tensor)
+        : type(type), tensor(tensor)
+    {
+    }
+
+    TensorType type{ TensorType::ACL_UNKNOWN };
+    ITensor   *tensor{ nullptr };
+};
+using OperatorTensor = OutputTensor;
 
 namespace experimental
 {

@@ -34,8 +34,8 @@
 namespace arm_compute
 {
 NERNNLayer::NERNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation_kernel(), _fully_connected(memory_manager), _copy_kernel(), _fully_connected_out(), _gemm_output(),
-      _add_output(), _is_prepared(false)
+    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation(), _fully_connected(memory_manager), _copy_kernel(), _fully_connected_out(), _gemm_output(), _add_output(),
+      _is_prepared(false)
 {
 }
 
@@ -60,7 +60,7 @@ Status NERNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights
 
     ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, weights, bias, &shape_info));
     ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&shape_info, &shape_info, info));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&shape_info, &shape_info, info));
 
     return Status{};
 }
@@ -95,7 +95,7 @@ void NERNNLayer::configure(const ITensor *input, const ITensor *weights, const I
     _fully_connected_out.allocator()->allocate();
     _gemm_output.allocator()->allocate();
 
-    _activation_kernel.configure(&_add_output, hidden_state, info);
+    _activation.configure(&_add_output, hidden_state, info);
     _add_output.allocator()->allocate();
 
     _copy_kernel.configure(hidden_state, output);
@@ -112,7 +112,7 @@ void NERNNLayer::run()
     _gemm_state_f.run();
 
     NEScheduler::get().schedule(&_add_kernel, Window::DimY);
-    NEScheduler::get().schedule(&_activation_kernel, Window::DimY);
+    _activation.run();
 
     // copy hidden out to output
     NEScheduler::get().schedule(&_copy_kernel, Window::DimY);

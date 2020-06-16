@@ -49,7 +49,7 @@ void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     kernel->run(kernel->window(), info);
 }
 
-void SingleThreadScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, std::vector<InputOperatorTensors *> &inputs, std::vector<OutputOperatorTensors *> &outputs)
+void SingleThreadScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs)
 {
     ARM_COMPUTE_UNUSED(hints);
     ThreadInfo info;

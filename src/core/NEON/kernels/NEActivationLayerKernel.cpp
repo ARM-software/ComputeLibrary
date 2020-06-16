@@ -95,7 +95,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input, ITensorInfo *output)
 {
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps());
@@ -116,23 +116,15 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 NEActivationLayerKernel::NEActivationLayerKernel()
-    : _input(nullptr), _output(nullptr), _func(nullptr), _act_info()
+    : _func(nullptr), _act_info()
 {
 }
 
-void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
+void NEActivationLayerKernel::configure(const ITensorInfo *input, ITensorInfo *output, ActivationLayerInfo activation_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    _input    = input;
     _act_info = activation_info;
-    _output   = input;
-
-    // Out-of-place calculation
-    if(output != nullptr)
-    {
-        _output = output;
-    }
 
     // Disabled activation, thus no operation needed
     if(!activation_info.enabled())
@@ -140,7 +132,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         _func = nullptr;
     }
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr, activation_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output, activation_info));
 
     // Activation functions : FP32
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f32 =
@@ -218,7 +210,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
 
     };
 
-    switch(input->info()->data_type())
+    switch(input->data_type())
     {
         case DataType::QASYMM8_SIGNED:
             _func = act_map_qasymm8_signed[activation_info.activation()];
@@ -242,14 +234,14 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (output != nullptr) ? output->info() : nullptr);
+    auto win_config = validate_and_configure_window(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICPPKernel::configure(win_config.second);
 }
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
 typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
-NEActivationLayerKernel::activation(const Window &window)
+NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Window &window)
 {
     /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
@@ -262,16 +254,16 @@ NEActivationLayerKernel::activation(const Window &window)
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input(_input, win_collapsed);
-    Iterator output(_output, win_collapsed);
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
 
     // A small delta added to the input to prevent NAN values caused by zeros in inputs to SQRT
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    const auto delta = wrapper::vdup_n(static_cast<T>(1e-7), ExactTagType{});
+    const auto delta = wrapper::vdup_n(static_cast<T>(1e-7), ExactTagType {});
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    const auto delta = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType{});
+    const auto delta = wrapper::vdup_n(static_cast<T>(1e-24), ExactTagType {});
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    const auto const_1     = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
+    const auto const_1     = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType {});
     const auto const_0     = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
     const auto const_6     = wrapper::vdup_n(static_cast<T>(6.f), ExactTagType{});
     const auto const_3     = wrapper::vdup_n(static_cast<T>(3.f), ExactTagType{});
@@ -402,7 +394,7 @@ NEActivationLayerKernel::activation(const Window &window)
 }
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
+typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Window &window)
 {
     const int                window_step_x  = 16 / sizeof(T);
     const auto               window_start_x = static_cast<int>(window.x().start());
@@ -412,11 +404,11 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input(_input, win_collapsed);
-    Iterator output(_output, win_collapsed);
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
 
-    const UniformQuantizationInfo qi_in           = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out          = _output->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_in           = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out          = dst->info()->quantization_info().uniform();
     const qasymm8x16_t            va              = vdupq_n_u8(quantize_qasymm8(_act_info.a(), qi_in));
     const qasymm8x16_t            vb              = vdupq_n_u8(quantize_qasymm8(_act_info.b(), qi_in));
     const qasymm8_t               a               = quantize_qasymm8(_act_info.a(), qi_in);
@@ -579,7 +571,7 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
 }
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
+typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Window &window)
 {
     const int                window_step_x  = 16 / sizeof(T);
     const auto               window_start_x = static_cast<int>(window.x().start());
@@ -589,11 +581,11 @@ typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NE
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input(_input, win_collapsed);
-    Iterator output(_output, win_collapsed);
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
 
-    const UniformQuantizationInfo qi_in           = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out          = _output->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_in           = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out          = dst->info()->quantization_info().uniform();
     const qasymm8x16_signed_t     va              = vdupq_n_s8(quantize_qasymm8_signed(_act_info.a(), qi_in));
     const qasymm8x16_signed_t     vb              = vdupq_n_s8(quantize_qasymm8_signed(_act_info.b(), qi_in));
     const qasymm8_signed_t        a               = quantize_qasymm8_signed(_act_info.a(), qi_in);
@@ -756,7 +748,7 @@ typename std::enable_if<std::is_same<T, qasymm8_signed_t>::value, void>::type NE
 }
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, qsymm16_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
+typename std::enable_if<std::is_same<T, qsymm16_t>::value, void>::type NEActivationLayerKernel::activation(const ITensor *src, ITensor *dst, const Window &window)
 {
     const int                window_step_x  = 16 / sizeof(T);
     const auto               window_start_x = static_cast<int>(window.x().start());
@@ -766,11 +758,11 @@ typename std::enable_if<std::is_same<T, qsymm16_t>::value, void>::type NEActivat
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator input(_input, win_collapsed);
-    Iterator output(_output, win_collapsed);
+    Iterator input(src, win_collapsed);
+    Iterator output(dst, win_collapsed);
 
-    const UniformQuantizationInfo qi_in    = _input->info()->quantization_info().uniform();
-    const UniformQuantizationInfo qi_out   = _output->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_in    = src->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out   = dst->info()->quantization_info().uniform();
     const auto                    vconst_1 = vdupq_n_f32(1.f);
     const float32x4_t             va_f32   = vdupq_n_f32(_act_info.a());
     const float32x4_t             vb_f32   = vdupq_n_f32(_act_info.b());
@@ -863,7 +855,9 @@ Status NEActivationLayerKernel::validate(const ITensorInfo *input, const ITensor
     return Status{};
 }
 
-void NEActivationLayerKernel::run(const Window &window, const ThreadInfo &info)
+void NEActivationLayerKernel::run_op(const std::vector<InputTensor> &inputs,
+                                     const std::vector<OutputTensor> &outputs,
+                                     const Window &window, const ThreadInfo &info)
 {
     // Early exit on disabled activation
     if(!_act_info.enabled())
@@ -876,5 +870,7 @@ void NEActivationLayerKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    (this->*_func)(window);
+    ARM_COMPUTE_ERROR_ON(inputs.empty() || outputs.empty());
+
+    (this->*_func)(inputs[0].tensor, outputs[0].tensor, window);
 }
