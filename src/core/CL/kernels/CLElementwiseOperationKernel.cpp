@@ -248,9 +248,6 @@ void CLElementwiseOperationKernel::configure_common(const ICLTensor *input1, con
 
 void CLElementwiseOperationKernel::configure_common(const CLCompileContext &compile_context, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
-
     // Configure kernel window
     auto win_config = validate_and_configure_window(*input1->info(), *input2->info(), *output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
@@ -347,6 +344,9 @@ void CLSaturatedArithmeticOperationKernel::configure(const CLCompileContext &com
                                                      const ConvertPolicy       &policy,
                                                      const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_ERROR_THROW_ON(CLSaturatedArithmeticOperationKernel::validate(op, input1->info(), input2->info(), output->info(), policy, act_info));
+
     _policy   = policy;
     _op       = op;
     _act_info = act_info;
@@ -368,11 +368,6 @@ Status CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation op, co
 std::pair<Status, Window> CLSaturatedArithmeticOperationKernel::validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
     return validate_and_configure_window_for_arithmetic_operators(input1, input2, output);
-}
-
-Status CLSaturatedArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
-{
-    return validate_arguments_with_arithmetic_rules(input1, input2, output);
 }
 
 CLBuildOptions CLSaturatedArithmeticOperationKernel::generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
@@ -405,6 +400,9 @@ void CLArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTen
 void CLArithmeticOperationKernel::configure(const CLCompileContext &compile_context, ArithmeticOperation op, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output,
                                             const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_ERROR_THROW_ON(CLArithmeticOperationKernel::validate(op, input1->info(), input2->info(), output->info(), act_info));
+
     _op       = op;
     _act_info = act_info;
     configure_common(compile_context, input1, input2, output);
@@ -438,18 +436,6 @@ std::pair<Status, Window> CLArithmeticOperationKernel::validate_and_configure_wi
     else
     {
         return validate_and_configure_window_for_arithmetic_operators(input1, input2, output);
-    }
-}
-Status CLArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
-{
-    if(_op == ArithmeticOperation::DIV || _op == ArithmeticOperation::POWER)
-    {
-        // Division and Power operators don't support integer arithmetic
-        return validate_arguments_with_float_only_supported_rules(input1, input2, output);
-    }
-    else
-    {
-        return validate_arguments_with_arithmetic_rules(input1, input2, output);
     }
 }
 

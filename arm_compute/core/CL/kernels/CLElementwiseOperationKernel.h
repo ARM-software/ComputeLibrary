@@ -72,14 +72,6 @@ protected:
      */
     virtual std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output) = 0;
 
-    /** Validate the argument passed to the kernel
-     *
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/F16/U32/S32/F32.
-     * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor. Data types supported: Same as @p input1.
-     */
-    virtual Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) = 0;
-
     /** Generate the build options for the specific kernel
      *
      * @reutrn a CLBuildOptions struct
@@ -159,7 +151,6 @@ protected:
     // Inherited methods overridden:
     std::string name() override;
     std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output) override;
-    Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) override;
     CLBuildOptions generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) override;
     std::string generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &input1, const ITensorInfo &output) override;
 
@@ -213,7 +204,6 @@ protected:
     // Inherited methods overridden:
     std::string name() override;
     std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output) override;
-    Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) override;
     CLBuildOptions generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) override;
     std::string generate_id_for_tuning(const std::string &kernel_name, const ITensorInfo &input1, const ITensorInfo &output) override;
 

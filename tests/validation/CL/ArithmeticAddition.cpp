@@ -102,6 +102,31 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+/** Validate fused activation expecting the following behaviours:
+ *
+ * - Fused activation with float data type should succeed
+ * - Fused activation with quantized data type should fail
+ *
+ */
+TEST_CASE(FusedActivation, framework::DatasetMode::ALL)
+{
+    auto   input  = TensorInfo{ TensorShape(2U, 2U), 1, DataType::F32 };
+    auto   output = TensorInfo{ TensorShape(2U, 2U), 1, DataType::F32 };
+    Status result{};
+
+    const auto act_info = ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU);
+
+    // Fused-activation float type
+    result = CLArithmeticAddition::validate(&input, &input, &output, ConvertPolicy::WRAP, act_info);
+    ARM_COMPUTE_EXPECT(bool(result) == true, framework::LogLevel::ERRORS);
+
+    // Fused-activation quantized type
+    input.set_data_type(DataType::QASYMM8);
+    output.set_data_type(DataType::QASYMM8);
+    result = CLArithmeticAddition::validate(&input, &input, &output, ConvertPolicy::WRAP, act_info);
+    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
+}
+
 template <typename T>
 using CLArithmeticAdditionFixture = ArithmeticAdditionValidationFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
 
