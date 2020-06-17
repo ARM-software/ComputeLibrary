@@ -333,8 +333,11 @@ function run() {
   local total_num_experiment
   local num_params
   local num_configs
-  num_params=$( wc -l ${GEMM_SHAPES_FILE} | cut -d " " -f 1)
-  num_configs=$( wc -l ${GEMM_CONFIGS_FILE} | cut -d " " -f 1 )
+  #local match_expression="^(?:\s*\d+\s*,)+\s*\d+\s*$"
+  local match_expression="^(\s*[0-9]+\s*,)+\s*[0-9]\s*$"
+  # Don't count empty lines and lines starting with # (comments)
+  num_params=$( grep -E "$match_expression" "${GEMM_SHAPES_FILE}" | wc -l  | cut -d " " -f 1)
+  num_configs=$( grep -E "$match_expression" "${GEMM_CONFIGS_FILE}" | wc -l  | cut -d " " -f 1)
   (( total_num_experiment=${num_params} * ${num_configs} ))
   # Time elapsed since the beginning in seconds
   local time_elapsed_s
@@ -346,19 +349,22 @@ function run() {
   do
     while read gemm_config
     do
-      echo "Running..." 1>&2
-      example_args="${gemm_shape},${gemm_config}"
-      # Run experiment
-      ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${expr_count}.${OUT_EXTENSION} --instruments=OPENCL_TIMER_MS
-      # Print progress
-      print_progress ${expr_count} ${total_num_experiment}
-      # Print time statistics
-      time_elapsed_s=$SECONDS
-      echo "Time elapsed since beginning: $(( $time_elapsed_s / 60 ))m $(( $time_elapsed_s % 60 ))s" 1>&2
-      (( time_est_s=(${total_num_experiment} - ${expr_count}) * ${time_elapsed_s} / ${expr_count} ))
-      echo "Time estimated to finish: $(( $time_est_s / 60 ))m $(( $time_est_s % 60 ))s" 1>&2
-      (( expr_count++ ))
-      echo "Done." 1>&2
+      # Ignore empty lines and lines starting with # (comments)
+      if echo "$gemm_shape" | grep -Eq "$match_expression" && echo "$gemm_config" | grep -Pq "$match_expression";then
+        echo "Running..." 1>&2
+        example_args="${gemm_shape},${gemm_config}"
+        # Run experiment
+        ${EXAMPLE_BIN_DIR}/${example_bin} --example_args=${example_args} --iterations=${NUM_ITERATION} --json-file=${OUT_DIR}/${expr_count}.${OUT_EXTENSION} --instruments=OPENCL_TIMER_MS
+        # Print progress
+        print_progress ${expr_count} ${total_num_experiment}
+        # Print time statistics
+        time_elapsed_s=$SECONDS
+        echo "Time elapsed since beginning: $(( $time_elapsed_s / 60 ))m $(( $time_elapsed_s % 60 ))s" 1>&2
+        (( time_est_s=(${total_num_experiment} - ${expr_count}) * ${time_elapsed_s} / ${expr_count} ))
+        echo "Time estimated to finish: $(( $time_est_s / 60 ))m $(( $time_est_s % 60 ))s" 1>&2
+        (( expr_count++ ))
+        echo "Done." 1>&2
+      fi
     done < "${GEMM_CONFIGS_FILE}"
   done < "${GEMM_SHAPES_FILE}"
   echo "Finished running all configs for ${example_bin}" 1>&2
