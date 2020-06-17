@@ -191,7 +191,7 @@ void NEQLSTMLayer::configure(const ITensor *input,
         _projection_reduction.configure(_projection_weights, &_projection_eff_bias, GEMMLowpReductionKernelInfo(output_size, false, lstm_params.hidden_state_zero(), true));
         if(_projection_bias != nullptr)
         {
-            _projection_bias_add.configure(&_projection_eff_bias, _projection_bias, nullptr, ConvertPolicy::SATURATE);
+            _projection_bias_add.configure(_projection_bias, &_projection_eff_bias, &_projection_eff_bias, ConvertPolicy::SATURATE);
         }
     }
 

@@ -241,30 +241,6 @@ public:
     }
 };
 
-/** Data set containing pairs of small tensor shapes that are broadcast compatible for in-place computations.
- *  When doing in-place computations, only the second input can be broadcast.
- */
-class SmallShapesBroadcastInPlace final : public framework::dataset::ZipDataset<ShapeDataset, ShapeDataset>
-{
-public:
-    SmallShapesBroadcastInPlace()
-        : ZipDataset<ShapeDataset, ShapeDataset>(
-              ShapeDataset("Shape0",
-    {
-        TensorShape{ 9U, 9U, 3U, 4U },
-                     TensorShape{ 27U, 13U, 2U, 4U },
-                     TensorShape{ 1U, 16U, 10U, 2U, 128U },
-    }),
-    ShapeDataset("Shape1",
-    {
-        TensorShape{ 9U, 1U, 3U },
-        TensorShape{ 1U },
-        TensorShape{ 1U, 1U, 1U, 1U, 128U },
-    }))
-    {
-    }
-};
-
 /** Data set containing medium tensor shapes. */
 class MediumShapes final : public ShapeDataset
 {

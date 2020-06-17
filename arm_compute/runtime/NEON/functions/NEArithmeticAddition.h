@@ -25,14 +25,14 @@
 #define ARM_COMPUTE_NEARITHMETICADDITION_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to run @ref NEArithmeticAdditionKernel */
-class NEArithmeticAddition : public INESimpleFunctionNoBorder
+class NEArithmeticAddition : public INESimpleFunction
 {
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
@@ -51,18 +51,18 @@ public:
      *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
      *   - (QSYMM16,QSYMM16) -> QSYMM16
      *
-     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in]      input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[out]     output   (Optional) Output tensor. Can be nullptr. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in]      policy   Policy to use to handle overflow.
-     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
+     * @param[in]  input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[out] output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  policy   Policy to use to handle overflow.
+     * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAddition
      *
      * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
      * @param[in] input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in] output   (Optional) Output tensor info. Can be nullptr. Data types supported: U8/SQASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in] output   Output tensor info. Data types supported: U8/SQASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
      * @param[in] policy   Policy to use to handle overflow
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      *
