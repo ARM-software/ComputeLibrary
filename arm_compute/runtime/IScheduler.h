@@ -157,7 +157,7 @@ public:
      * @param[in] inputs  Vector containing the input tensors.
      * @param[in] outputs Vector containing the output tensors.
      */
-    virtual void schedule_op(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs) = 0;
+    virtual void schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs) = 0;
 
     /** Execute all the passed workloads
      *

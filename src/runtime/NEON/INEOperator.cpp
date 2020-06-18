@@ -33,7 +33,7 @@ INEOperator::INEOperator(IRuntimeContext *ctx)
 {
 }
 
-void INEOperator::run(std::vector<InputTensor> inputs, std::vector<OutputTensor> outputs, std::vector<OperatorTensor> workspace)
+void INEOperator::run(InputTensorMap inputs, OutputTensorMap outputs, OperatorTensorMap workspace)
 {
     ARM_COMPUTE_UNUSED(workspace);
 
@@ -45,7 +45,7 @@ void INEOperator::run(std::vector<InputTensor> inputs, std::vector<OutputTensor>
     NEScheduler::get().schedule_op(_kernel.get(), Window::DimY, inputs, outputs);
 }
 
-void INEOperator::prepare(std::vector<OperatorTensor> constants)
+void INEOperator::prepare(OperatorTensorMap constants)
 {
     ARM_COMPUTE_UNUSED(constants);
 }

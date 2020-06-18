@@ -86,14 +86,14 @@ void NEReshapeLayerKernel::configure(const ITensorInfo *input, ITensorInfo *outp
     INEKernel::configure(win);
 }
 
-void NEReshapeLayerKernel::run_op(const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs, const Window &window, const ThreadInfo &info)
+void NEReshapeLayerKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    const auto src = inputs[0].tensor;
-    auto       dst = outputs[0].tensor;
+    const auto src = inputs.at(TensorType::ACL_SRC);
+    auto       dst = outputs.at(TensorType::ACL_DST);
 
     switch(src->info()->data_type())
     {

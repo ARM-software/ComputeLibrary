@@ -1055,13 +1055,13 @@ void elementwise_comp_op_quantized_signed(const ITensor *in1, const ITensor *in2
 }
 
 std::function<void(const ITensor *, const ITensor *, ITensor *, const Window &)>
-configure_func(const ITensor *input1, const ITensor *input2, ITensor *output,
+configure_func(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output,
                std::map<std::string, NEElementwiseOperationKernel::ElementwiseFunction *> map_function)
 {
     std::string function_to_call("op_");
-    function_to_call += string_from_data_type(input1->info()->data_type()) + "_";
-    function_to_call += string_from_data_type(input2->info()->data_type()) + "_";
-    function_to_call += string_from_data_type(output->info()->data_type());
+    function_to_call += string_from_data_type(input1->data_type()) + "_";
+    function_to_call += string_from_data_type(input2->data_type()) + "_";
+    function_to_call += string_from_data_type(output->data_type());
 
     auto it = map_function.find(function_to_call);
 
@@ -1078,7 +1078,7 @@ configure_func(const ITensor *input1, const ITensor *input2, ITensor *output,
 
 template <ArithmeticOperation op>
 std::function<void(const ITensor *, const ITensor *, ITensor *, const Window &)>
-configure_arithm_func(const ITensor *input1, const ITensor *input2, ITensor *output)
+configure_arithm_func(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
     static std::map<std::string, NEElementwiseOperationKernel::ElementwiseFunction *> map_function =
     {
@@ -1097,7 +1097,7 @@ configure_arithm_func(const ITensor *input1, const ITensor *input2, ITensor *out
 
 template <ComparisonOperation op>
 std::function<void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window)>
-configure_comp_func(const ITensor *input1, const ITensor *input2, ITensor *output)
+configure_comp_func(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
     static std::map<std::string, NEElementwiseOperationKernel::ElementwiseFunction *> map_function =
     {
@@ -1140,41 +1140,36 @@ Status NEElementwiseOperationKernel::validate_arguments_common(const ITensorInfo
     return Status{};
 }
 
-void NEElementwiseOperationKernel::configure_common(const ITensor *input1, const ITensor *input2, ITensor *output)
+void NEElementwiseOperationKernel::configure_common(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
 
     // Configure kernel window
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1->info(), *input2->info());
+    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
     const TensorShape &out_shape    = broadcast_pair.first;
     const ValidRegion &valid_region = broadcast_pair.second;
 
     // Auto initialize output if not initialized
-    auto_init_if_empty(*output->info(), out_shape, 1, input1->info()->data_type());
+    auto_init_if_empty(*output, out_shape, 1, input1->data_type());
 
     Window win = calculate_max_window(valid_region);
-
-    _input1 = input1;
-    _input2 = input2;
-    _output = output;
 
     INEKernel::configure(win);
 }
 
-void NEElementwiseOperationKernel::run(const Window &window, const ThreadInfo &info)
+void NEElementwiseOperationKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info, window);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_function == nullptr);
-    _function(_input1, _input2, _output, window);
+    _function(inputs.at(TensorType::ACL_SRC_0), inputs.at(TensorType::ACL_SRC_1), outputs.at(TensorType::ACL_DST), window);
 }
 
 /** Arithmetic operators (min, max, squared_diff) */
-
-void NEArithmeticOperationKernel::configure(ArithmeticOperation op, const ITensor *input1, const ITensor *input2, ITensor *output)
+void NEArithmeticOperationKernel::configure(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output));
     configure_common(input1, input2, output);
     switch(op)
     {
@@ -1215,9 +1210,9 @@ Status NEArithmeticOperationKernel::validate(ArithmeticOperation op, const ITens
 
 /** The division operator */
 
-void NEDivisionOperationKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
+void NEDivisionOperationKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output));
     configure_common(input1, input2, output);
     _function = configure_arithm_func<ArithmeticOperation::DIV>(input1, input2, output);
 }
@@ -1236,9 +1231,9 @@ Status NEDivisionOperationKernel::validate(const ITensorInfo *input1, const ITen
 }
 
 /** The power operator */
-void NEPowerOperationKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
+void NEPowerOperationKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output));
     configure_common(input1, input2, output);
     _function = configure_arithm_func<ArithmeticOperation::POWER>(input1, input2, output);
 }
@@ -1257,10 +1252,9 @@ Status NEPowerOperationKernel::validate(const ITensorInfo *input1, const ITensor
 }
 
 /** Comparison operators (equal, not equal, less than, greater than, less than or equal, greater than or equal) */
-
-void NEComparisonOperationKernel::configure(ComparisonOperation op, const ITensor *input1, const ITensor *input2, ITensor *output)
+void NEComparisonOperationKernel::configure(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output)
 {
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output));
     configure_common(input1, input2, output);
     switch(op)
     {

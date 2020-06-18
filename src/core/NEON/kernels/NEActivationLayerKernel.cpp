@@ -855,8 +855,8 @@ Status NEActivationLayerKernel::validate(const ITensorInfo *input, const ITensor
     return Status{};
 }
 
-void NEActivationLayerKernel::run_op(const std::vector<InputTensor> &inputs,
-                                     const std::vector<OutputTensor> &outputs,
+void NEActivationLayerKernel::run_op(const InputTensorMap &inputs,
+                                     const OutputTensorMap &outputs,
                                      const Window &window, const ThreadInfo &info)
 {
     // Early exit on disabled activation
@@ -872,5 +872,5 @@ void NEActivationLayerKernel::run_op(const std::vector<InputTensor> &inputs,
 
     ARM_COMPUTE_ERROR_ON(inputs.empty() || outputs.empty());
 
-    (this->*_func)(inputs[0].tensor, outputs[0].tensor, window);
+    (this->*_func)(inputs.at(TensorType::ACL_SRC), outputs.at(TensorType::ACL_DST), window);
 }

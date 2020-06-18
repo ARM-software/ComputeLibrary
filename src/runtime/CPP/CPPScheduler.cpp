@@ -363,7 +363,7 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 }
 #endif /* DOXYGEN_SKIP_THIS */
 
-void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs)
+void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
@@ -473,15 +473,15 @@ void CPPScheduler::schedule_common(ICPPKernel *kernel, const Hints &hints, const
     }
 }
 
-void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs)
+void CPPScheduler::schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs)
 {
     schedule_common(kernel, hints, inputs, outputs);
 }
 
 void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
-    const std::vector<InputTensor> inputs;
-    std::vector<OutputTensor>      outputs;
+    const InputTensorMap inputs;
+    OutputTensorMap      outputs;
     schedule_common(kernel, hints, inputs, outputs);
 }
 } // namespace arm_compute

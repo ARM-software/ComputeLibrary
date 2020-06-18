@@ -84,7 +84,7 @@ public:
      * @param[in] window  Region on which to execute the kernel. (Must be a region of the window returned by window())
      * @param[in] info    Info about executing thread and CPU.
      */
-    virtual void run_op(const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs, const Window &window, const ThreadInfo &info)
+    virtual void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
     {
         ARM_COMPUTE_UNUSED(inputs, outputs, window, info);
     }

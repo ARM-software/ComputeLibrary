@@ -29,7 +29,9 @@
 
 namespace arm_compute
 {
-void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor *output)
+namespace experimental
+{
+void NEPReluLayer::configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticOperationKernel>();
     k->configure(ArithmeticOperation::PRELU, input, alpha, output);
@@ -39,5 +41,48 @@ void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor
 Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
 {
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::PRELU, input, alpha, output);
+}
+
+MemoryRequirements NEPReluLayer::workspace() const
+{
+    return MemoryRequirements{};
+}
+} // nsamespace experimental
+
+struct NEPReluLayer::Impl
+{
+    const ITensor                              *src_0{ nullptr };
+    const ITensor                              *src_1{ nullptr };
+    ITensor                                    *dst{ nullptr };
+    std::unique_ptr<experimental::NEPReluLayer> op{ nullptr };
+};
+
+NEPReluLayer::NEPReluLayer()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+NEPReluLayer::NEPReluLayer(NEPReluLayer &&) = default;
+NEPReluLayer &NEPReluLayer::operator=(NEPReluLayer &&) = default;
+NEPReluLayer::~NEPReluLayer()                          = default;
+
+void NEPReluLayer::configure(const ITensor *input, const ITensor *alpha, ITensor *output)
+{
+    _impl->src_0 = input;
+    _impl->src_1 = alpha;
+    _impl->dst   = output;
+    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEPReluLayer>();
+    _impl->op->configure(input->info(), alpha->info(), output->info());
+}
+
+void NEPReluLayer::run()
+{
+    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    _impl->op->run(src, dst, {});
+}
+
+Status NEPReluLayer::validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output)
+{
+    return experimental::NEPReluLayer::validate(input, alpha, output);
 }
 } // namespace arm_compute

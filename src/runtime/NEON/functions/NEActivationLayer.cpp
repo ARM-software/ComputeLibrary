@@ -90,9 +90,9 @@ Status NEActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *
 
 void NEActivationLayer::run()
 {
-    const InputTensor src{ TensorType::ACL_SRC, _impl->src };
-    OutputTensor      dst{ TensorType::ACL_DST, _impl->dst };
+    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
 
-    _impl->op->run({ src }, { dst }, {});
+    _impl->op->run(src, dst, {});
 }
 } // namespace arm_compute

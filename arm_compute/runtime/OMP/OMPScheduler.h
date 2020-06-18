@@ -66,7 +66,7 @@ public:
      * @param[in] inputs  Vector containing the input tensors.
      * @param[in] outputs Vector containing the output tensors.
      */
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs) override;
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs) override;
 
 protected:
     /** Execute all the passed workloads

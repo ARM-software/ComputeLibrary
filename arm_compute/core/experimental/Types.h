@@ -50,29 +50,9 @@ enum class TensorType
     ACL_INT_2   = 52
 };
 
-/** Input tensor aggregate */
-struct InputTensor
-{
-    InputTensor(TensorType type, const ITensor *tensor)
-        : type(type), tensor(tensor)
-    {
-    }
-
-    TensorType     type{ TensorType::ACL_UNKNOWN };
-    const ITensor *tensor{ nullptr };
-};
-/** Output tensor aggregate */
-struct OutputTensor
-{
-    OutputTensor(TensorType type, ITensor *tensor)
-        : type(type), tensor(tensor)
-    {
-    }
-
-    TensorType type{ TensorType::ACL_UNKNOWN };
-    ITensor   *tensor{ nullptr };
-};
-using OperatorTensor = OutputTensor;
+using InputTensorMap    = std::map<TensorType, const ITensor *>;
+using OutputTensorMap   = std::map<TensorType, ITensor *>;
+using OperatorTensorMap = OutputTensorMap;
 
 namespace experimental
 {

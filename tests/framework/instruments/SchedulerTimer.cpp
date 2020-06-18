@@ -86,7 +86,7 @@ public:
         _kernels.push_back(std::move(info));
     }
 
-    void schedule_op(ICPPKernel *kernel, const Hints &hints, const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs) override
+    void schedule_op(ICPPKernel *kernel, const Hints &hints, const InputTensorMap &inputs, const OutputTensorMap &outputs) override
     {
         _timer.start();
         _real_scheduler.schedule_op(kernel, hints, inputs, outputs);

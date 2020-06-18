@@ -76,7 +76,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
 
     // Inherited methods overridden:
-    void run_op(const std::vector<InputTensor> &inputs, const std::vector<OutputTensor> &outputs,
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
                 const Window &window, const ThreadInfo &info) override;
 
 private:

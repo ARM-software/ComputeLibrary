@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,19 +25,63 @@
 #define ARM_COMPUTE_NEPRELULAYER_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/NEON/INEOperator.h"
 
 namespace arm_compute
 {
 class ITensor;
 
+namespace experimental
+{
 /** Basic function to run @ref NEArithmeticOperationKernel for PRELU
  *
  * @note The function implements an activation layer with the PRELU activation function.
  */
-class NEPReluLayer : public INESimpleFunction
+class NEPReluLayer : public INEOperator
 {
 public:
+    /** Set the input and output tensor.
+     *
+     * @param[in]  input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  alpha  Source alpha tensor info. Data types supported: same of @p input.
+     * @param[out] output Destination tensor info. Data type supported: same as @p input
+     */
+    void configure(const ITensorInfo *input, const ITensorInfo *alpha, ITensorInfo *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
+     *
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in] alpha  Source alpha tensor info. Data types supported: same of @p input.
+     * @param[in] output Destination tensor info. Data type supported: same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    MemoryRequirements workspace() const override;
+};
+} // namespace experimental
+
+/** Basic function to run @ref NEArithmeticOperationKernel for PRELU
+ *
+ * @note The function implements an activation layer with the PRELU activation function.
+ */
+class NEPReluLayer : public IFunction
+{
+public:
+    /** Default Constructor */
+    NEPReluLayer();
+    /** Default Destructor */
+    ~NEPReluLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEPReluLayer(const NEPReluLayer &) = delete;
+    /** Default move constructor */
+    NEPReluLayer(NEPReluLayer &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEPReluLayer &operator=(const NEPReluLayer &) = delete;
+    /** Default move assignment operator */
+    NEPReluLayer &operator=(NEPReluLayer &&);
     /** Set the input and output tensor.
      *
      * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
@@ -54,6 +98,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *alpha, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEPRELULAYER_H */
