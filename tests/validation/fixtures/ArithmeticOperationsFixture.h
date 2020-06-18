@@ -260,7 +260,7 @@ public:
     {
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::SUB, shape0, shape1,
                                                                                             data_type0, data_type1, output_data_type, convert_policy,
-                                                                                            qinfo0, qinfo1, qinfo_out, ActivationLayerInfo(), false);
+                                                                                            qinfo0, qinfo1, qinfo_out, ActivationLayerInfo());
     }
 };
 } // namespace validation

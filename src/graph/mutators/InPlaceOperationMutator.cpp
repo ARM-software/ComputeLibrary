@@ -42,7 +42,13 @@ IGraphMutator::MutationType InPlaceOperationMutator::type() const
 
 void InPlaceOperationMutator::mutate(Graph &g)
 {
-    std::set<NodeType> in_place_nodes = { NodeType::BatchNormalizationLayer, NodeType::ActivationLayer, NodeType::PrintLayer };
+    std::set<NodeType> in_place_nodes =
+    {
+        NodeType::ActivationLayer,
+        NodeType::BatchNormalizationLayer,
+        NodeType::EltwiseLayer,
+        NodeType::PrintLayer
+    };
 
     // Not interested in the order of nodes
     for(auto &node : g.nodes())

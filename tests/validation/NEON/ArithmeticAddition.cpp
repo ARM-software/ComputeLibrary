@@ -107,6 +107,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+TEST_CASE(NoPaddingAdded, framework::DatasetMode::PRECOMMIT)
+{
+    // NEArithmeticAddition doesn't use padding, so make sure this is the case.
+    Tensor input1 = create_tensor<Tensor>(TensorShape(15U, 15U), DataType::F32);
+    Tensor input2 = create_tensor<Tensor>(TensorShape(15U, 1U), DataType::F32);
+    Tensor output = create_tensor<Tensor>(TensorShape(15U, 15U), DataType::F32);
+
+    NEArithmeticAddition add;
+    add.configure(&input1, &input2, &output, ConvertPolicy::WRAP);
+
+    // Validate padding is zero
+    validate(input1.info()->padding(), PaddingSize());
+    validate(input2.info()->padding(), PaddingSize());
+    validate(output.info()->padding(), PaddingSize());
+}
+
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),

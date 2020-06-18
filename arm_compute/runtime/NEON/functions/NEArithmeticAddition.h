@@ -25,14 +25,14 @@
 #define ARM_COMPUTE_NEARITHMETICADDITION_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to run @ref NEArithmeticAdditionKernel */
-class NEArithmeticAddition : public INESimpleFunction
+class NEArithmeticAddition : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
