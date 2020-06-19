@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,8 +58,8 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in]  input            Source tensor. Data type supported: All
-     * @param[out] output           Destination tensor. Data type supported: Same as @p input
+     * @param[in]  input            Source tensor info. Data type supported: All
+     * @param[out] output           Destination tensor info. Data type supported: Same as @p input
      * @param[in]  starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  strides          The strides of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -68,7 +68,7 @@ public:
      * @param[in]  shrink_axis_mask If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
      *                              A slice of size 1 starting from starts[i] in the dimension must be preserved.
      */
-    void configure(const ITensor *input, ITensor *output,
+    void configure(const ITensorInfo *input, ITensorInfo *output,
                    const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
                    int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
 
@@ -91,14 +91,13 @@ public:
                            int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                const Window &window, const ThreadInfo &info) override;
 
 private:
-    const ITensor *_input;         /**< Source tensor */
-    ITensor       *_output;        /**< Destination tensor */
-    Coordinates    _starts_abs;    /**< Absolute start coordinates */
-    Coordinates    _final_strides; /**< Final strides */
-    int32_t        _shrink_mask;   /**< Shrink axis mask */
+    Coordinates _starts_abs;    /**< Absolute start coordinates */
+    Coordinates _final_strides; /**< Final strides */
+    int32_t     _shrink_mask;   /**< Shrink axis mask */
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NE_STRIDED_SLICE_KERNEL_H */

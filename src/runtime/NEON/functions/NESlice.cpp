@@ -33,7 +33,9 @@
 
 namespace arm_compute
 {
-void NESlice::configure(const ITensor *input, ITensor *output, const Coordinates &starts, const Coordinates &ends)
+namespace experimental
+{
+void NESlice::configure(const ITensorInfo *input, ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
@@ -60,4 +62,46 @@ Status NESlice::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
     return NEStridedSliceKernel::validate(input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
 }
+
+MemoryRequirements NESlice::workspace() const
+{
+    return MemoryRequirements{};
+}
+} // namespace experimental
+
+struct NESlice::Impl
+{
+    const ITensor                         *src{ nullptr };
+    ITensor                               *dst{ nullptr };
+    std::unique_ptr<experimental::NESlice> op{ nullptr };
+};
+
+NESlice::NESlice()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+NESlice::NESlice(NESlice &&) = default;
+NESlice &NESlice::operator=(NESlice &&) = default;
+NESlice::~NESlice()                     = default;
+
+Status NESlice::validate(const ITensorInfo *input, const ITensorInfo *output, const Coordinates &starts, const Coordinates &ends)
+{
+    return experimental::NESlice::validate(input, output, starts, ends);
+}
+
+void NESlice::configure(const ITensor *input, ITensor *output, const Coordinates &starts, const Coordinates &ends)
+{
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::NESlice>();
+    _impl->op->configure(input->info(), output->info(), starts, ends);
+}
+
+void NESlice::run()
+{
+    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    _impl->op->run(src, dst, {});
+}
+
 } // namespace arm_compute
