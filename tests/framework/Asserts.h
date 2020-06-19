@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,6 +129,47 @@ ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_comput
         {                                                                                                                                     \
             std::stringstream msg;                                                                                                            \
             msg << "Expectation '" #X "' failed.\n";                                                                                          \
+            arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
+            arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
+        }                                                                                                                                     \
+        arm_compute::test::framework::Framework::get().clear_test_info();                                                                     \
+    } while(false)
+
+#define ARM_COMPUTE_EXPECT_NO_THROW(X, LEVEL)                                                                                                 \
+    do                                                                                                                                        \
+    {                                                                                                                                         \
+        try                                                                                                                                   \
+        {                                                                                                                                     \
+            const auto &x = X;                                                                                                                \
+            (void)x;                                                                                                                          \
+        }                                                                                                                                     \
+        catch(...)                                                                                                                            \
+        {                                                                                                                                     \
+            std::stringstream msg;                                                                                                            \
+            msg << "Expectation '" #X "' to not throw failed.\n";                                                                             \
+            arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
+            arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
+        }                                                                                                                                     \
+        arm_compute::test::framework::Framework::get().clear_test_info();                                                                     \
+    } while(false)
+
+#define ARM_COMPUTE_EXPECT_THROW(X, LEVEL)                                                                                                    \
+    do                                                                                                                                        \
+    {                                                                                                                                         \
+        bool exception_caught = false;                                                                                                        \
+        try                                                                                                                                   \
+        {                                                                                                                                     \
+            const auto &x = X;                                                                                                                \
+            (void)x;                                                                                                                          \
+        }                                                                                                                                     \
+        catch(...)                                                                                                                            \
+        {                                                                                                                                     \
+            exception_caught = true;                                                                                                          \
+        }                                                                                                                                     \
+        if(!exception_caught)                                                                                                                 \
+        {                                                                                                                                     \
+            std::stringstream msg;                                                                                                            \
+            msg << "Expectation '" #X "' to throw failed.\n";                                                                                 \
             arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
             arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
         }                                                                                                                                     \

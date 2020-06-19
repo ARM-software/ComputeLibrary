@@ -51,8 +51,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITe
     // The window needs to be based on the output
     Window             win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
     AccessWindowStatic input1_access(input1, 0, 0, ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration), input1->dimension(1));
-    const unsigned int input2_right_padding = (output->dimension(0) / num_elems_processed_per_iteration) * num_elems_processed_per_iteration - input1->dimension(
-                                                  0) + num_elems_processed_per_iteration - input2->dimension(0);
+    const unsigned int input2_right_padding = ((output->dimension(0) / num_elems_processed_per_iteration) * num_elems_processed_per_iteration - input1->dimension(0) - input2->dimension(
+                                                   0)) % num_elems_processed_per_iteration;
     AccessWindowStatic input2_access(input2, -(input1->dimension(0) % num_elems_processed_per_iteration),
                                      0, input2->dimension(0) + input2_right_padding, input2->dimension(1));
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
