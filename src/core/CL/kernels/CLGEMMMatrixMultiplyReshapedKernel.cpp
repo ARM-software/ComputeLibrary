@@ -38,6 +38,7 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "src/core/CL/CLUtils.h"
 #include "support/StringSupport.h"
 
 #include <cstddef>
@@ -380,29 +381,14 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
 
     const unsigned int total_cross_plane_pad = _output->info()->padding().top + _output->info()->padding().bottom;
 
-    cl_mem      cl_image;
-    cl_int      err = CL_SUCCESS;
     cl::Image2D input1_image2d;
 
     if(_export_to_cl_image)
     {
-        // Create OpenCL image object from OpenCL buffer
-        const cl_image_format format = { CL_RGBA, CL_FLOAT };
+        const TensorShape shape2d(_input1->info()->dimension(0) / 4, _input1->info()->dimension(1) * _input1->info()->dimension(2));
+        const size_t      image_row_pitch = _input1->info()->strides_in_bytes()[1];
 
-        cl_image_desc desc;
-        memset(&desc, 0, sizeof(desc));
-        desc.image_type      = CL_MEM_OBJECT_IMAGE2D;
-        desc.mem_object      = _input1->cl_buffer()();
-        desc.image_row_pitch = _input1->info()->strides_in_bytes()[1];
-        desc.image_width     = _input1->info()->dimension(0) / 4;
-        desc.image_height    = _input1->info()->dimension(1) * _input1->info()->dimension(2);
-
-        cl_image = clCreateImage(CLKernelLibrary::get().context()(), CL_MEM_READ_ONLY, &format, &desc, nullptr, &err);
-
-        ARM_COMPUTE_UNUSED(err);
-        ARM_COMPUTE_ERROR_ON_MSG(err != CL_SUCCESS, "Error during the creation of CL image from buffer");
-
-        input1_image2d = cl::Image2D(cl_image);
+        input1_image2d = create_image2d_from_buffer(CLKernelLibrary::get().context(), _input1->cl_buffer(), shape2d, CL_FLOAT, image_row_pitch);
     }
 
     do

@@ -55,6 +55,7 @@ cc_library_static {
         "src/core/CL/CLCoreRuntimeContext.cpp",
         "src/core/CL/CLHelpers.cpp",
         "src/core/CL/CLKernelLibrary.cpp",
+        "src/core/CL/CLUtils.cpp",
         "src/core/CL/ICLDistribution1D.cpp",
         "src/core/CL/ICLHOG.cpp",
         "src/core/CL/ICLKernel.cpp",

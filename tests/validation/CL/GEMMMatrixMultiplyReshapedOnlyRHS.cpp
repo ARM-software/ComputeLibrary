@@ -67,6 +67,9 @@ namespace
 RelativeTolerance<float> rel_tolerance_f32(0.001f);
 constexpr float          abs_tolerance_f32(0.0001f);
 
+RelativeTolerance<float> rel_tolerance_f16(0.001f);
+constexpr float          abs_tolerance_f16(0.01f);
+
 /** Alpha values to test */
 const auto a_values = framework::dataset::make("alpha", {-0.75f} );
 
@@ -98,14 +101,23 @@ const auto act_values = framework::dataset::make("Activation",
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
 });
 
-/** M0 values to test */
-const auto m0_values = framework::dataset::make("M0", { 8 });
+/** M0 values to test - precommit */
+const auto m0_values_precommit = framework::dataset::make("M0", { 4 });
 
-/** N0 values to test */
-const auto n0_values = framework::dataset::make("N0", { 16 });
+/** N0 values to test - precommit*/
+const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
 
-/** K0 values to test */
-const auto k0_values = framework::dataset::make("K0", { 16 });
+/** K0 values to test - precommit*/
+const auto k0_values_precommit = framework::dataset::make("K0", { 4 });
+
+/** M0 values to test - nightly */
+const auto m0_values_nightly = framework::dataset::make("M0", { 8 });
+
+/** N0 values to test - nightly */
+const auto n0_values_nightly = framework::dataset::make("N0", { 16 });
+
+/** K0 values to test - nightly */
+const auto k0_values_nightly = framework::dataset::make("K0", { 16 });
 
 /** H0 values to test */
 const auto h0_values = framework::dataset::make("H0", 1, 3);
@@ -122,7 +134,7 @@ const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { 
 /** Configuration test */
 bool validate_configuration(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value,
                             unsigned int m0_value, unsigned int n0_value, unsigned int k0_value, unsigned int h0_value,
-                            bool i_value_rhs, bool t_value_rhs, bool broadcast_bias, bool input_as_3d, unsigned int depth_output_gemm3d, const ActivationLayerInfo &act_info,
+                            bool i_value_rhs, bool t_value_rhs, bool export_to_cl_image, bool broadcast_bias, bool input_as_3d, unsigned int depth_output_gemm3d, const ActivationLayerInfo &act_info,
                             DataType dt_input0, DataType dt_input1, DataType dt_input2, DataType dt_output, float alpha, float beta)
 {
     const unsigned int M = m_value;
@@ -139,6 +151,7 @@ bool validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
     rhs_info.h0         = h0_value;
     rhs_info.interleave = i_value_rhs;
     rhs_info.transpose  = t_value_rhs;
+    rhs_info.export_to_cl_image = export_to_cl_image;
 
     GEMMKernelInfo kernel_info;
     kernel_info.m                       = M;
@@ -190,42 +203,55 @@ TEST_SUITE(GEMMMatrixMultiplyReshapedOnlyRHS)
  *     - Unsupported bias addition: bias broadcast mode is 0 if the input or output has to be reinterpreted as 3D
  *     - Incorrect bias diemension when bias broadcast mode is 1 and beta is not 0.0f, should be (n, 1), not (n, m)
  *     - Incorrect input0 dimension when input is reinterpreted as 3D: input0->dimension(1) * input0->dimension(2) != m
+ *     - Correct support for creating an OpenCL image object from buffer
+ *     - Incorrect support for creating an OpenCL image object from buffer. N0 is 2 but it can only be 4,8 and 16
+ *     - Incorrect support for creating an OpenCL image object from buffer. Data type is F16 but it can only be F32
  */
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
-framework::dataset::make("batch_size",          { 1, 1, 1, 1, 1, 1, 2 }),
-framework::dataset::make("M0",                  { 4, 9, 4, 4, 4, 4, 4 })),
-framework::dataset::make("N0",                  { 4, 4, 18, 4, 4, 4, 4 })),
-framework::dataset::make("K0",                  { 4, 4, 4, 1, 4, 4, 4 })),
-framework::dataset::make("broadcast_bias",      { false, false, false, false, false, true, true })),
-framework::dataset::make("input_as_3d",         { 0, 0, 0, 0, 1, 0, 1 })),
-framework::dataset::make("depth_output_gemm3d", { 0, 0, 0, 0, 0, 1, 0 })),
-framework::dataset::make("data_type_input0",    { DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32})),
-framework::dataset::make("data_type_input1",    { DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32})),
-framework::dataset::make("data_type_input2",    { DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32})),
-framework::dataset::make("data_type_output",    { DataType::F16, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32})),
-framework::dataset::make("Beta",                { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f })),
-framework::dataset::make("Expected",            { false, false, false, false, false, false, false })),
-b_value, m0_value, n0_value, k0_value, broadcast_bias, input_as_3d, depth_output_gemm3d, dt_input0, dt_intpu1, dt_input2, dt_output, beta, expected)
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(zip(
+framework::dataset::make("batch_size",          { 1, 1, 1, 1, 1, 1, 2, 1, 1, 1 }),
+framework::dataset::make("M0",                  { 4, 9, 4, 4, 4, 4, 4, 4, 4, 4 })),
+framework::dataset::make("N0",                  { 4, 4, 18, 4, 4, 4, 4, 8, 2, 8 })),
+framework::dataset::make("K0",                  { 4, 4, 4, 1, 4, 4, 4, 4, 4, 4 })),
+framework::dataset::make("broadcast_bias",      { false, false, false, false, false, true, true, false, false, false })),
+framework::dataset::make("input_as_3d",         { 0, 0, 0, 0, 1, 0, 1, 0, 0, 0 })),
+framework::dataset::make("depth_output_gemm3d", { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 })),
+framework::dataset::make("export_to_cl_image",  { false, false, false, false, false, false, false, true, true, true })),
+framework::dataset::make("data_type_input0",    { DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F16})),
+framework::dataset::make("data_type_input1",    { DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F16})),
+framework::dataset::make("data_type_input2",    { DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F16})),
+framework::dataset::make("data_type_output",    { DataType::F16, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F32, DataType::F16})),
+framework::dataset::make("Beta",                { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f , 1.0f})),
+framework::dataset::make("Expected",            { false, false, false, false, false, false, false, true, false, false })),
+b_value, m0_value, n0_value, k0_value, broadcast_bias, input_as_3d, depth_output_gemm3d, export_to_cl_image, dt_input0, dt_intpu1, dt_input2, dt_output, beta, expected)
 {
-    bool status = validate_configuration(37, 51, 23, b_value, m0_value, n0_value, k0_value, 1, false, false, broadcast_bias, input_as_3d, depth_output_gemm3d, ActivationLayerInfo(), dt_input0, dt_intpu1, dt_input2, dt_output, 1.0f, beta);
-    ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
+    bool expected_value = expected;
+
+    // Change expected to false if the target platform does not support the OpenCL cl_khr_image2d_from_buffer extension
+    if(!image2d_from_buffer_supported(CLKernelLibrary::get().get_device()) && export_to_cl_image)
+    {
+        expected_value = false;
+    }
+
+    bool status = validate_configuration(37, 51, 23, b_value, m0_value, n0_value, k0_value, 1, false, false, export_to_cl_image, broadcast_bias, input_as_3d, depth_output_gemm3d, ActivationLayerInfo(), dt_input0, dt_intpu1, dt_input2, dt_output, 1.0f, beta);
+    ARM_COMPUTE_EXPECT(status == expected_value, framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunPrecommit, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<float>, framework::DatasetMode::PRECOMMIT,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
                                                                    k_values),
                                                                    b_values),
-                                                                   m0_values),
-                                                                   n0_values),
-                                                                   k0_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
                                                                    h0_values),
                                                                    i_values_rhs),
                                                                    t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
@@ -236,19 +262,43 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<floa
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+FIXTURE_DATA_TEST_CASE(RunNightly, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<float>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_values_nightly),
+                                                                   k0_values_nightly),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::PRECOMMIT,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
                                                                    k_values),
                                                                    b_values),
-                                                                   m0_values),
-                                                                   n0_values),
-                                                                   k0_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
                                                                    h0_values),
                                                                    i_values_rhs),
                                                                    t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                                                                    a_values),
                                                                    beta_values),
@@ -258,7 +308,235 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
+FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_values_nightly),
+                                                                   k0_values_nightly),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+
+TEST_SUITE(ExportToCLImage)
+FIXTURE_DATA_TEST_CASE(RunPrecommit, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<float>, framework::DatasetMode::PRECOMMIT,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values),
+                                                                   act_values))
+{
+    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
+    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunNightly, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<float>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_values_nightly),
+                                                                   k0_values_nightly),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values),
+                                                                   act_values))
+{
+    // Validate output only if the target platform supports the OpenCL cl_khr_image2d_from_buffer extension
+    if(image2d_from_buffer_supported(CLKernelLibrary::get().get_device()))
+    {
+        validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_INFO();
+    }
+}
+
+FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::PRECOMMIT,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<float>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_values_nightly),
+                                                                   k0_values_nightly),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
+                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+TEST_SUITE_END() // ExportToCLImage
 TEST_SUITE_END() // FP32
+
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunPrecommit, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<half>, framework::DatasetMode::PRECOMMIT,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunNightly, CLGEMMMatrixMultiplyReshapedOnlyRHSFixture<half>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_values,
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_values_nightly),
+                                                                   k0_values_nightly),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunPrecommit3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<half>, framework::DatasetMode::PRECOMMIT,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_precommit),
+                                                                   n0_values_precommit),
+                                                                   k0_values_precommit),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunNightly3D, CLGEMMMatrixMultiplyReshapedOnlyRHS3DFixture<half>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                                                                   m_w_values,
+                                                                   m_h_values),
+                                                                   n_values),
+                                                                   k_values),
+                                                                   b_values),
+                                                                   m0_values_nightly),
+                                                                   n0_values_nightly),
+                                                                   k0_values_nightly),
+                                                                   h0_values),
+                                                                   i_values_rhs),
+                                                                   t_values_rhs),
+                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
+                                                                   framework::dataset::make("DataType", DataType::F16)),
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   act_values))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
+}
+
+TEST_SUITE_END() // FP16
+
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // GEMMMatrixMulipltyReshapedOnlyRHS
 TEST_SUITE_END() // CL
