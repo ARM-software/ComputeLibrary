@@ -42,8 +42,8 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
     // Add 1 if ceil_policy_scale is true
     const size_t round_value = ceil_policy_scale ? 1U : 0U;
     TensorShape  shape_scaled(in.shape());
-    shape_scaled.set(0, (in.shape()[0] + round_value) * scale_x);
-    shape_scaled.set(1, (in.shape()[1] + round_value) * scale_y);
+    shape_scaled.set(0, (in.shape()[0] + round_value) * scale_x, /* apply_dim_correction = */ false);
+    shape_scaled.set(1, (in.shape()[1] + round_value) * scale_y, /* apply_dim_correction = */ false);
     SimpleTensor<T> out(shape_scaled, in.data_type());
 
     // Compute the ratio between source width/height and destination width/height

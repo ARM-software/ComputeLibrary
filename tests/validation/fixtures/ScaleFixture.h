@@ -133,8 +133,8 @@ protected:
         const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
         TensorShape shape_scaled(shape);
-        shape_scaled.set(idx_width, shape[idx_width] * _scale_x);
-        shape_scaled.set(idx_height, shape[idx_height] * _scale_y);
+        shape_scaled.set(idx_width, shape[idx_width] * _scale_x, /* apply_dim_correction = */ false);
+        shape_scaled.set(idx_height, shape[idx_height] * _scale_y, /* apply_dim_correction = */ false);
         TensorType dst = create_tensor<TensorType>(shape_scaled, _data_type, 1, _quantization_info, data_layout);
 
         // Create and configure function
