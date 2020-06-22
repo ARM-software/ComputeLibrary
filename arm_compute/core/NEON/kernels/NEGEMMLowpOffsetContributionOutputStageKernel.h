@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,22 +115,18 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
-    using NEGEMMLowpOffsetContributionOutputStageFunction = std::function<void(const Window, const ITensor *, const ITensor *, const ITensor *, const ITensor *,
-                                                                               ITensor *, int32_t, int32_t, int32_t, bool, GEMMLowpOutputStageInfo)>;
-
 private:
     /** Function to use for the particular tensors passed to configure() */
-    NEGEMMLowpOffsetContributionOutputStageFunction _function;
-    const ITensor                                  *_vector_sum_col;
-    const ITensor                                  *_vector_sum_row;
-    const ITensor                                  *_bias;
-    const ITensor                                  *_mm_result;
-    ITensor                                        *_output;
-    int32_t                                         _a_offset;
-    int32_t                                         _b_offset;
-    int32_t                                         _k_offset;
-    bool                                            _slide_vector_sum_col;
-    GEMMLowpOutputStageInfo                         _output_stage;
+    const ITensor          *_vector_sum_col;
+    const ITensor          *_vector_sum_row;
+    const ITensor          *_bias;
+    const ITensor          *_mm_result;
+    ITensor                *_output;
+    int32_t                 _a_offset;
+    int32_t                 _b_offset;
+    int32_t                 _k_offset;
+    bool                    _slide_vector_sum_col;
+    GEMMLowpOutputStageInfo _output_stage;
 };
 } // namespace arm_compute
 

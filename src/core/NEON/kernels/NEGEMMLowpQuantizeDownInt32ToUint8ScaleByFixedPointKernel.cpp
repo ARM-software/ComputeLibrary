@@ -145,7 +145,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                 in_s32.val[2] = vaddq_s32(in_s32.val[2], bias_s32.val[2]);
                 in_s32.val[3] = vaddq_s32(in_s32.val[3], bias_s32.val[3]);
 
-                vst1q_u8(out.ptr() + x, finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8));
+                vst1q_u8(out.ptr() + x, finalize_quantization(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8, is_bounded_relu));
             }
 
             // Compute left-over elements
@@ -157,7 +157,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                 // Add bias
                 in_value += bias_value;
                 // Finalize and store the result
-                *(out.ptr() + x) = finalize_quantization<is_bounded_relu>(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max));
+                *(out.ptr() + x) = finalize_quantization(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max), is_bounded_relu);
             }
         },
         in, out, bias);
@@ -180,7 +180,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                     }
                 };
 
-                vst1q_u8(out.ptr() + x, finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8));
+                vst1q_u8(out.ptr() + x, finalize_quantization(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8, is_bounded_relu));
             }
 
             // Compute left-over elements
@@ -189,7 +189,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                 const int32_t in_value = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
 
                 // Finalize and store the result
-                *(out.ptr() + x) = finalize_quantization<is_bounded_relu>(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max));
+                *(out.ptr() + x) = finalize_quantization(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max), is_bounded_relu);
             }
         },
         in, out);

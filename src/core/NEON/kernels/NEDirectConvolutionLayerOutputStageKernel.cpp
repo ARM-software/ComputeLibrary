@@ -275,7 +275,7 @@ void output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window
         }
 
         const auto out_ptr = reinterpret_cast<TOut *>(out.ptr());
-        wrapper::vstore(out_ptr, finalize_quantization<false>(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max));
+        wrapper::vstore(out_ptr, finalize_quantization(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max, false));
     },
     in, out);
 }
@@ -326,7 +326,7 @@ void output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window
         }
 
         const auto out_ptr = reinterpret_cast<TOut *>(out.ptr());
-        wrapper::vstore(out_ptr, finalize_quantization<false>(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max));
+        wrapper::vstore(out_ptr, finalize_quantization(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max, false));
     },
     in, bi, out);
 }
