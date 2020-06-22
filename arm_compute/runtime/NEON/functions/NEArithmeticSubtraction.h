@@ -63,5 +63,5 @@ public:
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 };
-}
+} // namespace arm_compute
 #endif /* ARM_COMPUTE_NEARITHMETICSUBTRACTION_H */
