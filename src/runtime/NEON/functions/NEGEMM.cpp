@@ -68,16 +68,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     if(run_optimised)
     {
         const ITensor *c_to_use = is_c_bias ? c : nullptr;
-        if(MEMInfo::get_policy() == MemoryPolicy::MINIMIZE)
-        {
-            GEMMInfo gemm_info_ntb = gemm_info;
-            gemm_info_ntb.set_pretranpose_B(false);
-            _asm_glue.configure(a, b, c_to_use, d, gemm_info_ntb);
-        }
-        else
-        {
-            _asm_glue.configure(a, b, c_to_use, d, gemm_info);
-        }
+        _asm_glue.configure(a, b, c_to_use, d, gemm_info);
         ARM_COMPUTE_ERROR_ON(!_asm_glue.is_configured());
 
         // Scale product by alpha

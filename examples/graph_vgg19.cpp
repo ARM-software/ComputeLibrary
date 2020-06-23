@@ -40,16 +40,6 @@ public:
     }
     bool do_setup(int argc, char **argv) override
     {
-        // Check if the system has enough RAM to run the example, systems with less than 2GB have
-        // to hint the API to minimize memory consumption otherwise it'll run out of memory and
-        // fail throwing the bad_alloc exception
-        arm_compute::MEMInfo meminfo;
-        const size_t         mem_total = meminfo.get_total_in_kb();
-        if(mem_total <= arm_compute::MEMInfo::TWO_GB_IN_KB)
-        {
-            arm_compute::MEMInfo::set_policy(arm_compute::MemoryPolicy::MINIMIZE);
-        }
-
         // Parse arguments
         cmd_parser.parse(argc, argv);
         cmd_parser.validate();
