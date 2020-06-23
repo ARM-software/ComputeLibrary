@@ -80,7 +80,7 @@ protected:
         TensorType src2 = create_tensor<TensorType>(shape1, dt_in2, 1, qinfo1);
         TensorType dst  = create_tensor<TensorType>(TensorShape::broadcast_shape(shape0, shape1), dt_out, 1, qinfo_out);
 
-        auto allocate_tensor = [this](TensorType & t)
+        auto allocate_tensor = [](TensorType & t)
         {
             ARM_COMPUTE_EXPECT(t.info()->is_resizable(), framework::LogLevel::ERRORS);
             t.allocator()->allocate();
