@@ -43,7 +43,7 @@ namespace arm_compute
 {
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager, IWeightsManager *weights_manager)
     : _memory_group(memory_manager), _weights_manager(weights_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(memory_manager, weights_manager), _ma_kernel(),
-      _alpha_scale_func(nullptr), _add_bias_kernel(), _activation_func(), _tmp_a(), _tmp_b(), _tmp_d(), _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_alpha_scale(false),
+      _alpha_scale_func(nullptr), _add_bias(), _activation_func(), _tmp_a(), _tmp_b(), _tmp_d(), _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_alpha_scale(false),
       _run_addition(false), _run_bias_addition(false), _run_activation(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
@@ -141,7 +141,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
         if(_run_bias_addition)
         {
-            _add_bias_kernel.configure(gemm_output_to_use, c, d, ConvertPolicy::SATURATE);
+            _add_bias.configure(gemm_output_to_use, c, d, ConvertPolicy::SATURATE);
             _tmp_d.allocator()->allocate();
         }
     }
@@ -258,7 +258,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
         if(c != nullptr && gemm_info.reshape_b_only_on_first_run())
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&tmp_output_info, c, output, ConvertPolicy::SATURATE));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&tmp_output_info, c, output, ConvertPolicy::SATURATE));
         }
     }
 
@@ -311,7 +311,7 @@ void NEGEMM::run()
         // Run bias addition kernel
         if(_run_bias_addition)
         {
-            NEScheduler::get().schedule(&_add_bias_kernel, Window::DimY);
+            _add_bias.run();
         }
     }
 

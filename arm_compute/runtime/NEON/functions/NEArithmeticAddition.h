@@ -25,16 +25,75 @@
 #define ARM_COMPUTE_NEARITHMETICADDITION_H
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/NEON/INEOperator.h"
 
 namespace arm_compute
 {
 class ITensor;
 
+namespace experimental
+{
 /** Basic function to run @ref NEArithmeticAdditionKernel */
-class NEArithmeticAddition : public INESimpleFunctionNoBorder
+class NEArithmeticAddition : public INEOperator
 {
 public:
+    /** Initialise the kernel's inputs, output and conversion policy.
+     *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)           -> U8
+     *   - (U8,U8)           -> S16
+     *   - (S16,U8)          -> S16
+     *   - (U8,S16)          -> S16
+     *   - (S16,S16)         -> S16
+     *   - (S32,S32)         -> S32
+     *   - (F16,F16)         -> F16
+     *   - (F32,F32)         -> F32
+     *   - (QASYMM8,QASYMM8) -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     *
+     * @param[in]  input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[out] output   Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  policy   Policy to use to handle overflow.
+     * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
+     */
+    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAddition
+     *
+     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in] input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in] output   Output tensor info. Data types supported: U8/SQASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in] policy   Policy to use to handle overflow
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+
+    // Inherited methods overridden:
+    MemoryRequirements workspace() const override;
+};
+} // namespace experimental
+
+/** Basic function to run @ref NEArithmeticAdditionKernel */
+class NEArithmeticAddition : public IFunction
+{
+public:
+    /** Default Constructor */
+    NEArithmeticAddition();
+    /** Default Destructor */
+    ~NEArithmeticAddition();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEArithmeticAddition(const NEArithmeticAddition &) = delete;
+    /** Default move constructor */
+    NEArithmeticAddition(NEArithmeticAddition &&);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEArithmeticAddition &operator=(const NEArithmeticAddition &) = delete;
+    /** Default move assignment operator */
+    NEArithmeticAddition &operator=(NEArithmeticAddition &&);
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * Valid configurations (Input1,Input2) -> Output :
@@ -57,7 +116,7 @@ public:
      * @param[in]  policy   Policy to use to handle overflow.
      * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Currently not supported.
      */
-    void configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAddition
      *
      * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
@@ -69,6 +128,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEARITHMETICADDITION_H */

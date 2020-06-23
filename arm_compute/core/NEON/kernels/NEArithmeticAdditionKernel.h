@@ -68,12 +68,12 @@ public:
      *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
      *   - (QSYMM16,QSYMM16) -> QSYMM16
      *
-     * @param[in]  input1 First input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[in]  input2 Second input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
-     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
+     * @param[in]  input1 First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[in]  input2 Second input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
+     * @param[out] output The output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in]  policy Overflow policy.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
+    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAdditionKernel
      *
      * @param[in] input1 First input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32
@@ -86,7 +86,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised add functions
@@ -99,11 +99,8 @@ private:
      */
     using AddFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const Window &window);
     /** Add function to use for the particular tensor types passed to configure() */
-    AddFunction   *_func;
-    const ITensor *_input1;
-    const ITensor *_input2;
-    ITensor       *_output;
-    ConvertPolicy  _policy;
+    AddFunction *_func;
+    ConvertPolicy _policy;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEARITHMETICADDITIONKERNEL_H */

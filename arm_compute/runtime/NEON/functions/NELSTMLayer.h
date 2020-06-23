@@ -25,13 +25,13 @@
 #define ARM_COMPUTE_NELSTMLAYER_H
 
 #include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
-#include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
 #include "arm_compute/core/NEON/kernels/NECopyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
+#include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
+#include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
@@ -149,7 +149,7 @@ private:
     MemoryGroup                     _memory_group;
     NEFullyConnectedLayer           _fully_connected_input_gate;
     NEArithmeticAddition            _accum_input_gate1;
-    NEArithmeticSubtractionKernel   _subtract_input_gate;
+    NEArithmeticSubtraction         _subtract_input_gate;
     NEPixelWiseMultiplicationKernel _pixelwise_mul_input_gate;
     NEActivationLayer               _activation_input_gate;
     NEFullyConnectedLayer           _fully_connected_forget_gate;
@@ -159,8 +159,8 @@ private:
     NEFullyConnectedLayer           _fully_connected_cell_state;
     NEGEMM                          _gemm_cell_state1;
     NETransposeKernel               _transpose_cell_state;
-    NEArithmeticAdditionKernel      _accum_cell_state1;
-    NEArithmeticAdditionKernel      _accum_cell_state2;
+    NEArithmeticAddition            _accum_cell_state1;
+    NEArithmeticAddition            _accum_cell_state2;
     NEPixelWiseMultiplicationKernel _pixelwise_mul_cell_state1;
     NEActivationLayer               _activation_cell_state;
     NEActivationLayer               _cell_clip;
@@ -182,16 +182,16 @@ private:
     NEConcatenateLayer              _concat_weights_output;
     NEMeanStdDevNormalizationLayer  _mean_std_norm_input_gate;
     NEPixelWiseMultiplicationKernel _pixelwise_mul_input_gate_coeff;
-    NEArithmeticAdditionKernel      _accum_input_gate_bias;
+    NEArithmeticAddition            _accum_input_gate_bias;
     NEMeanStdDevNormalizationLayer  _mean_std_norm_forget_gate;
     NEPixelWiseMultiplicationKernel _pixelwise_mul_forget_gate_coeff;
-    NEArithmeticAdditionKernel      _accum_forget_gate_bias;
+    NEArithmeticAddition            _accum_forget_gate_bias;
     NEMeanStdDevNormalizationLayer  _mean_std_norm_cell_gate;
     NEPixelWiseMultiplicationKernel _pixelwise_mul_cell_gate_coeff;
-    NEArithmeticAdditionKernel      _accum_cell_gate_bias;
+    NEArithmeticAddition            _accum_cell_gate_bias;
     NEMeanStdDevNormalizationLayer  _mean_std_norm_output_gate;
     NEPixelWiseMultiplicationKernel _pixelwise_mul_output_gate_coeff;
-    NEArithmeticAdditionKernel      _accum_output_gate_bias;
+    NEArithmeticAddition            _accum_output_gate_bias;
     Tensor                          _input_gate_out1;
     Tensor                          _input_gate_out2;
     Tensor                          _input_gate_out3;

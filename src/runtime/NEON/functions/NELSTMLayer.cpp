@@ -512,7 +512,7 @@ Status NELSTMLayer::validate(const ITensorInfo *input,
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticSubtractionKernel::validate(&forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticSubtraction::validate(&forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
     }
 
     // Validate cell state
@@ -610,7 +610,7 @@ void NELSTMLayer::run()
     {
         _mean_std_norm_forget_gate.run();
         NEScheduler::get().schedule(&_pixelwise_mul_forget_gate_coeff, Window::DimY);
-        NEScheduler::get().schedule(&_accum_forget_gate_bias, Window::DimY);
+        _accum_forget_gate_bias.run();
     }
     _activation_forget_gate.run();
 
@@ -624,7 +624,7 @@ void NELSTMLayer::run()
         {
             std::fill_n(reinterpret_cast<float *>(_ones.buffer()), _ones.info()->total_size() / _ones.info()->element_size(), 1);
         }
-        NEScheduler::get().schedule(&_subtract_input_gate, Window::DimY);
+        _subtract_input_gate.run();
     }
     else
     {
@@ -640,7 +640,7 @@ void NELSTMLayer::run()
         {
             _mean_std_norm_input_gate.run();
             NEScheduler::get().schedule(&_pixelwise_mul_input_gate_coeff, Window::DimY);
-            NEScheduler::get().schedule(&_accum_input_gate_bias, Window::DimY);
+            _accum_input_gate_bias.run();
         }
         _activation_input_gate.run();
     }
@@ -648,17 +648,17 @@ void NELSTMLayer::run()
     _fully_connected_cell_state.run();
     NEScheduler::get().schedule(&_transpose_cell_state, Window::DimY);
     _gemm_cell_state1.run();
-    NEScheduler::get().schedule(&_accum_cell_state1, Window::DimY);
+    _accum_cell_state1.run();
     if(_is_layer_norm_lstm)
     {
         _mean_std_norm_cell_gate.run();
         NEScheduler::get().schedule(&_pixelwise_mul_cell_gate_coeff, Window::DimY);
-        NEScheduler::get().schedule(&_accum_cell_gate_bias, Window::DimY);
+        _accum_cell_gate_bias.run();
     }
     _activation_cell_state.run();
     NEScheduler::get().schedule(&_pixelwise_mul_cell_state1, Window::DimY);
     NEScheduler::get().schedule(&_pixelwise_mul_cell_state2, Window::DimY);
-    NEScheduler::get().schedule(&_accum_cell_state2, Window::DimY);
+    _accum_cell_state2.run();
 
     if(_perform_cell_clipping)
     {
@@ -675,7 +675,7 @@ void NELSTMLayer::run()
     {
         _mean_std_norm_output_gate.run();
         NEScheduler::get().schedule(&_pixelwise_mul_output_gate_coeff, Window::DimY);
-        NEScheduler::get().schedule(&_accum_output_gate_bias, Window::DimY);
+        _accum_output_gate_bias.run();
     }
     _activation_output.run();
 

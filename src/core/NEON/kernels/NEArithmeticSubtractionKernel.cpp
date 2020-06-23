@@ -719,35 +719,32 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
 } // namespace
 
 NEArithmeticSubtractionKernel::NEArithmeticSubtractionKernel()
-    : _func(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _policy(ConvertPolicy::WRAP)
+    : _func(nullptr), _policy(ConvertPolicy::WRAP)
 {
 }
 
-void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy)
+void NEArithmeticSubtractionKernel::configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1->info(), *input2->info(), *output->info(), policy));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(*input1, *input2, *output, policy));
 
-    _input1 = input1;
-    _input2 = input2;
-    _output = output;
     _policy = policy;
 
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1->info(), *input2->info());
+    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
     const TensorShape &out_shape    = broadcast_pair.first;
     const ValidRegion &valid_region = broadcast_pair.second;
 
     // Auto initialize output if not initialized
-    set_shape_if_empty(*output->info(), out_shape);
+    set_shape_if_empty(*output, out_shape);
 
-    switch(input1->info()->data_type())
+    switch(input1->data_type())
     {
         case DataType::U8:
-            if(input2->info()->data_type() == DataType::U8 && output->info()->data_type() == DataType::U8)
+            if(input2->data_type() == DataType::U8 && output->data_type() == DataType::U8)
             {
                 _func = &sub_same<uint8_t>;
             }
-            else if(input2->info()->data_type() == DataType::U8 && output->info()->data_type() == DataType::S16)
+            else if(input2->data_type() == DataType::U8 && output->data_type() == DataType::S16)
             {
                 _func = &sub_U8_U8_S16;
             }
@@ -758,14 +755,14 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
             break;
         case DataType::QASYMM8:
             _func = &sub_quantized<uint8_t>;
-            set_data_type_if_unknown(*output->info(), DataType::QASYMM8);
+            set_data_type_if_unknown(*output, DataType::QASYMM8);
             break;
         case DataType::QASYMM8_SIGNED:
             _func = &sub_quantized<int8_t>;
-            set_data_type_if_unknown(*output->info(), DataType::QASYMM8_SIGNED);
+            set_data_type_if_unknown(*output, DataType::QASYMM8_SIGNED);
             break;
         case DataType::S16:
-            if(input2->info()->data_type() == DataType::U8)
+            if(input2->data_type() == DataType::U8)
             {
                 _func = &sub_S16_U8_S16;
             }
@@ -773,21 +770,21 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
             {
                 _func = &sub_same<int16_t>;
             }
-            set_format_if_unknown(*output->info(), Format::S16);
+            set_format_if_unknown(*output, Format::S16);
             break;
         case DataType::QSYMM16:
             _func = &sub_QSYMM16_QSYMM16_QSYMM16;
-            set_data_type_if_unknown(*output->info(), DataType::QSYMM16);
+            set_data_type_if_unknown(*output, DataType::QSYMM16);
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
             _func = &sub_same<float16_t>;
-            set_format_if_unknown(*output->info(), Format::F16);
+            set_format_if_unknown(*output, Format::F16);
             break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
             _func = &sub_same<float>;
-            set_format_if_unknown(*output->info(), Format::F32);
+            set_format_if_unknown(*output, Format::F32);
             break;
         default:
             _func = nullptr;
@@ -795,8 +792,8 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
 
     // NEArithmeticSubtractionKernel doesn't need padding so update_window_and_padding() can be skipped
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(valid_region);
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(valid_region);
     Window win = calculate_max_window(valid_region, Steps());
 
     INEKernel::configure(win);
@@ -810,13 +807,12 @@ Status NEArithmeticSubtractionKernel::validate(const ITensorInfo *input1, const 
     return Status{};
 }
 
-void NEArithmeticSubtractionKernel::run(const Window &window, const ThreadInfo &info)
+void NEArithmeticSubtractionKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(_func == nullptr);
-
-    (*_func)(_input1, _input2, _output, window, (_policy == ConvertPolicy::SATURATE));
+    // Dispatch kernel
+    (*_func)(inputs.at(TensorType::ACL_SRC_0), inputs.at(TensorType::ACL_SRC_1), outputs.at(TensorType::ACL_DST), window, (_policy == ConvertPolicy::SATURATE));
 }
 } // namespace arm_compute

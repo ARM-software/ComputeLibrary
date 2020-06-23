@@ -71,7 +71,7 @@ public:
      * @param[out] output The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32.
      * @param[in]  policy Overflow policy. Convert policy cannot be WRAP if datatype is quantized.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
+    void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticSubtractionKernel
      *
      * @note Convert policy cannot be WRAP if datatype is QASYMM8
@@ -86,7 +86,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised sub functions
@@ -99,11 +99,8 @@ private:
      */
     using SubFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window, bool is_sat);
     /** Sub function to use for the particular tensor types passed to configure() */
-    SubFunction   *_func;
-    const ITensor *_input1;
-    const ITensor *_input2;
-    ITensor       *_output;
-    ConvertPolicy  _policy;
+    SubFunction *_func;
+    ConvertPolicy _policy;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NEARITHMETICSUBTRACTIONKERNEL_H */

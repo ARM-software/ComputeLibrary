@@ -24,7 +24,6 @@
 #ifndef ARM_COMPUTE_NEGEMM_H
 #define ARM_COMPUTE_NEGEMM_H
 
-#include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
@@ -35,6 +34,7 @@
 #include "arm_compute/runtime/IWeightsManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -112,7 +112,7 @@ private:
     NEGEMMAssemblyDispatch     _asm_glue;
     NEGEMMMatrixAdditionKernel _ma_kernel;
     NEActivationLayer          _alpha_scale_func;
-    NEArithmeticAdditionKernel _add_bias_kernel;
+    NEArithmeticAddition       _add_bias;
     NEActivationLayer          _activation_func;
 
     Tensor         _tmp_a;

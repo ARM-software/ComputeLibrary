@@ -619,7 +619,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         if(lstm_params.projection_bias() != nullptr)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lstm_params.projection_bias(), 1, DataType::S32);
-            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(lstm_params.projection_bias(), &projection_eff_bias_info, &projection_eff_bias_info, ConvertPolicy::SATURATE));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(lstm_params.projection_bias(), &projection_eff_bias_info, &projection_eff_bias_info, ConvertPolicy::SATURATE));
         }
     }
 
@@ -662,7 +662,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const float recurrent_to_forget_scale = recurrent_to_forget_weights->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.forget_intermediate_scale();
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, output_state_in, &recurrent_weights_transposed, &eff_bias_info, recurrent_to_forget_scale, &mm_out_info, &forget_outstage_info));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&forget_outstage_info, &forget_outstage_info, &forget_outstage_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_outstage_info, &forget_outstage_info, &forget_outstage_info, ConvertPolicy::SATURATE));
 
     if(lstm_params.has_peephole_opt())
     {
@@ -672,7 +672,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         const float cell_to_forget_scale = std::pow(2, cell_shift) * lstm_params.cell_to_forget_weights()->quantization_info().uniform().scale / lstm_params.forget_intermediate_scale();
         ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_forget_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOutputStage::validate(&mm_out_info, nullptr, &forget_outstage_info, gemmlowp_info));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&forget_outstage_info, &forget_outstage_info, &forget_outstage_info, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_outstage_info, &forget_outstage_info, &forget_outstage_info, ConvertPolicy::SATURATE));
     }
 
     if(has_layer_norm)
@@ -697,7 +697,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const float recurrent_to_cell_scale = recurrent_to_cell_weights->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.cell_intermediate_scale();
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, output_state_in, &recurrent_weights_transposed, &eff_bias_info, recurrent_to_cell_scale, &mm_out_info, &cell_outstage_info));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&cell_outstage_info, &cell_outstage_info, &cell_outstage_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&cell_outstage_info, &cell_outstage_info, &cell_outstage_info, ConvertPolicy::SATURATE));
 
     if(has_layer_norm)
     {
@@ -714,7 +714,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     if(lstm_params.has_cifg_opt())
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(lstm_params.input_gate_bias() != nullptr, "Input gate bias must not be present when CIFG is used");
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticSubtractionKernel::validate(&input_gate_info, &forget_gate_info, &forget_gate_info, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticSubtraction::validate(&input_gate_info, &forget_gate_info, &forget_gate_info, ConvertPolicy::SATURATE));
     }
     else
     {
@@ -733,7 +733,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         const float recurrent_to_input_scale = lstm_params.recurrent_to_input_weights()->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.input_intermediate_scale();
         ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, output_state_in, &recurrent_weights_transposed, &eff_bias_info, recurrent_to_input_scale, &mm_out_info, &input_outstage_info));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&input_outstage_info, &input_outstage_info, &input_outstage_info, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&input_outstage_info, &input_outstage_info, &input_outstage_info, ConvertPolicy::SATURATE));
 
         if(lstm_params.has_peephole_opt())
         {
@@ -742,7 +742,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
             const float cell_to_input_scale = std::pow(2, cell_shift) * lstm_params.cell_to_input_weights()->quantization_info().uniform().scale / lstm_params.input_intermediate_scale();
             ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_input_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
             ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpOutputStage::validate(&mm_out_info, &eff_bias_info, &input_outstage_info, gemmlowp_info));
-            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&input_outstage_info, &input_outstage_info, &input_outstage_info, ConvertPolicy::SATURATE));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&input_outstage_info, &input_outstage_info, &input_outstage_info, ConvertPolicy::SATURATE));
         }
 
         if(has_layer_norm)
@@ -757,7 +757,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     // Cell.
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&forget_gate_info, cell_state_in, &forget_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
     ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(&input_gate_info, cell_state_in, &cell_gate_info, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&forget_gate_info, &cell_gate_info, cell_state_out, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&forget_gate_info, &cell_gate_info, cell_state_out, ConvertPolicy::SATURATE));
     if(quantized_cell_clip > 0)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(cell_state_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -quantized_cell_clip,
@@ -772,7 +772,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
     const float recurrent_to_output_scale = recurrent_to_output_weights->quantization_info().uniform().scale * qoutput_state_in.scale / lstm_params.output_intermediate_scale();
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemmlowp_info, output_state_in, &recurrent_weights_transposed, &eff_bias_info, recurrent_to_output_scale, &mm_out_info, &output_outstage_info));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
     if(lstm_params.has_peephole_opt())
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lstm_params.cell_to_output_weights(), 1, DataType::QSYMM16);
@@ -782,7 +782,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
         // ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier(cell_to_output_scale, &gemmlowp_info.gemmlowp_multiplier, &gemmlowp_info.gemmlowp_shift));
         ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplicationKernel::validate(cell_state_out, lstm_params.cell_to_output_weights(), &output_outstage_info, 1.f, ConvertPolicy::SATURATE,
                                                                               RoundingPolicy::TO_ZERO));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&output_outstage_info, &output_outstage_info, &output_outstage_info, ConvertPolicy::SATURATE));
     }
 
     if(has_layer_norm)
@@ -837,7 +837,7 @@ Status NEQLSTMLayer::validate(const ITensorInfo *input,
             ARM_COMPUTE_RETURN_ON_ERROR(NEQLSTMLayer::TensorCopyKernel::validate(*output_state_out, projection_outstage_info));
         }
 
-        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(output_state_out, output_state_out, output_state_out, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(output_state_out, output_state_out, output_state_out, ConvertPolicy::SATURATE));
 
         if(projection_tensor_copy_required)
         {
@@ -893,13 +893,13 @@ void NEQLSTMLayer::run()
 
     _mm_recurrent_to_forget.run();
     _recurrent_to_forget_outstage.run();
-    NEScheduler::get().schedule(&_accumulate_input_recurrent_forget, Window::DimY);
+    _accumulate_input_recurrent_forget.run();
 
     if(_has_peephole)
     {
         NEScheduler::get().schedule(&_pixelwise_mul_cell_to_forget, Window::DimY);
         _cell_to_forget_outstage.run();
-        NEScheduler::get().schedule(&_accumulate_cell_forget, Window::DimY);
+        _accumulate_cell_forget.run();
     }
 
     if(_has_layer_norm)
@@ -915,7 +915,7 @@ void NEQLSTMLayer::run()
 
     _mm_recurrent_to_cell.run();
     _recurrent_to_cell_outstage.run();
-    NEScheduler::get().schedule(&_accumulate_input_recurrent_modulation, Window::DimY);
+    _accumulate_input_recurrent_modulation.run();
 
     if(_has_layer_norm)
     {
@@ -927,7 +927,7 @@ void NEQLSTMLayer::run()
     // Input gate
     if(_has_cifg)
     {
-        NEScheduler::get().schedule(&_input_gate_sub, Window::DimY);
+        _input_gate_sub.run();
     }
     else
     {
@@ -935,13 +935,13 @@ void NEQLSTMLayer::run()
         _input_to_input_outstage.run();
         _mm_recurrent_to_input.run();
         _recurrent_to_input_outstage.run();
-        NEScheduler::get().schedule(&_accumulate_input_recurrent_input, Window::DimY);
+        _accumulate_input_recurrent_input.run();
 
         if(_has_peephole)
         {
             NEScheduler::get().schedule(&_pixelwise_mul_cell_to_input, Window::DimY);
             _cell_to_input_outstage.run();
-            NEScheduler::get().schedule(&_accumulate_cell_input, Window::DimY);
+            _accumulate_cell_input.run();
         }
 
         if(_has_layer_norm)
@@ -955,7 +955,8 @@ void NEQLSTMLayer::run()
     // Cell.
     NEScheduler::get().schedule(&_pixelwise_mul_forget_cell, Window::DimY);
     NEScheduler::get().schedule(&_pixelwise_mul_input_cell, Window::DimY);
-    NEScheduler::get().schedule(&_add_forget_cell, Window::DimY);
+    _add_forget_cell.run();
+
     if(_has_cell_clipping)
     {
         _cell_clip.run();
@@ -966,12 +967,12 @@ void NEQLSTMLayer::run()
     _input_to_output_outstage.run();
     _mm_recurrent_to_output.run();
     _recurrent_to_output_outstage.run();
-    NEScheduler::get().schedule(&_accumulate_input_recurrent_output, Window::DimY);
+    _accumulate_input_recurrent_output.run();
     if(_has_peephole)
     {
         NEScheduler::get().schedule(&_pixelwise_mul_cell_to_output, Window::DimY);
         _cell_to_output_outstage.run();
-        NEScheduler::get().schedule(&_accumulate_cell_to_output, Window::DimY);
+        _accumulate_cell_to_output.run();
     }
 
     if(_has_layer_norm)
@@ -997,7 +998,7 @@ void NEQLSTMLayer::run()
             _projection_output_to_accumulate_copy.run();
         }
 
-        NEScheduler::get().schedule(&_accumulate_projection, Window::DimY);
+        _accumulate_projection.run();
 
         if(_projection_tensor_copy_required)
         {
@@ -1077,7 +1078,7 @@ void NEQLSTMLayer::prepare()
             NEScheduler::get().schedule(&_projection_reduction, Window::DimY);
             if(_projection_bias != nullptr)
             {
-                NEScheduler::get().schedule(&_projection_bias_add, Window::DimY);
+                _projection_bias_add.run();
                 _projection_bias->mark_as_unused();
             }
 
