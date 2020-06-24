@@ -41,10 +41,17 @@ public:
     {
     }
 
-    bool setup(const std::string &data_path, Target target)
+    bool setup(const CommonGraphParams &common_params, const SimpleOption<std::string> &expected_output_filename)
     {
         using namespace arm_compute;
         using namespace graph_utils;
+
+        const DataLayout  data_layout = common_params.data_layout;
+        const std::string data_path   = common_params.data_path;
+        const Target      target      = common_params.target;
+
+        const DataLayoutDimension x_dim = (data_layout == DataLayout::NHWC) ? DataLayoutDimension::CHANNEL : DataLayoutDimension::WIDTH;
+        const DataLayoutDimension y_dim = (data_layout == DataLayout::NHWC) ? DataLayoutDimension::WIDTH : DataLayoutDimension::HEIGHT;
 
         NodeID id_ConstantFolding_truediv_1_recip = _graph.add_node<ConstNode>(
                                                         TensorDescriptor
@@ -52,10 +59,10 @@ public:
             TensorShape{ 1, 1, 1 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_ConstantFolding_truediv_1_recip = _graph.node(id_ConstantFolding_truediv_1_recip);
         node_ConstantFolding_truediv_1_recip->set_common_node_parameters(NodeParams{ "ConstantFolding_truediv_1_recip", target });
-        node_ConstantFolding_truediv_1_recip->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/ConstantFolding_truediv_1_recip.npy", DataLayout::NHWC));
+        node_ConstantFolding_truediv_1_recip->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/ConstantFolding_truediv_1_recip.npy", data_layout));
 
         NodeID id_ConstantFolding_truediv_recip = _graph.add_node<ConstNode>(
                                                       TensorDescriptor
@@ -63,109 +70,109 @@ public:
             TensorShape{ 1, 1, 1 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_ConstantFolding_truediv_recip = _graph.node(id_ConstantFolding_truediv_recip);
         node_ConstantFolding_truediv_recip->set_common_node_parameters(NodeParams{ "ConstantFolding_truediv_recip", target });
-        node_ConstantFolding_truediv_recip->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/ConstantFolding_truediv_recip.npy", DataLayout::NHWC));
+        node_ConstantFolding_truediv_recip->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/ConstantFolding_truediv_recip.npy", data_layout));
 
         NodeID id_detector_yolo_v3_mul_6_y = _graph.add_node<ConstNode>(
                                                  TensorDescriptor
         {
-            TensorShape{ 1, 1, 2 },
+            TensorShape{ 2 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_mul_6_y = _graph.node(id_detector_yolo_v3_mul_6_y);
         node_detector_yolo_v3_mul_6_y->set_common_node_parameters(NodeParams{ "detector_yolo_v3_mul_6_y", target });
-        node_detector_yolo_v3_mul_6_y->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_mul_6_y.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_mul_6_y->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_mul_6_y.npy", data_layout));
 
         NodeID id_detector_yolo_v3_mul_3_y = _graph.add_node<ConstNode>(
                                                  TensorDescriptor
         {
-            TensorShape{ 1, 1, 2 },
+            TensorShape{ 2 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_mul_3_y = _graph.node(id_detector_yolo_v3_mul_3_y);
         node_detector_yolo_v3_mul_3_y->set_common_node_parameters(NodeParams{ "detector_yolo_v3_mul_3_y", target });
-        node_detector_yolo_v3_mul_3_y->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_mul_3_y.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_mul_3_y->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_mul_3_y.npy", data_layout));
 
         NodeID id_detector_yolo_v3_mul_y = _graph.add_node<ConstNode>(
                                                TensorDescriptor
         {
-            TensorShape{ 1, 1, 2 },
+            TensorShape{ 2 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_mul_y = _graph.node(id_detector_yolo_v3_mul_y);
         node_detector_yolo_v3_mul_y->set_common_node_parameters(NodeParams{ "detector_yolo_v3_mul_y", target });
-        node_detector_yolo_v3_mul_y->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_mul_y.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_mul_y->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_mul_y.npy", data_layout));
 
         NodeID id_detector_yolo_v3_mul_7 = _graph.add_node<ConstNode>(
                                                TensorDescriptor
         {
-            TensorShape{ 1, 8112, 2 },
+            TensorShape{ 2, 8112 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_mul_7 = _graph.node(id_detector_yolo_v3_mul_7);
         node_detector_yolo_v3_mul_7->set_common_node_parameters(NodeParams{ "detector_yolo_v3_mul_7", target });
-        node_detector_yolo_v3_mul_7->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_mul_7.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_mul_7->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_mul_7.npy", data_layout));
 
         NodeID id_detector_yolo_v3_Reshape_11 = _graph.add_node<ConstNode>(
                                                     TensorDescriptor
         {
-            TensorShape{ 1, 8112, 2 },
+            TensorShape{ 2, 8112 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_Reshape_11 = _graph.node(id_detector_yolo_v3_Reshape_11);
         node_detector_yolo_v3_Reshape_11->set_common_node_parameters(NodeParams{ "detector_yolo_v3_Reshape_11", target });
-        node_detector_yolo_v3_Reshape_11->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_Reshape_11.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_Reshape_11->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_Reshape_11.npy", data_layout));
 
         NodeID id_detector_yolo_v3_mul_4 = _graph.add_node<ConstNode>(
                                                TensorDescriptor
         {
-            TensorShape{ 1, 2028, 2 },
+            TensorShape{ 2, 2028 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_mul_4 = _graph.node(id_detector_yolo_v3_mul_4);
         node_detector_yolo_v3_mul_4->set_common_node_parameters(NodeParams{ "detector_yolo_v3_mul_4", target });
-        node_detector_yolo_v3_mul_4->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_mul_4.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_mul_4->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_mul_4.npy", data_layout));
 
         NodeID id_detector_yolo_v3_Reshape_7 = _graph.add_node<ConstNode>(
                                                    TensorDescriptor
         {
-            TensorShape{ 1, 2028, 2 },
+            TensorShape{ 2, 2028 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_Reshape_7 = _graph.node(id_detector_yolo_v3_Reshape_7);
         node_detector_yolo_v3_Reshape_7->set_common_node_parameters(NodeParams{ "detector_yolo_v3_Reshape_7", target });
-        node_detector_yolo_v3_Reshape_7->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_Reshape_7.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_Reshape_7->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_Reshape_7.npy", data_layout));
 
         NodeID id_detector_yolo_v3_mul_1 = _graph.add_node<ConstNode>(
                                                TensorDescriptor
         {
-            TensorShape{ 1, 507, 2 },
+            TensorShape{ 2, 507 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_mul_1 = _graph.node(id_detector_yolo_v3_mul_1);
         node_detector_yolo_v3_mul_1->set_common_node_parameters(NodeParams{ "detector_yolo_v3_mul_1", target });
-        node_detector_yolo_v3_mul_1->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_mul_1.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_mul_1->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_mul_1.npy", data_layout));
 
         NodeID id_detector_yolo_v3_Reshape_3 = _graph.add_node<ConstNode>(
                                                    TensorDescriptor
         {
-            TensorShape{ 1, 507, 2 },
+            TensorShape{ 2, 507 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_detector_yolo_v3_Reshape_3 = _graph.node(id_detector_yolo_v3_Reshape_3);
         node_detector_yolo_v3_Reshape_3->set_common_node_parameters(NodeParams{ "detector_yolo_v3_Reshape_3", target });
-        node_detector_yolo_v3_Reshape_3->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo_v3_Reshape_3.npy", DataLayout::NHWC));
+        node_detector_yolo_v3_Reshape_3->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/detector_yolo-v3_Reshape_3.npy", data_layout));
 
         NodeID id_input_to_detector_3 = _graph.add_node<InputNode>(
                                             TensorDescriptor
@@ -173,20 +180,20 @@ public:
             TensorShape{ 255, 52, 52, 1 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_input_to_detector_3 = _graph.node(id_input_to_detector_3);
         node_input_to_detector_3->set_common_node_parameters(NodeParams{ "input_to_detector_3", target });
-        node_input_to_detector_3->output(0)->set_accessor(support::cpp14::make_unique<DummyAccessor>());
+        node_input_to_detector_3->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/input_to_detector_3.npy", data_layout));
 
         NodeID id_detector_yolo_v3_Reshape_10 = _graph.add_node<ReshapeLayerNode>(
-                                                    TensorShape{ 1, 8112, 85 });
+                                                    TensorShape{ 85, 8112 });
         INode *node_detector_yolo_v3_Reshape_10 = _graph.node(id_detector_yolo_v3_Reshape_10);
         node_detector_yolo_v3_Reshape_10->set_common_node_parameters(NodeParams{ "detector_yolo_v3_Reshape_10", target });
         _graph.add_connection(id_input_to_detector_3, 0, id_detector_yolo_v3_Reshape_10, 0);
 
         NodeID id_detector_yolo_v3_split_2 = _graph.add_node<SplitLayerNode>(
                                                  4,
-                                                 -1,
+                                                 0,
                                                  std::vector<int> { 2, 2, 1, 80 });
         INode *node_detector_yolo_v3_split_2 = _graph.node(id_detector_yolo_v3_split_2);
         node_detector_yolo_v3_split_2->set_common_node_parameters(NodeParams{ "detector_yolo_v3_split_2", target });
@@ -251,7 +258,7 @@ public:
 
         NodeID id_detector_yolo_v3_concat_8 = _graph.add_node<ConcatenateLayerNode>(
                                                   4,
-                                                  descriptors::ConcatLayerDescriptor{ DataLayoutDimension::HEIGHT });
+                                                  descriptors::ConcatLayerDescriptor{ x_dim });
         INode *node_detector_yolo_v3_concat_8 = _graph.node(id_detector_yolo_v3_concat_8);
         node_detector_yolo_v3_concat_8->set_common_node_parameters(NodeParams{ "detector_yolo_v3_concat_8", target });
         _graph.add_connection(id_detector_yolo_v3_mul_6, 0, id_detector_yolo_v3_concat_8, 0);
@@ -265,20 +272,20 @@ public:
             TensorShape{ 255, 26, 26, 1 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_input_to_detector_2 = _graph.node(id_input_to_detector_2);
         node_input_to_detector_2->set_common_node_parameters(NodeParams{ "input_to_detector_2", target });
-        node_input_to_detector_2->output(0)->set_accessor(support::cpp14::make_unique<DummyAccessor>());
+        node_input_to_detector_2->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/input_to_detector_2.npy", data_layout));
 
         NodeID id_detector_yolo_v3_Reshape_6 = _graph.add_node<ReshapeLayerNode>(
-                                                   TensorShape{ 1, 2028, 85 });
+                                                   TensorShape{ 85, 2028 });
         INode *node_detector_yolo_v3_Reshape_6 = _graph.node(id_detector_yolo_v3_Reshape_6);
         node_detector_yolo_v3_Reshape_6->set_common_node_parameters(NodeParams{ "detector_yolo_v3_Reshape_6", target });
         _graph.add_connection(id_input_to_detector_2, 0, id_detector_yolo_v3_Reshape_6, 0);
 
         NodeID id_detector_yolo_v3_split_1 = _graph.add_node<SplitLayerNode>(
                                                  4,
-                                                 -1,
+                                                 0,
                                                  std::vector<int> { 2, 2, 1, 80 });
         INode *node_detector_yolo_v3_split_1 = _graph.node(id_detector_yolo_v3_split_1);
         node_detector_yolo_v3_split_1->set_common_node_parameters(NodeParams{ "detector_yolo_v3_split_1", target });
@@ -343,7 +350,7 @@ public:
 
         NodeID id_detector_yolo_v3_concat_5 = _graph.add_node<ConcatenateLayerNode>(
                                                   4,
-                                                  descriptors::ConcatLayerDescriptor{ DataLayoutDimension::HEIGHT });
+                                                  descriptors::ConcatLayerDescriptor{ x_dim });
         INode *node_detector_yolo_v3_concat_5 = _graph.node(id_detector_yolo_v3_concat_5);
         node_detector_yolo_v3_concat_5->set_common_node_parameters(NodeParams{ "detector_yolo_v3_concat_5", target });
         _graph.add_connection(id_detector_yolo_v3_mul_3, 0, id_detector_yolo_v3_concat_5, 0);
@@ -357,20 +364,20 @@ public:
             TensorShape{ 255, 13, 13, 1 },
             DataType::F32,
             QuantizationInfo(),
-            DataLayout::NHWC });
+            data_layout });
         INode *node_input_to_detector_1 = _graph.node(id_input_to_detector_1);
         node_input_to_detector_1->set_common_node_parameters(NodeParams{ "input_to_detector_1", target });
-        node_input_to_detector_1->output(0)->set_accessor(support::cpp14::make_unique<DummyAccessor>());
+        node_input_to_detector_1->output(0)->set_accessor(get_weights_accessor(data_path, "/cnn_data/yolov3_output_detector/input_to_detector_1.npy", data_layout));
 
         NodeID id_detector_yolo_v3_Reshape_2 = _graph.add_node<ReshapeLayerNode>(
-                                                   TensorShape{ 1, 507, 85 });
+                                                   TensorShape{ 85, 507 });
         INode *node_detector_yolo_v3_Reshape_2 = _graph.node(id_detector_yolo_v3_Reshape_2);
         node_detector_yolo_v3_Reshape_2->set_common_node_parameters(NodeParams{ "detector_yolo_v3_Reshape_2", target });
         _graph.add_connection(id_input_to_detector_1, 0, id_detector_yolo_v3_Reshape_2, 0);
 
         NodeID id_detector_yolo_v3_split = _graph.add_node<SplitLayerNode>(
                                                4,
-                                               -1,
+                                               0,
                                                std::vector<int> { 2, 2, 1, 80 });
         INode *node_detector_yolo_v3_split = _graph.node(id_detector_yolo_v3_split);
         node_detector_yolo_v3_split->set_common_node_parameters(NodeParams{ "detector_yolo_v3_split", target });
@@ -435,7 +442,7 @@ public:
 
         NodeID id_detector_yolo_v3_concat_2 = _graph.add_node<ConcatenateLayerNode>(
                                                   4,
-                                                  descriptors::ConcatLayerDescriptor{ DataLayoutDimension::HEIGHT });
+                                                  descriptors::ConcatLayerDescriptor{ x_dim });
         INode *node_detector_yolo_v3_concat_2 = _graph.node(id_detector_yolo_v3_concat_2);
         node_detector_yolo_v3_concat_2->set_common_node_parameters(NodeParams{ "detector_yolo_v3_concat_2", target });
         _graph.add_connection(id_detector_yolo_v3_mul, 0, id_detector_yolo_v3_concat_2, 0);
@@ -445,7 +452,7 @@ public:
 
         NodeID id_detector_yolo_v3_concat_9 = _graph.add_node<ConcatenateLayerNode>(
                                                   3,
-                                                  descriptors::ConcatLayerDescriptor{ DataLayoutDimension::WIDTH });
+                                                  descriptors::ConcatLayerDescriptor{ y_dim });
         INode *node_detector_yolo_v3_concat_9 = _graph.node(id_detector_yolo_v3_concat_9);
         node_detector_yolo_v3_concat_9->set_common_node_parameters(NodeParams{ "detector_yolo_v3_concat_9", target });
         _graph.add_connection(id_detector_yolo_v3_concat_2, 0, id_detector_yolo_v3_concat_9, 0);
@@ -454,7 +461,7 @@ public:
 
         NodeID id_split = _graph.add_node<SplitLayerNode>(
                               5,
-                              -1,
+                              0,
                               std::vector<int> { 1, 1, 1, 1, -1 });
         INode *node_split = _graph.node(id_split);
         node_split->set_common_node_parameters(NodeParams{ "split", target });
@@ -522,7 +529,7 @@ public:
 
         NodeID id_output_boxes = _graph.add_node<ConcatenateLayerNode>(
                                      5,
-                                     descriptors::ConcatLayerDescriptor{ DataLayoutDimension::HEIGHT });
+                                     descriptors::ConcatLayerDescriptor{ x_dim });
         INode *node_output_boxes = _graph.node(id_output_boxes);
         node_output_boxes->set_common_node_parameters(NodeParams{ "output_boxes", target });
         _graph.add_connection(id_sub, 0, id_output_boxes, 0);
@@ -535,7 +542,7 @@ public:
         INode *node_output_140640247016360 = _graph.node(id_output_140640247016360);
         node_output_140640247016360->set_common_node_parameters(NodeParams{ "output_140640247016360", target });
         _graph.add_connection(id_output_boxes, 0, id_output_140640247016360, 0);
-        node_output_140640247016360->input(0)->set_accessor(support::cpp14::make_unique<DummyAccessor>(0));
+        node_output_140640247016360->input(0)->set_accessor(get_npy_output_accessor(expected_output_filename.value(), TensorShape(85U, 10647U), DataType::F32, data_layout));
 
         return true;
     }
@@ -554,7 +561,11 @@ public:
     GraphYoloV3OutputDetectorExample()
         : cmd_parser(), common_opts(cmd_parser), common_params()
     {
+        expected_output_filename = cmd_parser.add_option<SimpleOption<std::string>>("expected-output-filename", "");
+        expected_output_filename->set_help("Name of npy file containing the expected output to validate the graph output.");
     }
+    GraphYoloV3OutputDetectorExample(const GraphYoloV3OutputDetectorExample &) = delete;
+    GraphYoloV3OutputDetectorExample &operator=(const GraphYoloV3OutputDetectorExample &) = delete;
 
     bool do_setup(int argc, char **argv) override
     {
@@ -575,7 +586,7 @@ public:
         // Print parameter values
         std::cout << common_params << std::endl;
 
-        model.setup(common_params.data_path, common_params.target);
+        model.setup(common_params, *expected_output_filename);
 
         GraphConfig config;
         config.num_threads = common_params.threads;
@@ -605,6 +616,8 @@ private:
     GraphManager manager{};
 
     GraphYoloV3OutputDetector model{};
+
+    SimpleOption<std::string> *expected_output_filename{ nullptr };
 };
 
 int main(int argc, char **argv)
