@@ -981,27 +981,6 @@ bool needs_serialized_reduction(ReductionOperation op, DataType dt, unsigned int
  */
 QuantizationInfo get_softmax_output_quantization_info(DataType input_type, bool is_log);
 
-/** Returns resize ratio between input and output with consideration of aligned corners
- *
- * @param[in] input_size    The input size
- * @param[in] output_size   the output size
- * @param[in] align_corners True to align corners of input and output. Defaults to false.
- *
- * @return The ratio between input and output (i.e., the input size divided by the output size)
- */
-float calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners = false);
-
-/** Returns if aligned corners are allowed for the given sampling policy
- *
- * @param[in] sampling_policy The sampling policy to consider
- *
- * @return True if aligned corners are allowed
- */
-inline bool is_align_corners_allowed(SamplingPolicy sampling_policy)
-{
-    return sampling_policy != SamplingPolicy::CENTER;
-}
-
 /** Returns a pair of minimum and maximum values for a quantized activation
  *
  * @param[in] act_info  The information for activation

@@ -244,23 +244,6 @@ TEST_CASE(AlignedCornerNotSupported, framework::DatasetMode::ALL)
     result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), sampling_policy, default_use_padding, align_corners });
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
-
-TEST_CASE(InvalidAlignedCornerOutput, framework::DatasetMode::ALL)
-{
-    // Bilinear with aligned corners require at least 2x2 output to prevent overflow.
-    // Also, aligned corners require sampling policy to be TOP_LEFT.
-    constexpr auto interpolation_policy = InterpolationPolicy::BILINEAR;
-    constexpr bool align_corners        = true;
-    constexpr auto sampling_policy      = SamplingPolicy::TOP_LEFT;
-    const auto     invalid_output_shape = TensorShape{ 1, 1, 3, 2 };
-
-    const auto input  = TensorInfo{ input_shape, 1, default_data_type, default_data_layout };
-    const auto output = TensorInfo{ invalid_output_shape, 1, default_data_type, default_data_layout };
-    Status     result{};
-
-    result = NEScale::validate(&input, &output, ScaleKernelInfo{ interpolation_policy, default_border_mode, PixelValue(), sampling_policy, default_use_padding, align_corners });
-    ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
-}
 TEST_SUITE_END() // Validate
 
 template <typename T>

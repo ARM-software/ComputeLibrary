@@ -415,6 +415,7 @@ cc_library_static {
         "src/core/Utils.cpp",
         "src/core/Validate.cpp",
         "src/core/Version.cpp",
+        "src/core/utils/ScaleUtils.cpp",
         "src/core/utils/helpers/fft.cpp",
         "src/core/utils/helpers/tensor_transform.cpp",
         "src/core/utils/io/FileHandler.cpp",

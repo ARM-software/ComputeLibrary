@@ -30,6 +30,8 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 
+#include "src/core/utils/ScaleUtils.h"
+
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -68,19 +70,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dy, 1, DataType::F32);
     }
 
-    ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !is_align_corners_allowed(info.sampling_policy));
-
-    if(info.align_corners && is_align_corners_allowed(info.sampling_policy))
-    {
-        // For bilinear method with aligned corners, the resize ratio will
-        // be calculated by (input_size - 1)/(output_size - 1). Belows are
-        // checking possible overflows.
-        const auto input_width  = input->dimension(width_index);
-        const auto input_height = input->dimension(height_index);
-
-        ARM_COMPUTE_RETURN_ERROR_ON(input_width == 0 || input_height == 0);
-        ARM_COMPUTE_RETURN_ERROR_ON((output_width - 1 == 0) || (output_height - 1 == 0));
-    }
+    ARM_COMPUTE_RETURN_ERROR_ON(info.align_corners && !arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy));
 
     if(info.interpolation_policy == InterpolationPolicy::AREA)
     {
@@ -378,7 +368,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     _border_mode           = info.border_mode;
     _constant_border_value = info.constant_border_value;
     _use_padding           = info.use_padding;
-    _align_corners         = info.align_corners;
+    _align_corners         = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_output_shape(output->info()->tensor_shape(), data_layout);
 
     if(info.sampling_policy == SamplingPolicy::CENTER)
     {
@@ -386,8 +376,8 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     }
 
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_width), output->info()->dimension(idx_width), _align_corners);
-    const auto hr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), _align_corners);
+    const auto wr = arm_compute::scale_utils::calculate_resize_ratio(input->info()->dimension(idx_width), output->info()->dimension(idx_width), _align_corners);
+    const auto hr = arm_compute::scale_utils::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), _align_corners);
 
     // Add constant border only on top in case of NHWC layout
     if(data_layout == DataLayout::NHWC)
@@ -437,7 +427,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
     const size_t input_stride = _input->info()->strides_in_bytes()[1];
 
     // Compute the ratio between source height and destination height
-    const auto hr = arm_compute::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
+    const auto hr = arm_compute::scale_utils::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
 
     // Don't increment in X and Y direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
@@ -670,7 +660,7 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S16, DataType::F16, DataType::F32);
 
     // Compute the ratio between source height and destination height
-    const auto hr = arm_compute::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
+    const auto hr = arm_compute::scale_utils::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
 
     // Don't increment in X and Y direction for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets
@@ -971,8 +961,8 @@ void NEScaleKernel::scale_area_nchw(const Window &window)
     Iterator in(_input, win_in);
     Iterator out(_output, window);
 
-    const auto   wr        = arm_compute::calculate_resize_ratio(_input->info()->dimension(0), _output->info()->dimension(0), _align_corners);
-    const auto   hr        = arm_compute::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
+    const auto   wr        = arm_compute::scale_utils::calculate_resize_ratio(_input->info()->dimension(0), _output->info()->dimension(0), _align_corners);
+    const auto   hr        = arm_compute::scale_utils::calculate_resize_ratio(_input->info()->dimension(1), _output->info()->dimension(1), _align_corners);
     const auto   w         = _input->info()->dimension(0);
     const auto   h         = _input->info()->dimension(1);
     const size_t in_stride = _input->info()->strides_in_bytes()[1];
@@ -1019,7 +1009,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
     const size_t input_stride_c = _input->info()->strides_in_bytes()[idx_channels];
 
     // Compute the ratio between source height and destination height
-    const auto hr = arm_compute::calculate_resize_ratio(_input->info()->dimension(idx_height), _output->info()->dimension(idx_height), _align_corners);
+    const auto hr = arm_compute::scale_utils::calculate_resize_ratio(_input->info()->dimension(idx_height), _output->info()->dimension(idx_height), _align_corners);
 
     // Don't increment in width/height/channels for the input tensor
     // A pointer to the start of this plane is needed as base for the precomputed offsets

@@ -456,18 +456,6 @@ QuantizationInfo arm_compute::get_softmax_output_quantization_info(DataType inpu
     return QuantizationInfo(1.f / 256, 0);
 }
 
-float arm_compute::calculate_resize_ratio(size_t input_size, size_t output_size, bool align_corners)
-{
-    const size_t offset = align_corners ? 1 : 0;
-    const auto   in     = input_size - offset;
-    const auto   out    = output_size - offset;
-
-    ARM_COMPUTE_ERROR_ON((input_size == 0 || output_size == 0) && offset == 1);
-    ARM_COMPUTE_ERROR_ON(out == 0);
-
-    return static_cast<float>(in) / static_cast<float>(out);
-}
-
 std::pair<int32_t, int32_t> arm_compute::get_quantized_activation_min_max(ActivationLayerInfo act_info, DataType data_type, UniformQuantizationInfo oq_info)
 {
     const bool is_qasymm8_signed = is_data_type_quantized_asymmetric_signed(data_type);

@@ -74,11 +74,8 @@ protected:
 
         constexpr float max_width{ 8192.0f };
         constexpr float max_height{ 6384.0f };
-
-        const bool is_align_corners_used = _align_corners && arm_compute::is_align_corners_allowed(_sampling_policy);
-
-        const float min_width  = is_align_corners_used ? 2.f : 1.f;
-        const float min_height = is_align_corners_used ? 2.f : 1.f;
+        const float     min_width{ 1.f };
+        const float     min_height{ 1.f };
 
         std::mt19937                          generator(library->seed());
         std::uniform_real_distribution<float> distribution_float(_min_scale, _max_scale);

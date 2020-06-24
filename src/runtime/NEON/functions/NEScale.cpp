@@ -33,6 +33,8 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 
+#include "src/core/utils/ScaleUtils.h"
+
 #include <cmath>
 #include <cstddef>
 #include <utility>
@@ -107,7 +109,8 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), info));
 
     _use_padding                     = info.use_padding;
-    const bool is_align_corners_used = info.align_corners && is_align_corners_allowed(info.sampling_policy);
+    const bool is_align_corners_used = info.align_corners && arm_compute::scale_utils::is_align_corners_allowed_sampling_policy(info.sampling_policy)
+                                       && arm_compute::scale_utils::is_align_corners_allowed_output_shape(output->info()->tensor_shape(), output->info()->data_layout());
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();
@@ -118,8 +121,8 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
     const TensorShape shape(output->info()->dimension(idx_width), output->info()->dimension(idx_height));
 
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_width), output->info()->dimension(idx_width), is_align_corners_used);
-    const auto hr = arm_compute::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), is_align_corners_used);
+    const auto wr = arm_compute::scale_utils::calculate_resize_ratio(input->info()->dimension(idx_width), output->info()->dimension(idx_width), is_align_corners_used);
+    const auto hr = arm_compute::scale_utils::calculate_resize_ratio(input->info()->dimension(idx_height), output->info()->dimension(idx_height), is_align_corners_used);
 
     // Get the element size of the input image
     const size_t input_element_size = input->info()->element_size();
