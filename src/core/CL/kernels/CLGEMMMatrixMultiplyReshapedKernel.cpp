@@ -225,7 +225,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 
 CLGEMMMatrixMultiplyReshapedKernel::CLGEMMMatrixMultiplyReshapedKernel()
     : _input0(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_output_as_3d(false), _use_dummy_work_items(false), _add_bias(false),
-      _broadcast_bias(false), _export_to_cl_image(false)
+      _broadcast_bias(false), _export_to_cl_image(false), _k(1)
 {
 }
 
@@ -254,6 +254,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const CLCompileContext &compi
     _add_bias                 = _input2 != nullptr;
     _broadcast_bias           = gemm_info.broadcast_bias;
     _export_to_cl_image       = rhs_info.export_to_cl_image;
+    _k                        = gemm_info.k;
 
     // Check if we need to slide the matrix B
     const unsigned int num_dimensions_input0 = _input0->info()->num_dimensions();
@@ -434,6 +435,9 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
 
         // Output buffer
         add_2D_tensor_argument(idx, _output, slice);
+
+        // K dimension (not used if _export_to_cl_image == true)
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_k));
 
         // LHS stride_z
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));

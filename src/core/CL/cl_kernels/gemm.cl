@@ -1904,6 +1904,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  k                                  Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
@@ -1916,6 +1917,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
                                             IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                             IMAGE_DECLARATION(dst),
+                                            uint k,
                                             uint lhs_stride_z,
                                             uint rhs_stride_z,
 #if defined(BETA)
@@ -1982,7 +1984,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
     REPEAT_VAR_INIT_TO_CONST(M0, uint, zlhs, 0); //uint zlhs0=0,zlhs1=0,zlhs2=0,... zlhs7=0;
     REPEAT_VAR_INIT_TO_CONST(16, uint, zero, 0);
 
-    for(int i = 0; i < K; i += K0)
+    for(int i = 0; i < k; i += K0)
     {
         // Supported cases (M0, K0):
         // 1,2 - 1,3 - 1,4 - 1,8 - 1,16
@@ -2166,6 +2168,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  k                                  Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
@@ -2178,6 +2181,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
                                                     IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                                     IMAGE_DECLARATION(dst),
+                                                    uint k,
                                                     uint lhs_stride_z,
                                                     uint rhs_stride_z,
 #if defined(BETA)
@@ -2538,6 +2542,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t_texture(IMAGE_DECLARATION(lhs),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  k                                  Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
@@ -2550,6 +2555,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
                                             IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                             IMAGE_DECLARATION(dst),
+                                            uint k,
                                             uint lhs_stride_z,
                                             uint rhs_stride_z,
 #if defined(BETA)
@@ -2619,7 +2625,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
     __global DATA_TYPE *lhs = (__global DATA_TYPE *)(lhs_addr);
     __global DATA_TYPE *rhs = (__global DATA_TYPE *)(rhs_addr);
 
-    for(int i = 0; i < K; i += K0)
+    for(int i = 0; i < k; i += K0)
     {
         VEC_DATA_TYPE(DATA_TYPE, M0)
         a0;
@@ -2907,6 +2913,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt(IMAGE_DECLARATION(lhs),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  k                                  Number of columns in LHS matrix and rows in RHS matrix not reshaped.
  * @param[in]  lhs_stride_z                       Stride of the LHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  rhs_stride_z                       Stride of the RHS reshaped matrix in Z dimension (in bytes)
  * @param[in]  bias_stride_z                      (Optional) Stride of the bias matrix in Z dimension (in bytes)
@@ -2919,6 +2926,7 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
                                                     IMAGE_DECLARATION(bias),
 #endif // defined(BETA)
                                                     IMAGE_DECLARATION(dst),
+                                                    uint k,
                                                     uint lhs_stride_z,
                                                     uint rhs_stride_z,
 #if defined(BETA)

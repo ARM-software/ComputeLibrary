@@ -182,6 +182,7 @@ private:
     bool             _add_bias;
     bool             _broadcast_bias;
     bool             _export_to_cl_image;
+    unsigned int     _k;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMMATRIXMULTIPLYRESHAPEDKERNEL_H*/
