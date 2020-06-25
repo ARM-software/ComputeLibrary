@@ -77,7 +77,7 @@ public:
         return false;
     }
 
-    /** Main execute member fucntion
+    /** Main execute member function
      * @param [in] work_range     specifies the range of work we want to be computed, total range defined by get_window_size()
      * @param [in] thread_locator where are we inside of the thread space
      * @naram [in] threadid       a unique threadid

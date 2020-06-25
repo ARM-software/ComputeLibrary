@@ -438,9 +438,15 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
         const int granule_threshold = 200;
         scheduling_hint             = IScheduler::Hints(Window::DimX, IScheduler::StrategyHint::DYNAMIC, granule_threshold);
     }
-    else if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED_2D && (_d->info()->data_type() == DataType::F32 || _d->info()->data_type() == DataType::F16))
+    else if(_kernel_info.method == arm_gemm::GemmMethod::GEMM_INTERLEAVED_2D && (_d->info()->data_type() == DataType::F32 || _d->info()->data_type() == DataType::F16 ||  _d->info()->data_type() == DataType::U8 || _d->info()->data_type() == DataType::S8) )
     {
         //GEMM_INTERLEAVED supports 2D parallelism, IScheduler::split_dimensions_all signals to parallelise over all window dimensions
+        const int granule_threshold = 200;
+        scheduling_hint             = IScheduler::Hints(IScheduler::split_dimensions_all, IScheduler::StrategyHint::STATIC, granule_threshold);
+    }
+    else if(_kernel_info.method == arm_gemm::GemmMethod::QUANTIZE_WRAPPER_2D && (_d->info()->data_type() == DataType::QASYMM8 || _d->info()->data_type() == DataType::QASYMM8_SIGNED))
+    {
+        //special case for QASYMM8 to support 2D parallelism, scheduler here may be tweaked differently compared to FP32 case
         const int granule_threshold = 200;
         scheduling_hint             = IScheduler::Hints(IScheduler::split_dimensions_all, IScheduler::StrategyHint::STATIC, granule_threshold);
     }

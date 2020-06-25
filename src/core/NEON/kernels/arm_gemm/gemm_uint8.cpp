@@ -27,6 +27,7 @@
 #include "gemm_common.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
+#include "gemm_interleaved_pretransposed_2d.hpp"
 #include "gemm_hybrid.hpp"
 
 #include "kernels/a64_gemm_u16_12x8.hpp"
@@ -107,15 +108,29 @@ static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_u8u32_dot_16x4, uint8_t, uint32_t>(args); }
 },
 {
+    GemmMethod::GEMM_INTERLEAVED_2D,
+    "gemm_u8_12x8_2d",
+    [](const GemmArgs &args) { return args._ci->has_dotprod(); },
+    [](const GemmArgs &args) { return (args._maxthreads >= 8) && (args._Msize >= 8) && (args._Nsize >= 8) ; },
+    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<gemm_u8_12x8, uint8_t, uint32_t>(args); }
+},
+{
     GemmMethod::GEMM_INTERLEAVED,
-    "gemm_u8_12x8",
+    "gemm_u8_12x8_1d",
     [](const GemmArgs &args) { return args._ci->has_dotprod(); },
     nullptr,
     [](const GemmArgs &args) { return new GemmInterleaved<gemm_u8_12x8, uint8_t, uint32_t>(args); }
 },
 {
+    GemmMethod::GEMM_INTERLEAVED_2D,
+    "gemm_u8_4x4_2d",
+    nullptr,
+    [](const GemmArgs &args) { return (args._maxthreads >= 8) && (args._Msize >= 8) && (args._Nsize >= 8); },
+    [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<gemm_u8_4x4, uint8_t, uint32_t>(args); }
+},
+{
     GemmMethod::GEMM_INTERLEAVED,
-    "gemm_u8_4x4",
+    "gemm_u8_4x4_1d",
     nullptr,
     nullptr,
     [](const GemmArgs &args) { return new GemmInterleaved<gemm_u8_4x4, uint8_t, uint32_t>(args); }
