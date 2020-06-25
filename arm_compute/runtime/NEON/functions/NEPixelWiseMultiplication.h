@@ -26,13 +26,14 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to run @ref NEPixelWiseMultiplicationKernel */
-class NEPixelWiseMultiplication : public INESimpleFunction
+class NEPixelWiseMultiplication : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs, output and convertion policy.

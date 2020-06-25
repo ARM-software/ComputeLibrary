@@ -43,8 +43,6 @@ const float       scale255_constant      = 1.f / 255.f;
 const float32x4_t scale255_constant_f32q = vdupq_n_f32(scale255_constant);
 const float32x4_t positive_round_f32q    = vdupq_n_f32(0.5f);
 
-constexpr unsigned int num_elems_processed_per_iteration = 16;
-
 inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_UNUSED(overflow_policy);
@@ -100,60 +98,6 @@ inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *i
     return Status{};
 }
 
-inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
-{
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
-    const ValidRegion &valid_region = broadcast_pair.second;
-
-    // Auto initialize output if not initialized
-    {
-        ARM_COMPUTE_UNUSED(set_shape_if_empty(*output, input1->tensor_shape()));
-
-        if(input1->data_type() == DataType::S16 || input2->data_type() == DataType::S16)
-        {
-            set_format_if_unknown(*output, Format::S16);
-        }
-        else if(input1->data_type() == DataType::F32 || input2->data_type() == DataType::F32)
-        {
-            set_format_if_unknown(*output, Format::F32);
-        }
-        else if(input1->data_type() == DataType::F16 || input2->data_type() == DataType::F16)
-        {
-            set_format_if_unknown(*output, Format::F16);
-        }
-        else if(input1->data_type() == DataType::QASYMM8 || input2->data_type() == DataType::QASYMM8)
-        {
-            set_data_type_if_unknown(*output, DataType::QASYMM8);
-        }
-        else if(input1->data_type() == DataType::QASYMM8_SIGNED || input2->data_type() == DataType::QASYMM8_SIGNED)
-        {
-            set_data_type_if_unknown(*output, DataType::QASYMM8_SIGNED);
-        }
-        else if(input1->data_type() == DataType::QSYMM16 || input2->data_type() == DataType::QSYMM16)
-        {
-            set_data_type_if_unknown(*output, DataType::QSYMM16);
-        }
-    }
-
-    // Configure kernel window
-    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration));
-    Window win_input1 = win.broadcast_if_dimension_le_one(*input1);
-    Window win_input2 = win.broadcast_if_dimension_le_one(*input2);
-
-    AccessWindowHorizontal input1_access(input1, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal input2_access(input2, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win_input1, input1_access)
-                          || update_window_and_padding(win_input2, input2_access)
-                          || update_window_and_padding(win, output_access);
-
-    output_access.set_valid_region(win, valid_region);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
-}
-
 /* Scales a given vector by 1/255.
  *
  * @note This does not work for all cases. e.g. for float of 0.49999999999999994 and large floats.
@@ -178,224 +122,390 @@ inline uint16x8_t scale255_U16_U16(uint16x8_t in)
     return vreinterpretq_u16_s16(vcombine_s16(vmovn_s32(tmp_s2), vmovn_s32(tmp_s1)));
 }
 
-inline void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr,
-                                                       float32x4_t input1_vscale, int32x4_t input1_voffset, float32x4_t input2_vscale, int32x4_t input2_voffset, float32x4_t output_voffset, float32x4_t vinvscale)
+template <typename T>
+inline typename std::enable_if<std::is_same<T, int8_t>::value, int8x16_t>::type
+vquantize(float32x4x4_t val, const UniformQuantizationInfo &info)
 {
-    const auto input1 = static_cast<const qasymm8_t *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const qasymm8_t *__restrict>(input2_ptr);
-    const auto output = static_cast<qasymm8_t *__restrict>(output_ptr);
-
-    const qasymm8x16_t input1_q = vld1q_u8(input1);
-    const qasymm8x16_t input2_q = vld1q_u8(input2);
-
-    // Dequantitize inputs
-    float32x4x4_t in1_f32x4x4;
-    float32x4x4_t in2_f32x4x4;
-    in1_f32x4x4.val[0] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(input1_q))))), input1_voffset)), input1_vscale);
-    in1_f32x4x4.val[1] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(input1_q))))), input1_voffset)), input1_vscale);
-    in1_f32x4x4.val[2] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(input1_q))))), input1_voffset)), input1_vscale);
-    in1_f32x4x4.val[3] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(input1_q))))), input1_voffset)), input1_vscale);
-
-    in2_f32x4x4.val[0] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(input2_q))))), input2_voffset)), input2_vscale);
-    in2_f32x4x4.val[1] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(input2_q))))), input2_voffset)), input2_vscale);
-    in2_f32x4x4.val[2] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(input2_q))))), input2_voffset)), input2_vscale);
-    in2_f32x4x4.val[3] = vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(input2_q))))), input2_voffset)), input2_vscale);
-
-    float32x4x4_t out_f32x4x4;
-    out_f32x4x4.val[0] = vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]);
-    out_f32x4x4.val[1] = vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]);
-    out_f32x4x4.val[2] = vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]);
-    out_f32x4x4.val[3] = vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]);
-
-    int32x4x4_t rf;
-#ifdef __aarch64__
-    rf.val[0] = vcvtnq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[0], vinvscale));
-    rf.val[1] = vcvtnq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[1], vinvscale));
-    rf.val[2] = vcvtnq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[2], vinvscale));
-    rf.val[3] = vcvtnq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[3], vinvscale));
-#else  //__aarch64__
-    rf.val[0] = vcvtq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[0], vinvscale));
-    rf.val[1] = vcvtq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[1], vinvscale));
-    rf.val[2] = vcvtq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[2], vinvscale));
-    rf.val[3] = vcvtq_s32_f32(vmlaq_f32(output_voffset, out_f32x4x4.val[3], vinvscale));
-#endif //__aarch64__
-    const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
-    const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
-
-    vst1q_u8(output, vcombine_u8(pa, pb));
+    return vquantize_signed(val, info);
 }
 
-inline void mul_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED_n(
-    const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr,
-    float scale, const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info,
-    const UniformQuantizationInfo &output_qua_info)
-
+template <typename T>
+inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8x16_t>::type
+vquantize(float32x4x4_t val, const UniformQuantizationInfo &info)
 {
-    const auto                input1   = static_cast<const qasymm8_signed_t *__restrict>(input1_ptr);
-    const auto                input2   = static_cast<const qasymm8_signed_t *__restrict>(input2_ptr);
-    const auto                output   = static_cast<qasymm8_signed_t *__restrict>(output_ptr);
-    const qasymm8x16_signed_t input1_q = vld1q_s8(input1);
-    const qasymm8x16_signed_t input2_q = vld1q_s8(input2);
-    // Dequantitize inputs
-    const float32x4x4_t           in1_f32x4x4  = vdequantize(input1_q, input1_qua_info);
-    const float32x4x4_t           in2_f32x4x4  = vdequantize(input2_q, input2_qua_info);
-    const UniformQuantizationInfo tmp_qua_info = { output_qua_info.scale / scale, output_qua_info.offset };
-    const float32x4x4_t           out_f32x4x4 =
-    {
-        vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
-        vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
-        vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
-        vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
-    };
-    const int8x16_t result = vquantize_signed(out_f32x4x4, tmp_qua_info);
-    vst1q_s8(output, result);
+    return vquantize(val, info);
 }
 
-void mul_saturate_QSYMM16_QSYMM16_QSYMM16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
-                                            const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info, const UniformQuantizationInfo &output_qua_info)
+template <typename T>
+inline typename std::enable_if<std::is_same<T, int8_t>::value, int8_t>::type
+quantize(float val, const UniformQuantizationInfo &info)
 {
-    const auto input1 = static_cast<const qsymm16_t *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const qsymm16_t *__restrict>(input2_ptr);
-    const auto output = static_cast<qsymm16_t *__restrict>(output_ptr);
+    int32_t tmp = static_cast<int32_t>(val / info.scale) + info.offset;
 
-    const qsymm16x8x2_t input1_q =
-    {
-        {
-            vld1q_s16(input1),
-            vld1q_s16(input1 + 8),
-        }
-    };
-    const qsymm16x8x2_t input2_q =
-    {
-        {
-            vld1q_s16(input2),
-            vld1q_s16(input2 + 8),
-        }
-    };
+    T tmp_qua = static_cast<T>(tmp > SCHAR_MAX) ? SCHAR_MAX : ((tmp < SCHAR_MIN) ? SCHAR_MIN : tmp);
+    return tmp_qua;
+}
 
-    // Dequantitize inputs
-    const float32x4x4_t in1_f32x4x4 = vdequantize(input1_q, input1_qua_info);
-    const float32x4x4_t in2_f32x4x4 = vdequantize(input2_q, input2_qua_info);
+template <typename T>
+inline typename std::enable_if<std::is_same<T, uint8_t>::value, uint8_t>::type
+quantize(float val, const UniformQuantizationInfo &info)
+{
+    int32_t tmp = static_cast<int32_t>(val / info.scale) + info.offset;
+
+    T tmp_qua = static_cast<T>((tmp > UCHAR_MAX) ? UCHAR_MAX : tmp);
+    return tmp_qua;
+}
+
+template <typename T>
+inline float dequantize(const T *input, const UniformQuantizationInfo &info)
+{
+    return static_cast<float>((*input) - info.offset) * info.scale;
+}
+
+template <typename T>
+void mul_saturate_quantized_8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale)
+{
+    const UniformQuantizationInfo input1_qua_info = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo input2_qua_info = in2->info()->quantization_info().uniform();
+    const UniformQuantizationInfo output_qua_info = out->info()->quantization_info().uniform();
+
+    // Create input windows
+    Window win        = window;
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+
+    // Clear X Dimension on execution window as we handle manually
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input1(in1, input1_win);
+    Iterator input2(in2, input2_win);
+    Iterator output(out, win);
+
+    const int  window_step_x  = 16 / sizeof(T);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
 
     const UniformQuantizationInfo tmp_qua_info = { output_qua_info.scale / scale, output_qua_info.offset };
 
-    const float32x4x4_t out_f32x4x4 =
+    execute_window_loop(win, [&](const Coordinates &)
     {
-        vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
-        vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
-        vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
-        vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
-    };
+        const auto input1_ptr = reinterpret_cast<const T *>(input1.ptr());
+        const auto input2_ptr = reinterpret_cast<const T *>(input2.ptr());
+        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
 
-    const qsymm16x8x2_t result = vquantize_qsymm16(out_f32x4x4, tmp_qua_info);
-    vst1q_s16(output, result.val[0]);
-    vst1q_s16(output + 8, result.val[1]);
+        // Compute window_step_x elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const auto input1_q = wrapper::vloadq(input1_ptr + x);
+            const auto input2_q = wrapper::vloadq(input2_ptr + x);
+
+            // Dequantize inputs
+            const float32x4x4_t in1_f32x4x4 = vdequantize(input1_q, input1_qua_info);
+            const float32x4x4_t in2_f32x4x4 = vdequantize(input2_q, input2_qua_info);
+
+            const float32x4x4_t out_f32x4x4 =
+            {
+                vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
+                vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
+                vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
+                vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
+            };
+
+            // Quantize output
+            const auto result = vquantize<T>(out_f32x4x4, tmp_qua_info);
+            wrapper::vstore(output_ptr + x, result);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            // Dequantize inputs
+            float tmp_in1 = dequantize(input1_ptr + x, input1_qua_info);
+            float tmp_in2 = dequantize(input2_ptr + x, input2_qua_info);
+            float tmp_f   = tmp_in1 * tmp_in2;
+
+            // Quantize output
+            const auto tmp_qua = quantize<T>(tmp_f, tmp_qua_info);
+            *(output_ptr + x)  = tmp_qua;
+        }
+    },
+    input1, input2, output);
 }
 
-void mul_QSYMM16_QSYMM16_S32_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int scale)
+void mul_saturate_QSYMM16_QSYMM16_QSYMM16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale)
+{
+    const UniformQuantizationInfo input1_qua_info = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo input2_qua_info = in2->info()->quantization_info().uniform();
+    const UniformQuantizationInfo output_qua_info = out->info()->quantization_info().uniform();
+
+    // Create input windows
+    Window win        = window;
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+
+    // Clear X Dimension on execution window as we handle manually
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input1(in1, input1_win);
+    Iterator input2(in2, input2_win);
+    Iterator output(out, win);
+
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    const UniformQuantizationInfo tmp_qua_info = { output_qua_info.scale / scale, output_qua_info.offset };
+
+    execute_window_loop(win, [&](const Coordinates &)
+    {
+        const auto input1_ptr = reinterpret_cast<const qsymm16_t *>(input1.ptr());
+        const auto input2_ptr = reinterpret_cast<const qsymm16_t *>(input2.ptr());
+        const auto output_ptr = reinterpret_cast<qsymm16_t *>(output.ptr());
+
+        // Compute window_step_x elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const qsymm16x8x2_t input1_q =
+            {
+                {
+                    vld1q_s16(input1_ptr + x),
+                    vld1q_s16(input1_ptr + x + 8),
+                }
+            };
+            const qsymm16x8x2_t input2_q =
+            {
+                {
+                    vld1q_s16(input2_ptr + x),
+                    vld1q_s16(input2_ptr + x + 8),
+                }
+            };
+
+            // Dequantize inputs
+            const float32x4x4_t in1_f32x4x4 = vdequantize(input1_q, input1_qua_info);
+            const float32x4x4_t in2_f32x4x4 = vdequantize(input2_q, input2_qua_info);
+
+            const float32x4x4_t out_f32x4x4 =
+            {
+                vmulq_f32(in1_f32x4x4.val[0], in2_f32x4x4.val[0]),
+                vmulq_f32(in1_f32x4x4.val[1], in2_f32x4x4.val[1]),
+                vmulq_f32(in1_f32x4x4.val[2], in2_f32x4x4.val[2]),
+                vmulq_f32(in1_f32x4x4.val[3], in2_f32x4x4.val[3]),
+            };
+
+            const qsymm16x8x2_t result = vquantize_qsymm16(out_f32x4x4, tmp_qua_info);
+            vst1q_s16(output_ptr + x, result.val[0]);
+            vst1q_s16(output_ptr + x + 8, result.val[1]);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            // Dequantize inputs
+            float tmp_in1 = static_cast<float>(*(input1_ptr + x)) * input1_qua_info.scale;
+            float tmp_in2 = static_cast<float>(*(input2_ptr + x)) * input2_qua_info.scale;
+            float tmp_f   = tmp_in1 * tmp_in2;
+
+            // Quantize output, lrintf() has same rounding mode as vcombine_s16
+            int32_t   tmp     = lrintf(tmp_f / tmp_qua_info.scale);
+            qsymm16_t tmp_qua = static_cast<qsymm16_t>(tmp > SHRT_MAX) ? SHRT_MAX : ((tmp < SHRT_MIN) ? SHRT_MIN : tmp);
+            *(output_ptr + x) = tmp_qua;
+        }
+    },
+    input1, input2, output);
+}
+
+void mul_QSYMM16_QSYMM16_S32(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int scale)
 {
     ARM_COMPUTE_UNUSED(scale);
-    const auto input1 = static_cast<const qsymm16_t *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const qsymm16_t *__restrict>(input2_ptr);
-    const auto output = static_cast<int32_t *__restrict>(output_ptr);
 
-    const qsymm16x8x2_t input1_q =
-    {
-        {
-            vld1q_s16(input1),
-            vld1q_s16(input1 + 8),
-        }
-    };
-    const qsymm16x8x2_t input2_q =
-    {
-        {
-            vld1q_s16(input2),
-            vld1q_s16(input2 + 8),
-        }
-    };
+    // Create input windows
+    Window win        = window;
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
 
-    const int32x4x4_t in1_s32 =
-    {
-        {
-            vmovl_s16(vget_low_s16(input1_q.val[0])),
-            vmovl_s16(vget_high_s16(input1_q.val[0])),
-            vmovl_s16(vget_low_s16(input1_q.val[1])),
-            vmovl_s16(vget_high_s16(input1_q.val[1])),
-        }
-    };
-    const int32x4x4_t in2_s32 =
-    {
-        {
-            vmovl_s16(vget_low_s16(input2_q.val[0])),
-            vmovl_s16(vget_high_s16(input2_q.val[0])),
-            vmovl_s16(vget_low_s16(input2_q.val[1])),
-            vmovl_s16(vget_high_s16(input2_q.val[1])),
-        }
-    };
+    // Clear X Dimension on execution window as we handle manually
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    const int32x4x4_t result =
-    {
-        {
-            vmulq_s32(in1_s32.val[0], in2_s32.val[0]),
-            vmulq_s32(in1_s32.val[1], in2_s32.val[1]),
-            vmulq_s32(in1_s32.val[2], in2_s32.val[2]),
-            vmulq_s32(in1_s32.val[3], in2_s32.val[3]),
-        }
-    };
+    Iterator input1(in1, input1_win);
+    Iterator input2(in2, input2_win);
+    Iterator output(out, win);
 
-    vst1q_s32(output, result.val[0]);
-    vst1q_s32(output + 4, result.val[1]);
-    vst1q_s32(output + 8, result.val[2]);
-    vst1q_s32(output + 12, result.val[3]);
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    execute_window_loop(win, [&](const Coordinates &)
+    {
+        const auto input1_ptr = reinterpret_cast<const qsymm16_t *>(input1.ptr());
+        const auto input2_ptr = reinterpret_cast<const qsymm16_t *>(input2.ptr());
+        const auto output_ptr = reinterpret_cast<int32_t *>(output.ptr());
+
+        // Compute window_step_x elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const qsymm16x8x2_t input1_q =
+            {
+                {
+                    vld1q_s16(input1_ptr + x),
+                    vld1q_s16(input1_ptr + x + 8),
+                }
+            };
+            const qsymm16x8x2_t input2_q =
+            {
+                {
+                    vld1q_s16(input2_ptr + x),
+                    vld1q_s16(input2_ptr + x + 8),
+                }
+            };
+
+            const int32x4x4_t in1_s32 =
+            {
+                {
+                    vmovl_s16(vget_low_s16(input1_q.val[0])),
+                    vmovl_s16(vget_high_s16(input1_q.val[0])),
+                    vmovl_s16(vget_low_s16(input1_q.val[1])),
+                    vmovl_s16(vget_high_s16(input1_q.val[1])),
+                }
+            };
+            const int32x4x4_t in2_s32 =
+            {
+                {
+                    vmovl_s16(vget_low_s16(input2_q.val[0])),
+                    vmovl_s16(vget_high_s16(input2_q.val[0])),
+                    vmovl_s16(vget_low_s16(input2_q.val[1])),
+                    vmovl_s16(vget_high_s16(input2_q.val[1])),
+                }
+            };
+
+            const int32x4x4_t result =
+            {
+                {
+                    vmulq_s32(in1_s32.val[0], in2_s32.val[0]),
+                    vmulq_s32(in1_s32.val[1], in2_s32.val[1]),
+                    vmulq_s32(in1_s32.val[2], in2_s32.val[2]),
+                    vmulq_s32(in1_s32.val[3], in2_s32.val[3]),
+                }
+            };
+
+            vst1q_s32(output_ptr + x, result.val[0]);
+            vst1q_s32(output_ptr + x + 4, result.val[1]);
+            vst1q_s32(output_ptr + x + 8, result.val[2]);
+            vst1q_s32(output_ptr + x + 12, result.val[3]);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            int32_t tmp       = static_cast<int32_t>(*(input1_ptr + x)) * static_cast<int32_t>(*(input2_ptr + x));
+            *(output_ptr + x) = tmp;
+        }
+    },
+    input1, input2, output);
 }
 
 template <bool is_scale255, bool is_sat>
-void mul_U8_U8_U8_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int n)
+void mul_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int n)
 {
-    const auto input1 = static_cast<const uint8_t *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const uint8_t *__restrict>(input2_ptr);
-    const auto output = static_cast<uint8_t *__restrict>(output_ptr);
+    // Create input windows
+    Window win        = window;
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
 
-    const uint8x16_t ta1 = vld1q_u8(input1);
-    const uint8x16_t ta2 = vld1q_u8(input2);
+    // Clear X Dimension on execution window as we handle manually
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    uint16x8_t       tmp1_high = vmovl_u8(vget_high_u8(ta1));
-    const uint16x8_t tmp2_high = vmovl_u8(vget_high_u8(ta2));
-    uint16x8_t       tmp1_low  = vmovl_u8(vget_low_u8(ta1));
-    const uint16x8_t tmp2_low  = vmovl_u8(vget_low_u8(ta2));
+    Iterator input1(in1, input1_win);
+    Iterator input2(in2, input2_win);
+    Iterator output(out, win);
 
-    tmp1_high = vmulq_u16(tmp1_high, tmp2_high);
-    tmp1_low  = vmulq_u16(tmp1_low, tmp2_low);
+    const int  window_step_x  = 16 / sizeof(uint8_t);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
 
-    if(is_scale255)
+    execute_window_loop(win, [&](const Coordinates &)
     {
-        tmp1_high = scale255_U16_U16(tmp1_high);
-        tmp1_low  = scale255_U16_U16(tmp1_low);
-    }
-    else
-    {
-        const int16x8_t vn = vdupq_n_s16(-n);
+        const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
+        const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
+        const auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
 
-        if(is_sat)
+        // Compute window_step_x elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
-            tmp1_high = vqshlq_u16(tmp1_high, vn);
-            tmp1_low  = vqshlq_u16(tmp1_low, vn);
-        }
-        else
-        {
-            tmp1_high = vshlq_u16(tmp1_high, vn);
-            tmp1_low  = vshlq_u16(tmp1_low, vn);
-        }
-    }
+            const uint8x16_t ta1 = wrapper::vloadq(input1_ptr + x);
+            const uint8x16_t ta2 = wrapper::vloadq(input2_ptr + x);
 
-    if(is_sat)
-    {
-        vst1q_u8(output, vcombine_u8(vqmovn_u16(tmp1_low), vqmovn_u16(tmp1_high)));
-    }
-    else
-    {
-        vst1q_u8(output, vcombine_u8(vmovn_u16(tmp1_low), vmovn_u16(tmp1_high)));
-    }
+            uint16x8_t       tmp1_high = vmovl_u8(vget_high_u8(ta1));
+            const uint16x8_t tmp2_high = vmovl_u8(vget_high_u8(ta2));
+            uint16x8_t       tmp1_low  = vmovl_u8(vget_low_u8(ta1));
+            const uint16x8_t tmp2_low  = vmovl_u8(vget_low_u8(ta2));
+
+            tmp1_high = vmulq_u16(tmp1_high, tmp2_high);
+            tmp1_low  = vmulq_u16(tmp1_low, tmp2_low);
+
+            if(is_scale255)
+            {
+                tmp1_high = scale255_U16_U16(tmp1_high);
+                tmp1_low  = scale255_U16_U16(tmp1_low);
+            }
+            else
+            {
+                const int16x8_t vn = vdupq_n_s16(-n);
+
+                if(is_sat)
+                {
+                    tmp1_high = vqshlq_u16(tmp1_high, vn);
+                    tmp1_low  = vqshlq_u16(tmp1_low, vn);
+                }
+                else
+                {
+                    tmp1_high = vshlq_u16(tmp1_high, vn);
+                    tmp1_low  = vshlq_u16(tmp1_low, vn);
+                }
+            }
+            if(is_sat)
+            {
+                vst1q_u8(output_ptr, vcombine_u8(vqmovn_u16(tmp1_low), vqmovn_u16(tmp1_high)));
+            }
+            else
+            {
+                vst1q_u8(output_ptr, vcombine_u8(vmovn_u16(tmp1_low), vmovn_u16(tmp1_high)));
+            }
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            uint16_t tmp = static_cast<uint16_t>(*(input1_ptr + x)) * static_cast<uint16_t>(*(input2_ptr + x));
+
+            if(is_scale255)
+            {
+                float tmp_f = static_cast<float>(tmp) * scale255_constant;
+                tmp         = static_cast<uint16_t>(tmp_f + 0.5f);
+            }
+            else
+            {
+                tmp >>= n;
+            }
+            if(is_sat && tmp > 255)
+            {
+                tmp = 255;
+            }
+            *(output_ptr + x) = static_cast<uint8_t>(tmp);
+        }
+    },
+    input1, input2, output);
 }
 
 template <bool is_scale255, bool is_sat>
@@ -468,51 +578,189 @@ inline int16x8x2_t mul_S16_S16_S16_n_k(const int16x8x2_t &input1, const int16x8x
 }
 
 template <bool is_scale255, bool is_sat>
-void mul_S16_S16_S16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int n)
+void mul_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int n)
 {
-    const auto input1 = static_cast<const int16_t *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const int16_t *__restrict>(input2_ptr);
-    const auto output = static_cast<int16_t *__restrict>(output_ptr);
+    // Create input windows
+    Window win        = window;
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
 
-    const int16x8x2_t ta1 =
-    {
-        {
-            vld1q_s16(input1),
-            vld1q_s16(input1 + 8),
-        }
-    };
-    const int16x8x2_t ta2 =
-    {
-        {
-            vld1q_s16(input2),
-            vld1q_s16(input2 + 8),
-        }
-    };
-    const int16x8x2_t result = mul_S16_S16_S16_n_k<is_scale255, is_sat>(ta1, ta2, n);
+    // Clear X Dimension on execution window as we handle manually
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    vst1q_s16(output, result.val[0]);
-    vst1q_s16(output + 8, result.val[1]);
+    Iterator input1(in1, input1_win);
+    Iterator input2(in2, input2_win);
+    Iterator output(out, win);
+
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    execute_window_loop(win, [&](const Coordinates &)
+    {
+        const auto input1_ptr = reinterpret_cast<const int16_t *>(input1.ptr());
+        const auto input2_ptr = reinterpret_cast<const int16_t *>(input2.ptr());
+        const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
+
+        // Compute window_step_x elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const int16x8x2_t ta1 =
+            {
+                {
+                    vld1q_s16(input1_ptr + x),
+                    vld1q_s16(input1_ptr + x + 8),
+                }
+            };
+            const int16x8x2_t ta2 =
+            {
+                {
+                    vld1q_s16(input2_ptr + x),
+                    vld1q_s16(input2_ptr + x + 8),
+                }
+            };
+            const int16x8x2_t result = mul_S16_S16_S16_n_k<is_scale255, is_sat>(ta1, ta2, n);
+
+            vst1q_s16(output_ptr + x, result.val[0]);
+            vst1q_s16(output_ptr + x + 8, result.val[1]);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            int32_t tmp = static_cast<int32_t>(*(input1_ptr + x)) * static_cast<int32_t>(*(input2_ptr + x));
+
+            if(is_scale255)
+            {
+                float tmp_f = static_cast<float>(tmp) * scale255_constant;
+
+                tmp = static_cast<int32_t>(tmp_f + 0.5f);
+            }
+            else
+            {
+                if(tmp >= 0)
+                {
+                    tmp >>= n;
+                }
+                else
+                {
+                    uint32_t mask = (1u << n) - 1;
+                    tmp           = (tmp + static_cast<int32_t>(mask)) >> n;
+                }
+            }
+            if(is_sat)
+            {
+                tmp = (tmp > SHRT_MAX) ? SHRT_MAX : ((tmp < SHRT_MIN) ? SHRT_MIN : tmp);
+            }
+            *(output_ptr + x) = static_cast<int16_t>(tmp);
+        }
+    },
+    input1, input2, output);
 }
 
-void mul_F32_F32_F32_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale)
+void mul_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale)
 {
-    const auto input1 = static_cast<const float *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const float *__restrict>(input2_ptr);
-    const auto output = static_cast<float *__restrict>(output_ptr);
+    // Create input windows
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
 
-    const float32x4x4_t ta1       = vld4q_f32(input1);
-    const float32x4x4_t ta2       = vld4q_f32(input2);
-    const float32x4_t   scale_vec = vdupq_n_f32(scale);
-    const float32x4x4_t result =
+    // Clear X Dimension on execution window as we handle manually
+    Window win = window;
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    constexpr int window_step_x         = 16 / sizeof(float);
+    const auto    window_start_x        = static_cast<int>(window.x().start());
+    const auto    window_end_x          = static_cast<int>(window.x().end());
+    const bool    is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
+
+    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
+    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
+    Iterator output(out, window);
+
+    using ExactTagType = typename wrapper::traits::neon_vector<float, window_step_x>::tag_type;
+
+    if(is_broadcast_across_x)
     {
+        const bool     is_broadcast_input_2 = input2_win.x().step() == 0;
+        Window         broadcast_win        = is_broadcast_input_2 ? input2_win : input1_win;
+        Window         non_broadcast_win    = !is_broadcast_input_2 ? input2_win : input1_win;
+        const ITensor *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
+        const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
+
+        // Clear X Dimension on execution window as we handle manually
+        non_broadcast_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator broadcast_input(broadcast_tensor, broadcast_win);
+        Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
         {
-            vmulq_f32(vmulq_f32(ta1.val[0], ta2.val[0]), scale_vec),
-            vmulq_f32(vmulq_f32(ta1.val[1], ta2.val[1]), scale_vec),
-            vmulq_f32(vmulq_f32(ta1.val[2], ta2.val[2]), scale_vec),
-            vmulq_f32(vmulq_f32(ta1.val[3], ta2.val[3]), scale_vec)
-        }
-    };
-    vst4q_f32(output, result);
+            const auto non_broadcast_input_ptr = reinterpret_cast<const float *>(non_broadcast_input.ptr());
+            const auto output_ptr              = reinterpret_cast<float *>(output.ptr());
+
+            const float broadcast_value     = *reinterpret_cast<const float *>(broadcast_input.ptr());
+            const auto  broadcast_value_vec = wrapper::vdup_n(broadcast_value, ExactTagType{});
+            const auto  scale_vec           = wrapper::vdup_n(scale, ExactTagType{});
+
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const auto non_broadcast_v = wrapper::vloadq(non_broadcast_input_ptr + x);
+                auto       res             = wrapper::vmul(wrapper::vmul(broadcast_value_vec, non_broadcast_v), scale_vec);
+                wrapper::vstore(output_ptr + x, res);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                const auto non_broadcast_v = *(non_broadcast_input_ptr + x);
+                *(output_ptr + x)          = broadcast_value * non_broadcast_v * scale;
+            }
+        },
+        broadcast_input, non_broadcast_input, output);
+    }
+    else
+    {
+        // Clear X Dimension on execution window as we handle manually
+        input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+        input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+        Iterator input1(in1, input1_win);
+        Iterator input2(in2, input2_win);
+        Iterator output(out, win);
+
+        execute_window_loop(win, [&](const Coordinates &)
+        {
+            const auto input1_ptr = reinterpret_cast<const float *>(input1.ptr());
+            const auto input2_ptr = reinterpret_cast<const float *>(input2.ptr());
+            const auto output_ptr = reinterpret_cast<float *>(output.ptr());
+
+            // Compute window_step_x elements per iteration
+            int x = window_start_x;
+            for(; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                const auto ta1       = wrapper::vloadq(input1_ptr + x);
+                const auto ta2       = wrapper::vloadq(input2_ptr + x);
+                const auto scale_vec = wrapper::vdup_n(scale, ExactTagType{});
+                const auto res       = wrapper::vmul(wrapper::vmul(ta1, ta2), scale_vec);
+                wrapper::vstore(output_ptr + x, res);
+            }
+
+            // Compute left-over elements
+            for(; x < window_end_x; ++x)
+            {
+                const auto ta1    = *(input1_ptr + x);
+                const auto ta2    = *(input2_ptr + x);
+                *(output_ptr + x) = ta1 * ta2 * scale;
+            }
+        },
+        input1, input2, output);
+    }
 }
 
 void c_mul_F32_F32_F32_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr)
@@ -544,138 +792,275 @@ void c_mul_F32_F32_F32_n(const void *__restrict input1_ptr, const void *__restri
     wrapper::vstore(output, res);
 }
 
-void mul_F16_F16_F16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale)
-{
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    const auto          input1 = static_cast<const float16_t *__restrict>(input1_ptr);
-    const auto          input2 = static_cast<const float16_t *__restrict>(input2_ptr);
-    const auto          output = static_cast<float16_t *__restrict>(output_ptr);
-    const float16x8x2_t ta1 =
+void mul_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale)
+{
+    // Create input windows
+    Window win        = window;
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
+
+    // Clear X Dimension on execution window as we handle manually
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input1(in1, input1_win);
+    Iterator input2(in2, input2_win);
+    Iterator output(out, win);
+
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    execute_window_loop(win, [&](const Coordinates &)
     {
+        const auto input1_ptr = reinterpret_cast<const float16_t *>(input1.ptr());
+        const auto input2_ptr = reinterpret_cast<const float16_t *>(input2.ptr());
+        const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
+
+        // Compute window_step_x elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
-            vld1q_f16(input1),
-            vld1q_f16(input1 + 8),
+            const float16x8x2_t ta1 =
+            {
+                {
+                    vld1q_f16(input1_ptr + x),
+                    vld1q_f16(input1_ptr + x + 8),
+                }
+            };
+            const float16x8x2_t ta2 =
+            {
+                {
+                    vld1q_f16(input2_ptr + x),
+                    vld1q_f16(input2_ptr + x + 8),
+                }
+            };
+            const float16x8_t   scale_vec = vdupq_n_f16(scale);
+            const float16x8x2_t result =
+            {
+                {
+                    vmulq_f16(vmulq_f16(ta1.val[0], ta2.val[0]), scale_vec),
+                    vmulq_f16(vmulq_f16(ta1.val[1], ta2.val[1]), scale_vec),
+                }
+            };
+            vst1q_f16(output_ptr + x, result.val[0]);
+            vst1q_f16(output_ptr + x + 8, result.val[1]);
         }
-    };
-    const float16x8x2_t ta2 =
-    {
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
         {
-            vld1q_f16(input2),
-            vld1q_f16(input2 + 8),
+            const auto ta1    = *(input1_ptr + x);
+            const auto ta2    = *(input2_ptr + x);
+            *(output_ptr + x) = ta1 * ta2 * scale;
         }
-    };
-    const float16x8_t   scale_vec = vdupq_n_f16(scale);
-    const float16x8x2_t result =
-    {
-        {
-            vmulq_f16(vmulq_f16(ta1.val[0], ta2.val[0]), scale_vec),
-            vmulq_f16(vmulq_f16(ta1.val[1], ta2.val[1]), scale_vec),
-        }
-    };
-    vst1q_f16(output, result.val[0]);
-    vst1q_f16(output + 8, result.val[1]);
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    ARM_COMPUTE_UNUSED(input1_ptr);
-    ARM_COMPUTE_UNUSED(input2_ptr);
-    ARM_COMPUTE_UNUSED(output_ptr);
-    ARM_COMPUTE_UNUSED(scale);
-    ARM_COMPUTE_ERROR("Not supported. Recompile the library with arch=arm64-v8.2-a.");
+    },
+    input1, input2, output);
+}
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-}
 
 template <bool is_scale255, bool is_sat>
-void mul_U8_U8_S16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int n)
+void mul_U8_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int n)
 {
-    const auto input1 = static_cast<const uint8_t *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const uint8_t *__restrict>(input2_ptr);
-    const auto output = static_cast<int16_t *__restrict>(output_ptr);
+    // Create input windows
+    Window win        = window;
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
 
-    const uint8x16_t bv = vld1q_u8(input2);
-    const uint8x16_t av = vld1q_u8(input1);
+    // Clear X Dimension on execution window as we handle manually
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    uint16x8_t tmp_low  = vmovl_u8(vget_low_u8(av));
-    uint16x8_t tmp_high = vmovl_u8(vget_high_u8(av));
-    tmp_low             = vmulq_u16(tmp_low, vmovl_u8(vget_low_u8(bv)));
-    tmp_high            = vmulq_u16(tmp_high, vmovl_u8(vget_high_u8(bv)));
+    Iterator input1(in1, input1_win);
+    Iterator input2(in2, input2_win);
+    Iterator output(out, win);
 
-    if(is_scale255)
+    const int  window_step_x  = 16 / sizeof(uint8_t);
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    execute_window_loop(win, [&](const Coordinates &)
     {
-        tmp_low  = scale255_U16_U16(tmp_low);
-        tmp_high = scale255_U16_U16(tmp_high);
-    }
-    else
-    {
-        const int16x8_t vn = vdupq_n_s16(-n);
+        const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
+        const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
+        const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
 
-        if(is_sat)
+        // Compute window_step_x elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
-            tmp_low  = vqshlq_u16(tmp_low, vn);
-            tmp_high = vqshlq_u16(tmp_high, vn);
+            const uint8x16_t bv = wrapper::vloadq(input2_ptr + x);
+            const uint8x16_t av = wrapper::vloadq(input1_ptr + x);
+
+            uint16x8_t tmp_low  = vmovl_u8(vget_low_u8(av));
+            uint16x8_t tmp_high = vmovl_u8(vget_high_u8(av));
+            tmp_low             = vmulq_u16(tmp_low, vmovl_u8(vget_low_u8(bv)));
+            tmp_high            = vmulq_u16(tmp_high, vmovl_u8(vget_high_u8(bv)));
+
+            if(is_scale255)
+            {
+                tmp_low  = scale255_U16_U16(tmp_low);
+                tmp_high = scale255_U16_U16(tmp_high);
+            }
+            else
+            {
+                const int16x8_t vn = vdupq_n_s16(-n);
+
+                if(is_sat)
+                {
+                    tmp_low  = vqshlq_u16(tmp_low, vn);
+                    tmp_high = vqshlq_u16(tmp_high, vn);
+                }
+                else
+                {
+                    tmp_low  = vshlq_u16(tmp_low, vn);
+                    tmp_high = vshlq_u16(tmp_high, vn);
+                }
+            }
+
+            if(is_sat)
+            {
+                static const uint16x8_t max = vdupq_n_u16(SHRT_MAX);
+
+                tmp_low  = vminq_u16(tmp_low, max);
+                tmp_high = vminq_u16(tmp_high, max);
+            }
+
+            vst1q_s16(output_ptr + x, vreinterpretq_s16_u16(tmp_low));
+            vst1q_s16(output_ptr + x + 8, vreinterpretq_s16_u16(tmp_high));
         }
-        else
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
         {
-            tmp_low  = vshlq_u16(tmp_low, vn);
-            tmp_high = vshlq_u16(tmp_high, vn);
+            int32_t tmp = static_cast<int32_t>(*(input1_ptr + x)) * static_cast<int32_t>(*(input2_ptr + x));
+
+            if(is_scale255)
+            {
+                float tmp_f = static_cast<float>(tmp) * scale255_constant;
+                tmp         = static_cast<int32_t>(tmp_f + 0.5f);
+            }
+            else
+            {
+                tmp >>= n;
+            }
+
+            if(is_sat)
+            {
+                tmp = (tmp > SHRT_MAX) ? SHRT_MAX : tmp;
+            }
+
+            *(output_ptr + x) = static_cast<int16_t>(tmp);
         }
-    }
-
-    if(is_sat)
-    {
-        static const uint16x8_t max = vdupq_n_u16(SHRT_MAX);
-
-        tmp_low  = vminq_u16(tmp_low, max);
-        tmp_high = vminq_u16(tmp_high, max);
-    }
-
-    vst1q_s16(output, vreinterpretq_s16_u16(tmp_low));
-    vst1q_s16(output + 8, vreinterpretq_s16_u16(tmp_high));
+    },
+    input1, input2, output);
 }
 
 template <bool is_scale255, bool is_sat>
-void mul_S16_U8_S16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int n)
+void mul_S16_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int n)
 {
-    const auto input1 = static_cast<const int16_t *__restrict>(input1_ptr);
-    const auto input2 = static_cast<const uint8_t *__restrict>(input2_ptr);
-    const auto output = static_cast<int16_t *__restrict>(output_ptr);
+    // Create input windows
+    Window win        = window;
+    Window input1_win = window.broadcast_if_dimension_le_one(in1->info()->tensor_shape());
+    Window input2_win = window.broadcast_if_dimension_le_one(in2->info()->tensor_shape());
 
-    const int16x8x2_t ta1 =
-    {
-        {
-            vld1q_s16(input1),
-            vld1q_s16(input1 + 8),
-        }
-    };
-    const uint8x8x2_t ta2u =
-    {
-        {
-            vld1_u8(input2),
-            vld1_u8(input2 + 8),
-        }
-    };
-    const int16x8x2_t ta2 =
-    {
-        {
-            vreinterpretq_s16_u16(vmovl_u8(ta2u.val[0])),
-            vreinterpretq_s16_u16(vmovl_u8(ta2u.val[1]))
-        }
-    };
+    // Clear X Dimension on execution window as we handle manually
+    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    const int16x8x2_t result = mul_S16_S16_S16_n_k<is_scale255, is_sat>(ta1, ta2, n);
+    Iterator input1(in1, input1_win);
+    Iterator input2(in2, input2_win);
+    Iterator output(out, win);
 
-    vst1q_s16(output, result.val[0]);
-    vst1q_s16(output + 8, result.val[1]);
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
+
+    execute_window_loop(win, [&](const Coordinates &)
+    {
+        const auto input1_ptr = reinterpret_cast<const int16_t *>(input1.ptr());
+        const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
+        const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
+
+        // Compute window_step_x elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
+        {
+            const int16x8x2_t ta1 =
+            {
+                {
+                    vld1q_s16(input1_ptr + x),
+                    vld1q_s16(input1_ptr + x + 8),
+                }
+            };
+            const uint8x8x2_t ta2u =
+            {
+                {
+                    vld1_u8(input2_ptr + x),
+                    vld1_u8(input2_ptr + x + 8),
+                }
+            };
+            const int16x8x2_t ta2 =
+            {
+                {
+                    vreinterpretq_s16_u16(vmovl_u8(ta2u.val[0])),
+                    vreinterpretq_s16_u16(vmovl_u8(ta2u.val[1]))
+                }
+            };
+
+            const int16x8x2_t result = mul_S16_S16_S16_n_k<is_scale255, is_sat>(ta1, ta2, n);
+
+            vst1q_s16(output_ptr + x, result.val[0]);
+            vst1q_s16(output_ptr + x + 8, result.val[1]);
+        }
+
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            int32_t tmp = static_cast<int32_t>(*(input1_ptr + x)) * static_cast<int32_t>(*(input2_ptr + x));
+
+            if(is_scale255)
+            {
+                float tmp_f = static_cast<float>(tmp) * scale255_constant;
+
+                tmp = static_cast<int32_t>(tmp_f + 0.5f);
+            }
+            else
+            {
+                if(tmp >= 0)
+                {
+                    tmp >>= n;
+                }
+                else
+                {
+                    uint32_t mask = (1u << n) - 1;
+                    tmp           = (tmp + static_cast<int32_t>(mask)) >> n;
+                }
+            }
+            if(is_sat)
+            {
+                tmp = (tmp > SHRT_MAX) ? SHRT_MAX : ((tmp < SHRT_MIN) ? SHRT_MIN : tmp);
+            }
+            *(output_ptr + x) = static_cast<int16_t>(tmp);
+        }
+    },
+    input1, input2, output);
 }
 
 template <bool is_scale255, bool is_sat>
-void mul_U8_S16_S16_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int n)
+void mul_U8_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int n)
 {
     // Simply swap the two input buffers
-    mul_S16_U8_S16_n<is_scale255, is_sat>(input2_ptr, input1_ptr, output_ptr, n);
+    mul_S16_U8_S16<is_scale255, is_sat>(in2, in1, out, window, n);
 }
 } // namespace
 
 NEPixelWiseMultiplicationKernel::NEPixelWiseMultiplicationKernel()
-    : _func_float(nullptr), _func_int(nullptr), _func_quantized(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _scale{ 0 }, _scale_exponent{ 0 }, _run_optimized_qasymm8(false)
+    : _func_float(nullptr), _func_int(nullptr), _func_quantized(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _scale{ 0 }, _scale_exponent{ 0 }
 {
 }
 
@@ -686,19 +1071,21 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info(), scale, overflow_policy, rounding_policy));
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1->info(), *input2->info());
+    const TensorShape &out_shape    = broadcast_pair.first;
+    const ValidRegion &valid_region = broadcast_pair.second;
 
-    _input1                = input1;
-    _input2                = input2;
-    _output                = output;
-    _scale                 = scale;
-    _scale_exponent        = 0;
-    _func_quantized        = nullptr;
-    _func_int              = nullptr;
-    _func_float            = nullptr;
-    _run_optimized_qasymm8 = false;
+    // Auto initialize output if not initialized
+    set_shape_if_empty(*output->info(), out_shape);
+
+    _input1         = input1;
+    _input2         = input2;
+    _output         = output;
+    _scale          = scale;
+    _scale_exponent = 0;
+    _func_quantized = nullptr;
+    _func_int       = nullptr;
+    _func_float     = nullptr;
 
     bool is_scale_255 = false;
     // Check and validate scaling factor
@@ -722,93 +1109,109 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
     const DataType dt_output = output->info()->data_type();
     const bool     is_sat    = (overflow_policy == ConvertPolicy::SATURATE);
 
-    if(dt_input1 == DataType::QASYMM8 && dt_input2 == DataType::QASYMM8)
+    switch(dt_input1)
     {
-        _run_optimized_qasymm8 = true;
-    }
-    else if(dt_input1 == DataType::QASYMM8_SIGNED && dt_input2 == DataType::QASYMM8_SIGNED)
-    {
-        _func_quantized = &mul_saturate_QASYMM8_SIGNED_QASYMM8_SIGNED_QASYMM8_SIGNED_n;
-    }
-    else if(dt_input1 == DataType::QSYMM16 && dt_input2 == DataType::QSYMM16 && dt_output == DataType::QSYMM16)
-    {
-        _func_quantized = &mul_saturate_QSYMM16_QSYMM16_QSYMM16_n;
-    }
-    else if(dt_input1 == DataType::QSYMM16 && dt_input2 == DataType::QSYMM16 && dt_output == DataType::S32)
-    {
-        _func_int = &mul_QSYMM16_QSYMM16_S32_n;
-    }
-    else if(DataType::U8 == dt_input1 && DataType::U8 == dt_input2 && DataType::U8 == dt_output)
-    {
-        if(is_scale_255)
-        {
-            _func_int = is_sat ? &mul_U8_U8_U8_n<true, true> : &mul_U8_U8_U8_n<true, false>;
-        }
-        else
-        {
-            _func_int = is_sat ? &mul_U8_U8_U8_n<false, true> : &mul_U8_U8_U8_n<false, false>;
-        }
-    }
-    else if(DataType::S16 == dt_input1 && DataType::S16 == dt_input2 && DataType::S16 == dt_output)
-    {
-        if(is_scale_255)
-        {
-            _func_int = is_sat ? &mul_S16_S16_S16_n<true, true> : &mul_S16_S16_S16_n<true, false>;
-        }
-        else
-        {
-            _func_int = is_sat ? &mul_S16_S16_S16_n<false, true> : &mul_S16_S16_S16_n<false, false>;
-        }
-    }
-    else if(DataType::S16 == dt_input1 && DataType::U8 == dt_input2 && DataType::S16 == dt_output)
-    {
-        if(is_scale_255)
-        {
-            _func_int = is_sat ? &mul_S16_U8_S16_n<true, true> : &mul_S16_U8_S16_n<true, false>;
-        }
-        else
-        {
-            _func_int = is_sat ? &mul_S16_U8_S16_n<false, true> : &mul_S16_U8_S16_n<false, false>;
-        }
-    }
-    else if(DataType::U8 == dt_input1 && DataType::S16 == dt_input2 && DataType::S16 == dt_output)
-    {
-        if(is_scale_255)
-        {
-            _func_int = is_sat ? &mul_U8_S16_S16_n<true, true> : &mul_U8_S16_S16_n<true, false>;
-        }
-        else
-        {
-            _func_int = is_sat ? &mul_U8_S16_S16_n<false, true> : &mul_U8_S16_S16_n<false, false>;
-        }
-    }
-    else if(DataType::U8 == dt_input1 && DataType::U8 == dt_input2 && DataType::S16 == dt_output)
-    {
-        if(is_scale_255)
-        {
-            _func_int = is_sat ? &mul_U8_U8_S16_n<true, true> : &mul_U8_U8_S16_n<true, false>;
-        }
-        else
-        {
-            _func_int = is_sat ? &mul_U8_U8_S16_n<false, true> : &mul_U8_U8_S16_n<false, false>;
-        }
-    }
-    else if(DataType::F16 == dt_input1 && DataType::F16 == dt_input2 && DataType::F16 == dt_output)
-    {
-        _func_float = &mul_F16_F16_F16_n;
-        _func_int   = nullptr;
-    }
-    else if(DataType::F32 == dt_input1 && DataType::F32 == dt_input2 && DataType::F32 == dt_output)
-    {
-        _func_float = &mul_F32_F32_F32_n;
-        _func_int   = nullptr;
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("You called with the wrong img formats");
+        case DataType::QASYMM8:
+            if(dt_input2 == DataType::QASYMM8 && dt_output == DataType::QASYMM8)
+            {
+                _func_quantized = &mul_saturate_quantized_8<uint8_t>;
+            }
+            break;
+        case DataType::QASYMM8_SIGNED:
+            if(dt_input2 == DataType::QASYMM8_SIGNED)
+            {
+                _func_quantized = &mul_saturate_quantized_8<int8_t>;
+                ;
+            }
+            break;
+        case DataType::QSYMM16:
+            if(dt_input2 == DataType::QSYMM16 && dt_output == DataType::QSYMM16)
+            {
+                _func_quantized = &mul_saturate_QSYMM16_QSYMM16_QSYMM16;
+            }
+            else if(dt_input2 == DataType::QSYMM16 && dt_output == DataType::S32)
+            {
+                _func_int = &mul_QSYMM16_QSYMM16_S32;
+            }
+            break;
+        case DataType::S16:
+            if(DataType::U8 == dt_input2 && DataType::S16 == dt_output)
+            {
+                if(is_scale_255)
+                {
+                    _func_int = is_sat ? &mul_S16_U8_S16<true, true> : &mul_S16_U8_S16<true, false>;
+                }
+                else
+                {
+                    _func_int = is_sat ? &mul_S16_U8_S16<false, true> : &mul_S16_U8_S16<false, false>;
+                }
+            }
+            if(DataType::S16 == dt_input2 && DataType::S16 == dt_output)
+            {
+                if(is_scale_255)
+                {
+                    _func_int = is_sat ? &mul_S16_S16_S16<true, true> : &mul_S16_S16_S16<true, false>;
+                }
+                else
+                {
+                    _func_int = is_sat ? &mul_S16_S16_S16<false, true> : &mul_S16_S16_S16<false, false>;
+                }
+            }
+            break;
+        case DataType::U8:
+            if(DataType::U8 == dt_input2 && DataType::U8 == dt_output)
+            {
+                if(is_scale_255)
+                {
+                    _func_int = is_sat ? &mul_U8_U8_U8<true, true> : &mul_U8_U8_U8<true, false>;
+                }
+                else
+                {
+                    _func_int = is_sat ? &mul_U8_U8_U8<false, true> : &mul_U8_U8_U8<false, false>;
+                }
+            }
+            else if(DataType::U8 == dt_input2 && DataType::S16 == dt_output)
+            {
+                if(is_scale_255)
+                {
+                    _func_int = is_sat ? &mul_U8_U8_S16<true, true> : &mul_U8_U8_S16<true, false>;
+                }
+                else
+                {
+                    _func_int = is_sat ? &mul_U8_U8_S16<false, true> : &mul_U8_U8_S16<false, false>;
+                }
+            }
+            else if(DataType::S16 == dt_input2 && DataType::S16 == dt_output)
+            {
+                if(is_scale_255)
+                {
+                    _func_int = is_sat ? &mul_U8_S16_S16<true, true> : &mul_U8_S16_S16<true, false>;
+                }
+                else
+                {
+                    _func_int = is_sat ? &mul_U8_S16_S16<false, true> : &mul_U8_S16_S16<false, false>;
+                }
+            }
+            break;
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+            _func_float = &mul_F16_F16_F16;
+            break;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        case DataType::F32:
+            _func_float = &mul_F32_F32_F32;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("You called with the wrong img formats");
     }
 
-    INEKernel::configure(win_config.second);
+    // Configure kernel window
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(valid_region);
+    Window win = calculate_max_window(valid_region, Steps());
+
+    INEKernel::configure(win);
 }
 
 Status NEPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy,
@@ -816,7 +1219,6 @@ Status NEPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, cons
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, scale, overflow_policy, rounding_policy));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
     return Status{};
 }
@@ -827,95 +1229,19 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    const TensorShape &in_shape1 = _input1->info()->tensor_shape();
-    const TensorShape &in_shape2 = _input2->info()->tensor_shape();
-    const TensorShape &out_shape = _output->info()->tensor_shape();
-
-    bool can_collapse = true;
-    if(std::min(in_shape1.total_size(), in_shape2.total_size()) > 1)
+    if(_func_quantized != nullptr)
     {
-        can_collapse = (std::min(in_shape1.num_dimensions(), in_shape2.num_dimensions()) > Window::DimZ);
-        for(size_t d = Window::DimZ; can_collapse && (d < out_shape.num_dimensions()); ++d)
-        {
-            can_collapse = (in_shape1[d] == in_shape2[d]);
-        }
-    }
-
-    bool   has_collapsed = false;
-    Window collapsed     = can_collapse ? window.collapse_if_possible(INEKernel::window(), Window::DimZ, &has_collapsed) : window;
-
-    const TensorShape &in_shape1_collapsed = has_collapsed ? in_shape1.collapsed_from(Window::DimZ) : in_shape1;
-    const TensorShape &in_shape2_collapsed = has_collapsed ? in_shape2.collapsed_from(Window::DimZ) : in_shape2;
-
-    Window slice        = collapsed.first_slice_window_3D();
-    Window slice_input1 = slice.broadcast_if_dimension_le_one(in_shape1_collapsed);
-    Window slice_input2 = slice.broadcast_if_dimension_le_one(in_shape2_collapsed);
-
-    Iterator input1(_input1, slice_input1);
-    Iterator input2(_input2, slice_input2);
-    Iterator output(_output, slice);
-
-    if((_run_optimized_qasymm8) || (_func_quantized != nullptr))
-    {
-        if(_run_optimized_qasymm8)
-        {
-            const int32x4_t   input1_voffset = vdupq_n_s32(_input1->info()->quantization_info().uniform().offset);
-            const float32x4_t input1_vscale  = vdupq_n_f32(_input1->info()->quantization_info().uniform().scale);
-            const int32x4_t   input2_voffset = vdupq_n_s32(_input2->info()->quantization_info().uniform().offset);
-            const float32x4_t input2_vscale  = vdupq_n_f32(_input2->info()->quantization_info().uniform().scale);
-            const float32x4_t output_voffset = vdupq_n_f32(static_cast<float>(_output->info()->quantization_info().uniform().offset));
-            const float       output_scale   = _output->info()->quantization_info().uniform().scale;
-            const float32x4_t vinvscale      = vdupq_n_f32(1.f / (output_scale / _scale));
-
-            execute_window_loop(collapsed, [&](const Coordinates &)
-            {
-                mul_saturate_QASYMM8_QASYMM8_QASYMM8_n_opt(input1.ptr(), input2.ptr(), output.ptr(),
-                                                           input1_vscale, input1_voffset, input2_vscale, input2_voffset, output_voffset, vinvscale);
-                ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
-                ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
-            },
-            input1, input2, output);
-        }
-        else
-        {
-            execute_window_loop(collapsed, [&](const Coordinates &)
-            {
-                (*_func_quantized)(input1.ptr(), input2.ptr(), output.ptr(), _scale,
-                                   _input1->info()->quantization_info().uniform(), _input2->info()->quantization_info().uniform(), _output->info()->quantization_info().uniform());
-                ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
-                ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
-            },
-            input1, input2, output);
-        }
+        (*_func_quantized)(_input1, _input2, _output, window, _scale);
     }
     else if(_func_int != nullptr)
     {
-        execute_window_loop(collapsed, [&](const Coordinates &)
-        {
-            (*_func_int)(input1.ptr(), input2.ptr(), output.ptr(), _scale_exponent);
-            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
-            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
-        },
-        input1, input2, output);
+        (*_func_int)(_input1, _input2, _output, window, _scale_exponent);
     }
     else
     {
         ARM_COMPUTE_ERROR_ON(_func_float == nullptr);
-        execute_window_loop(collapsed, [&](const Coordinates &)
-        {
-            (*_func_float)(input1.ptr(), input2.ptr(), output.ptr(), _scale);
-            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
-            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
-        },
-        input1, input2, output);
+        (*_func_float)(_input1, _input2, _output, window, _scale);
     }
-}
-
-BorderSize NEPixelWiseMultiplicationKernel::border_size() const
-{
-    const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
-    const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
-    return BorderSize{ 0, border, 0, 0 };
 }
 
 namespace

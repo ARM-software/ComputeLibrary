@@ -83,16 +83,17 @@ const auto InPlaceDataSet = framework::dataset::make("InPlace", { false, true })
 
 // *INDENT-OFF*
 // clang-format off
-#define PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, SHAPES, DT1, DT2, SCALE, RP, INPLACE_DATASET, VALIDATE) \
-    FIXTURE_DATA_TEST_CASE(TEST_NAME, NEPixelWiseMultiplication##FIXTURE, framework::DatasetMode::MODE,                   \
-                           combine(combine(combine(combine(combine(combine(                                                       \
+#define PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, SHAPES, DT1, DT2, DT3, SCALE, RP, INPLACE_DATASET, VALIDATE) \
+    FIXTURE_DATA_TEST_CASE(TEST_NAME, NEPixelWiseMultiplication##FIXTURE, framework::DatasetMode::MODE,                        \
+                           combine(combine(combine(combine(combine(combine(combine(                                            \
                            datasets::SHAPES,                                                                              \
                            framework::dataset::make("DataType1", DataType::DT1)),                                         \
                            framework::dataset::make("DataType2", DataType::DT2)),                                         \
+                           framework::dataset::make("DataType3", DataType::DT3)),                                         \
                            framework::dataset::make("Scale", std::move(SCALE))),                                          \
                            datasets::ConvertPolicies()),                                                                  \
-                           framework::dataset::make("RoundingPolicy", RoundingPolicy::RP)), \
-                           (INPLACE_DATASET)))                               \
+                           framework::dataset::make("RoundingPolicy", RoundingPolicy::RP)),                               \
+                           (INPLACE_DATASET)))                                                                            \
     {                                                                                                                     \
         VALIDATE                                                                                                          \
     }
@@ -115,6 +116,7 @@ template <typename T>
 using NEPixelWiseMultiplicationToF32Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, float>;
 template <typename T>
 using NEPixelWiseMultiplicationBroadcastFixture = PixelWiseMultiplicationBroadcastValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, float>;
+using NEPixelWiseMultiplicationU8U8ToS16Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, uint8_t, uint8_t, int16_t>;
 
 TEST_SUITE(NEON)
 TEST_SUITE(PixelWiseMultiplication)
@@ -193,7 +195,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                    ConvertPolicy::WRAP,
                                         })),
 
-               framework::dataset::make("Expected", { true, true, false, false, false, false, false, false, true , false, false, true, false })),
+               framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, true , false, false, true, false })),
                input1_info, input2_info, output_info, scale, policy, expected)
 {
     bool has_error = bool(NEPixelWiseMultiplication::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), scale, policy, RoundingPolicy::TO_ZERO));
@@ -376,18 +378,48 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16ToS32Fixture, f
 TEST_SUITE_END() // QSYMM16toS32
 TEST_SUITE_END() // Quantized
 
+TEST_SUITE(U8U8toS16)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationU8U8ToS16Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                       framework::dataset::make("DataTypeIn1", DataType::U8)),
+                                                                                                                       framework::dataset::make("DataTypeIn2", DataType::U8)),
+                                                                                                                       framework::dataset::make("DataTypeOut", DataType::S16)),
+                                                                                                                       framework::dataset::make("Scale", { scale_255 })),
+                                                                                                                       datasets::ConvertPolicies()),
+                                                                                                                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_UP)),
+                                                                                                                       framework::dataset::make("InPlace", { false })))
+{
+    // Validate output
+    validate_wrap(Accessor(_target), _reference, AbsoluteTolerance<int16_t>(1), 0.f);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall1, NEPixelWiseMultiplicationU8U8ToS16Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                        framework::dataset::make("DataTypeIn1", DataType::U8)),
+                                                                                                                        framework::dataset::make("DataTypeIn2", DataType::U8)),
+                                                                                                                        framework::dataset::make("DataTypeOut", DataType::S16)),
+                                                                                                                        framework::dataset::make("Scale", { scale_other })),
+                                                                                                                        datasets::ConvertPolicies()),
+                                                                                                                        framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_ZERO)),
+                                                                                                                        framework::dataset::make("InPlace", { false })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+TEST_SUITE_END() // U8U8toS16
+
 TEST_SUITE(U8toU8)
 
 TEST_SUITE(Scale255)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToU8Fixture<uint8_t>, ALL, SmallShapes(), U8, U8, scale_255, TO_NEAREST_UP, InPlaceDataSet, WRAP_VALIDATE(uint8_t, 1))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToU8Fixture<uint8_t>, ALL, SmallShapes(), U8, U8, U8, scale_255, TO_NEAREST_UP, InPlaceDataSet, WRAP_VALIDATE(uint8_t, 1))
 TEST_SUITE_END() // Scale255
 
 TEST_SUITE(ScaleUnity)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToU8Fixture<uint8_t>, ALL, SmallShapes(), U8, U8, scale_unity, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToU8Fixture<uint8_t>, ALL, SmallShapes(), U8, U8, U8, scale_unity, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE(ScaleOther)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToU8Fixture<uint8_t>, ALL, SmallShapes(), U8, U8, scale_other, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToU8Fixture<uint8_t>, ALL, SmallShapes(), U8, U8, U8, scale_other, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
 TEST_SUITE_END() // ScaleOther
 
 TEST_SUITE_END() // U8toU8
@@ -395,16 +427,18 @@ TEST_SUITE_END() // U8toU8
 TEST_SUITE(U8toS16)
 
 TEST_SUITE(Scale255)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<uint8_t>, ALL, SmallShapes(), U8, S16, scale_255, TO_NEAREST_UP, framework::dataset::make("InPlace", { false }),
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<uint8_t>, ALL, SmallShapes(), U8, S16, S16, scale_255, TO_NEAREST_UP, framework::dataset::make("InPlace", { false }),
                                                  WRAP_VALIDATE(int16_t, 2))
 TEST_SUITE_END() // Scale255
 
 TEST_SUITE(ScaleUnity)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<uint8_t>, ALL, SmallShapes(), U8, S16, scale_unity, TO_ZERO, framework::dataset::make("InPlace", { false }), DEFAULT_VALIDATE)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<uint8_t>, ALL, SmallShapes(), U8, S16, S16, scale_unity, TO_ZERO, framework::dataset::make("InPlace", { false }),
+                                                 DEFAULT_VALIDATE)
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE(ScaleOther)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<uint8_t>, ALL, SmallShapes(), U8, S16, scale_other, TO_ZERO, framework::dataset::make("InPlace", { false }), DEFAULT_VALIDATE)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<uint8_t>, ALL, SmallShapes(), U8, S16, S16, scale_other, TO_ZERO, framework::dataset::make("InPlace", { false }),
+                                                 DEFAULT_VALIDATE)
 TEST_SUITE_END() // ScaleOther
 
 TEST_SUITE_END() // U8toS16
@@ -412,15 +446,15 @@ TEST_SUITE_END() // U8toS16
 TEST_SUITE(S16toS16)
 
 TEST_SUITE(Scale255)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<int16_t>, ALL, SmallShapes(), S16, S16, scale_255, TO_NEAREST_UP, InPlaceDataSet, WRAP_VALIDATE(int16_t, 2))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<int16_t>, ALL, SmallShapes(), S16, S16, S16, scale_255, TO_NEAREST_UP, InPlaceDataSet, WRAP_VALIDATE(int16_t, 2))
 TEST_SUITE_END() // Scale255
 
 TEST_SUITE(ScaleUnity)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<int16_t>, ALL, SmallShapes(), S16, S16, scale_unity, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<int16_t>, ALL, SmallShapes(), S16, S16, S16, scale_unity, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE(ScaleOther)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<int16_t>, ALL, SmallShapes(), S16, S16, scale_other, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToS16Fixture<int16_t>, ALL, SmallShapes(), S16, S16, S16, scale_other, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
 TEST_SUITE_END() // ScaleOther
 
 TEST_SUITE_END() // S16toS16
@@ -429,7 +463,7 @@ TEST_SUITE_END() // S16toS16
 TEST_SUITE(F16toF16)
 
 TEST_SUITE(Scale255)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF16Fixture<half_float::half>, ALL, SmallShapes(), F16, F16, scale_255, TO_NEAREST_UP, InPlaceDataSet, VALIDATE(float, 1.f))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF16Fixture<half_float::half>, ALL, SmallShapes(), F16, F16, F16, scale_255, TO_NEAREST_UP, InPlaceDataSet, VALIDATE(float, 1.f))
 TEST_SUITE_END() // Scale255
 
 TEST_SUITE_END() // F16toF16
@@ -438,21 +472,21 @@ TEST_SUITE_END() // F16toF16
 TEST_SUITE(F32toF32)
 
 TEST_SUITE(Scale255)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, ALL, SmallShapes(), F32, F32, scale_255, TO_NEAREST_UP, InPlaceDataSet, VALIDATE(float, 1.f))
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, ALL, SmallShapes(), F32, F32, F32, scale_255, TO_NEAREST_UP, InPlaceDataSet, VALIDATE(float, 1.f))
 TEST_SUITE_END() // Scale255
 
 TEST_SUITE(ScaleUnity)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, ALL, SmallShapes(), F32, F32, scale_unity, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, ALL, SmallShapes(), F32, F32, F32, scale_unity, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE(ScaleOther)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, ALL, SmallShapes(), F32, F32, scale_other, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, ALL, SmallShapes(), F32, F32, F32, scale_other, TO_ZERO, InPlaceDataSet, DEFAULT_VALIDATE)
 TEST_SUITE_END() // ScaleOther
 
 TEST_SUITE_END() // F32toF32
 
 TEST_SUITE(Broadcast)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<float>, ALL, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, framework::dataset::make("InPlace", { false }),
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<float>, ALL, SmallShapesBroadcast(), F32, F32, F32, scale_255, TO_NEAREST_UP, framework::dataset::make("InPlace", { false }),
                                                  VALIDATE(float, 1.f))
 TEST_SUITE_END() // Broadcast
 

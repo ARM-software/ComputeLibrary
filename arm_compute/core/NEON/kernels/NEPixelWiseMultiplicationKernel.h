@@ -100,38 +100,36 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
     /** Common signature for all the specialised multiplication functions with integer scaling factor
      *
-     * @param[in]  input1_ptr Pointer to the first input tensor.
-     * @param[in]  input2_ptr Pointer to the second input tensor.
-     * @param[out] output_ptr Pointer to the output tensor.
-     * @param[in]  scale      Integer scale factor.
+     * @param[in]  in1    Input1 tensor object.
+     * @param[in]  in2    Input2 tensor object.
+     * @param[out] out    Output tensor object.
+     * @param[in]  window Region on which to execute the kernel
+     * @param[in]  scale  Integer scale factor.
      */
-    using MulFunctionInt = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int scale);
+    using MulFunctionInt = void(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, int scale);
     /** Common signature for all the specialised multiplication functions with float scaling factor
      *
-     * @param[in]  input1_ptr Pointer to the first input tensor.
-     * @param[in]  input2_ptr Pointer to the second input tensor.
-     * @param[out] output_ptr Pointer to the output tensor.
-     * @param[in]  scale      Float scale factor.
+     * @param[in]  in1    Input1 tensor object.
+     * @param[in]  in2    Input2 tensor object.
+     * @param[out] out    Output tensor object.
+     * @param[in]  window Region on which to execute the kernel
+     * @param[in]  scale  Float scale factor.
      */
-    using MulFunctionFloat = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale);
+    using MulFunctionFloat = void(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale);
     /** Common signature for all the specialised QASYMM8 multiplication functions with float scaling factor
      *
-     * @param[in]  input1_ptr      Pointer to the first input tensor.
-     * @param[in]  input2_ptr      Pointer to the second input tensor.
-     * @param[out] output_ptr      Pointer to the output tensor.
-     * @param[in]  scale           Float scale factor.
-     * @param[in]  input1_qua_info Quantization Info of tensor input1.
-     * @param[in]  input2_qua_info Quantization Info of tensor input2.
-     * @param[in]  output_qua_info Quantization Info of tensor output.
+     * @param[in]  in1    Input1 tensor object.
+     * @param[in]  in2    Input2 tensor object.
+     * @param[out] out    Output tensor object.
+     * @param[in]  window Region on which to execute the kernel
+     * @param[in]  scale  Float scale factor.
      *
      */
-    using MulFunctionQuantized = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
-                                      const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info, const UniformQuantizationInfo &output_qua_info);
+    using MulFunctionQuantized = void(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window, float scale);
 
     MulFunctionFloat     *_func_float;
     MulFunctionInt       *_func_int;
@@ -143,7 +141,6 @@ private:
     ITensor       *_output;
     float          _scale;
     int            _scale_exponent;
-    bool           _run_optimized_qasymm8;
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */

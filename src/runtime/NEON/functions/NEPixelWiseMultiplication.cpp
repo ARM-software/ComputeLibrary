@@ -38,16 +38,6 @@ void NEPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITen
     auto k = arm_compute::support::cpp14::make_unique<NEPixelWiseMultiplicationKernel>();
     k->configure(input1, input2, output, scale, overflow_policy, rounding_policy);
     _kernel = std::move(k);
-
-    if(output->info()->dimension(0) > 1)
-    {
-        ITensor *broadcasted_info = (input1->info()->dimension(0) == 1) ? input1 : input2;
-
-        if(broadcasted_info->info()->dimension(0) == 1)
-        {
-            _border_handler.configure(broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
-        }
-    }
 }
 Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
                                            const ActivationLayerInfo &act_info)
@@ -62,16 +52,6 @@ void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input
     auto k = arm_compute::support::cpp14::make_unique<NEComplexPixelWiseMultiplicationKernel>();
     k->configure(input1, input2, output);
     _kernel = std::move(k);
-
-    if(output->info()->dimension(0) > 1)
-    {
-        ITensor *broadcasted_info = (input1->info()->dimension(0) == 1) ? input1 : input2;
-
-        if(broadcasted_info->info()->dimension(0) == 1)
-        {
-            _border_handler.configure(broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
-        }
-    }
 }
 
 Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
