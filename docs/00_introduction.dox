@@ -1340,13 +1340,13 @@ i.e. to natively compile the "graph_lenet" example for Linux 32bit:
 
 i.e. to natively compile the "graph_lenet" example for Linux 64bit:
 
-	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option)
 
 @note If compiling using static libraries, this order must be followed when linking: arm_compute_graph_static, arm_compute, arm_compute_core
 
-@note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L
+@note These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L (e.g. -Llib/linux-arm64-v8a-neon-cl-asserts/)
 @note You might need to export the path to OpenCL library as well in your LD_LIBRARY_PATH if Compute Library was built with OpenCL enabled.
 
 To run the built executable simply run:
