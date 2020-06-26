@@ -1016,6 +1016,8 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (e.g. -DM0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 2, 3, 4, 8, 16
@@ -1286,7 +1288,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, M, N, y, x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -1308,6 +1310,8 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (e.g. -DM0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 4, 8, 16
@@ -1628,7 +1632,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, M, N, y, x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -1725,6 +1729,8 @@ __kernel void gemm_mm_reshaped_only_rhs_t_texture(IMAGE_DECLARATION(lhs),
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (e.g. -DM0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 2, 3, 4, 8, 16
@@ -2020,7 +2026,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, M, N, y, x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -2042,6 +2048,8 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (e.g. -DM0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (e.g. -DH0=2)
  * @note If the K0xN0 blocks in the reshaped RHS matrix have been interleaved, the option -DRHS_INTERLEAVE must passed at compile time.
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 4, 8, 16
@@ -2325,7 +2333,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_texture(IMAGE_DECLARATION(lhs),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, M, N, y, x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X
@@ -3983,6 +3991,8 @@ __kernel void gemm_mm_reshaped_lhs_t_rhs_nt_texture(IMAGE_DECLARATION(lhs),
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (e.g. -DM0=2)
  * @note The number of K0 partial accumulations must be passed at compile time using -DK0 (e.g., -DK0=2)
  * @note The number of N0 columns to process must be passed at compile time using -DN0 (e.g. -DN0=2)
+ * @note The size of the partial store block in y must be passed at compile time using -DPARTIAL_STORE_M0 (e.g. -DPARTIAL_STORE_M0=1)
+ * @note The size of the partial store block in x must be passed at compile time using -DPARTIAL_STORE_N0 (e.g. -DPARTIAL_STORE_N0=1)
  * @note Only the following configurations of M0, N0 and K0 are currently supported:
  *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 2, 3, 4, 8, 16
@@ -4250,7 +4260,7 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
 #endif // defined(ACTIVATION_TYPE)
 
     // Store output block
-    STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
+    STORE_BLOCK_BOUNDARY_AWARE(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout, PARTIAL_STORE_M0, PARTIAL_STORE_N0, M, N, y, x);
 
 #undef RHS_BLOCK_SIZE
 #undef RHS_OFFSET_X

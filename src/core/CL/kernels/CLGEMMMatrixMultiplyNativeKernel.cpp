@@ -170,8 +170,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
                                      ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
                                      input1->dimension(1));
     AccessWindowStatic output_access(output, 0, 0,
-                                     ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
-                                     output->dimension(1) + bottom_pad);
+                                     output->dimension(0),
+                                     output->dimension(1));
 
     if(input2 != nullptr)
     {
@@ -264,6 +264,10 @@ void CLGEMMMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile
     const unsigned int h_gemm_3d = _reinterpret_output_as_3d ? output->info()->dimension(1) : input0->info()->dimension(1);
     const unsigned int d_gemm_3d = _reinterpret_output_as_3d ? output->info()->dimension(2) : input0->info()->dimension(2);
 
+    // Calculate partial (store instead of load) M0 and partial N0 for the partial blocks at the end of a row/column if any. This is to avoid padding.
+    const unsigned int partial_store_m0 = internal_m % lhs_info.m0;
+    const unsigned int partial_store_n0 = gemm_info.n % rhs_info.n0;
+
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
@@ -283,6 +287,8 @@ void CLGEMMMatrixMultiplyNativeKernel::configure(const CLCompileContext &compile
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
+    build_opts.add_option("-DPARTIAL_STORE_M0=" + support::cpp11::to_string(partial_store_m0));
+    build_opts.add_option("-DPARTIAL_STORE_N0=" + support::cpp11::to_string(partial_store_n0));
     build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(gemm_info.activation_info.activation())));
     build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.a()));
     build_opts.add_option_if(gemm_info.activation_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(gemm_info.activation_info.b()));
