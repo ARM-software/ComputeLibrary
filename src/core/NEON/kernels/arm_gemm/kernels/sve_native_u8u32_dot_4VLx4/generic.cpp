@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
 
 namespace arm_gemm {
 
-void sve_native_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, int ldb, uint32_t *C, int ldc, int M, int N, int K, const uint32_t *bias, Activation act, bool append) {
+void sve_native_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, int ldb, uint32_t *C, int ldc, int M, int N, int K, const uint32_t *, Activation, bool append) {
     const long loops_count = ((K + 16) / 32) - 1;
     K -= loops_count * 32;
     const long regs_count = (K / 16) - 1;
