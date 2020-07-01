@@ -28,7 +28,7 @@ namespace arm_gemm {
 template<typename Tin, typename Tout>
 void requantize_block_32(const Requantize32 &qp, unsigned int width, unsigned int height,
                          const Tin *input, unsigned int in_stride, Tout *output, unsigned int out_stride,
-                         const int32_t *row_bias, const int32_t *col_bias);
+                         const int32_t *row_bias, const int32_t *col_bias, unsigned int start_col);
 
 template<typename T>
 void compute_row_sums(const Requantize32 &qp, unsigned int width, unsigned int height,

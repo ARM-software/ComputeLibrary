@@ -115,7 +115,7 @@ private:
                                     _args._Nsize,
                                     this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (first_row * this->_ldc), this->_ldc,
                                     _row_sums + (multi * _args._nbatches * _args._Msize) + (batch * _args._Msize) + first_row,
-                                    _col_sums + (multi * _args._Nsize));
+                                    _col_sums + (multi * _args._Nsize), 0);
             }
         }
     }

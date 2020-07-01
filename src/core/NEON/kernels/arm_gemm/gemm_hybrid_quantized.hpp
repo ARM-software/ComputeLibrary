@@ -228,7 +228,7 @@ public:
 
                     requantize_block_32(_qp, (nmax - n0), (m_end - m_start), result_buffer, (nmax - n0),
                                         this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
-                                        local_row_sums, col_bias + (multi * _Nsize) + n0);
+                                        local_row_sums, col_bias + (multi * _Nsize) + n0, n0);
                 }
             } while (p.next_dim0());
         }
