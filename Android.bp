@@ -45,7 +45,8 @@ cc_library_static {
                          "arm_compute/core/NEON/kernels/assembly",
                          "arm_compute/core/NEON/kernels/convolution/common",
                          "arm_compute/core/NEON/kernels/convolution/depthwise",
-                         "arm_compute/core/NEON/kernels/convolution/winograd"],
+                         "src/core/NEON/kernels/assembly",
+                         "src/core/NEON/kernels/convolution/winograd"],
     export_include_dirs: [".", "./include"],
     srcs: [
         "src/core/AccessWindowAutoPadding.cpp",
