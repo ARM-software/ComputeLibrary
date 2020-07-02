@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -107,15 +108,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     if(rhs_info.export_to_cl_image)
     {
-        constexpr unsigned int num_floats_per_pixel = 4;
-
-        const unsigned int stride_y_in_elements = output->strides_in_bytes()[1] / output->element_size();
-        const unsigned int pixel_aligment       = get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device());
-        const unsigned int row_pitch_alignment  = pixel_aligment * num_floats_per_pixel;
-        const unsigned int round_up_width       = ((stride_y_in_elements + row_pitch_alignment - 1) / row_pitch_alignment) * row_pitch_alignment;
-        const unsigned int padding              = round_up_width - stride_y_in_elements;
-
-        output->extend_padding(PaddingSize(0, padding, 0, 0));
+        arm_compute::cl_gemm::update_padding_for_cl_image(output);
     }
 
     // Collapse along the Z direction

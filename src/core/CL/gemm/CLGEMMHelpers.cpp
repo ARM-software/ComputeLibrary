@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
+
+#include "arm_compute/core/CL/CLKernelLibrary.h"
 
 #include <utility>
 
@@ -50,6 +52,19 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_lhs_rhs_info(unsigned 
     rhs_info.transpose  = rhs_transpose;
 
     return std::make_pair(lhs_info, rhs_info);
+}
+
+void update_padding_for_cl_image(ITensorInfo *tensor)
+{
+    constexpr unsigned int num_floats_per_pixel = 4;
+
+    const unsigned int stride_y_in_elements = tensor->strides_in_bytes()[1] / tensor->element_size();
+    const unsigned int pixel_aligment       = get_cl_image_pitch_alignment(CLKernelLibrary::get().get_device());
+    const unsigned int row_pitch_alignment  = pixel_aligment * num_floats_per_pixel;
+    const unsigned int round_up_width       = ((stride_y_in_elements + row_pitch_alignment - 1) / row_pitch_alignment) * row_pitch_alignment;
+    const unsigned int padding              = round_up_width - stride_y_in_elements;
+
+    tensor->extend_padding(PaddingSize(0, padding, 0, 0));
 }
 } // namespace cl_gemm
 } // namespace arm_compute

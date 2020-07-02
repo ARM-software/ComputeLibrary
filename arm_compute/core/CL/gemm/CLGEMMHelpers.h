@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_CLGEMMHELPERS_H
 #define ARM_COMPUTE_CLGEMMHELPERS_H
 
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -48,6 +49,12 @@ namespace cl_gemm
  */
 std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure_lhs_rhs_info(unsigned int m, unsigned int n, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0,
                                                                        bool lhs_interleave, bool rhs_interleave, bool lhs_transpose, bool rhs_transpose);
+
+/** Update padding required to export the OpenCL buffer to OpenCL image2d
+ *
+ * @param[in,out] tensor ITensorInfo of the tensor required to be exported to OpenCL image2d
+ */
+void update_padding_for_cl_image(ITensorInfo *tensor);
 } // namespace cl_gemm
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLGEMMHELPERS_H */

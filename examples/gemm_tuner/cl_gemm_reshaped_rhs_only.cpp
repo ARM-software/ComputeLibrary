@@ -26,6 +26,7 @@
 #endif /* ARM_COMPUTE_CL */
 
 #include "CommonGemmExampleOptions.h"
+#include "arm_compute/core/CL/gemm/CLGEMMHelpers.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/KernelDescriptors.h"
@@ -51,12 +52,13 @@ namespace
 /** Structure holding all tunable gemm configs specific to this example/strategy */
 struct GemmConfigs
 {
-    size_t m0{ 4 };                /**< Number of rows processed by the matrix multiplication */
-    size_t n0{ 4 };                /**< Number of columns processed by the matrix multiplication */
-    size_t k0{ 4 };                /**< Number of partial accumulations performed by the matrix multiplication */
-    size_t h0{ 1 };                /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
-    bool   interleave_rhs{ true }; /**< Interleave rhs matrix */
-    bool   transpose_rhs{ true };  /**< Transpose rhs matrix */
+    size_t m0{ 4 };                        /**< Number of rows processed by the matrix multiplication */
+    size_t n0{ 4 };                        /**< Number of columns processed by the matrix multiplication */
+    size_t k0{ 4 };                        /**< Number of partial accumulations performed by the matrix multiplication */
+    size_t h0{ 1 };                        /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool   interleave_rhs{ true };         /**< Interleave rhs matrix */
+    bool   transpose_rhs{ true };          /**< Transpose rhs matrix */
+    bool   export_to_cl_image_rhs{ true }; /**< Export rhs matrix to cl_image.*/
 };
 
 /** Formatted output of the GemmConfigs type
@@ -77,6 +79,7 @@ struct GemmConfigs
     os << "h0 : " << configs.h0 << std::endl;
     os << "interleave_rhs : " << (configs.interleave_rhs ? true_str : false_str) << std::endl;
     os << "transpose_rhs : " << (configs.transpose_rhs ? true_str : false_str) << std::endl;
+    os << "export_to_cl_image_rhs : " << (configs.export_to_cl_image_rhs ? true_str : false_str) << std::endl;
     return os;
 }
 
@@ -94,7 +97,8 @@ public:
           k0(parser.add_positional_option<SimpleOption<size_t>>("k0", 4)),
           h0(parser.add_positional_option<SimpleOption<size_t>>("h0", 1)),
           interleave_rhs(parser.add_positional_option<SimpleOption<size_t>>("interleave_rhs", 1)),
-          transpose_rhs(parser.add_positional_option<SimpleOption<size_t>>("transpose_rhs", 1))
+          transpose_rhs(parser.add_positional_option<SimpleOption<size_t>>("transpose_rhs", 1)),
+          export_to_cl_image_rhs(parser.add_positional_option<SimpleOption<size_t>>("export_to_cl_image_rhs", 1))
     {
         m0->set_help("Number of rows processed by the matrix multiplication");
         n0->set_help("Number of columns processed by the matrix multiplication");
@@ -102,6 +106,7 @@ public:
         h0->set_help("Number of horizontal blocks of size (k0xn0) stored on the same output row");
         interleave_rhs->set_help("Interleave rhs matrix (1) / Do not interleave rhs matrix (0)");
         transpose_rhs->set_help("Transpose rhs matrix (1) / Do not transpose rhs matrix (0)");
+        export_to_cl_image_rhs->set_help("Export rhs matrix to cl_image (1) / Do not export rhs matrix to cl_image (0)");
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GemmConfigOptions(const GemmConfigOptions &) = delete;
@@ -114,12 +119,13 @@ public:
     /** Default destructor */
     ~GemmConfigOptions() = default;
 
-    SimpleOption<size_t> *m0;             /**< Number of rows processed by the matrix multiplication option */
-    SimpleOption<size_t> *n0;             /**< Number of columns processed by the matrix multiplication option */
-    SimpleOption<size_t> *k0;             /**< Number of partial accumulations performed by the matrix multiplication option */
-    SimpleOption<size_t> *h0;             /**< Number of horizontal blocks of size (k0xn0) stored on the same output row option */
-    SimpleOption<size_t> *interleave_rhs; /**< Interleave rhs matrix option (1 enable; 0 disable) */
-    SimpleOption<size_t> *transpose_rhs;  /**< Transpose rhs matrix option (1 enable; 0 disable) */
+    SimpleOption<size_t> *m0;                     /**< Number of rows processed by the matrix multiplication option */
+    SimpleOption<size_t> *n0;                     /**< Number of columns processed by the matrix multiplication option */
+    SimpleOption<size_t> *k0;                     /**< Number of partial accumulations performed by the matrix multiplication option */
+    SimpleOption<size_t> *h0;                     /**< Number of horizontal blocks of size (k0xn0) stored on the same output row option */
+    SimpleOption<size_t> *interleave_rhs;         /**< Interleave rhs matrix option (1 enable; 0 disable) */
+    SimpleOption<size_t> *transpose_rhs;          /**< Transpose rhs matrix option (1 enable; 0 disable) */
+    SimpleOption<size_t> *export_to_cl_image_rhs; /**< Export rhs matrix to cl_image.*/
 };
 
 /** Consumes the gemm configuration options and creates a structure containing all information
@@ -131,12 +137,13 @@ public:
 GemmConfigs consume_gemm_configs(const GemmConfigOptions &options)
 {
     GemmConfigs configs;
-    configs.m0             = options.m0->value();
-    configs.n0             = options.n0->value();
-    configs.k0             = options.k0->value();
-    configs.h0             = options.h0->value();
-    configs.interleave_rhs = options.interleave_rhs->value() != 0;
-    configs.transpose_rhs  = options.transpose_rhs->value() != 0;
+    configs.m0                     = options.m0->value();
+    configs.n0                     = options.n0->value();
+    configs.k0                     = options.k0->value();
+    configs.h0                     = options.h0->value();
+    configs.interleave_rhs         = options.interleave_rhs->value() != 0;
+    configs.transpose_rhs          = options.transpose_rhs->value() != 0;
+    configs.export_to_cl_image_rhs = options.export_to_cl_image_rhs->value() != 0;
     return configs;
 }
 
@@ -200,11 +207,12 @@ public:
         lhs_info.k0 = configs.k0;
 
         GEMMRHSMatrixInfo rhs_info;
-        rhs_info.n0         = configs.n0;
-        rhs_info.k0         = configs.k0;
-        rhs_info.h0         = configs.h0;
-        rhs_info.interleave = configs.interleave_rhs;
-        rhs_info.transpose  = configs.transpose_rhs;
+        rhs_info.n0                 = configs.n0;
+        rhs_info.k0                 = configs.k0;
+        rhs_info.h0                 = configs.h0;
+        rhs_info.interleave         = configs.interleave_rhs;
+        rhs_info.transpose          = configs.transpose_rhs;
+        rhs_info.export_to_cl_image = configs.export_to_cl_image_rhs;
 
         GEMMKernelInfo kernel_info;
         kernel_info.m                       = params.M;
@@ -218,6 +226,10 @@ public:
         // Initialise rhs_reshaped tensor info
         auto_init_if_empty(*rhs_reshaped.info(), rhs.info()->clone()->set_tensor_shape(compute_rhs_reshaped_shape(*rhs.info(), rhs_info)));
 
+        if(rhs_info.export_to_cl_image)
+        {
+            arm_compute::cl_gemm::update_padding_for_cl_image(rhs_reshaped.info());
+        }
         // Configure function
         gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
