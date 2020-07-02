@@ -25,6 +25,9 @@
 
 #ifdef __aarch64__
 
+
+
+
 namespace arm_gemm
 {
 
@@ -75,7 +78,10 @@ public:
     // Default to the generic kernel
     kern_type kernel=a64_native_fp32_mla_16x4;
 
-    native_fp32_mla_16x4(const CPUInfo *ci) { UNUSED(ci); }
+    native_fp32_mla_16x4(const CPUInfo *)
+    {
+
+    }
 };
 
 } // namespace arm_gemm

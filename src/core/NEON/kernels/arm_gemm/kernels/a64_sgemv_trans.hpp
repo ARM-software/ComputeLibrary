@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017,2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
 
     kern_type kernel=a64_sgemv_trans;
 
-    sgemv_trans(const CPUInfo *ci) { UNUSED(ci); }
+    sgemv_trans(const CPUInfo *) { }
 };
 
 } // namespace arm_gemm

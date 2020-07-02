@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_gemm.hpp"
+#include "bfloat.hpp"
 #include "gemm_common.hpp"
 #include "gemm_hybrid.hpp"
 #include "gemm_implementation.hpp"
@@ -43,10 +44,7 @@
 #include "kernels/sve_hybrid_bf16fp32_mmla_6VLx2.hpp"
 #include "kernels/sve_hybrid_bf16fp32_mmla_8VLx2.hpp"
 
-#include "bfloat.hpp"
-
 namespace arm_gemm {
-
 
 static const GemmImplementation<bfloat16, float> gemm_bf16_methods[] =
 {

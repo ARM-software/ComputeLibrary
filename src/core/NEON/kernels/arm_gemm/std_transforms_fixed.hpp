@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ class StdTransformsFixed
 public:
     template<typename TIn>
     void PrepareA(TOperand *out, const TIn *in, const int stride, const int y0,
-                  const int ymax, const int k0, const int kmax, bool transposed) {
+                  const int ymax, const int k0, const int kmax, bool transposed) const {
         if (transposed) {
             Transform<height, block,  true>(out, in, stride, y0, ymax, k0, kmax);
         } else {
@@ -55,7 +55,7 @@ public:
 
     template<typename TIn>
     void PrepareB(TOperand *out, const TIn *in, const int stride, const int x0,
-                  const int xmax, const int k0, const int kmax, bool transposed) {
+                  const int xmax, const int k0, const int kmax, bool transposed) const {
         if (transposed) {
             Transform<width, block, false>(out, in, stride, x0, xmax, k0, kmax);
         } else {
@@ -64,7 +64,7 @@ public:
     }
 
     template<typename TOut>
-    void Merge(TOut *out, const TResult *in, int stride, int y0, int ymax, int x0, int xmax, const TOut *bias, const Activation act, bool append) {
+    void Merge(TOut *out, const TResult *in, int stride, int y0, int ymax, int x0, int xmax, const TOut *bias, const Activation act, bool append) const {
         MergeResults<width, height>(out, in, stride, y0, ymax, x0, xmax, bias, act, append);
     }
 };

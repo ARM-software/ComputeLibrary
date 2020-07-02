@@ -34,6 +34,7 @@ void a64_sgemm_asimd_12x8(const float *, const float *, float *, int, int, int);
 void a64_sgemm_asimd_12x8_a53(const float *, const float *, float *, int, int, int);
 void a64_sgemm_asimd_12x8_a55(const float *, const float *, float *, int, int, int);
 void a64_sgemm_asimd_12x8_a55r1(const float *, const float *, float *, int, int, int);
+void a64_sgemm_asimd_12x8_x1(const float *, const float *, float *, int, int, int);
 
 // 12x8 SGEMM "strategy" class.
 //
@@ -81,6 +82,10 @@ public:
 
             case CPUModel::A55r1:
                 kernel = a64_sgemm_asimd_12x8_a55r1;
+                break;
+
+            case CPUModel::X1:
+                kernel = a64_sgemm_asimd_12x8_x1;
                 break;
 
             default:

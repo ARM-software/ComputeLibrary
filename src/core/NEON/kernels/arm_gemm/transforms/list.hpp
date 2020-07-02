@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "a64_transpose_interleave_8way_32bit.hpp"
 #include "sve_interleave_8way_32bit.hpp"
 #include "sve_interleave_8way_block2_16bit.hpp"
+#include "sve_interleave_8way_block2_32bit.hpp"
 #include "sve_interleave_8way_block4_16bit.hpp"
 #include "sve_interleave_8way_block4_8bit.hpp"
 #include "sve_interleave_8way_block8_8bit.hpp"

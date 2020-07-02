@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,9 @@
 #include "kernels/a64_sgemv_trans.hpp"
 
 #include "kernels/sve_hybrid_fp32_mla_4VLx4.hpp"
+#include "kernels/sve_hybrid_fp32_mmla_4VLx4.hpp"
 #include "kernels/sve_interleaved_fp32_mla_3VLx8.hpp"
+#include "kernels/sve_interleaved_fp32_mmla_3VLx8.hpp"
 #include "kernels/sve_native_fp32_mla_4VLx4.hpp"
 #include "kernels/sve_smallK_hybrid_fp32_mla_1VLx8.hpp"
 
@@ -74,6 +76,23 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     nullptr,
     [](const GemmArgs &args) { return new GemvNativeTransposed<sgemv_trans, float, float>(args); }
 },
+
+#if defined(__ARM_FEATURE_SVE) && defined(MMLA_FP32)
+{
+    GemmMethod::GEMM_HYBRID,
+    "hybrid_fp32_mmla_4VLx4",
+    [](const GemmArgs &args) { return (args._Ksize >= 4) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mmla_4VLx4, float, float>(args); }
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "interleaved_fp32_mmla_3VLx8",
+    [](const GemmArgs &args) { return (args._Ksize>4); },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmInterleaved<interleaved_fp32_mmla_3VLx8, float, float>(args); }
+},
+#endif // __ARM_FEATURE_SVE && MMLA_FP32
 
 #ifdef __ARM_FEATURE_SVE
 // SVE smallk / native / hybrid methods
@@ -124,7 +143,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
 },
 {
     GemmMethod::GEMM_HYBRID,
-    "hybrid_fp32_mla_16x4_normal",
+    "hybrid_fp32_mla_16x4",
     [](const GemmArgs &args) { return (args._Ksize >= 4) && !args._trA && args._pretransposed_hint; },
     [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || (args._Msize < 16) || (args._nmulti > 1); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp32_mla_16x4, float, float>(args); }
@@ -146,7 +165,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs &args) { return new GemmInterleaved<interleaved_fp32_mla_3VLx8, float, float>(args); }
 },
 #endif // __ARM_FEATURE_SVE
-//Pretranpose, 2D split
+// Pretranposed, 2D split
 {
     GemmMethod::GEMM_INTERLEAVED_2D,
     "sgemm_12x8_pretranspose_2d",
@@ -154,7 +173,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs &args) { return args._maxthreads >= 8; },
     [](const GemmArgs &args) { return new GemmInterleavedPretransposed2d<sgemm_12x8, float, float>(args); }
 },
-//Tranpose, 2D split, no blockmanager
+// Non-pretransposed, 2D split (no buffer manager)
 {
     GemmMethod::GEMM_INTERLEAVED_2D,
     "sgemm_12x8_2d",
@@ -162,7 +181,7 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs &args) { return (!args._pretransposed_hint) && (args._maxthreads >= 8); },
     [](const GemmArgs &args) { return new GemmInterleaved2d<sgemm_12x8, float, float>(args); }
 },
-//Tranpose, 1D split, with blockmanager
+// 1D split (with pretransposed or not)
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sgemm_12x8_1d",
@@ -170,7 +189,6 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     nullptr,
     [](const GemmArgs &args) { return new GemmInterleaved<sgemm_12x8, float, float>(args); }
 },
-
 #endif // __aarch64__
 
 #ifdef __arm__

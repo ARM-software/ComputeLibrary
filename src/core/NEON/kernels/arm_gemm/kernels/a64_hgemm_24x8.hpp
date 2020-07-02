@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@ namespace arm_gemm {
 // Actual kernel implementations
 void a64_hgemm_asimd_24x8(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
 void a64_hgemm_asimd_24x8_a55r1(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
+void a64_hgemm_asimd_24x8_x1(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
 
 // 24x8 HGEMM "strategy" class.  Describes the kernel properties.
 //
@@ -68,6 +69,8 @@ public:
 
         if (model == CPUModel::A55r1) {
             kernel = a64_hgemm_asimd_24x8_a55r1;
+        } else if (model == CPUModel::X1) {
+            kernel = a64_hgemm_asimd_24x8_x1;
         }
     }
 };

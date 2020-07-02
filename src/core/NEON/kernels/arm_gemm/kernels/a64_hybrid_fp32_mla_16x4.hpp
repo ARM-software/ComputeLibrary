@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@ namespace arm_gemm
 // Actual kernel implementations
 void a64_hybrid_fp32_mla_16x4(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 void a64_hybrid_fp32_mla_16x4_a55(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
+void a64_hybrid_fp32_mla_16x4_x1(const float *, int, const float *, float *, int, int, int, int, const float *, Activation, bool);
 
 class hybrid_fp32_mla_16x4
 {
@@ -83,6 +84,8 @@ public:
     {
         if (ci->get_cpu_model() == CPUModel::A55r1) {
             kernel = a64_hybrid_fp32_mla_16x4_a55;
+        } else if (ci->get_cpu_model() == CPUModel::X1) {
+            kernel = a64_hybrid_fp32_mla_16x4_x1;
         }
     }
 };

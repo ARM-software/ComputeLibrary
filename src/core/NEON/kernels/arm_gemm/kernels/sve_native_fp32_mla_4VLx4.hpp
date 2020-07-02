@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,9 @@
 #pragma once
 
 #ifdef __ARM_FEATURE_SVE
+
+
+
 
 namespace arm_gemm
 {
@@ -75,7 +78,10 @@ public:
     // Default to the generic kernel
     kern_type kernel=sve_native_fp32_mla_4VLx4;
 
-    native_fp32_mla_4VLx4(const CPUInfo *ci) { UNUSED(ci); }
+    native_fp32_mla_4VLx4(const CPUInfo *)
+    {
+
+    }
 };
 
 } // namespace arm_gemm

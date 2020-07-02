@@ -77,7 +77,10 @@ public:
     // Default to the generic kernel
     kern_type kernel=sve_smallK_hybrid_u8u32_dot_1VLx8;
 
-    smallK_hybrid_u8u32_dot_1VLx8(const CPUInfo *ci) { UNUSED(ci); }
+    smallK_hybrid_u8u32_dot_1VLx8(const CPUInfo *)
+    {
+
+    }
 };
 
 } // namespace arm_gemm

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,9 +32,7 @@
 
 namespace arm_gemm {
 
-void a64_hybrid_s8s32_dot_16x4(const int8_t *A, int lda, const int8_t *B, int32_t *C, int ldc, int M, int N, int K, const int32_t *bias, Activation act, bool append) {
-    UNUSED(bias);
-    UNUSED(act);
+void a64_hybrid_s8s32_dot_16x4(const int8_t *A, int lda, const int8_t *B, int32_t *C, int ldc, int M, int N, int K, const int32_t *, Activation , bool append) {
     const int K_stride = ((K + 3) / 4) * 4;
     const long loops_count = ((K + 16) / 32) - 1;
     K -= loops_count * 32;
@@ -43,11 +41,22 @@ void a64_hybrid_s8s32_dot_16x4(const int8_t *A, int lda, const int8_t *B, int32_
     const long blocks_count = K / 4;
     const long odds_count = K - (blocks_count * 4);
 
-    for (int y=0; y<M; y+=4) {
+    int rows_to_compute;
+
+    for (int y=0; y<M; y+=rows_to_compute) {
         const int8_t * const a_ptr0_base = A + (y * lda);
         const unsigned long ldab = lda * sizeof(int8_t);
 
         int32_t *c_ptr0 = C + (y * ldc);
+
+        rows_to_compute = M-y;
+        if (rows_to_compute > 4) {
+            if (rows_to_compute % 4) {
+                rows_to_compute = 4 - 1;
+            } else {
+                rows_to_compute = 4;
+            }
+        }
 
         for (int x0=0; x0<N; x0+=16ul) {
             const long width = std::min((unsigned long)N-x0, 16ul);
@@ -72,7 +81,7 @@ void a64_hybrid_s8s32_dot_16x4(const int8_t *A, int lda, const int8_t *B, int32_
                 c_ptr0 = result_buffer;
             }
 
-            switch(M-y) {
+            switch(rows_to_compute) {
                 case 1:
                     __asm __volatile (
                         "cbnz %[append], 1f\n"

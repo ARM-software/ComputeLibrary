@@ -284,7 +284,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::configure(const ITensor *a, c
     //if we disable this code below in brackets then ConvLayer deadlocks when threads > 1 and
     //the shapes are In=1x1x1024 Weights=1x1x1024x1001 Biases=1001 Out=1x1x1001
     {
-        const unsigned int window_size = get_total_window_size(*_gemm_kernel_asm);
+        const unsigned int window_size = _gemm_kernel_asm->get_window_size().total_size();
         if(window_size < static_cast<unsigned int>(args._maxthreads))
         {
             _gemm_kernel_asm->set_nthreads(window_size);
@@ -408,7 +408,7 @@ void Fallback<TypeInput, TypeOutput, OutputStage>::run()
     if(_workspace.buffer() != nullptr)
     {
         _gemm_kernel_asm->set_working_space(reinterpret_cast<void *>(_workspace.buffer()));
-        const unsigned int window_size = get_total_window_size(*_gemm_kernel_asm);
+        const unsigned int window_size = _gemm_kernel_asm->get_window_size().total_size();
         unsigned int       num_threads = NEScheduler::get().num_threads();
         if(window_size < num_threads)
         {

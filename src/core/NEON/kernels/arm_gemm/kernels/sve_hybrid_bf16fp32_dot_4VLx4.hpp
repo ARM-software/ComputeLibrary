@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,7 +78,10 @@ public:
     // Default to the generic kernel
     kern_type kernel=sve_hybrid_bf16fp32_dot_4VLx4;
 
-    hybrid_bf16fp32_dot_4VLx4(const CPUInfo *ci) { UNUSED(ci); }
+    hybrid_bf16fp32_dot_4VLx4(const CPUInfo *)
+    {
+
+    }
 };
 
 } // namespace arm_gemm

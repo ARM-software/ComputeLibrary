@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,15 +87,18 @@ public:
 
     // Window is number of out_width blocks, times number of multis.
     ndrange_t get_window_size() const override {
-        return { iceildiv(_Nsize, strategy::out_width()) * _nmultis, 1u, 1u, 1u, 1u, 1u };
+        return { iceildiv(_Nsize, strategy::out_width()) * _nmultis };
     }
 
     // Actually execute the GEMV.
-    void execute_1d(unsigned int start, unsigned int end, int) {
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
         strategy strat(_ci);
+
+        const auto start = work_range.get_position(0);
+        const auto end   = work_range.get_position_end(0);
 
         /* Break the window values down into multis of interest... */
         const unsigned int window_per_multi = iceildiv(_Nsize, strategy::out_width());
@@ -143,17 +146,6 @@ public:
                 }
             }
         }
-    }
-
-    // Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
-
-        const auto start = work_range.get_position(0);
-        const auto size  = work_range.get_size(0);
-        const auto stop  = start + size;
-
-        execute_1d(start, stop, threadid);
     }
 
     /* Pretransposed interface implementation */

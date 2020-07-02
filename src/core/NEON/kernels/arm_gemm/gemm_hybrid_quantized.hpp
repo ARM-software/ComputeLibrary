@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,9 +28,8 @@
 #include <algorithm>
 
 #include "arm_gemm.hpp"
-#include "utils.hpp"
-
 #include "ndrange.hpp"
+#include "utils.hpp"
 
 #include "mergeresults.hpp"
 #include "transform.hpp"
@@ -151,7 +150,7 @@ public:
 
     // Interface implementation - Compulsory functions
     ndrange_t get_window_size() const override {
-        return { _window_range.total_size(), 1u, 1u, 1u, 1u, 1u };
+        return { _window_range.total_size() };
     }
 
     // This kernel can always be dynamically scheduled.
@@ -159,7 +158,8 @@ public:
         return true;
     }
 
-    void execute_1d(unsigned int start, unsigned int end, int threadid) {
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int threadid) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -180,7 +180,7 @@ public:
             unsigned int kmax   = std::min(k0 + _k_block, _Ksize);
             unsigned int kern_k = roundup(kmax-k0, strategy::k_unroll());
 
-            auto p = _window_range.iterator(start, end);
+            auto p = _window_range.iterator(work_range.get_position(0), work_range.get_position_end(0));
 
             if (p.done()) {
                 return;
@@ -232,17 +232,6 @@ public:
                 }
             } while (p.next_dim0());
         }
-    }
-
-    // Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
-
-        const auto start = work_range.get_position(0);
-        const auto size  = work_range.get_size(0);
-        const auto stop  = start + size;
-
-        execute_1d(start, stop, threadid);
     }
 
     // Working space needed for intermediate result buffers.

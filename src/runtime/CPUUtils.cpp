@@ -73,6 +73,7 @@ bool model_supports_dot(CPUModel model)
     {
         case CPUModel::GENERIC_FP16_DOT:
         case CPUModel::A55r1:
+        case CPUModel::X1:
             return true;
         default:
             return false;
@@ -86,6 +87,7 @@ bool model_supports_fp16(CPUModel model)
         case CPUModel::GENERIC_FP16:
         case CPUModel::GENERIC_FP16_DOT:
         case CPUModel::A55r1:
+        case CPUModel::X1:
             return true;
         default:
             return false;
@@ -120,6 +122,9 @@ CPUModel midr_to_model(const unsigned int midr)
                 {
                     model = CPUModel::A55r0;
                 }
+                break;
+            case 0xd44: // X1
+                model = CPUModel::X1;
                 break;
             case 0xd0a: // A75
                 if(variant != 0)

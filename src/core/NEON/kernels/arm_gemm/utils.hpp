@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,8 +31,6 @@
 
 // Paranoid option for the above with assert
 // #define UNREACHABLE(why)   assert(0 && why)
-
-#define UNUSED(x)   (void)(x)
 
 template<typename T>
 inline T iceildiv(const T a, const T b) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,11 +62,22 @@ void sve_hybrid_bf16fp32_dot_4VLx4(const bfloat16 *A, int lda, const bfloat16 *B
             break;
     }
 
-    for (int y=0; y<M; y+=4) {
+    int rows_to_compute;
+
+    for (int y=0; y<M; y+=rows_to_compute) {
         const bfloat16 * const a_ptr0_base = A + (y * lda);
         const unsigned long ldab = lda * sizeof(bfloat16);
 
         float *c_ptr0 = C + (y * ldc);
+
+        rows_to_compute = M-y;
+        if (rows_to_compute > 4) {
+            if (rows_to_compute % 4) {
+                rows_to_compute = 4 - 1;
+            } else {
+                rows_to_compute = 4;
+            }
+        }
 
         for (int x0=0; x0<N; x0+=(4 * get_vector_length<float>())) {
             const long width = std::min((unsigned long)N-x0, (4 * get_vector_length<float>()));
@@ -79,7 +90,7 @@ void sve_hybrid_bf16fp32_dot_4VLx4(const bfloat16 *A, int lda, const bfloat16 *B
             const unsigned long ldcb = ldc * sizeof(float);
             const float *biasptr = bias ? bias+x0 : nullbias;
 
-            switch(M-y) {
+            switch(rows_to_compute) {
                 case 1:
                     __asm __volatile (
                         "whilelt p6.h, %[temp], %[leftovers]\n"

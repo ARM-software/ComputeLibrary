@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,10 @@ public:
 
     kern_type kernel=a64_interleaved_bf16fp32_mmla_12x8;
 
-    interleaved_bf16fp32_mmla_12x8(const CPUInfo *ci) { UNUSED(ci); }
+    interleaved_bf16fp32_mmla_12x8(const CPUInfo *)
+    {
+
+    }
 };
 
 } // namespace arm_gemm

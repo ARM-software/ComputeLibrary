@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,9 +29,8 @@
 
 #include "arm_gemm.hpp"
 #include "bias_adder.hpp"
-#include "utils.hpp"
-
 #include "ndrange.hpp"
+#include "utils.hpp"
 
 #include "mergeresults.hpp"
 #include "transform.hpp"
@@ -144,7 +143,7 @@ public:
 
     // Interface implementation - Compulsory functions
     ndrange_t get_window_size() const override {
-        return { _window_range.total_size(), 1u, 1u, 1u, 1u, 1u };
+        return { _window_range.total_size() };
     }
 
     // This kernel can always be dynamically scheduled.
@@ -152,8 +151,8 @@ public:
         return true;
     }
 
-    void execute_1d(unsigned int start, unsigned int end, int threadid) {
-        UNUSED(threadid);
+    // Execute
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -174,7 +173,7 @@ public:
             const bool first_pass = (k0 == 0);
             const bool last_pass = (kmax == _Ksize);
 
-            auto p = _window_range.iterator(start, end);
+            auto p = _window_range.iterator(work_range.get_position(0), work_range.get_position_end(0));
 
             if (p.done()) {
                 return;
@@ -194,7 +193,7 @@ public:
                                      (n0 * kern_k);
 
 #ifdef CYCLE_PROFILING
-                auto p = prof.ScopedProfiler(PROFILE_KERNEL, (m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
+                auto p = prof.ScopedProfiler(PROFILE_KERNEL, (unsigned long)(m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
 #endif
 
                 strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda) + k0, this->_lda,
@@ -213,17 +212,6 @@ public:
 
             } while (p.next_dim1());
         }
-    }
-
-    // Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
-
-        const auto start = work_range.get_position(0);
-        const auto size  = work_range.get_size(0);
-        const auto stop  = start + size;
-
-        execute_1d(start, stop, threadid);
     }
 
     // Interface implementation - pretransposed

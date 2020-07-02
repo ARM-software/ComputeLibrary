@@ -303,32 +303,22 @@ public:
     BufferManager(BufferManager &) = delete;
     BufferManager & operator=(BufferManager &) = delete;
 
-    BufferManager(const int maxthreads, const size_t buffersize, void *storage) : _storage(storage) {
-        UNUSED(maxthreads);
-        UNUSED(buffersize);
-    }
+    BufferManager(const int, const size_t, void *storage) : _storage(storage) { }
 
     ~BufferManager() { }
 
     // Say how much storage is needed.
-    static inline size_t get_storage_requirement(const int maxthreads, const size_t buffersize) {
-        UNUSED(maxthreads);
+    static inline size_t get_storage_requirement(const int, const size_t buffersize) {
         return buffersize;
     }
 
     template <typename T>
-    void try_populate(const int index, T func) {
-         UNUSED(index);
-         UNUSED(func);
-    }
+    void try_populate(const int, T) { }
 
-    void release(const int index) {
-         UNUSED(index);
-    }
+    void release(const int) { }
 
     template <typename T>
-    void *get(const int index, T func) {
-        UNUSED(index);
+    void *get(const int, T func) {
         func(_storage);
         return _storage;
     }

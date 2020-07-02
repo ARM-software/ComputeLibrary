@@ -24,6 +24,7 @@
 #ifdef __aarch64__
 
 #include "arm_gemm.hpp"
+#include "utils.hpp"
 
 #include <arm_neon.h>
 
@@ -283,7 +284,6 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
                 v_mul0=v_mul;
                 v_shf0=v_shift;
             }
-
             // Load column pointers
             int32x4_t v_col0 = vld1q_s32(colptr);
             colptr += 4;
@@ -604,7 +604,6 @@ namespace {
              * that the terms can simply be added in the requantize code.
              * */
             switch (rows) {
-                default:
                 case 1:
                     /* If we only have one output, just use ADDV.  Multiply
                      * the offset into all four components separately so it
@@ -646,6 +645,9 @@ namespace {
 
                     vst1q_s32(row_bias, t0);
                     break;
+                default:
+                    UNREACHABLE("Impossible.");
+
             }
         }
 
@@ -836,7 +838,6 @@ void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int h
 
                 if (numcols==16) {
                     switch(numrows) {
-                        default:
                         case 1:
                             add_block<1>(input + row * in_stride + col, in_stride, col_bias + col);
                             break;
@@ -852,6 +853,9 @@ void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int h
                         case 4:
                             add_block<4>(input + row * in_stride + col, in_stride, col_bias + col);
                             break;
+
+                        default:
+                            UNREACHABLE("Impossible.");
                     }
                 } else {
                     for (; col<width; col++) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,10 +26,8 @@
 #ifdef __aarch64__
 
 template<>
-void MergeResults<4, 4, false>(uint32_t *out, const uint32_t *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const uint32_t *bias, Activation act, bool append)
+void MergeResults<4, 4, false>(uint32_t *out, const uint32_t *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const uint32_t *bias, Activation , bool append)
 {
-    UNUSED(act);
-
     const uint32_t *inptr = in;
     uint32_t nullbias[4];
 
@@ -240,11 +238,7 @@ void MergeResults<4, 4, false>(uint32_t *out, const uint32_t *in, const int ldou
             }
             else
             {
-                const uint32_t *biasptr = nullbias;
-                if (bias)
-                {
-                    biasptr = bias + i;
-                }
+                const uint32_t *biasptr = bias ? bias + i : nullbias;
 
                 switch(height)
                 {

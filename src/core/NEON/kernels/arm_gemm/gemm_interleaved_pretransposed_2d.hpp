@@ -173,15 +173,12 @@ class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
 
     // Internal execute function.
     // This supports both the "pretransposed" and "standard" interfaces via the template parameter.
-    void execute_pretranspose(unsigned int m_start, unsigned int m_end, unsigned int n_start, unsigned int n_end, int threadid, int mthreadid, int nthreadid) {
+    void execute_pretranspose(unsigned int m_start, unsigned int m_end, unsigned int n_start, unsigned int n_end, int threadid, int, int) {
         /* Make sure we've been set up correctly. */
         assert(_B_transposed);
         assert(_working_space);
         assert(this->_Aptr);
         assert(this->_Cptr);
-
-        UNUSED(mthreadid);
-        UNUSED(nthreadid);
 
 #ifdef CYCLE_PROFILING
         profiler prof;
@@ -389,7 +386,7 @@ public:
         unsigned m = (_Mround / strategy::out_height()) * _nbatches;
         unsigned n = _Nround_div;
 
-        return { m, n, 1u, 1u, 1u, 1u };
+        return { m, n };
     }
 
     // set_nthreads: pass on to buffer manager to avoid it waiting for non-existant threads.
@@ -401,8 +398,6 @@ public:
         /* This particular GEMM implementation can only be broken up over the M & N
          * dimensions, we inform the frame work of this limitation via the get_window_size function
          */
-        assert(ndrange_popcount(work_range) <= 2);
-
         const auto m_start = work_range.get_position(0);
         const auto n_start = work_range.get_position(1);
         const auto m_size  = work_range.get_size(0);

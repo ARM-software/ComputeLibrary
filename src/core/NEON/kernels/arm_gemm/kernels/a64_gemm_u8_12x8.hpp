@@ -32,6 +32,7 @@ namespace arm_gemm {
 // Load the actual kernel
 void a64_gemm_u8_12x8(const uint8_t *, const uint8_t *, uint32_t *, int, int, int);
 void a64_gemm_u8_12x8_a55r1(const uint8_t *, const uint8_t *, uint32_t *, int, int, int);
+void a64_gemm_u8_12x8_x1(const uint8_t *, const uint8_t *, uint32_t *, int, int, int);
 
 class gemm_u8_12x8 {
 public:
@@ -73,6 +74,8 @@ public:
 
         if (mod == CPUModel::A55r1) {
             kernel = a64_gemm_u8_12x8_a55r1;
+        } else if (mod == CPUModel::X1) {
+            kernel = a64_gemm_u8_12x8_x1;
         }
     }
 };

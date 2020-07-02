@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 ARM Limited.
+ * Copyright (c) 2019-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,7 +149,7 @@ public:
     }
 
     ndrange_t get_window_size() const override {
-        return _subgemm->get_window_size();
+        return { _subgemm->get_window_size() };
     }
 
     void set_nthreads(int nthreads) override {
@@ -158,8 +158,7 @@ public:
         _args._maxthreads = nthreads;
     }
 
-    // Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
+    void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
         _subgemm->execute(work_range, thread_locator, threadid);
         if (!_args._pretransposed_hint) {
             col_sums_runtime(threadid);

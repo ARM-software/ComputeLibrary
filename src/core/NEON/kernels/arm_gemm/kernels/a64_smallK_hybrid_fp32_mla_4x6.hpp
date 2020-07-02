@@ -75,7 +75,10 @@ public:
     // Default to the generic kernel
     kern_type kernel=a64_smallK_hybrid_fp32_mla_4x6;
 
-    smallK_hybrid_fp32_mla_4x6(const CPUInfo *ci) { UNUSED(ci); }
+    smallK_hybrid_fp32_mla_4x6(const CPUInfo *)
+    {
+
+    }
 };
 
 } // namespace arm_gemm

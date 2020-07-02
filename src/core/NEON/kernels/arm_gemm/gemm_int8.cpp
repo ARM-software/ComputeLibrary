@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ namespace arm_gemm {
 
 static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
 #ifdef __ARM_FEATURE_SVE
-#ifdef V8P6
+#ifdef MMLA_INT8
 {
     GemmMethod::GEMM_INTERLEAVED,
     "interleaved_s8s32_mmla_3VLx8",
@@ -85,7 +85,7 @@ static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
     [](const GemmArgs &args) { return new GemmInterleaved<interleaved_s8s32_dot_3VLx8, int8_t, int32_t>(args); }
 },
 #endif
-#ifdef V8P6
+#ifdef MMLA_INT8
 {
     GemmMethod::GEMM_INTERLEAVED,
     "interleaved_s8s32_mmla_12x8",

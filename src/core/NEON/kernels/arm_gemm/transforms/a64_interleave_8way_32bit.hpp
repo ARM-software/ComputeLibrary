@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,6 @@ inline void TransformImpl<8, 1, false, 4, 4, false>::Transform(T *out, const T *
             /* 'first' forces this to always run at least once, needed if the total size is <=7. */
             if ((y + 7) >= ymax) {
                 switch ((y + 7) - ymax) {
-                    /* Everything falls through in here */
                     case 6:
                         inptr1 = zerobuff;
                         // fall through

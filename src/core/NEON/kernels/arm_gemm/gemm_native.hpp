@@ -88,7 +88,7 @@ public:
 
     // Window is amount per multi multiplied by total number of multis.
     ndrange_t get_window_size() const override {
-        return { _window_range.total_size(), 1u, 1u, 1u, 1u, 1u };
+        return { _window_range.total_size() };
     }
 
     // Native GEMMs can always be dynamically scheduled (whether requested or not)
@@ -97,7 +97,7 @@ public:
     }
 
     // Actually execute the GEMM.
-    void execute_1d(unsigned int start, unsigned int end, int) {
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int) override {
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
@@ -106,7 +106,7 @@ public:
         static_assert(std::is_same<To, Toi>::value, "gemm_native: Operand types must be the same.");
         static_assert(std::is_same<Tr, Tri>::value, "gemm_native: Result types must be the same.");
 
-        auto p = _window_range.iterator(start, end);
+        auto p = _window_range.iterator(work_range.get_position(0), work_range.get_position_end(0));
 
         if (p.done()) {
             return;
@@ -138,16 +138,6 @@ public:
                            (ymax - y0), (nmax - n0));
             }
         } while (p.next_dim1());
-    }
-
-    //Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
-
-        const auto start = work_range.get_position(0);
-        const auto stop  = work_range.get_position_end(0);
-
-        execute_1d(start, stop, threadid);
     }
 };
 

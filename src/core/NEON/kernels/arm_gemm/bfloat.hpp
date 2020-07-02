@@ -30,4 +30,3 @@ namespace arm_gemm {
 using bfloat16 = arm_compute::bfloat16;
 
 } // namespace arm_gemm
-

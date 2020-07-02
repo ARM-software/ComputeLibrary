@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -386,8 +386,8 @@ public:
     // not multi for now (as this would cause problems with the buffer
     // manager).
     ndrange_t get_window_size() const override {
-        auto m_win_size = (_Mround / strategy::out_height()) * _nbatches;
-        return { m_win_size, 1u, 1u, 1u, 1u, 1u };
+        // _Mround is a multiple of out_height by definition.
+        return { (_Mround / strategy::out_height()) * _nbatches };
     }
 
     // set_nthreads: pass on to buffer manager to avoid it waiting for non-existant threads.
@@ -399,22 +399,15 @@ public:
     }
 
     // Execute
-    void execute_1d(unsigned int start, unsigned int end, int threadid) {
+    void execute(const ndcoord_t &work_range, const ndcoord_t &, int threadid) override {
+        const auto start = work_range.get_position(0);
+        const auto end   = work_range.get_position_end(0);
+
         if (_pretransposed) {
             execute_internal<true>(start, end, threadid);
         } else {
             execute_internal<false>(start, end, threadid);
         }
-    }
-
-    //Execute
-    void execute(const ndcoord_t& work_range, const ndcoord_t& thread_locator, int threadid) override {
-        UNUSED(thread_locator);
-
-        const auto start = work_range.get_position(0);
-        const auto stop  = work_range.get_position_end(0);
-
-        execute_1d(start, stop, threadid);
     }
 
     // Interface implementation - working space

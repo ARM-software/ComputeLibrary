@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,11 +61,22 @@ void a64_hybrid_fp32_mla_16x4(const float *A, int lda, const float *B, float *C,
             break;
     }
 
-    for (int y=0; y<M; y+=4) {
+    int rows_to_compute;
+
+    for (int y=0; y<M; y+=rows_to_compute) {
         const float * const a_ptr0_base = A + (y * lda);
         const unsigned long ldab = lda * sizeof(float);
 
         float *c_ptr0 = C + (y * ldc);
+
+        rows_to_compute = M-y;
+        if (rows_to_compute > 4) {
+            if (rows_to_compute % 4) {
+                rows_to_compute = 4 - 1;
+            } else {
+                rows_to_compute = 4;
+            }
+        }
 
         for (int x0=0; x0<N; x0+=16ul) {
             const long width = std::min((unsigned long)N-x0, 16ul);
@@ -90,7 +101,7 @@ void a64_hybrid_fp32_mla_16x4(const float *A, int lda, const float *B, float *C,
             }
             const float *biasptr = bias ? bias+x0 : nullbias;
 
-            switch(M-y) {
+            switch(rows_to_compute) {
                 case 1:
                     __asm __volatile (
                         "cbnz %[append], 1f\n"
