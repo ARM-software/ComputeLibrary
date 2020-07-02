@@ -1060,27 +1060,24 @@ void mul_U8_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, const 
 } // namespace
 
 NEPixelWiseMultiplicationKernel::NEPixelWiseMultiplicationKernel()
-    : _func_float(nullptr), _func_int(nullptr), _func_quantized(nullptr), _input1(nullptr), _input2(nullptr), _output(nullptr), _scale{ 0 }, _scale_exponent{ 0 }
+    : _func_float(nullptr), _func_int(nullptr), _func_quantized(nullptr), _scale{ 0 }, _scale_exponent{ 0 }
 {
 }
 
-void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
+void NEPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_UNUSED(rounding_policy);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info(), scale, overflow_policy, rounding_policy));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1, input2, output, scale, overflow_policy, rounding_policy));
 
-    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1->info(), *input2->info());
+    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
     const TensorShape &out_shape    = broadcast_pair.first;
     const ValidRegion &valid_region = broadcast_pair.second;
 
     // Auto initialize output if not initialized
-    set_shape_if_empty(*output->info(), out_shape);
+    set_shape_if_empty(*output, out_shape);
 
-    _input1         = input1;
-    _input2         = input2;
-    _output         = output;
     _scale          = scale;
     _scale_exponent = 0;
     _func_quantized = nullptr;
@@ -1104,9 +1101,9 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
         _scale_exponent = std::abs(exponent - 1);
     }
 
-    const DataType dt_input1 = input1->info()->data_type();
-    const DataType dt_input2 = input2->info()->data_type();
-    const DataType dt_output = output->info()->data_type();
+    const DataType dt_input1 = input1->data_type();
+    const DataType dt_input2 = input2->data_type();
+    const DataType dt_output = output->data_type();
     const bool     is_sat    = (overflow_policy == ConvertPolicy::SATURATE);
 
     switch(dt_input1)
@@ -1207,8 +1204,8 @@ void NEPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITe
 
     // Configure kernel window
     Coordinates coord;
-    coord.set_num_dimensions(output->info()->num_dimensions());
-    output->info()->set_valid_region(valid_region);
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(valid_region);
     Window win = calculate_max_window(valid_region, Steps());
 
     INEKernel::configure(win);
@@ -1223,27 +1220,30 @@ Status NEPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, cons
     return Status{};
 }
 
-void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo &info)
+void NEPixelWiseMultiplicationKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
+    auto input1 = inputs.at(TensorType::ACL_SRC_0);
+    auto input2 = inputs.at(TensorType::ACL_SRC_1);
+    auto output = outputs.at(TensorType::ACL_DST);
+
     if(_func_quantized != nullptr)
     {
-        (*_func_quantized)(_input1, _input2, _output, window, _scale);
+        (*_func_quantized)(input1, input2, output, window, _scale);
     }
     else if(_func_int != nullptr)
     {
-        (*_func_int)(_input1, _input2, _output, window, _scale_exponent);
+        (*_func_int)(input1, input2, output, window, _scale_exponent);
     }
     else
     {
         ARM_COMPUTE_ERROR_ON(_func_float == nullptr);
-        (*_func_float)(_input1, _input2, _output, window, _scale);
+        (*_func_float)(input1, input2, output, window, _scale);
     }
 }
-
 namespace
 {
 constexpr unsigned int num_elems_processed_per_iteration_complex = 2;
@@ -1296,23 +1296,14 @@ std::pair<Status, Window> validate_and_configure_window_complex(ITensorInfo *inp
 }
 } // namespace
 
-NEComplexPixelWiseMultiplicationKernel::NEComplexPixelWiseMultiplicationKernel()
-    : _input1(nullptr), _input2(nullptr), _output(nullptr)
-{
-}
-
-void NEComplexPixelWiseMultiplicationKernel::configure(const ITensor *input1, const ITensor *input2, ITensor *output)
+void NEComplexPixelWiseMultiplicationKernel::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1->info(), input2->info(), output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_complex(input1, input2, output));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window_complex(input1->info(), input2->info(), output->info());
+    auto win_config = validate_and_configure_window_complex(input1, input2, output);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-
-    _input1 = input1;
-    _input2 = input2;
-    _output = output;
 
     // Create kernel
     INEKernel::configure(win_config.second);
@@ -1327,27 +1318,24 @@ Status NEComplexPixelWiseMultiplicationKernel::validate(const ITensorInfo *input
     return Status{};
 }
 
-void NEComplexPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo &info)
+void NEComplexPixelWiseMultiplicationKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    Iterator input1(_input1, window.broadcast_if_dimension_le_one(_input1->info()->tensor_shape()));
-    Iterator input2(_input2, window.broadcast_if_dimension_le_one(_input2->info()->tensor_shape()));
-    Iterator output(_output, window);
+    auto input1 = inputs.at(TensorType::ACL_SRC_0);
+    auto input2 = inputs.at(TensorType::ACL_SRC_1);
+    auto output = outputs.at(TensorType::ACL_DST);
+
+    Iterator input1_it(input1, window.broadcast_if_dimension_le_one(input1->info()->tensor_shape()));
+    Iterator input2_it(input2, window.broadcast_if_dimension_le_one(input2->info()->tensor_shape()));
+    Iterator output_it(output, window);
 
     execute_window_loop(window, [&](const Coordinates &)
     {
-        c_mul_F32_F32_F32_n(input1.ptr(), input2.ptr(), output.ptr());
+        c_mul_F32_F32_F32_n(input1_it.ptr(), input2_it.ptr(), output_it.ptr());
     },
-    input1, input2, output);
-}
-
-BorderSize NEComplexPixelWiseMultiplicationKernel::border_size() const
-{
-    const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
-    const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration_complex - 1U, replicateSize);
-    return { 0, border, 0, 0 };
+    input1_it, input2_it, output_it);
 }
 } // namespace arm_compute

@@ -72,7 +72,7 @@ public:
      * @param[in]  overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8, QASYMM8_SIGNED or QSYMM16.
      * @param[in]  rounding_policy Rounding policy.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+    void configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEPixelWiseMultiplicationKernel
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
@@ -98,8 +98,8 @@ public:
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 
-    // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
+    // Inherited methods overridden
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info) override;
 
 private:
     /** Common signature for all the specialised multiplication functions with integer scaling factor
@@ -136,11 +136,8 @@ private:
     MulFunctionQuantized *_func_quantized;
 
 private:
-    const ITensor *_input1;
-    const ITensor *_input2;
-    ITensor       *_output;
-    float          _scale;
-    int            _scale_exponent;
+    float _scale;
+    int   _scale_exponent;
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */
@@ -151,23 +148,13 @@ public:
     {
         return "NEComplexPixelWiseMultiplicationKernel";
     }
-    /** Default constructor.*/
-    NEComplexPixelWiseMultiplicationKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEComplexPixelWiseMultiplicationKernel(const NEComplexPixelWiseMultiplicationKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEComplexPixelWiseMultiplicationKernel &operator=(const NEComplexPixelWiseMultiplicationKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEComplexPixelWiseMultiplicationKernel(NEComplexPixelWiseMultiplicationKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEComplexPixelWiseMultiplicationKernel &operator=(NEComplexPixelWiseMultiplicationKernel &&) = default;
     /** Initialise the kernel's input, output and border mode.
      *
      * @param[in]  input1 An input tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
      * @param[in]  input2 An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
      * @param[out] output The output tensor, Data types supported: same as @p input1.  Number of channels supported: same as @p input1.
      */
-    void configure(const ITensor *input1, const ITensor *input2, ITensor *output);
+    void configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEComplexPixelWiseMultiplicationKernel
      *
      * @param[in] input1 An input tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
@@ -179,13 +166,7 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
-
-private:
-    const ITensor *_input1;
-    const ITensor *_input2;
-    ITensor       *_output;
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, const ThreadInfo &info) override;
 };
 
 } // namespace arm_compute

@@ -31,7 +31,9 @@
 
 namespace arm_compute
 {
-void NEPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+namespace experimental
+{
+void NEPixelWiseMultiplication::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
                                           const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
@@ -46,7 +48,12 @@ Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITen
     return NEPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy);
 }
 
-void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
+MemoryRequirements NEPixelWiseMultiplication::workspace() const
+{
+    return MemoryRequirements{};
+}
+
+void NEComplexPixelWiseMultiplication::configure(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(act_info);
     auto k = arm_compute::support::cpp14::make_unique<NEComplexPixelWiseMultiplicationKernel>();
@@ -60,4 +67,85 @@ Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, con
     return NEComplexPixelWiseMultiplicationKernel::validate(input1, input2, output);
 }
 
+MemoryRequirements NEComplexPixelWiseMultiplication::workspace() const
+{
+    return MemoryRequirements{};
+}
+} // namespace experimental
+
+struct NEPixelWiseMultiplication::Impl
+{
+    const ITensor                                           *src_0{ nullptr };
+    const ITensor                                           *src_1{ nullptr };
+    ITensor                                                 *dst{ nullptr };
+    std::unique_ptr<experimental::NEPixelWiseMultiplication> op{ nullptr };
+};
+
+NEPixelWiseMultiplication::NEPixelWiseMultiplication()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+NEPixelWiseMultiplication::NEPixelWiseMultiplication(NEPixelWiseMultiplication &&) = default;
+NEPixelWiseMultiplication &NEPixelWiseMultiplication::operator=(NEPixelWiseMultiplication &&) = default;
+NEPixelWiseMultiplication::~NEPixelWiseMultiplication()                                       = default;
+
+Status NEPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+                                           const ActivationLayerInfo &act_info)
+{
+    return experimental::NEPixelWiseMultiplication::validate(input1, input2, output, scale, overflow_policy, rounding_policy, act_info);
+}
+
+void NEPixelWiseMultiplication::configure(const ITensor *input1, const ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy,
+                                          const ActivationLayerInfo &act_info)
+{
+    _impl->src_0 = input1;
+    _impl->src_1 = input2;
+    _impl->dst   = output;
+    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEPixelWiseMultiplication>();
+    _impl->op->configure(input1->info(), input2->info(), output->info(), scale, overflow_policy, rounding_policy, act_info);
+}
+
+void NEPixelWiseMultiplication::run()
+{
+    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    _impl->op->run(src, dst, {});
+}
+
+struct NEComplexPixelWiseMultiplication::Impl
+{
+    ITensor                                                        *src_0{ nullptr };
+    ITensor                                                        *src_1{ nullptr };
+    ITensor                                                        *dst{ nullptr };
+    std::unique_ptr<experimental::NEComplexPixelWiseMultiplication> op{ nullptr };
+};
+
+NEComplexPixelWiseMultiplication::NEComplexPixelWiseMultiplication()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+NEComplexPixelWiseMultiplication::NEComplexPixelWiseMultiplication(NEComplexPixelWiseMultiplication &&) = default;
+NEComplexPixelWiseMultiplication &NEComplexPixelWiseMultiplication::operator=(NEComplexPixelWiseMultiplication &&) = default;
+NEComplexPixelWiseMultiplication::~NEComplexPixelWiseMultiplication()                                              = default;
+
+Status NEComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, const ActivationLayerInfo &act_info)
+{
+    return experimental::NEComplexPixelWiseMultiplication::validate(input1, input2, output, act_info);
+}
+
+void NEComplexPixelWiseMultiplication::configure(ITensor *input1, ITensor *input2, ITensor *output, const ActivationLayerInfo &act_info)
+{
+    _impl->src_0 = input1;
+    _impl->src_1 = input2;
+    _impl->dst   = output;
+    _impl->op    = arm_compute::support::cpp14::make_unique<experimental::NEComplexPixelWiseMultiplication>();
+    _impl->op->configure(input1->info(), input2->info(), output->info(), act_info);
+}
+
+void NEComplexPixelWiseMultiplication::run()
+{
+    const InputTensorMap  src{ { TensorType::ACL_SRC_0, _impl->src_0 }, { TensorType::ACL_SRC_1, _impl->src_1 } };
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+    _impl->op->run(src, dst, {});
+}
 } // namespace arm_compute

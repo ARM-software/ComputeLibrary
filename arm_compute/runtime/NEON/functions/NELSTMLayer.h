@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NECopyKernel.h"
-#include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
@@ -36,6 +35,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 
 namespace arm_compute
@@ -146,89 +146,89 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup                     _memory_group;
-    NEFullyConnectedLayer           _fully_connected_input_gate;
-    NEArithmeticAddition            _accum_input_gate1;
-    NEArithmeticSubtraction         _subtract_input_gate;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_input_gate;
-    NEActivationLayer               _activation_input_gate;
-    NEFullyConnectedLayer           _fully_connected_forget_gate;
-    NEArithmeticAddition            _accum_forget_gate1;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_forget_gate;
-    NEActivationLayer               _activation_forget_gate;
-    NEFullyConnectedLayer           _fully_connected_cell_state;
-    NEGEMM                          _gemm_cell_state1;
-    NETransposeKernel               _transpose_cell_state;
-    NEArithmeticAddition            _accum_cell_state1;
-    NEArithmeticAddition            _accum_cell_state2;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_cell_state1;
-    NEActivationLayer               _activation_cell_state;
-    NEActivationLayer               _cell_clip;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_cell_state2;
-    NEFullyConnectedLayer           _fully_connected_output;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_output_state1;
-    NEArithmeticAddition            _accum_output1;
-    NEActivationLayer               _activation_output;
-    NEActivationLayer               _activation_output_state;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_output_state2;
-    NEFullyConnectedLayer           _fully_connected_output_state;
-    NEActivationLayer               _projection_clip;
-    NECopyKernel                    _copy_cell_state;
-    NECopyKernel                    _copy_output;
-    NEConcatenateLayer              _concat_scratch_buffer;
-    NEConcatenateLayer              _concat_inputs_forget_gate;
-    NEConcatenateLayer              _concat_weights_forget_gate;
-    NEConcatenateLayer              _concat_weights_input_gate;
-    NEConcatenateLayer              _concat_weights_output;
-    NEMeanStdDevNormalizationLayer  _mean_std_norm_input_gate;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_input_gate_coeff;
-    NEArithmeticAddition            _accum_input_gate_bias;
-    NEMeanStdDevNormalizationLayer  _mean_std_norm_forget_gate;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_forget_gate_coeff;
-    NEArithmeticAddition            _accum_forget_gate_bias;
-    NEMeanStdDevNormalizationLayer  _mean_std_norm_cell_gate;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_cell_gate_coeff;
-    NEArithmeticAddition            _accum_cell_gate_bias;
-    NEMeanStdDevNormalizationLayer  _mean_std_norm_output_gate;
-    NEPixelWiseMultiplicationKernel _pixelwise_mul_output_gate_coeff;
-    NEArithmeticAddition            _accum_output_gate_bias;
-    Tensor                          _input_gate_out1;
-    Tensor                          _input_gate_out2;
-    Tensor                          _input_gate_out3;
-    Tensor                          _input_gate_out4;
-    Tensor                          _forget_gate_out1;
-    Tensor                          _forget_gate_out2;
-    Tensor                          _forget_gate_out3;
-    Tensor                          _forget_gate_out4;
-    Tensor                          _forget_gate_out5;
-    Tensor                          _forget_gate_out6;
-    Tensor                          _cell_state_out1;
-    Tensor                          _cell_state_out2;
-    Tensor                          _cell_state_out3;
-    Tensor                          _cell_state_out4;
-    Tensor                          _cell_state_out5;
-    Tensor                          _output1;
-    Tensor                          _output2;
-    Tensor                          _output3;
-    Tensor                          _output4;
-    Tensor                          _cell_state_activation;
-    Tensor                          _output_state1;
-    Tensor                          _ones;
-    Tensor                          _input_layer_norm_out1;
-    Tensor                          _input_layer_norm_out2;
-    Tensor                          _forget_layer_norm_out1;
-    Tensor                          _forget_layer_norm_out2;
-    Tensor                          _cell_layer_norm_out1;
-    Tensor                          _cell_layer_norm_out2;
-    Tensor                          _output_layer_norm_out1;
-    Tensor                          _output_layer_norm_out2;
-    bool                            _run_peephole_opt;
-    bool                            _run_cifg_opt;
-    bool                            _perform_cell_clipping;
-    bool                            _has_projection_weights;
-    bool                            _perform_projection_clipping;
-    bool                            _is_prepared;
-    bool                            _is_layer_norm_lstm;
+    MemoryGroup                    _memory_group;
+    NEFullyConnectedLayer          _fully_connected_input_gate;
+    NEArithmeticAddition           _accum_input_gate1;
+    NEArithmeticSubtraction        _subtract_input_gate;
+    NEPixelWiseMultiplication      _pixelwise_mul_input_gate;
+    NEActivationLayer              _activation_input_gate;
+    NEFullyConnectedLayer          _fully_connected_forget_gate;
+    NEArithmeticAddition           _accum_forget_gate1;
+    NEPixelWiseMultiplication      _pixelwise_mul_forget_gate;
+    NEActivationLayer              _activation_forget_gate;
+    NEFullyConnectedLayer          _fully_connected_cell_state;
+    NEGEMM                         _gemm_cell_state1;
+    NETransposeKernel              _transpose_cell_state;
+    NEArithmeticAddition           _accum_cell_state1;
+    NEArithmeticAddition           _accum_cell_state2;
+    NEPixelWiseMultiplication      _pixelwise_mul_cell_state1;
+    NEActivationLayer              _activation_cell_state;
+    NEActivationLayer              _cell_clip;
+    NEPixelWiseMultiplication      _pixelwise_mul_cell_state2;
+    NEFullyConnectedLayer          _fully_connected_output;
+    NEPixelWiseMultiplication      _pixelwise_mul_output_state1;
+    NEArithmeticAddition           _accum_output1;
+    NEActivationLayer              _activation_output;
+    NEActivationLayer              _activation_output_state;
+    NEPixelWiseMultiplication      _pixelwise_mul_output_state2;
+    NEFullyConnectedLayer          _fully_connected_output_state;
+    NEActivationLayer              _projection_clip;
+    NECopyKernel                   _copy_cell_state;
+    NECopyKernel                   _copy_output;
+    NEConcatenateLayer             _concat_scratch_buffer;
+    NEConcatenateLayer             _concat_inputs_forget_gate;
+    NEConcatenateLayer             _concat_weights_forget_gate;
+    NEConcatenateLayer             _concat_weights_input_gate;
+    NEConcatenateLayer             _concat_weights_output;
+    NEMeanStdDevNormalizationLayer _mean_std_norm_input_gate;
+    NEPixelWiseMultiplication      _pixelwise_mul_input_gate_coeff;
+    NEArithmeticAddition           _accum_input_gate_bias;
+    NEMeanStdDevNormalizationLayer _mean_std_norm_forget_gate;
+    NEPixelWiseMultiplication      _pixelwise_mul_forget_gate_coeff;
+    NEArithmeticAddition           _accum_forget_gate_bias;
+    NEMeanStdDevNormalizationLayer _mean_std_norm_cell_gate;
+    NEPixelWiseMultiplication      _pixelwise_mul_cell_gate_coeff;
+    NEArithmeticAddition           _accum_cell_gate_bias;
+    NEMeanStdDevNormalizationLayer _mean_std_norm_output_gate;
+    NEPixelWiseMultiplication      _pixelwise_mul_output_gate_coeff;
+    NEArithmeticAddition           _accum_output_gate_bias;
+    Tensor                         _input_gate_out1;
+    Tensor                         _input_gate_out2;
+    Tensor                         _input_gate_out3;
+    Tensor                         _input_gate_out4;
+    Tensor                         _forget_gate_out1;
+    Tensor                         _forget_gate_out2;
+    Tensor                         _forget_gate_out3;
+    Tensor                         _forget_gate_out4;
+    Tensor                         _forget_gate_out5;
+    Tensor                         _forget_gate_out6;
+    Tensor                         _cell_state_out1;
+    Tensor                         _cell_state_out2;
+    Tensor                         _cell_state_out3;
+    Tensor                         _cell_state_out4;
+    Tensor                         _cell_state_out5;
+    Tensor                         _output1;
+    Tensor                         _output2;
+    Tensor                         _output3;
+    Tensor                         _output4;
+    Tensor                         _cell_state_activation;
+    Tensor                         _output_state1;
+    Tensor                         _ones;
+    Tensor                         _input_layer_norm_out1;
+    Tensor                         _input_layer_norm_out2;
+    Tensor                         _forget_layer_norm_out1;
+    Tensor                         _forget_layer_norm_out2;
+    Tensor                         _cell_layer_norm_out1;
+    Tensor                         _cell_layer_norm_out2;
+    Tensor                         _output_layer_norm_out1;
+    Tensor                         _output_layer_norm_out2;
+    bool                           _run_peephole_opt;
+    bool                           _run_cifg_opt;
+    bool                           _perform_cell_clipping;
+    bool                           _has_projection_weights;
+    bool                           _perform_projection_clipping;
+    bool                           _is_prepared;
+    bool                           _is_layer_norm_lstm;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_NELSTMLAYER_H */
