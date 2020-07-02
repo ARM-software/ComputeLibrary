@@ -38,8 +38,8 @@
 #include <string>
 
 /** [CLReshapeLayerKernel Kernel] **/
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
@@ -54,44 +54,30 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
     return Status{};
 }
-
 } // namespace
 
-CLReshapeLayerKernel::CLReshapeLayerKernel()
-    : _input(nullptr), _output(nullptr)
-{
-}
-
-void CLReshapeLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
-{
-    configure(CLKernelLibrary::get().get_compile_context(), input, output);
-}
-
-void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
-
-    _input  = input;
-    _output = output;
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input, output));
 
     // Create kernel
-    std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size()) };
+    std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->element_size()) };
     _kernel                          = create_kernel(compile_context, "reshape_layer", build_opts);
 
     // Add static arguments
     const cl_int2 input_shape =
     {
         {
-            static_cast<cl_int>(_input->info()->tensor_shape()[0]),
-            static_cast<cl_int>(_input->info()->tensor_shape()[1])
+            static_cast<cl_int>(input->tensor_shape()[0]),
+            static_cast<cl_int>(input->tensor_shape()[1])
         }
     };
     const cl_int2 output_shape =
     {
         {
-            static_cast<cl_int>(_output->info()->tensor_shape()[0]),
-            static_cast<cl_int>(_output->info()->tensor_shape()[1])
+            static_cast<cl_int>(output->tensor_shape()[0]),
+            static_cast<cl_int>(output->tensor_shape()[1])
         }
     };
     unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
@@ -99,10 +85,10 @@ void CLReshapeLayerKernel::configure(const CLCompileContext &compile_context, co
     _kernel.setArg<cl_int2>(idx++, output_shape);
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info());
+    Window win = calculate_max_window(*input);
 
     // Set the output valid region
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
     ICLKernel::configure_internal(win);
 }
 
@@ -113,7 +99,7 @@ Status CLReshapeLayerKernel::validate(const ITensorInfo *input, const ITensorInf
     return Status{};
 }
 
-void CLReshapeLayerKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLReshapeLayerKernel::run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
@@ -121,10 +107,14 @@ void CLReshapeLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice            = window_collapsed.first_slice_window_3D();
 
+    const auto src = dynamic_cast<const ICLTensor *>(inputs.at(TensorType::ACL_SRC));
+    auto       dst = dynamic_cast<ICLTensor *>(outputs.at(TensorType::ACL_DST));
+
     // Set inputs
     unsigned int idx = 0;
-    add_3D_tensor_argument(idx, _input, window_collapsed);
-    add_3D_tensor_argument(idx, _output, window_collapsed);
+    add_3D_tensor_argument(idx, src, window_collapsed);
+    add_3D_tensor_argument(idx, dst, window_collapsed);
     enqueue(queue, *this, slice, lws_hint());
 }
+} // namespace arm_compute
 /** [CLReshapeLayerKernel Kernel] **/

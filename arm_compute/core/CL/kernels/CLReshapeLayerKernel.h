@@ -35,31 +35,13 @@ class ICLTensor;
 class CLReshapeLayerKernel : public ICLKernel
 {
 public:
-    /** Default constructor */
-    CLReshapeLayerKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLReshapeLayerKernel(const CLReshapeLayerKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLReshapeLayerKernel &operator=(const CLReshapeLayerKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    CLReshapeLayerKernel(CLReshapeLayerKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    CLReshapeLayerKernel &operator=(CLReshapeLayerKernel &&) = default;
-    /** Default destructor */
-    ~CLReshapeLayerKernel() = default;
-    /** Set the input and output of the kernel
-     *
-     * @param[in]  input  Source tensor. Data type supported: All.
-     * @param[out] output Destination tensor. Data type supported: Same as @p input
-     */
-    void configure(const ICLTensor *input, ICLTensor *output);
     /** Set the input and output of the kernel
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data type supported: All.
-     * @param[out] output          Destination tensor. Data type supported: Same as @p input
+     * @param[in]  input           Source tensor info. Data type supported: All.
+     * @param[out] output          Destination tensor info. Data type supported: Same as @p input
      */
-    void configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output);
+    void configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayerKernel
      *
@@ -71,11 +53,8 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
-
-private:
-    const ICLTensor *_input;  /**< Source tensor */
-    ICLTensor       *_output; /**< Destination tensor */
+    void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs,
+                const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_CLRESHAPELAYERKERNEL_H */

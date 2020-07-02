@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/IKernel.h"
+#include "arm_compute/core/experimental/Types.h"
 
 #include <string>
 
@@ -216,7 +217,23 @@ public:
      * @param[in]     window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      * @param[in,out] queue  Command queue on which to enqueue the kernel.
      */
-    virtual void run(const Window &window, cl::CommandQueue &queue) = 0;
+    virtual void run(const Window &window, cl::CommandQueue &queue)
+    {
+        ARM_COMPUTE_UNUSED(window, queue);
+    }
+    /** Enqueue the OpenCL kernel to process the given window  on the passed OpenCL command queue.
+     *
+     * @note The queue is *not* flushed by this method, and therefore the kernel will not have been executed by the time this method returns.
+     *
+     * @param[in]     inputs  A vector containing the input tensors.
+     * @param[in]     outputs A vector containing the output tensors.
+     * @param[in]     window  Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     * @param[in,out] queue   Command queue on which to enqueue the kernel.
+     */
+    virtual void run_op(const InputTensorMap &inputs, const OutputTensorMap &outputs, const Window &window, cl::CommandQueue &queue)
+    {
+        ARM_COMPUTE_UNUSED(inputs, outputs, window, queue);
+    }
     /** Add the passed parameters to the object's kernel's arguments starting from the index idx.
      *
      * @param[in,out] idx   Index at which to start adding the arguments. Will be incremented by the number of kernel arguments set.

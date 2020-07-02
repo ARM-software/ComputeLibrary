@@ -439,6 +439,7 @@ cc_library_static {
         "src/runtime/CL/CLMemoryRegion.cpp",
         "src/runtime/CL/CLMultiHOG.cpp",
         "src/runtime/CL/CLMultiImage.cpp",
+        "src/runtime/CL/CLOperator.cpp",
         "src/runtime/CL/CLPyramid.cpp",
         "src/runtime/CL/CLRuntimeContext.cpp",
         "src/runtime/CL/CLScheduler.cpp",

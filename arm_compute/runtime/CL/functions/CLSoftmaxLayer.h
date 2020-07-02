@@ -24,10 +24,10 @@
 #ifndef ARM_COMPUTE_CLSOFTMAXLAYER_H
 #define ARM_COMPUTE_CLSOFTMAXLAYER_H
 
-#include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
+#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -136,8 +136,8 @@ private:
     MemoryGroup                    _memory_group;
     CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;
     CLLogits1DNormKernel           _norm_kernel;
-    std::unique_ptr<ICLKernel>     _flatten_kernel_ptr;
-    CLReshapeLayerKernel           _reshape_kernel;
+    std::unique_ptr<IFunction>     _flatten_ptr;
+    CLReshapeLayer                 _reshape;
     CLTensor                       _max;
     CLTensor                       _sum;
     CLTensor                       _tmp;

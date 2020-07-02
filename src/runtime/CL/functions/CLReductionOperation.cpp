@@ -39,7 +39,7 @@
 namespace arm_compute
 {
 CLReductionOperation::CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _results_vector(), _reduction_kernels_vector(), _border_handlers_vector(), _reshape_kernel(), _op(), _num_of_stages(), _reduction_axis(), _is_serial(),
+    : _memory_group(std::move(memory_manager)), _results_vector(), _reduction_kernels_vector(), _border_handlers_vector(), _reshape(), _op(), _num_of_stages(), _reduction_axis(), _is_serial(),
       _is_reshape_required(false)
 {
 }
@@ -152,7 +152,7 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
 
     if(is_reshape_required)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(output_internal, output));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayer::validate(output_internal, output));
     }
 
     return Status{};
@@ -351,7 +351,7 @@ void CLReductionOperation::configure(const CLCompileContext &compile_context, IC
 
     if(_is_reshape_required)
     {
-        _reshape_kernel.configure(compile_context, &_results_vector.back(), output);
+        _reshape.configure(compile_context, &_results_vector.back(), output);
         _results_vector.back().allocator()->allocate();
     }
 }
@@ -375,7 +375,7 @@ void CLReductionOperation::run()
 
     if(_is_reshape_required)
     {
-        CLScheduler::get().enqueue(_reshape_kernel, false);
+        _reshape.run();
     }
 }
 } // namespace arm_compute

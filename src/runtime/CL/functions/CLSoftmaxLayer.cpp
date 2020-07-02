@@ -36,7 +36,7 @@ namespace arm_compute
 {
 template <bool IS_LOG>
 CLSoftmaxLayerGeneric<IS_LOG>::CLSoftmaxLayerGeneric(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _max_shift_exp_sum_kernel(), _norm_kernel(), _flatten_kernel_ptr(), _reshape_kernel(), _max(), _sum(), _tmp(), _input_flattened(), _output_flattened(),
+    : _memory_group(std::move(memory_manager)), _max_shift_exp_sum_kernel(), _norm_kernel(), _flatten_ptr(), _reshape(), _max(), _sum(), _tmp(), _input_flattened(), _output_flattened(),
       _needs_flattening(false)
 {
 }
@@ -64,15 +64,15 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure_reshape_input_kernel(const CLCompi
     //   2. first_n_reduce_axes == 4: Reduce all 4 dimensions. This can only be handled by CLReshapeKernel instead of CLFlattenKernel.
     if(first_n_reduce_axes == 3)
     {
-        auto flatten_kernel_ptr = support::cpp14::make_unique<CLFlattenLayerKernel>();
-        flatten_kernel_ptr->configure(compile_context, input, &_input_flattened);
-        _flatten_kernel_ptr = std::move(flatten_kernel_ptr);
+        auto flatten = support::cpp14::make_unique<CLFlattenLayer>();
+        flatten->configure(compile_context, input, &_input_flattened);
+        _flatten_ptr = std::move(flatten);
     }
     else
     {
-        auto reshape_kernel_ptr = support::cpp14::make_unique<CLReshapeLayerKernel>();
-        reshape_kernel_ptr->configure(compile_context, input, &_input_flattened);
-        _flatten_kernel_ptr = std::move(reshape_kernel_ptr);
+        auto reshape_ptr = support::cpp14::make_unique<CLReshapeLayer>();
+        reshape_ptr->configure(compile_context, input, &_input_flattened);
+        _flatten_ptr = std::move(reshape_ptr);
     }
 
     // We need to init the output tensor here. Indeed, the reshape kernel expects
@@ -152,7 +152,7 @@ void CLSoftmaxLayerGeneric<IS_LOG>::configure(const CLCompileContext &compile_co
         _norm_kernel.configure(compile_context, &_tmp, &_sum, &_output_flattened, softmax_info);
 
         // Reshape the flat output into a the requested (4D) output
-        _reshape_kernel.configure(compile_context, &_output_flattened, output);
+        _reshape.configure(compile_context, &_output_flattened, output);
 
         // Allocate the intermediate flat tensors
         _input_flattened.allocator()->allocate();
@@ -199,11 +199,11 @@ Status CLSoftmaxLayerGeneric<IS_LOG>::validate(const ITensorInfo *input, const I
 
         if(first_n_reduce_axes == 3)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLFlattenLayerKernel::validate(input, &tensor_info_flat));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLFlattenLayer::validate(input, &tensor_info_flat));
         }
         else
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(input, &tensor_info_flat));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayer::validate(input, &tensor_info_flat));
         }
     }
 
@@ -231,7 +231,7 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::run()
 
     if(_needs_flattening)
     {
-        CLScheduler::get().enqueue(*_flatten_kernel_ptr, false);
+        _flatten_ptr->run();
     }
 
     CLScheduler::get().enqueue(_max_shift_exp_sum_kernel, false);
@@ -239,7 +239,7 @@ void           CLSoftmaxLayerGeneric<IS_LOG>::run()
 
     if(_needs_flattening)
     {
-        CLScheduler::get().enqueue(_reshape_kernel, true);
+        _reshape.run();
     }
 }
 

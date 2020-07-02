@@ -28,14 +28,11 @@
 #include "support/MemorySupport.h"
 
 /** [CLReshapeLayer snippet] **/
-using namespace arm_compute;
-
-void CLReshapeLayer::configure(const ICLTensor *input, ICLTensor *output)
+namespace arm_compute
 {
-    configure(CLKernelLibrary::get().get_compile_context(), input, output);
-}
-
-void CLReshapeLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+namespace experimental
+{
+void CLReshapeLayer::configure(const CLCompileContext &compile_context, const ITensorInfo *input, ITensorInfo *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLReshapeLayerKernel>();
     k->configure(compile_context, input, output);
@@ -44,6 +41,58 @@ void CLReshapeLayer::configure(const CLCompileContext &compile_context, const IC
 
 Status CLReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    return CLReshapeLayerKernel::validate(input, output);
+    return arm_compute::CLReshapeLayerKernel::validate(input, output);
 }
+
+MemoryRequirements CLReshapeLayer::workspace() const
+{
+    return MemoryRequirements{};
+}
+} // namespace experimental
+
+struct CLReshapeLayer::Impl
+{
+    const ICLTensor                              *src{ nullptr };
+    ICLTensor                                    *dst{ nullptr };
+    std::unique_ptr<experimental::CLReshapeLayer> op{ nullptr };
+};
+
+CLReshapeLayer::CLReshapeLayer()
+    : _impl(support::cpp14::make_unique<Impl>())
+{
+}
+
+CLReshapeLayer::CLReshapeLayer(CLReshapeLayer &&) = default;
+CLReshapeLayer &CLReshapeLayer::operator=(CLReshapeLayer &&) = default;
+CLReshapeLayer::~CLReshapeLayer()                            = default;
+
+void CLReshapeLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    configure(CLKernelLibrary::get().get_compile_context(), input, output);
+}
+
+void CLReshapeLayer::configure(const CLCompileContext &compile_context, const ICLTensor *input, ICLTensor *output)
+{
+    _impl->src = input;
+    _impl->dst = output;
+    _impl->op  = arm_compute::support::cpp14::make_unique<experimental::CLReshapeLayer>();
+    _impl->op->configure(compile_context, input->info(), output->info());
+}
+
+Status CLReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ON_ERROR(experimental::CLReshapeLayer::validate(input, output));
+
+    return Status{};
+}
+
+void CLReshapeLayer::run()
+{
+    const InputTensorMap  src{ { TensorType::ACL_SRC, _impl->src } };
+    const OutputTensorMap dst{ { TensorType::ACL_DST, _impl->dst } };
+
+    _impl->op->run(src, dst, {});
+}
+} // namespace arm_compute
 /** [CLReshapeLayer snippet] **/

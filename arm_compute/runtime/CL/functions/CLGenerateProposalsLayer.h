@@ -29,10 +29,10 @@
 #include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
 #include "arm_compute/core/CL/kernels/CLQuantizationLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -131,9 +131,9 @@ private:
 
     // OpenCL kernels
     CLPermuteKernel              _permute_deltas_kernel;
-    CLReshapeLayerKernel         _flatten_deltas_kernel;
+    CLReshapeLayer               _flatten_deltas;
     CLPermuteKernel              _permute_scores_kernel;
-    CLReshapeLayerKernel         _flatten_scores_kernel;
+    CLReshapeLayer               _flatten_scores;
     CLComputeAllAnchorsKernel    _compute_anchors_kernel;
     CLBoundingBoxTransformKernel _bounding_box_kernel;
     CLPadLayerKernel             _pad_kernel;

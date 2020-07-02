@@ -35,7 +35,7 @@
 namespace arm_compute
 {
 CLArgMinMaxLayer::CLArgMinMaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _results_vector(), _not_reshaped_output(), _reduction_kernels_vector(), _reshape_kernel(), _num_of_stages(), _reduction_axis()
+    : _memory_group(std::move(memory_manager)), _results_vector(), _not_reshaped_output(), _reduction_kernels_vector(), _reshape(), _num_of_stages(), _reduction_axis()
 {
 }
 
@@ -103,7 +103,7 @@ Status CLArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITen
         const unsigned int last_stage = num_of_stages - 1;
         ARM_COMPUTE_RETURN_ON_ERROR(CLArgMinMaxLayerKernel::validate(input, &sums_vector[last_stage - 1], &not_reshaped_output, axis, op));
     }
-    ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(&not_reshaped_output, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayer::validate(&not_reshaped_output, output));
     return Status{};
 }
 
@@ -158,7 +158,7 @@ void CLArgMinMaxLayer::configure(const CLCompileContext &compile_context, const 
         _reduction_kernels_vector[last_stage].configure(compile_context, input, &_results_vector[last_stage - 1], &_not_reshaped_output, axis, op);
         _results_vector[last_stage - 1].allocator()->allocate();
     }
-    _reshape_kernel.configure(compile_context, &_not_reshaped_output, output);
+    _reshape.configure(compile_context, &_not_reshaped_output, output);
     _not_reshaped_output.allocator()->allocate();
 }
 
@@ -170,6 +170,6 @@ void CLArgMinMaxLayer::run()
     {
         CLScheduler::get().enqueue(_reduction_kernels_vector[i], false);
     }
-    CLScheduler::get().enqueue(_reshape_kernel, false);
+    _reshape.run();
 }
 } // namespace arm_compute

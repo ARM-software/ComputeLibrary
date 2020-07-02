@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -151,7 +151,7 @@ void CLScheduler::init(cl::Context context, cl::CommandQueue queue, const cl::De
     _cl_tuner       = cl_tuner;
 }
 
-void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
+void CLScheduler::enqueue_common(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs, bool flush)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!_is_initialised,
                              "The CLScheduler is not initialised yet! Please call the CLScheduler::get().default_init(), \
@@ -165,11 +165,28 @@ void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
     }
 
     // Run kernel
-    kernel.run(kernel.window(), _queue);
+    if(inputs.empty())
+    {
+        kernel.run(kernel.window(), _queue);
+    }
+    else
+    {
+        kernel.run_op(inputs, outputs, kernel.window(), _queue);
+    }
 
     if(flush)
     {
         _queue.flush();
     }
+}
+
+void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
+{
+    enqueue_common(kernel, {}, {}, flush);
+}
+
+void CLScheduler::enqueue_op(ICLKernel &kernel, const InputTensorMap &inputs, const OutputTensorMap &outputs, bool flush)
+{
+    enqueue_common(kernel, inputs, outputs, flush);
 }
 } // namespace arm_compute
