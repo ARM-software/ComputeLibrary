@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,10 +100,14 @@ __kernel void scale_nearest_neighbour_nchw(
     const float scale_x,
     const float scale_y)
 {
-    Image        in  = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
-    Image        out = CONVERT_TO_IMAGE_STRUCT(out);
-    const float2 r   = (float2)(scale_x, scale_y);
-    const float8 tc  = clamp_to_border_with_size(transform_nearest(get_current_coords(), r), input_width, input_height, BORDER_SIZE);
+    Image        in          = CONVERT_TO_IMAGE_STRUCT_NO_STEP(in);
+    Image        out         = CONVERT_TO_IMAGE_STRUCT(out);
+    const float2 r           = (float2)(scale_x, scale_y);
+    float8       transformed = transform_nearest(get_current_coords(), r);
+#ifdef ALIGN_CORNERS
+    transformed = round(transformed);
+#endif // ALIGN_CORNERS
+    const float8 tc = clamp_to_border_with_size(transformed, input_width, input_height, BORDER_SIZE);
     vstore4(read_texels4(&in, convert_int8(tc)), 0, (__global DATA_TYPE *)out.ptr);
 }
 
@@ -182,14 +186,18 @@ __kernel void scale_nearest_neighbour_nhwc(
     Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT(out, DEPTH_OUT);
 
 #ifdef SAMPLING_POLICY_TOP_LEFT
-    const float new_x = get_global_id(1) * scale_x;
-    const float new_y = (get_global_id(2) % DEPTH_OUT) * scale_y;
+    float new_x = get_global_id(1) * scale_x;
+    float new_y = (get_global_id(2) % DEPTH_OUT) * scale_y;
 #elif SAMPLING_POLICY_CENTER
-    const float new_x = (get_global_id(1) + 0.5f) * scale_x;
-    const float new_y = ((get_global_id(2) % DEPTH_OUT) + 0.5f) * scale_y;
+    float new_x = (get_global_id(1) + 0.5f) * scale_x;
+    float new_y = ((get_global_id(2) % DEPTH_OUT) + 0.5f) * scale_y;
 #else /* SAMPLING_POLICY */
 #error("Unsupported sampling policy");
 #endif /* SAMPLING_POLICY */
+#ifdef ALIGN_CORNERS
+    new_x = round(new_x);
+    new_y = round(new_y);
+#endif /* ALIGN_CORNERS */
     const float clamped_x = clamp(new_x, 0.0f, input_width - 1);
     const float clamped_y = clamp(new_y, 0.0f, input_height - 1);
 

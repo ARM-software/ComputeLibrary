@@ -52,7 +52,7 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
     DataType::F16,
 });
 
-/** Align corners, this functionality is supported only by NEON */
+/** Aligned corners, this functionality is supported only by NEON and OpenCL backends */
 const auto AlignCorners = framework::dataset::make("AlignCorners",
 {
     false,

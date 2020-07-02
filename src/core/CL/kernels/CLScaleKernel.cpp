@@ -211,6 +211,7 @@ void CLScaleKernel::configure(const CLCompileContext &compile_context, const ICL
     build_opts.add_option_if(info.border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
     build_opts.add_option_if(is_nhwc, "-DDEPTH_OUT=" + support::cpp11::to_string(output->info()->dimension(2)));
     build_opts.add_option_if_else(info.sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+    build_opts.add_option_if(_align_corners, "-DALIGN_CORNERS");
     if(call_quantized_kernel)
     {
         const UniformQuantizationInfo qinfo = input->info()->quantization_info().uniform();

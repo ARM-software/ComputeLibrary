@@ -30,6 +30,7 @@
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/Rounding.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 
@@ -43,7 +44,7 @@ namespace arm_compute
 {
 namespace
 {
-void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float wr, float hr, size_t input_element_size, SamplingPolicy sampling_policy)
+void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float wr, float hr, size_t input_element_size, SamplingPolicy sampling_policy, bool align_corners)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == offsets);
     ARM_COMPUTE_UNUSED(sampling_policy);
@@ -84,7 +85,8 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
 
         execute_window_loop(win, [&](const Coordinates & id)
         {
-            const size_t in_xi = std::floor((id.x() + sampling_offset) * wr);
+            const float float_in_xi = (id.x() + sampling_offset) * wr;
+            const auto  in_xi       = static_cast<size_t>(align_corners ? arm_compute::utils::rounding::round_half_away_from_zero(float_in_xi) : std::floor(float_in_xi));
 
             *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * input_element_size;
         },
@@ -143,7 +145,7 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
             _offsets.allocator()->allocate();
 
             // Pre-compute offsets for nearest interpolation
-            precompute_dx_dy_offsets(nullptr, nullptr, &_offsets, wr, hr, input_element_size, info.sampling_policy);
+            precompute_dx_dy_offsets(nullptr, nullptr, &_offsets, wr, hr, input_element_size, info.sampling_policy, is_align_corners_used);
             break;
         }
         case InterpolationPolicy::BILINEAR:
@@ -163,7 +165,7 @@ void NEScale::configure(ITensor *input, ITensor *output, const ScaleKernelInfo &
             _dy.allocator()->allocate();
 
             // Pre-compute dx, dy and offsets for bilinear interpolation
-            precompute_dx_dy_offsets(&_dx, &_dy, &_offsets, wr, hr, input_element_size, info.sampling_policy);
+            precompute_dx_dy_offsets(&_dx, &_dy, &_offsets, wr, hr, input_element_size, info.sampling_policy, is_align_corners_used);
             break;
         }
         case InterpolationPolicy::AREA:

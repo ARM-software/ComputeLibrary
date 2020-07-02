@@ -25,6 +25,7 @@
 #include "Scale.h"
 
 #include "Utils.h"
+#include "arm_compute/core/utils/misc/Rounding.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "src/core/utils/ScaleUtils.h"
 
@@ -81,8 +82,8 @@ SimpleTensor<T> scale_core(const SimpleTensor<T> &in, float scale_x, float scale
                 switch(sampling_policy)
                 {
                     case SamplingPolicy::TOP_LEFT:
-                        x_src = std::floor(idx * wr);
-                        y_src = std::floor(idy * hr);
+                        x_src = align_corners ? arm_compute::utils::rounding::round_half_away_from_zero(idx * wr) : std::floor(idx * wr);
+                        y_src = align_corners ? arm_compute::utils::rounding::round_half_away_from_zero(idy * hr) : std::floor(idy * hr);
                         break;
                     case SamplingPolicy::CENTER:
                         //Calculate the source coords without -0.5f is equivalent to round the x_scr/y_src coords
