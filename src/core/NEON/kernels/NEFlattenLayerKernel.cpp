@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,19 +33,17 @@
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
-#include <arm_neon.h>
-
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace misc::shape_calculator;
 
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -135,3 +133,4 @@ void NEFlattenLayerKernel::run(const Window &window, const ThreadInfo &info)
     }
     while(in_window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_1D(out_slice));
 }
+} // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ public:
     /** Set the source, destination and border mode of the kernel
      *
      * @param[in]  input            Source tensor. Data type supported: U8
-     * @param[out] output           Destination tensor. Data type supported: S16
+     * @param[out] output           Destination tensor. Data type supported: same as @p input
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
     void configure(const ITensor *input, ITensor *output, bool border_undefined);

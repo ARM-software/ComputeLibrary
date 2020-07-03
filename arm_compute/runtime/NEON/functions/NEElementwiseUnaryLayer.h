@@ -96,13 +96,13 @@ class NELogLayer : public INESimpleFunctionNoBorder
 public:
     /** Initialize the function
      *
-     * @param[in]  input  Input tensor. Data types supported: F16/F32/S32.
+     * @param[in]  input  Input tensor. Data types supported: F16/F32.
      * @param[out] output Output tensor. Data types supported: same as @p input.
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NELogLayer
      *
-     * @param[in] input  First tensor input info. Data types supported: F16/F32/S32.
+     * @param[in] input  First tensor input info. Data types supported: F16/F32.
      * @param[in] output Output tensor info. Data types supported: Same as @p input.
      *
      * @return a status

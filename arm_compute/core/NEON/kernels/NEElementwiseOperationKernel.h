@@ -59,10 +59,10 @@ public:
 
     /** Common signature for all the specialised arithmetic functions
      *
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Dependent on subclass.
-     * @param[in] window Region on which to execute the kernel.
+     * @param[in]  input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in]  input2 Second tensor input info. Data types supported: Same as @p input1.
+     * @param[out] output Output tensor info. Data types supported: Dependent on subclass.
+     * @param[in]  window Region on which to execute the kernel.
      */
     using ElementwiseFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
 
@@ -100,10 +100,10 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
      *
-     * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in]  op     Arithmetic operation to be executed.
+     * @param[in]  input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in]  input2 Second tensor input info. Data types supported: Same as @p input1.
+     * @param[out] output Output tensor info. Data types supported: Same as @p input1.
      */
     void configure(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
@@ -131,9 +131,9 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
      *
-     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in]  input1 First tensor input info. Data types supported: F16/F32.
+     * @param[in]  input2 Second tensor input info. Data types supported: Same as @p input1.
+     * @param[out] output Output tensor info. Data types supported: Same as @p input1.
      */
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
@@ -168,9 +168,9 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
      *
-     * @param[in]  input1 First tensor input info. Data types supported: F16/F32.
-     * @param[in]  input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[out] output Output tensor info. Data types supported: Same as @p input1.
+     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
+     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      *
      * @return a Status
      */
@@ -189,10 +189,10 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
      *
-     * @param[in] op     Comparison operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: U16/U32.
+     * @param[in]  op     Comparison operation to be executed.
+     * @param[in]  input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
+     * @param[in]  input2 Second tensor input info. Data types supported: Same as @p input1.
+     * @param[out] output Output tensor info. Data types supported: U8.
      */
     void configure(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output);
 
@@ -201,7 +201,7 @@ public:
      * @param[in] op     Comparison operation to be executed.
      * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: U16/U32.
+     * @param[in] output Output tensor info. Data types supported: U8.
      *
      * @return a Status
      */

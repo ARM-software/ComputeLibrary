@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,16 +30,9 @@
 #include "arm_compute/core/Validate.h"
 
 #include <arm_neon.h>
-#include <cstddef>
-#include <cstdint>
-
-using namespace arm_compute;
 
 namespace arm_compute
 {
-class Coordinates;
-} // namespace arm_compute
-
 BorderSize NEDilateKernel::border_size() const
 {
     return BorderSize(1);
@@ -47,6 +40,10 @@ BorderSize NEDilateKernel::border_size() const
 
 void NEDilateKernel::configure(const ITensor *input, ITensor *output, bool border_undefined)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+
     _input  = input;
     _output = output;
 
@@ -126,3 +123,4 @@ void NEDilateKernel::run(const Window &window, const ThreadInfo &info)
     },
     in, out);
 }
+} // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,23 +24,16 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include <arm_neon.h>
-#include <cstddef>
-#include <cstring>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 TensorShape get_output_shape(const ITensorInfo *input)
@@ -57,7 +50,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
     if(output->total_size() != 0)
     {
@@ -192,3 +184,4 @@ void NEGEMMTranspose1xWKernel::run(const Window &window, const ThreadInfo &info)
         }
     }
 }
+} // namespace arm_compute

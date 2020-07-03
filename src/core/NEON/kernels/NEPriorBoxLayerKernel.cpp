@@ -29,7 +29,6 @@
 #include "arm_compute/core/Validate.h"
 
 #include <arm_neon.h>
-#include <cstdint>
 
 namespace arm_compute
 {
@@ -68,6 +67,7 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
     if(output != nullptr && output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != 2);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
     }
 
     return Status{};

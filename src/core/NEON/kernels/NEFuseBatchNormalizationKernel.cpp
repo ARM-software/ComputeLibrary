@@ -32,7 +32,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
-#include "utils/TypePrinter.h"
 #include <map>
 
 namespace arm_compute

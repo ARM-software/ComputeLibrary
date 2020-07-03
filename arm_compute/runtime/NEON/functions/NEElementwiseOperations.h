@@ -292,7 +292,7 @@ public:
      *
      * @param[in, out] input1 First tensor input. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in, out] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[out]     output Output tensor. Data types supported: U16/U32.
+     * @param[out]     output Output tensor. Data types supported: U8.
      * @param[in]      op     Comparison Operation to be performed.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, ComparisonOperation op);
@@ -300,7 +300,7 @@ public:
      *
      * @param[in] input1 First tensor input info. Data types supported: QASYMM8/QASYMM8_SIGNED/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor info. Data types supported: U16/U32.
+     * @param[in] output Output tensor info. Data types supported: U8.
      * @param[in] op     Comparison Operation to be performed.
      *
      * @return a status

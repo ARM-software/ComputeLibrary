@@ -74,6 +74,18 @@ public:
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticSubtractionKernel
      *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                          -> U8
+     *   - (U8,U8)                          -> S16
+     *   - (QASYMM8, QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (S16,U8)                         -> S16
+     *   - (U8,S16)                         -> S16
+     *   - (S16,S16)                        -> S16
+     *   - (F16,F16)                        -> F16
+     *   - (F32,F32)                        -> F32
+     *
      * @note Convert policy cannot be WRAP if datatype is QASYMM8
      *
      * @param[in] input1 An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32

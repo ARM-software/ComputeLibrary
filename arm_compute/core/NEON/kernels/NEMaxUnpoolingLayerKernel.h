@@ -54,7 +54,7 @@ public:
      *
      * @note Output shape must be equal to the shape of the original input to pool.
      *
-     * @param[in]  input     Source tensor. Data types supported: F16/F32.
+     * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] indices   The indices of the maximal values. Data type supported: U32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
@@ -62,9 +62,9 @@ public:
     void configure(const ITensor *input, const ITensor *indices, ITensor *output, const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEMaxUnpoolingLayerKernel
      *
-     * @param[in] input     Source tensor. Data types supported: F16/F32.
-     * @param[in] output    Destination tensor. Data types supported: Same as @p input.
-     * @param[in] indices   The indices of the maximal values. Data type supported: U32.
+     * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
+     * @param[in] indices   Tensor info of the indices of the maximal values. Data type supported: U32.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *
      * @return a status
@@ -89,9 +89,6 @@ private:
     const ITensor    *_input;
     ITensor          *_output;
     const ITensor    *_indices;
-    PoolingLayerInfo  _pool_info;
-    DataLayout        _data_layout;
-    unsigned int      _num_elems_processed_per_iteration;
 };
 } // namespace arm_compute
 #endif /*ARM_COMPUTE_NEMAXUNPOOLINGLAYERKERNEL_H */

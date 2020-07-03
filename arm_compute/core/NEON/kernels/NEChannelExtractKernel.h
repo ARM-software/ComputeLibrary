@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 ARM Limited.
+ * Copyright (c) 2016-2020 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,6 @@
 
 #include "arm_compute/core/NEON/INESimpleKernel.h"
 #include "arm_compute/core/Types.h"
-
-#include <cstdint>
 
 namespace arm_compute
 {
@@ -60,7 +58,7 @@ public:
      *
      * @param[in]  input   Source tensor. Formats supported: RGB888/RGBA8888/YUYV422/UYVY422
      * @param[in]  channel Channel to extract.
-     * @param[out] output  Destination tensor. Format supported: u8
+     * @param[out] output  Destination tensor. Format supported: U8
      */
     void configure(const ITensor *input, Channel channel, ITensor *output);
     /** Set the input and output of the kernel

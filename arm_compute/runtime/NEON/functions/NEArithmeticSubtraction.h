@@ -47,6 +47,18 @@ class NEArithmeticSubtraction : public INEOperator
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                          -> U8
+     *   - (U8,U8)                          -> S16
+     *   - (QASYMM8, QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (S16,U8)                         -> S16
+     *   - (U8,S16)                         -> S16
+     *   - (S16,S16)                        -> S16
+     *   - (F16,F16)                        -> F16
+     *   - (F32,F32)                        -> F32
+     *
      * @param[in]  input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
      * @param[in]  input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
      * @param[out] output   Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/QSYMM16/S16/F16/F32
@@ -55,6 +67,18 @@ public:
      */
     void configure(const ITensorInfo *input1, const ITensorInfo *input2, ITensorInfo *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticSubtraction
+     *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                          -> U8
+     *   - (U8,U8)                          -> S16
+     *   - (QASYMM8, QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED, QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (S16,U8)                         -> S16
+     *   - (U8,S16)                         -> S16
+     *   - (S16,S16)                        -> S16
+     *   - (F16,F16)                        -> F16
+     *   - (F32,F32)                        -> F32
      *
      * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32
      * @param[in] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/F16/F32

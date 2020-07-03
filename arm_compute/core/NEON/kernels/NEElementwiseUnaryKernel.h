@@ -60,7 +60,7 @@ public:
     /** Function to configure the @ref NEElementwiseUnaryKernel
      *
      * @param[in]  op     Arithmetic operation to be executed.
-     * @param[in]  input  First tensor input. Data types supported: F16/F32.
+     * @param[in]  input  First tensor input. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
      * @param[out] output Output tensor. Data types supported: Same as @p input.
      */
     void configure(ElementWiseUnary op, const ITensor *input, ITensor *output);
@@ -68,7 +68,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEElementwiseUnaryKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] input  First tensor input info. Data types supported: F16/F32, F16/F32/S32 for NEG/ABS operations.
      * @param[in] output Output tensor info. Data types supported: Same as @p input.
      *
      * @return a Status

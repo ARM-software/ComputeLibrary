@@ -52,7 +52,7 @@ public:
     ~NEUpsampleLayerKernel() = default;
     /** Set the input output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
      * @param[in]  info   Contains stride information described in @ref Size2D.
      * @param[in]  policy Defines the policy to fill the intermediate pixels.
@@ -61,7 +61,7 @@ public:
     void configure(const ITensor *input, ITensor *output, const Size2D &info, const InterpolationPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEUpsampleLayerKernel
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[in] output Destination tensor info. Data types supported: same as @p input.
      * @param[in] info   Contains stride information described in @ref Size2D.
      * @param[in] policy Defines the policy to fill the intermediate pixels.

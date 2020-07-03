@@ -23,16 +23,8 @@
  */
 #include "arm_compute/core/NEON/kernels/NEMaxUnpoolingLayerKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CPP/Validate.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/NEAsymm.h"
-#include "arm_compute/core/NEON/NEFixedPoint.h"
-#include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
@@ -48,6 +40,10 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, const ITensorInfo *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, indices);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32);
+
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
     PoolingType         pool_type       = pool_info.pool_type;
@@ -56,10 +52,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     const int    pool_size_x = pool_info.pool_size.width;
     const int    pool_size_y = pool_info.pool_size.height;
     const Size2D pool_size(pool_size_x, pool_size_y);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32);
+
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX, "Pooling indices only supported for MAX pooling method");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
     if(output->total_size() != 0)
     {
@@ -72,20 +66,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 } // namespace
 
 NEMaxUnpoolingLayerKernel::NEMaxUnpoolingLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _indices(nullptr), _pool_info(), _data_layout(DataLayout::UNKNOWN), _num_elems_processed_per_iteration(0)
+    : _func(nullptr), _input(nullptr), _output(nullptr), _indices(nullptr)
 {
 }
 
 void NEMaxUnpoolingLayerKernel::configure(const ITensor *input, const ITensor *indices, ITensor *output, const PoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    const Size2D pool_size(pool_info.pool_size.width, pool_info.pool_size.height);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, indices->info()));
-    _input       = input;
-    _output      = output;
-    _indices     = indices;
-    _pool_info   = pool_info;
-    _data_layout = input->info()->data_layout();
+
+    _input   = input;
+    _output  = output;
+    _indices = indices;
+
     switch(input->info()->data_type())
     {
         case DataType::F32:
@@ -107,8 +100,8 @@ void NEMaxUnpoolingLayerKernel::configure(const ITensor *input, const ITensor *i
     }
     const TensorShape output_shape = compute_unpool_shape(*input->info(), pool_info);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
-    _num_elems_processed_per_iteration = 1;
-    auto window                        = calculate_max_window(*input->info(), Steps(_num_elems_processed_per_iteration));
+
+    auto window = calculate_max_window(*input->info(), Steps());
     INEKernel::configure(window);
 }
 template <typename T>
