@@ -47,8 +47,8 @@ public:
     }
     /** Static function to check if given info will lead to a valid configuration of @ref CPPSplit
      *
-     * @param[in] input   The input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
-     * @param[in] outputs A vector containing the output tensors' info. Data types supported: Same as @p input.
+     * @param[in] input   The input tensor info. Data types supported: All.
+     * @param[in] outputs A vector containing the output tensors' info. Data types supported: same as @p input.
      *                    The output tensors should match the input tensor dimensions for all shape dimensions apart
      *                    from the split dimension
      * @param[in] axis    Axis on which to split the input.

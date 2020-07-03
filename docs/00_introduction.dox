@@ -343,7 +343,7 @@ v20.02 Public major release
      - @ref NEElementwiseMin
      - @ref NEElementwiseSquaredDiff
      - @ref NEFullyConnectedLayer
-     - @ref NEGEMMMatrixVectorMultiplyKernel
+     - NEGEMMMatrixVectorMultiplyKernel
      - @ref NEPixelWiseMultiplication
      - @ref NEPoolingLayer
      - @ref NEPReluLayer
@@ -915,7 +915,7 @@ v17.12 Public major release
  - New NEON kernels / functions
     - arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
     - arm_compute::NEHGEMMAArch64FP16Kernel
-    - @ref NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel / NEDepthwiseIm2ColKernel / NEGEMMMatrixVectorMultiplyKernel / NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
     - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - NEWinogradLayer / NEWinogradLayerKernel
@@ -1037,7 +1037,7 @@ v17.03.1 First Major public release of the sources
    - @ref NETransposeKernel / @ref NETranspose
    - @ref NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
    - @ref NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
-   - @ref NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
+   - NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
    - @ref NEGEMMLowpMatrixMultiplyKernel / NEGEMMLowp
 
 v17.03 Sources preview

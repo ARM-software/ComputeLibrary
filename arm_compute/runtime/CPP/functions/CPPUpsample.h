@@ -38,8 +38,8 @@ class CPPUpsample : public ICPPSimpleFunction
 public:
     /** Configure the upsample CPP kernel
      *
-     * @param[in]  input  The input tensor to upsample. Data types supported: F32/F16/QASYMM8/QASYMM8_SIGNED
-     * @param[out] output The output tensor. Data types supported: Same as @p input
+     * @param[in]  input  The input tensor to upsample. Data types supported: All.
+     * @param[out] output The output tensor. Data types supported: same as @p input
      * @param[in]  info   Padding information
      */
     void configure(const ITensor *input, ITensor *output, const PadStrideInfo &info);
