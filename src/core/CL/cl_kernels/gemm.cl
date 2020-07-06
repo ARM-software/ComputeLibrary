@@ -61,7 +61,7 @@
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  * @note If the M0xK0 blocks have to be interleaved, the option -DINTERLEAVE must passed at compile time.
  *
- * @param[in]  src_ptr                           Pointer to the source LHS tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source LHS tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source LHS tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source LHS tensor in Y dimension (in bytes)
@@ -261,7 +261,7 @@ __kernel void gemm_reshape_lhs_matrix_nt(TENSOR3D_DECLARATION(src),
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  * @note If the M0xK0 blocks have to be interleaved, the option -DINTERLEAVE must passed at compile time.
  *
- * @param[in]  src_ptr                           Pointer to the source LHS tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source LHS tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source LHS tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source LHS tensor in Y dimension (in bytes)
@@ -412,7 +412,7 @@ __kernel void gemm_reshape_lhs_matrix_t(TENSOR3D_DECLARATION(src),
  *                                      K0: 1,2,3,4,8,16
  *                                      H0: greater than 0
  *
- * @param[in]  src_ptr                           Pointer to the source RHS tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source RHS tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source RHS tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source RHS tensor in Y dimension (in bytes)
@@ -566,7 +566,7 @@ __kernel void gemm_reshape_rhs_matrix_nt(TENSOR3D_DECLARATION(src),
  *                                      K0: 2,3,4,8,16
  *                                      H0: greater than 0
  *
- * @param[in]  src_ptr                           Pointer to the source RHS tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source RHS tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source RHS tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source RHS tensor in Y dimension (in bytes)
@@ -7626,39 +7626,3 @@ __kernel void gemm_lc_vm_f32(IMAGE_DECLARATION(src0),
     vstore4(acc, 0, (__global float *)(offset(&dst, 0, 0)));
 }
 #endif // defined(WIDTH_VECTOR_A)
-
-/** This kernel accumulates each row with the biases vector.
- *
- * @note The data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=short.
- * @note The vector size must be passed at compile time using -DVECTOR_SIZE e.g. -DVECTOR_SIZE=16.
- *
- * @param[in, out] accum_ptr                            Pointer to the accumulate tensor. Supported data type: U8/S8/U16/S16/F16/U32/S32/F32
- * @param[in]      accum_stride_x                       Stride of the accmulate tensor in X dimension (in bytes)
- * @param[in]      accum_step_x                         accum_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      accum_stride_y                       Stride of the accumlulate tensor in Y dimension (in bytes)
- * @param[in]      accum_step_y                         src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]      accum_offset_first_element_in_bytes  The offset of the first element in the accumulate tensor
- * @param[in]      biases_ptr                           Pointer to the biases vector. Same as @p accum_ptr
- * @param[in]      biases_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]      biases_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]      biases_offset_first_element_in_bytes The offset of the first element in the destination tensor
- */
-#if defined(DATA_TYPE) && defined(VECTOR_SIZE)
-__kernel void gemm_accumulate_biases(
-    IMAGE_DECLARATION(accum),
-    VECTOR_DECLARATION(biases))
-{
-    Image  accum  = CONVERT_TO_IMAGE_STRUCT(accum);
-    Vector biases = CONVERT_TO_VECTOR_STRUCT(biases);
-
-    // Vector size, e.g. number of vector elements.
-    VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
-    accum_value = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)accum.ptr);
-    VEC_DATA_TYPE(DATA_TYPE, VECTOR_SIZE)
-    biases_value = VLOAD(VECTOR_SIZE)(0, (__global DATA_TYPE *)biases.ptr);
-    accum_value  = biases_value + accum_value;
-    // Store result in the accumulate buffer
-    VSTORE(VECTOR_SIZE)
-    (accum_value, 0, (__global DATA_TYPE *)accum.ptr);
-}
-#endif // defined(DATA_TYPE) && defined(VECTOR_SIZE)

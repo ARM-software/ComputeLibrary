@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@
  * @note The depth of the input tensor must be passed at compile time using -DSRC_DEPTH: e.g. -DSRC_DEPTH=64
  * @note The distance between 2 consecutive pixels along the x and y direction must be passed at compile time using -DSTRIDE: e.g. -DSTRIDE=2
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -79,7 +79,7 @@ __kernel void reorg_layer_nchw(
  * @note The depth of the input tensor must be passed at compile time using -DSRC_DEPTH: e.g. -DSRC_DEPTH=64
  * @note The distance between 2 consecutive pixels along the x and y direction must be passed at compile time using -DSTRIDE: e.g. -DSTRIDE=2
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

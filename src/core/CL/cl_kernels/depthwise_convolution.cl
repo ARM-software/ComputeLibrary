@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -692,7 +692,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=vec_size, e.g., -DVEC_SIZE=4
  * @attention Input's height and width should be 3
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

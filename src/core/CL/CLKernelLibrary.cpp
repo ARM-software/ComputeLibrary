@@ -203,7 +203,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gather", "gather.cl" },
     { "gaussian1x5_sub_x", "gaussian_pyramid.cl" },
     { "gaussian5x1_sub_y", "gaussian_pyramid.cl" },
-    { "gemm_accumulate_biases", "gemm.cl" },
     { "gemm_ma_f16", "gemm.cl" },
     { "gemm_ma_f32", "gemm.cl" },
     { "gemm_mv", "gemv.cl" },

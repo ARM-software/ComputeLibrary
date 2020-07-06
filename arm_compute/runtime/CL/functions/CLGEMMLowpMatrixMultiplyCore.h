@@ -59,8 +59,8 @@ public:
      * @note GEMMLowp:  low precision GEMM kernel. [A * B + C]
      *  This kernel performs the following computations:
      *
-     *  -# Convert a values from QASYMM8 to int32 and add a_offset to each of them.
-     *  -# Convert b values from QASYMM8 to int32 and add b_offset to each of them.
+     *  -# Convert a values from 8-bit quantized to int32 and add a_offset to each of them.
+     *  -# Convert b values from 8-bit quantized to int32 and add b_offset to each of them.
      *  -# Compute the matrix product of the resulting a * b in int32.
      *  -# Quantize to uint8 if gemm_info.gemmlowp_output_stage != NONE
      *
@@ -77,8 +77,8 @@ public:
      * @note GEMMLowp:  low precision GEMM kernel. [A * B + C]
      *  This kernel performs the following computations:
      *
-     *  -# Convert a values from QASYMM8 to int32 and add a_offset to each of them.
-     *  -# Convert b values from QASYMM8 to int32 and add b_offset to each of them.
+     *  -# Convert a values from 8-bit quantized to int32 and add a_offset to each of them.
+     *  -# Convert b values from 8-bit quantized to int32 and add b_offset to each of them.
      *  -# Compute the matrix product of the resulting a * b in int32.
      *  -# Quantize to uint8 if gemm_info.gemmlowp_output_stage != NONE
      *

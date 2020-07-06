@@ -38,19 +38,25 @@ class CLPixelWiseMultiplication : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and convertion policy.
      *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                         -> U8
+     *   - (U8,U8)                         -> S16
+     *   - (U8,S16)                        -> S16
+     *   - (S16,U8)                        -> S16
+     *   - (S16,S16)                       -> S16
+     *   - (F16,F16)                       -> F16
+     *   - (F32,F32)                       -> F32
+     *   - (QASYMM8,QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16
+     *   - (QSYMM16,QSYMM16)               -> S32
+     *
      * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          An input tensor. Data types supported: same as @p input1.
+     * @param[in, out] input2          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          The output tensor. Data types supported:
-     *                                 - U8, only if both input are U8
-     *                                 - QASYMM8, only if both inputs are QASYMM8
-     *                                 - QASYMM8_SIGNED, only if both inputs are QASYMM8_SIGNED
-     *                                 - S16
-     *                                 - QSYMM16, only if both inputs are QSYMM16
-     *                                 - S32, only if both inputs are QSYMM16
-     *                                 - F16
-     *                                 - F32
+     * @param[out]     output          The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in]      scale           Scale to apply after multiplication.
      *                                 Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]      overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate
@@ -61,12 +67,26 @@ public:
                    ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and convertion policy.
      *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                         -> U8
+     *   - (U8,U8)                         -> S16
+     *   - (U8,S16)                        -> S16
+     *   - (S16,U8)                        -> S16
+     *   - (S16,S16)                       -> S16
+     *   - (F16,F16)                       -> F16
+     *   - (F32,F32)                       -> F32
+     *   - (QASYMM8,QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16
+     *   - (QSYMM16,QSYMM16)               -> S32
+     *
      * @param[in]      compile_context The compile context to be used.
      * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          An input tensor. Data types supported: same as @p input1.
+     * @param[in, out] input2          An input tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          The output tensor, Data types supported: same as @p input1. Note: U8 requires both inputs to be U8.
+     * @param[out]     output          The output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in]      scale           Scale to apply after multiplication.
      *                                 Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]      overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate
@@ -77,17 +97,24 @@ public:
                    ConvertPolicy overflow_policy, RoundingPolicy rounding_policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLPixelWiseMultiplication
      *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)                         -> U8
+     *   - (U8,U8)                         -> S16
+     *   - (U8,S16)                        -> S16
+     *   - (S16,U8)                        -> S16
+     *   - (S16,S16)                       -> S16
+     *   - (F16,F16)                       -> F16
+     *   - (F32,F32)                       -> F32
+     *   - (QASYMM8,QASYMM8)               -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16)               -> QSYMM16
+     *   - (QSYMM16,QSYMM16)               -> S32
+     *
+     *
      * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
-     * @param[in] input2          An input tensor info. Data types supported: same as @p input1.
-     * @param[in] output          The output tensor info. Data types supported:
-     *                            - U8, only if both input are U8
-     *                            - QASYMM8, only if both inputs are QASYMM8
-     *                            - QASYMM8_SIGNED, only if both inputs are QASYMM8_SIGNED
-     *                            - S16
-     *                            - QSYMM16, only if both inputs are QSYMM16
-     *                            - S32, only if both inputs are QSYMM16
-     *                            - F16
-     *                            - F32
+     * @param[in] input2          An input tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in] output          The output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      * @param[in] scale           Scale to apply after multiplication.
      *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in] overflow_policy Overflow policy. Supported overflow policies: Wrap, Saturate

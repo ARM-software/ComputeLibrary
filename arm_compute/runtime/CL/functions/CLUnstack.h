@@ -48,8 +48,8 @@ public:
     CLUnstack();
     /** Set the input, output and unstacking axis.
      *
-     * @param[in]     input         A tensor to be unstacked. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
-     * @param[in,out] output_vector A vector of tensors. Data types supported: Same as @p input.
+     * @param[in]     input         A tensor to be unstacked. Data type supported: All.
+     * @param[in,out] output_vector A vector of tensors. Data types supported: same as @p input.
      *                              Note: The number of elements of the vector will be used as the number of slices to be taken from the axis.
      * @param[in]     axis          The axis to unstack along. Valid values are [-R,R) where R is the input's rank. Negative values wrap around.
      *
@@ -58,8 +58,8 @@ public:
     /** Set the input, output and unstacking axis.
      *
      * @param[in]     compile_context The compile context to be used.
-     * @param[in]     input           A tensor to be unstacked. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32.
-     * @param[in,out] output_vector   A vector of tensors. Data types supported: Same as @p input.
+     * @param[in]     input           A tensor to be unstacked. Data type supported: All.
+     * @param[in,out] output_vector   A vector of tensors. Data types supported: same as @p input.
      *                                Note: The number of elements of the vector will be used as the number of slices to be taken from the axis.
      * @param[in]     axis            The axis to unstack along. Valid values are [-R,R) where R is the input's rank. Negative values wrap around.
      *
@@ -67,8 +67,8 @@ public:
     void configure(const CLCompileContext &compile_context, const ICLTensor *input, const std::vector<ICLTensor *> &output_vector, int axis);
     /** Static function to check if given info will lead to a valid configuration of @ref CLUnstack
      *
-     * @param[in] input         Input tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
-     * @param[in] output_vector Vector of output tensors' info. Data types supported: Same as @p input.
+     * @param[in] input         Input tensor info. Data type supported: All.
+     * @param[in] output_vector Vector of output tensors' info. Data types supported: same as @p input.
      * @param[in] axis          The axis to unstack along. Valid values are [-R,R) where R is the input's rank. Negative values wrap around.
      *
      * @return a status

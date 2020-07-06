@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,7 +132,7 @@
  *  -# -DDATA_TYPE_IN_BYTES=2 for transposing U16, S16 or FP16 matrices
  *  -# -DDATA_TYPE_IN_BYTES=4 for transposing U32, S32 or FP32 matrices
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source matrix in Y dimension (in bytes)

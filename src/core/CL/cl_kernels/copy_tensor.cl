@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
  * -# -DDEPTH = The third dimension (depth) of the tensor (it is needed only if d == 3)
  * -# -DDATA_TYPE = Input and output datatypes.
  *
- * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  in_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -80,7 +80,7 @@ __kernel void copy_pad_tensor(
 #if defined(DATA_TYPE)
 /** Performs a copy of input tensor to the output tensor.
  *
- * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: All
  * @param[in]  in_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in_stride_y                       Stride of the source tensor in Y dimension (in bytes)

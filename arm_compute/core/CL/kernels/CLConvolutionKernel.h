@@ -108,7 +108,7 @@ public:
      *
      * @param[in]  compile_context  The compile context to be used.
      * @param[in]  input            Source tensor. Data types supported: U8.
-     * @param[out] output           Destination tensor, Data types supported: S16.
+     * @param[out] output           Destination tensor, Data types supported: U16/S16/S32.
      * @param[in]  conv             Convolution matrix to apply to the input tensor.
      * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
      */
@@ -135,7 +135,7 @@ class CLSeparableConvolutionVertKernel : public ICLSimple2DKernel
 public:
     /** Initialise the kernel's input, output and border mode.
      *
-     * @param[in]  input            Source tensor. Data types supported: S16.
+     * @param[in]  input            Source tensor. Data types supported: U16/S16/S32.
      * @param[out] output           Destination tensor, Data types supported: U8, S16.
      * @param[in]  conv             Convolution matrix to apply to the input tensor.
      * @param[in]  scale            Scale of the convolution matrix.
@@ -146,7 +146,7 @@ public:
     /** Initialise the kernel's input, output and border mode.
      *
      * @param[in]  compile_context  The compile context to be used.
-     * @param[in]  input            Source tensor. Data types supported: S16.
+     * @param[in]  input            Source tensor. Data types supported: U16/S16/S32.
      * @param[out] output           Destination tensor, Data types supported: U8, S16.
      * @param[in]  conv             Convolution matrix to apply to the input tensor.
      * @param[in]  scale            Scale of the convolution matrix.

@@ -52,14 +52,19 @@ Status CLUpsampleLayerKernel::validate(const ITensorInfo *input, const ITensorIn
     const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_width) != info.x() * input->dimension(idx_width));
-    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_height) != info.y() * input->dimension(idx_height));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
+
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.x() != 2 || info.y() != 2, "Only stride 2 is supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(upsampling_policy != InterpolationPolicy::NEAREST_NEIGHBOR, "Only nearest neighbor policy supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_width) != info.x() * input->dimension(idx_width));
+        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_height) != info.y() * input->dimension(idx_height));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+    }
 
     return Status{};
 }
@@ -126,7 +131,7 @@ void CLUpsampleLayerKernel::configure(const CLCompileContext &compile_context, c
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    build_opts.add_option(("-DDATA_TYPE=" + get_cl_unsigned_type_from_element_size(input->info()->element_size())));
     build_opts.add_option_if(multi_access_x, "-DVEC_SIZE_IN=" + support::cpp11::to_string(_num_elems_processed_per_iteration_input_x));
     build_opts.add_option_if(multi_access_x, "-DVEC_SIZE_OUT=" + support::cpp11::to_string(num_elems_processed_per_iteration_x));
     build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X_IN=" + support::cpp11::to_string(std::max<int>(_input->info()->dimension(0) - _num_elems_processed_per_iteration_input_x, 0)));

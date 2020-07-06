@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,13 +26,13 @@
 /** This function applies upsample on an input image. (NCHW)
  *
  * @attention The following variables must be passed at compile time:
- * -# -DDATA_TYPE = Tensor data type. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * -# -DDATA_TYPE = Tensor data type. Supported data types: All
  * -# -DVEC_SIZE_IN = Input vector size
  * -# -DVEC_SIZE_OUT = Output vector size
  * -# -DLAST_ACCESSED_X_IN = The input element that is on the X border (threads trying to set this, might need to step back a bit)
  * -# -DLAST_ACCESSED_X_OUT = The output element that is on the X border (threads trying to set this, might need to step back a bit)
  *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -81,13 +81,13 @@ __kernel void upsample_layer_nchw(
 /** This function applies upsample on an input image. (NHWC)
  *
  * @attention The following variables must be passed at compile time:
- * -# -DDATA_TYPE = Tensor data type. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * -# -DDATA_TYPE = Tensor data type. Supported data types: All
  * -# -DVEC_SIZE_IN = Input vector size
  * -# -DVEC_SIZE_OUT = Output vector size
  * -# -DLAST_ACCESSED_X_IN = The input element that is on the X border (threads trying to set this, might need to step back a bit)
  * -# -DLAST_ACCESSED_X_OUT = The output element that is on the X border (threads trying to set this, might need to step back a bit)
  *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: All
  * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)

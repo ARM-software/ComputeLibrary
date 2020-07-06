@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@
  * @note Quantization offsets of the input/output tensors are passed in only if asymmetric with -DO1_VAL= and -DO2_VAL= respectively.
  * @note Quantized value of constant zero should be given as a preprocessor argument using -DCONST_0=value. e.g. -DCONST_0=128.
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QSYMM16
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM16
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -112,7 +112,7 @@ __kernel void activation_layer_quant_f32(
  * @note Quantization offsets of the input/output tensors are passed in with -DO1_VAL= and -DO2_VAL= respectively.
  * @note Quantized value of constant zero should be given as a preprocessor argument using -DCONST_0=value. e.g. -DCONST_0=128.
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QSYMM16
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QASYMM8_SIGNED/QSYMM16
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)

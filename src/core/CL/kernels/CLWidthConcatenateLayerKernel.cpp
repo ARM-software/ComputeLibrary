@@ -27,18 +27,13 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "support/StringSupport.h"
-
-#include <map>
 
 namespace arm_compute
 {
@@ -106,7 +101,7 @@ void CLWidthConcatenateLayerKernel::configure(const CLCompileContext &compile_co
 
     // Add build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DWIDTH_OFFSET=" + support::cpp11::to_string(_width_offset));
     build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));

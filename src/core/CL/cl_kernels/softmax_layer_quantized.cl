@@ -96,7 +96,7 @@ int4 mult_by_quantized_multiplier_parallel(int4 data)
  * @note Quantized beta can be optionally passed at compile time using -DINPUT_BETA_MULTIPLIER and -DINPUT_BETA_LEFT_SHIFT (if undefined, assume beta equals 1.0)
  * @note -DDIFF_MIN must be passed at compile time. It is threshold difference between maximum value of input data and current processed value, it defines whether the value will be taken into account or not.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QASYMM8
+ * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -548,7 +548,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
  * @param[in]  sum_stride_z                      Stride of the sum values tensor in Z dimension (in bytes)
  * @param[in]  sum_step_z                        sum_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  sum_offset_first_element_in_bytes The offset of the first element in the sum values tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor slice. Supported data types: QASYMM8
+ * @param[out] dst_ptr                           Pointer to the destination tensor slice. Supported data types: QASYMM8/QASYMM8_SIGNED
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)

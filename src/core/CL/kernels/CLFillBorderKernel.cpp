@@ -35,13 +35,8 @@
 #include "arm_compute/core/Window.h"
 #include "support/StringSupport.h"
 
-#include <cstdint>
-#include <set>
-#include <sstream>
-#include <string>
-
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLFillBorderKernel::CLFillBorderKernel()
     : ICLKernel(), _tensor(nullptr)
 {
@@ -85,7 +80,7 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context, ICLT
 
     // Define build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(dt));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
     build_opts.add_option("-DBORDER_SIZE_TOP=" + support::cpp11::to_string(border_size.top));
     build_opts.add_option("-DBORDER_SIZE_BOTTOM=" + support::cpp11::to_string(border_size.bottom));
     build_opts.add_option("-DBORDER_SIZE_LEFT=" + support::cpp11::to_string(border_size.left));
@@ -191,3 +186,4 @@ void CLFillBorderKernel::run(const Window &window, cl::CommandQueue &queue)
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

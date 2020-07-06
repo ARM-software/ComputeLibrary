@@ -28,9 +28,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
-#include <cmath>
 #include <memory>
-#include <tuple>
 
 namespace arm_compute
 {
@@ -275,6 +273,7 @@ Status CLLSTMLayerQuantized::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights, recurrent_to_input_weights,
                                         recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights, input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias, cell_state_in,
                                         output_state_in, cell_state_out, output_state_out);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::QASYMM8);
 
     const int input_size  = input->dimension(0);
     const int batch_size  = input->dimension(1);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited.
+ * Copyright (c) 2016-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
  * @attention  The border size for top, bottom, left, right needs to be passed at the compile time.
  * e.g. --DBORDER_SIZE_TOP=0 -DBORDER_SIZE_BOTTOM=2 -DBORDER_SIZE_LEFT=0 -DBORDER_SIZE_RIGHT=2
  *
- * @param[in,out] buf_ptr                           Pointer to the source image. Supported data types: U8/U16/S16/U32/S32/F16/F32
+ * @param[in,out] buf_ptr                           Pointer to the source image. Supported data types: All
  * @param[in]     buf_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]     buf_step_x                        buf_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]     buf_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -106,7 +106,7 @@ __kernel void fill_image_borders_replicate(
  * @attention  The border size for top, bottom, left, right needs to be passed at the compile time.
  * e.g. --DBORDER_SIZE_TOP=0 -DBORDER_SIZE_BOTTOM=2 -DBORDER_SIZE_LEFT=0 -DBORDER_SIZE_RIGHT=2
  *
- * @param[out] buf_ptr                           Pointer to the source image. Supported data types: U8/U16/S16/U32/S32/F16/F32
+ * @param[out] buf_ptr                           Pointer to the source image. Supported data types: All
  * @param[in]  buf_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  buf_step_x                        buf_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  buf_stride_y                      Stride of the source image in Y dimension (in bytes)

@@ -33,7 +33,7 @@ class ICLTensor;
 
 /** Basic function to run @ref CLSaturatedArithmeticOperationKernel for addition
  *
- * @note The tensor data type for the inputs must be U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
+ * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
  * @note The function performs an arithmetic addition between two tensors.
  */
 class CLArithmeticAddition : public ICLSimpleFunction
@@ -41,32 +41,74 @@ class CLArithmeticAddition : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)           -> U8
+     *   - (U8,U8)           -> S16
+     *   - (S16,U8)          -> S16
+     *   - (U8,S16)          -> S16
+     *   - (S16,S16)         -> S16
+     *   - (S32,S32)         -> S32
+     *   - (F16,F16)         -> F16
+     *   - (F32,F32)         -> F32
+     *   - (QASYMM8,QASYMM8) -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     *
+     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2   Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QSYMM16 (only if @p input1 is QSYMM16), S16/F16/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output   Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), QSYMM16 (only if both inputs is QSYMM16), S16/F16/F32.
+     * @param[out]     output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      * @param[in]      policy   Policy to use to handle overflow.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
     void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)           -> U8
+     *   - (U8,U8)           -> S16
+     *   - (S16,U8)          -> S16
+     *   - (U8,S16)          -> S16
+     *   - (S16,S16)         -> S16
+     *   - (S32,S32)         -> S32
+     *   - (F16,F16)         -> F16
+     *   - (F32,F32)         -> F32
+     *   - (QASYMM8,QASYMM8) -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
+     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QSYMM16 (only if @p input1 is QSYMM16), S16/F16/F32.
+     * @param[in, out] input2          Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), QSYMM16 (only if both inputs is QSYMM16), S16/F16/F32.
+     * @param[out]     output          Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      * @param[in]      policy          Policy to use to handle overflow.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel for addition
      *
-     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
-     * @param[in] input2   Second tensor input info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), QSYMM16 (only if @p input1 is QSYMM16), S16/F16/F32.
-     * @param[in] output   Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), QSYMM16 (only if both inputs is QSYMM16), S16/F16/F32.
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)           -> U8
+     *   - (U8,U8)           -> S16
+     *   - (S16,U8)          -> S16
+     *   - (U8,S16)          -> S16
+     *   - (S16,S16)         -> S16
+     *   - (S32,S32)         -> S32
+     *   - (F16,F16)         -> F16
+     *   - (F32,F32)         -> F32
+     *   - (QASYMM8,QASYMM8) -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     *
+     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
+     * @param[in] output   Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      * @param[in] policy   Policy to use to handle overflow.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      *
@@ -77,7 +119,7 @@ public:
 
 /** Basic function to run @ref CLSaturatedArithmeticOperationKernel for subtraction
  *
- * @note The tensor data type for the inputs must be U8/QASYMM8/S16/S32/U32/F16/F32.
+ * @note The tensor data type for the inputs must be U8/QASYMM8/QASYMM8_SIGNED/S16/S32/F16/F32.
  * @note The function performs an arithmetic subtraction between two tensors.
  */
 class CLArithmeticSubtraction : public ICLSimpleFunction
@@ -85,32 +127,74 @@ class CLArithmeticSubtraction : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/S16/S32/U32/F16/F32.
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)           -> U8
+     *   - (U8,U8)           -> S16
+     *   - (S16,U8)          -> S16
+     *   - (U8,S16)          -> S16
+     *   - (S16,S16)         -> S16
+     *   - (S32,S32)         -> S32
+     *   - (F16,F16)         -> F16
+     *   - (F32,F32)         -> F32
+     *   - (QASYMM8,QASYMM8) -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     *
+     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2   Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16/F16/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output   Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16/F16/F32.
+     * @param[out]     output   Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      * @param[in]      policy   Policy to use to handle overflow.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
     void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)           -> U8
+     *   - (U8,U8)           -> S16
+     *   - (S16,U8)          -> S16
+     *   - (U8,S16)          -> S16
+     *   - (S16,S16)         -> S16
+     *   - (S32,S32)         -> S32
+     *   - (F16,F16)         -> F16
+     *   - (F32,F32)         -> F32
+     *   - (QASYMM8,QASYMM8) -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/S16/S32/U32/F16/F32.
+     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16/F16/F32.
+     * @param[in, out] input2          Second tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16/F16/F32.
+     * @param[out]     output          Output tensor. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      * @param[in]      policy          Policy to use to handle overflow.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel for subtraction
      *
-     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/S16/S32/U32/F16/F32.
-     * @param[in] input2   Second tensor input info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16/F16/F32.
-     * @param[in] output   Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 ( only if both inputs are QASYMM8), S16/F16/F32.
+     * Valid configurations (Input1,Input2) -> Output :
+     *
+     *   - (U8,U8)           -> U8
+     *   - (U8,U8)           -> S16
+     *   - (S16,U8)          -> S16
+     *   - (U8,S16)          -> S16
+     *   - (S16,S16)         -> S16
+     *   - (S32,S32)         -> S32
+     *   - (F16,F16)         -> F16
+     *   - (F32,F32)         -> F32
+     *   - (QASYMM8,QASYMM8) -> QASYMM8
+     *   - (QASYMM8_SIGNED,QASYMM8_SIGNED) -> QASYMM8_SIGNED
+     *   - (QSYMM16,QSYMM16) -> QSYMM16
+     *
+     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
+     * @param[in] output   Output tensor info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/F16/F32.
      * @param[in] policy   Policy to use to handle overflow.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      *
@@ -170,30 +254,30 @@ class CLElementwiseMax : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
+     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2   Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: same as @p input1.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output   Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[out]     output   Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
     void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
+     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
+     * @param[in, out] input2          Second tensor input. Data types supported: same as @p input1.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[out]     output          Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel for max
      *
-     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
-     * @param[in] input2   Second tensor input info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
-     * @param[in] output   Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 ( only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
@@ -211,30 +295,30 @@ class CLElementwiseMin : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
+     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2   Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: same as @p input1.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output   Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[out]     output   Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
     void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
+     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
+     * @param[in, out] input2          Second tensor input. Data types supported: same as @p input1.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[out]     output          Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel for min
      *
-     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/S16/QSYMM16/S32/U32/F16/F32.
-     * @param[in] input2   Second tensor input info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
-     * @param[in] output   Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 ( only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/S32/U32/F16/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
@@ -252,30 +336,30 @@ class CLElementwiseSquaredDiff : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and conversion policy.
      *
-     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
+     * @param[in, out] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2   Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
+     * @param[in, out] input2   Second tensor input. Data types supported: same as @p input1.
      *                          The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output   Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[out]     output   Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation.
      */
     void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Initialise the kernel's inputs, output and conversion policy.
      *
      * @param[in]      compile_context The compile context to be used.
-     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
+     * @param[in, out] input1          First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
+     * @param[in, out] input2          Second tensor input. Data types supported: same as @p input1.
      *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[out]     output          Output tensor. Data types supported: same as @p input1.
      * @param[in]      act_info        (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const CLCompileContext &compile_context, ICLTensor *input1, ICLTensor *input2, ICLTensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel for squared difference
      *
-     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/S16/QSYMM16/F16/F32.
-     * @param[in] input2   Second tensor input info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, QSYMM16 (only if @p input1 is QSYMM16), F16/F32.
-     * @param[in] output   Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 ( only if both inputs are QASYMM8), S16, QSYMM16 (only if both inputs are QSYMM16), F16/F32.
+     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/F32.
+     * @param[in] input2   Second tensor input info. Data types supported: same as @p input1.
+     * @param[in] output   Output tensor info. Data types supported: same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2020 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
  * -# -DVEC_SIZE = Vector size
  * -# -DLAST_ACCESSED_X = The element that is on the X border (threads trying to set this, might need to step back a bit)
  *
- * @param[in] tensor_ptr                           Pointer to the source image. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+ * @param[in] tensor_ptr                           Pointer to the source image. Data types supported: All.
  * @param[in] tensor_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in] tensor_step_x                        tensor_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] tensor_stride_y                      Stride of the source image in Y dimension (in bytes)

@@ -113,7 +113,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
      *
      * @param[in] op       Arithmetic operation to be executed.
-     * @param[in] input1   First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in] input2   Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output   Output tensor. Data types supported: Same as @p input1.
      * @param[in] policy   Policy to use to handle overflow.
@@ -124,7 +124,7 @@ public:
      *
      * @param[in] compile_context The compile context to be used.
      * @param[in] op              Arithmetic operation to be executed.
-     * @param[in] input1          First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1          First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in] input2          Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output          Output tensor. Data types supported: Same as @p input1.
      * @param[in] policy          Policy to use to handle overflow.
@@ -136,7 +136,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
      *
      * @param[in] op       Arithmetic operation to be executed.
-     * @param[in] input1   First tensor input info. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
      * @param[in] policy   Policy to use to handle overflow.
@@ -170,7 +170,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
      *
      * @param[in] op       Arithmetic operation to be executed.
-     * @param[in] input1   First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1   First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in] input2   Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output   Output tensor. Data types supported: Same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.
@@ -180,7 +180,7 @@ public:
      *
      * @param[in] compile_context The compile context to be used.
      * @param[in] op              Arithmetic operation to be executed.
-     * @param[in] input1          First tensor input. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1          First tensor input. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in] input2          Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output          Output tensor. Data types supported: Same as @p input1.
      * @param[in] act_info        (Optional) Activation layer information in case of a fused activation.
@@ -191,7 +191,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
      *
      * @param[in] op       Arithmetic operation to be executed.
-     * @param[in] input1   First tensor input info. Data types supported: U8/S8/QASYMM8/QASYMM8_SIGNED/U16/S16/QSYMM16/F16/U32/S32/F32.
+     * @param[in] input1   First tensor input info. Data types supported: U8/QASYMM8/QASYMM8_SIGNED/S16/QSYMM16/F16/S32/F32.
      * @param[in] input2   Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output   Output tensor info. Data types supported: Same as @p input1.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation.

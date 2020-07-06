@@ -135,7 +135,6 @@ cc_library_static {
         "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToInt8ScaleByFixedPointKernel.cpp",
         "src/core/CL/kernels/CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.cpp",
         "src/core/CL/kernels/CLGEMMLowpReductionKernel.cpp",
-        "src/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.cpp",
         "src/core/CL/kernels/CLGEMMMatrixMultiplyKernel.cpp",
         "src/core/CL/kernels/CLGEMMMatrixMultiplyNativeKernel.cpp",
         "src/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.cpp",

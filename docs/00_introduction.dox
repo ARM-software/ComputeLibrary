@@ -1049,7 +1049,7 @@ v17.03 Sources preview
  - New OpenCL kernels / functions:
    - @ref CLGradientKernel, @ref CLEdgeNonMaxSuppressionKernel, @ref CLEdgeTraceKernel / @ref CLCannyEdge
    - GEMM refactoring + FP16 support: CLGEMMInterleave4x4Kernel, CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, CLGEMMMatrixAdditionKernel / @ref CLGEMM
-   - @ref CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
+   - CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
    - @ref CLTransposeKernel / @ref CLTranspose
    - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / @ref CLOpticalFlow
    - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
@@ -1061,7 +1061,7 @@ v17.03 Sources preview
 
 v17.02.1 Sources preview
  - New OpenCL kernels / functions:
-   - @ref CLLogits1DMaxKernel, @ref CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
+   - CLLogits1DMaxKernel, CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
    - @ref CLPoolingLayerKernel / @ref CLPoolingLayer
    - @ref CLIm2ColKernel, @ref CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / @ref CLConvolutionLayer
    - @ref CLRemapKernel / @ref CLRemap

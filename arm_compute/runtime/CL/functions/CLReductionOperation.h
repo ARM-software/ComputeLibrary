@@ -26,19 +26,17 @@
 
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 
-#include <cstdint>
 #include <memory>
-#include <vector>
 
 namespace arm_compute
 {
+// Forward declarations
 class ICLTensor;
 
 /** Perform reduction operation.
@@ -54,7 +52,7 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  input     Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32/S32.
      * @param[out] output    Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  axis      Axis along which to reduce. Supported reduction axis : 0, 1, 2, 3
      * @param[in]  op        Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
@@ -64,7 +62,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  compile_context The compile context to be used.
-     * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in]  input           Source tensor. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32/S32.
      * @param[out] output          Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  axis            Axis along which to reduce. Supported reduction axis : 0, 1, 2, 3
      * @param[in]  op              Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
@@ -74,7 +72,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperation.
      *
-     * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
+     * @param[in] input     Source tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32/S32.
      * @param[in] output    Destination tensor info. Data types and data layouts supported: Same as @p input.
      * @param[in] axis      Axis along which to reduce. Supported reduction axis : 0, 1, 2, 3
      * @param[in] op        Reduction operation to perform. Operations supported: MEAN_SUM, PROD, SUM_SQUARE, SUM, MIN, MAX
@@ -95,7 +93,6 @@ private:
     std::vector<CLReductionOperationKernel> _reduction_kernels_vector;
     std::vector<CLFillBorderKernel>         _border_handlers_vector;
     CLReshapeLayer                          _reshape;
-    ReductionOperation                      _op;
     unsigned int                            _num_of_stages;
     unsigned int                            _reduction_axis;
     bool                                    _is_serial;
