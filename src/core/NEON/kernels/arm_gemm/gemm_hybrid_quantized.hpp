@@ -56,8 +56,6 @@ class GemmHybridQuantized : public GemmCommon<To, Tr> {
     const unsigned int _nbatches;
     const unsigned int _nmulti;
 
-    const bool _trB;
-
     /* Blocking info */
     const unsigned int _k_block;
     const unsigned int _n_block;
@@ -142,7 +140,7 @@ public:
     /* Constructor */
     GemmHybridQuantized(const GemmArgs &args, const Requantize32 &qp)
               : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
-                _nbatches(args._nbatches), _nmulti(args._nmulti), _trB(args._trB),
+                _nbatches(args._nbatches), _nmulti(args._nmulti),
                 _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmulti),
@@ -279,7 +277,7 @@ public:
                     const unsigned int size = roundup(xmax-x0, strategy::out_width()) * k_size;
 
                     strat.transforms.PrepareB( buffer, B + (multi * B_multi_stride), ldb,
-                                               x0, xmax, k0, kmax, _trB);
+                                               x0, xmax, k0, kmax);
 
                     buffer += size;
                 }

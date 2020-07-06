@@ -58,7 +58,7 @@ public:
         return 1;
     }
 
-    static constexpr bool supports_append()
+    static constexpr bool supports_accumulate()
     {
         return true;
     }

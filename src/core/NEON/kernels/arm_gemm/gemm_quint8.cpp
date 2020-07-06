@@ -42,14 +42,14 @@ static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_meth
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "smallK_hybrid_u8u32_dot_1VLx8",
-    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize<=64 && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize<=64; },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_u8u32_dot_1VLx8, uint8_t, uint8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "hybrid_u8u32_dot_4VLx4",
-    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize>=16 && !args._trA && !args._trB && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._Ksize>=16; },
     [](const GemmArgs &args, const Requantize32 &) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_u8u32_dot_4VLx4, uint8_t, uint8_t>(args, qp); }
 },
@@ -57,21 +57,21 @@ static const GemmImplementation<uint8_t, uint8_t, Requantize32> gemm_quint8_meth
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "smallK_hybrid_u8u32_dot_4x8",
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize<=32); },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_u8u32_dot_4x8, uint8_t, uint8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "smallK_hybrid_u8u32_dot_4x6",
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && (args._Nsize % 4 == 0) && (args._Ksize>32) && (args._Ksize<=64); },
     nullptr,
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<smallK_hybrid_u8u32_dot_4x6, uint8_t, uint8_t>(args, qp); }
 },
 {
     GemmMethod::GEMM_HYBRID_QUANTIZED,
     "hybrid_u8u32_dot_16x4",
-    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && args._Ksize>=16 && !args._trA && !args._trB && args._pretransposed_hint; },
+    [](const GemmArgs &args, const Requantize32 &) { return args._ci->has_dotprod() && args._Ksize>=16; },
     [](const GemmArgs &args, const Requantize32 &) { return args._Nsize<=256 && args._Ksize>128; },
     [](const GemmArgs &args, const Requantize32 &qp) { return new GemmHybridQuantized<hybrid_u8u32_dot_16x4, uint8_t, uint8_t>(args, qp); }
 },

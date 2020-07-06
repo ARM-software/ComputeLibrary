@@ -457,7 +457,7 @@ void create_arm_gemm(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &arm_gem
     const CPUInfo               &ci          = NEScheduler::get().cpu_info();
     unsigned int                 num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.batches, p.multis, false, false, activation, num_threads, gemm_info.pretranpose_B());
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.batches, p.multis, activation, num_threads);
 
     // Create arm_gemm fallback
     auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput>>();
@@ -475,7 +475,7 @@ void create_arm_gemm_quant(std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &a
     const CPUInfo               &ci          = NEScheduler::get().cpu_info();
     unsigned int                 num_threads = NEScheduler::get().num_threads();
 
-    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.batches, p.multis, false, false, activation, num_threads, gemm_info.pretranpose_B());
+    arm_gemm::GemmArgs args(&ci, p.M, p.N, p.K, p.batches, p.multis, activation, num_threads);
 
     // Create arm_gemm fallback
     auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput, arm_gemm::Requantize32>>();

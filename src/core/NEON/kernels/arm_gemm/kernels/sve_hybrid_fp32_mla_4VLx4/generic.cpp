@@ -32,7 +32,7 @@
 
 namespace arm_gemm {
 
-void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C, int ldc, int M, int N, int K, const float *bias, Activation act, bool append) {
+void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C, int ldc, int M, int N, int K, const float *bias, Activation act, bool accumulate) {
     const int K_stride = K;
     const long loops_count = ((K + 4) / 8) - 1;
     K -= loops_count * 8;
@@ -40,7 +40,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
     K -= (regs_count + 1) * 4;
     const long leftovers = K;
     float nullbias[256];
-    if (!append && !bias) {
+    if (!accumulate && !bias) {
         memset(nullbias, 0, (4 * get_vector_length<float>() * sizeof(float)));
     }
     float minval = - static_cast<float>(std::numeric_limits<float>::infinity());
@@ -101,7 +101,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
                         "whilelt p2.s, %[temp], %[width]\n"
                         "incw %[temp], all, mul #1\n"
                         "whilelt p3.s, %[temp], %[width]\n"
-                        "cbnz %[append], 1f\n"
+                        "cbnz %[accumulate], 1f\n"
                         "ld1w z16.s, p0/z, [%[biasptr]]\n"
                         "ld1w z17.s, p1/z, [%[biasptr], #1, MUL VL]\n"
                         "ld1w z18.s, p2/z, [%[biasptr], #2, MUL VL]\n"
@@ -377,7 +377,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
                         "st1w z19.s, p3, [%[c_ptr0], #3, MUL VL]\n"
                         "addvl %[c_ptr0], %[c_ptr0], #4\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [temp] "+r" (temp), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr), [leftovers] "r" (leftovers)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr), [leftovers] "r" (leftovers)
                         : "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "cc", "memory"
                     );
                     break;
@@ -396,7 +396,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
                         "whilelt p2.s, %[temp], %[width]\n"
                         "incw %[temp], all, mul #1\n"
                         "whilelt p3.s, %[temp], %[width]\n"
-                        "cbnz %[append], 1f\n"
+                        "cbnz %[accumulate], 1f\n"
                         "ld1w z16.s, p0/z, [%[biasptr]]\n"
                         "ld1w z17.s, p1/z, [%[biasptr], #1, MUL VL]\n"
                         "ld1w z18.s, p2/z, [%[biasptr], #2, MUL VL]\n"
@@ -810,7 +810,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
                         ".unreq a_ptr1\n"
                         ".unreq c_ptr1\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [temp] "+r" (temp), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr), [leftovers] "r" (leftovers)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr), [leftovers] "r" (leftovers)
                         : "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "x0", "x1", "cc", "memory"
                     );
                     break;
@@ -833,7 +833,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
                         "whilelt p2.s, %[temp], %[width]\n"
                         "incw %[temp], all, mul #1\n"
                         "whilelt p3.s, %[temp], %[width]\n"
-                        "cbnz %[append], 1f\n"
+                        "cbnz %[accumulate], 1f\n"
                         "ld1w z16.s, p0/z, [%[biasptr]]\n"
                         "ld1w z17.s, p1/z, [%[biasptr], #1, MUL VL]\n"
                         "ld1w z18.s, p2/z, [%[biasptr], #2, MUL VL]\n"
@@ -1385,7 +1385,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
                         ".unreq c_ptr1\n"
                         ".unreq c_ptr2\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [temp] "+r" (temp), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr), [leftovers] "r" (leftovers)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr), [leftovers] "r" (leftovers)
                         : "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "x0", "x1", "x2", "x3", "cc", "memory"
                     );
                     break;
@@ -1413,7 +1413,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
                         "whilelt p2.s, %[temp], %[width]\n"
                         "incw %[temp], all, mul #1\n"
                         "whilelt p3.s, %[temp], %[width]\n"
-                        "cbnz %[append], 1f\n"
+                        "cbnz %[accumulate], 1f\n"
                         "ld1w z16.s, p0/z, [%[biasptr]]\n"
                         "ld1w z17.s, p1/z, [%[biasptr], #1, MUL VL]\n"
                         "ld1w z18.s, p2/z, [%[biasptr], #2, MUL VL]\n"
@@ -2103,7 +2103,7 @@ void sve_hybrid_fp32_mla_4VLx4(const float *A, int lda, const float *B, float *C
                         ".unreq c_ptr2\n"
                         ".unreq c_ptr3\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [temp] "+r" (temp), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr), [leftovers] "r" (leftovers)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [biasptr] "r" (biasptr), [minptr] "r" (minptr), [maxptr] "r" (maxptr), [leftovers] "r" (leftovers)
                         : "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "x0", "x1", "x2", "x3", "x4", "x5", "cc", "memory"
                     );
                     break;

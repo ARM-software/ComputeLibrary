@@ -59,7 +59,7 @@ public:
         return 4;
     }
 
-    static constexpr bool supports_append()
+    static constexpr bool supports_accumulate()
     {
         return true;
     }

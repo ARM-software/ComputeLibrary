@@ -45,22 +45,14 @@ class StdTransformsFixed
 public:
     template<typename TIn>
     void PrepareA(TOperand *out, const TIn *in, const int stride, const int y0,
-                  const int ymax, const int k0, const int kmax, bool transposed) const {
-        if (transposed) {
-            Transform<height, block,  true>(out, in, stride, y0, ymax, k0, kmax);
-        } else {
-            Transform<height, block, false>(out, in, stride, y0, ymax, k0, kmax);
-        }
+                  const int ymax, const int k0, const int kmax) const {
+        Transform<height, block, false>(out, in, stride, y0, ymax, k0, kmax);
     }
 
     template<typename TIn>
     void PrepareB(TOperand *out, const TIn *in, const int stride, const int x0,
-                  const int xmax, const int k0, const int kmax, bool transposed) const {
-        if (transposed) {
-            Transform<width, block, false>(out, in, stride, x0, xmax, k0, kmax);
-        } else {
-            Transform<width, block,  true>(out, in, stride, x0, xmax, k0, kmax);
-        }
+                  const int xmax, const int k0, const int kmax) const {
+        Transform<width, block,  true>(out, in, stride, x0, xmax, k0, kmax);
     }
 
     template<typename TOut>

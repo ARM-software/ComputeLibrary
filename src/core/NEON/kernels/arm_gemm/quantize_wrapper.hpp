@@ -61,16 +61,9 @@ private:
     }
 
     /* Local working space: We need space for the subgemm output (above) and
-     * the row sums.  If the GEMM is not pretransposed we need to store the
-     * column sums here too.  */
+     * the row sums.  */
     size_t local_working_size() const {
-        size_t sz = subgemm_output_size() + row_sum_size();
-
-        if (_args._pretransposed_hint) {
-            return sz;
-        }
-
-        return sz + col_sum_size();
+        return subgemm_output_size() + row_sum_size();
     }
 
     void set_child_arrays() {
@@ -87,15 +80,6 @@ private:
     void col_sums_pretransposed(const To *B, const int ldb, const int B_multi_stride) {
         for (unsigned int multi=0; multi<_args._nmulti; multi++) {
             compute_col_sums(_params, _args._Nsize, _args._Ksize, B + (multi * B_multi_stride), ldb, _col_sums + (multi * _args._Nsize), _args._Ksize, multi, 0);
-        }
-    }
-
-    void col_sums_runtime(unsigned int threadid) {
-        unsigned int first_col = (threadid * _args._Nsize) / _args._maxthreads;
-        unsigned int last_col = ((threadid + 1) * _args._Nsize) / _args._maxthreads;
-
-        for (unsigned int multi=0; multi<_args._nmulti; multi++) {
-            compute_col_sums(_params, (last_col - first_col), _args._Ksize, this->_Bptr + (multi * this->_B_multi_stride) + first_col, this->_ldb, _col_sums + (multi * _args._Nsize) + first_col, _args._Ksize, multi, first_col);
         }
     }
 
@@ -126,15 +110,11 @@ public:
     QuantizeWrapper operator=(const QuantizeWrapper &) = delete;
 
     QuantizeWrapper(const GemmArgs &args, const Requantize32 &qp) : _params(qp), _args(args), _barrier(args._maxthreads) {
-        GemmArgs newargs = GemmArgs(args._ci, args._Msize, args._Nsize, args._Ksize, args._nbatches, args._nmulti, args._trA, args._trB, Activation(), args._maxthreads, args._pretransposed_hint, nullptr);
+        GemmArgs newargs = GemmArgs(args._ci, args._Msize, args._Nsize, args._Ksize, args._nbatches, args._nmulti, Activation(), args._maxthreads, nullptr);
         _subgemm = gemm<To, Tgemm>(newargs);
 
         if (_subgemm == nullptr) {
             return;
-        }
-
-        if (!_subgemm->B_is_pretransposed()) {
-            _args._pretransposed_hint = false;
         }
     }
 
@@ -160,9 +140,6 @@ public:
 
     void execute(const ndcoord_t &work_range, const ndcoord_t &thread_locator, int threadid) override {
         _subgemm->execute(work_range, thread_locator, threadid);
-        if (!_args._pretransposed_hint) {
-            col_sums_runtime(threadid);
-        }
 
         _barrier.arrive_and_wait();
 
@@ -177,7 +154,7 @@ public:
 
     // ptr
     // V
-    // | subgemm output | row_sums | col_sums (if not pretransposed | subgemm working space |
+    // | subgemm output | row_sums | subgemm working space |
     void set_working_space(void *space) override {
         uintptr_t space_int = reinterpret_cast<uintptr_t>(space);
 
@@ -185,16 +162,13 @@ public:
         _subgemm->set_working_space(reinterpret_cast<void *>(space_int + local_working_size()));
 
         _row_sums = reinterpret_cast<int32_t *>(space_int + subgemm_output_size());
-        if (!_args._pretransposed_hint) {
-            _col_sums = reinterpret_cast<int32_t *>(space_int + subgemm_output_size() + row_sum_size());
-        }
 
         set_child_arrays();
     }
 
     bool B_is_pretransposed() const override {
         /* We clear this flag if the subgemm isn't pretransposed, so just return its value */
-        return _args._pretransposed_hint;
+        return _subgemm->B_is_pretransposed();
     }
 
     bool B_pretranspose_required() const override {
@@ -202,18 +176,10 @@ public:
     }
 
     size_t get_B_pretransposed_array_size() const override {
-        if (_args._pretransposed_hint) {
-            return _subgemm->get_B_pretransposed_array_size() + col_sum_size();
-        }
-
-        return 0;
+        return _subgemm->get_B_pretransposed_array_size() + col_sum_size();
     }
 
     void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) override {
-        if (!_args._pretransposed_hint) {
-            return;
-        }
-
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(buffer);
         _subgemm->pretranspose_B_array(reinterpret_cast<void *>(buffer_int + col_sum_size()), B, ldb, B_multi_stride);
 
@@ -223,10 +189,6 @@ public:
     }
 
     void set_pretransposed_B_data(void *buffer) override {
-        if (!_args._pretransposed_hint) {
-            return;
-        }
-
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(buffer);
         _subgemm->set_pretransposed_B_data(reinterpret_cast<void *>(buffer_int + col_sum_size()));
         _col_sums = reinterpret_cast<int32_t *>(buffer);

@@ -104,19 +104,15 @@ public:
     unsigned int      _Ksize;
     unsigned int      _nbatches;
     unsigned int      _nmulti;
-    bool              _trA;
-    bool              _trB;
     Activation        _act;
     int               _maxthreads;
-    bool              _pretransposed_hint;
     const GemmConfig *_cfg;
 
     GemmArgs(const CPUInfo *ci, const unsigned int M, const unsigned int N,
              const unsigned int K, const unsigned int nbatches,
-             const unsigned int nmulti, const bool trA, const bool trB,
-             Activation act, const int maxthreads,
-             const bool pretransposed_hint, const GemmConfig *cfg = nullptr)
-        : _ci(ci), _Msize(M), _Nsize(N), _Ksize(K), _nbatches(nbatches), _nmulti(nmulti), _trA(trA), _trB(trB), _act(act), _maxthreads(maxthreads), _pretransposed_hint(pretransposed_hint), _cfg(cfg)
+             const unsigned int nmulti, Activation act, const int maxthreads,
+             const GemmConfig *cfg = nullptr)
+        : _ci(ci), _Msize(M), _Nsize(N), _Ksize(K), _nbatches(nbatches), _nmulti(nmulti), _act(act), _maxthreads(maxthreads), _cfg(cfg)
     {
     }
 };

@@ -62,9 +62,6 @@ class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
     const unsigned int _nbatches;
     const unsigned int _nmulti;
 
-    const bool _trA;
-    const bool _trB;
-
     const Activation _act;
 
     const int _maxthreads;
@@ -252,8 +249,7 @@ class GemmInterleavedPretransposed2d : public GemmCommon<To, Tr> {
                         first_m,
                         last_m,
                         current.k0(),
-                        current.kmax(),
-                        _trA);
+                        current.kmax());
                 }
             }
 
@@ -317,8 +313,6 @@ public:
     ,    _Ksize(args._Ksize)
     ,    _nbatches(args._nbatches)
     ,    _nmulti(args._nmulti)
-    ,    _trA(args._trA)
-    ,    _trB(args._trB)
     ,    _act(args._act)
     ,    _maxthreads(args._maxthreads)
     ,    _nthreads(args._maxthreads) 
@@ -330,8 +324,6 @@ public:
     ,    _Nround_div ( iceildiv(_Nsize, strategy::out_width()) )
     ,    _Nround     ( _Nround_div * strategy::out_width()     )
     {
-
-        assert(args._pretransposed_hint);
         assert(_maxthreads > 0);
 
         const unsigned int L1_size = _ci->get_L1_cache_size();
@@ -411,7 +403,7 @@ public:
         execute_pretranspose(m_start, m_end, n_start, n_end, threadid, m_threadid, n_threadid);
     }
 
-    std::size_t get_working_size()const override {
+    std::size_t get_working_size() const override {
         /* Because we do not know how schedular will break up
          * the task, we need to ensure that alloc enough
          * space to be able to handle the case where every thread
@@ -493,7 +485,7 @@ public:
             k_size *= strategy::k_unroll();
 
             strat.transforms.PrepareB(buffer, B + (current.multi() * B_multi_stride), ldb,
-                                      current.x0(), current.xmax(), current.k0(), current.kmax(), _trB);
+                                      current.x0(), current.xmax(), current.k0(), current.kmax());
 
             buffer += (x_size * k_size);
         } while (current.advance());

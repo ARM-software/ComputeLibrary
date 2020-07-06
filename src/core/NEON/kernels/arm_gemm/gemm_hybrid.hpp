@@ -57,8 +57,6 @@ class GemmHybrid : public GemmCommon<To, Tr> {
     const unsigned int _nbatches;
     const unsigned int _nmulti;
 
-    const bool _trB;
-
     const Activation _act;
 
     /* Blocking info */
@@ -72,8 +70,8 @@ class GemmHybrid : public GemmCommon<To, Tr> {
     const NDRange<4> _window_range;
 
     static unsigned int compute_k_block(const GemmArgs &args) {
-        // Some kernels don't support append mode - these can't do K blocking at all.
-        if (!strategy::supports_append()) {
+        // Some kernels don't support accumulate mode - these can't do K blocking at all.
+        if (!strategy::supports_accumulate()) {
             return args._Ksize;
         }
 
@@ -135,7 +133,7 @@ public:
     /* Constructor */
     GemmHybrid(const GemmArgs &args)
               : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
-                _nbatches(args._nbatches), _nmulti(args._nmulti), _trB(args._trB),
+                _nbatches(args._nbatches), _nmulti(args._nmulti),
                 _act(args._act),
                 _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
@@ -243,7 +241,7 @@ public:
                     const unsigned int size = roundup(xmax-x0, strategy::out_width()) * k_size;
 
                     strat.transforms.PrepareB( buffer, B + (multi * B_multi_stride), ldb,
-                                               x0, xmax, k0, kmax, _trB);
+                                               x0, xmax, k0, kmax);
 
                     buffer += size;
                 }

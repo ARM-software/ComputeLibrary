@@ -51,8 +51,6 @@ class GemvPretransposed : public GemmCommon<To, Tr> {
 
     const unsigned int _nmultis;
 
-    const bool _trB;
-
     const Activation _act;
 
     const CPUInfo * const _ci;
@@ -69,7 +67,7 @@ public:
     GemvPretransposed & operator= (GemvPretransposed &) = delete;
 
     GemvPretransposed(const GemmArgs &args)
-                      : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _trB(args._trB), _act(args._act), _ci(args._ci),
+                      : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _act(args._act), _ci(args._ci),
                         _buffer_per_multi(_Ksize * iceildiv(_Nsize, strategy::A_interleave()) * strategy::A_interleave()) {
         /* For now don't do any blocking. TODO: figure out if we should. */
         if (args._cfg && args._cfg->inner_block_size) {
@@ -169,7 +167,7 @@ public:
             /* Reverse sense here as we are dealing with B rather than A.  So if
              * strategy::A_transpose is false and _trB is false, we still
              * transpose.  */
-            if (_trB ^ strategy::A_transpose()) {
+            if (strategy::A_transpose()) {
                 Transform<strategy::A_interleave(), strategy::A_block(), false>(A_buffer + (multi * _buffer_per_multi), B + (multi * B_multi_stride), ldb, 0, _Nsize, 0, _Ksize);
             } else {
                 Transform<strategy::A_interleave(), strategy::A_block(), true>(A_buffer + (multi * _buffer_per_multi), B + (multi * B_multi_stride), ldb, 0, _Nsize, 0, _Ksize);

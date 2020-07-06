@@ -645,9 +645,9 @@ namespace {
 
                     vst1q_s32(row_bias, t0);
                     break;
+
                 default:
                     UNREACHABLE("Impossible.");
-
             }
         }
 

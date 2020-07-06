@@ -32,7 +32,7 @@
 
 namespace arm_gemm {
 
-void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uint32_t *C, int ldc, int M, int N, int K, const uint32_t *, Activation , bool append) {
+void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uint32_t *C, int ldc, int M, int N, int K, const uint32_t *, Activation , bool accumulate) {
     const int K_stride = ((K + 3) / 4) * 4;
     const long loops_count = ((K + 16) / 32) - 1;
     K -= loops_count * 32;
@@ -80,7 +80,7 @@ void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uin
                         "whilelt p2.s, %[temp], %[width]\n"
                         "incw %[temp], all, mul #1\n"
                         "whilelt p3.s, %[temp], %[width]\n"
-                        "cbnz %[append], 1f\n"
+                        "cbnz %[accumulate], 1f\n"
                         "mov z16.s, #0\n"
                         "ld1rqb z0.b, p7/z, [%[a_ptr0]]\n"
                         "mov z17.s, #0\n"
@@ -366,7 +366,7 @@ void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uin
                         "st1w z19.s, p3, [%[c_ptr0], #3, MUL VL]\n"
                         "addvl %[c_ptr0], %[c_ptr0], #4\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [temp] "+r" (temp), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [leftovers] "r" (leftovers)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [leftovers] "r" (leftovers)
                         : "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "cc", "memory"
                     );
                     break;
@@ -385,7 +385,7 @@ void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uin
                         "whilelt p2.s, %[temp], %[width]\n"
                         "incw %[temp], all, mul #1\n"
                         "whilelt p3.s, %[temp], %[width]\n"
-                        "cbnz %[append], 1f\n"
+                        "cbnz %[accumulate], 1f\n"
                         "mov z16.s, #0\n"
                         "ld1rqb z0.b, p7/z, [%[a_ptr0]]\n"
                         "mov z17.s, #0\n"
@@ -809,7 +809,7 @@ void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uin
                         ".unreq a_ptr1\n"
                         ".unreq c_ptr1\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [temp] "+r" (temp), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [leftovers] "r" (leftovers)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [leftovers] "r" (leftovers)
                         : "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "x0", "x1", "cc", "memory"
                     );
                     break;
@@ -832,7 +832,7 @@ void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uin
                         "whilelt p2.s, %[temp], %[width]\n"
                         "incw %[temp], all, mul #1\n"
                         "whilelt p3.s, %[temp], %[width]\n"
-                        "cbnz %[append], 1f\n"
+                        "cbnz %[accumulate], 1f\n"
                         "mov z16.s, #0\n"
                         "ld1rqb z0.b, p7/z, [%[a_ptr0]]\n"
                         "mov z17.s, #0\n"
@@ -1394,7 +1394,7 @@ void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uin
                         ".unreq c_ptr1\n"
                         ".unreq c_ptr2\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [temp] "+r" (temp), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [leftovers] "r" (leftovers)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [leftovers] "r" (leftovers)
                         : "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "x0", "x1", "x2", "x3", "cc", "memory"
                     );
                     break;
@@ -1422,7 +1422,7 @@ void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uin
                         "whilelt p2.s, %[temp], %[width]\n"
                         "incw %[temp], all, mul #1\n"
                         "whilelt p3.s, %[temp], %[width]\n"
-                        "cbnz %[append], 1f\n"
+                        "cbnz %[accumulate], 1f\n"
                         "mov z16.s, #0\n"
                         "ld1rqb z0.b, p7/z, [%[a_ptr0]]\n"
                         "mov z17.s, #0\n"
@@ -2122,7 +2122,7 @@ void sve_hybrid_u8u32_dot_4VLx4(const uint8_t *A, int lda, const uint8_t *B, uin
                         ".unreq c_ptr2\n"
                         ".unreq c_ptr3\n"
                         : [a_ptr0] "+r" (a_ptr0), [b_ptr0] "+r" (b_ptr0), [c_ptr0] "+r" (c_ptr0), [loops] "+r" (loops), [regs] "+r" (regs), [temp] "+r" (temp), [blocks] "+r" (blocks)
-                        : [width] "r" (width), [append] "r" (static_cast<uint64_t>(append)), [lda] "r" (ldab), [ldc] "r" (ldcb), [leftovers] "r" (leftovers)
+                        : [width] "r" (width), [accumulate] "r" (static_cast<uint64_t>(accumulate)), [lda] "r" (ldab), [ldc] "r" (ldcb), [leftovers] "r" (leftovers)
                         : "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "x0", "x1", "x2", "x3", "x4", "x5", "cc", "memory"
                     );
                     break;

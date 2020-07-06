@@ -31,14 +31,12 @@
 #include "gemm_hybrid.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
-#include "gemm_native.hpp"
 
 #include "kernels/a32_sgemm_8x6.hpp"
 #include "kernels/a64_hgemm_24x8.hpp"
 #include "kernels/a64_sgemm_12x8.hpp"
 #include "kernels/sve_hybrid_fp16_mla_4VLx4.hpp"
 #include "kernels/sve_interleaved_fp16_mla_3VLx8.hpp"
-#include "kernels/sve_native_fp16_mla_4VLx4.hpp"
 
 namespace arm_gemm {
 
@@ -47,16 +45,9 @@ static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
 {
     GemmMethod::GEMM_HYBRID,
     "hybrid_fp16_mla_4VLx4",
-    [](const GemmArgs &args) { return (args._Ksize >= 8) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs &args) { return (args._Ksize >= 8); },
     [](const GemmArgs &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
     [](const GemmArgs &args) { return new GemmHybrid<hybrid_fp16_mla_4VLx4, __fp16, __fp16>(args); }
-},
-{
-    GemmMethod::GEMM_NATIVE,
-    "native_fp16_mla_4VLx4",
-    [](const GemmArgs &args) { return (args._Ksize >= 8 && !args._trA && !args._trB); },
-    [](const GemmArgs &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
-    [](const GemmArgs &args) { return new GemmNative<native_fp16_mla_4VLx4, __fp16, __fp16>(args); }
 },
 {
     GemmMethod::GEMM_INTERLEAVED,
